@@ -1,0 +1,867 @@
+#----------------------------------------------------------------------------------------------------------
+#
+# TMB2012 UCF for Virtex6 XC6VLX195T prototype mezzanine card schematic 2012 rev 3
+#
+#----------------------------------------------------------------------------------------------------------
+# 10/19/2010 Port to Virtex6
+# 11/03/2010 Move tmb_clock0 to B31
+# 01/24/2011 Update signals for 11/14/2010 mez card schematic
+# 01/28/2011 Add gtx transceiver pins
+# 01/31/2011 Comment out gtx pins to compile without gtx units, remove mez_busy, alas
+# 02/03/2011 Comment out vrn|vr[ pins, their locations are now verified so don't need them in ucf
+# 06/02/2011 Update signals for 04/29/2011 mez card schematic, will they ever get it right?
+# 07/13/2011 Swap cfeb3_rx17,18 and rpc_rx36,37 because the tamu mez board design is incorrect
+# 07/31/2012 New pins for ccb_tx[14] and ccb_tx[26], replace gtl_oe with qpll_err
+# 07/31/2012 Remove foe, fwe, restore mez_busy as testled[10]
+# 08/08/2012 Rename rst_qpll to _rst_qpll
+# 09/12/2012 Rename _rst_qpll to qpll_nrst
+# 09/12/2012 Rename _t12_fault to t12_nfault
+# 12/04/2012 Implement main clock constraint
+#----------------------------------------------------------------------------------------------------------
+#ET "_ccb_tx<26>"	LOC = "AG23";	# I/O_1
+NET "_ccb_tx<26>"	LOC = "AF23";	# I/O_1
+NET "_ccb_tx<0>"	LOC = "AE29";	# I/O_2
+NET "_ccb_tx<1>"	LOC = "AF31";	# I/O_3
+NET "_ccb_tx<2>"	LOC = "AE31";	# I/O_4
+NET "_ccb_tx<3>"	LOC = "AC23";	# I/O_5
+NET "_ccb_tx<4>"	LOC = "AF29";	# I/O_6
+NET "_ccb_tx<5>"	LOC = "AG30";	# I/O_7
+NET "_ccb_tx<6>"	LOC = "AD24";	# I/O_8
+NET "_ccb_tx<7>"	LOC = "AC22";	# I/O_9
+NET "_ccb_tx<8>"	LOC = "AF30";	# I/O_10
+NET "_ccb_tx<9>"	LOC	= "AC29";	# I/O_11
+NET "_ccb_tx<10>"	LOC = "AC30";	# I/O_12
+NET "_ccb_tx<11>"	LOC = "AB23";	# I/O_13
+NET "_ccb_tx<12>"	LOC = "AD29";	# I/O_14
+NET "_ccb_tx<13>"	LOC = "AC27";	# I/O_15
+#ET "_ccb_tx<14>"	LOC = "AA23";	# I/O_16
+NET "_ccb_tx<14>"	LOC = "AA24";	# I/O_16
+NET "_ccb_tx<15>"	LOC = "AD22";	# I/O_17
+NET "_ccb_tx<16>"	LOC = "AF28";	# I/O_18
+NET "_ccb_tx<17>"	LOC = "AE28";	# I/O_19
+
+NET "_ccb_rx<18>"	LOC = "AB28";	# I/O_20
+NET "_ccb_rx<19>"	LOC = "AH30";	# I/O_21
+NET "_ccb_rx<20>"	LOC = "AK33";	# I/O_22
+NET "_ccb_rx<21>"	LOC = "AK34";	# I/O_23
+NET "_ccb_rx<22>"	LOC = "AL33";	# I/O_24
+NET "_ccb_rx<23>"	LOC = "AL31";	# I/O_25
+NET "_ccb_rx<24>"	LOC = "AL30";	# I/O_26
+NET "_ccb_rx<25>"	LOC = "AK32";	# I/O_27
+NET "_ccb_rx<26>"	LOC = "AL34";	# I/O_28
+NET "_ccb_rx<27>"	LOC = "AJ30";	# I/O_29
+NET "_ccb_rx<28>"	LOC = "AJ29";	# I/O_30
+NET "_ccb_rx<29>"	LOC = "AH29";	# I/O_31
+NET "_ccb_rx<30>"	LOC = "AM33";	# I/O_32
+NET "_ccb_rx<31>"	LOC = "AN34";	# I/O_33
+NET "_ccb_rx<32>"	LOC = "AN33";	# I/O_34
+NET "_ccb_rx<33>"	LOC = "AP33";	# I/O_35
+NET "_ccb_rx<0>"	LOC = "AG28";	# I/O_36
+NET "_ccb_rx<1>"	LOC = "AM32";	# I/O_37
+NET "_ccb_rx<2>"	LOC = "AN32";	# I/O_38
+NET "_ccb_rx<3>"	LOC = "AG27";	# I/O_39
+NET "_ccb_rx<4>"	LOC = "AC25";	# I/O_40
+NET "_ccb_rx<5>"	LOC = "AD27";	# I/O_41
+NET "_ccb_rx<6>"	LOC = "AP32";	# I/O_42
+NET "_ccb_rx<7>"	LOC = "AM31";	# I/O_43
+NET "_ccb_rx<8>"	LOC = "AP30";	# I/O_44
+NET "_ccb_rx<9>"	LOC = "AF26";	# I/O_45
+NET "_ccb_rx<10>"	LOC = "AE27";	# I/O_46
+NET "_ccb_rx<11>"	LOC = "AD25";	# I/O_47
+NET "_ccb_rx<12>"	LOC = "AD26";	# I/O_48
+NET "_ccb_rx<13>"	LOC = "AE26";	# I/O_49
+NET "_ccb_rx<14>"	LOC = "AM30";	# I/O_50
+NET "_ccb_rx<15>"	LOC = "AP29";	# I/O_51
+NET "_ccb_rx<16>"	LOC = "AM28";	# I/O_52
+NET "_ccb_rx<17>"	LOC = "AK31";	# I/O_53
+
+NET "vme_d<0>"		LOC = "AN30";	# I/O_54
+NET "vme_d<1>"		LOC = "AJ27";	# I/O_55
+NET "vme_d<2>"		LOC = "AJ25";	# I/O_56
+NET "vme_d<3>"		LOC = "AH28";	# I/O_57
+NET "vme_d<4>"		LOC = "AP31";	# I/O_58
+NET "vme_d<5>"		LOC = "AN29";	# I/O_59
+NET "vme_d<6>"		LOC = "AP27";	# I/O_60
+NET "vme_d<7>"		LOC = "AL28";	# I/O_61
+NET "vme_d<8>"		LOC = "AM27";	# I/O_62
+NET "vme_d<9>"		LOC = "AK29";	# I/O_63
+NET "vme_d<10>"		LOC = "AN28";	# I/O_64
+NET "vme_d<11>"		LOC = "AL29";	# I/O_65
+NET "vme_d<12>"		LOC = "AK27";	# I/O_66
+NET "vme_d<13>"		LOC = "AK28";	# I/O_67
+NET "vme_d<14>"		LOC = "AM26";	# I/O_68
+NET "vme_d<15>"		LOC = "AH27";	# I/O_69
+
+NET "vme_am<0>"		LOC = "AG26";	# I/O_70
+NET "vme_am<1>"		LOC = "AL26";	# I/O_71
+NET "vme_am<2>"		LOC = "AN27";	# I/O_72
+NET "vme_am<3>"		LOC = "AL25";	# I/O_73
+NET "vme_am<4>"		LOC = "AL24";	# I/O_74
+NET "vme_am<5>"		LOC = "AM25";	# I/O_75
+
+NET "vme_a<1>"		LOC = "AP21";	# I/O_76
+NET "vme_a<2>"		LOC = "AM23";	# I/O_77
+NET "vme_a<3>"		LOC = "AN24";	# I/O_78
+NET "vme_a<4>"		LOC = "AP25";	# I/O_79
+NET "vme_a<5>"		LOC = "AH25";	# I/O_80 
+NET "vme_a<6>"		LOC = "AP24";	# I/O_81
+NET "vme_a<7>"		LOC = "AP22";	# I/O_82
+NET "vme_a<8>"		LOC = "AP26";	# I/O_83
+NET "vme_a<9>"		LOC = "AN20";	# I/O_84
+NET "vme_a<10>"		LOC = "AG25";	# I/O_85
+NET "vme_a<11>"		LOC = "AN23";	# I/O_86
+NET "vme_a<12>"		LOC = "AN25";	# I/O_87
+NET "vme_a<13>"		LOC = "AN18";	# I/O_88
+NET "vme_a<14>"		LOC = "AN19";	# I/O_89
+NET "vme_a<15>"		LOC = "AP20";	# I/O_90
+NET "vme_a<16>"		LOC = "AN22";	# I/O_91
+NET "vme_a<17>"		LOC = "AP19";	# I/O_92
+NET "vme_a<18>"		LOC = "AK22";	# I/O_93
+NET "vme_a<19>"		LOC = "AJ21";	# I/O_94
+NET "vme_a<20>"		LOC = "AM21";	# I/O_95
+NET "vme_a<21>"		LOC = "AH24";	# I/O_96
+NET "vme_a<22>"		LOC = "AJ24";	# I/O_97
+NET "vme_a<23>"		LOC = "AL23";	# I/O_98
+
+NET "_vme_cmd<10>"	LOC = "AK24";	# I/O_99
+NET "_vme_cmd<9>"	LOC = "AM22";	# I/O_100
+NET "_vme_cmd<8>"	LOC = "AK23";	# I/O_101
+NET "_vme_cmd<7>"	LOC = "AF21";	# I/O_102
+NET "_vme_cmd<6>"	LOC = "AH23";	# I/O_103
+NET "_vme_cmd<5>"	LOC = "AL21";	# I/O_104
+NET "_vme_cmd<4>"	LOC = "AM18";	# I/O_105
+NET "_vme_cmd<3>"	LOC = "AM20";	# I/O_106
+NET "_vme_cmd<2>"	LOC = "AJ22";	# I/O_107
+NET "_vme_cmd<1>"	LOC = "AD21";	# I/O_108
+NET "_vme_cmd<0>"	LOC = "AH22";	# I/O_109
+
+NET "vme_reply<0>"	LOC = "AF20";	# I/O_110
+NET "vme_reply<1>"	LOC = "AE21";	# I/O_111*
+NET "vme_reply<2>"	LOC = "AF19";	# I/O_112*
+NET "vme_reply<3>"	LOC = "AL20";	# I/O_113*
+NET "vme_reply<4>"	LOC = "AD20";	# I/O_114*
+NET "vme_reply<5>"	LOC = "AD19";	# I/O_115
+NET "vme_reply<6>"	LOC = "AE19";	# I/O_116
+
+NET "_vme_geo<0>"	LOC = "AK21";	# I/O_117
+NET "_vme_geo<1>"	LOC = "AG21";	# I/O_118
+NET "_vme_geo<2>"	LOC = "AG22";	# I/O_119
+NET "_vme_geo<3>"	LOC = "AL19";	# I/O_120
+NET "_vme_geo<4>"	LOC = "AL18";	# I/O_121
+NET "_vme_geo<5>"	LOC = "AK19";	# I/O_122
+NET "_vme_geo<6>"	LOC = "AG20";	# I/O_123
+
+NET "_hard_reset_alct_fpga"	LOC = "AC20";	# I/O_124
+NET "_hard_reset_tmb_fpga"	LOC = "AC19";	# I/O_125
+
+NET "cfeb0_rx<23>"	LOC = "AK18";	# I/O_126
+NET "cfeb0_rx<22>"	LOC = "AP17";	# I/O_127
+NET "cfeb0_rx<21>"	LOC = "AM17";	# I/O_128
+NET "cfeb0_rx<20>"	LOC = "AJ19";	# I/O_129
+NET "cfeb0_rx<19>"	LOC = "AL16";	# I/O_130
+NET "cfeb0_rx<18>"	LOC = "AP16";	# I/O_131
+NET "cfeb0_rx<17>"	LOC = "AN17";	# I/O_132
+NET "cfeb0_rx<16>"	LOC = "AH19";	# I/O_133
+NET "cfeb0_rx<15>"	LOC = "AN14";	# I/O_134
+NET "cfeb0_rx<14>"	LOC = "AL15";	# I/O_135
+NET "cfeb0_rx<13>"	LOC = "AM16";	# I/O_136
+NET "cfeb0_rx<12>"	LOC = "AJ17";	# I/O_137
+NET "cfeb0_rx<11>"	LOC = "AL13";	# I/O_138
+NET "cfeb0_rx<10>"	LOC = "AP15";	# I/O_139
+NET "cfeb0_rx<9>"	LOC = "AM15";	# I/O_140
+NET "cfeb0_rx<8>"	LOC = "AM13";	# I/O_141
+NET "cfeb0_rx<7>"	LOC = "AK16";	# I/O_142
+NET "cfeb0_rx<6>"	LOC = "AP14";	# I/O_143
+NET "cfeb0_rx<5>"	LOC = "AN15";	# I/O_144
+NET "cfeb0_rx<4>"	LOC = "AP12";	# I/O_145
+NET "cfeb0_rx<3>"	LOC = "AM12";	# I/O_146
+NET "cfeb0_rx<2>"	LOC = "AN13";	# I/O_147
+NET "cfeb0_rx<1>"	LOC = "AK17";	# I/O_148
+NET "cfeb0_rx<0>"	LOC = "AN12";	# I/O_149
+
+NET "cfeb1_rx<23>"	LOC = "AP11";	# I/O_150
+NET "cfeb1_rx<22>"	LOC = "AM10";	# I/O_151
+NET "cfeb1_rx<21>"	LOC = "AJ15";	# I/O_152
+NET "cfeb1_rx<20>"	LOC = "AM11";	# I/O_153
+NET "cfeb1_rx<19>"	LOC = "AH9";	# I/O_154
+NET "cfeb1_rx<18>"	LOC = "AK14";	# I/O_155
+NET "cfeb1_rx<17>"	LOC = "AJ16";	# I/O_156
+NET "cfeb1_rx<16>"	LOC = "AK13";	# I/O_157
+NET "cfeb1_rx<15>"	LOC = "AL10";	# I/O_158
+NET "cfeb1_rx<14>"	LOC = "AJ14";	# I/O_159
+NET "cfeb1_rx<13>"	LOC = "AL14";	# I/O_160
+NET "cfeb1_rx<12>"	LOC = "AK11";	# I/O_161
+NET "cfeb1_rx<11>"	LOC = "AL11";	# I/O_162
+NET "cfeb1_rx<10>"	LOC = "AH14";	# I/O_163
+NET "cfeb1_rx<9>"	LOC = "AJ12";	# I/O_164
+NET "cfeb1_rx<8>"	LOC = "AH17";	# I/O_165
+NET "cfeb1_rx<7>"	LOC = "AH12";	# I/O_166
+NET "cfeb1_rx<6>"	LOC = "AH15";	# I/O_167
+NET "cfeb1_rx<5>"	LOC = "AK12";	# I/O_168
+NET "cfeb1_rx<4>"	LOC = "AG15";	# I/O_169
+NET "cfeb1_rx<3>"	LOC = "AG16";	# I/O_170
+NET "cfeb1_rx<2>"	LOC = "AJ11";	# I/O_171
+NET "cfeb1_rx<1>"	LOC = "AG17";	# I/O_172
+NET "cfeb1_rx<0>"	LOC = "AH13";	# I/O_173
+
+NET "cfeb2_rx<23>"	LOC = "AG12";	# I/O_174
+NET "cfeb2_rx<22>"	LOC = "AJ9";	# I/O_175
+NET "cfeb2_rx<21>"	LOC = "AH10";	# I/O_176
+NET "cfeb2_rx<20>"	LOC = "AJ10";	# I/O_177*
+NET "cfeb2_rx<19>"	LOC = "AF16";	# I/O_178
+NET "cfeb2_rx<18>"	LOC = "AG11";	# I/O_179
+NET "cfeb2_rx<17>"	LOC = "AG10";	# I/O_180
+NET "cfeb2_rx<16>"	LOC = "AF15";	# I/O_181
+NET "cfeb2_rx<15>"	LOC = "AF14";	# I/O_182
+NET "cfeb2_rx<14>"	LOC = "AE14";	# I/O_183
+NET "cfeb2_rx<13>"	LOC = "AF11";	# I/O_184
+
+NET "vstat<0>"		LOC = "K13";	# I/O_185*
+NET "alct_rxclockd"	LOC = "V23";	# I/O_186	alct_rxclk1p
+NET "vstat<1>"		LOC = "V25";	# I/O_187*
+NET "mpc_clock"		LOC = "K12";	# I/O_188
+
+NET "cfeb2_rx<12>"	LOC = "AE12";	# I/O_189
+NET "cfeb2_rx<11>"	LOC = "AD12";	# I/O_190
+NET "cfeb2_rx<10>"	LOC = "AE16";	# I/O_191
+
+NET "vstat<2>"		LOC = "D11";	# I/O_192*
+NET "rpc_dsn"		LOC = "V28";	# I/O_193
+NET "vstat<3>"		LOC = "E11";	# I/O_194*
+
+NET "cfeb2_rx<9>"	LOC = "AD11";	# I/O_195
+NET "cfeb2_rx<8>"	LOC = "AC13";	# I/O_196
+
+#ET "tmb_clock0d"	LOC = "B10";	# I/O_197	Replaced by QPLL LHCCLK_P/N on A10,B10
+
+NET "cfeb2_rx<7>"	LOC = "AE11";	# I/O_198
+NET "cfeb2_rx<6>"	LOC = "L10";	# I/O_199
+NET "cfeb2_rx<5>"	LOC = "AD14";	# I/O_200
+NET "cfeb2_rx<4>"	LOC = "AB10";	# I/O_201
+NET "cfeb2_rx<3>"	LOC = "AE13";	# I/O_202
+NET "cfeb2_rx<2>"	LOC = "AF18";	# I/O_203
+NET "cfeb2_rx<1>"	LOC = "M12";	# I/O_204
+NET "cfeb2_rx<0>"	LOC = "AC12";	# I/O_205
+
+NET "cfeb3_rx<23>"	LOC = "AC10";	# I/O_206
+NET "cfeb3_rx<22>"	LOC = "AC15";	# I/O_207
+NET "cfeb3_rx<21>"	LOC = "AD17";	# I/O_208
+NET "cfeb3_rx<20>"	LOC = "AC14";	# I/O_209
+NET "cfeb3_rx<19>"	LOC = "AD15";	# I/O_210
+
+#ET "cfeb3_rx<18>"	LOC = "M13";	# I/O_211
+#ET "cfeb3_rx<17>"	LOC = "AC18";	# I/O_212
+NET "cfeb3_rx<17>"	LOC = "M13";	# I/O_212 Fixes pin swap schematic error
+NET "cfeb3_rx<18>"	LOC = "AC18";	# I/O_211 Fixes pin swap schematic error
+
+NET "cfeb3_rx<16>"	LOC = "AE17";	# I/O_213
+NET "cfeb3_rx<15>"	LOC = "AD16";	# I/O_214
+NET "cfeb3_rx<14>"	LOC = "L13";	# I/O_215
+NET "cfeb3_rx<13>"	LOC = "M10";	# I/O_216
+NET "cfeb3_rx<12>"	LOC = "AC17";	# I/O_217
+NET "cfeb3_rx<11>"	LOC = "AE18";	# I/O_218
+NET "cfeb3_rx<10>"	LOC = "K9";		# I/O_219
+NET "cfeb3_rx<9>"	LOC = "M11";	# I/O_220
+NET "cfeb3_rx<8>"	LOC = "J11";	# I/O_221
+NET "cfeb3_rx<7>"	LOC = "L9";		# I/O_222
+NET "cfeb3_rx<6>"	LOC = "D12";	# I/O_223
+NET "cfeb3_rx<5>"	LOC = "J12";	# I/O_224
+NET "cfeb3_rx<4>"	LOC = "H10";	# I/O_225
+NET "cfeb3_rx<3>"	LOC = "B11";	# I/O_226
+NET "cfeb3_rx<2>"	LOC = "K14";	# I/O_227
+NET "cfeb3_rx<1>"	LOC = "L14";	# I/O_228
+NET "cfeb3_rx<0>"	LOC = "A11";	# I/O_229
+
+NET "cfeb4_rx<23>"	LOC = "B12";	# I/O_230
+NET "cfeb4_rx<22>"	LOC = "A13";	# I/O_231
+NET "cfeb4_rx<21>"	LOC = "C13";	# I/O_232
+NET "cfeb4_rx<20>"	LOC = "H15";	# I/O_233
+NET "cfeb4_rx<19>"	LOC = "C12";	# I/O_234
+NET "cfeb4_rx<18>"	LOC = "B13";	# I/O_235
+NET "cfeb4_rx<17>"	LOC = "C14";	# I/O_236
+NET "cfeb4_rx<16>"	LOC = "M15";	# I/O_237
+NET "cfeb4_rx<15>"	LOC = "L15";	# I/O_238
+NET "cfeb4_rx<14>"	LOC = "A15";	# I/O_239
+NET "cfeb4_rx<13>"	LOC = "A14";	# I/O_240
+NET "cfeb4_rx<12>"	LOC = "J10";	# I/O_241
+NET "cfeb4_rx<11>"	LOC = "J15";	# I/O_242
+NET "cfeb4_rx<10>"	LOC = "B15";	# I/O_243
+NET "cfeb4_rx<9>"	LOC = "D14";	# I/O_244
+NET "cfeb4_rx<8>"	LOC = "E13";	# I/O_245
+NET "cfeb4_rx<7>"	LOC = "F14";	# I/O_246
+NET "cfeb4_rx<6>"	LOC = "E14";	# I/O_247
+NET "cfeb4_rx<5>"	LOC = "J14";	# I/O_248
+NET "cfeb4_rx<4>"	LOC = "H14";	# I/O_249
+NET "cfeb4_rx<3>"	LOC = "F13";	# I/O_250
+NET "cfeb4_rx<2>"	LOC = "F11";	# I/O_251
+NET "cfeb4_rx<1>"	LOC = "G11";	# I/O_252
+NET "cfeb4_rx<0>"	LOC = "G12";	# I/O_253
+
+NET "cfeb_clock_en<4>"	LOC = "H12";	# I/O_254
+NET "cfeb_clock_en<3>"	LOC = "E12";	# I/O_255
+NET "cfeb_clock_en<2>"	LOC = "G10";	# I/O_256
+NET "cfeb_clock_en<1>"	LOC = "H13";	# I/O_257
+NET "cfeb_clock_en<0>"	LOC = "G13";	# I/O_258
+
+NET "cfeb_oe"		LOC = "G15";	# I/O_259
+NET "rpc_smbrx"		LOC = "B16";	# I/O_260	rpc_rxalt<0>
+NET "alct_txa<17>"	LOC = "D16";	# I/O_261
+
+NET "gp_io4"		LOC = "E16";	# I/O_262	rpc_done
+NET "gp_io3"		LOC = "K16";	# I/O_263	jtag_fpga3 tck
+NET "gp_io2"		LOC = "J16";	# I/O_264	jtag_fpga2 tms
+NET "gp_io1"		LOC = "G17";	# I/O_265	jtag_fpga1 tdi (in)
+NET "gp_io0"		LOC = "M17";	# I/O_266	jtag_fgpa0 tdo (out) shunted to gp_io1, usually
+
+NET "_t_crit"		LOC = "M16";	# I/O_267
+NET "smb_clk"		LOC = "K17";	# I/O_268	smb1
+NET "smb_data"		LOC = "F15";	# I/O_269	smb0
+
+NET "adc_io3_dout"	LOC = "A16"; 	# I/O_270
+NET "adc_io<2>"		LOC = "C15";	# I/O_271
+NET "adc_io<1>"		LOC = "H17";	# I/O_272
+NET "adc_io<0>"		LOC = "J17";	# I/O_273
+NET "tmb_sn"		LOC = "F20";	# I/O_274
+
+NET "prom_led<7>"	LOC = "D17";	# I/O_275
+NET "prom_led<6>"	LOC = "C17";	# I/O_276
+NET "prom_led<5>"	LOC = "B17";	# I/O_277
+NET "prom_led<4>"	LOC = "L16";	# I/O_278
+NET "prom_led<3>"	LOC = "D15";	# I/O_279
+NET "prom_led<2>"	LOC = "E18";	# I/O_280
+NET "prom_led<1>"	LOC = "E17";	# I/O_281
+NET "prom_led<0>"	LOC = "F18";	# I/O_282
+
+NET "prom_ctrl<5>"	LOC = "J19";	# I/O_283
+NET "prom_ctrl<4>"	LOC = "L18";	# I/O_284
+NET "prom_ctrl<3>"	LOC = "L19";	# I/O_285
+NET "prom_ctrl<2>"	LOC = "M18";	# I/O_286
+NET "prom_ctrl<1>"	LOC = "H18";	# I/O_287
+NET "prom_ctrl<0>"	LOC = "K18";	# I/O_288
+
+NET "sel_usr<3>"	LOC = "H19";	# I/O_289
+NET "sel_usr<2>"	LOC = "K19";	# I/O_290
+NET "sel_usr<1>"	LOC = "G18";	# I/O_291
+NET "sel_usr<0>"	LOC = "E19";	# I/O_292
+
+NET "jtag_usr<3>"	LOC = "D20";	# I/O_293
+NET "jtag_usr<2>"	LOC = "F19";	# I/O_294
+NET "jtag_usr<1>"	LOC = "B18";	# I/O_295
+NET "jtag_usr0_tdo"	LOC = "L21";	# I/O_296
+
+NET "step<4>"		LOC = "C18";	# I/O_297
+NET "step<3>"		LOC = "L20";	# I/O_298
+NET "step<2>"		LOC = "D19";	# I/O_299
+NET "step<1>"		LOC = "J20";	# I/O_300
+NET "step<0>"		LOC = "H20";	# I/O_301
+
+NET	"ddd_serial_out"LOC = "K21";	# I/O_302	sda0
+NET "ddd_adr_latch"	LOC = "A18";	# I/O_303	scl2
+NET "ddd_clock"		LOC = "C19";	# I/O_304	scl1
+NET "ddd_serial_in"	LOC = "A19";	# I/O_305	scl0
+
+NET "rpc_loop"		LOC = "J21";	# I/O_306
+NET "_dmb_oe"		LOC = "K22";	# I/O_307
+NET "dmb_loop"		LOC = "J22";	# I/O_308
+NET "gtl_loop"		LOC = "G21";	# I/O_309
+NET "ccb_status_oe"	LOC = "G20";	# I/O_310
+
+#ET "_gtl_oe"		LOC = "F21";	# I/O_311
+NET "qpll_err"		LOC = "F21";
+
+NET "alct_rx<28>"	LOC = "A21";	# I/O_312
+NET "alct_rx<27>"	LOC = "A20";	# I/O_313
+NET "alct_rx<26>"	LOC = "B21";	# I/O_314
+NET "alct_rx<25>"	LOC = "B23";	# I/O_315
+NET "alct_rx<24>"	LOC = "B20";	# I/O_316
+NET "alct_rx<23>"	LOC = "G22";	# I/O_317
+NET "alct_rx<22>"	LOC = "B22";	# I/O_318
+NET "alct_rx<21>"	LOC = "C20";	# I/O_319
+NET "alct_rx<20>"	LOC = "A23";	# I/O_320
+NET "alct_rx<19>"	LOC = "H22";	# I/O_321
+NET "alct_rx<18>"	LOC = "A24";	# I/O_322
+NET "alct_rx<17>"	LOC = "B25";	# I/O_323
+NET "alct_rx<16>"	LOC = "A25";	# I/O_324
+NET "alct_rx<15>"	LOC = "C25";	# I/O_325
+NET "alct_rx<14>"	LOC = "C24";	# I/O_326
+NET "alct_rx<13>"	LOC = "C22";	# I/O_327
+NET "alct_rx<12>"	LOC = "D22";	# I/O_328
+NET "alct_rx<11>"	LOC = "C23";	# I/O_329
+NET "alct_rx<10>"	LOC = "E23";	# I/O_330
+NET "alct_rx<9>"	LOC = "E22";	# I/O_331
+NET "alct_rx<8>"	LOC = "E24";	# I/O_332
+NET "alct_rx<7>"	LOC = "D24";	# I/O_333
+NET "alct_rx<6>"	LOC = "A26";	# I/O_334
+NET "alct_rx<5>"	LOC = "B27";	# I/O_335
+NET "alct_rx<4>"	LOC = "B28";	# I/O_336
+NET "alct_rx<3>"	LOC = "B26";	# I/O_337
+NET "alct_rx<2>"	LOC = "C27";	# I/O_338
+NET "alct_rx<1>"	LOC = "A28";	# I/O_339
+
+NET "rpc_tx<3>"		LOC = "D25";	# I/O_340
+NET "alct_rxoe"		LOC = "F25";	# I/O_341
+NET "alct_loop"		LOC = "F26";	# I/O_342
+NET "alct_txb<23>"	LOC = "E26";	# I/O_343
+NET "alct_txb<22>"	LOC = "G27";	# I/O_344
+NET "alct_txb<21>"	LOC = "G26";	# I/O_345
+NET "alct_txb<20>"	LOC = "E27";	# I/O_346
+NET "alct_txoe"		LOC = "D27";	# I/O_347
+NET "alct_clock_en"	LOC = "D26";	# I/O_348
+
+NET "alct_txb<19>"	LOC = "K26";	# I/O_349
+NET "alct_txa<16>"	LOC = "K27";	# I/O_350
+NET "alct_txa<15>"	LOC = "E28";	# I/O_351
+NET "alct_txa<14>"	LOC = "J26";	# I/O_352
+NET "alct_txa<13>"	LOC = "G28";	# I/O_353
+NET "alct_txa<12>"	LOC = "L26";	# I/O_354
+NET "alct_txa<11>"	LOC = "D29";	# I/O_355
+NET "alct_txa<10>"	LOC = "F28";	# I/O_356
+NET "alct_txa<9>"	LOC = "H27";	# I/O_357
+NET "alct_txa<8>"	LOC = "J27";	# I/O_358
+NET "alct_txa<7>"	LOC = "K29";	# I/O_359
+NET "alct_txa<6>"	LOC = "J29";	# I/O_360
+NET "alct_txa<5>"	LOC = "K28";	# I/O_361
+
+#ET "rpc_rx<36>"	LOC = "C28";	# I/O_362
+#ET "rpc_rx<37>"	LOC = "A29";	# I/O_363
+NET "rpc_rx<37>"	LOC = "C28";	# I/O_363	Fixes pin swap schematic error
+NET "rpc_rx<36>"	LOC = "A29";	# I/O_362	Fixes pin swap schematic error
+
+NET "rpc_rx<32>"	LOC = "C29";	# I/O_364
+NET "rpc_rx<33>"	LOC = "J25";	# I/O_365
+NET "rpc_rx<34>"	LOC = "D30";	# I/O_366
+NET "rpc_rx<35>"	LOC = "C30";	# I/O_367
+NET "rpc_rx<0>"		LOC = "L25";	# I/O_368
+NET "rpc_rx<1>"		LOC = "A30";	# I/O_369
+NET "rpc_rx<2>"		LOC = "J24";	# I/O_370
+NET "rpc_rx<3>"		LOC = "B30";	# I/O_371
+NET "rpc_rx<4>"		LOC = "G25";	# I/O_372
+NET "rpc_rx<5>"		LOC = "H30";	# I/O_373
+NET "rpc_rx<6>"		LOC = "B32";	# I/O_374
+NET "rpc_rx<7>"		LOC = "F30";	# I/O_375
+NET "rpc_rx<8>"		LOC = "J30";	# I/O_376
+NET "rpc_rx<9>"		LOC = "B34";	# I/O_377
+NET "rpc_rx<10>"	LOC = "A33";	# I/O_378
+NET "rpc_rx<11>"	LOC = "B33";	# I/O_379
+NET "rpc_rx<12>"	LOC = "E31";	# I/O_380
+NET "rpc_rx<13>"	LOC = "C33";	# I/O_381
+NET "rpc_rx<14>"	LOC = "D31";	# I/O_382
+NET "rpc_rx<15>"	LOC = "G31";	# I/O_383
+NET "rpc_rx<16>"	LOC = "G30";	# I/O_384
+NET "rpc_rx<17>"	LOC = "C32";	# I/O_385
+NET "rpc_rx<18>"	LOC = "C34";	# I/O_386
+NET "rpc_rx<19>"	LOC = "F31";	# I/O_387
+NET "rpc_rx<20>"	LOC = "E33";	# I/O_388
+NET "rpc_rx<21>"	LOC = "D32";	# I/O_389
+NET "rpc_rx<22>"	LOC = "D34";	# I/O_390
+NET "rpc_rx<23>"	LOC = "G33";	# I/O_391
+NET "rpc_rx<24>"	LOC = "F33";	# I/O_392
+NET "rpc_rx<25>"	LOC = "E32";	# I/O_393
+NET "rpc_rx<26>"	LOC = "G32";	# I/O_394
+NET "rpc_rx<27>"	LOC = "H34";	# I/O_395
+NET "rpc_rx<28>"	LOC = "H33";	# I/O_396
+NET "rpc_rx<29>"	LOC = "T23";	# I/O_397
+NET "rpc_rx<30>"	LOC = "T24";	# I/O_398
+NET "rpc_rx<31>"	LOC = "U23";	# I/O_399
+
+NET "rpc_tx<2>"		LOC = "H32";	# I/O_400	rpc_looptm
+NET "rpc_tx<1>"		LOC = "J31";	# I/O_401	rpc_posneg
+NET "rpc_tx<0>"		LOC = "J32";	# I/O_402	rpc_sync
+
+NET "mez_done"		LOC = "W25";	# I/O_403
+NET "_mpc_tx<27>"	LOC = "L29";	# I/O_404
+NET "_mpc_tx<28>"	LOC = "N29";	# I/O_405
+NET "mez_sn"		LOC = "M31";	# I/O_406	Mez card missing DSN device =:-(
+
+NET "_mpc_tx<29>"	LOC = "M25";	# I/O_407
+NET "_mpc_tx<30>"	LOC = "M28";	# I/O_408
+NET "_mpc_tx<31>"	LOC = "N30";	# I/O_409
+NET "_mpc_tx<0>"	LOC = "N32";	# I/O_410
+NET "_mpc_tx<1>"	LOC = "N25";	# I/O_411
+NET "_mpc_tx<2>"	LOC = "M27";	# I/O_412
+NET "_mpc_tx<3>"	LOC = "P29";	# I/O_413
+NET "_mpc_tx<4>"	LOC = "N34";	# I/O_414
+NET "_mpc_tx<5>"	LOC = "M26";	# I/O_415
+NET "_mpc_tx<6>"	LOC = "P27";	# I/O_416
+NET "_mpc_tx<7>"	LOC = "P31";	# I/O_417
+NET "_mpc_tx<8>"	LOC = "N33";	# I/O_418
+NET "_mpc_tx<9>"	LOC = "P26";	# I/O_419
+NET "_mpc_tx<10>"	LOC = "N28";	# I/O_420
+NET "_mpc_tx<11>"	LOC = "R28";	# I/O_421
+NET "_mpc_tx<12>"	LOC = "P34";	# I/O_422
+NET "_mpc_tx<13>"	LOC = "P25";	# I/O_423
+NET "_mpc_tx<14>"	LOC = "R26";	# I/O_424
+NET "_mpc_tx<15>"	LOC = "P30";	# I/O_425
+
+NET "dmb_tx<48>"	LOC = "R33";	# I/O_426
+NET "dmb_tx<47>"	LOC = "A9";		# I/O_427
+NET "dmb_tx<46>"	LOC = "A8";		# I/O_428
+NET "dmb_tx<45>"	LOC = "R34";	# I/O_429
+NET "dmb_tx<44>"	LOC = "T33";	# I/O_430
+
+NET "dmb_rx<5>"		LOC = "U31";	# I/O_431
+NET "dmb_rx<4>"		LOC = "V34";	# I/O_432
+NET "dmb_rx<3>"		LOC = "T34";	# I/O_433
+NET "dmb_rx<2>"		LOC = "U32";	# I/O_434
+NET "dmb_rx<1>"		LOC = "W31";	# I/O_435*
+NET "dmb_rx<0>"		LOC = "U33";	# I/O_436
+
+NET "dmb_tx<43>"	LOC = "T31";	# I/O_437
+NET "dmb_tx<42>"	LOC = "B8";		# I/O_438
+NET "dmb_tx<41>"	LOC = "C10";	# I/O_439
+
+NET "dmb_tx<40>"	LOC = "C9";	# Pre-production: I/O_440
+NET "dmb_tx<39>"	LOC = "W32";	# Pre-production: I/O_441
+#NET "dmb_tx<40>"	LOC = "W32";	# Production: I/O_440
+#NET "dmb_tx<39>"	LOC = "C9";	# Production: I/O_441
+
+NET "dmb_tx<38>"	LOC = "C8";		# I/O_442
+NET "dmb_tx<37>"	LOC = "D10";	# I/O_443
+NET "dmb_tx<36>"	LOC = "D9";		# I/O_444
+NET "dmb_tx<35>"	LOC = "E8";		# I/O_445
+NET "dmb_tx<34>"	LOC = "E9";		# I/O_446
+NET "dmb_tx<33>"	LOC = "Y34";	# I/O_447
+NET "dmb_tx<32>"	LOC = "W34";	# I/O_448
+NET "dmb_tx<31>"	LOC = "F10";	# I/O_449
+NET "dmb_tx<30>"	LOC = "F9";		# I/O_450
+NET "dmb_tx<29>"	LOC = "Y32";	# I/O_451
+NET "dmb_tx<28>"	LOC = "Y33";	# I/O_452
+NET "dmb_tx<27>"	LOC = "AD9";	# I/O_453
+NET "dmb_tx<26>"	LOC = "AC9";	# I/O_454
+NET "dmb_tx<25>"	LOC = "AA33";	# I/O_455
+NET "dmb_tx<24>"	LOC = "AA34";	# I/O_456
+NET "dmb_tx<23>"	LOC = "AE9";	# I/O_457
+NET "dmb_tx<22>"	LOC = "AD10";	# I/O_458
+NET "dmb_tx<21>"	LOC = "AC34";	# I/O_459
+NET "dmb_tx<20>"	LOC = "AB33";	# I/O_460
+NET "dmb_tx<19>"	LOC = "AF9";	# I/O_461
+NET "dmb_tx<18>"	LOC = "AF10";	# I/O_462
+NET "dmb_tx<17>"	LOC = "AD32";	# I/O_463
+NET "dmb_tx<16>"	LOC = "AC33";	# I/O_464
+NET "dmb_tx<15>"	LOC = "AK9";	# I/O_465
+NET "dmb_tx<14>"	LOC = "AH8";	# I/O_466
+NET "dmb_tx<13>"	LOC = "AE34";	# I/O_467
+NET "dmb_tx<12>"	LOC = "AD34";	# I/O_468
+NET "dmb_tx<11>"	LOC = "AL9";	# I/O_469
+NET "dmb_tx<10>"	LOC = "AG8";	# I/O_470
+NET "dmb_tx<9>"		LOC = "AE32";	# I/O_471
+NET "dmb_tx<8>"		LOC = "AE33";	# I/O_472
+NET "dmb_tx<7>"		LOC = "AL8";	# I/O_473
+NET "dmb_tx<6>"		LOC = "AK8";	# I/O_474
+NET "dmb_tx<5>"		LOC = "AF33";	# I/O_475
+NET "dmb_tx<4>"		LOC = "AF34";	# I/O_476
+
+NET "_ccb_rx<37>"	LOC = "Y27";	# I/O_477
+NET "_ccb_rx<38>"	LOC = "AA29";	# I/O_478
+NET "_ccb_rx<39>"	LOC = "AG32";	# I/O_479
+NET "_ccb_rx<40>"	LOC = "AA30";	# I/O_480
+NET "_ccb_rx<41>"	LOC = "Y29";	# I/O_481
+NET "_ccb_rx<42>"	LOC = "Y26";	# I/O_482
+NET "_ccb_rx<43>"	LOC = "AG31";	# I/O_483
+NET "_ccb_rx<44>"	LOC = "AH34";	# I/O_484
+NET "_ccb_rx<45>"	LOC = "AJ34";	# I/O_485
+NET "_ccb_rx<46>"	LOC = "AA31";	# I/O_486
+NET "_ccb_rx<47>"	LOC = "Y28";	# I/O_487
+NET "_ccb_rx<48>"	LOC = "AH33";	# I/O_488
+NET "_ccb_rx<49>"	LOC = "AA25";	# I/O_489
+NET "_ccb_rx<50>"	LOC = "AH32";	# I/O_490
+NET "_ccb_rx<34>"	LOC = "AA26";	# I/O_491
+NET "_ccb_rx<35>"	LOC = "AB27";	# I/O_492
+
+NET "_ccb_tx<18>"	LOC = "AB31";	# I/O_493
+NET "_ccb_tx<19>"	LOC = "AB26";	# I/O_494
+NET "_ccb_tx<20>"	LOC = "AB25";	# I/O_495
+NET "_ccb_tx<21>"	LOC = "AB30";	# I/O_496
+NET "_ccb_tx<22>"	LOC = "AE24";	# I/O_497
+NET "_ccb_tx<23>"	LOC = "AC28";	# I/O_498
+NET "_ccb_tx<24>"	LOC = "AD30";	# I/O_499
+NET "_ccb_tx<25>"	LOC = "AD31";	# I/O_500
+
+NET "_mpc_tx<16>"	LOC = "K31";	# I/O_501
+NET "_mpc_tx<17>"	LOC = "J34";	# I/O_502
+NET "_mpc_tx<18>"	LOC = "K32";	# I/O_503
+NET "_mpc_tx<19>"	LOC = "K33";	# I/O_504
+NET "_mpc_tx<20>"	LOC = "L28";	# I/O_505
+NET "_mpc_tx<21>"	LOC = "L33";	# I/O_506
+NET "_mpc_tx<22>"	LOC = "L30";	# I/O_507
+NET "_mpc_tx<23>"	LOC = "M32";	# I/O_508
+NET "_mpc_tx<24>"	LOC = "L31";	# I/O_509
+NET "_mpc_tx<25>"	LOC = "M33";	# I/O_510
+NET "_mpc_tx<26>"	LOC = "N27";	# I/O_511
+
+NET "dmb_tx<3>"		LOC = "AG33";	# I/O_512
+NET "dmb_tx<2>"		LOC = "Y31";	# I/O_513
+NET "dmb_tx<1>"		LOC = "AN9";	# I/O_514
+NET "dmb_tx<0>"		LOC = "AP9";	# I/O_515
+NET "_ccb_rx<36>"	LOC = "AA28";	# I/O_516
+
+NET "gp_io5"   		LOC = "V30";	# I/O_517	TP_INIT
+NET "gp_io6"   		LOC = "W30";	# I/O_518	TP_WR
+NET "gp_io7"   		LOC = "W29";	# I/O_519	TP_CS
+#ET "mez_busy" 		LOC = "AA8";	# I/O_520	BUSY	Not a user IO on Virtex6, assigned to testled[10]
+
+NET "led_fp<0>"		LOC = "AF24";	# I/O_521	D0
+NET "led_fp<1>"		LOC = "AF25";	# I/O_522	D1
+NET "led_fp<2>"		LOC = "W24";	# I/O_523	D2
+NET "led_fp<3>"		LOC = "V24";	# I/O_524	D3
+NET "led_fp<4>"		LOC = "H24";	# I/O_525	D4
+NET "led_fp<5>"		LOC = "H25";	# I/O_526	D5
+NET "led_fp<6>"		LOC = "P24";	# I/O_527	D6
+NET "led_fp<7>"		LOC = "R24";	# I/O_528	D7
+
+NET "tmb_clock0"  	LOC = "B31";	# GCLK19P
+NET "tmb_clock1"  	LOC = "K24";	# GCLK1-6P
+NET "alct_rxclock"	LOC = "L23";	# GCLK2-0P
+NET "dcc_clock"   	LOC = "H28";	# GCLK3-2P
+
+#NET "/prog_b"		LOC = "L8";		# /PROGR
+#NET "dxn"    		LOC = "W17";	# DXN
+#NET "dxp"    		LOC = "W18";	# DXP
+   
+#NET "tck"			LOC = "AE8";	# TCK_Pr
+#NET "tdi"			LOC = "AD8";	# TDI_Pr
+#NET "tdo"			LOC = "AC8";	# TDO
+#NET "tms"			LOC = "AF8";	# TMS_Pr
+
+NET "meztp20"		LOC = "G23";	# D8	mez_tp1
+NET "meztp21"		LOC = "H23";	# D9	mez_tp2
+NET "meztp22"		LOC = "N24";	# D10	mez_tp3
+NET "meztp23"		LOC = "N23";	# D11	mez_tp4
+NET "meztp24"		LOC = "F23";	# D12	mez_tp5
+NET "meztp25"		LOC = "F24";	# D13	mez_tp6
+NET "meztp26"		LOC = "L24";	# D14	mez_tp7
+NET "meztp27"		LOC = "M23";	# D15	mez_tp8
+
+#----------------------------------------------------------------------------------------------------------
+# Virtex6 Mezzanine Specific IOs
+#----------------------------------------------------------------------------------------------------------
+# Switches
+NET "set_sw<7>"		LOC = "U25";
+NET "set_sw<8>"		LOC = "U26";
+
+# LEDs
+NET "testled<1>"	LOC = "T29";
+NET "testled<2>"	LOC = "R31";
+NET "testled<3>"	LOC = "T26";
+NET "testled<4>"	LOC = "R29";
+NET "testled<5>"	LOC = "R27";
+NET "testled<6>"	LOC = "T30";
+NET "testled<7>"	LOC = "U28";
+NET "testled<8>"	LOC = "T28";
+NET "testled<9>"	LOC = "T25";
+#ET "testled<10>"	LOC = "U27";
+NET "mez_busy"		LOC = "U27";
+
+# CERN QPLL
+NET "clk40p"		LOC = "A10" | IOSTANDARD = "LVDS_25";  # Differential 40 MHz from QPLL, aka lhc_ckp
+NET "clk40n"		LOC = "B10" | IOSTANDARD = "LVDS_25";  # Differential 40 MHz from QPLL, aka lhc_ckn
+
+NET "clk160p"		LOC = "AB6" | IOSTANDARD = "LVDS_25";
+NET "clk160n"		LOC = "AB5" | IOSTANDARD = "LVDS_25";
+
+NET "reset"			LOC = "V29";
+NET "qpll_nrst"		LOC = "U30";
+NET "qpll_lock"		LOC = "M22";
+NET "qpll_err"		LOC = "F21";
+
+# CCLD-033 crystal
+NET "clk125p"		LOC = "J9";	# Signal for Finisar, not needed for final Mezz boards, will be a FREE pin
+NET "clk125n"		LOC = "H9";	# Signal for Finisar, not needed for final Mezz boards, will be a FREE pin
+
+# SNAP12 serial interface
+NET "t12_sclk"		LOC = "V27";
+NET "t12_sdat"		LOC = "A31";
+NET "t12_rst"		LOC = "AC24";
+NET "t12_nfault"	LOC = "P32";
+
+NET "r12_sclk"		LOC = "W26";
+NET "r12_sdat"		LOC = "H29";
+NET "r12_fok"		LOC = "M30";
+
+# Finisar
+NET "f_sclk"		LOC = "W27";
+NET "f_sdat"		LOC = "R32";
+NET "f_fok"			LOC = "K23";
+
+# PROM
+NET "fcs"			LOC = "Y24";
+#ET "FOE"			LOC = "AA24";
+#ET "FWE"			LOC = "AF23";
+
+#-------------------------------------------------------------------------------------------------------------------
+# SNAP12 receivers
+#-------------------------------------------------------------------------------------------------------------------
+# Snap fiber1 mgt: gtx4/rx1
+NET "rxp[0]"		LOC = AM5 | IOSTANDARD = "LVDS_25";	# MGTRXP1_112
+NET "rxn[0]"		LOC = AM6 | IOSTANDARD = "LVDS_25";	# MGTRXN1_112
+
+# Snap fiber2 mgt: gtx7/rx2
+NET "rxp[1]"		LOC = AL3 | IOSTANDARD = "LVDS_25";	# MGTRXP2_112
+NET "rxn[1]"		LOC = AL4 | IOSTANDARD = "LVDS_25";	# MGTRXN2_112
+
+# Snap fiber3 mgt: gtx8/rx3
+NET "rxp[2]"		LOC = AJ3 | IOSTANDARD = "LVDS_25";	# MGTRXP3_112
+NET "rxn[2]"		LOC = AJ4 | IOSTANDARD = "LVDS_25";	# MGTRXN3_112
+
+# Snap fiber4 mgt: gtx9/rx8
+NET "rxp[3]"		LOC = AA3 | IOSTANDARD = "LVDS_25";	# MGTRXP0_114
+NET "rxn[3]"		LOC = AA4 | IOSTANDARD = "LVDS_25";	# MGTRXN0_114
+
+# Snap fiber5 mgt: gtx10/rx9
+NET "rxp[4]"		LOC = W3  | IOSTANDARD = "LVDS_25"; # MGTRXP1_114	RX p|n swapped at snap12 end
+NET "rxn[4]"		LOC = W4  | IOSTANDARD = "LVDS_25";	# MGTRXN1_114	RX p|n swapped at snap12 end
+
+# Snap fiber6 mgt: gtx11/rx10
+NET "rxp[5]"		LOC = U3  | IOSTANDARD = "LVDS_25"; # MGTRXP2_114	RX p|n swapped at snap12 end
+NET "rxn[5]"		LOC = U4  | IOSTANDARD = "LVDS_25"; # MGTRXN2_114	RX p|n swapped at snap12 end
+
+# Snap fiber7 mgt: gtx2/rx11
+NET "rxp[6]"		LOC = R3  | IOSTANDARD = "LVDS_25";	# MGTRXP3_114
+NET "rxn[6]"		LOC = R4  | IOSTANDARD = "LVDS_25";	# MGTRXN3_114
+
+#----------------------------------------------------------------------------------------------------------
+# IO Bank Impedances, just for reference, do not lock these pins
+#----------------------------------------------------------------------------------------------------------
+#NET "VRN12"			LOC = "AJ31";
+#NET "VRN13"			LOC = "AB32";
+#NET "VRN14"			LOC = "V32";
+#NET "VRN15"			LOC = "K34";
+#NET "VRN16"			LOC = "E34";
+#NET "VRN22"			LOC = "AJ20";
+#NET "VRN23"			LOC = "AK26";
+#NET "VRN24"			LOC = "AE23";
+#NET "VRN25"			LOC = "E29";
+#NET "VRN26"			LOC = "D21";
+#NET "VRN32"			LOC = "AH18";
+#NET "VRN33"			LOC = "AF13";
+#NET "VRN34"			LOC = "AN10";
+#NET "VRN35"			LOC = "K11";
+#NET "VRN36"			LOC = "F16";
+
+#NET "VRP12"			LOC = "AJ32";
+#NET "VRP13"			LOC = "AC32";
+#NET "VRP14"			LOC = "V33";
+#NET "VRP15"			LOC = "L34";
+#NET "VRP16"			LOC = "F34";
+#NET "VRP22"			LOC = "AH20";
+#NET "VRP23"			LOC = "AJ26";
+#NET "VRP24"			LOC = "AE22";
+#NET "VRP25"			LOC = "F29";
+#NET "VRP26"			LOC = "E21";
+#NET "VRP32"			LOC = "AG18";
+#NET "VRP33"			LOC = "AG13";
+#NET "VRP34"			LOC = "AP10";
+#NET "VRP35"			LOC = "L11";
+#NET "VRP36"			LOC = "G16";
+
+#----------------------------------------------------------------------------------------------------------
+# Special IOs
+#----------------------------------------------------------------------------------------------------------
+NET "gp_io1"				PULLUP;	# FPGA JTAG chain missing pullups on TMB
+NET "gp_io2"				PULLUP;
+NET "gp_io3"				PULLUP;
+NET "gp_io4"				PULLUP;
+NET "mez_done"				PULLDOWN;
+
+#----------------------------------------------------------------------------------------------------------
+# TMB Output Port Drive
+#----------------------------------------------------------------------------------------------------------
+# CFEB
+NET "cfeb_clock_en<*>"		SLEW=FAST | DRIVE=4;
+NET "cfeb_oe"				SLEW=FAST | DRIVE=4;
+
+# ALCT 80MHz rx,txa,txb
+NET "alct_txa<*>"			IOSTANDARD=LVDCI_25;
+NET "alct_txb<*>"			IOSTANDARD=LVDCI_25;
+
+#ALCT static
+NET "alct_clock_en"			SLEW=FAST | DRIVE=4;
+NET "alct_rxoe"				SLEW=FAST | DRIVE=4;
+NET "alct_txoe"				SLEW=FAST | DRIVE=4;
+NET "alct_loop"				SLEW=FAST | DRIVE=4;
+
+# DMB
+NET "dmb_tx<*>"				SLEW=FAST | DRIVE=4;
+NET "dmb_loop"				SLEW=FAST | DRIVE=4;
+NET "_dmb_oe"				SLEW=FAST | DRIVE=4;
+
+# MPC
+NET "_mpc_tx<*>"			SLEW=FAST;	#revert to 12mA default 10/06/05
+
+# RPC
+NET "rpc_loop"				SLEW=FAST | DRIVE=4;
+NET "rpc_tx<*>"				SLEW=FAST | DRIVE=4;
+
+# CCB
+NET "_ccb_tx<*>"			SLEW=FAST | DRIVE=4;
+#ET "_gtl_oe"				SLEW=FAST | DRIVE=4;
+NET "ccb_status_oe"			SLEW=FAST | DRIVE=4;
+NET "_hard_reset_alct_fpga"	SLEW=FAST | DRIVE=4;
+NET "_hard_reset_tmb_fpga"	SLEW=FAST | DRIVE=4;
+NET "gtl_loop"				SLEW=FAST | DRIVE=4;
+
+# VME
+NET "vme_d<*>"				SLEW=FAST | DRIVE=4;
+NET "vme_reply<*>"			SLEW=FAST | DRIVE=4;
+
+# JTAG
+NET "jtag_usr<*>"			SLEW=FAST | DRIVE=4;
+NET "sel_usr<*>"			SLEW=FAST | DRIVE=4;
+
+# PROM
+NET "prom_led<*>"			SLEW=FAST | DRIVE=4;
+NET "prom_ctrl<*>"			SLEW=FAST | DRIVE=4;	
+
+# Clock
+NET "step<*>"				SLEW=FAST | DRIVE=4;
+
+# 3D3444
+NET "ddd_clock"				SLEW=FAST | DRIVE=4;
+NET "ddd_adr_latch"			SLEW=FAST | DRIVE=4;
+NET "ddd_serial_in"			SLEW=FAST | DRIVE=4;
+
+# Status
+NET "tmb_sn"				SLEW=FAST | DRIVE=4;
+NET "smb_data"				SLEW=FAST | DRIVE=4;
+NET "mez_sn"				SLEW=FAST | DRIVE=4;
+NET "adc_io<*>"				SLEW=FAST | DRIVE=4;
+NET "smb_clk"				SLEW=FAST | DRIVE=4;
+NET "mez_busy"				SLEW=FAST | DRIVE=4;
+NET "led_fp<*>"				SLEW=FAST | DRIVE=4;
+
+# General Purpose I/Os
+NET "gp_io0"				SLEW=FAST | DRIVE=4;
+NET "gp_io1"				SLEW=FAST | DRIVE=4;
+NET "gp_io2"				SLEW=FAST | DRIVE=4;
+NET "gp_io3"				SLEW=FAST | DRIVE=4;
+NET "gp_io5"				SLEW=FAST | DRIVE=4;
+NET "gp_io6"				SLEW=FAST | DRIVE=4;
+NET "gp_io7"				SLEW=FAST | DRIVE=4;
+
+# Mezzanine Test Points
+NET "meztp20"				SLEW=FAST | DRIVE=4;
+NET "meztp21"				SLEW=FAST | DRIVE=4;
+NET "meztp22"				SLEW=FAST | DRIVE=4;
+NET "meztp23"				SLEW=FAST | DRIVE=4;
+NET "meztp24"				SLEW=FAST | DRIVE=4;
+NET "meztp25"				SLEW=FAST | DRIVE=4;
+NET "meztp26"				SLEW=FAST | DRIVE=4;
+NET "meztp27"				SLEW=FAST | DRIVE=4;
+
+#----------------------------------------------------------------------------------------------------------
+# Timing
+#----------------------------------------------------------------------------------------------------------
+NET "tmb_clock0"	TNM_NET = "tmb_clock0";	# TMB main Clock
+TIMESPEC "TS_tmb_clock0" = PERIOD "tmb_clock0"  25.0 ns HIGH 50%;
+
+NET "clock_160" 	TNM_NET = "clock_160";	# GTX clock
+TIMESPEC "TS_clock_160"  = PERIOD "clock_160" 6.25 ns HIGH 50%;
+
+# Phase shifted clocks
+NET "clock_cfeb_rxd<*>"	TIG;
+NET "clock_alct_rxd"	TIG;
+NET "clock_alct_txd"	TIG;
+
+#----------------------------------------------------------------------------------------------------------
+# End of TMB2012 UCF
+#----------------------------------------------------------------------------------------------------------

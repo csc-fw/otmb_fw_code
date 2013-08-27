@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<project xmlns="http://www.xilinx.com/XMLSchema" xmlns:xil_pn="http://www.xilinx.com/XMLSchema">
+
+  <header>
+    <!-- ISE source project file created by Project Navigator.             -->
+    <!--                                                                   -->
+    <!-- This file contains project source information including a list of -->
+    <!-- project source files, project and process properties.  This file, -->
+    <!-- along with the project source files, is sufficient to open and    -->
+    <!-- implement in ISE Project Navigator.                               -->
+    <!--                                                                   -->
+    <!-- Copyright (c) 1995-2010 Xilinx, Inc.  All rights reserved. -->
+  </header>
+
+  <version xil_pn:ise_version="12.4" xil_pn:schema_version="2"/>
+
+  <files>
+    <file xil_pn:name="../source/otmb_top.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/gtx_rx_buf_bypass_ise124.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/otmb_pinout_preprod.ucf" xil_pn:type="FILE_UCF">
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/triad_decode.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/vme.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/vmesm.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/x_delay.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/x_delay_os.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/x_demux_ddr_alct_muonic.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/x_demux_ddr_mpc.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/x_flashsm.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/x_mux_ddr_alct_muonic.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/x_mux_ddr_mpc.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/x_oneshot.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/parity.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/pattern_finder.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/pattern_unit.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/phaser.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/ramblock.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/rpc.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/scope160.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/sequencer.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/srl16e_bbl.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/srl16e_bit.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/sync_err_ctrl.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/tmb.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/alct.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/alct_lfsr_rng.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/alct_startup.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/best_1of7.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/best_1of7_busy.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/best_1of32.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/best_1of32_busy.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/buffer_read_ctrl.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/buffer_write_ctrl.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/ccb.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/ccb_lock.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/cfeb.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/cfeb_bit_check.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/clock_ctrl.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/crc22a.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/cylon1.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/cylon2.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/ddd_rat.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/ddd_tmb.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/dsn_rat.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/dsn_tmb.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/ecc16_encoder.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/ecc32_decoder.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/ecc32_encoder.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/fence_queue.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/gtx_comp_fiber_in.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/gtx_lfsr_r24_c160.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/gtx_optical_rx.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/gtx_prbs_rx_c160.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/gtx_rx_buf_bypass_gtx.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/gtx_rx_sync.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/gtx_sysmon.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/jtagsm_new.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/jtagsm_old.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/lct_quality.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+    <file xil_pn:name="../source/miniscope.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation"/>
+      <association xil_pn:name="Implementation"/>
+    </file>
+  </files>
+
+  <properties>
+    <property xil_pn:name="Device" xil_pn:value="xc6vlx240t" xil_pn:valueState="non-default"/>
+    <property xil_pn:name="Device Family" xil_pn:value="Virtex6" xil_pn:valueState="non-default"/>
+    <property xil_pn:name="Enable Message Filtering" xil_pn:value="true" xil_pn:valueState="non-default"/>
+    <property xil_pn:name="Implementation Top" xil_pn:value="Module|otmb_virtex6" xil_pn:valueState="non-default"/>
+    <property xil_pn:name="Implementation Top File" xil_pn:value="../source/otmb_top.v" xil_pn:valueState="non-default"/>
+    <property xil_pn:name="Implementation Top Instance Path" xil_pn:value="/otmb_virtex6" xil_pn:valueState="non-default"/>
+    <property xil_pn:name="Package" xil_pn:value="ff1156" xil_pn:valueState="non-default"/>
+    <property xil_pn:name="Preferred Language" xil_pn:value="Verilog" xil_pn:valueState="default"/>
+    <property xil_pn:name="Property Specification in Project File" xil_pn:value="Store non-default values only" xil_pn:valueState="non-default"/>
+    <property xil_pn:name="Simulator" xil_pn:value="Modelsim-SE Mixed" xil_pn:valueState="non-default"/>
+    <property xil_pn:name="Speed Grade" xil_pn:value="-1" xil_pn:valueState="non-default"/>
+    <property xil_pn:name="Synthesis Tool" xil_pn:value="XST (VHDL/Verilog)" xil_pn:valueState="default"/>
+    <property xil_pn:name="Top-Level Source Type" xil_pn:value="HDL" xil_pn:valueState="default"/>
+    <property xil_pn:name="UserID Code (8 Digit Hexadecimal)" xil_pn:value="0x06042013" xil_pn:valueState="non-default"/>
+    <property xil_pn:name="Working Directory" xil_pn:value="." xil_pn:valueState="non-default"/>
+    <!--                                                                                  -->
+    <!-- The following properties are for internal use only. These should not be modified.-->
+    <!--                                                                                  -->
+    <property xil_pn:name="PROP_DesignName" xil_pn:value="otmb_preprod_124" xil_pn:valueState="non-default"/>
+    <property xil_pn:name="PROP_DevFamilyPMName" xil_pn:value="virtex6" xil_pn:valueState="default"/>
+    <property xil_pn:name="PROP_intProjectCreationTimestamp" xil_pn:value="2013-08-26T16:24:20" xil_pn:valueState="non-default"/>
+    <property xil_pn:name="PROP_intWbtProjectID" xil_pn:value="E5602B9C379346F5A79A919EEAF19D31" xil_pn:valueState="non-default"/>
+    <property xil_pn:name="PROP_intWorkingDirLocWRTProjDir" xil_pn:value="Same" xil_pn:valueState="non-default"/>
+    <property xil_pn:name="PROP_intWorkingDirUsed" xil_pn:value="No" xil_pn:valueState="non-default"/>
+  </properties>
+
+  <bindings/>
+
+  <libraries/>
+
+  <autoManagedFiles>
+    <!-- The following files are identified by `include statements in verilog -->
+    <!-- source files and are automatically managed by Project Navigator.     -->
+    <!--                                                                      -->
+    <!-- Do not hand-edit this section, as it will be overwritten when the    -->
+    <!-- project is analyzed based on files automatically identified as       -->
+    <!-- include files.                                                       -->
+    <file xil_pn:name="../source/firmware_version.v" xil_pn:type="FILE_VERILOG"/>
+  </autoManagedFiles>
+
+</project>
