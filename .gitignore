@@ -5,7 +5,7 @@ work/
 *.wlf
 *.bak
 *.do
-commands/*out.txt
+source/simulation/commands/*out.txt
 
 ### ISE ###
 xlnx_auto_0_xdb/

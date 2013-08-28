@@ -189,7 +189,7 @@ module GTX_RX_SYNC
     always @(posedge USER_CLK)
     begin
         if (RESET)
-            sync_done_count_r <= `DLY  6'b0000000;
+            sync_done_count_r <= `DLY  6'b000000;
         else if(count_32_wait_complete_r && phase_align_r)
             sync_done_count_r <= `DLY  sync_done_count_r + 1'b1;
     end

@@ -461,81 +461,81 @@
 	clock_ctrl uclock_ctrl
 	(
 // Clock inputs
-	.tmb_clock0				(tmb_clock0),				// In	40MHz clock bypasses 3D3444 and loads Mez PROMs, chip bottom
-	.tmb_clock0d			(tmb_clock0d),				// In	40MHz clock bypasses 3D3444 and loads Mez PROMs, chip top
-	.tmb_clock1				(tmb_clock1),				// In	40MHz clock with 3D3444 delay
-	.alct_rxclock			(alct_rxclock),				// In	40MHz ALCT receive data clock with 3D3444 delay, chip bottom
-	.alct_rxclockd			(alct_rxclockd),			// In	40MHz ALCT receive data clock with 3D3444 delay, chip top
-	.mpc_clock				(mpc_clock),				// In	40MHz MPC clock
-	.dcc_clock				(dcc_clock),				// In	40MHz Duty cycle corrected clock with 3D3444 delay
-	.rpc_sig				(gp_io4),					// In	40MHz Unused
+	 .tmb_clock0		(tmb_clock0),		// In	40MHz clock bypasses 3D3444 and loads Mez PROMs, chip bottom
+	 .tmb_clock0d		(tmb_clock0d),		// In	40MHz clock bypasses 3D3444 and loads Mez PROMs, chip top
+	.tmb_clock1		(tmb_clock1),		// In	40MHz clock with 3D3444 delay
+	.alct_rxclock		(alct_rxclock),		// In	40MHz ALCT receive data clock with 3D3444 delay, chip bottom
+	.alct_rxclockd		(alct_rxclockd),	// In	40MHz ALCT receive data clock with 3D3444 delay, chip top
+	.mpc_clock		(mpc_clock),		// In	40MHz MPC clock
+	.dcc_clock		(dcc_clock),		// In	40MHz Duty cycle corrected clock with 3D3444 delay
+	.rpc_sig		(gp_io4),		// In	40MHz Unused
 
 // Main clock outputs
-	.clock					(clock),					// Out	40MHz global TMB clock
-	.clock_2x				(clock_2x),					// Out	80MHz commutator clock
-	.clock_lac				(clock_lac),				// Out	40MHz logic accessible clock
-	.clock_vme				(clock_vme),				// Out	10MHz global VME clock
+	.clock			(clock),					// Out	40MHz global TMB clock
+	.clock_2x		(clock_2x),					// Out	80MHz commutator clock
+	.clock_lac		(clock_lac),				// Out	40MHz logic accessible clock
+	.clock_vme		(clock_vme),				// Out	10MHz global VME clock
 
 // Phase delayed clocks
-	.clock_alct_txd			(clock_alct_txd),			// Out	40MHz ALCT transmit data clock 1x
-	.clock_alct_rxd			(clock_alct_rxd),			// Out	40MHz ALCT receive  data clock 1x
-	.clock_cfeb0_rxd		(clock_cfeb_rxd[0]),		// Out	40MHz CFEB receive  data clock 1x
-	.clock_cfeb1_rxd		(clock_cfeb_rxd[1]),		// Out	40MHz CFEB receive  data clock 1x
-	.clock_cfeb2_rxd		(clock_cfeb_rxd[2]),		// Out	40MHz CFEB receive  data clock 1x
-	.clock_cfeb3_rxd		(clock_cfeb_rxd[3]),		// Out	40MHz CFEB receive  data clock 1x
-	.clock_cfeb4_rxd		(clock_cfeb_rxd[4]),		// Out	40MHz CFEB receive  data clock 1x
-	.clock_cfeb5_rxd		(clock_cfeb_rxd[5]),		// Out	40MHz CFEB receive  data clock 1x
-	.clock_cfeb6_rxd		(clock_cfeb_rxd[6]),		// Out	40MHz CFEB receive  data clock 1x
+	.clock_alct_txd		(clock_alct_txd),			// Out	40MHz ALCT transmit data clock 1x
+	.clock_alct_rxd		(clock_alct_rxd),			// Out	40MHz ALCT receive  data clock 1x
+	.clock_cfeb0_rxd	(clock_cfeb_rxd[0]),		// Out	40MHz CFEB receive  data clock 1x
+	.clock_cfeb1_rxd	(clock_cfeb_rxd[1]),		// Out	40MHz CFEB receive  data clock 1x
+	.clock_cfeb2_rxd	(clock_cfeb_rxd[2]),		// Out	40MHz CFEB receive  data clock 1x
+	.clock_cfeb3_rxd	(clock_cfeb_rxd[3]),		// Out	40MHz CFEB receive  data clock 1x
+	.clock_cfeb4_rxd	(clock_cfeb_rxd[4]),		// Out	40MHz CFEB receive  data clock 1x
+	.clock_cfeb5_rxd	(clock_cfeb_rxd[5]),		// Out	40MHz CFEB receive  data clock 1x
+	.clock_cfeb6_rxd	(clock_cfeb_rxd[6]),		// Out	40MHz CFEB receive  data clock 1x
 
 // Global reset
-	.mmcm_reset				(1'b0),						// In	PLL reset input for simulation
-	.global_reset_en		(global_reset_en),			// In	Enable global reset on lock_lost
-	.global_reset			(global_reset),				// Out	Global reset
+	.mmcm_reset		(1'b0),						// In	PLL reset input for simulation
+	.global_reset_en	(global_reset_en),			// In	Enable global reset on lock_lost
+	.global_reset		(global_reset),				// Out	Global reset
 	.clock_lock_lost_err	(clock_lock_lost_err),		// Out	40MHz main clock lost lock
 
 // Clock DCM lock status
-	.lock_tmb_clock0		(lock_tmb_clock0),			// Out	DCM lock status
-	.lock_tmb_clock0d		(lock_tmb_clock0d),			// Out	DCM lock status
-	.lock_alct_rxclockd		(lock_alct_rxclockd),		// Out	DCM lock status
-	.lock_mpc_clock			(lock_mpc_clock),			// Out	DCM lock status
-	.lock_dcc_clock			(lock_dcc_clock),			// Out	DCM lock status
-	.lock_rpc_rxalt1		(lock_rpc_rxalt1),			// Out	DCM lock status
-	.lock_tmb_clock1		(lock_tmb_clock1),			// Out	DCM lock status
-	.lock_alct_rxclock		(lock_alct_rxclock),		// Out	DCM lock status
+	.lock_tmb_clock0	(lock_tmb_clock0),			// Out	DCM lock status
+	.lock_tmb_clock0d	(lock_tmb_clock0d),			// Out	DCM lock status
+	.lock_alct_rxclockd	(lock_alct_rxclockd),		// Out	DCM lock status
+	.lock_mpc_clock		(lock_mpc_clock),			// Out	DCM lock status
+	.lock_dcc_clock		(lock_dcc_clock),			// Out	DCM lock status
+	.lock_rpc_rxalt1	(lock_rpc_rxalt1),			// Out	DCM lock status
+	.lock_tmb_clock1	(lock_tmb_clock1),			// Out	DCM lock status
+	.lock_alct_rxclock	(lock_alct_rxclock),		// Out	DCM lock status
 
 // Phaser VME control/status ports
-	.dps_fire				(dps_fire[MXDPS-1:0]),		// In	Set new phase
-	.dps_reset				(dps_reset[MXDPS-1:0]),		// In	VME Reset current phase
-	.dps_busy				(dps_busy[MXDPS-1:0]),		// Out	Phase shifter busy
-	.dps_lock				(dps_lock[MXDPS-1:0]),		// Out	PLL lock status
+	.dps_fire		(dps_fire[MXDPS-1:0]),		// In	Set new phase
+	.dps_reset		(dps_reset[MXDPS-1:0]),		// In	VME Reset current phase
+	.dps_busy		(dps_busy[MXDPS-1:0]),		// Out	Phase shifter busy
+	.dps_lock		(dps_lock[MXDPS-1:0]),		// Out	PLL lock status
 
-	.dps0_phase				(dps0_phase[7:0]),			// In	Phase to set, 0-255
-	.dps1_phase				(dps1_phase[7:0]),			// In	Phase to set, 0-255
-	.dps2_phase				(dps2_phase[7:0]),			// In	Phase to set, 0-255
-	.dps3_phase				(dps3_phase[7:0]),			// In	Phase to set, 0-255
-	.dps4_phase				(dps4_phase[7:0]),			// In	Phase to set, 0-255
-	.dps5_phase				(dps5_phase[7:0]),			// In	Phase to set, 0-255
-	.dps6_phase				(dps6_phase[7:0]),			// In	Phase to set, 0-255
-	.dps7_phase				(dps7_phase[7:0]),			// In	Phase to set, 0-255
-	.dps8_phase				(dps8_phase[7:0]),			// In	Phase to set, 0-255
+	.dps0_phase		(dps0_phase[7:0]),			// In	Phase to set, 0-255
+	.dps1_phase		(dps1_phase[7:0]),			// In	Phase to set, 0-255
+	.dps2_phase		(dps2_phase[7:0]),			// In	Phase to set, 0-255
+	.dps3_phase		(dps3_phase[7:0]),			// In	Phase to set, 0-255
+	.dps4_phase		(dps4_phase[7:0]),			// In	Phase to set, 0-255
+	.dps5_phase		(dps5_phase[7:0]),			// In	Phase to set, 0-255
+	.dps6_phase		(dps6_phase[7:0]),			// In	Phase to set, 0-255
+	.dps7_phase		(dps7_phase[7:0]),			// In	Phase to set, 0-255
+	.dps8_phase		(dps8_phase[7:0]),			// In	Phase to set, 0-255
 
-	.dps0_sm_vec			(dps0_sm_vec[2:0]),			// Out	Phase shifter machine state
-	.dps1_sm_vec			(dps1_sm_vec[2:0]),			// Out	Phase shifter machine state
-	.dps2_sm_vec			(dps2_sm_vec[2:0]),			// Out	Phase shifter machine state
-	.dps3_sm_vec			(dps3_sm_vec[2:0]),			// Out	Phase shifter machine state
-	.dps4_sm_vec			(dps4_sm_vec[2:0]),			// Out	Phase shifter machine state
-	.dps5_sm_vec			(dps5_sm_vec[2:0]),			// Out	Phase shifter machine state
-	.dps6_sm_vec			(dps6_sm_vec[2:0]),			// Out	Phase shifter machine state
-	.dps7_sm_vec			(dps7_sm_vec[2:0]),			// Out	Phase shifter machine state
-	.dps8_sm_vec			(dps8_sm_vec[2:0])			// Out	Phase shifter machine state
+	.dps0_sm_vec		(dps0_sm_vec[2:0]),			// Out	Phase shifter machine state
+	.dps1_sm_vec		(dps1_sm_vec[2:0]),			// Out	Phase shifter machine state
+	.dps2_sm_vec		(dps2_sm_vec[2:0]),			// Out	Phase shifter machine state
+	.dps3_sm_vec		(dps3_sm_vec[2:0]),			// Out	Phase shifter machine state
+	.dps4_sm_vec		(dps4_sm_vec[2:0]),			// Out	Phase shifter machine state
+	.dps5_sm_vec		(dps5_sm_vec[2:0]),			// Out	Phase shifter machine state
+	.dps6_sm_vec		(dps6_sm_vec[2:0]),			// Out	Phase shifter machine state
+	.dps7_sm_vec		(dps7_sm_vec[2:0]),			// Out	Phase shifter machine state
+	.dps8_sm_vec		(dps8_sm_vec[2:0])			// Out	Phase shifter machine state
 	);
 
 //-------------------------------------------------------------------------------------------------------------------
 // Optical receivers
 //-------------------------------------------------------------------------------------------------------------------
 // Clock input buffers
-	IBUFGDS #(.DIFF_TERM("TRUE" ),.IOSTANDARD("LVDS_25")) uclk40  (.I(clk40p ),.IB(clk40n ),.O(clk40 ));	//  40MHz from QPLL
-	IBUFGDS #(.DIFF_TERM("FALSE"),.IOSTANDARD("DEFAULT")) uclk125 (.I(clk125p),.IB(clk125n),.O(clk125));	// 125MHz from xtal
+	IBUFGDS #(.DIFF_TERM(1 ),.IOSTANDARD("LVDS_25")) uclk40  (.I(clk40p ),.IB(clk40n ),.O(clk40 ));	//  40MHz from QPLL
+	IBUFGDS #(.DIFF_TERM(0),.IOSTANDARD("DEFAULT")) uclk125 (.I(clk125p),.IB(clk125n),.O(clk125));	// 125MHz from xtal
 	IBUFDS_GTXE1 uclk160 (.I(clk160p),.IB(clk160n),.O(clock_160),.ODIV2(),.CEB(1'b0));						// 160MHz from QPLL for GTX
 
 

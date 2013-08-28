@@ -994,9 +994,11 @@
 	parameter nsep = 128'h0A0A0A0A0A0A0A0A0A0A0A0A0A0A0A0A;
 	parameter psep = 128'h0A0A0A0A0A0A0A0A0A0A0A0A0A0A0A0A;
 	generate
-	for (i=0; i<=15; i=i+1) begin: sepram
-	RAM16X1D uram16x1d
-	(
+	for (i=0; i<=7; i=i+1) begin: sepram07
+	   parameter INIT_07 = {nsep[i+120],nsep[i+112],nsep[i+104],nsep[i+96],nsep[i+88],nsep[i+80],nsep[i+72],nsep[i+64],nsep[i+56],nsep[i+48],nsep[i+40],nsep[i+32],nsep[i+24],nsep[i+16],nsep[i+8],nsep[i-0]};
+	RAM16X1D #(
+	.INIT(INIT_07)
+	) uram16x1d	(
 	.WCLK	(clock),		// Port A	Write clock input
 	.WE		(wea),			// Port A	Write enable input
 	.A0		(adra[0]),		// Port A	R/W address[0] input bit
@@ -1013,8 +1015,39 @@
 	.DPO	(rdatab[i])		// Port B	Read-only 1-bit data output for DPRA
 	);
 
-	if (i<=7) begin: gena defparam sepram[i].uram16x1d.INIT = {nsep[i+120],nsep[i+112],nsep[i+104],nsep[i+96],nsep[i+88],nsep[i+80],nsep[i+72],nsep[i+64],nsep[i+56],nsep[i+48],nsep[i+40],nsep[i+32],nsep[i+24],nsep[i+16],nsep[i+8],nsep[i-0]}; end
-	else 	  begin: genb defparam sepram[i].uram16x1d.INIT = {psep[i+112],psep[i+104],psep[i+96 ],psep[i+88],psep[i+80],psep[i+72],psep[i+64],psep[i+56],psep[i+48],psep[i+40],psep[i+32],psep[i+24],psep[i+16],psep[i+8 ],psep[i+0],psep[i-8]}; end
+	//     if (i<=7) begin: gena defparam sepram[i].uram16x1d.INIT = {nsep[i+120],nsep[i+112],nsep[i+104],nsep[i+96],nsep[i+88],nsep[i+80],nsep[i+72],nsep[i+64],nsep[i+56],nsep[i+48],nsep[i+40],
+	//  							      nsep[i+32],nsep[i+24],nsep[i+16],nsep[i+8],nsep[i-0]}; end
+	//     else 	  begin: genb defparam sepram[i].uram16x1d.INIT = {psep[i+112],psep[i+104],psep[i+96 ],psep[i+88],psep[i+80],psep[i+72],psep[i+64],psep[i+56],psep[i+48],psep[i+40],psep[i+32],
+	//  								   psep[i+24],psep[i+16],psep[i+8 ],psep[i+0],psep[i-8]}; end
+	end
+	endgenerate
+
+	generate
+	for (i=8; i<=15; i=i+1) begin: sepram815
+	   parameter INIT_815 = {psep[i+112],psep[i+104],psep[i+96 ],psep[i+88],psep[i+80],psep[i+72],psep[i+64],psep[i+56],psep[i+48],psep[i+40],psep[i+32], psep[i+24],psep[i+16],psep[i+8 ],psep[i+0],psep[i-8]};
+	RAM16X1D #(
+	.INIT(INIT_815)
+	) uram16x1d	(
+	.WCLK	(clock),		// Port A	Write clock input
+	.WE		(wea),			// Port A	Write enable input
+	.A0		(adra[0]),		// Port A	R/W address[0] input bit
+	.A1		(adra[1]),		// Port A	R/W address[1] input bit
+	.A2		(adra[2]),		// Port A	R/W address[2] input bit
+	.A3		(adra[3]),		// Port A	R/W address[3] input bit
+	.D		(wdataa[i]),	// Port A	Write 1-bit data input
+	.SPO	(rdataa[i]),	// Port A	R/W 1-bit data output for A0-A3
+
+	.DPRA0	(adrb[0]),		// Port B	Read address[0] input bit
+	.DPRA1	(adrb[1]),		// Port B	Read address[1] input bit
+	.DPRA2	(adrb[2]),		// Port B	Read address[2] input bit
+	.DPRA3	(adrb[03]),		// Port B	Read address[3] input bit
+	.DPO	(rdatab[i])		// Port B	Read-only 1-bit data output for DPRA
+	);
+
+	//     if (i<=7) begin: gena defparam sepram[i].uram16x1d.INIT = {nsep[i+120],nsep[i+112],nsep[i+104],nsep[i+96],nsep[i+88],nsep[i+80],nsep[i+72],nsep[i+64],nsep[i+56],nsep[i+48],nsep[i+40],
+	//  							      nsep[i+32],nsep[i+24],nsep[i+16],nsep[i+8],nsep[i-0]}; end
+	//     else 	  begin: genb defparam sepram[i].uram16x1d.INIT = {psep[i+112],psep[i+104],psep[i+96 ],psep[i+88],psep[i+80],psep[i+72],psep[i+64],psep[i+56],psep[i+48],psep[i+40],psep[i+32],
+	//  								   psep[i+24],psep[i+16],psep[i+8 ],psep[i+0],psep[i-8]}; end
 	end
 	endgenerate
 

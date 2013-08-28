@@ -370,51 +370,81 @@
 	wire [18:0]	inj_rdataa [1:0];
 
 	initial $display("rpc: generating Virtex6 RAMB18E1_S18_S18 ram.uinjpads");
-	genvar i;
-	generate
-	for (i=0; i<=1; i=i+1) begin: ram
 
-	RAMB18E1 #(											// Virtex6
-	.RAM_MODE			("TDP"),						// SDP or TDP
- 	.READ_WIDTH_A		(18),							// 0,1,2,4,9,18,36 Read/write width per port
-	.WRITE_WIDTH_A		(18),							// 0,1,2,4,9,18
-	.READ_WIDTH_B		(18),							// 0,1,2,4,9,18
-	.WRITE_WIDTH_B		(0),							// 0,1,2,4,9,18,36
-	.WRITE_MODE_A		("READ_FIRST"),					// Must be same for both ports in SDP mode: WRITE_FIRST, READ_FIRST, or NO_CHANGE)
-	.WRITE_MODE_B		("READ_FIRST"),
-	.SIM_COLLISION_CHECK("ALL")							// ALL, WARNING_ONLY, GENERATE_X_ONLY or NONE)
-	) uinjpads (
-	.WEA				({2{inj_wen[i]}}),				//  2-bit A port write enable input
-	.ENARDEN			(1'b1),							//  1-bit A port enable/Read enable input
-	.RSTRAMARSTRAM		(1'b0),							//  1-bit A port set/reset input
-	.RSTREGARSTREG		(1'b0),							//  1-bit A port register set/reset input
-	.REGCEAREGCE		(1'b0),							//  1-bit A port register enable/Register enable input
-	.CLKARDCLK			(clock),						//  1-bit A port clock/Read clock input
-	.ADDRARDADDR		({inj_rwadr[9:0],4'hF}),		// 14-bit A port address/Read address input 18b->[13:4]
-	.DIADI				(inj_wdata[15:0]),				// 16-bit A port data/LSB data input
-	.DIPADIP			(),								//  2-bit A port parity/LSB parity input
-	.DOADO				(inj_rdataa[i][15:0]),			// 16-bit A port data/LSB data output
-	.DOPADOP			(),								//  2-bit A port parity/LSB parity output
+	RAMB18E1 #(				// Virtex6
+	.INIT_00 (256'h000F000E000D000C000B000A00090008000700060005000400030002EFABABCD),
+	.RAM_MODE		("TDP"),	// SDP or TDP
+ 	.READ_WIDTH_A		(18),		// 0,1,2,4,9,18,36 Read/write width per port
+	.WRITE_WIDTH_A		(18),		// 0,1,2,4,9,18
+	.READ_WIDTH_B		(18),		// 0,1,2,4,9,18
+	.WRITE_WIDTH_B		(0),		// 0,1,2,4,9,18,36
+	.WRITE_MODE_A		("READ_FIRST"),	// Must be same for both ports in SDP mode: 
+	.WRITE_MODE_B		("READ_FIRST"), // WRITE_FIRST, READ_FIRST, or NO_CHANGE)
+	.SIM_COLLISION_CHECK	("ALL")		// ALL, WARNING_ONLY, GENERATE_X_ONLY or NONE)
+	) uinjpads0 (
+	.WEA		({2{inj_wen[0]}}),	//  2-bit A port write enable input
+	.ENARDEN	(1'b1),			//  1-bit A port enable/Read enable input
+	.RSTRAMARSTRAM	(1'b0),				//  1-bit A port set/reset input
+	.RSTREGARSTREG	(1'b0),				//  1-bit A port register set/reset input
+	.REGCEAREGCE	(1'b0),				//  1-bit A port register enable/Register enable input
+	.CLKARDCLK	(clock),		//  1-bit A port clock/Read clock input
+	.ADDRARDADDR	({inj_rwadr[9:0],4'hF}),	// 14-bit A port address/Read address input 18b->[13:4]
+	.DIADI		(inj_wdata[15:0]),	// 16-bit A port data/LSB data input
+	.DIPADIP	(),			//  2-bit A port parity/LSB parity input
+	.DOADO		(inj_rdataa[0][15:0]),	// 16-bit A port data/LSB data output
+	.DOPADOP	(),			//  2-bit A port parity/LSB parity output
 
-	.WEBWE				(),								//  4-bit B port write enable/Write enable input
-	.ENBWREN			(1'b1),							//  1-bit B port enable/Write enable input
-	.REGCEB				(1'b0),							//  1-bit B port register enable input
-	.RSTRAMB			(1'b0),							//  1-bit B port set/reset input
-	.RSTREGB			(1'b0),							//  1-bit B port register set/reset input
-	.CLKBWRCLK			(clock),						//  1-bit B port clock/Write clock input
-	.ADDRBWRADDR		({inj_tbin_adr[9:0],4'hF}),		// 14-bit B port address/Write address input 18b->[13:4]
-	.DIBDI				(),								// 16-bit B port data/MSB data input
-	.DIPBDIP			(),								//  2-bit B port parity/MSB parity input
-	.DOBDO				(rpc_inj[i][15:0]),				// 16-bit B port data/MSB data output
-	.DOPBDOP			());							//  2-bit B port parity/MSB parity output
+	.WEBWE		(),			//  4-bit B port write enable/Write enable input
+	.ENBWREN	(1'b1),			//  1-bit B port enable/Write enable input
+	.REGCEB		(1'b0),			//  1-bit B port register enable input
+	.RSTRAMB	(1'b0),			//  1-bit B port set/reset input
+	.RSTREGB	(1'b0),			//  1-bit B port register set/reset input
+	.CLKBWRCLK	(clock),		//  1-bit B port clock/Write clock input
+	.ADDRBWRADDR	({inj_tbin_adr[9:0],4'hF}),	// 14-bit B port address/Write address input 18b->[13:4]
+	.DIBDI		(),			// 16-bit B port data/MSB data input
+	.DIPBDIP	(),			//  2-bit B port parity/MSB parity input
+	.DOBDO		(rpc_inj[0][15:0]),	// 16-bit B port data/MSB data output
+	.DOPBDOP	());			//  2-bit B port parity/MSB parity output
 
-	end
-	endgenerate
+	RAMB18E1 #(				// Virtex6
+	.INIT_00 (256'h432f432E432D432C432B432A432943284327432643254324432343224321CCCC),
+	.RAM_MODE		("TDP"),	// SDP or TDP
+ 	.READ_WIDTH_A		(18),		// 0,1,2,4,9,18,36 Read/write width per port
+	.WRITE_WIDTH_A		(18),		// 0,1,2,4,9,18
+	.READ_WIDTH_B		(18),		// 0,1,2,4,9,18
+	.WRITE_WIDTH_B		(0),		// 0,1,2,4,9,18,36
+	.WRITE_MODE_A		("READ_FIRST"),	// Must be same for both ports in SDP mode: 
+	.WRITE_MODE_B		("READ_FIRST"), // WRITE_FIRST, READ_FIRST, or NO_CHANGE)
+	.SIM_COLLISION_CHECK	("ALL")		// ALL, WARNING_ONLY, GENERATE_X_ONLY or NONE)
+	) uinjpads1 (
+	.WEA		({2{inj_wen[1]}}),	//  2-bit A port write enable input
+	.ENARDEN	(1'b1),			//  1-bit A port enable/Read enable input
+	.RSTRAMARSTRAM	(1'b0),				//  1-bit A port set/reset input
+	.RSTREGARSTREG	(1'b0),				//  1-bit A port register set/reset input
+	.REGCEAREGCE	(1'b0),				//  1-bit A port register enable/Register enable input
+	.CLKARDCLK	(clock),		//  1-bit A port clock/Read clock input
+	.ADDRARDADDR	({inj_rwadr[9:0],4'hF}),	// 14-bit A port address/Read address input 18b->[13:4]
+	.DIADI		(inj_wdata[15:0]),	// 16-bit A port data/LSB data input
+	.DIPADIP	(),			//  2-bit A port parity/LSB parity input
+	.DOADO		(inj_rdataa[1][15:0]),	// 16-bit A port data/LSB data output
+	.DOPADOP	(),			//  2-bit A port parity/LSB parity output
+
+	.WEBWE		(),			//  4-bit B port write enable/Write enable input
+	.ENBWREN	(1'b1),			//  1-bit B port enable/Write enable input
+	.REGCEB		(1'b0),			//  1-bit B port register enable input
+	.RSTRAMB	(1'b0),			//  1-bit B port set/reset input
+	.RSTREGB	(1'b0),			//  1-bit B port register set/reset input
+	.CLKBWRCLK	(clock),		//  1-bit B port clock/Write clock input
+	.ADDRBWRADDR	({inj_tbin_adr[9:0],4'hF}),	// 14-bit B port address/Write address input 18b->[13:4]
+	.DIBDI		(),			// 16-bit B port data/MSB data input
+	.DIPBDIP	(),			//  2-bit B port parity/MSB parity input
+	.DOBDO		(rpc_inj[1][15:0]),	// 16-bit B port data/MSB data output
+	.DOPBDOP	());			//  2-bit B port parity/MSB parity output
 
 // Initialize Pad Injector RAMs, INIT values contain preset test pattern
 // Tbin                         	       FFFFEEEEDDDDCCCCBBBBAAAA9999888877776666555544443333222211110000;
-	defparam ram[0].uinjpads.INIT_00 =256'h000F000E000D000C000B000A00090008000700060005000400030002EFABABCD;
-	defparam ram[1].uinjpads.INIT_00 =256'h432f432E432D432C432B432A432943284327432643254324432343224321CCCC;
+	//  defparam ram[0].uinjpads.INIT_00 =256'h000F000E000D000C000B000A00090008000700060005000400030002EFABABCD;
+	//  defparam ram[1].uinjpads.INIT_00 =256'h432f432E432D432C432B432A432943284327432643254324432343224321CCCC;
 
 // Injector RAM: RPC BXN
 // Port A: rw  8 bits x 1024 tbins deep, read/write via VME
@@ -429,6 +459,8 @@
 	wire [7:0] dumbxn;
 
 	RAMB18E1 #(												// Virtex6
+	.INIT_00(256'h432f432E432D432C432B432A432943284327432643254324432343224321ABCD),													
+	.INIT_01(256'h432f432E432D432C432B432A432943284327432643254324432343224321DDDD),													
 	.RAM_MODE			("TDP"),							// SDP or TDP
  	.READ_WIDTH_A		(9),								// 0,1,2,4,9,18,36 Read/write width per port
 	.WRITE_WIDTH_A		(9),								// 0,1,2,4,9,18
@@ -464,8 +496,8 @@
 	);
 
 // Initialize BXN Injector RAM, INIT values contain preset test pattern
-	defparam uinjbxn.INIT_00 =256'h432f432E432D432C432B432A432943284327432643254324432343224321ABCD;
-	defparam uinjbxn.INIT_01 =256'h432f432E432D432C432B432A432943284327432643254324432343224321DDDD;
+	// defparam uinjbxn.INIT_00 =256'h432f432E432D432C432B432A432943284327432643254324432343224321ABCD;
+	// defparam uinjbxn.INIT_01 =256'h432f432E432D432C432B432A432943284327432643254324432343224321DDDD;
 
 // Multiplex Injector RAM output data
 	reg [18:0] inj_rdata;
@@ -524,6 +556,7 @@
 	wire [8:0] dum [4:0];
 	assign dopa= 0;										// Virtex6 does not require parity-out if parity-in is used
 
+        genvar 	   i;
 	generate
 	for (i=0; i<=4; i=i+1) begin: raw
 

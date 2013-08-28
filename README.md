@@ -11,3 +11,16 @@ This repository contains the source code and 4 ISE project files:
 
 The difference between production and pre-production firmware is
 the .UCF file included in the project. 
+- For pre-production: dmb_tx40 -> pin C9,  dmb_tx39 -> pin W32
+- For production:     dmb_tx40 -> pin W32, dmb_tx39 -> pin C9
+
+The difference between the ISE 14.5 and 12.4 projects is in the file
+gtx_rx_buf_bypass.v, where they have different values for the
+parameter GTX_POWER_SAVE. 
+ISE 14.5 allows to bypass the RX Delay Aligner, thus saving some
+power consumption.
+
+### Simulation
+The file otmb_virtex6.mpf is a ModelSim project file.
+The folder source/simulation contains a test bench, as well as a
+file handler and VME emulator, for the OTMB firmware simulation.
