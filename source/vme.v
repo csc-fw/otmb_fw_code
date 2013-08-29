@@ -24,6 +24,11 @@
 	cfeb_exists,
 	revcode,
 
+// ODMB device
+      bd_sel,
+      odmb_sel,
+      odmb_data,
+
 // VME Bus Input Port Map
 	d_vme,
 	a,
@@ -906,243 +911,243 @@
 //------------------------------------------------------------------------------------------------------------------
 // Bus Parameters
 //------------------------------------------------------------------------------------------------------------------
-	parameter MXCFEB		= 7;			// Number of CFEBs on CSC
-	parameter MXLY			= 6;			// Number Layers in CSC
-	parameter MXHS			= 32;			// Number of 1/2-Strips per layer
-	parameter MXKEYB		= 5;			// Number of key bits
-	parameter MXDS			= 8;			// Number of DiStrips per layer
-	parameter MXBDID		= 5;			// Number TMB Board ID bits
-	parameter MXCSC			= 4;			// Number CSC Chamber ID bits
-	parameter MXRID			= 4;			// Number Run ID bits
-	parameter MXDRIFT		= 2;			// Number drift delay bits
-	parameter MXBXN			= 12;			// Number BXN bits, LHC bunchs numbered 0 to 3563
-	parameter MXL1DELAY		= 8;			// NUmber L1Acc delay counter bits
-	parameter MXL1WIND		= 4;			// Number L1Acc window width bits
-	parameter MXFMODE		= 3;			// Number FIFO Mode bits
-	parameter MXTBIN		= 5;			// Number FIFO time bin bits
-	parameter MXRAMADR		= 12;			// Number Raw Hits RAM address bits
-	parameter MXRAMDATA		= 18;			// Number Raw Hits RAM data bits, does not include fifo wren
-	parameter MXCLCT		= 16;			// Number bits per CLCT word
-	parameter MXCLCTC		= 3;			// Number bits per CLCT common data word
-	parameter MXFRAME		= 16;			// Number bits per muon frame
-	parameter MXEXTDLY		= 4;			// Number bits CLCT external trigger delay
-	parameter MXMPCDLY		= 4;			// Number MPC delay time bits
-	parameter MXARAMADR		= 11;			// Number ALCT Raw Hits RAM address bits
-	parameter MXARAMDATA	= 18;			// Number ALCT Raw Hits RAM data bits, does not include fifo wren
-	parameter MXBUF			= 8;			// Number of buffers
-	parameter MXBUFB		= 3;			// Buffer address width
-	parameter MXFLUSH		= 4;			// Number bits needed for flush counter
-	parameter MXTHROTTLE	= 8;			// Number bits needed for throttle counter
-	parameter MXDPS			= 9;			// Number of digital phase shifters 2 ALCT + 7 DCFEB
+	parameter MXCFEB			= 7;			// Number of CFEBs on CSC
+	parameter MXLY				= 6;			// Number Layers in CSC
+	parameter MXHS				= 32;			// Number of 1/2-Strips per layer
+	parameter MXKEYB			= 5;			// Number of key bits
+	parameter MXDS				= 8;			// Number of DiStrips per layer
+	parameter MXBDID			= 5;			// Number TMB Board ID bits
+	parameter MXCSC				= 4;			// Number CSC Chamber ID bits
+	parameter MXRID				= 4;			// Number Run ID bits
+	parameter MXDRIFT			= 2;			// Number drift delay bits
+	parameter MXBXN				= 12;			// Number BXN bits, LHC bunchs numbered 0 to 3563
+	parameter MXL1DELAY			= 8;			// NUmber L1Acc delay counter bits
+	parameter MXL1WIND			= 4;			// Number L1Acc window width bits
+	parameter MXFMODE			= 3;			// Number FIFO Mode bits
+	parameter MXTBIN			= 5;			// Number FIFO time bin bits
+	parameter MXRAMADR			= 12;			// Number Raw Hits RAM address bits
+	parameter MXRAMDATA			= 18;			// Number Raw Hits RAM data bits, does not include fifo wren
+	parameter MXCLCT			= 16;			// Number bits per CLCT word
+	parameter MXCLCTC			= 3;			// Number bits per CLCT common data word
+	parameter MXFRAME			= 16;			// Number bits per muon frame
+	parameter MXEXTDLY			= 4;			// Number bits CLCT external trigger delay
+	parameter MXMPCDLY			= 4;			// Number MPC delay time bits
+	parameter MXARAMADR			= 11;			// Number ALCT Raw Hits RAM address bits
+	parameter MXARAMDATA			= 18;			// Number ALCT Raw Hits RAM data bits, does not include fifo wren
+	parameter MXBUF				= 8;			// Number of buffers
+	parameter MXBUFB			= 3;			// Buffer address width
+	parameter MXFLUSH			= 4;			// Number bits needed for flush counter
+	parameter MXTHROTTLE			= 8;			// Number bits needed for throttle counter
+	parameter MXDPS				= 9;			// Number of digital phase shifters 2 ALCT + 7 DCFEB
 	
-	parameter MXRPC			= 2;			// Number RPCs
-	parameter MXRPCB		= 1;			// Number RPC ID bits
-	parameter MXRPCPAD		= 16;			// Number RPC pads per link board
-	parameter MXRPCDB		= 19;			// Number RPC bits per link board
+	parameter MXRPC				= 2;			// Number RPCs
+	parameter MXRPCB			= 1;			// Number RPC ID bits
+	parameter MXRPCPAD			= 16;			// Number RPC pads per link board
+	parameter MXRPCDB			= 19;			// Number RPC bits per link board
 
-	parameter MXPIDB		= 4;			// Pattern ID bits
-	parameter MXHITB		= 3;			// Hits on pattern bits
-	parameter MXPATB		= 3+4;			// Pattern bits
+	parameter MXPIDB			= 4;			// Pattern ID bits
+	parameter MXHITB			= 3;			// Hits on pattern bits
+	parameter MXPATB			= 3+4;			// Pattern bits
 
 // Raw hits RAM parameters
-	parameter RAM_DEPTH		= 2048;			// Storage bx depth
-	parameter RAM_ADRB		= 11;			// Address width=log2(ram_depth)
-	parameter MXBADR		= RAM_ADRB;		// Header buffer data address bits
-	parameter MXBDATA		= 32;			// Pushed data width
+	parameter RAM_DEPTH			= 2048;			// Storage bx depth
+	parameter RAM_ADRB			= 11;			// Address width=log2(ram_depth)
+	parameter MXBADR			= RAM_ADRB;		// Header buffer data address bits
+	parameter MXBDATA			= 32;			// Pushed data width
 
 // Counters
-	parameter MXCNTVME		= 30;			// VME counters
-	parameter MXL1ARX		= 12;			// Number L1As received counter bits
-	parameter MXORBIT		= 30;			// Number orbit counter bits
+	parameter MXCNTVME			= 30;			// VME counters
+	parameter MXL1ARX			= 12;			// Number L1As received counter bits
+	parameter MXORBIT			= 30;			// Number orbit counter bits
 
 //------------------------------------------------------------------------------------------------------------------
 // VME Addresses
 //------------------------------------------------------------------------------------------------------------------
-	parameter ADR_TMB_GLOBAL			= 'd26;		// Slot number to address all TMBs in parallel
-	parameter ADR_BROADCAST				= 'd27;		// Slot number to address all peripheral crate modules
+	parameter ADR_TMB_GLOBAL		= 'd26;		// Slot number to address all TMBs in parallel
+	parameter ADR_BROADCAST			= 'd27;		// Slot number to address all peripheral crate modules
 
-	parameter ADR_IDREG0				= 9'h00;	// ID Register 0
-	parameter ADR_IDREG1				= 9'h02;	// ID Register 1
-	parameter ADR_IDREG2				= 9'h04;	// ID Register 2
-	parameter ADR_IDREG3				= 9'h06;	// ID Register 3
+	parameter ADR_IDREG0			= 9'h00;	// ID Register 0
+	parameter ADR_IDREG1			= 9'h02;	// ID Register 1
+	parameter ADR_IDREG2			= 9'h04;	// ID Register 2
+	parameter ADR_IDREG3			= 9'h06;	// ID Register 3
 
-	parameter ADR_VME_STATUS			= 9'h08;	// VME Status Register
-	parameter ADR_VME_ADR0				= 9'h0A;	// VME Address read-back
-	parameter ADR_VME_ADR1				= 9'h0C;	// VME Address read-back
+	parameter ADR_VME_STATUS		= 9'h08;	// VME Status Register
+	parameter ADR_VME_ADR0			= 9'h0A;	// VME Address read-back
+	parameter ADR_VME_ADR1			= 9'h0C;	// VME Address read-back
 
-	parameter ADR_LOOPBK				= 9'h0E;	// Loop-back Register
-	parameter ADR_USR_JTAG				= 9'h10;	// User JTAG
-	parameter ADR_PROM					= 9'h12;	// PROM
+	parameter ADR_LOOPBK			= 9'h0E;	// Loop-back Register
+	parameter ADR_USR_JTAG			= 9'h10;	// User JTAG
+	parameter ADR_PROM			= 9'h12;	// PROM
 
-	parameter ADR_DDDSM					= 9'h14;	// 3D3444 State Machine Register + Clock DCMs
-	parameter ADR_DDD0					= 9'h16;	// 3D3444 chip 0
-	parameter ADR_DDD1					= 9'h18;	// 3D3444 chip 1
-	parameter ADR_DDD2					= 9'h1A;	// 3D3444 chip 2
-	parameter ADR_DDDOE					= 9'h1C;	// 3D3444 channel enables
-	parameter ADR_RATCTRL				= 9'h1E;	// RAT Module control
+	parameter ADR_DDDSM			= 9'h14;	// 3D3444 State Machine Register + Clock DCMs
+	parameter ADR_DDD0			= 9'h16;	// 3D3444 chip 0
+	parameter ADR_DDD1			= 9'h18;	// 3D3444 chip 1
+	parameter ADR_DDD2			= 9'h1A;	// 3D3444 chip 2
+	parameter ADR_DDDOE			= 9'h1C;	// 3D3444 channel enables
+	parameter ADR_RATCTRL			= 9'h1E;	// RAT Module control
 
-	parameter ADR_STEP					= 9'h20;	// Step Register
-	parameter ADR_LED					= 9'h22;	// Front Panel LEDs
-	parameter ADR_ADC					= 9'h24;	// ADCs
-	parameter ADR_DSN					= 9'h26;	// Digital Serials
+	parameter ADR_STEP			= 9'h20;	// Step Register
+	parameter ADR_LED			= 9'h22;	// Front Panel LEDs
+	parameter ADR_ADC			= 9'h24;	// ADCs
+	parameter ADR_DSN			= 9'h26;	// Digital Serials
 
-	parameter ADR_MOD_CFG				= 9'h28;	// TMB Configuration
-	parameter ADR_CCB_CFG				= 9'h2A;	// CCB Configuration
-	parameter ADR_CCB_TRIG				= 9'h2C;	// CCB Trigger Control
-	parameter ADR_CCB_STAT0				= 9'h2E;	// CCB Status
+	parameter ADR_MOD_CFG			= 9'h28;	// TMB Configuration
+	parameter ADR_CCB_CFG			= 9'h2A;	// CCB Configuration
+	parameter ADR_CCB_TRIG			= 9'h2C;	// CCB Trigger Control
+	parameter ADR_CCB_STAT0			= 9'h2E;	// CCB Status
 
-	parameter ADR_ALCT_CFG				= 9'h30;	// ALCT Configuration
-	parameter ADR_ALCT_INJ				= 9'h32;	// ALCT Injector Control
-	parameter ADR_ALCT0_INJ				= 9'h34;	// ALCT Injected ALCT0
-	parameter ADR_ALCT1_INJ				= 9'h36;	// ALCT Injected ALCT1
-	parameter ADR_ALCT_STAT				= 9'h38;	// ALCT Status
-	parameter ADR_ALCT0_RCD				= 9'h3A;	// ALCT Latched LCT0
-	parameter ADR_ALCT1_RCD				= 9'h3C;	// ALCT Latched LCT1
-	parameter ADR_ALCT_FIFO0			= 9'h3E;	// ALCT FIFO word count
+	parameter ADR_ALCT_CFG			= 9'h30;	// ALCT Configuration
+	parameter ADR_ALCT_INJ			= 9'h32;	// ALCT Injector Control
+	parameter ADR_ALCT0_INJ			= 9'h34;	// ALCT Injected ALCT0
+	parameter ADR_ALCT1_INJ			= 9'h36;	// ALCT Injected ALCT1
+	parameter ADR_ALCT_STAT			= 9'h38;	// ALCT Status
+	parameter ADR_ALCT0_RCD			= 9'h3A;	// ALCT Latched LCT0
+	parameter ADR_ALCT1_RCD			= 9'h3C;	// ALCT Latched LCT1
+	parameter ADR_ALCT_FIFO0		= 9'h3E;	// ALCT FIFO word count
 
-	parameter ADR_DMB_MON				= 9'h40;	// DMB Monitored signals
+	parameter ADR_DMB_MON			= 9'h40;	// DMB Monitored signals
 
-	parameter ADR_CFEB_INJ				= 9'h42;	// CFEB Injector Control
-	parameter ADR_CFEB_INJ_ADR			= 9'h44;	// CFEB Injector RAM address
+	parameter ADR_CFEB_INJ			= 9'h42;	// CFEB Injector Control
+	parameter ADR_CFEB_INJ_ADR		= 9'h44;	// CFEB Injector RAM address
 	parameter ADR_CFEB_INJ_WDATA		= 9'h46;	// CFEB Injector Write Data
 	parameter ADR_CFEB_INJ_RDATA		= 9'h48;	// CFEB Injector Read  Data
 
-	parameter ADR_HCM001				= 9'h4A;	// CFEB0 Ly0,Ly1 Hot Channel Mask
-	parameter ADR_HCM023				= 9'h4C;	// CFEB0 Ly2,Ly3 Hot Channel Mask
-	parameter ADR_HCM045				= 9'h4E;	// CFEB0 Ly4,Ly5 Hot Channel Mask
-	parameter ADR_HCM101				= 9'h50;	// CFEB1 Ly0,Ly1 Hot Channel Mask
-	parameter ADR_HCM123				= 9'h52;	// CFEB1 Ly2,Ly3 Hot Channel Mask
-	parameter ADR_HCM145				= 9'h54;	// CFEB1 Ly4,Ly5 Hot Channel Mask
-	parameter ADR_HCM201				= 9'h56;	// CFEB2 Ly0,Ly1 Hot Channel Mask
-	parameter ADR_HCM223				= 9'h58;	// CFEB2 Ly2,Ly3 Hot Channel Mask
-	parameter ADR_HCM245				= 9'h5A;	// CFEB2 Ly4,Ly5 Hot Channel Mask
-	parameter ADR_HCM301				= 9'h5C;	// CFEB3 Ly0,Ly1 Hot Channel Mask
-	parameter ADR_HCM323				= 9'h5E;	// CFEB3 Ly2,Ly3 Hot Channel Mask
-	parameter ADR_HCM345				= 9'h60;	// CFEB3 Ly4,Ly5 Hot Channel Mask
-	parameter ADR_HCM401				= 9'h62;	// CFEB4 Ly0,Ly1 Hot Channel Mask
-	parameter ADR_HCM423				= 9'h64;	// CFEB4 Ly2,Ly3 Hot Channel Mask
-	parameter ADR_HCM445				= 9'h66;	// CFEB4 Ly4,Ly5 Hot Channel Mask
+	parameter ADR_HCM001			= 9'h4A;	// CFEB0 Ly0,Ly1 Hot Channel Mask
+	parameter ADR_HCM023			= 9'h4C;	// CFEB0 Ly2,Ly3 Hot Channel Mask
+	parameter ADR_HCM045			= 9'h4E;	// CFEB0 Ly4,Ly5 Hot Channel Mask
+	parameter ADR_HCM101			= 9'h50;	// CFEB1 Ly0,Ly1 Hot Channel Mask
+	parameter ADR_HCM123			= 9'h52;	// CFEB1 Ly2,Ly3 Hot Channel Mask
+	parameter ADR_HCM145			= 9'h54;	// CFEB1 Ly4,Ly5 Hot Channel Mask
+	parameter ADR_HCM201			= 9'h56;	// CFEB2 Ly0,Ly1 Hot Channel Mask
+	parameter ADR_HCM223			= 9'h58;	// CFEB2 Ly2,Ly3 Hot Channel Mask
+	parameter ADR_HCM245			= 9'h5A;	// CFEB2 Ly4,Ly5 Hot Channel Mask
+	parameter ADR_HCM301			= 9'h5C;	// CFEB3 Ly0,Ly1 Hot Channel Mask
+	parameter ADR_HCM323			= 9'h5E;	// CFEB3 Ly2,Ly3 Hot Channel Mask
+	parameter ADR_HCM345			= 9'h60;	// CFEB3 Ly4,Ly5 Hot Channel Mask
+	parameter ADR_HCM401			= 9'h62;	// CFEB4 Ly0,Ly1 Hot Channel Mask
+	parameter ADR_HCM423			= 9'h64;	// CFEB4 Ly2,Ly3 Hot Channel Mask
+	parameter ADR_HCM445			= 9'h66;	// CFEB4 Ly4,Ly5 Hot Channel Mask
 
-	parameter ADR_SEQ_TRIG_EN			= 9'h68;	// Sequencer Trigger Source Enables
-	parameter ADR_SEQ_TRIG_DLY0			= 9'h6A;	// Sequencer Trigger Source Delays
-	parameter ADR_SEQ_TRIG_DLY1			= 9'h6C;	// Sequencer Trigger Source Delays
-	parameter ADR_SEQ_ID				= 9'h6E;	// Sequencer ID info
+	parameter ADR_SEQ_TRIG_EN		= 9'h68;	// Sequencer Trigger Source Enables
+	parameter ADR_SEQ_TRIG_DLY0		= 9'h6A;	// Sequencer Trigger Source Delays
+	parameter ADR_SEQ_TRIG_DLY1		= 9'h6C;	// Sequencer Trigger Source Delays
+	parameter ADR_SEQ_ID			= 9'h6E;	// Sequencer ID info
 
-	parameter ADR_SEQ_CLCT				= 9'h70;	// Sequencer CLCT Configuration
-	parameter ADR_SEQ_FIFO				= 9'h72;	// Sequencer FIFO Configuration
-	parameter ADR_SEQ_L1A				= 9'h74;	// Sequencer L1A  Configuration
-	parameter ADR_SEQ_OFFSET0			= 9'h76;	// Sequencer Counter Offsets
+	parameter ADR_SEQ_CLCT			= 9'h70;	// Sequencer CLCT Configuration
+	parameter ADR_SEQ_FIFO			= 9'h72;	// Sequencer FIFO Configuration
+	parameter ADR_SEQ_L1A			= 9'h74;	// Sequencer L1A  Configuration
+	parameter ADR_SEQ_OFFSET0		= 9'h76;	// Sequencer Counter Offsets
 
-	parameter ADR_SEQ_CLCT0				= 9'h78;	// CLCT Latched LCT0
-	parameter ADR_SEQ_CLCT1				= 9'h7A;	// CLCT Latched LCT1
-	parameter ADR_SEQ_TRIG_SRC			= 9'h7C;	// Sequencer Trigger source read
+	parameter ADR_SEQ_CLCT0			= 9'h78;	// CLCT Latched LCT0
+	parameter ADR_SEQ_CLCT1			= 9'h7A;	// CLCT Latched LCT1
+	parameter ADR_SEQ_TRIG_SRC		= 9'h7C;	// Sequencer Trigger source read
 
-	parameter ADR_DMB_RAM_ADR			= 9'h7E;	// Sequencer RAM Address
-	parameter ADR_DMB_RAM_WDATA			= 9'h80;	// Sequencer RAM Write Data
-	parameter ADR_DMB_RAM_WDCNT			= 9'h82;	// Sequencer RAM Word Count
-	parameter ADR_DMB_RAM_RDATA			= 9'h84;	// Sequencer RAM Read Data
+	parameter ADR_DMB_RAM_ADR		= 9'h7E;	// Sequencer RAM Address
+	parameter ADR_DMB_RAM_WDATA		= 9'h80;	// Sequencer RAM Write Data
+	parameter ADR_DMB_RAM_WDCNT		= 9'h82;	// Sequencer RAM Word Count
+	parameter ADR_DMB_RAM_RDATA		= 9'h84;	// Sequencer RAM Read Data
 
-	parameter ADR_TMB_TRIG				= 9'h86;	// TMB Trigger Configuration
+	parameter ADR_TMB_TRIG			= 9'h86;	// TMB Trigger Configuration
 
-	parameter ADR_MPC0_FRAME0			= 9'h88;	// MPC0 Frame 0 Data sent to MPC
-	parameter ADR_MPC0_FRAME1			= 9'h8A;	// MPC0 Frame 1 Data sent to MPC
-	parameter ADR_MPC1_FRAME0			= 9'h8C;	// MPC1 Frame 0 Data sent to MPC
-	parameter ADR_MPC1_FRAME1			= 9'h8E;	// MPC1 Frame 1 Data sent to MPC
+	parameter ADR_MPC0_FRAME0		= 9'h88;	// MPC0 Frame 0 Data sent to MPC
+	parameter ADR_MPC0_FRAME1		= 9'h8A;	// MPC0 Frame 1 Data sent to MPC
+	parameter ADR_MPC1_FRAME0		= 9'h8C;	// MPC1 Frame 0 Data sent to MPC
+	parameter ADR_MPC1_FRAME1		= 9'h8E;	// MPC1 Frame 1 Data sent to MPC
 
-	parameter ADR_MPC_INJ				= 9'h90;	// MPC Injector Control
-	parameter ADR_MPC_RAM_ADR			= 9'h92;	// MPC Injector RAM address
-	parameter ADR_MPC_RAM_WDATA			= 9'h94;	// MPC Injector RAM Write Data
-	parameter ADR_MPC_RAM_RDATA			= 9'h96;	// MPC Injector RAM Read  Data
+	parameter ADR_MPC_INJ			= 9'h90;	// MPC Injector Control
+	parameter ADR_MPC_RAM_ADR		= 9'h92;	// MPC Injector RAM address
+	parameter ADR_MPC_RAM_WDATA		= 9'h94;	// MPC Injector RAM Write Data
+	parameter ADR_MPC_RAM_RDATA		= 9'h96;	// MPC Injector RAM Read  Data
 
-	parameter ADR_SCP_CTRL				= 9'h98;	// Scope control
-	parameter ADR_SCP_RDATA				= 9'h9A;	// Scope read data
+	parameter ADR_SCP_CTRL			= 9'h98;	// Scope control
+	parameter ADR_SCP_RDATA			= 9'h9A;	// Scope read data
 
-	parameter ADR_CCB_CMD				= 9'h9C;	// CCB TTC Command
-	parameter ADR_BUF_STAT0				= 9'h9E;	// Buffer Status
-	parameter ADR_BUF_STAT1				= 9'hA0;	// Buffer Status
-	parameter ADR_BUF_STAT2				= 9'hA2;	// Buffer Status
-	parameter ADR_BUF_STAT3				= 9'hA4;	// Buffer Status
-	parameter ADR_BUF_STAT4				= 9'hA6;	// Buffer Status
+	parameter ADR_CCB_CMD			= 9'h9C;	// CCB TTC Command
+	parameter ADR_BUF_STAT0			= 9'h9E;	// Buffer Status
+	parameter ADR_BUF_STAT1			= 9'hA0;	// Buffer Status
+	parameter ADR_BUF_STAT2			= 9'hA2;	// Buffer Status
+	parameter ADR_BUF_STAT3			= 9'hA4;	// Buffer Status
+	parameter ADR_BUF_STAT4			= 9'hA6;	// Buffer Status
 	
-	parameter ADR_ALCTFIFO1				= 9'hA8;	// ALCT Raw hits RAM Control
-	parameter ADR_ALCTFIFO2				= 9'hAA;	// ALCT Raw hits RAM data
+	parameter ADR_ALCTFIFO1			= 9'hA8;	// ALCT Raw hits RAM Control
+	parameter ADR_ALCTFIFO2			= 9'hAA;	// ALCT Raw hits RAM data
 
-	parameter ADR_SEQMOD				= 9'hAC;	// Sequencer Trigger Modifiers
-	parameter ADR_SEQSM					= 9'hAE;	// Sequencer Machine State
-	parameter ADR_SEQCLCTM				= 9'hB0;	// Sequencer CLCT msbs
-	parameter ADR_TMBTIM				= 9'hB2;	// TMB Timing
-	parameter ADR_LHC_CYCLE				= 9'hB4;	// LHC Cycle, max BXN
+	parameter ADR_SEQMOD			= 9'hAC;	// Sequencer Trigger Modifiers
+	parameter ADR_SEQSM			= 9'hAE;	// Sequencer Machine State
+	parameter ADR_SEQCLCTM			= 9'hB0;	// Sequencer CLCT msbs
+	parameter ADR_TMBTIM			= 9'hB2;	// TMB Timing
+	parameter ADR_LHC_CYCLE			= 9'hB4;	// LHC Cycle, max BXN
 
-	parameter ADR_RPC_CFG				= 9'hB6;	// RPC Configuration
-	parameter ADR_RPC_RDATA				= 9'hB8;	// RPC sync mode read data
-	parameter ADR_RPC_RAW_DELAY			= 9'hBA;	// RPC raw hits delay
-	parameter ADR_RPC_INJ				= 9'hBC;	// RPC injector control
-	parameter ADR_RPC_INJ_ADR			= 9'hBE;	// RPC injector RAM addresses
-	parameter ADR_RPC_INJ_WDATA			= 9'hC0;	// RPC injector RAM write data
-	parameter ADR_RPC_INJ_RDATA			= 9'hC2;	// RPC injector RAM read  data
-	parameter ADR_RPC_TBINS				= 9'hC4;	// RPC Time bins
-	parameter ADR_RPC0_HCM				= 9'hC6;	// RPC hot channel mask
-	parameter ADR_RPC1_HCM				= 9'hC8;	// RPC hot channel mask
+	parameter ADR_RPC_CFG			= 9'hB6;	// RPC Configuration
+	parameter ADR_RPC_RDATA			= 9'hB8;	// RPC sync mode read data
+	parameter ADR_RPC_RAW_DELAY		= 9'hBA;	// RPC raw hits delay
+	parameter ADR_RPC_INJ			= 9'hBC;	// RPC injector control
+	parameter ADR_RPC_INJ_ADR		= 9'hBE;	// RPC injector RAM addresses
+	parameter ADR_RPC_INJ_WDATA		= 9'hC0;	// RPC injector RAM write data
+	parameter ADR_RPC_INJ_RDATA		= 9'hC2;	// RPC injector RAM read  data
+	parameter ADR_RPC_TBINS			= 9'hC4;	// RPC Time bins
+	parameter ADR_RPC0_HCM			= 9'hC6;	// RPC hot channel mask
+	parameter ADR_RPC1_HCM			= 9'hC8;	// RPC hot channel mask
 
-	parameter ADR_BX0_DELAY				= 9'hCA;	// BX0 to MPC delays
-	parameter ADR_NON_TRIG_RO			= 9'hCC;	// Non-triggering readout
+	parameter ADR_BX0_DELAY			= 9'hCA;	// BX0 to MPC delays
+	parameter ADR_NON_TRIG_RO		= 9'hCC;	// Non-triggering readout
 
-	parameter ADR_SCP_TRIG				= 9'hCE;	// Scope trigger source channel
+	parameter ADR_SCP_TRIG			= 9'hCE;	// Scope trigger source channel
 
-	parameter ADR_CNT_CTRL				= 9'hD0;	// Counter control
-	parameter ADR_CNT_RDATA				= 9'hD2;	// Counter data
+	parameter ADR_CNT_CTRL			= 9'hD0;	// Counter control
+	parameter ADR_CNT_RDATA			= 9'hD2;	// Counter data
 
-	parameter ADR_JTAGSM0				= 9'hD4;	// JTAG state machine
-	parameter ADR_JTAGSM1				= 9'hD6;
-	parameter ADR_JTAGSM2				= 9'hD8;
+	parameter ADR_JTAGSM0			= 9'hD4;	// JTAG state machine
+	parameter ADR_JTAGSM1			= 9'hD6;
+	parameter ADR_JTAGSM2			= 9'hD8;
 
-	parameter ADR_VMESM0				= 9'hDA;	// VME state machine
-	parameter ADR_VMESM1				= 9'hDC;
-	parameter ADR_VMESM2				= 9'hDE;
-	parameter ADR_VMESM3				= 9'hE0;
-	parameter ADR_VMESM4				= 9'hE2;
+	parameter ADR_VMESM0			= 9'hDA;	// VME state machine
+	parameter ADR_VMESM1			= 9'hDC;
+	parameter ADR_VMESM2			= 9'hDE;
+	parameter ADR_VMESM3			= 9'hE0;
+	parameter ADR_VMESM4			= 9'hE2;
 
-	parameter ADR_DDDRSM				= 9'hE4;	// RAT 3D3444 State Machine Register
-	parameter ADR_DDDR0					= 9'hE6;	// RAT 3D3444 chip 0
+	parameter ADR_DDDRSM			= 9'hE4;	// RAT 3D3444 State Machine Register
+	parameter ADR_DDDR0			= 9'hE6;	// RAT 3D3444 chip 0
 
-	parameter ADR_UPTIME				= 9'hE8;	// Uptime counter
-	parameter ADR_BDSTATUS				= 9'hEA;	// Board status summary
+	parameter ADR_UPTIME			= 9'hE8;	// Uptime counter
+	parameter ADR_BDSTATUS			= 9'hEA;	// Board status summary
 
-	parameter ADR_BXN_CLCT				= 9'hEC;	// CLCT bxn at pretrigger
-	parameter ADR_BXN_ALCT				= 9'hEE;	// ALCT bxn at alct valid pattern flag
+	parameter ADR_BXN_CLCT			= 9'hEC;	// CLCT bxn at pretrigger
+	parameter ADR_BXN_ALCT			= 9'hEE;	// ALCT bxn at alct valid pattern flag
 
-	parameter ADR_LAYER_TRIG			= 9'hF0;	// Layer trigger mode
+	parameter ADR_LAYER_TRIG		= 9'hF0;	// Layer trigger mode
 
-	parameter ADR_ISE_VERSION			= 9'hF2;	// ISE Compiler version
-	parameter ADR_TEMP0					= 9'hF4;	// Temporary
-	parameter ADR_TEMP1					= 9'hF6;	// Temporary
-	parameter ADR_TEMP2					= 9'hF8;	// Temporary
-	parameter ADR_PARITY				= 9'hFA;	// Parity errors
+	parameter ADR_ISE_VERSION		= 9'hF2;	// ISE Compiler version
+	parameter ADR_TEMP0			= 9'hF4;	// Temporary
+	parameter ADR_TEMP1			= 9'hF6;	// Temporary
+	parameter ADR_TEMP2			= 9'hF8;	// Temporary
+	parameter ADR_PARITY			= 9'hFA;	// Parity errors
 
-	parameter ADR_CCB_STAT1				= 9'hFC;	// CCB Status
+	parameter ADR_CCB_STAT1			= 9'hFC;	// CCB Status
 
-	parameter ADR_BXN_L1A				= 9'hFE;	// CLCT bxn at L1A
-	parameter ADR_L1A_LOOKBACK			= 9'h100;	// L1A look back
-	parameter ADR_SEQ_DEBUG				= 9'h102;	// Sequencer debug latches
+	parameter ADR_BXN_L1A			= 9'hFE;	// CLCT bxn at L1A
+	parameter ADR_L1A_LOOKBACK		= 9'h100;	// L1A look back
+	parameter ADR_SEQ_DEBUG			= 9'h102;	// Sequencer debug latches
 
 	parameter ADR_ALCT_SYNC_CTRL		= 9'h104;	// ALCT sync mode control
 	parameter ADR_ALCT_SYNC_TXDATA_1ST	= 9'h106;	// ALCT sync mode transmit data, 1st in time
 	parameter ADR_ALCT_SYNC_TXDATA_2ND	= 9'h108;	// ALCT sync mode transmit data, 2nd in time
 
-	parameter ADR_SEQ_OFFSET1			= 9'h10A;	// Sequencer Counter Offsets continued
-	parameter ADR_MINISCOPE				= 9'h10C;	// Miniscope
+	parameter ADR_SEQ_OFFSET1		= 9'h10A;	// Sequencer Counter Offsets continued
+	parameter ADR_MINISCOPE			= 9'h10C;	// Miniscope
 
-	parameter ADR_PHASER0				= 9'h10E;	// Phaser 0 alct_rxd phase
-	parameter ADR_PHASER1				= 9'h110;	// Phaser 1 alct_txd phase
-	parameter ADR_PHASER2				= 9'h112;	// Phaser 2 cfeb0_rxd phase
-	parameter ADR_PHASER3				= 9'h114;	// Phaser 3 cfeb1_rxd phase
-	parameter ADR_PHASER4				= 9'h116;	// Phaser 4 cfeb2_rxd phase
-	parameter ADR_PHASER5				= 9'h118;	// Phaser 5 cfeb3_rxd phase
-	parameter ADR_PHASER6				= 9'h11A;	// Phaser 6 cfeb4_rxd phase
+	parameter ADR_PHASER0			= 9'h10E;	// Phaser 0 alct_rxd phase
+	parameter ADR_PHASER1			= 9'h110;	// Phaser 1 alct_txd phase
+	parameter ADR_PHASER2			= 9'h112;	// Phaser 2 cfeb0_rxd phase
+	parameter ADR_PHASER3			= 9'h114;	// Phaser 3 cfeb1_rxd phase
+	parameter ADR_PHASER4			= 9'h116;	// Phaser 4 cfeb2_rxd phase
+	parameter ADR_PHASER5			= 9'h118;	// Phaser 5 cfeb3_rxd phase
+	parameter ADR_PHASER6			= 9'h11A;	// Phaser 6 cfeb4_rxd phase
 
-	parameter ADR_DELAY0_INT			= 9'h11C;	// Interstage delays
-	parameter ADR_DELAY1_INT			= 9'h11E;	// Interstage delays
-	parameter ADR_SYNC_ERR_CTRL			= 9'h120;	// Sync error control
+	parameter ADR_DELAY0_INT		= 9'h11C;	// Interstage delays
+	parameter ADR_DELAY1_INT		= 9'h11E;	// Interstage delays
+	parameter ADR_SYNC_ERR_CTRL		= 9'h120;	// Sync error control
 
 	parameter ADR_CFEB_BADBITS_CTRL		= 9'h122;	// CFEB  Bad Bit Control/Status
 	parameter ADR_CFEB_BADBITS_TIMER	= 9'h124;	// CFEB  Bad Bit Check Interval
@@ -1172,16 +1177,16 @@
 
 // Virtex-6 Only
 	parameter ADR_V6_SNAP12_QPLL		= 9'h148;	// Virtex-6 SNAP12 Serial interface + QPLL
-	parameter ADR_V6_GTX_RX_ALL			= 9'h14A;	// Virtex-6 GTX  common control
-	parameter ADR_V6_GTX_RX0			= 9'h14C;	// Virtex-6 GTX0 control and status
-	parameter ADR_V6_GTX_RX1			= 9'h14E;	// Virtex-6 GTX1 control and status
-	parameter ADR_V6_GTX_RX2			= 9'h150;	// Virtex-6 GTX2 control and status
-	parameter ADR_V6_GTX_RX3			= 9'h152;	// Virtex-6 GTX3 control and status
-	parameter ADR_V6_GTX_RX4			= 9'h154;	// Virtex-6 GTX4 control and status
-	parameter ADR_V6_GTX_RX5			= 9'h156;	// Virtex-6 GTX5 control and status
-	parameter ADR_V6_GTX_RX6			= 9'h158;	// Virtex-6 GTX6 control and status
+	parameter ADR_V6_GTX_RX_ALL		= 9'h14A;	// Virtex-6 GTX  common control
+	parameter ADR_V6_GTX_RX0		= 9'h14C;	// Virtex-6 GTX0 control and status
+	parameter ADR_V6_GTX_RX1		= 9'h14E;	// Virtex-6 GTX1 control and status
+	parameter ADR_V6_GTX_RX2		= 9'h150;	// Virtex-6 GTX2 control and status
+	parameter ADR_V6_GTX_RX3		= 9'h152;	// Virtex-6 GTX3 control and status
+	parameter ADR_V6_GTX_RX4		= 9'h154;	// Virtex-6 GTX4 control and status
+	parameter ADR_V6_GTX_RX5		= 9'h156;	// Virtex-6 GTX5 control and status
+	parameter ADR_V6_GTX_RX6		= 9'h158;	// Virtex-6 GTX6 control and status
 
-	parameter ADR_V6_SYSMON				= 9'h15A;	// Virtex-6 Sysmon ADC
+	parameter ADR_V6_SYSMON			= 9'h15A;	// Virtex-6 Sysmon ADC
 
 	parameter ADR_V6_CFEB_BADBITS_CTRL	= 9'h15C;	// CFEB  Bad Bit Control/Status
 	parameter ADR_V6_CFEB5_BADBITS_LY01	= 9'h15E;	// CFEB5 Bad Bit Array
@@ -1192,18 +1197,20 @@
 	parameter ADR_V6_CFEB6_BADBITS_LY23	= 9'h166;	// CFEB6 Bad Bit Array
 	parameter ADR_V6_CFEB6_BADBITS_LY45	= 9'h168;	// CFEB6 Bad Bit Array
 
-	parameter ADR_V6_PHASER7			= 9'h16A;	// Phaser 7 cfeb5_rxd phase
-	parameter ADR_V6_PHASER8			= 9'h16C;	// Phaser 8 cfeb6_rxd phase
+	parameter ADR_V6_PHASER7		= 9'h16A;	// Phaser 7 cfeb5_rxd phase
+	parameter ADR_V6_PHASER8		= 9'h16C;	// Phaser 8 cfeb6_rxd phase
 
-	parameter ADR_V6_HCM501				= 9'h16E;	// CFEB5 Ly0,Ly1 Hot Channel Mask
-	parameter ADR_V6_HCM523				= 9'h170;	// CFEB5 Ly2,Ly3 Hot Channel Mask
-	parameter ADR_V6_HCM545				= 9'h172;	// CFEB5 Ly4,Ly5 Hot Channel Mask
+	parameter ADR_V6_HCM501			= 9'h16E;	// CFEB5 Ly0,Ly1 Hot Channel Mask
+	parameter ADR_V6_HCM523			= 9'h170;	// CFEB5 Ly2,Ly3 Hot Channel Mask
+	parameter ADR_V6_HCM545			= 9'h172;	// CFEB5 Ly4,Ly5 Hot Channel Mask
 
-	parameter ADR_V6_HCM601				= 9'h174;	// CFEB6 Ly0,Ly1 Hot Channel Mask
-	parameter ADR_V6_HCM623				= 9'h176;	// CFEB6 Ly2,Ly3 Hot Channel Mask
-	parameter ADR_V6_HCM645				= 9'h178;	// CFEB6 Ly4,Ly5 Hot Channel Mask
+	parameter ADR_V6_HCM601			= 9'h174;	// CFEB6 Ly0,Ly1 Hot Channel Mask
+	parameter ADR_V6_HCM623			= 9'h176;	// CFEB6 Ly2,Ly3 Hot Channel Mask
+	parameter ADR_V6_HCM645			= 9'h178;	// CFEB6 Ly4,Ly5 Hot Channel Mask
 
-	parameter ADR_V6_EXTEND				= 9'h17A;	// DCFEB 7-bit extensions
+	parameter ADR_V6_EXTEND			= 9'h17A;	// DCFEB 7-bit extensions
+
+	parameter ADR_ODMB			= 9'h1EE;	// ODMB mode: various addresses are handled inside odmb_device
 
 //------------------------------------------------------------------------------------------------------------------
 // Ports
@@ -1219,6 +1226,11 @@
 // Firmware Version Ports
 	input	[MXCFEB-1:0]	cfeb_exists;			// CFEBs instantiated in this version
 	output	[14:0]			revcode;				// Firmware revision code
+
+// ODMB device
+   output 				bd_sel;	// Out Board selected
+   input 				odmb_sel;	// In  ODMB mode selected
+   input [15:0] 			odmb_data; // In  ODMB data
 
 // VME Bus Input Port Map
 `define IO (*IOB="true"*)
@@ -2831,398 +2843,400 @@
 
 	always @* begin
 	case (reg_adr)
-	ADR_IDREG0:			data_out	<=	id_reg0_rd;
-	ADR_IDREG1:			data_out	<=	id_reg1_rd;
-	ADR_IDREG2:			data_out	<=	id_reg2_rd;
-	ADR_IDREG3:			data_out	<=	id_reg3_rd;
+	ADR_IDREG0:			data_out	<= id_reg0_rd;
+	ADR_IDREG1:			data_out	<= id_reg1_rd;
+	ADR_IDREG2:			data_out	<= id_reg2_rd;
+	ADR_IDREG3:			data_out	<= id_reg3_rd;
+							   
+	ADR_VME_STATUS:			data_out	<= vme_status_rd;
+	ADR_VME_ADR0:			data_out	<= vme_adr0_rd;
+	ADR_VME_ADR1:			data_out	<= vme_adr1_rd;
+							   
+	ADR_LOOPBK:			data_out	<= tmb_loop_rd;
+	ADR_USR_JTAG:			data_out	<= usr_jtag_rd;
+	ADR_PROM:			data_out	<= prom_rd;
+							   
+	ADR_DDDSM:			data_out	<= dddsm_rd;
+	ADR_DDD0:			data_out	<= ddd0_rd;
+	ADR_DDD1:			data_out	<= ddd1_rd;
+	ADR_DDD2:			data_out	<= ddd2_rd;
+	ADR_DDDOE:			data_out	<= dddoe_rd;
+	ADR_RATCTRL:			data_out	<= rat_control_rd;
+							   
+	ADR_STEP:			data_out	<= step_rd;
+	ADR_LED:			data_out	<= led_rd;
+	ADR_ADC:			data_out	<= adc_rd;
+	ADR_DSN:			data_out	<= dsn_rd;
+							   
+	ADR_MOD_CFG:			data_out	<= mod_cfg_rd;
+	ADR_CCB_CFG:			data_out	<= ccb_cfg_rd;
+	ADR_CCB_TRIG:			data_out	<= ccb_trig_rd;
+	ADR_CCB_STAT0:			data_out	<= ccb_stat0_rd;
+							   
+	ADR_ALCT_CFG:			data_out	<= alct_cfg_rd;
+	ADR_ALCT_INJ:			data_out	<= alct_inj_rd;
+	ADR_ALCT0_INJ:			data_out	<= alct0_inj_rd;
+	ADR_ALCT1_INJ:			data_out	<= alct1_inj_rd;
+	ADR_ALCT_STAT:			data_out	<= alct_stat_rd;
+	ADR_ALCT0_RCD:			data_out	<= alct0_rcd_rd;
+	ADR_ALCT1_RCD:			data_out	<= alct1_rcd_rd;
+	ADR_ALCT_FIFO0:			data_out	<= alct_fifo0_rd;
+							   
+	ADR_DMB_MON:			data_out	<= dmb_mon_rd;
+							   
+	ADR_CFEB_INJ:			data_out	<= cfeb_inj_rd;
+	ADR_CFEB_INJ_ADR:		data_out	<= cfeb_inj_adr_rd;
+	ADR_CFEB_INJ_WDATA:		data_out	<= cfeb_inj_wdata_rd;
+	ADR_CFEB_INJ_RDATA:		data_out	<= cfeb_inj_rdata_rd;
+							   
+	ADR_HCM001:			data_out	<= hcm001_rd;
+	ADR_HCM023:			data_out	<= hcm023_rd;
+	ADR_HCM045:			data_out	<= hcm045_rd;
+	ADR_HCM101:			data_out	<= hcm101_rd;
+	ADR_HCM123:			data_out	<= hcm123_rd;
+	ADR_HCM145:			data_out	<= hcm145_rd;
+	ADR_HCM201:			data_out	<= hcm201_rd;
+	ADR_HCM223:			data_out	<= hcm223_rd;
+	ADR_HCM245:			data_out	<= hcm245_rd;
+	ADR_HCM301:			data_out	<= hcm301_rd;
+	ADR_HCM323:			data_out	<= hcm323_rd;
+	ADR_HCM345:			data_out	<= hcm345_rd;
+	ADR_HCM401:			data_out	<= hcm401_rd;
+	ADR_HCM423:			data_out	<= hcm423_rd;
+	ADR_HCM445:			data_out	<= hcm445_rd;
+							   
+	ADR_SEQ_TRIG_EN:		data_out	<= seq_trigen_rd;
+	ADR_SEQ_TRIG_DLY0:		data_out	<= seq_trigdly0_rd;
+	ADR_SEQ_TRIG_DLY1:		data_out	<= seq_trigdly1_rd;
+	ADR_SEQ_ID:			data_out	<= seq_id_rd;
+							   
+	ADR_SEQ_CLCT:			data_out	<= seq_clct_rd;
+	ADR_SEQ_FIFO:			data_out	<= seq_fifo_rd;
+	ADR_SEQ_L1A:			data_out	<= seq_l1a_rd;
+	ADR_SEQ_OFFSET0:		data_out	<= seq_offset0_rd;
+							   
+	ADR_SEQ_CLCT0:			data_out	<= seq_clct0_rd;
+	ADR_SEQ_CLCT1:			data_out	<= seq_clct1_rd;
+	ADR_SEQ_TRIG_SRC:		data_out	<= seq_trig_source_rd;
+							   
+	ADR_DMB_RAM_ADR:		data_out	<= dmb_ram_adr_rd;
+	ADR_DMB_RAM_WDATA:		data_out	<= dmb_ram_wdata_rd;
+	ADR_DMB_RAM_WDCNT:		data_out	<= dmb_ram_wdcnt_rd;
+	ADR_DMB_RAM_RDATA:		data_out	<= dmb_ram_rdata_rd;
+							   
+	ADR_TMB_TRIG:			data_out	<= tmb_trig_rd;
+							   
+	ADR_MPC0_FRAME0:		data_out	<= mpc0_frame0_rd;
+	ADR_MPC0_FRAME1:		data_out	<= mpc0_frame1_rd;
+	ADR_MPC1_FRAME0:		data_out	<= mpc1_frame0_rd;
+	ADR_MPC1_FRAME1:		data_out	<= mpc1_frame1_rd;
+							   
+	ADR_MPC_INJ:			data_out	<= mpc_inj_rd;
+	ADR_MPC_RAM_ADR:		data_out	<= mpc_ram_adr_rd;	
+	ADR_MPC_RAM_WDATA:		data_out	<= mpc_ram_wdata_rd;
+	ADR_MPC_RAM_RDATA:		data_out	<= mpc_ram_rdata_rd;
+							   
+	ADR_SCP_CTRL:			data_out	<= scp_ctrl_rd;
+	ADR_SCP_RDATA:			data_out	<= scp_rdata_rd;
+							   
+	ADR_CCB_CMD:			data_out	<= ccb_cmd_rd;
+	ADR_BUF_STAT0:			data_out	<= buf_stat0_rd;
+	ADR_BUF_STAT1:			data_out	<= buf_stat1_rd;
+	ADR_BUF_STAT2:			data_out	<= buf_stat2_rd;
+	ADR_BUF_STAT3:			data_out	<= buf_stat3_rd;
+	ADR_BUF_STAT4:			data_out	<= buf_stat4_rd;
+	ADR_ALCTFIFO1:			data_out	<= alct_fifo1_rd;
+	ADR_ALCTFIFO2:			data_out	<= alct_fifo2_rd;
+	ADR_SEQMOD:			data_out	<= seq_trigmod_rd;
+	ADR_SEQSM:			data_out	<= seq_smstat_rd;
+	ADR_SEQCLCTM:			data_out	<= seq_clctmsb_rd;
+	ADR_TMBTIM:			data_out	<= tmb_timing_rd;
+	ADR_LHC_CYCLE:			data_out	<= lhc_cycle_rd;
+							   
+	ADR_RPC_CFG:			data_out	<= rpc_cfg_rd;
+	ADR_RPC_RDATA:			data_out	<= rpc_rdata_rd;
+	ADR_RPC_RAW_DELAY:		data_out	<= rpc_raw_delay_rd;
+	ADR_RPC_INJ:			data_out	<= rpc_inj_rd;
+	ADR_RPC_INJ_ADR:		data_out	<= rpc_inj_adr_rd;
+	ADR_RPC_INJ_WDATA:		data_out	<= rpc_inj_wdata_rd;
+	ADR_RPC_INJ_RDATA:		data_out	<= rpc_inj_rdata_rd;
+	ADR_RPC_TBINS:			data_out	<= rpc_tbins_rd;
+	ADR_RPC0_HCM:			data_out	<= rpc0_hcm_rd;
+	ADR_RPC1_HCM:			data_out	<= rpc1_hcm_rd;
+	ADR_BX0_DELAY:			data_out	<= bx0_delay_rd;
+	ADR_NON_TRIG_RO:		data_out	<= non_trig_ro_rd;
+							   
+	ADR_SCP_TRIG:			data_out	<= scp_trigger_ch_rd;
+							   
+	ADR_CNT_CTRL:			data_out	<= cnt_ctrl_rd;
+	ADR_CNT_RDATA:			data_out	<= cnt_rdata_rd;
+							   
+	ADR_JTAGSM0:			data_out	<= jtagsm0_rd;
+	ADR_JTAGSM1:			data_out	<= jtagsm1_rd;
+	ADR_JTAGSM2:			data_out	<= jtagsm2_rd;
+							   
+	ADR_VMESM0:			data_out	<= vmesm0_rd;
+	ADR_VMESM1:			data_out	<= vmesm1_rd;
+	ADR_VMESM2:			data_out	<= vmesm2_rd;
+	ADR_VMESM3:			data_out	<= vmesm3_rd;
+	ADR_VMESM4:			data_out	<= vmesm4_rd;
+							   
+	ADR_DDDRSM:			data_out	<= dddrsm_rd;
+	ADR_DDDR0:			data_out	<= dddr_rd;
+							   
+	ADR_UPTIME:			data_out	<= uptime_rd;
+	ADR_BDSTATUS:			data_out	<= bd_status_rd;
+							   
+	ADR_BXN_CLCT:			data_out	<= bxn_clct_rd;
+	ADR_BXN_ALCT:			data_out	<= bxn_alct_rd;
+							   
+	ADR_LAYER_TRIG:			data_out	<= layer_trig_rd;
+							   
+	ADR_ISE_VERSION:		data_out	<= ise_version_rd;
+	ADR_TEMP0:			data_out	<= temp0_rd;
+	ADR_TEMP1:			data_out	<= temp1_rd;
+	ADR_TEMP2:			data_out	<= temp2_rd;
+	ADR_PARITY:			data_out	<= parity_rd;
+							   
+	ADR_CCB_STAT1:			data_out	<= ccb_stat1_rd;
+	ADR_BXN_L1A:			data_out	<= bxn_l1a_rd;
+	ADR_L1A_LOOKBACK:		data_out	<= l1a_lookback_rd;
+	ADR_SEQ_DEBUG:			data_out	<= seqdeb_rd;
+							   
+	ADR_ALCT_SYNC_CTRL:		data_out	<= alct_sync_ctrl_rd;
+	ADR_ALCT_SYNC_TXDATA_1ST:	data_out	<= alct_sync_txdata_1st_rd;
+	ADR_ALCT_SYNC_TXDATA_2ND:	data_out	<= alct_sync_txdata_2nd_rd;
+							   
+	ADR_SEQ_OFFSET1:		data_out	<= seq_offset1_rd;
+	ADR_MINISCOPE:			data_out	<= miniscope_rd;
+							   
+	ADR_PHASER0:			data_out	<= phaser0_rd;
+	ADR_PHASER1:			data_out	<= phaser1_rd;
+	ADR_PHASER2:			data_out	<= phaser2_rd;
+	ADR_PHASER3:			data_out	<= phaser3_rd;
+	ADR_PHASER4:			data_out	<= phaser4_rd;
+	ADR_PHASER5:			data_out	<= phaser5_rd;
+	ADR_PHASER6:			data_out	<= phaser6_rd;
+							   
+	ADR_DELAY0_INT:			data_out	<= delay0_int_rd;
+	ADR_DELAY1_INT:			data_out	<= delay1_int_rd;
+	ADR_SYNC_ERR_CTRL:		data_out	<= sync_err_ctrl_rd;
+							   
+	ADR_CFEB_BADBITS_CTRL:		data_out	<= cfeb_badbits_ctrl_rd;
+	ADR_CFEB_BADBITS_TIMER:		data_out	<= cfeb_badbits_nbx_rd;
+							   
+	ADR_CFEB0_BADBITS_LY01:		data_out	<= cfeb0_badbits_ly01_rd;
+	ADR_CFEB0_BADBITS_LY23:		data_out	<= cfeb0_badbits_ly23_rd;
+	ADR_CFEB0_BADBITS_LY45:		data_out	<= cfeb0_badbits_ly45_rd;
+							   
+	ADR_CFEB1_BADBITS_LY01:		data_out	<= cfeb1_badbits_ly01_rd;
+	ADR_CFEB1_BADBITS_LY23:		data_out	<= cfeb1_badbits_ly23_rd;
+	ADR_CFEB1_BADBITS_LY45:		data_out	<= cfeb1_badbits_ly45_rd;
+							   
+	ADR_CFEB2_BADBITS_LY01:		data_out	<= cfeb2_badbits_ly01_rd;
+	ADR_CFEB2_BADBITS_LY23:		data_out	<= cfeb2_badbits_ly23_rd;
+	ADR_CFEB2_BADBITS_LY45:		data_out	<= cfeb2_badbits_ly45_rd;
+							   
+	ADR_CFEB3_BADBITS_LY01:		data_out	<= cfeb3_badbits_ly01_rd;
+	ADR_CFEB3_BADBITS_LY23:		data_out	<= cfeb3_badbits_ly23_rd;
+	ADR_CFEB3_BADBITS_LY45:		data_out	<= cfeb3_badbits_ly45_rd;
+							   
+	ADR_CFEB4_BADBITS_LY01:		data_out	<= cfeb4_badbits_ly01_rd;
+	ADR_CFEB4_BADBITS_LY23:		data_out	<= cfeb4_badbits_ly23_rd;
+	ADR_CFEB4_BADBITS_LY45:		data_out	<= cfeb4_badbits_ly45_rd;
+							   
+	ADR_ALCT_STARTUP_DELAY:		data_out	<= alct_startup_delay_rd;
+	ADR_ALCT_STARTUP_STATUS:	data_out	<= alct_startup_status_rd;
+							   
+// Virtex-6 Only					   
+	ADR_V6_SNAP12_QPLL:		data_out	<= virtex6_snap12_qpll_rd;
+	ADR_V6_GTX_RX_ALL:		data_out	<= virtex6_gtx_rx_all_rd;
 
-	ADR_VME_STATUS:		data_out	<=	vme_status_rd;
-	ADR_VME_ADR0:		data_out	<=	vme_adr0_rd;
-	ADR_VME_ADR1:		data_out	<=	vme_adr1_rd;
+	ADR_V6_GTX_RX0:			data_out	<= virtex6_gtx_rx_rd[0];
+	ADR_V6_GTX_RX1:			data_out	<= virtex6_gtx_rx_rd[1];
+	ADR_V6_GTX_RX2:			data_out	<= virtex6_gtx_rx_rd[2];
+	ADR_V6_GTX_RX3:			data_out	<= virtex6_gtx_rx_rd[3];
+	ADR_V6_GTX_RX4:			data_out	<= virtex6_gtx_rx_rd[4];
+	ADR_V6_GTX_RX5:			data_out	<= virtex6_gtx_rx_rd[5];
+	ADR_V6_GTX_RX6:			data_out	<= virtex6_gtx_rx_rd[6];
 
-	ADR_LOOPBK:			data_out	<=	tmb_loop_rd;
-	ADR_USR_JTAG:		data_out	<=	usr_jtag_rd;
-	ADR_PROM:			data_out	<=	prom_rd;
+	ADR_V6_SYSMON:			data_out	<=  virtex6_sysmon_rd;
 
-	ADR_DDDSM:			data_out	<=	dddsm_rd;
-	ADR_DDD0:			data_out	<=	ddd0_rd;
-	ADR_DDD1:			data_out	<=	ddd1_rd;
-	ADR_DDD2:			data_out	<=	ddd2_rd;
-	ADR_DDDOE:			data_out	<=	dddoe_rd;
-	ADR_RATCTRL:		data_out	<=	rat_control_rd;
+	ADR_V6_CFEB_BADBITS_CTRL:	data_out	<=	cfeb_v6_badbits_ctrl_rd;
+	ADR_V6_CFEB5_BADBITS_LY01:	data_out	<= cfeb5_badbits_ly01_rd;
+	ADR_V6_CFEB5_BADBITS_LY23:	data_out	<= cfeb5_badbits_ly23_rd;
+	ADR_V6_CFEB5_BADBITS_LY45:	data_out	<= cfeb5_badbits_ly45_rd;
 
-	ADR_STEP:			data_out	<=	step_rd;
-	ADR_LED:			data_out	<=	led_rd;
-	ADR_ADC:			data_out	<=	adc_rd;
-	ADR_DSN:			data_out	<=	dsn_rd;
+	ADR_V6_CFEB6_BADBITS_LY01:	data_out	<= cfeb6_badbits_ly01_rd;
+	ADR_V6_CFEB6_BADBITS_LY23:	data_out	<= cfeb6_badbits_ly23_rd;
+	ADR_V6_CFEB6_BADBITS_LY45:	data_out	<= cfeb6_badbits_ly45_rd;
 
-	ADR_MOD_CFG:		data_out	<=	mod_cfg_rd;
-	ADR_CCB_CFG:		data_out	<=	ccb_cfg_rd;
-	ADR_CCB_TRIG:		data_out	<=	ccb_trig_rd;
-	ADR_CCB_STAT0:		data_out	<=	ccb_stat0_rd;
+	ADR_V6_PHASER7:			data_out	<= phaser7_rd;
+	ADR_V6_PHASER8:			data_out	<= phaser8_rd;
 
-	ADR_ALCT_CFG:		data_out	<=	alct_cfg_rd;
-	ADR_ALCT_INJ:		data_out	<=	alct_inj_rd;
-	ADR_ALCT0_INJ:		data_out	<=	alct0_inj_rd;
-	ADR_ALCT1_INJ:		data_out	<=	alct1_inj_rd;
-	ADR_ALCT_STAT:		data_out	<=	alct_stat_rd;
-	ADR_ALCT0_RCD:		data_out	<=	alct0_rcd_rd;
-	ADR_ALCT1_RCD:		data_out	<=	alct1_rcd_rd;
-	ADR_ALCT_FIFO0:		data_out	<=	alct_fifo0_rd;
+	ADR_V6_HCM501:			data_out	<= hcm501_rd;
+	ADR_V6_HCM523:			data_out	<= hcm523_rd;
+	ADR_V6_HCM545:			data_out	<= hcm545_rd;
+	ADR_V6_HCM601:			data_out	<= hcm601_rd;
+	ADR_V6_HCM623:			data_out	<= hcm623_rd;
+	ADR_V6_HCM645:			data_out	<= hcm645_rd;
 
-	ADR_DMB_MON:		data_out	<=	dmb_mon_rd;
+	ADR_V6_EXTEND:			data_out	<= virtex6_extend_rd;
 
-	ADR_CFEB_INJ:		data_out	<=	cfeb_inj_rd;
-	ADR_CFEB_INJ_ADR:	data_out	<=	cfeb_inj_adr_rd;
-	ADR_CFEB_INJ_WDATA:	data_out	<=	cfeb_inj_wdata_rd;
-	ADR_CFEB_INJ_RDATA:	data_out	<=	cfeb_inj_rdata_rd;
+	ADR_ODMB:			data_out	<= odmb_data;
 
-	ADR_HCM001:			data_out	<=	hcm001_rd;
-	ADR_HCM023:			data_out	<=	hcm023_rd;
-	ADR_HCM045:			data_out	<=	hcm045_rd;
-	ADR_HCM101:			data_out	<=	hcm101_rd;
-	ADR_HCM123:			data_out	<=	hcm123_rd;
-	ADR_HCM145:			data_out	<=	hcm145_rd;
-	ADR_HCM201:			data_out	<=	hcm201_rd;
-	ADR_HCM223:			data_out	<=	hcm223_rd;
-	ADR_HCM245:			data_out	<=	hcm245_rd;
-	ADR_HCM301:			data_out	<=	hcm301_rd;
-	ADR_HCM323:			data_out	<=	hcm323_rd;
-	ADR_HCM345:			data_out	<=	hcm345_rd;
-	ADR_HCM401:			data_out	<=	hcm401_rd;
-	ADR_HCM423:			data_out	<=	hcm423_rd;
-	ADR_HCM445:			data_out	<=	hcm445_rd;
-
-	ADR_SEQ_TRIG_EN:	data_out	<=	seq_trigen_rd;
-	ADR_SEQ_TRIG_DLY0:	data_out	<=	seq_trigdly0_rd;
-	ADR_SEQ_TRIG_DLY1:	data_out	<=	seq_trigdly1_rd;
-	ADR_SEQ_ID:			data_out	<=	seq_id_rd;
-
-	ADR_SEQ_CLCT:		data_out	<=	seq_clct_rd;
-	ADR_SEQ_FIFO:		data_out	<=	seq_fifo_rd;
-	ADR_SEQ_L1A:		data_out	<=	seq_l1a_rd;
-	ADR_SEQ_OFFSET0:	data_out	<=	seq_offset0_rd;
-
-	ADR_SEQ_CLCT0:		data_out	<=	seq_clct0_rd;
-	ADR_SEQ_CLCT1:		data_out	<=	seq_clct1_rd;
-	ADR_SEQ_TRIG_SRC:	data_out	<=	seq_trig_source_rd;
-
-	ADR_DMB_RAM_ADR:	data_out	<=	dmb_ram_adr_rd;
-	ADR_DMB_RAM_WDATA:	data_out	<=	dmb_ram_wdata_rd;
-	ADR_DMB_RAM_WDCNT:	data_out	<=	dmb_ram_wdcnt_rd;
-	ADR_DMB_RAM_RDATA:	data_out	<=	dmb_ram_rdata_rd;
-
-	ADR_TMB_TRIG:		data_out	<=	tmb_trig_rd;
-
-	ADR_MPC0_FRAME0:	data_out	<=	mpc0_frame0_rd;
-	ADR_MPC0_FRAME1:	data_out	<=	mpc0_frame1_rd;
-	ADR_MPC1_FRAME0:	data_out	<=	mpc1_frame0_rd;
-	ADR_MPC1_FRAME1:	data_out	<=	mpc1_frame1_rd;
-
-	ADR_MPC_INJ:		data_out	<=	mpc_inj_rd;
-	ADR_MPC_RAM_ADR:	data_out	<=	mpc_ram_adr_rd;	
-	ADR_MPC_RAM_WDATA:	data_out	<=	mpc_ram_wdata_rd;
-	ADR_MPC_RAM_RDATA:	data_out	<=	mpc_ram_rdata_rd;
-
-	ADR_SCP_CTRL:		data_out	<=	scp_ctrl_rd;
-	ADR_SCP_RDATA:		data_out	<=	scp_rdata_rd;
-
-	ADR_CCB_CMD:		data_out	<=	ccb_cmd_rd;
-	ADR_BUF_STAT0:		data_out	<=	buf_stat0_rd;
-	ADR_BUF_STAT1:		data_out	<=	buf_stat1_rd;
-	ADR_BUF_STAT2:		data_out	<=	buf_stat2_rd;
-	ADR_BUF_STAT3:		data_out	<=	buf_stat3_rd;
-	ADR_BUF_STAT4:		data_out	<=	buf_stat4_rd;
-	ADR_ALCTFIFO1:		data_out	<=	alct_fifo1_rd;
-	ADR_ALCTFIFO2:		data_out	<=	alct_fifo2_rd;
-	ADR_SEQMOD:			data_out	<=	seq_trigmod_rd;
-	ADR_SEQSM:			data_out	<=	seq_smstat_rd;
-	ADR_SEQCLCTM:		data_out	<=	seq_clctmsb_rd;
-	ADR_TMBTIM:			data_out	<=	tmb_timing_rd;
-	ADR_LHC_CYCLE:		data_out	<=	lhc_cycle_rd;
-
-	ADR_RPC_CFG:		data_out	<=	rpc_cfg_rd;
-	ADR_RPC_RDATA:		data_out	<=	rpc_rdata_rd;
-	ADR_RPC_RAW_DELAY:	data_out	<=	rpc_raw_delay_rd;
-	ADR_RPC_INJ:		data_out	<=	rpc_inj_rd;
-	ADR_RPC_INJ_ADR:	data_out	<=	rpc_inj_adr_rd;
-	ADR_RPC_INJ_WDATA:	data_out	<=	rpc_inj_wdata_rd;
-	ADR_RPC_INJ_RDATA:	data_out	<=	rpc_inj_rdata_rd;
-	ADR_RPC_TBINS:		data_out	<=	rpc_tbins_rd;
-	ADR_RPC0_HCM:		data_out	<=	rpc0_hcm_rd;
-	ADR_RPC1_HCM:		data_out	<=	rpc1_hcm_rd;
-	ADR_BX0_DELAY:		data_out	<=	bx0_delay_rd;
-	ADR_NON_TRIG_RO:	data_out	<=	non_trig_ro_rd;
-
-	ADR_SCP_TRIG:				data_out <=	scp_trigger_ch_rd;
-
-	ADR_CNT_CTRL:				data_out <=	cnt_ctrl_rd;
-	ADR_CNT_RDATA:				data_out <=	cnt_rdata_rd;
-	
-	ADR_JTAGSM0:				data_out <=	jtagsm0_rd;
-	ADR_JTAGSM1:				data_out <=	jtagsm1_rd;
-	ADR_JTAGSM2:				data_out <=	jtagsm2_rd;
-
-	ADR_VMESM0:					data_out <=	vmesm0_rd;
-	ADR_VMESM1:					data_out <=	vmesm1_rd;
-	ADR_VMESM2:					data_out <=	vmesm2_rd;
-	ADR_VMESM3:					data_out <=	vmesm3_rd;
-	ADR_VMESM4:					data_out <=	vmesm4_rd;
-
-	ADR_DDDRSM:					data_out <=	dddrsm_rd;
-	ADR_DDDR0:					data_out <=	dddr_rd;
-
-	ADR_UPTIME:					data_out <=	uptime_rd;
-	ADR_BDSTATUS:				data_out <=	bd_status_rd;
-
-	ADR_BXN_CLCT:				data_out <=	bxn_clct_rd;
-	ADR_BXN_ALCT:				data_out <=	bxn_alct_rd;
-
-	ADR_LAYER_TRIG:				data_out <=	layer_trig_rd;
-
-	ADR_ISE_VERSION:			data_out <=	ise_version_rd;
-	ADR_TEMP0:					data_out <=	temp0_rd;
-	ADR_TEMP1:					data_out <=	temp1_rd;
-	ADR_TEMP2:					data_out <=	temp2_rd;
-	ADR_PARITY:					data_out <=	parity_rd;
-	
-	ADR_CCB_STAT1:				data_out <=	ccb_stat1_rd;
-	ADR_BXN_L1A:				data_out <=	bxn_l1a_rd;
-	ADR_L1A_LOOKBACK:			data_out <=	l1a_lookback_rd;
-	ADR_SEQ_DEBUG:				data_out <=	seqdeb_rd;
-
-	ADR_ALCT_SYNC_CTRL:			data_out <=	alct_sync_ctrl_rd;
-	ADR_ALCT_SYNC_TXDATA_1ST:	data_out <=	alct_sync_txdata_1st_rd;
-	ADR_ALCT_SYNC_TXDATA_2ND:	data_out <=	alct_sync_txdata_2nd_rd;
-
-	ADR_SEQ_OFFSET1:			data_out <=	seq_offset1_rd;
-	ADR_MINISCOPE:				data_out <=	miniscope_rd;
-
-	ADR_PHASER0:				data_out <=	phaser0_rd;
-	ADR_PHASER1:				data_out <=	phaser1_rd;
-	ADR_PHASER2:				data_out <=	phaser2_rd;
-	ADR_PHASER3:				data_out <=	phaser3_rd;
-	ADR_PHASER4:				data_out <=	phaser4_rd;
-	ADR_PHASER5:				data_out <=	phaser5_rd;
-	ADR_PHASER6:				data_out <=	phaser6_rd;
-
-	ADR_DELAY0_INT:				data_out <=	delay0_int_rd;
-	ADR_DELAY1_INT:				data_out <=	delay1_int_rd;
-	ADR_SYNC_ERR_CTRL:			data_out <=	sync_err_ctrl_rd;
-	
-	ADR_CFEB_BADBITS_CTRL:		data_out <=	cfeb_badbits_ctrl_rd;
-	ADR_CFEB_BADBITS_TIMER:		data_out <=	cfeb_badbits_nbx_rd;
-
-	ADR_CFEB0_BADBITS_LY01:		data_out <=	cfeb0_badbits_ly01_rd;
-	ADR_CFEB0_BADBITS_LY23:		data_out <=	cfeb0_badbits_ly23_rd;
-	ADR_CFEB0_BADBITS_LY45:		data_out <=	cfeb0_badbits_ly45_rd;
-
-	ADR_CFEB1_BADBITS_LY01:		data_out <=	cfeb1_badbits_ly01_rd;
-	ADR_CFEB1_BADBITS_LY23:		data_out <=	cfeb1_badbits_ly23_rd;
-	ADR_CFEB1_BADBITS_LY45:		data_out <=	cfeb1_badbits_ly45_rd;
-
-	ADR_CFEB2_BADBITS_LY01:		data_out <=	cfeb2_badbits_ly01_rd;
-	ADR_CFEB2_BADBITS_LY23:		data_out <=	cfeb2_badbits_ly23_rd;
-	ADR_CFEB2_BADBITS_LY45:		data_out <=	cfeb2_badbits_ly45_rd;
-
-	ADR_CFEB3_BADBITS_LY01:		data_out <=	cfeb3_badbits_ly01_rd;
-	ADR_CFEB3_BADBITS_LY23:		data_out <=	cfeb3_badbits_ly23_rd;
-	ADR_CFEB3_BADBITS_LY45:		data_out <=	cfeb3_badbits_ly45_rd;
-
-	ADR_CFEB4_BADBITS_LY01:		data_out <=	cfeb4_badbits_ly01_rd;
-	ADR_CFEB4_BADBITS_LY23:		data_out <=	cfeb4_badbits_ly23_rd;
-	ADR_CFEB4_BADBITS_LY45:		data_out <=	cfeb4_badbits_ly45_rd;
-
-	ADR_ALCT_STARTUP_DELAY:		data_out <=	alct_startup_delay_rd;
-	ADR_ALCT_STARTUP_STATUS:	data_out <=	alct_startup_status_rd;
-
-// Virtex-6 Only
-	ADR_V6_SNAP12_QPLL:			data_out <=	virtex6_snap12_qpll_rd;
-	ADR_V6_GTX_RX_ALL:			data_out <= virtex6_gtx_rx_all_rd;
-
-	ADR_V6_GTX_RX0:				data_out <= virtex6_gtx_rx_rd[0];
-	ADR_V6_GTX_RX1:				data_out <= virtex6_gtx_rx_rd[1];
-	ADR_V6_GTX_RX2:				data_out <= virtex6_gtx_rx_rd[2];
-	ADR_V6_GTX_RX3:				data_out <= virtex6_gtx_rx_rd[3];
-	ADR_V6_GTX_RX4:				data_out <= virtex6_gtx_rx_rd[4];
-	ADR_V6_GTX_RX5:				data_out <= virtex6_gtx_rx_rd[5];
-	ADR_V6_GTX_RX6:				data_out <= virtex6_gtx_rx_rd[6];
-
-	ADR_V6_SYSMON:				data_out <=  virtex6_sysmon_rd;
-
-	ADR_V6_CFEB_BADBITS_CTRL:	data_out <=	cfeb_v6_badbits_ctrl_rd;
-	ADR_V6_CFEB5_BADBITS_LY01:	data_out <= cfeb5_badbits_ly01_rd;
-	ADR_V6_CFEB5_BADBITS_LY23:	data_out <= cfeb5_badbits_ly23_rd;
-	ADR_V6_CFEB5_BADBITS_LY45:	data_out <= cfeb5_badbits_ly45_rd;
-
-	ADR_V6_CFEB6_BADBITS_LY01:	data_out <= cfeb6_badbits_ly01_rd;
-	ADR_V6_CFEB6_BADBITS_LY23:	data_out <= cfeb6_badbits_ly23_rd;
-	ADR_V6_CFEB6_BADBITS_LY45:	data_out <= cfeb6_badbits_ly45_rd;
-
-	ADR_V6_PHASER7:				data_out <= phaser7_rd;
-	ADR_V6_PHASER8:				data_out <= phaser8_rd;
-
-	ADR_V6_HCM501:				data_out <= hcm501_rd;
-	ADR_V6_HCM523:				data_out <= hcm523_rd;
-	ADR_V6_HCM545:				data_out <= hcm545_rd;
-	ADR_V6_HCM601:				data_out <= hcm601_rd;
-	ADR_V6_HCM623:				data_out <= hcm623_rd;
-	ADR_V6_HCM645:				data_out <= hcm645_rd;
-
-	ADR_V6_EXTEND:				data_out <= virtex6_extend_rd;
-
-	default:					data_out <= 16'hDEAF;
+	default:			data_out	<= 16'hDEAF;
 	endcase
 	end
 
 //------------------------------------------------------------------------------------------------------------------
 // VME Write-Data Address Decoder
 //------------------------------------------------------------------------------------------------------------------
-	assign wr_tmb_loop				= (reg_adr==ADR_LOOPBK				&& clk_en);
-	assign wr_usr_jtag				= (reg_adr==ADR_USR_JTAG			&& clk_en) && !wr_usr_jtag_dis;
-	assign wr_prom					= (reg_adr==ADR_PROM				&& clk_en);
+	assign wr_tmb_loop		= (reg_adr==ADR_LOOPBK			&& clk_en);
+	assign wr_usr_jtag		= (reg_adr==ADR_USR_JTAG		&& clk_en) && !wr_usr_jtag_dis;
+	assign wr_prom			= (reg_adr==ADR_PROM			&& clk_en);
 
-	assign wr_dddsm					= (reg_adr==ADR_DDDSM				&& clk_en);
-	assign wr_ddd0					= (reg_adr==ADR_DDD0				&& clk_en);
-	assign wr_ddd1					= (reg_adr==ADR_DDD1				&& clk_en);
-	assign wr_ddd2					= (reg_adr==ADR_DDD2				&& clk_en);
-	assign wr_dddoe					= (reg_adr==ADR_DDDOE				&& clk_en);
-	assign wr_rat_control			= (reg_adr==ADR_RATCTRL				&& clk_en);
+	assign wr_dddsm			= (reg_adr==ADR_DDDSM			&& clk_en);
+	assign wr_ddd0			= (reg_adr==ADR_DDD0			&& clk_en);
+	assign wr_ddd1			= (reg_adr==ADR_DDD1			&& clk_en);
+	assign wr_ddd2			= (reg_adr==ADR_DDD2			&& clk_en);
+	assign wr_dddoe			= (reg_adr==ADR_DDDOE			&& clk_en);
+	assign wr_rat_control		= (reg_adr==ADR_RATCTRL			&& clk_en);
 
-	assign wr_step					= (reg_adr==ADR_STEP				&& clk_en);
-	assign wr_led					= (reg_adr==ADR_LED					&& clk_en);
-	assign wr_adc					= (reg_adr==ADR_ADC					&& clk_en);
-	assign wr_dsn					= (reg_adr==ADR_DSN					&& clk_en);
+	assign wr_step			= (reg_adr==ADR_STEP			&& clk_en);
+	assign wr_led			= (reg_adr==ADR_LED			&& clk_en);
+	assign wr_adc			= (reg_adr==ADR_ADC			&& clk_en);
+	assign wr_dsn			= (reg_adr==ADR_DSN			&& clk_en);
 
-	assign wr_mod_cfg				= (reg_adr==ADR_MOD_CFG				&& clk_en);
-	assign wr_ccb_cfg				= (reg_adr==ADR_CCB_CFG				&& clk_en);
-	assign wr_ccb_trig				= (reg_adr==ADR_CCB_TRIG			&& clk_en);
-	assign wr_alct_cfg				= (reg_adr==ADR_ALCT_CFG			&& clk_en);
-	assign wr_alct_inj				= (reg_adr==ADR_ALCT_INJ			&& clk_en);
-	assign wr_alct0_inj				= (reg_adr==ADR_ALCT0_INJ			&& clk_en);
-	assign wr_alct1_inj				= (reg_adr==ADR_ALCT1_INJ			&& clk_en);
-	assign wr_alct_stat				= (reg_adr==ADR_ALCT_STAT			&& clk_en);
-	assign wr_cfeb_inj				= (reg_adr==ADR_CFEB_INJ			&& clk_en);
-	assign wr_cfeb_inj_adr			= (reg_adr==ADR_CFEB_INJ_ADR		&& clk_en);
-	assign wr_cfeb_inj_wdata		= (reg_adr==ADR_CFEB_INJ_WDATA		&& clk_en);
+	assign wr_mod_cfg		= (reg_adr==ADR_MOD_CFG			&& clk_en);
+	assign wr_ccb_cfg		= (reg_adr==ADR_CCB_CFG			&& clk_en);
+	assign wr_ccb_trig		= (reg_adr==ADR_CCB_TRIG		&& clk_en);
+	assign wr_alct_cfg		= (reg_adr==ADR_ALCT_CFG		&& clk_en);
+	assign wr_alct_inj		= (reg_adr==ADR_ALCT_INJ		&& clk_en);
+	assign wr_alct0_inj		= (reg_adr==ADR_ALCT0_INJ		&& clk_en);
+	assign wr_alct1_inj		= (reg_adr==ADR_ALCT1_INJ		&& clk_en);
+	assign wr_alct_stat		= (reg_adr==ADR_ALCT_STAT		&& clk_en);
+	assign wr_cfeb_inj		= (reg_adr==ADR_CFEB_INJ		&& clk_en);
+	assign wr_cfeb_inj_adr		= (reg_adr==ADR_CFEB_INJ_ADR		&& clk_en);
+	assign wr_cfeb_inj_wdata	= (reg_adr==ADR_CFEB_INJ_WDATA		&& clk_en);
 
-	assign wr_hcm001				= (reg_adr==ADR_HCM001				&& clk_en);
-	assign wr_hcm023				= (reg_adr==ADR_HCM023				&& clk_en);
-	assign wr_hcm045				= (reg_adr==ADR_HCM045				&& clk_en);
-	assign wr_hcm101				= (reg_adr==ADR_HCM101				&& clk_en);
-	assign wr_hcm123				= (reg_adr==ADR_HCM123				&& clk_en);
-	assign wr_hcm145				= (reg_adr==ADR_HCM145				&& clk_en);
-	assign wr_hcm201				= (reg_adr==ADR_HCM201				&& clk_en);
-	assign wr_hcm223				= (reg_adr==ADR_HCM223				&& clk_en);
-	assign wr_hcm245				= (reg_adr==ADR_HCM245				&& clk_en);
-	assign wr_hcm301				= (reg_adr==ADR_HCM301				&& clk_en);
-	assign wr_hcm323				= (reg_adr==ADR_HCM323				&& clk_en);
-	assign wr_hcm345				= (reg_adr==ADR_HCM345				&& clk_en);
-	assign wr_hcm401				= (reg_adr==ADR_HCM401				&& clk_en);
-	assign wr_hcm423				= (reg_adr==ADR_HCM423				&& clk_en);
-	assign wr_hcm445				= (reg_adr==ADR_HCM445				&& clk_en);
-	assign wr_hcm501				= (reg_adr==ADR_V6_HCM501			&& clk_en);
-	assign wr_hcm523				= (reg_adr==ADR_V6_HCM523			&& clk_en);
-	assign wr_hcm545				= (reg_adr==ADR_V6_HCM545			&& clk_en);
-	assign wr_hcm601				= (reg_adr==ADR_V6_HCM601			&& clk_en);
-	assign wr_hcm623				= (reg_adr==ADR_V6_HCM623			&& clk_en);
-	assign wr_hcm645				= (reg_adr==ADR_V6_HCM645			&& clk_en);
+	assign wr_hcm001		= (reg_adr==ADR_HCM001			&& clk_en);
+	assign wr_hcm023		= (reg_adr==ADR_HCM023			&& clk_en);
+	assign wr_hcm045		= (reg_adr==ADR_HCM045			&& clk_en);
+	assign wr_hcm101		= (reg_adr==ADR_HCM101			&& clk_en);
+	assign wr_hcm123		= (reg_adr==ADR_HCM123			&& clk_en);
+	assign wr_hcm145		= (reg_adr==ADR_HCM145			&& clk_en);
+	assign wr_hcm201		= (reg_adr==ADR_HCM201			&& clk_en);
+	assign wr_hcm223		= (reg_adr==ADR_HCM223			&& clk_en);
+	assign wr_hcm245		= (reg_adr==ADR_HCM245			&& clk_en);
+	assign wr_hcm301		= (reg_adr==ADR_HCM301			&& clk_en);
+	assign wr_hcm323		= (reg_adr==ADR_HCM323			&& clk_en);
+	assign wr_hcm345		= (reg_adr==ADR_HCM345			&& clk_en);
+	assign wr_hcm401		= (reg_adr==ADR_HCM401			&& clk_en);
+	assign wr_hcm423		= (reg_adr==ADR_HCM423			&& clk_en);
+	assign wr_hcm445		= (reg_adr==ADR_HCM445			&& clk_en);
+	assign wr_hcm501		= (reg_adr==ADR_V6_HCM501		&& clk_en);
+	assign wr_hcm523		= (reg_adr==ADR_V6_HCM523		&& clk_en);
+	assign wr_hcm545		= (reg_adr==ADR_V6_HCM545		&& clk_en);
+	assign wr_hcm601		= (reg_adr==ADR_V6_HCM601		&& clk_en);
+	assign wr_hcm623		= (reg_adr==ADR_V6_HCM623		&& clk_en);
+	assign wr_hcm645		= (reg_adr==ADR_V6_HCM645		&& clk_en);
 
-	assign wr_seq_trigen			= (reg_adr==ADR_SEQ_TRIG_EN			&& clk_en);
-	assign wr_seq_trigdly0			= (reg_adr==ADR_SEQ_TRIG_DLY0		&& clk_en);
-	assign wr_seq_trigdly1			= (reg_adr==ADR_SEQ_TRIG_DLY1		&& clk_en);
-	assign wr_seq_id				= (reg_adr==ADR_SEQ_ID				&& clk_en);
+	assign wr_seq_trigen		= (reg_adr==ADR_SEQ_TRIG_EN		&& clk_en);
+	assign wr_seq_trigdly0		= (reg_adr==ADR_SEQ_TRIG_DLY0		&& clk_en);
+	assign wr_seq_trigdly1		= (reg_adr==ADR_SEQ_TRIG_DLY1		&& clk_en);
+	assign wr_seq_id		= (reg_adr==ADR_SEQ_ID			&& clk_en);
 
-	assign wr_seq_clct				= (reg_adr==ADR_SEQ_CLCT			&& clk_en);
-	assign wr_seq_fifo				= (reg_adr==ADR_SEQ_FIFO			&& clk_en);
-	assign wr_seq_l1a				= (reg_adr==ADR_SEQ_L1A				&& clk_en);
-	assign wr_seq_offset0			= (reg_adr==ADR_SEQ_OFFSET0			&& clk_en);
-	assign wr_dmb_ram_adr			= (reg_adr==ADR_DMB_RAM_ADR			&& clk_en);
-	assign wr_dmb_ram_wdata			= (reg_adr==ADR_DMB_RAM_WDATA		&& clk_en);
-	assign wr_tmb_trig				= (reg_adr==ADR_TMB_TRIG			&& clk_en);
-	assign wr_mpc_inj				= (reg_adr==ADR_MPC_INJ				&& clk_en);
-	assign wr_mpc_ram_adr			= (reg_adr==ADR_MPC_RAM_ADR			&& clk_en);
-	assign wr_mpc_ram_wdata			= (reg_adr==ADR_MPC_RAM_WDATA		&& clk_en);
+	assign wr_seq_clct		= (reg_adr==ADR_SEQ_CLCT		&& clk_en);
+	assign wr_seq_fifo		= (reg_adr==ADR_SEQ_FIFO		&& clk_en);
+	assign wr_seq_l1a		= (reg_adr==ADR_SEQ_L1A			&& clk_en);
+	assign wr_seq_offset0		= (reg_adr==ADR_SEQ_OFFSET0		&& clk_en);
+	assign wr_dmb_ram_adr		= (reg_adr==ADR_DMB_RAM_ADR		&& clk_en);
+	assign wr_dmb_ram_wdata		= (reg_adr==ADR_DMB_RAM_WDATA		&& clk_en);
+	assign wr_tmb_trig		= (reg_adr==ADR_TMB_TRIG		&& clk_en);
+	assign wr_mpc_inj		= (reg_adr==ADR_MPC_INJ			&& clk_en);
+	assign wr_mpc_ram_adr		= (reg_adr==ADR_MPC_RAM_ADR		&& clk_en);
+	assign wr_mpc_ram_wdata		= (reg_adr==ADR_MPC_RAM_WDATA		&& clk_en);
 
-	assign wr_scp_ctrl				= (reg_adr==ADR_SCP_CTRL			&& clk_en);
-	assign wr_scp_rdata				= (reg_adr==ADR_SCP_RDATA			&& clk_en);
+	assign wr_scp_ctrl		= (reg_adr==ADR_SCP_CTRL		&& clk_en);
+	assign wr_scp_rdata		= (reg_adr==ADR_SCP_RDATA		&& clk_en);
 
-	assign wr_ccb_cmd				= (reg_adr==ADR_CCB_CMD				&& clk_en);
-	assign wr_alct_fifo1			= (reg_adr==ADR_ALCTFIFO1			&& clk_en);
-	assign wr_seq_trigmod			= (reg_adr==ADR_SEQMOD				&& clk_en);
-	assign wr_tmb_timing			= (reg_adr==ADR_TMBTIM				&& clk_en);
-	assign wr_lhc_cycle				= (reg_adr==ADR_LHC_CYCLE			&& clk_en);
+	assign wr_ccb_cmd		= (reg_adr==ADR_CCB_CMD			&& clk_en);
+	assign wr_alct_fifo1		= (reg_adr==ADR_ALCTFIFO1		&& clk_en);
+	assign wr_seq_trigmod		= (reg_adr==ADR_SEQMOD			&& clk_en);
+	assign wr_tmb_timing		= (reg_adr==ADR_TMBTIM			&& clk_en);
+	assign wr_lhc_cycle		= (reg_adr==ADR_LHC_CYCLE		&& clk_en);
 
-	assign wr_rpc_cfg				= (reg_adr==ADR_RPC_CFG				&& clk_en);
-	assign wr_rpc_raw_delay			= (reg_adr==ADR_RPC_RAW_DELAY		&& clk_en);
-	assign wr_rpc_inj				= (reg_adr==ADR_RPC_INJ				&& clk_en);
-	assign wr_rpc_inj_adr			= (reg_adr==ADR_RPC_INJ_ADR			&& clk_en);
-	assign wr_rpc_inj_wdata			= (reg_adr==ADR_RPC_INJ_WDATA		&& clk_en);
-	assign wr_rpc_tbins				= (reg_adr==ADR_RPC_TBINS			&& clk_en);
-	assign wr_rpc0_hcm				= (reg_adr==ADR_RPC0_HCM			&& clk_en);
-	assign wr_rpc1_hcm				= (reg_adr==ADR_RPC1_HCM			&& clk_en);
-	assign wr_bx0_delay				= (reg_adr==ADR_BX0_DELAY			&& clk_en);
-	assign wr_non_trig_ro			= (reg_adr==ADR_NON_TRIG_RO			&& clk_en);
+	assign wr_rpc_cfg		= (reg_adr==ADR_RPC_CFG			&& clk_en);
+	assign wr_rpc_raw_delay		= (reg_adr==ADR_RPC_RAW_DELAY		&& clk_en);
+	assign wr_rpc_inj		= (reg_adr==ADR_RPC_INJ			&& clk_en);
+	assign wr_rpc_inj_adr		= (reg_adr==ADR_RPC_INJ_ADR		&& clk_en);
+	assign wr_rpc_inj_wdata		= (reg_adr==ADR_RPC_INJ_WDATA		&& clk_en);
+	assign wr_rpc_tbins		= (reg_adr==ADR_RPC_TBINS		&& clk_en);
+	assign wr_rpc0_hcm		= (reg_adr==ADR_RPC0_HCM		&& clk_en);
+	assign wr_rpc1_hcm		= (reg_adr==ADR_RPC1_HCM		&& clk_en);
+	assign wr_bx0_delay		= (reg_adr==ADR_BX0_DELAY		&& clk_en);
+	assign wr_non_trig_ro		= (reg_adr==ADR_NON_TRIG_RO		&& clk_en);
 
-	assign wr_scp_trigger_ch		= (reg_adr==ADR_SCP_TRIG			&& clk_en);
-	assign wr_cnt_ctrl				= (reg_adr==ADR_CNT_CTRL			&& clk_en);
+	assign wr_scp_trigger_ch	= (reg_adr==ADR_SCP_TRIG		&& clk_en);
+	assign wr_cnt_ctrl		= (reg_adr==ADR_CNT_CTRL		&& clk_en);
 
-	assign wr_jtagsm0				= (reg_adr==ADR_JTAGSM0				&& clk_en);
-	assign wr_vmesm0				= (reg_adr==ADR_VMESM0				&& clk_en);
-	assign wr_vmesm4				= (reg_adr==ADR_VMESM4				&& clk_en);
+	assign wr_jtagsm0		= (reg_adr==ADR_JTAGSM0			&& clk_en);
+	assign wr_vmesm0		= (reg_adr==ADR_VMESM0			&& clk_en);
+	assign wr_vmesm4		= (reg_adr==ADR_VMESM4			&& clk_en);
 
-	assign wr_dddrsm				= (reg_adr==ADR_DDDRSM				&& clk_en);
-	assign wr_dddr	 				= (reg_adr==ADR_DDDR0				&& clk_en);
+	assign wr_dddrsm		= (reg_adr==ADR_DDDRSM			&& clk_en);
+	assign wr_dddr	 		= (reg_adr==ADR_DDDR0			&& clk_en);
 
-	assign wr_layer_trig			= (reg_adr==ADR_LAYER_TRIG			&& clk_en);
+	assign wr_layer_trig		= (reg_adr==ADR_LAYER_TRIG		&& clk_en);
 
-	assign wr_temp0					= (reg_adr==ADR_TEMP0				&& clk_en);
-	assign wr_temp1					= (reg_adr==ADR_TEMP1				&& clk_en);
-	assign wr_temp2					= (reg_adr==ADR_TEMP2				&& clk_en);
-	assign wr_parity				= (reg_adr==ADR_PARITY				&& clk_en);
-	assign wr_l1a_lookback			= (reg_adr==ADR_L1A_LOOKBACK		&& clk_en);
-	assign wr_seqdeb				= (reg_adr==ADR_SEQ_DEBUG			&& clk_en);
+	assign wr_temp0			= (reg_adr==ADR_TEMP0			&& clk_en);
+	assign wr_temp1			= (reg_adr==ADR_TEMP1			&& clk_en);
+	assign wr_temp2			= (reg_adr==ADR_TEMP2			&& clk_en);
+	assign wr_parity		= (reg_adr==ADR_PARITY			&& clk_en);
+	assign wr_l1a_lookback		= (reg_adr==ADR_L1A_LOOKBACK		&& clk_en);
+	assign wr_seqdeb		= (reg_adr==ADR_SEQ_DEBUG		&& clk_en);
 
-	assign wr_alct_sync_ctrl		= (reg_adr==ADR_ALCT_SYNC_CTRL		&& clk_en);
-	assign wr_alct_sync_txdata_1st	= (reg_adr==ADR_ALCT_SYNC_TXDATA_1ST&& clk_en);
-	assign wr_alct_sync_txdata_2nd	= (reg_adr==ADR_ALCT_SYNC_TXDATA_2ND&& clk_en);
+	assign wr_alct_sync_ctrl	= (reg_adr==ADR_ALCT_SYNC_CTRL		&& clk_en);
+	assign wr_alct_sync_txdata_1st	= (reg_adr==ADR_ALCT_SYNC_TXDATA_1ST	&& clk_en);
+	assign wr_alct_sync_txdata_2nd	= (reg_adr==ADR_ALCT_SYNC_TXDATA_2ND	&& clk_en);
 
-	assign wr_seq_offset1			= (reg_adr==ADR_SEQ_OFFSET1			&& clk_en);
-	assign wr_miniscope				= (reg_adr==ADR_MINISCOPE			&& clk_en);
+	assign wr_seq_offset1		= (reg_adr==ADR_SEQ_OFFSET1		&& clk_en);
+	assign wr_miniscope		= (reg_adr==ADR_MINISCOPE		&& clk_en);
 
-	assign wr_phaser0				= (reg_adr==ADR_PHASER0				&& clk_en);
-	assign wr_phaser1				= (reg_adr==ADR_PHASER1				&& clk_en);
-	assign wr_phaser2				= (reg_adr==ADR_PHASER2				&& clk_en);
-	assign wr_phaser3				= (reg_adr==ADR_PHASER3				&& clk_en);
-	assign wr_phaser4				= (reg_adr==ADR_PHASER4				&& clk_en);
-	assign wr_phaser5				= (reg_adr==ADR_PHASER5				&& clk_en);
-	assign wr_phaser6				= (reg_adr==ADR_PHASER6				&& clk_en);
-	assign wr_phaser7				= (reg_adr==ADR_V6_PHASER7			&& clk_en);
-	assign wr_phaser8				= (reg_adr==ADR_V6_PHASER8			&& clk_en);
+	assign wr_phaser0		= (reg_adr==ADR_PHASER0			&& clk_en);
+	assign wr_phaser1		= (reg_adr==ADR_PHASER1			&& clk_en);
+	assign wr_phaser2		= (reg_adr==ADR_PHASER2			&& clk_en);
+	assign wr_phaser3		= (reg_adr==ADR_PHASER3			&& clk_en);
+	assign wr_phaser4		= (reg_adr==ADR_PHASER4			&& clk_en);
+	assign wr_phaser5		= (reg_adr==ADR_PHASER5			&& clk_en);
+	assign wr_phaser6		= (reg_adr==ADR_PHASER6			&& clk_en);
+	assign wr_phaser7		= (reg_adr==ADR_V6_PHASER7		&& clk_en);
+	assign wr_phaser8		= (reg_adr==ADR_V6_PHASER8		&& clk_en);
 
-	assign wr_delay0_int			= (reg_adr==ADR_DELAY0_INT			&& clk_en);
-	assign wr_delay1_int			= (reg_adr==ADR_DELAY1_INT			&& clk_en);
-	assign wr_sync_err_ctrl			= (reg_adr==ADR_SYNC_ERR_CTRL		&& clk_en);
+	assign wr_delay0_int		= (reg_adr==ADR_DELAY0_INT		&& clk_en);
+	assign wr_delay1_int		= (reg_adr==ADR_DELAY1_INT		&& clk_en);
+	assign wr_sync_err_ctrl		= (reg_adr==ADR_SYNC_ERR_CTRL		&& clk_en);
 
-	assign wr_cfeb_badbits_ctrl		= (reg_adr==ADR_CFEB_BADBITS_CTRL	&& clk_en);
-	assign wr_cfeb_v6_badbits_ctrl	= (reg_adr==ADR_V6_CFEB_BADBITS_CTRL&& clk_en);
-	assign wr_cfeb_badbits_nbx		= (reg_adr==ADR_CFEB_BADBITS_TIMER	&& clk_en);
+	assign wr_cfeb_badbits_ctrl	= (reg_adr==ADR_CFEB_BADBITS_CTRL	&& clk_en);
+	assign wr_cfeb_v6_badbits_ctrl	= (reg_adr==ADR_V6_CFEB_BADBITS_CTRL	&& clk_en);
+	assign wr_cfeb_badbits_nbx	= (reg_adr==ADR_CFEB_BADBITS_TIMER	&& clk_en);
 
 	assign wr_alct_startup_delay	= (reg_adr==ADR_ALCT_STARTUP_DELAY	&& clk_en);
 	
 	assign wr_virtex6_snap12_qpll	= (reg_adr==ADR_V6_SNAP12_QPLL		&& clk_en);
 	assign wr_virtex6_gtx_rx_all	= (reg_adr==ADR_V6_GTX_RX_ALL		&& clk_en);
-	assign wr_virtex6_gtx_rx[0]		= (reg_adr==ADR_V6_GTX_RX0			&& clk_en);
-	assign wr_virtex6_gtx_rx[1]		= (reg_adr==ADR_V6_GTX_RX1			&& clk_en);
-	assign wr_virtex6_gtx_rx[2]		= (reg_adr==ADR_V6_GTX_RX2			&& clk_en);
-	assign wr_virtex6_gtx_rx[3]		= (reg_adr==ADR_V6_GTX_RX3			&& clk_en);
-	assign wr_virtex6_gtx_rx[4]		= (reg_adr==ADR_V6_GTX_RX4			&& clk_en);
-	assign wr_virtex6_gtx_rx[5]		= (reg_adr==ADR_V6_GTX_RX5			&& clk_en);
-	assign wr_virtex6_gtx_rx[6]		= (reg_adr==ADR_V6_GTX_RX6			&& clk_en);
-	assign wr_virtex6_sysmon		= (reg_adr==ADR_V6_SYSMON			&& clk_en);
+	assign wr_virtex6_gtx_rx[0]	= (reg_adr==ADR_V6_GTX_RX0		&& clk_en);
+	assign wr_virtex6_gtx_rx[1]	= (reg_adr==ADR_V6_GTX_RX1		&& clk_en);
+	assign wr_virtex6_gtx_rx[2]	= (reg_adr==ADR_V6_GTX_RX2		&& clk_en);
+	assign wr_virtex6_gtx_rx[3]	= (reg_adr==ADR_V6_GTX_RX3		&& clk_en);
+	assign wr_virtex6_gtx_rx[4]	= (reg_adr==ADR_V6_GTX_RX4		&& clk_en);
+	assign wr_virtex6_gtx_rx[5]	= (reg_adr==ADR_V6_GTX_RX5		&& clk_en);
+	assign wr_virtex6_gtx_rx[6]	= (reg_adr==ADR_V6_GTX_RX6		&& clk_en);
+	assign wr_virtex6_sysmon	= (reg_adr==ADR_V6_SYSMON		&& clk_en);
 
-	assign wr_virtex6_extend		= (reg_adr==ADR_V6_EXTEND			&& clk_en);
-	assign wr_adr_cap				= (                        			  adr_cap);
+	assign wr_virtex6_extend	= (reg_adr==ADR_V6_EXTEND		&& clk_en);
+	assign wr_adr_cap		= (adr_cap);
 
 //------------------------------------------------------------------------------------------------------------------
 // VME Bidirectional Data Bus

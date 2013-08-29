@@ -1,2 +1,3 @@
-R  1  0  Read firmware type
-R  2  0  Read firmware version
+R  1	0  Read firmware type
+R  2  	0  Read firmware version
+R  1EE  0  Read ODMB
