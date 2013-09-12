@@ -786,7 +786,9 @@ NET "dmb_loop"				SLEW=FAST | DRIVE=4;
 NET "_dmb_oe"				SLEW=FAST | DRIVE=4;
 
 # MPC
-NET "_mpc_tx<*>"			SLEW=FAST;	#revert to 12mA default 10/06/05
+#NET "_mpc_tx<*>"			SLEW=FAST;	#revert to 12mA default 10/06/05
+#NET "_mpc_tx<*>"			SLEW=SLOW | DRIVE=4;	# Mike wanted it slow and 4mA
+NET "_mpc_tx<*>"			SLEW=FAST | DRIVE=4;	# Mike also wanted it fast and 4mA
 
 # RPC
 NET "rpc_loop"				SLEW=FAST | DRIVE=4;

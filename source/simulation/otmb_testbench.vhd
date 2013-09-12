@@ -281,7 +281,7 @@ architecture OTMB_TESTBENCH_arch of OTMB_TESTBENCH is
   signal alct_rxoe              : std_logic;
   signal alct_txoe              : std_logic;
   signal alct_loop              : std_logic;
-  signal dmb_rx                 : std_logic_vector(5 downto 0);
+  signal dmb_rx                 : std_logic_vector(5 downto 0) := (others => '0');
   signal dmb_tx                 : std_logic_vector(48 downto 0);
   signal dmb_loop               : std_logic;
   signal p_dmb_oe               : std_logic;
@@ -291,8 +291,8 @@ architecture OTMB_TESTBENCH_arch of OTMB_TESTBENCH is
   signal rpc_dsn                : std_logic;
   signal rpc_loop               : std_logic;
   signal rpc_tx                 : std_logic_vector(3 downto 0);
-  signal p_ccb_rx               : std_logic_vector(50 downto 0);
-  signal p_ccb_tx               : std_logic_vector(26 downto 0);
+  signal p_ccb_rx               : std_logic_vector(50 downto 0) := (others => '1');
+  signal p_ccb_tx               : std_logic_vector(26 downto 0) := (others => '1');
   signal ccb_status_oe          : std_logic;
   signal p_hard_reset_alct_fpga : std_logic;
   signal p_hard_reset_tmb_fpga  : std_logic;

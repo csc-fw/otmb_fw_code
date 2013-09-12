@@ -4259,40 +4259,40 @@
 // Output to DMB via IOB FFs, async load outputs nowrite mode until startup done, do not specify initial state else xst chokes
 	reg [MXDMB-1:0] dmb_tx={8'h00,1'b1,6'h00,1'b1,33'h000000000}; // synthesis attribute IOB of dmb_tx is "true";
 
-	always @(posedge clock or posedge startup_blank) begin
-	if (startup_blank) begin					// async preset
-	dmb_tx[14: 0]	<= 0;						// clct data
-	dmb_tx[29:15]	<= 0;						// alct data
-	dmb_tx[30]		<= 0;						// DDU special
-	dmb_tx[31]		<= 0;						// DMB last
-	dmb_tx[32]		<= 0;						// DMB first
-	dmb_tx[33]		<= 1;						// DMB /wr
-	dmb_tx[34]		<= 0;						// DMB active cfeb flag
-	dmb_tx[39:35]	<= 0;						// DMB active cfeb list
-	dmb_tx[40]		<= 1;						// ALCT _wr_fifo
-	dmb_tx[41]		<= 0;						// ALCT ddu_special
-	dmb_tx[42]		<= 0;						// ALCT last frame
-	dmb_tx[43]		<= 0;						// ALCT first frame
-	dmb_tx[45:44]	<= 0;						// DMB active cfeb list
-	dmb_tx[48:46]	<= 0;						// Unassigned
-	end
-	else begin									// sync load
-	dmb_tx[14:0]	<= dmb_ffdly[14:0];			// fifo data
-	dmb_tx[29:15]	<= alct_dmb[14:0];			// alct data	
-	dmb_tx[30]		<= dmb_ffdly[15];			// DDU special
-	dmb_tx[31]		<= dmb_ffdly[16];			// DMB last
-	dmb_tx[32]		<= dmb_dav;					// DMB data available
-	dmb_tx[33]		<= dmb_ffdly[18];			// DMB /wr
-	dmb_tx[34]		<= active_feb_flag;			// DMB active cfeb flag
-	dmb_tx[39:35]	<= active_feb_list[4:0];	// DMB active cfeb list
-	dmb_tx[40]		<= alct_dmb[18];			// ALCT _wr_fifo
-	dmb_tx[41]		<= alct_dmb[15];			// ALCT ddu_special
-	dmb_tx[42]		<= alct_dmb[16];			// ALCT last frame
-	dmb_tx[43]		<= alct_dmb[17];			// ALCT first frame
-	dmb_tx[45:44]	<= active_feb_list[6:5];	// DMB active cfeb list
-	dmb_tx[48:46]	<= dmb_tx_reserved[2:0];	// Unassigned
-	end
-	end
+   always @(posedge clock or posedge startup_blank) begin
+      if (startup_blank) begin				// async preset
+	 dmb_tx[14: 0]	<= 0;				// clct data
+	 dmb_tx[29:15]	<= 0;				// alct data
+	 dmb_tx[30]	<= 0;				// DDU special
+	 dmb_tx[31]	<= 0;				// DMB last
+	 dmb_tx[32]	<= 0;				// DMB first
+	 dmb_tx[33]	<= 1;				// DMB /wr
+	 dmb_tx[34]	<= 0;				// DMB active cfeb flag
+	 dmb_tx[39:35]	<= 0;				// DMB active cfeb list
+	 dmb_tx[40]	<= 1;				// ALCT _wr_fifo
+	 dmb_tx[41]	<= 0;				// ALCT ddu_special
+	 dmb_tx[42]	<= 0;				// ALCT last frame
+	 dmb_tx[43]	<= 0;				// ALCT first frame
+	 dmb_tx[45:44]	<= 0;				// DMB active cfeb list
+	 dmb_tx[48:46]	<= 0;				// Unassigned
+      end
+      else begin					// sync load
+	 dmb_tx[14:0]	<= dmb_ffdly[14:0];		// fifo data
+	 dmb_tx[29:15]	<= alct_dmb[14:0];		// alct data	
+	 dmb_tx[30]	<= dmb_ffdly[15];		// DDU special
+	 dmb_tx[31]	<= dmb_ffdly[16];		// DMB last
+	 dmb_tx[32]	<= dmb_dav;			// DMB data available
+	 dmb_tx[33]	<= dmb_ffdly[18];		// DMB /wr
+	 dmb_tx[34]	<= active_feb_flag;		// DMB active cfeb flag
+	 dmb_tx[39:35]	<= active_feb_list[4:0];	// DMB active cfeb list
+	 dmb_tx[40]	<= alct_dmb[18];		// ALCT _wr_fifo
+	 dmb_tx[41]	<= alct_dmb[15];		// ALCT ddu_special
+	 dmb_tx[42]	<= alct_dmb[16];		// ALCT last frame
+	 dmb_tx[43]	<= alct_dmb[17];		// ALCT first frame
+	 dmb_tx[45:44]	<= active_feb_list[6:5];	// DMB active cfeb list
+	 dmb_tx[48:46]	<= dmb_tx_reserved[2:0];	// Unassigned
+      end
+   end
 
 //------------------------------------------------------------------------------------------------------------------
 // Scope Input Signals Section

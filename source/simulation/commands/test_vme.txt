@@ -1,3 +1,10 @@
 R  1	0  Read firmware type
 R  2  	0  Read firmware version
-R  1EE  0  Read ODMB
+R  a1EE  0  Read ODMB
+W  1EE  1  Set ODMB_SEL
+W  21EE  16  Set NWORDS_DUMMY
+r  21EE  16  Read NWORDS_DUMMY
+W  11EE  1  Request data
+R  1EE  0  Read ODMB_SEL
+R  1EE  0  Read ODMB_SEL
+R  1EE  0  Read ODMB_SEL
