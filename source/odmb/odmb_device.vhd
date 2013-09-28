@@ -26,6 +26,8 @@ entity odmb_device is
     odmb_sel    : out std_logic;
     odmb_data   : out std_logic_vector(15 downto 0)
     );
+  attribute IOB                : string;
+  attribute IOB of dmb_tx_odmb : signal is "True";
 end odmb_device;
 
 architecture odmb_device_arch of odmb_device is
@@ -86,6 +88,7 @@ architecture odmb_device_arch of odmb_device is
   signal odmb_sel_inner         : std_logic;
   signal w_odmb_sel, r_odmb_sel : std_logic;
   signal out_odmb_sel           : std_logic_vector(15 downto 0) := (others => '0');
+  signal dmb_tx_odmb_inner           : std_logic_vector(48 downto 0) := (others => '0');
 
   signal w_data_rqst     : std_logic;
   signal pulse_data_rqst : std_logic;
@@ -138,12 +141,15 @@ begin
   SRL32_OTMBDAV : SRLC32E port map(otmb_dav, open, otmb_dly, logich, clock, l1a_match(8));
   SRL32_ALCTDAV : SRLC32E port map(alct_dav, open, alct_dly, logich, clock, l1a_match(9));
 
-  dmb_tx_odmb <= dmb_tx_reserved & lct(7 downto 6) & alct_dav & eof_alct_data(16 downto 15) &
+  dmb_tx_odmb_inner <= dmb_tx_reserved & lct(7 downto 6) & alct_dav & eof_alct_data(16 downto 15) &
                  eof_alct_data_valid_b & lct(5 downto 0) & eof_otmb_data_valid_b & otmb_dav &
                  eof_otmb_data(16 downto 15) & eof_alct_data(14 downto 0) &
                  eof_otmb_data(14 downto 0);
 
-
+  GEN_DMB_TX : for I in 48 downto 0 generate
+    FDDMBTX : FD port map(dmb_tx_odmb(I), clock, dmb_tx_odmb_inner(I));
+  end generate GEN_DMB_TX;
+  
   eof_otmb_data_valid_b <= not eof_otmb_data_valid;
   eof_alct_data_valid_b <= not eof_alct_data_valid;
 
