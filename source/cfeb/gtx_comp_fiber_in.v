@@ -13,6 +13,7 @@
 	module gtx_comp_fiber_in
 	(
 	RST,
+	ttc_resync,
 	CMP_RX_N,
 	CMP_RX_P,
 //	CMP_TDIS,
@@ -33,6 +34,9 @@
 	CEW3,
 	LTNCY_TRIG,
 	RX_SYNC_DONE,
+        link_had_err,
+        link_good,
+	link_bad,
 	sump
     );
 //-------------------------------------------------------------------------------------------------------------------
@@ -45,6 +49,7 @@
 // Ports
 //-------------------------------------------------------------------------------------------------------------------
 	input			RST;
+        input 			ttc_resync;	// use this to clear the link status monitor
 	input			CMP_RX_N;
 	input			CMP_RX_P;
 //	output			CMP_TDIS;
@@ -66,6 +71,10 @@
 	output			LTNCY_TRIG;
 	output			RX_SYNC_DONE;
 	output			sump;
+        output 			link_had_err;
+        output 			link_good;
+        output 			link_bad;
+   
 
 //-------------------------------------------------------------------------------------------------------------------
 // Output Registers
@@ -121,8 +130,7 @@
 // Don't know
 	wire sync_match;
 	wire lt_trg;
-
-	reg			lt_trg_reg 	= 0;
+	reg		lt_trg_reg 	= 0;
 	reg [15:0]	w1_reg 		= 0;
 	reg [15:0]	w2_reg 		= 0;
 
@@ -253,34 +261,72 @@
 //-------------------------------------------------------------------------------------------------------------------
 // Receive data
 //-------------------------------------------------------------------------------------------------------------------
-	assign sync_match = (cmp_rx_isk==2'b01);
-	assign lt_trg     = (cmp_rx_isk==2'b01) && (cmp_rx_data[7:0] == 8'hFC);
+     assign sync_match = (cmp_rx_isk==2'b01);
+     assign lt_trg     = (cmp_rx_isk==2'b01) && (cmp_rx_data[7:0] == 8'hFC);
 
-	always @(posedge CMP_RX_CLK160) begin
-	CEW1	<= sync_match;
+   reg [3:0] mon_in = 0;
+   reg 	     mon_rst = 1;
+   reg [3:0] mon_count = 0;
+   reg [15:0] err_count = 0;   // bit 15 needs to be output: link_bad
+   reg 	     link_err = 0;
+   reg 	     link_went_down = 0;
+//   reg 	     link_had_err = 0; // needs to be output
+   reg 	     link_good = 0;    // needs to be output
+   assign link_bad = err_count[15]; // needs to be output
+   assign link_had_err = (link_err | mon_rst); // output, signals the link had a problem or was never alive
+
+     always @(posedge CMP_RX_CLK160) begin
+	CEW1	<= sync_match;  // k-word comma, this is true at "zero" so "one" is ON next clock
 	CEW2	<= CEW1;
 	CEW3	<= CEW2;
 	CEW0	<= CEW3;
-	end
+     end
 
-	always @(posedge CMP_RX_CLK160) begin
-	if(CEW0)	begin
-				lt_trg_reg <= lt_trg;
-				end
-	if(CEW1)	begin
-				w1_reg			<=  cmp_rx_data;
-				NONZERO_WORD[1]	<= |cmp_rx_data;
-				end
-	if(CEW2) begin
-				w2_reg			<=  cmp_rx_data;
-				NONZERO_WORD[2]	<= |cmp_rx_data;
-				end
-	if(CEW3) begin
-				RCV_DATA		<= {cmp_rx_data,w2_reg,w1_reg};
-				LTNCY_TRIG		<=  lt_trg_reg;
-				NONZERO_WORD[3]	<= |cmp_rx_data;
-				end
+     always @(posedge CMP_RX_CLK160) begin
+	if(CEW0)	begin     // this gets set for the first time after the first CEW3
+	   lt_trg_reg <= lt_trg;
+	   mon_in[0] <= (!cmp_rx_lossofsync[1]) && (cmp_rx_isk==2'b01) && (cmp_rx_data[3:0] == 4'hC); // theoretically allows 8 possible commas:
+	   //  1C,3C,5C,7C,9C,BC,DC,FC to represent 3 extra bits in the "final" GEM hit.   But not F7, FB, FD and FE.
+	   //  So we could identify that BC=0 (very common), 1C=1, 3C=2, 5C=3, 7C=4, 9C=5, DC=6, FC=7 (all less common).
+	   //  Then we have "51 data bits" per link (i.e. 102) every BX.
 	end
+	else if(CEW1)	begin
+	   w1_reg			<=  cmp_rx_data; // first data after the comma
+	   NONZERO_WORD[1]	<= |cmp_rx_data;
+	   mon_in[1] <= (!cmp_rx_lossofsync[1]) && (cmp_rx_notintable[1:0]==2'b00) && (cmp_rx_isk==2'b00); // no k-bits set
+	end
+	else if(CEW2) begin
+	   w2_reg			<=  cmp_rx_data;
+	   NONZERO_WORD[2]	<= |cmp_rx_data;
+	   mon_in[2] <= (!cmp_rx_lossofsync[1]) && (cmp_rx_notintable[1:0]==2'b00) && (cmp_rx_isk==2'b00); // no k-bits set
+	end
+	else if(CEW3) begin
+	   RCV_DATA		<= {cmp_rx_data,w2_reg,w1_reg};
+	   LTNCY_TRIG		<=  lt_trg_reg;
+	   NONZERO_WORD[3]	<= |cmp_rx_data;
+	   mon_in[3] <= (!cmp_rx_lossofsync[1]) && (cmp_rx_notintable[1:0]==2'b00) && (cmp_rx_isk==2'b00); // no k-bits set
+	end
+	else begin
+	   mon_in[3:0] <= 4'h0; // this will set mon_rst next cycle any time the link is down or goes bad
+	   NONZERO_WORD[3:1]	<= 3'h0;
+	   RCV_DATA		<= 0;
+	   LTNCY_TRIG		<= 0;
+	end
+	
+	mon_rst <= (mon_in[3:0]!=4'hF) | ttc_resync; // this basically indicates that the link is not stable at this time
+	if(mon_rst) mon_count[3:0] <= 4'h0;    // counter to track when 15 good BX cycles are completed
+	else if(!link_good && CEW3) mon_count <= mon_count + 1'b1;  // stop counter when 15 good BX is reached
+
+	link_good <= !mon_rst & (mon_count[3:0]==4'hf);  // use to signal the link is alive after 15 complete BX cycles
+	link_went_down <= (link_good && mon_rst && RX_SYNC_DONE); // use to signal the link was OK then had a problem
+
+	if(ttc_resync) link_err <= 0; // clear the error register on resync
+	else if(!link_err && RX_SYNC_DONE) link_err <= (link_went_down); // use to signal the link was OK then had a problem at least once
+
+	if(ttc_resync) err_count[15:0] <= 16'h0000;   // use err_count[15] to signal the link is bad
+	else if(RX_SYNC_DONE && link_went_down && err_count[15:12]!=4'hE) err_count <= err_count + 1'b1; // how many times the link was lost
+     end // always @ (posedge CMP_RX_CLK160)
+
 
 //-------------------------------------------------------------------------------------------------------------------
 // Pseudo-random bit signaling
@@ -439,9 +485,8 @@
 	CMP_TX_P					|
 	(|cmp_rx_isc[1:0])			|
 	(|cmp_rx_disperr[1:0])		|
-	(|cmp_rx_notintable[1:0])	|
 	(|rx_dly_align_mon[7:0])	|
-	(|cmp_rx_lossofsync[1:0])	|
+	(cmp_rx_lossofsync[0])	|
 	cmp_rx_commadet				|
 	cmp_rx_pll_lock;
 

@@ -623,14 +623,16 @@ NET "dcc_clock"   	LOC = "H28";	# GCLK3-2P
 #NET "tdo"			LOC = "AC8";	# TDO
 #NET "tms"			LOC = "AF8";	# TMS_Pr
 
-NET "meztp20"		LOC = "G23";	# D8	mez_tp1
-NET "meztp21"		LOC = "H23";	# D9	mez_tp2
-NET "meztp22"		LOC = "N24";	# D10	mez_tp3
-NET "meztp23"		LOC = "N23";	# D11	mez_tp4
-NET "meztp24"		LOC = "F23";	# D12	mez_tp5
-NET "meztp25"		LOC = "F24";	# D13	mez_tp6
-NET "meztp26"		LOC = "L24";	# D14	mez_tp7
-NET "meztp27"		LOC = "M23";	# D15	mez_tp8
+# These are 8 SMT LEDs on the Mez driven by the high-order Prom data input bits d[15:8]
+#    The LEDs are labelled  "D1-D8" on te Mez board, with colors bgyrgyrg
+NET "meztp20"		LOC = "G23"; # d8	mez_tp1 = LED "D1" [blue]
+NET "meztp21"		LOC = "H23"; # d9	mez_tp2 = LED "D2" [green]
+NET "meztp22"		LOC = "N24"; # d10	mez_tp3 = LED "D3" [yellow]  ~tmbclk0_lock
+NET "meztp23"		LOC = "N23"; # d11	mez_tp4 = LED "D4" [red]     tmbclk0_lock-was-lost
+NET "meztp24"		LOC = "F23"; # d12	mez_tp5 = LED "D5" [green]
+NET "meztp25"		LOC = "F24"; # d13	mez_tp6 = LED "D6" [yellow]  ~qpll_lock
+NET "meztp26"		LOC = "L24"; # d14	mez_tp7 = LED "D7" [red]     qpll_lock-was-lost
+NET "meztp27"		LOC = "M23"; # d15	mez_tp8 = LED "D8" [green]
 
 #----------------------------------------------------------------------------------------------------------
 # Virtex6 Mezzanine Specific IOs
@@ -640,17 +642,17 @@ NET "set_sw<7>"		LOC = "U25";
 NET "set_sw<8>"		LOC = "U26";
 
 # LEDs
-NET "testled<1>"	LOC = "T29";
-NET "testled<2>"	LOC = "R31";
-NET "testled<3>"	LOC = "T26";
+NET "testled<1>"	LOC = "T29"; # These 10 are NOT LEDs on the mez, but go to
+NET "testled<2>"	LOC = "R31"; #   labelled holes on the mez board board.  We
+NET "testled<3>"	LOC = "T26"; #   can use these I/O as testpoints, etc.
 NET "testled<4>"	LOC = "R29";
 NET "testled<5>"	LOC = "R27";
 NET "testled<6>"	LOC = "T30";
 NET "testled<7>"	LOC = "U28";
 NET "testled<8>"	LOC = "T28";
 NET "testled<9>"	LOC = "T25";
-#ET "testled<10>"	LOC = "U27";
-NET "mez_busy"		LOC = "U27";
+#ET "testled<10>"	LOC = "U27"; # reallocated for mez_busy...
+NET "mez_busy"		LOC = "U27"; #  note the actual FPGA Busy only goes to the Baseboard
 
 # CERN QPLL
 NET "clk40p"		LOC = "A10" | IOSTANDARD = "LVDS_25";  # Differential 40 MHz from QPLL, aka lhc_ckp
@@ -786,9 +788,7 @@ NET "dmb_loop"				SLEW=FAST | DRIVE=4;
 NET "_dmb_oe"				SLEW=FAST | DRIVE=4;
 
 # MPC
-#NET "_mpc_tx<*>"			SLEW=FAST;	#revert to 12mA default 10/06/05
-#NET "_mpc_tx<*>"			SLEW=SLOW | DRIVE=4;	# Mike wanted it slow and 4mA
-NET "_mpc_tx<*>"			SLEW=FAST | DRIVE=4;	# Mike also wanted it fast and 4mA
+NET "_mpc_tx<*>"			SLEW=FAST;	#revert to 12mA default 10/06/05
 
 # RPC
 NET "rpc_loop"				SLEW=FAST | DRIVE=4;

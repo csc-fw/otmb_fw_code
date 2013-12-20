@@ -4,8 +4,8 @@
 // Firmware version global definitions
 	`define FIRMWARE_TYPE		04'hC		// C=Normal CLCT/TMB, D=Debug PCB loopback version
 	`define VERSION				04'hE		// Version revision number, A=TMB2004 and earlier, E=TMB2005E production
-	`define MONTHDAY			16'h0604	// Version date
-	`define YEAR				16'h2013	// Version date
+	`define MONTHDAY			16'h1217	// Version date
+	`define YEAR				16'h2013	// Version year
 
 	`define AUTO_VME			01'h1		// Automatically initialize VME registers from PROM data,   0=do not
 	`define AUTO_JTAG			01'h1		// Automatically initialize JTAG chain from PROM data,      0=do not
@@ -16,13 +16,13 @@
 
 	`define VIRTEX6				04'h6		// FPGA type is Virtex6
 	`define MEZCARD				04'hD		// Mezzanine Card: D=Virtex6
-	`define ISE_VERSION			16'h1450	// ISE Compiler version
+	`define ISE_VERSION			16'h1460	// ISE Compiler version
 //	`define FPGAID				16'h6195	// FPGA Type 6195 XC6VLX195T
 	`define FPGAID				16'h6240	// FPGA Type 6240 XC6VLX240T
 
 // Conditional compile flags: Enable only one CSC_TYPE
-//	`define CSC_TYPE_C			04'hC		// Normal   ME1B: ME1B   chambers facing toward IR.    ME1B hs =!reversed, ME1A hs = reversed
-	`define CSC_TYPE_D			04'hD		// Reversed ME1B: ME1B   chambers facing away from IR. ME1B hs = reversed, ME1A hs =!reversed
+	`define CSC_TYPE_C			04'hC		// Normal   ME1B: ME1B   chambers facing toward IR.    ME1B hs =!reversed, ME1A hs = reversed
+//	`define CSC_TYPE_D			04'hD		// Reversed ME1B: ME1B   chambers facing away from IR. ME1B hs = reversed, ME1A hs =!reversed
 
 // Revision log
 //	02/08/2013	Initial Virtex-6 specific
@@ -44,6 +44,10 @@
 //	04/22/2013	Mod power_save in GTX core and switch to ISE 14.5
 //	05/08/2013	Revert to Virtex-2 muonic logic for ALCT and MPC, updated to Virtex-6 DDR prims
 //	06/04/2013	Restore n-bx delay to cfeb non-muonic stage
+//	12/13/2013	JG: ttc_resync resets the cfeb_badbits counters (see vme.v)
+//	12/14/2013	JG: assign qpll & mmcm lock indications on the Mez SMT LEDs
+//	12/15/2013	JG: adding fiber link monitor logic & modify related VME regs 14C-158, tweaked Mez SMT LED logic
+//	12/16-17/2013	JG: tuning link monitor logic & use "testLED" testpoints for diagnostic signals
 //---------------------------------------------------------------------------------------------------------------------------------------
 //	End Global Definitions
 //---------------------------------------------------------------------------------------------------------------------------------------

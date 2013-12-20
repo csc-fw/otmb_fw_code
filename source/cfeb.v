@@ -193,6 +193,9 @@
 	gtx_rx_pol_swap,
 	gtx_rx_err,
 	gtx_rx_err_count,
+        link_had_err,
+        link_good,
+	link_bad,
 	gtx_rx_sump
 
 // Debug
@@ -326,6 +329,10 @@
 	output	[15:0]			gtx_rx_err_count;		// Error count on this fiber channel
 	output					gtx_rx_sump;			// Unused signals
 
+        output 			link_had_err;
+        output 			link_good;
+        output 			link_bad;
+
 // Debug
 `ifdef DEBUG_CFEB
 	output	[71:0]			inj_sm_dsp;				// Injector state machine ascii display
@@ -383,6 +390,7 @@
 	.clock					(clock),					// In	40  MHz fabric clock
 	.clock_iob				(clock_cfeb_rxd),			// In	40  MHZ iob clock
 	.clock_160				(clock_160),				// In	160 MHz from QPLL for GTX reference clock
+	.ttc_resync				(ttc_resync),				// use this to clear the link status monitor
 
 // Muonic
 	.clear_sync				(~gtx_rx_enable),			// In	Clear sync stages
@@ -407,6 +415,9 @@
 	.gtx_rx_err				(gtx_rx_err),				// Out	PRBS test detects an error
 	.gtx_rx_err_count		(gtx_rx_err_count[15:0]),	// Out	Error count on this fiber channel
 	.gtx_rx_data			(gtx_rx_data[47:0]),		// Out	DCFEB comparator data
+        .link_had_err (link_had_err),
+        .link_good (link_good),
+	.link_bad (link_bad),
 	.gtx_rx_sump			(gtx_rx_sump)				// Unused signals
 	);
 
