@@ -306,7 +306,7 @@
 	parameter MXARAMADR		=	11;					// Number ALCT Raw Hits RAM address bits
 	parameter MXARAMDATA	=	18;					// Number ALCT Raw Hits RAM data bits, does not include fifo wren
 	parameter MXCNTVME		=	30;					// VME counter width
-	parameter MXASERR		=	6;					// Number of ALCT structure error counters 
+	parameter MXASERR		=	6;					// Number of ALCT structure error counters
 
 //-----------------------------------------------------------------------------------------------------------------
 // Ports

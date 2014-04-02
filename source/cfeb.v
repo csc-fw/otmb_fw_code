@@ -193,8 +193,8 @@
 	gtx_rx_pol_swap,
 	gtx_rx_err,
 	gtx_rx_err_count,
-        link_had_err,
-        link_good,
+  link_had_err,
+  link_good,
 	link_bad,
 	gtx_rx_sump
 
@@ -222,7 +222,7 @@
 //------------------------------------------------------------------------------------------------------------------
 // Bus Widths
 //------------------------------------------------------------------------------------------------------------------
-	parameter MXLY			= 6;					// Number Layers in CSC
+	parameter MXLY			= 6;					// Number of Layers in CSC
 	parameter MXMUX			= 24;					// Number of multiplexed CFEB bits
 	parameter MXTR			= MXMUX*2;				// Number of Triad bits per CFEB
 	parameter MXDS			= 8;					// Number of DiStrips per layer
@@ -310,7 +310,7 @@
 
 // SNAP12 optical receiver
 	input					clock_160;				// 160 MHz from QPLL for GTX reference clock
-	input					qpll_lock;				// QPLL locked 
+	input					qpll_lock;				// QPLL locked
 	input					rxp;					// SNAP12+ fiber input for GTX
 	input					rxn;					// SNAP12- fiber input for GTX
 
@@ -327,11 +327,11 @@
 	output					gtx_rx_pol_swap;		// GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
 	output					gtx_rx_err;				// PRBS test detects an error
 	output	[15:0]			gtx_rx_err_count;		// Error count on this fiber channel
-	output					gtx_rx_sump;			// Unused signals
+  output					gtx_rx_sump;			// Unused signals
 
-        output 			link_had_err;
-        output 			link_good;
-        output 			link_bad;
+  output link_had_err; // link stability monitor: error happened at least once
+  output link_good; // link stability monitor: always good, no errors since last resync
+  output link_bad; // link stability monitor: errors happened over 100 times
 
 // Debug
 `ifdef DEBUG_CFEB

@@ -31,15 +31,15 @@ module lct_quality (ACC,A,C,A4,C4,P,CPAT,Q);
   else if ( !ACC && A4 && C4 && (P==3 || P==2) ) Q=11; // HQ muon, more
   //                                              Q=10; // reserved for HQ muons with future patterns
   //                                              Q=9;  // reserved for HQ muons with future patterns
-  else if (  ACC       &&  A4       &&  C4 && CPAT ) Q=8; // HQ muon, but accel ALCT
-  else if (          A && !A4       &&  C4 && CPAT ) Q=7; // HQ cathode, but marginal anode
-  else if (            &&  A4 &&  C && !C4 && CPAT ) Q=6; // HQ anode, but marginal cathode
-  else if (          A && !A4 &&  C && !C4 && CPAT ) Q=5; // marginal anode and cathode
-  //                                                  Q=4; // reserved for LQ muons with 2D information in the future
-  else if (          A        &&  C        && P==1 ) Q=3; // any match but layer CLCT
-  else if (         !A        &&  C                ) Q=2; // some CLCT, no ALCT (unmatched)
-  else if (          A        && !C                ) Q=1; // some ALCT, no CLCT (unmatched)
-  else                                               Q=0; // should never be assigned
+  else if (  ACC   &&  A4       &&  C4 && CPAT ) Q=8; // HQ muon, but accel ALCT
+  else if (      A && !A4       &&  C4 && CPAT ) Q=7; // HQ cathode, but marginal anode
+  else if (            A4 &&  C && !C4 && CPAT ) Q=6; // HQ anode, but marginal cathode
+  else if (      A && !A4 &&  C && !C4 && CPAT ) Q=5; // marginal anode and cathode
+  //                                               Q=4; // reserved for LQ muons with 2D information in the future
+  else if (      A        &&  C        && P==1 ) Q=3; // any match but layer CLCT
+  else if (     !A        &&  C                ) Q=2; // some CLCT, no ALCT (unmatched)
+  else if (      A        && !C                ) Q=1; // some ALCT, no CLCT (unmatched)
+  else                                           Q=0; // should never be assigned
   end
 
 //-------------------------------------------------------------------------------------------------------------------

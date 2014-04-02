@@ -263,11 +263,17 @@ module pattern_finder (
   end
 
   // Global clock input buffers
-  IBUFG uibufg4p   ( .I(tmb_clock0 ), .O(tmb_clock0_ibufg) );
-  BUFG  ugbuftmb1x ( .I(clock_dcm ),  .O(clock ) );
+  IBUFG uibufg4p ( // Input clock buffer primitive for single-ended I/O
+    .I(tmb_clock0 ),
+    .O(tmb_clock0_ibufg)
+  );
+  BUFG ugbuftmb1x ( // Clock buffer primitive with one clock input and one clock output
+    .I(clock_dcm ),
+    .O(clock )
+  );
 
   // Main TMB DLL generates clocks at 1x=40MHz, 2x=80MHz, and 1/4 =10MHz
-  DCM udcmtmb (
+  DCM udcmtmb ( // Digital Clock Manager (DCM) primitive
     .CLKIN    (tmb_clock0_ibufg),
     .CLKFB    (clock),
     .RST      (1'b0),
@@ -1052,7 +1058,7 @@ module pattern_finder (
   generate
     for (i = 8; i <= 15; i = i + 1) begin: sepram815
       parameter INIT_815 = {psep[i + 112], psep[i + 104], psep[i + 96 ], psep[i + 88], psep[i + 80], psep[i + 72], psep[i + 64], psep[i + 56], psep[i + 48], psep[i + 40], psep[i + 32], psep[i + 24], psep[i + 16], psep[i + 8 ], psep[i + 0], psep[i - 8]};
-      RAM16X1D #( .INIT(INIT_815) ) uram16x1d (
+      RAM16X1D #( .INIT(INIT_815) ) uram16x1d ( // Primitive: 16-Deep by 1-Wide Static Dual Port Synchronous RAM
         .WCLK  (clock),     // Port A Write clock input
         .WE    (wea),       // Port A Write enable input
         .A0    (adra[0]),   // Port A R/W address[0] input bit

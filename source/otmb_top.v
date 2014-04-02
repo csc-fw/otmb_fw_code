@@ -472,14 +472,14 @@
 	.rpc_sig		(gp_io4),		// In	40MHz Unused
 
 // Main clock outputs
-	.clock			(clock),		// Out	40MHz global TMB clock
-	.clock_2x		(clock_2x),		// Out	80MHz commutator clock
-	.clock_lac		(clock_lac),		// Out	40MHz logic accessible clock
-	.clock_vme		(clock_vme),		// Out	10MHz global VME clock
+	.clock			(clock),		// Out 40MHz global TMB clock
+	.clock_2x		(clock_2x),		// Out 80MHz commutator clock
+	.clock_lac		(clock_lac),		// Out 40MHz logic accessible clock
+	.clock_vme		(clock_vme),		// Out 10MHz global VME clock
 
 // Phase delayed clocks
-	.clock_alct_txd		(clock_alct_txd),	// Out	40MHz ALCT transmit data clock 1x
-	.clock_alct_rxd		(clock_alct_rxd),	// Out	40MHz ALCT receive  data clock 1x
+	.clock_alct_txd		(clock_alct_txd),	// Out 40MHz ALCT transmit data clock 1x
+	.clock_alct_rxd		(clock_alct_rxd),	// Out 40MHz ALCT receive  data clock 1x
 	.clock_cfeb0_rxd	(clock_cfeb_rxd[0]),	// Out	40MHz CFEB receive  data clock 1x
 	.clock_cfeb1_rxd	(clock_cfeb_rxd[1]),	// Out	40MHz CFEB receive  data clock 1x
 	.clock_cfeb2_rxd	(clock_cfeb_rxd[2]),	// Out	40MHz CFEB receive  data clock 1x
@@ -1194,8 +1194,8 @@
 	.gtx_rx_pol_swap		(gtx_rx_pol_swap[icfeb]),		// Out	GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
 	.gtx_rx_err				(gtx_rx_err[icfeb]),		// Out	PRBS test detects an error
 	.gtx_rx_err_count		(gtx_rx_err_count[icfeb][15:0]),	// Out	Error count on this fiber channel
-        .link_had_err (link_had_err[icfeb]),  // link stability monitor: error happened at least once
-        .link_good (link_good[icfeb]),        // link stability monitor: always good, no errors since last resync
+  .link_had_err (link_had_err[icfeb]),  // link stability monitor: error happened at least once
+  .link_good (link_good[icfeb]),        // link stability monitor: always good, no errors since last resync
 	.link_bad (link_bad[icfeb]),          // link stability monitor: errors happened over 100 times
 	.gtx_rx_sump			(gtx_rx_sump[icfeb])			// Out	Unused signals
 
@@ -1261,7 +1261,7 @@
 	.cfeb0_ly5hs	(cfeb_ly5hs[0][MXHS-1:0]),				// In	1/2-strip pulses
 
 	.cfeb1_ly0hs	(cfeb_ly0hs[1][MXHS-1:0]),				// In	1/2-strip pulses
-	.cfeb1_ly1hs	(cfeb_ly1hs[1][MXHS-1:0]),				// In 	1/2-strip pulses
+	.cfeb1_ly1hs	(cfeb_ly1hs[1][MXHS-1:0]),				// In	1/2-strip pulses
 	.cfeb1_ly2hs	(cfeb_ly2hs[1][MXHS-1:0]),				// In	1/2-strip pulses
 	.cfeb1_ly3hs	(cfeb_ly3hs[1][MXHS-1:0]),				// In	1/2-strip pulses
 	.cfeb1_ly4hs	(cfeb_ly4hs[1][MXHS-1:0]),				// In	1/2-strip pulses
@@ -1271,7 +1271,7 @@
 	.cfeb2_ly1hs	(cfeb_ly1hs[2][MXHS-1:0]),				// In	1/2-strip pulses
 	.cfeb2_ly2hs	(cfeb_ly2hs[2][MXHS-1:0]),				// In	1/2-strip pulses
 	.cfeb2_ly3hs	(cfeb_ly3hs[2][MXHS-1:0]),				// In	1/2-strip pulses
-	.cfeb2_ly4hs	(cfeb_ly4hs[2][MXHS-1:0]),				// In 	1/2-strip pulses
+	.cfeb2_ly4hs	(cfeb_ly4hs[2][MXHS-1:0]),				// In 1/2-strip pulses
 	.cfeb2_ly5hs	(cfeb_ly5hs[2][MXHS-1:0]),				// In	1/2-strip pulses
 
 	.cfeb3_ly0hs	(cfeb_ly0hs[3][MXHS-1:0]),				// In	1/2-strip pulses
@@ -1279,7 +1279,7 @@
 	.cfeb3_ly2hs	(cfeb_ly2hs[3][MXHS-1:0]),				// In	1/2-strip pulses
 	.cfeb3_ly3hs	(cfeb_ly3hs[3][MXHS-1:0]),				// In	1/2-strip pulses
 	.cfeb3_ly4hs	(cfeb_ly4hs[3][MXHS-1:0]),				// In	1/2-strip pulses
-	.cfeb3_ly5hs	(cfeb_ly5hs[3][MXHS-1:0]),				// In 	1/2-strip pulses
+	.cfeb3_ly5hs	(cfeb_ly5hs[3][MXHS-1:0]),				// In 1/2-strip pulses
 
 	.cfeb4_ly0hs	(cfeb_ly0hs[4][MXHS-1:0]),				// In	1/2-strip pulses
 	.cfeb4_ly1hs	(cfeb_ly1hs[4][MXHS-1:0]),				// In	1/2-strip pulses

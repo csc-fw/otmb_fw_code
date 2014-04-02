@@ -1057,7 +1057,13 @@
 	parameter ADR_MPC0_FRAME1		= 9'h8A;	// MPC0 Frame 1 Data sent to MPC
 	parameter ADR_MPC1_FRAME0		= 9'h8C;	// MPC1 Frame 0 Data sent to MPC
 	parameter ADR_MPC1_FRAME1		= 9'h8E;	// MPC1 Frame 1 Data sent to MPC
-
+  
+  parameter ADR_MPC0_FRAME0_FIFO	= 9'h17C;	// MPC0 Frame 0 Data sent to MPC
+	parameter ADR_MPC0_FRAME1_FIFO	= 9'h17E;	// MPC0 Frame 1 Data sent to MPC
+	parameter ADR_MPC1_FRAME0_FIFO	= 9'h180;	// MPC1 Frame 0 Data sent to MPC
+	parameter ADR_MPC1_FRAME1_FIFO	= 9'h182;	// MPC1 Frame 1 Data sent to MPC
+	parameter ADR_MPC_FRAMES_FIFO_CTRL	= 9'h184;	// 
+  
 	parameter ADR_MPC_INJ			= 9'h90;	// MPC Injector Control
 	parameter ADR_MPC_RAM_ADR		= 9'h92;	// MPC Injector RAM address
 	parameter ADR_MPC_RAM_WDATA		= 9'h94;	// MPC Injector RAM Write Data
@@ -2300,7 +2306,16 @@
 	wire	[15:0]	mpc0_frame1_rd;
 	wire	[15:0]	mpc1_frame0_rd;
 	wire	[15:0]	mpc1_frame1_rd;
-
+  
+  reg  [15:0] mpc_frames_fifo_ctrl_wr;
+  wire [15:0] mpc_frames_fifo_ctrl_rd;
+  wire [63:0] mpc_frames_fifo_wr;
+  wire [63:0]	mpc_frames_fifo_rd;
+  wire [15:0]	mpc0_frame0_fifo_rd;
+  wire [15:0]	mpc0_frame1_fifo_rd;
+  wire [15:0]	mpc1_frame0_fifo_rd;
+  wire [15:0]	mpc1_frame1_fifo_rd;
+  
 	reg		[15:0]	mpc_inj_wr;
 	wire	[15:0]	mpc_inj_rd;
 
@@ -2682,7 +2697,9 @@
 	wire			wr_virtex6_sysmon;
 	wire			wr_virtex6_extend;
 	wire			wr_adr_cap;
-
+  
+  wire wr_mpc_frames_fifo_ctrl;
+  
 //---------------------------------------------------------------------------------------------------------------------
 //	Power-up Section
 //---------------------------------------------------------------------------------------------------------------------
@@ -2938,7 +2955,14 @@
 	ADR_MPC0_FRAME1:		data_out	<= mpc0_frame1_rd;
 	ADR_MPC1_FRAME0:		data_out	<= mpc1_frame0_rd;
 	ADR_MPC1_FRAME1:		data_out	<= mpc1_frame1_rd;
-							   
+	
+	ADR_MPC0_FRAME0_FIFO:		data_out	<= mpc0_frame0_fifo_rd;
+	ADR_MPC0_FRAME1_FIFO:		data_out	<= mpc0_frame1_fifo_rd;
+	ADR_MPC1_FRAME0_FIFO:		data_out	<= mpc1_frame0_fifo_rd;
+	ADR_MPC1_FRAME1_FIFO:		data_out	<= mpc1_frame1_fifo_rd;
+	
+	ADR_MPC_FRAMES_FIFO_CTRL: data_out	<= mpc_frames_fifo_ctrl_rd;
+	
 	ADR_MPC_INJ:			data_out	<= mpc_inj_rd;
 	ADR_MPC_RAM_ADR:		data_out	<= mpc_ram_adr_rd;	
 	ADR_MPC_RAM_WDATA:		data_out	<= mpc_ram_wdata_rd;
@@ -3245,7 +3269,9 @@
 
 	assign wr_virtex6_extend	= (reg_adr==ADR_V6_EXTEND		&& clk_en);
 	assign wr_adr_cap		= (adr_cap);
-
+  
+  assign wr_mpc_frames_fifo_ctrl = (reg_adr==	ADR_MPC_FRAMES_FIFO_CTRL && clk_en);
+  
 //------------------------------------------------------------------------------------------------------------------
 // VME Bidirectional Data Bus
 //------------------------------------------------------------------------------------------------------------------
@@ -5138,7 +5164,62 @@
 	assign mpc0_frame1_rd[15:0]		= mpc0_frame1_vme[15:0];	// R	2nd in time, 1st muon
 	assign mpc1_frame0_rd[15:0]		= mpc1_frame0_vme[15:0];	// R	1st in time, 2nd muon
 	assign mpc1_frame1_rd[15:0]		= mpc1_frame1_vme[15:0];	// R	2nd in time, 2nd muon
-
+  
+  assign mpc_frames_fifo_wr[15:0]  = mpc0_frame0_vme[15:0];
+  assign mpc_frames_fifo_wr[31:16] = mpc0_frame0_vme[15:0];
+  assign mpc_frames_fifo_wr[47:32] = mpc0_frame0_vme[15:0];
+  assign mpc_frames_fifo_wr[63:48] = mpc0_frame0_vme[15:0];
+  
+  wire mpc_frames_fifo_ctrl_full;
+  wire mpc_frames_fifo_ctrl_wr_ack;
+  wire mpc_frames_fifo_ctrl_overflow;
+  wire mpc_frames_fifo_ctrl_empty;
+  wire mpc_frames_fifo_ctrl_prog_full;
+  wire mpc_frames_fifo_ctrl_sbiterr;
+  wire mpc_frames_fifo_ctrl_dbiterr;
+  
+  wire mpc_frames_fifo_ctrl_wr_en;
+  wire mpc_frames_fifo_ctrl_rd_en;
+  
+  // Power-up defaults
+	initial begin
+	mpc_frames_fifo_ctrl_wr[0] = 1'b1;
+	mpc_frames_fifo_ctrl_wr[1] = 1'b1;
+	end
+  
+  assign mpc_frames_fifo_ctrl_wr_en = mpc_frames_fifo_ctrl_wr[0];
+  assign mpc_frames_fifo_ctrl_rd_en = mpc_frames_fifo_ctrl_wr[1];
+  
+  fifo_EventStorage ufifo_EventStorage
+  (
+  .clk(clock),
+  .rst(global_reset),
+  .din(mpc_frames_fifo_wr),
+  .wr_en(mpc_frames_fifo_ctrl_wr_en),
+  .rd_en(mpc_frames_fifo_ctrl_rd_en),
+  .dout(mpc_frames_fifo_rd),
+  .full(mpc_frames_fifo_ctrl_full),
+  .wr_ack(mpc_frames_fifo_ctrl_wr_ack),
+  .overflow(mpc_frames_fifo_ctrl_overflow),
+  .empty(mpc_frames_fifo_ctrl_empty),
+  .prog_full(mpc_frames_fifo_ctrl_prog_full),
+  .sbiterr(mpc_frames_fifo_ctrl_sbiterr),
+  .dbiterr(mpc_frames_fifo_ctrl_dbiterr)
+  );
+  
+  assign mpc0_frame0_fifo_rd[15:0] = mpc_frames_fifo_rd[15:0];
+  assign mpc0_frame1_fifo_rd[15:0] = mpc_frames_fifo_rd[31:16];
+  assign mpc1_frame0_fifo_rd[15:0] = mpc_frames_fifo_rd[47:32];
+  assign mpc1_frame1_fifo_rd[15:0] = mpc_frames_fifo_rd[63:48];
+  
+  assign mpc_frames_fifo_ctrl_rd[2] = mpc_frames_fifo_ctrl_full;
+  assign mpc_frames_fifo_ctrl_rd[3] = mpc_frames_fifo_ctrl_wr_ack;
+  assign mpc_frames_fifo_ctrl_rd[4] = mpc_frames_fifo_ctrl_overflow;
+  assign mpc_frames_fifo_ctrl_rd[5] = mpc_frames_fifo_ctrl_empty;
+  assign mpc_frames_fifo_ctrl_rd[6] = mpc_frames_fifo_ctrl_prog_full;
+  assign mpc_frames_fifo_ctrl_rd[7] = mpc_frames_fifo_ctrl_sbiterr;
+  assign mpc_frames_fifo_ctrl_rd[8] = mpc_frames_fifo_ctrl_dbiterr;
+  
 //------------------------------------------------------------------------------------------------------------------
 // ADR_MPC_INJ=90		MPC Injector Control Register
 //------------------------------------------------------------------------------------------------------------------
@@ -6803,6 +6884,7 @@
 	if (wr_virtex6_gtx_rx[6])		virtex6_gtx_rx_wr[6]	<=	d[15:0];	
 	if (wr_virtex6_sysmon)			virtex6_sysmon_wr		<=	d[15:0];
 	if (wr_virtex6_extend)			virtex6_extend_wr		<=	d[15:0];
+	if (wr_mpc_frames_fifo_ctrl) mpc_frames_fifo_ctrl_wr <= d[15:0];
 	end
 
 //------------------------------------------------------------------------------------------------------------------
