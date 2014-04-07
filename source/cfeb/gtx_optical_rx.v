@@ -33,7 +33,7 @@
 
 // Optical receiver status
 	gtx_rx_reset,
-	gtx_rx_reset_err_cnt,
+	gtx_rx_reset_err_cnt, 	// Resets the PRBS error counters... not needed, DISABLED by JRG
 	gtx_rx_en_prbs_test,
 	gtx_rx_start,
 	gtx_rx_fc,
@@ -41,7 +41,7 @@
 	gtx_rx_match,
 	gtx_rx_sync_done,
 	gtx_rx_err,
-	gtx_rx_err_count,
+	gtx_rx_err_count, // switch between  link_errcount or prbs_errcount if it's enabled
 	gtx_rx_data,
         link_had_err,
         link_good,
@@ -73,7 +73,7 @@
 
 // Optical receiver status
 	input			gtx_rx_reset;		// Reset GTX
-	input			gtx_rx_reset_err_cnt;	// Resets the PRBS test error counters
+	input			gtx_rx_reset_err_cnt;	// Resets the PRBS test error counters... DISABLED by JRG
 	input			gtx_rx_en_prbs_test;	// Select random input test data mode
 
 	output			gtx_rx_start;		// Set when the DCFEB Start Pattern is present
@@ -82,7 +82,7 @@
 	output			gtx_rx_match;		// PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
 	output			gtx_rx_sync_done;	// Use these to determine gtx_ready
 	output			gtx_rx_err;		// PRBS test detects an error
-	output	[15:0]	gtx_rx_err_count;		// Error count on this fiber channel
+	output	[15:0]	gtx_rx_err_count;		// Error count on this fiber channel (link errors or PRBS test errors if it's enabled)
 	output	[47:0]	gtx_rx_data;			// DCFEB comparator data
 
         output 			link_had_err;
@@ -127,6 +127,7 @@
 	.CEW3				(cew[3]),				// Out	On CEW3_r (== CEW3 + 1) the RCV_DATA is valid, use to clock into pipeline
 	.LTNCY_TRIG			(rx_fc),				// Out	Flags when RX sees "FC" for latency measurement.  Send raw to TP or LED
 	.RX_SYNC_DONE		(rx_sync_done),			// Out	Inverse of this goes into GTX Reset
+        .errcount (link_errcount[7:0]),
         .link_had_err (link_had_err),
         .link_good (link_good),
 	.link_bad (link_bad),
@@ -138,83 +139,91 @@
 // 160 MHz snap rx USR clock time domain
 //-------------------------------------------------------------------------------------------------------------------
 // Signals to bring into fabric clock domain
-	reg  [15:0] err_count = 0;
+	reg  [15:0] prbs_errcount = 0;
 	reg         err       = 0;
 
 // Signals in received clock domain
 	reg  [47:0]	comp_dat_r		= 0;
 	reg 		rst_errcount_r	= 0;
 
+        wire [7:0]	link_errcount;
+   
 	assign snap_wait = !(rx_sync_done & qpll_lock);	// Allow pattern checks when RX is ready
 
 	always @(posedge rx_clk160 or posedge gtx_rx_reset or posedge snap_wait)
 	begin
 
 // Reset case
-	if (gtx_rx_reset | snap_wait) begin
-	comp_dat_r		<= 0;
-	rst_errcount_r	<= 1;
-	end
+	   if (gtx_rx_reset | snap_wait) begin
+	      comp_dat_r <= 0;
+	      rst_errcount_r <= 1;
+	      prbs_errcount <= 0;
+	      err <= 0;
+	   end
 
 // Not Reset case
-	else begin						
-	rst_errcount_r <= gtx_rx_reset_err_cnt;
+	   else begin						
+// JRG	      rst_errcount_r <= gtx_rx_reset_err_cnt;
+	      rst_errcount_r <= 0;
 
-	if (cew[0]) begin					// Store comparator data using received fiber clock
-	comp_dat_r   <= comp_dat;
-	end
+	      if (cew[0]) begin			// Store comparator data using received fiber clock
+		 comp_dat_r   <= comp_dat;
+	      end
 
-	if (rst_errcount_r) begin			// Error counter reset
-	err_count	<= 0;
-	err			<= 0;
-	end
+	      if (rst_errcount_r) begin		// Error counter reset
+		 prbs_errcount <= 0;
+		 err	<= 0;
+	      end
 
-	else if (gtx_rx_en_prbs_test & cew[0] & !snap_wait & gtx_ready) begin  // Wait 3000 clocks after Reset
-	if (!rx_match & rx_valid ) begin
-	err			<= 1'b1;				// Take this to testLEDs for monitoring on scope
-	err_count	<= err_count + 1'b1;	// This goes to Results Reg for software monitoring
-	end
-	else
-	err 		<= 0;
-	end
+	      else if (gtx_rx_en_prbs_test & cew[0] & !snap_wait & gtx_ready) begin  // Wait 3000 clocks after Reset
+		 if (!rx_match & rx_valid ) begin
+		    err			<= 1'b1;	// Take this to testLEDs for monitoring on scope
+		    prbs_errcount	<= prbs_errcount + 1'b1;	// This goes to Results Reg for software monitoring
+		 end
+		 else
+		   err 		<= 0;
+	      end
 
-	end		// close not reset case
+	   end		// close not reset case
 	end		// close always
 
 //-------------------------------------------------------------------------------------------------------------------
 // Fabric clock time domain transition WITHOUT muonic timing
 //-------------------------------------------------------------------------------------------------------------------
-	reg	[47:0]	gtx_rx_data_raw		= 0;
-	reg			gtx_rx_start		= 0;
-	reg			gtx_rx_fc			= 0;
-	reg			gtx_rx_valid		= 0;
-	reg			gtx_rx_match		= 0;
-	reg			gtx_rx_sync_done	= 0;
-	reg			gtx_rx_err			= 0;
-	reg	[15:0]	gtx_rx_err_count	= 0;
+	reg	[47:0]	gtx_rx_data_raw	= 0;
+	reg		gtx_rx_start	= 0;
+	reg		gtx_rx_fc	= 0;
+	reg		gtx_rx_valid	= 0;
+	reg		gtx_rx_match	= 0;
+	reg		gtx_rx_sync_done= 0;
+	reg		gtx_rx_err	= 0;
+	reg	[15:0]	gtx_rx_err_count = 0;
 	
 	always @(posedge clock) begin
-	if (clear_sync) begin
-	gtx_rx_data_raw[47:0]	<= 0;
-	gtx_rx_start			<= 0;
-	gtx_rx_fc				<= 0;
-	gtx_rx_valid			<= 0;
-	gtx_rx_match			<= 0;
-	gtx_rx_sync_done		<= 0;
-	gtx_rx_err				<= 0;
-	gtx_rx_err_count		<= 0;
-	end
-	else begin
-	gtx_rx_data_raw[47:0]	<= comp_dat_r[47:0];
-	gtx_rx_start			<= rx_start;
-	gtx_rx_fc				<= rx_fc;
-	gtx_rx_valid			<= rx_valid;
-	gtx_rx_match			<= rx_match;
-	gtx_rx_sync_done		<= rx_sync_done;
-	gtx_rx_err				<= err;
-	gtx_rx_err_count[15:0]	<= err_count[15:0];
-	end
-	end
+	   if (clear_sync) begin
+	      gtx_rx_data_raw[47:0] <= 0;
+	      gtx_rx_start	<= 0;
+	      gtx_rx_fc		<= 0;
+	      gtx_rx_valid	<= 0;
+	      gtx_rx_match	<= 0;
+	      gtx_rx_sync_done	<= 0;
+	      gtx_rx_err	<= 0;
+	      gtx_rx_err_count	<= 0;
+	   end
+	   else begin
+	      gtx_rx_data_raw[47:0] <= comp_dat_r[47:0];
+	      gtx_rx_start	<= rx_start;
+	      gtx_rx_fc		<= rx_fc;
+	      gtx_rx_valid	<= rx_valid;
+	      gtx_rx_match	<= rx_match;
+	      gtx_rx_sync_done	<= rx_sync_done;
+	      gtx_rx_err	<= err;
+	      gtx_rx_err_count[15:0] <= (gtx_rx_en_prbs_test) ? prbs_errcount[15:0] : {8'h00,link_errcount[7:0]};
+//	      if (gtx_rx_en_prbs_test) gtx_rx_err_count[15:0] <= prbs_errcount[15:0];
+//	      else gtx_rx_err_count[15:0] <= {8'h00,link_errcount[7:0]};
+	   end // else: !if(clear_sync)
+	end // always @ (posedge clock)
+   
 
 // Delay data n-bx to compensate for osu cable length error
 	wire [47:0] gtx_rx_data_srl;

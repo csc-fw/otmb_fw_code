@@ -9,6 +9,7 @@
 //	02/19/2013	Expand 7 dcfeb pattern finder
 //	02/20/2013	Expand 7 digital phase shifters
 //	02/25/2013	Add 2 event counters for dcfeb[6:5]
+//	04/12/2013	Produce the first stable, functional version for use at Cern (but Muonic timing disabled)
 //  
 //-------------------------------------------------------------------------------------------------------------------
 //	Port Declarations
@@ -472,14 +473,14 @@
 	.rpc_sig		(gp_io4),		// In	40MHz Unused
 
 // Main clock outputs
-	.clock			(clock),		// Out 40MHz global TMB clock
-	.clock_2x		(clock_2x),		// Out 80MHz commutator clock
-	.clock_lac		(clock_lac),		// Out 40MHz logic accessible clock
-	.clock_vme		(clock_vme),		// Out 10MHz global VME clock
+	.clock			(clock),		// Out	40MHz global TMB clock
+	.clock_2x		(clock_2x),		// Out	80MHz commutator clock
+	.clock_lac		(clock_lac),		// Out	40MHz logic accessible clock
+	.clock_vme		(clock_vme),		// Out	10MHz global VME clock
 
 // Phase delayed clocks
-	.clock_alct_txd		(clock_alct_txd),	// Out 40MHz ALCT transmit data clock 1x
-	.clock_alct_rxd		(clock_alct_rxd),	// Out 40MHz ALCT receive  data clock 1x
+	.clock_alct_txd		(clock_alct_txd),	// Out	40MHz ALCT transmit data clock 1x
+	.clock_alct_rxd		(clock_alct_rxd),	// Out	40MHz ALCT receive  data clock 1x
 	.clock_cfeb0_rxd	(clock_cfeb_rxd[0]),	// Out	40MHz CFEB receive  data clock 1x
 	.clock_cfeb1_rxd	(clock_cfeb_rxd[1]),	// Out	40MHz CFEB receive  data clock 1x
 	.clock_cfeb2_rxd	(clock_cfeb_rxd[2]),	// Out	40MHz CFEB receive  data clock 1x
@@ -1086,7 +1087,7 @@
 	wire	[MXCFEB-1:0]	gtx_rx_pol_swap;	// Out	GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
 	wire	[MXCFEB-1:0]	gtx_rx_err;		// Out	PRBS test detects an error
 	wire	[MXCFEB-1:0]	gtx_rx_sump;		// Out	Unused signals
-	wire	[15:0]			gtx_rx_err_count [MXCFEB-1:0];	// Out	Error count on this fiber channel
+	wire	[15:0]		gtx_rx_err_count [MXCFEB-1:0];	// Out	Error count on this fiber channel
 	wire	[MXCFEB-1:0]	link_had_err;   // link stability monitor: error happened at least once
 	wire	[MXCFEB-1:0]	link_good;      // link stability monitor: always good, no errors since last resync
 	wire	[MXCFEB-1:0]	link_bad;       // link stability monitor: errors happened over 100 times
@@ -1194,8 +1195,8 @@
 	.gtx_rx_pol_swap		(gtx_rx_pol_swap[icfeb]),		// Out	GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
 	.gtx_rx_err				(gtx_rx_err[icfeb]),		// Out	PRBS test detects an error
 	.gtx_rx_err_count		(gtx_rx_err_count[icfeb][15:0]),	// Out	Error count on this fiber channel
-  .link_had_err (link_had_err[icfeb]),  // link stability monitor: error happened at least once
-  .link_good (link_good[icfeb]),        // link stability monitor: always good, no errors since last resync
+        .link_had_err (link_had_err[icfeb]),  // link stability monitor: error happened at least once
+        .link_good (link_good[icfeb]),        // link stability monitor: always good, no errors since last resync
 	.link_bad (link_bad[icfeb]),          // link stability monitor: errors happened over 100 times
 	.gtx_rx_sump			(gtx_rx_sump[icfeb])			// Out	Unused signals
 
@@ -1261,7 +1262,7 @@
 	.cfeb0_ly5hs	(cfeb_ly5hs[0][MXHS-1:0]),				// In	1/2-strip pulses
 
 	.cfeb1_ly0hs	(cfeb_ly0hs[1][MXHS-1:0]),				// In	1/2-strip pulses
-	.cfeb1_ly1hs	(cfeb_ly1hs[1][MXHS-1:0]),				// In	1/2-strip pulses
+	.cfeb1_ly1hs	(cfeb_ly1hs[1][MXHS-1:0]),				// In 	1/2-strip pulses
 	.cfeb1_ly2hs	(cfeb_ly2hs[1][MXHS-1:0]),				// In	1/2-strip pulses
 	.cfeb1_ly3hs	(cfeb_ly3hs[1][MXHS-1:0]),				// In	1/2-strip pulses
 	.cfeb1_ly4hs	(cfeb_ly4hs[1][MXHS-1:0]),				// In	1/2-strip pulses
@@ -1271,7 +1272,7 @@
 	.cfeb2_ly1hs	(cfeb_ly1hs[2][MXHS-1:0]),				// In	1/2-strip pulses
 	.cfeb2_ly2hs	(cfeb_ly2hs[2][MXHS-1:0]),				// In	1/2-strip pulses
 	.cfeb2_ly3hs	(cfeb_ly3hs[2][MXHS-1:0]),				// In	1/2-strip pulses
-	.cfeb2_ly4hs	(cfeb_ly4hs[2][MXHS-1:0]),				// In 1/2-strip pulses
+	.cfeb2_ly4hs	(cfeb_ly4hs[2][MXHS-1:0]),				// In 	1/2-strip pulses
 	.cfeb2_ly5hs	(cfeb_ly5hs[2][MXHS-1:0]),				// In	1/2-strip pulses
 
 	.cfeb3_ly0hs	(cfeb_ly0hs[3][MXHS-1:0]),				// In	1/2-strip pulses
@@ -1279,7 +1280,7 @@
 	.cfeb3_ly2hs	(cfeb_ly2hs[3][MXHS-1:0]),				// In	1/2-strip pulses
 	.cfeb3_ly3hs	(cfeb_ly3hs[3][MXHS-1:0]),				// In	1/2-strip pulses
 	.cfeb3_ly4hs	(cfeb_ly4hs[3][MXHS-1:0]),				// In	1/2-strip pulses
-	.cfeb3_ly5hs	(cfeb_ly5hs[3][MXHS-1:0]),				// In 1/2-strip pulses
+	.cfeb3_ly5hs	(cfeb_ly5hs[3][MXHS-1:0]),				// In 	1/2-strip pulses
 
 	.cfeb4_ly0hs	(cfeb_ly0hs[4][MXHS-1:0]),				// In	1/2-strip pulses
 	.cfeb4_ly1hs	(cfeb_ly1hs[4][MXHS-1:0]),				// In	1/2-strip pulses
@@ -2615,11 +2616,64 @@
      end // always @ (posedge clock or posedge ttc_resync)
 
 
-   assign mez_busy = (raw_mez_busy | alct_startup_msec | alct_wait_dll | alct_startup_done | alct_wait_vme | alct_wait_cfg);
+     assign mez_busy = (raw_mez_busy | alct_startup_msec | alct_wait_dll | alct_startup_done | alct_wait_vme | alct_wait_cfg);
 
-        assign testled[MXCFEB:1] = link_good[MXCFEB-1:0];
+        assign testled[7] = set_sw[8] ? alct_txd_posneg : link_good[6];
+        assign testled[6] = link_good[5];
+        assign testled[5] = set_sw[8] ? alct_rxd_posneg : link_good[4];
+        assign testled[4] = link_good[3];
+//      assign testled[MXCFEB:4] = link_good[MXCFEB-1:3];
+//	reg	[3:1]	testled_r;
+//        assign testled[3] = link_good[2] || ((set_sw == 2'b01) && clock_alct_txd);
+//        assign testled[2] = link_good[1] || ((set_sw == 2'b01) && clock_alct_rxd);
+//        assign testled[1] = link_good[0] || ((set_sw == 2'b01) && clock);
+//        assign testled[3:1] = testled_r[3:1];
         assign testled[8] = &link_good || ((set_sw == 2'b01) && alct_wait_cfg);
         assign testled[9] = (|link_bad) || ((set_sw == 2'b01) && sump);
+
+
+	ODDR #(
+	.DDR_CLK_EDGE ("OPPOSITE_EDGE"),	// "OPPOSITE_EDGE" or "SAME_EDGE" 
+	.INIT         (1'b0),			// Initial value of Q: 1'b0 or 1'b1
+	.SRTYPE       ("SYNC")			// Set/Reset type: "SYNC" or "ASYNC" 
+	) test_led_3 (
+	.C	(clock_alct_txd),	// In	1-bit clock input
+	.CE	(1'b1),			// In	1-bit clock enable input
+	.S	(1'b0),			// In	1-bit set
+	.R	(1'b0),			// In	1-bit reset
+	.D1	(set_sw[8] ? 1'b1 : link_good[2]),	// In	1-bit data input tx on positive edge
+	.D2	(set_sw[8] ? 1'b0 : link_good[2]),	// In	1-bit data input tx on negative edge
+	.Q	(testled[3]));		// Out	1-bit DDR output
+
+
+	ODDR #(
+	.DDR_CLK_EDGE ("OPPOSITE_EDGE"),	// "OPPOSITE_EDGE" or "SAME_EDGE" 
+	.INIT         (1'b0),			// Initial value of Q: 1'b0 or 1'b1
+	.SRTYPE       ("SYNC")			// Set/Reset type: "SYNC" or "ASYNC" 
+	) test_led_2 (
+	.C	(clock_alct_rxd),	// In	1-bit clock input
+	.CE	(1'b1),			// In	1-bit clock enable input
+	.S	(1'b0),			// In	1-bit set
+	.R	(1'b0),			// In	1-bit reset
+	.D1	(set_sw[8] ? 1'b1 : link_good[1]),	// In	1-bit data input tx on positive edge
+	.D2	(set_sw[8] ? 1'b0 : link_good[1]),	// In	1-bit data input tx on negative edge
+	.Q	(testled[2]));		// Out	1-bit DDR output
+
+
+	ODDR #(
+	.DDR_CLK_EDGE ("OPPOSITE_EDGE"),	// "OPPOSITE_EDGE" or "SAME_EDGE" 
+	.INIT         (1'b0),			// Initial value of Q: 1'b0 or 1'b1
+	.SRTYPE       ("SYNC")			// Set/Reset type: "SYNC" or "ASYNC" 
+	) test_led_1 (
+	.C	(clock),	// In	1-bit clock input
+	.CE	(1'b1),			// In	1-bit clock enable input
+	.S	(1'b0),			// In	1-bit set
+	.R	(1'b0),			// In	1-bit reset
+	.D1	(set_sw[8] ? 1'b1 : link_good[0]),	// In	1-bit data input tx on positive edge
+	.D2	(set_sw[8] ? 1'b0 : link_good[0]),	// In	1-bit data input tx on negative edge
+	.Q	(testled[1]));		// Out	1-bit DDR output
+
+
 
 	assign meztp20 = ~|link_had_err;    // blue OFF.  was ~alct_wait_cfg
 	assign meztp21 = ~l_tmbclk0_lock;   // green

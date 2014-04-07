@@ -34,6 +34,7 @@
 	CEW3,
 	LTNCY_TRIG,
 	RX_SYNC_DONE,
+        errcount,
         link_had_err,
         link_good,
 	link_bad,
@@ -71,6 +72,7 @@
 	output			LTNCY_TRIG;
 	output			RX_SYNC_DONE;
 	output			sump;
+        output 	[7:0]		errcount;
         output 			link_had_err;
         output 			link_good;
         output 			link_bad;
@@ -267,12 +269,13 @@
    reg [3:0] mon_in = 0;
    reg 	     mon_rst = 1;
    reg [3:0] mon_count = 0;
-   reg [15:0] err_count = 0;   // bit 15 needs to be output: link_bad
+   reg [7:0] err_count = 0;   // at least bit 7 needs to be output: link_bad
    reg 	     link_err = 0;
    reg 	     link_went_down = 0;
 //   reg 	     link_had_err = 0; // needs to be output
    reg 	     link_good = 0;    // needs to be output
-   assign link_bad = err_count[15]; // needs to be output
+   assign link_bad = err_count[7]; // needs to be output
+   assign errcount = err_count[7:0]; // can be a useful output
    assign link_had_err = (link_err | mon_rst); // output, signals the link had a problem or was never alive
 
      always @(posedge CMP_RX_CLK160) begin
@@ -323,8 +326,8 @@
 	if(ttc_resync) link_err <= 0; // clear the error register on resync
 	else if(!link_err && RX_SYNC_DONE) link_err <= (link_went_down); // use to signal the link was OK then had a problem at least once
 
-	if(ttc_resync) err_count[15:0] <= 16'h0000;   // use err_count[15] to signal the link is bad
-	else if(RX_SYNC_DONE && link_went_down && err_count[15:12]!=4'hE) err_count <= err_count + 1'b1; // how many times the link was lost
+	if(ttc_resync) err_count[7:0] <= 8'h00;   // use err_count[7] to signal the link is bad
+	else if(RX_SYNC_DONE && link_went_down && err_count[7:4]!=4'hE) err_count <= err_count + 1'b1; // how many times the link was lost
      end // always @ (posedge CMP_RX_CLK160)
 
 

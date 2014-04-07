@@ -4,7 +4,7 @@
 // Firmware version global definitions
 	`define FIRMWARE_TYPE		04'hC		// C=Normal CLCT/TMB, D=Debug PCB loopback version
 	`define VERSION				04'hE		// Version revision number, A=TMB2004 and earlier, E=TMB2005E production
-	`define MONTHDAY			16'h0402	// Version date
+	`define MONTHDAY			16'h0403	// Version date
 	`define YEAR				16'h2014	// Version year
 
 	`define AUTO_VME			01'h1		// Automatically initialize VME registers from PROM data,   0=do not
@@ -44,10 +44,18 @@
 //	04/22/2013	Mod power_save in GTX core and switch to ISE 14.5
 //	05/08/2013	Revert to Virtex-2 muonic logic for ALCT and MPC, updated to Virtex-6 DDR prims
 //	06/04/2013	Restore n-bx delay to cfeb non-muonic stage
-//	12/13/2013	JG: ttc_resync resets the cfeb_badbits counters (see vme.v)
-//	12/14/2013	JG: assign qpll & mmcm lock indications on the Mez SMT LEDs
-//	12/15/2013	JG: adding fiber link monitor logic & modify related VME regs 14C-158, tweaked Mez SMT LED logic
-//	12/16-17/2013	JG: tuning link monitor logic & use "testLED" testpoints for diagnostic signals
+//	12/13/2013	JRG: ttc_resync resets the cfeb_badbits counters (see vme.v)
+//	12/14/2013	JRG: assign qpll & mmcm lock indications on the Mez SMT LEDs
+//	12/15/2013	JRG: adding fiber link monitor logic & modify related VME regs 14C-158, tweaked Mez SMT LED logic
+//	12/16-17/2013	JRG: tuning link monitor logic & use "testLED" testpoints for diagnostic signals
+//	12/26/2013	JRG: modified the GTX error counters and reassigned GTX-related VME registers
+//	12/30/2013	JRG: modified the GTX VME registers with better combinations in bits4:0
+//	01/30/2014	set ALCTtx drive setting back to UCLA standard, also changes to DPS clocks (9 DPS -> 4 DPS w/BUFG feedbacks)
+//	02/10/2014	use ODDR to bring out clock, alct_rxclock, alct_txclock on testled 1:3
+//	02/12/2014	bring out alct_rx_posneg & alct_tx_posneg  on testled 5 & 7;  modify clk feedback circuit
+//                      in clock_ctrl.v: exchange names CLOCK --> CLOCK_FB   and   CLOCK_DPS --> CLOCK
+//	02/16/2014	tuned logic for clock_lac & changed inputs to ODDR's for ALCT Tx (now "Same Edge")
+//      04/03/2014  	merge my changes with Yuriy's code for extended MPC results register in VME
 //---------------------------------------------------------------------------------------------------------------------------------------
 //	End Global Definitions
 //---------------------------------------------------------------------------------------------------------------------------------------
