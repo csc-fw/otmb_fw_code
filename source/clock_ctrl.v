@@ -89,7 +89,7 @@
 //------------------------------------------------------------------------------------------------------------------
 // Generic
 //------------------------------------------------------------------------------------------------------------------
-	parameter MXDPS=9;							// 2 ALCT + 7 DCFEB
+	parameter MXDPS=4;							// 2 ALCT + 1 DCFEB(me1/1b)+ 1 DCFEB(me1/1a)
 
 //------------------------------------------------------------------------------------------------------------------
 // Ports
@@ -174,45 +174,50 @@
 // Global clock buffers
 //------------------------------------------------------------------------------------------------------------------
 // PLL feedback and fanout buffers
+   // JRG:  exchange names CLOCK --> CLOCK_FB   and   CLOCK_DPS --> CLOCK
+   wire clock_fb;  // JRG:  new signal name.
+   assign clock = clock_dps;  // JRG: added this new assign for CLOCK
+	BUFG  ubufg_pll_1x    (.I(clock_mmcm    ),.O(clock_fb           ));  // JRG: changed CLOCK here to CLOCK_FB
 	IBUFG uibufg_19p      (.I(tmb_clock0    ),.O(tmb_clock0_ibufg));
-	BUFG  ubufg_pll_1x    (.I(clock_mmcm    ),.O(clock           ));
+//	BUFG  ubufg_pll_1x    (.I(clock_mmcm    ),.O(clock           ));  // JRG: original def for CLOCK
 	BUFG  ubufg_pll_2x    (.I(clock_2x_mmcm ),.O(clock_2x        ));
 	BUFG  ubufg_pll_vme   (.I(clock_vme_mmcm),.O(clock_vme       ));
 	BUFG  ubufg_pll_dps   (.I(clock_dps_mmcm),.O(clock_dps       ));
 	BUFG  ubufg_pll_lac   (.I(clock_90_mmcm ),.O(clock_90        ));
+   
 
 //------------------------------------------------------------------------------------------------------------------
 // Main PLL generates clocks at 1x=40MHz, 2x=80MHz, 1/4x=10MHz
 //------------------------------------------------------------------------------------------------------------------
 	MMCM_ADV # (
-	.CLKIN1_PERIOD			(25.0),				// Primary   input clock period in ns to ps resolution (i.e. 33.333 is 30 MHz)
-	.CLKIN2_PERIOD			(),					// Secondary input clock period in ns to ps resolution (i.e. 33.333 is 30 MHz)
-	.REF_JITTER1			(0.010),			// Primary   reference input jitter in UI (0.000-0.999)
-	.REF_JITTER2			(),					// Secondary reference input jitter in UI (0.000-0.999)
+	.CLKIN1_PERIOD			(25.0),		// Primary   input clock period in ns to ps resolution (i.e. 33.333 is 30 MHz)
+	.CLKIN2_PERIOD			(),			// Secondary input clock period in ns to ps resolution (i.e. 33.333 is 30 MHz)
+	.REF_JITTER1			(0.010),	// Primary   reference input jitter in UI (0.000-0.999)
+	.REF_JITTER2			(),			// Secondary reference input jitter in UI (0.000-0.999)
 
-	.CLKOUT4_CASCADE		(0),			// Cascade CLKOUT4 counter with CLKOUT6 (TRUE/FALSE)
-	.CLOCK_HOLD				(0),			// Hold VCO Frequency (TRUE/FALSE)
-	.COMPENSATION			("ZHOLD"),			// "ZHOLD", "INTERNAL", "EXTERNAL", "CASCADE" or "BUF_IN" 
-	.STARTUP_WAIT			(0),			// Not supported. Must be set to FALSE
+	.CLKOUT4_CASCADE		(0),		// Cascade CLKOUT4 counter with CLKOUT6 (TRUE/FALSE)
+	.CLOCK_HOLD				(0),	// Hold VCO Frequency (TRUE/FALSE)
+	.COMPENSATION			("ZHOLD"),	// "ZHOLD", "INTERNAL", "EXTERNAL", "CASCADE" or "BUF_IN" 
+	.STARTUP_WAIT			(0),		// Not supported. Must be set to FALSE
 
-	.DIVCLK_DIVIDE			(1),				// Master division value (1-80)
-	.CLKFBOUT_PHASE			(0.000),			// Phase offset degrees of CLKFB (0.00-360.00)
+	.DIVCLK_DIVIDE			(1),		// Master division value (1-80)
+	.CLKFBOUT_PHASE			(0.000),	// Phase offset degrees of CLKFB (0.00-360.00)
 	.CLKFBOUT_USE_FINE_PS	(0),			// Fine phase shift enable (TRUE/FALSE)
 
-	.CLKOUT0_DUTY_CYCLE		(0.500),			// Duty cycle (0.01-0.99)
-	.CLKOUT0_PHASE			(0.000),			// Phase offset degrees of CLKFB (0.00-360.00) -57.6 degrees = -4ns
+	.CLKOUT0_DUTY_CYCLE		(0.500),	// Duty cycle (0.01-0.99)
+	.CLKOUT0_PHASE			(0.000),	// Phase offset degrees of CLKFB (0.00-360.00) -57.6 degrees = -4ns
 	.CLKOUT0_USE_FINE_PS	(0),			// Fine phase shift enable (TRUE/FALSE)
 
-	.CLKOUT1_DUTY_CYCLE		(0.500),			// Duty cycle (0.01-0.99)
-	.CLKOUT1_PHASE			(0.000),			// Phase offset degrees of CLKFB (0.00-360.00)
+	.CLKOUT1_DUTY_CYCLE		(0.500),	// Duty cycle (0.01-0.99)
+	.CLKOUT1_PHASE			(0.000),	// Phase offset degrees of CLKFB (0.00-360.00)
 	.CLKOUT1_USE_FINE_PS	(0),			// Fine phase shift enable (TRUE/FALSE)
 
-	.CLKOUT2_DUTY_CYCLE		(0.500),			// Duty cycle (0.01-0.99)
-	.CLKOUT2_PHASE			(0.000),			// Phase offset degrees of CLKFB (0.00-360.00)
+	.CLKOUT2_DUTY_CYCLE		(0.500),	// Duty cycle (0.01-0.99)
+	.CLKOUT2_PHASE			(0.000),	// Phase offset degrees of CLKFB (0.00-360.00)
 	.CLKOUT2_USE_FINE_PS	(0),			// Fine phase shift enable (TRUE/FALSE)
 
-	.CLKOUT3_DUTY_CYCLE		(0.500),			// Duty cycle (0.01-0.99)
-	.CLKOUT3_PHASE			(90.000),			// Phase offset degrees of CLKFB (0.00-360.00)
+	.CLKOUT3_DUTY_CYCLE		(0.500),	// Duty cycle (0.01-0.99)
+	.CLKOUT3_PHASE			(90.000),	// Phase offset degrees of CLKFB (0.00-360.00)
 	.CLKOUT3_USE_FINE_PS	(0),			// Fine phase shift enable (TRUE/FALSE)
 
 	.BANDWIDTH				("OPTIMIZED"),		// Jitter programming ("HIGH","LOW","OPTIMIZED")
@@ -225,55 +230,55 @@
 	) ummcm_main (
 
 	.CLKIN1					(tmb_clock0_ibufg),	// In	1-bit Primary clock
- 	.CLKIN2					(1'b0),				// In	1-bit Secondary clock
-	.CLKINSEL				(1'b1),				// In	1-bit Clock select: 1=primary 0=secondary
+ 	.CLKIN2					(1'b0),			// In	1-bit Secondary clock
+	.CLKINSEL				(1'b1),			// In	1-bit Clock select: 1=primary 0=secondary
         
 	.RST					(mmcm_reset),		// In	1-bit Reset
-	.PWRDWN					(1'b0),				// In	1-bit Power-down
+	.PWRDWN					(1'b0),			// In	1-bit Power-down
 	.LOCKED					(lock_tmb_clock0),	// Out	1-bit LOCK status
 	.CLKFBSTOPPED			(),					// Out	1-bit Feedback clock stopped
 	.CLKINSTOPPED			(),					// Out	1-bit Input    clock stopped
 
-	.CLKFBIN				(clock),			// In	1-bit Feedback clock input
+	.CLKFBIN				(clock_fb),		// In	1-bit Feedback clock input
 	.CLKFBOUT				(clock_mmcm),		// Out	1-bit Feedback clock output
-	.CLKFBOUTB				(),					// Out	1-bit Inverted CLKFBOUT
+	.CLKFBOUTB				(),				// Out	1-bit Inverted CLKFBOUT
 
 	.CLKOUT0				(clock_2x_mmcm),	// Out	1-bit CLKOUT0
-	.CLKOUT0B				(),					// Out	1-bit CLKOUT0 Inverted
+	.CLKOUT0B				(),				// Out	1-bit CLKOUT0 Inverted
 	.CLKOUT1				(clock_vme_mmcm),	// Out	1-bit CLKOUT1
-	.CLKOUT1B				(),					// Out	1-bit CLKOUT1 Inverted
+	.CLKOUT1B				(),				// Out	1-bit CLKOUT1 Inverted
 	.CLKOUT2				(clock_dps_mmcm),	// Out	1-bit CLKOUT2
-	.CLKOUT2B				(),					// Out	1-bit CLKOUT2 Inverted
+	.CLKOUT2B				(),				// Out	1-bit CLKOUT2 Inverted
 	.CLKOUT3				(clock_90_mmcm),	// Out	1-bit CLKOUT3
-	.CLKOUT3B				(),					// Out	1-bit CLKOUT3 Inverted
-	.CLKOUT4				(),					// Out	1-bit CLKOUT4
-	.CLKOUT5				(),					// Out	1-bit CLKOUT5
-	.CLKOUT6				(),					// Out	1-bit CLKOUT6
+	.CLKOUT3B				(),				// Out	1-bit CLKOUT3 Inverted
+	.CLKOUT4				(),				// Out	1-bit CLKOUT4
+	.CLKOUT5				(),				// Out	1-bit CLKOUT5
+	.CLKOUT6				(),				// Out	1-bit CLKOUT6
 
-	.DCLK					(1'b0),				// In	1-bit DRP clock Dynamic Reconfiguaration Port
-	.DEN					(1'b0),				// In	1-bit DRP enable
-	.DWE					(),					// In	1-bit DRP write enable
-	.DADDR					(7'h0),				// In	7-bit DRP address
-	.DI						(16'h0),			// In  16-bit DRP data
-	.DO						(),					// Out 16-bit DRP data
-	.DRDY					(),					// Out	1-bit DRP ready
+	.DCLK					(1'b0),			// In	1-bit DRP clock Dynamic Reconfiguaration Port
+	.DEN					(1'b0),			// In	1-bit DRP enable
+	.DWE					(),				// In	1-bit DRP write enable
+	.DADDR					(7'h0),			// In	7-bit DRP address
+	.DI						(16'h0),	// In  16-bit DRP data
+	.DO						(),			// Out 16-bit DRP data
+	.DRDY					(),				// Out	1-bit DRP ready
  
-	.PSCLK					(),					// In	1-bit Phase shift clock
-	.PSEN					(),					// In	1-bit Phase shift enable
-  	.PSINCDEC				(),					// In	1-bit Phase shift increment/decrement
-	.PSDONE					()					// Out	1-bit Phase shift done
+	.PSCLK					(),				// In	1-bit Phase shift clock
+	.PSEN					(),				// In	1-bit Phase shift enable
+  	.PSINCDEC				(),				// In	1-bit Phase shift increment/decrement
+	.PSDONE					()				// Out	1-bit Phase shift done
  	);
 
 //------------------------------------------------------------------------------------------------------------------
 // Logic Accessible Clock copy of 40MHz main clock, synchronized to clock_2x global net
 //------------------------------------------------------------------------------------------------------------------
 	FDRSE #(.INIT(1'b0)) ulac (
-	.Q	(clock_lac),							// Out	Data
-	.C	(clock_2x),								// In	Clock
-	.CE	(lock_tmb_clock0),						// In	Clock enable
-	.D	(!clock_90),							// In	Data
-	.R	(1'b0),									// In	Synchronous reset
-	.S	(1'b0));								// In	Synchronous set
+	.Q	(clock_lac),		// Out	Data
+	.C	(clock_2x),		// In	Clock
+	.CE	(lock_tmb_clock0),	// In	Clock enable
+	.D	(1'b1),			// In	Data
+	.R	(clock_90),		// In	Synchronous reset
+	.S	(1'b0));		// In	Synchronous set
 
 //------------------------------------------------------------------------------------------------------------------
 // Phase step ROMs translate 256 steps per cycle into 1400 steps per cycle
@@ -309,120 +314,129 @@
 	assign dps_phase[1][10:0] = rom[dps1_phase[7:0]];
 	assign dps_phase[2][10:0] = rom[dps2_phase[7:0]];
 	assign dps_phase[3][10:0] = rom[dps3_phase[7:0]];
+/*
 	assign dps_phase[4][10:0] = rom[dps4_phase[7:0]];
 	assign dps_phase[5][10:0] = rom[dps5_phase[7:0]];
 	assign dps_phase[6][10:0] = rom[dps6_phase[7:0]];
 	assign dps_phase[7][10:0] = rom[dps7_phase[7:0]];
 	assign dps_phase[8][10:0] = rom[dps8_phase[7:0]];
+*/
 
 	assign dps0_sm_vec[2:0]   = dps_sm_vec[0][2:0];
 	assign dps1_sm_vec[2:0]   = dps_sm_vec[1][2:0];
 	assign dps2_sm_vec[2:0]   = dps_sm_vec[2][2:0];
 	assign dps3_sm_vec[2:0]   = dps_sm_vec[3][2:0];
-	assign dps4_sm_vec[2:0]   = dps_sm_vec[4][2:0];
+	assign dps4_sm_vec[2:0]   = 0;
+	assign dps5_sm_vec[2:0]   = 0;
+	assign dps6_sm_vec[2:0]   = 0;
+	assign dps7_sm_vec[2:0]   = 0;
+	assign dps8_sm_vec[2:0]   = 0;
+/*
+   	assign dps4_sm_vec[2:0]   = dps_sm_vec[4][2:0];
 	assign dps5_sm_vec[2:0]   = dps_sm_vec[5][2:0];
 	assign dps6_sm_vec[2:0]   = dps_sm_vec[6][2:0];
 	assign dps7_sm_vec[2:0]   = dps_sm_vec[7][2:0];
 	assign dps8_sm_vec[2:0]   = dps_sm_vec[8][2:0];
-
+*/
 	assign clock_alct_rxd     = dps_clock[0];
 	assign clock_alct_txd     = dps_clock[1];
 	assign clock_cfeb0_rxd    = dps_clock[2];
-	assign clock_cfeb1_rxd    = dps_clock[3];
-	assign clock_cfeb2_rxd    = dps_clock[4];
-	assign clock_cfeb3_rxd    = dps_clock[5];
-	assign clock_cfeb4_rxd    = dps_clock[6];
-	assign clock_cfeb5_rxd    = dps_clock[7];
-	assign clock_cfeb6_rxd    = dps_clock[8];
+	assign clock_cfeb1_rxd    = dps_clock[2];
+	assign clock_cfeb2_rxd    = dps_clock[2];
+	assign clock_cfeb3_rxd    = dps_clock[2];
+	assign clock_cfeb4_rxd    = dps_clock[3];
+	assign clock_cfeb5_rxd    = dps_clock[3];
+	assign clock_cfeb6_rxd    = dps_clock[3];
 
 // PLL phase shifters
 	genvar i;
 	generate
-	for (i=0; i<=MXDPS-1; i=i+1) begin: dps
+	for (i=0; i<=MXDPS-1; i=i+1) begin: dps   // JRG: changed MXDPS to 4 (not 9)
 
-	assign dps_clock_fbi[i] = dps_clock_fbo[i];
+//	assign dps_clock_fbi[i] = dps_clock_fbo[i];
+	BUFG ubufg_fb(.I(dps_clock_fbo[i]), .O(dps_clock_fbi[i]));
 	BUFG ubufg_out(.I(dps_clock_out[i]), .O(dps_clock[i]));
 
 	MMCM_ADV # (
-	.CLKIN1_PERIOD			(25.0),				// Primary   input clock period in ns to ps resolution (i.e. 33.333 is 30 MHz)
-	.CLKIN2_PERIOD			(),					// Secondary input clock period in ns to ps resolution (i.e. 33.333 is 30 MHz)
-	.REF_JITTER1			(0.010),			// Primary   reference input jitter in UI (0.000-0.999)
-	.REF_JITTER2			(),					// Secondary reference input jitter in UI (0.000-0.999)
+	.CLKIN1_PERIOD		(25.0),		// Primary   input clock period in ns to ps resolution (i.e. 33.333 is 30 MHz)
+	.CLKIN2_PERIOD		(),		// Secondary input clock period in ns to ps resolution (i.e. 33.333 is 30 MHz)
+	.REF_JITTER1		(0.010),	// Primary   reference input jitter in UI (0.000-0.999)
+	.REF_JITTER2		(),		// Secondary reference input jitter in UI (0.000-0.999)
 
-	.CLKOUT4_CASCADE		(0),			// Cascade CLKOUT4 counter with CLKOUT6 (TRUE/FALSE)
-	.CLOCK_HOLD				(0),			// Hold VCO Frequency (TRUE/FALSE)
-	.COMPENSATION			("ZHOLD"),			// "ZHOLD", "INTERNAL", "EXTERNAL", "CASCADE" or "BUF_IN" 
-	.STARTUP_WAIT			(0),			// Not supported. Must be set to FALSE
+	.CLKOUT4_CASCADE	(0),		// Cascade CLKOUT4 counter with CLKOUT6 (TRUE/FALSE)
+	.CLOCK_HOLD		(0),	        // Hold VCO Frequency (TRUE/FALSE)
+	.COMPENSATION		("ZHOLD"),	// "ZHOLD", "INTERNAL", "EXTERNAL", "CASCADE" or "BUF_IN" 
+	.STARTUP_WAIT		(0),		// Not supported. Must be set to FALSE
 
-	.DIVCLK_DIVIDE			(1),				// Master division value (1-80)
-	.CLKFBOUT_PHASE			(0.000),			// Phase offset degrees of CLKFB (0.00-360.00)
+	.DIVCLK_DIVIDE		(1),		// Master division value (1-80). Fvco = CLKIN1_PERIOD x CLKFBOUT_MULT_F / DIVCLK_DIVIDE
+	.CLKFBOUT_PHASE		(0.000),	// Phase offset degrees of CLKFB (0.00-360.00)
 	.CLKFBOUT_USE_FINE_PS	(0),			// Fine phase shift enable (TRUE/FALSE)
 
-	.CLKOUT0_DUTY_CYCLE		(0.500),			// Duty cycle (0.01-0.99)
-	.CLKOUT0_PHASE			(0.000),			// Phase offset degrees of CLKFB (0.00-360.00)
-	.CLKOUT0_USE_FINE_PS	(1),			// Fine phase shift enable (TRUE/FALSE)
+	.CLKOUT0_DUTY_CYCLE	(0.500),	// Duty cycle (0.01-0.99)
+	.CLKOUT0_PHASE		(0.000),	// Phase offset degrees of CLKFB (0.00-360.00)
+	.CLKOUT0_USE_FINE_PS	(1),		// Fine phase shift enable (TRUE/FALSE)
 
-	.BANDWIDTH				("OPTIMIZED"),		// Jitter programming ("HIGH","LOW","OPTIMIZED")
-	.CLKFBOUT_MULT_F		(25.000),			// Multiply all CLKOUT (5.0-64.0)		1x   40MHz clock
-	.CLKOUT0_DIVIDE_F		(25.000)			// Divide amount (1.000-128.000) 		1x   40MHz clock
+	.BANDWIDTH		("OPTIMIZED"),	// Jitter programming ("HIGH","LOW","OPTIMIZED")     (note: 600MHz < Fvco < 1200Mhz)
+	.CLKFBOUT_MULT_F	(25.000),	// Multiply all CLKOUT (5.0-64.0)	25x  40MHz clock = 1000 MHz Vco:  1nsec
+	.CLKOUT0_DIVIDE_F	(25.000)	// Divide amount (1.000-128.000) 	Fvco/25 =  40MHz clock out
 
 	) ummcm_dps (
 
-	.CLKIN1					(clock_dps),		// In	1-bit Primary clock
- 	.CLKIN2					(1'b0),				// In	1-bit Secondary clock
-	.CLKINSEL				(1'b1),				// In	1-bit Clock select: 1=primary 0=secondary
+	.CLKIN1			(clock_dps),	// In	1-bit Primary clock
+ 	.CLKIN2			(1'b0),		// In	1-bit Secondary clock
+	.CLKINSEL		(1'b1),		// In	1-bit Clock select: 1=primary 0=secondary
         
-	.RST					(dps_reset[i]),		// In	1-bit Reset
-	.PWRDWN					(1'b0),				// In	1-bit Power-down
-	.LOCKED					(dps_lock[i]),		// Out	1-bit LOCK status
-	.CLKFBSTOPPED			(),					// Out	1-bit Feedback clock stopped
-	.CLKINSTOPPED			(),					// Out	1-bit Input    clock stopped
+	.RST			(dps_reset[i]),	// In	1-bit Reset
+	.PWRDWN			(1'b0),		// In	1-bit Power-down
+	.LOCKED			(dps_lock[i]),	// Out	1-bit LOCK status
+	.CLKFBSTOPPED		(),		// Out	1-bit Feedback clock stopped
+	.CLKINSTOPPED		(),		// Out	1-bit Input    clock stopped
 
-	.CLKFBIN				(dps_clock_fbi[i]),	// In	1-bit Feedback clock input
-	.CLKFBOUT				(dps_clock_fbo[i]),	// Out	1-bit Feedback clock output	1x 40MHz
-	.CLKFBOUTB				(),					// Out	1-bit Inverted CLKFBOUT
+	.CLKFBIN		(dps_clock_fbi[i]),	// In	1-bit Feedback clock input
+	.CLKFBOUT		(dps_clock_fbo[i]),	// Out	1-bit Feedback clock output	1x 40MHz
+	.CLKFBOUTB		(),					// Out	1-bit Inverted CLKFBOUT
 
-	.CLKOUT0				(dps_clock_out[i]),	// Out	1-bit CLKOUT0
-	.CLKOUT0B				(),					// Out	1-bit CLKOUT0 Inverted
-	.CLKOUT1				(),					// Out	1-bit CLKOUT1
-	.CLKOUT1B				(),					// Out	1-bit CLKOUT1 Inverted
-	.CLKOUT2				(),					// Out	1-bit CLKOUT2
-	.CLKOUT2B				(),					// Out	1-bit CLKOUT2 Inverted
-	.CLKOUT3				(),					// Out	1-bit CLKOUT3
-	.CLKOUT3B				(),					// Out	1-bit CLKOUT3 Inverted
-	.CLKOUT4				(),					// Out	1-bit CLKOUT4
-	.CLKOUT5				(),					// Out	1-bit CLKOUT5
-	.CLKOUT6				(),					// Out	1-bit CLKOUT6
+	.CLKOUT0		(dps_clock_out[i]),	// Out	1-bit CLKOUT0
+	.CLKOUT0B		(),			// Out	1-bit CLKOUT0 Inverted
+	.CLKOUT1		(),			// Out	1-bit CLKOUT1
+	.CLKOUT1B		(),			// Out	1-bit CLKOUT1 Inverted
+	.CLKOUT2		(),			// Out	1-bit CLKOUT2
+	.CLKOUT2B		(),			// Out	1-bit CLKOUT2 Inverted
+	.CLKOUT3		(),			// Out	1-bit CLKOUT3
+	.CLKOUT3B		(),			// Out	1-bit CLKOUT3 Inverted
+	.CLKOUT4		(),			// Out	1-bit CLKOUT4
+	.CLKOUT5		(),			// Out	1-bit CLKOUT5
+	.CLKOUT6		(),			// Out	1-bit CLKOUT6
 
-	.DCLK					(1'b0),				// In	1-bit DRP clock Dynamic Reconfiguaration Port
-	.DEN					(1'b0),				// In	1-bit DRP enable
-	.DWE					(),					// In	1-bit DRP write enable
-	.DADDR					(7'h0),				// In	7-bit DRP address
-	.DI						(16'h0),			// In  16-bit DRP data
-	.DO						(),					// Out 16-bit DRP data
-	.DRDY					(),					// Out	1-bit DRP ready
+	.DCLK			(1'b0),			// In	1-bit DRP clock Dynamic Reconfiguaration Port
+	.DEN			(1'b0),			// In	1-bit DRP enable
+	.DWE			(),			// In	1-bit DRP write enable
+	.DADDR			(7'h0),			// In	7-bit DRP address
+	.DI			(16'h0),		// In  16-bit DRP data
+	.DO			(),			// Out 16-bit DRP data
+	.DRDY			(),			// Out	1-bit DRP ready
  
-	.PSCLK					(clock),			// In	1-bit Phase shift clock
-	.PSEN					(dps_psen[i]),		// In	1-bit Phase shift enable
-  	.PSINCDEC				(dps_psincdec[i]),	// In	1-bit Phase shift increment/decrement
-	.PSDONE					(dps_psdone[i])		// Out	1-bit Phase shift done
+	.PSCLK			(clock),		// In	1-bit Phase shift clock:   1 ns / 56 step size...  
+	.PSEN			(dps_psen[i]),		// In	1-bit Phase shift enable:  1400 steps to span 25 ns
+  	.PSINCDEC		(dps_psincdec[i]),	// In	1-bit Phase shift increment/decrement
+	.PSDONE			(dps_psdone[i])		// Out	1-bit Phase shift done
  	);
 
 // Digital phase shifter state machine
 	phaser uphaser 
 	(
-	.clock			(clock),					// In	40MHz global TMB clock 1x
-	.global_reset	(global_reset),				// In	Global reset, asserted until main DLL locks
-	.lock_tmb		(lock_tmb_clock0),			// In	Lock state for TMB main clock DLL
-	.lock_dcm		(dps_lock[i]),				// In	Lock state for this DCM
-	.psen			(dps_psen[i]),				// Out	Dps phase shift enable
-	.psincdec		(dps_psincdec[i]),			// Out	Dps phase increment/decrement
-	.psdone			(dps_psdone[i]),			// In	Dps done
-	.fire			(dps_fire[i]),				// In	VME Set new phase
-	.reset			(dps_reset[i]),				// In	Reset current phase
-	.phase			(dps_phase[i][10:0]),		// In	VME Phase to set, 0-1399
-	.busy			(dps_busy[i]),				// Out	VME Phase shifter busy
-	.dps_sm_vec		(dps_sm_vec[i][2:0])		// Out	VME Phase shifter machine state
+	.clock			(clock),		// In	40MHz global TMB clock 1x
+	.global_reset	(global_reset),			// In	Global reset, asserted until main DLL locks
+	.lock_tmb		(lock_tmb_clock0),	// In	Lock state for TMB main clock DLL
+	.lock_dcm		(dps_lock[i]),		// In	Lock state for this DCM
+	.psen			(dps_psen[i]),		// Out	Dps phase shift enable
+	.psincdec		(dps_psincdec[i]),	// Out	Dps phase increment/decrement
+	.psdone			(dps_psdone[i]),	// In	Dps done
+	.fire			(dps_fire[i]),		// In	VME Set new phase
+	.reset			(dps_reset[i]),		// In	Reset current phase
+	.phase			(dps_phase[i][10:0]),	// In	VME Phase to set, 0-1399
+	.busy			(dps_busy[i]),		// Out	VME Phase shifter busy
+	.dps_sm_vec		(dps_sm_vec[i][2:0])	// Out	VME Phase shifter machine state
 	);
 	end
 	endgenerate

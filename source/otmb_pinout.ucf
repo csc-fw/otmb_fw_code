@@ -769,12 +769,20 @@ NET "mez_done"				PULLDOWN;
 # TMB Output Port Drive
 #----------------------------------------------------------------------------------------------------------
 # CFEB
-NET "cfeb_clock_en<*>"		SLEW=FAST | DRIVE=4;
+NET "cfeb_clock_en<*>"			SLEW=FAST | DRIVE=4;
 NET "cfeb_oe"				SLEW=FAST | DRIVE=4;
 
 # ALCT 80MHz rx,txa,txb
-NET "alct_txa<*>"			IOSTANDARD=LVDCI_25;
-NET "alct_txb<*>"			IOSTANDARD=LVDCI_25;
+NET "alct_txa<*>"			IOSTANDARD=LVDCI_25; # UCLA original settings
+NET "alct_txb<*>"			IOSTANDARD=LVDCI_25; 
+#NET "alct_txa<*>"			IOSTANDARD=LVDCI_25 | SLEW=FAST | DRIVE=16; # used for ver's 0108-01112014
+#NET "alct_txb<*>"			IOSTANDARD=LVDCI_25 | SLEW=FAST | DRIVE=16; 
+#  first try 4mA in ver 01082014.... later 8,16,6
+#  try 8mA in ver 01092014
+
+#  JRG: other ideas to try...  drive 4,6,8    slew=fast     try with LVDCI_25 & LVCMOS25 too
+#NET "alct_txa<*>"			IOSTANDARD=LVCMOS25 | SLEW=FAST | DRIVE=4;   # LVCMOS25 is default io_standard, ver 01202014
+#NET "alct_txb<*>"			IOSTANDARD=LVCMOS25 | SLEW=FAST | DRIVE=4;   # LVCMOS25 is default io_standard
 
 #ALCT static
 NET "alct_clock_en"			SLEW=FAST | DRIVE=4;

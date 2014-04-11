@@ -2698,6 +2698,18 @@
 	wire			wr_virtex6_extend;
 	wire			wr_adr_cap;
   
+       // Virtex-6 GTX error counters
+       wire    [7:0]           gtx_rx_err_count [MXCFEB-1:0];    // JRG In:    Error count on each fiber channel
+         assign        gtx_rx_err_count[0][7:0] = gtx_rx_err_count0[7:0];      //      Error count on this fiber channel
+         assign        gtx_rx_err_count[1][7:0] = gtx_rx_err_count1[7:0];      //      Error count on this fiber channel
+         assign        gtx_rx_err_count[2][7:0] = gtx_rx_err_count2[7:0];      //      Error count on this fiber channel
+         assign        gtx_rx_err_count[3][7:0] = gtx_rx_err_count3[7:0];      //      Error count on this fiber channel
+         assign        gtx_rx_err_count[4][7:0] = gtx_rx_err_count4[7:0];      //      Error count on this fiber channel
+         assign        gtx_rx_err_count[5][7:0] = gtx_rx_err_count5[7:0];      //      Error count on this fiber channel
+         assign        gtx_rx_err_count[6][7:0] = gtx_rx_err_count6[7:0];      //      Error count on this fiber channel
+       wire    [11:0]          gtx_rx_err_count_all; // R      JRG: create a sum of all GTX error counts
+
+
   wire wr_mpc_frames_fifo_ctrl;
   
 //---------------------------------------------------------------------------------------------------------------------
@@ -6629,28 +6641,41 @@
 	initial begin
 	virtex6_gtx_rx_all_wr[0]			= gtx_rx_enable_default;	// RW	Enable all GTX optical inputs, you should disable copper via mask_all
 	virtex6_gtx_rx_all_wr[1]			= 0;				// RW	Reset  all GTX
-	virtex6_gtx_rx_all_wr[2]			= 0;				// RW	Reset  all PRBS test error counters
-	virtex6_gtx_rx_all_wr[3]			= 0;				// RW	Select all random input test data mode
-	virtex6_gtx_rx_all_wr[10:4]			= 0;				// R	Readonly
-	virtex6_gtx_rx_all_wr[15:11]		= 0;					// RW	Unused
+        virtex6_gtx_rx_all_wr[2] = 0;           // RW   JRG: now this is Select all PRBS inputs test mode
+//      virtex6_gtx_rx_all_wr[2] = 0;           // RW   JRG: was Reset  all PRBS test error counters
+//      virtex6_gtx_rx_all_wr[3] = 0;           // RW   JRG: was Select all PRBS inputs test mode
+        virtex6_gtx_rx_all_wr[10:3] = 0;        // R    Readonly
+        virtex6_gtx_rx_all_wr[15:11] = 0;       // RW   JRG: Unused until recent changes
+
 	end
 
 	wire   gtx_rx_enable_all			= virtex6_gtx_rx_all_wr[0];	// RW	Enable all GTX optical inputs, you should disable copper via mask_all
 	wire   gtx_rx_reset_all				= virtex6_gtx_rx_all_wr[1];	// RW	Reset all GTX
-	wire   gtx_rx_reset_err_cnt_all		= virtex6_gtx_rx_all_wr[2];		// RW	Reset all PRBS test error counters
-	wire   gtx_rx_en_prbs_test_all		= virtex6_gtx_rx_all_wr[3];		// RW	Select all  random input test data mode
+      wire   gtx_rx_reset_err_cnt_all = 0;    // RW   JRG: this will NEVER Reset all PRBS test error counters
+//    wire   gtx_rx_reset_err_cnt_all = virtex6_gtx_rx_all_wr[2];     // RW   Reset all PRBS test error counters
+//    wire   gtx_rx_en_prbs_test_all  = virtex6_gtx_rx_all_wr[3];     // RW   Select all  random input test data mode
+      wire   gtx_rx_en_prbs_test_all  = virtex6_gtx_rx_all_wr[2];     // RW   JRG: was bit3; Select all  random input test data mode
 
-	assign virtex6_gtx_rx_all_rd[3:0]	= virtex6_gtx_rx_all_wr[3:0];		// RW	Readback
-	assign virtex6_gtx_rx_all_rd[4]		= |gtx_rx_start[MXCFEB-1:0];		// R	Set when the DCFEB Start Pattern is present
-	assign virtex6_gtx_rx_all_rd[5]		= |gtx_rx_fc[MXCFEB-1:0];		// R	Flags when Rx sees "FC" code (sent by Tx) for latency measurement
-	assign virtex6_gtx_rx_all_rd[6]		= |gtx_rx_valid[MXCFEB-1:0];		// R	Valid data detected on link
-	assign virtex6_gtx_rx_all_rd[7]		= |gtx_rx_match[MXCFEB-1:0];		// R	PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
-	assign virtex6_gtx_rx_all_rd[8]		= |gtx_rx_sync_done[MXCFEB-1:0];	// R	Use these to determine gtx_ready
-	assign virtex6_gtx_rx_all_rd[9]		= |gtx_rx_pol_swap[MXCFEB-1:0];		// R	GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
-	assign virtex6_gtx_rx_all_rd[10]	= |gtx_rx_err[MXCFEB-1:0];		// R	PRBS test detects an error
-	assign virtex6_gtx_rx_all_rd[15:11]	= virtex6_gtx_rx_all_wr[15:11];		// RW	Unused
+      assign virtex6_gtx_rx_all_rd[2:0] = virtex6_gtx_rx_all_wr[2:0]; // RW   Readback. JRG: changed these around; it was 4 bits, now 3 bits == PRBS test enable, Reset GTX, Enable GTX
+      assign virtex6_gtx_rx_all_rd[3] = &gtx_rx_sync_done[MXCFEB-1:0];        // R    JRG: this changed... rx_sync_done (bit8) moved here (OR all gtx_ready)   ---> new: AND these bits
+      assign virtex6_gtx_rx_all_rd[4] = &gtx_link_good[MXCFEB-1:0];   // R    link stability monitor: TRUE indicates the link has been stable for at least 15 BX on a link   ---> new: AND these bits
+      assign virtex6_gtx_rx_all_rd[5] = |gtx_link_had_err[MXCFEB-1:0];        // R    link stability monitor: TRUE indicates an error happened at least once on a link
+      assign virtex6_gtx_rx_all_rd[6] = |gtx_link_bad[MXCFEB-1:0];            // R    link stability monitor: TRUE indicates that errors happened over 100 times on a link
+//    assign virtex6_gtx_rx_all_rd[4] = |gtx_rx_start[MXCFEB-1:0];    // R    JRG: not useful! -- Set when the DCFEB Start Pattern is present
+//    assign virtex6_gtx_rx_all_rd[5] = |gtx_rx_fc[MXCFEB-1:0];       // R    JRG: not useful! -- Flags when Rx sees "FC" code (sent by Tx) for latency measurement
+//    assign virtex6_gtx_rx_all_rd[6] = |gtx_rx_valid[MXCFEB-1:0];    // R    JRG: not useful! -- Valid data detected on link
+//    assign virtex6_gtx_rx_all_rd[7] = |gtx_rx_match[MXCFEB-1:0];    // R    JRG: not useful! -- PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
+      assign virtex6_gtx_rx_all_rd[7] = |gtx_rx_pol_swap[MXCFEB-1:0]; // R    JRG: was bit9, and not very useful to read this signal -- GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes that are corrected within the GTX module
+//    assign virtex6_gtx_rx_all_rd[10]= |gtx_rx_err[MXCFEB-1:0];      // R    PRBS test detects an error
 
-	wire virtex6_gtx_rx_all_sump		= |virtex6_gtx_rx_all_wr[10:4];		// R	Unused write bits
+      assign virtex6_gtx_rx_all_rd[15:8]      =  (gtx_rx_err_count_all[11:8]==4'h0) ? gtx_rx_err_count_all[7:0] : 8'hFE; // R JRG: a sum of all GTX error counts, full scale set at hex FE
+
+
+//    assign virtex6_gtx_rx_all_rd[15:11] = virtex6_gtx_rx_all_wr[15:11]; // RW       JRG: was Unused
+      wire virtex6_gtx_rx_all_sump    = |virtex6_gtx_rx_all_wr[10:3]; // R    Unused write bits. JRG: used to be [10:4]
+
+      assign gtx_rx_err_count_all[11:0] = gtx_rx_err_count0[7:0]+gtx_rx_err_count1[7:0]+gtx_rx_err_count2[7:0]+gtx_rx_err_count3[7:0]+gtx_rx_err_count4[7:0]+gtx_rx_err_count5[7:0]+gtx_rx_err_count6[7:0];
+
 
 //------------------------------------------------------------------------------------------------------------------
 // Virtex-6 GTX receiver 0 = 0x14C through receiver 6 = 0x158
@@ -6665,36 +6690,40 @@
 
 	initial begin
 	virtex6_gtx_rx_wr[idcfeb][0]			= 0;							// RW	Enable GTX optical input, you should disable copper via mask_all
-	virtex6_gtx_rx_wr[idcfeb][1]			= 0;							// RW	Reset this GTX
-	virtex6_gtx_rx_wr[idcfeb][2]			= 0;							// RW	Reset PRBS test error counters
-	virtex6_gtx_rx_wr[idcfeb][3]			= 0;							// RW	Select random input test data mode
-	virtex6_gtx_rx_wr[idcfeb][10:4]			= 0;							// R	Readonly
-	virtex6_gtx_rx_wr[idcfeb][15:11]		= 0;							// RW	Unused
+
+        virtex6_gtx_rx_wr[idcfeb][1]                    = 0;    // RW   Reset this GTX. JRG: 0 & 1 should be combined, consider this later... if you hold RESET true it's really the same as a Disable, so when false it's like an Enable
+//      virtex6_gtx_rx_wr[idcfeb][2]                    = 0;    // RW   JRG: not useful! -- Reset PRBS test error counters
+//      virtex6_gtx_rx_wr[idcfeb][3]                    = 0;    // RW   was enable PRBS inputs test mode
+        virtex6_gtx_rx_wr[idcfeb][2]                    = 0;    // RW   JRG: moved from bit3 to bit2 -- Enable PRBS inputs test mode
+        virtex6_gtx_rx_wr[idcfeb][10:3]                 = 0;    // R    Readonly.  JRG: was [10:4]
+        virtex6_gtx_rx_wr[idcfeb][15:11]                = 0;    // RW   JRG: Unused until recent changes
 	end
 
 	assign gtx_rx_enable[idcfeb]			= virtex6_gtx_rx_wr[idcfeb][0] | gtx_rx_enable_all;	// RW	Enable GTX optical input, you should disable copper via mask_all
 	assign gtx_rx_reset[idcfeb]			= virtex6_gtx_rx_wr[idcfeb][1] | gtx_rx_reset_all;	// RW	Reset this GTX
-	assign gtx_rx_reset_err_cnt[idcfeb]		= virtex6_gtx_rx_wr[idcfeb][2] | gtx_rx_reset_err_cnt_all;	// RW	Reset PRBS test error counters
-	assign gtx_rx_en_prbs_test[idcfeb]		= virtex6_gtx_rx_wr[idcfeb][3] | gtx_rx_en_prbs_test_all;	// RW	Select random input test data mode
 
-	assign virtex6_gtx_rx_rd[idcfeb][3:0]	= virtex6_gtx_rx_wr[idcfeb][3:0];	// RW	Readback
+//      assign gtx_rx_reset_err_cnt[idcfeb]             = virtex6_gtx_rx_wr[idcfeb][2] | gtx_rx_reset_err_cnt_all;      // RW   Reset PRBS test error counters
+        assign gtx_rx_reset_err_cnt[idcfeb]             = gtx_rx_reset_err_cnt_all;     // RW   JRG: just the ALL case will Reset PRBS test error counters
+//      assign gtx_rx_en_prbs_test[idcfeb]              = virtex6_gtx_rx_wr[idcfeb][3] | gtx_rx_en_prbs_test_all;       // RW   Select random input test data mode
+        assign gtx_rx_en_prbs_test[idcfeb]              = virtex6_gtx_rx_wr[idcfeb][2] | gtx_rx_en_prbs_test_all;       // RW   Select random input test data mode
 
-	assign virtex6_gtx_rx_rd[idcfeb][4]		= gtx_link_good[idcfeb];	// R	link stability monitor: always good, no errors since last resync
-	assign virtex6_gtx_rx_rd[idcfeb][5]		= gtx_link_had_err[idcfeb];	// R	link stability monitor: error happened at least once
-	assign virtex6_gtx_rx_rd[idcfeb][6]		= gtx_link_bad[idcfeb];		// R	link stability monitor: errors happened over 100 times
-	assign virtex6_gtx_rx_rd[idcfeb][7]		= 1'b0;				// R	was worthless: PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
+        assign virtex6_gtx_rx_rd[idcfeb][2:0]   = virtex6_gtx_rx_wr[idcfeb][2:0]|virtex6_gtx_rx_all_wr[2:0]; // RW      Readback. JRG: changed these around; it was 4 bits, now 3 bits == PRBS test enable, Reset GTX, Enable GTX  ---> new: OR these bits with virtex6_gtx_rx_all_wr[2:0]
+        assign virtex6_gtx_rx_rd[idcfeb][3]     = gtx_rx_sync_done[idcfeb];     // R    JRG: this changed... rx_sync_done moved here (gtx_ready)
+        assign virtex6_gtx_rx_rd[idcfeb][4]     = gtx_link_good[idcfeb];        // R    link stability monitor: TRUE indicates the link has been stable for at least 15 BX on this link
+        assign virtex6_gtx_rx_rd[idcfeb][5]     = gtx_link_had_err[idcfeb];     // R    link stability monitor: TRUE indicates an error happened at least once on this link
+        assign virtex6_gtx_rx_rd[idcfeb][6]     = gtx_link_bad[idcfeb];         // R    link stability monitor: TRUE indicates that errors happened over 100 times on this link
 
-// orig	assign virtex6_gtx_rx_rd[idcfeb][4]		= gtx_rx_start[idcfeb];		// R	Set when the DCFEB Start Pattern is present
-// orig	assign virtex6_gtx_rx_rd[idcfeb][5]		= gtx_rx_fc[idcfeb];		// R	Flags when Rx sees "FC" code (sent by Tx) for latency measurement
-// orig	assign virtex6_gtx_rx_rd[idcfeb][6]		= gtx_rx_valid[idcfeb];		// R	Valid data detected on link
-// orig	assign virtex6_gtx_rx_rd[idcfeb][7]		= gtx_rx_match[idcfeb];		// R	PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
+// orig       assign virtex6_gtx_rx_rd[idcfeb][4]             = gtx_rx_start[idcfeb];         // R    JRG: not useful! -- Set when the DCFEB Start Pattern is present
+// orig       assign virtex6_gtx_rx_rd[idcfeb][5]             = gtx_rx_fc[idcfeb];            // R    JRG: not useful! -- Flags when Rx sees "FC" code (sent by Tx) for latency measurement
+// orig       assign virtex6_gtx_rx_rd[idcfeb][6]             = gtx_rx_valid[idcfeb];         // R    JRG: not useful! -- Valid data detected on link
+// orig       assign virtex6_gtx_rx_rd[idcfeb][7]             = gtx_rx_match[idcfeb];         // R    JRG: not useful! -- PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
+        assign virtex6_gtx_rx_rd[idcfeb][7]             = gtx_rx_pol_swap[idcfeb];      // R    JRG: was bit9, and not very useful to read this signal -- GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes that are corrected within the GTX module
+        assign virtex6_gtx_rx_rd[idcfeb][15:8]          =  gtx_rx_err_count[idcfeb];    // R    JRG: constructed this 8-bit array set above
 
-	assign virtex6_gtx_rx_rd[idcfeb][8]		= gtx_rx_sync_done[idcfeb];	// R	Use these to determine gtx_ready
-	assign virtex6_gtx_rx_rd[idcfeb][9]		= gtx_rx_pol_swap[idcfeb];	// R	GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
-	assign virtex6_gtx_rx_rd[idcfeb][10]	= gtx_rx_err[idcfeb];				// R	PRBS test detects an error
-	assign virtex6_gtx_rx_rd[idcfeb][15:11]	= virtex6_gtx_rx_wr[idcfeb][15:11];	// RW	Unused
+//      assign virtex6_gtx_rx_rd[idcfeb][10]    = gtx_rx_err[idcfeb];                   // R    JRG: not useful! -- PRBS test detects an error
+//      assign virtex6_gtx_rx_rd[idcfeb][15:11] = virtex6_gtx_rx_wr[idcfeb][15:11];     // RW   JRG: was Unused
 
-	assign virtex6_gtx_rx_sump[idcfeb]		= |virtex6_gtx_rx_wr[idcfeb][10:4];	// R	Unused write bits 
+        assign virtex6_gtx_rx_sump[idcfeb]              = |virtex6_gtx_rx_wr[idcfeb][10:3];     // R    Unused write bits. JRG: used to be [10:4]
 
 	end
 	endgenerate

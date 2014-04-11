@@ -75,37 +75,32 @@
 	reg  [2*WIDTH-1:0] din_is_ff = 0;
 
 	always @(posedge clock_2x) begin
-	if (isen) din_is_ff <= din_ff;
+	if (isen) din_is_ff <= din_ff; // din_is_ff changes every 25 ns, but either rising or falling edge (posneg)
 	end
 
-// Hold 2nd-in-time in IOB clock time domain, ucf LOCs these near DDR IOBs
-	reg  [WIDTH-1:0] din2nd_iobff_hold = 0;
+// Pass 1st & 2nd-in-time directly to ODDR in IOB clock time domain (use same-edge feature)
 	wire [WIDTH-1:0] din1st_iobff;
 	wire [WIDTH-1:0] din2nd_iobff;
 
 	assign din1st_iobff = din_is_ff[WIDTH-1:0];
 	assign din2nd_iobff = din_is_ff[2*WIDTH-1:WIDTH];
 
-	always @(posedge clock_iob) begin
-	din2nd_iobff_hold <= din2nd_iobff;
-	end
-
 // Generate array of output IOB DDRs, xst can not infer ddr outputs, alas
 	genvar i;
 	generate
 	for (i=0; i<=WIDTH-1; i=i+1) begin: ddr_gen
 	ODDR #(
-	.DDR_CLK_EDGE ("OPPOSITE_EDGE"),	// "OPPOSITE_EDGE" or "SAME_EDGE" 
-	.INIT         (1'b0),				// Initial value of Q: 1'b0 or 1'b1
-	.SRTYPE       ("SYNC")				// Set/Reset type: "SYNC" or "ASYNC" 
+	.DDR_CLK_EDGE ("SAME_EDGE"),	// "OPPOSITE_EDGE" or "SAME_EDGE" 
+	.INIT         (1'b0),		// Initial value of Q: 1'b0 or 1'b1
+	.SRTYPE       ("SYNC")		// Set/Reset type: "SYNC" or "ASYNC" 
 	) u0 (
-	.C	(clock_iob),					// In	1-bit clock input
-	.CE	(clock_en),						// In	1-bit clock enable input
-	.S	(1'b0),							// In	1-bit set
-	.R	(clr),							// In	1-bit reset
-	.D1	(din1st_iobff[i]),				// In	1-bit data input tx on positive edge
-	.D2	(din2nd_iobff_hold[i]),			// In	1-bit data input tx on negative edge
-	.Q	(dout[i]));						// Out	1-bit DDR output
+	.C	(clock_iob),		// In	1-bit clock input
+	.CE	(clock_en),		// In	1-bit clock enable input
+	.S	(1'b0),			// In	1-bit set
+	.R	(clr),			// In	1-bit reset
+	.D1	(din1st_iobff[i]),	// In	1-bit data input tx on positive edge
+	.D2	(din2nd_iobff[i]),	// In	1-bit data input tx on negative edge
+	.Q	(dout[i]));		// Out	1-bit DDR output
 	end
 	endgenerate
 
