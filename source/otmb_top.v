@@ -2513,6 +2513,7 @@
 
 // VME Status
 	.event_clear_vme	(event_clear_vme),				// In	Event clear for aff,clct,mpc vme diagnostic registers
+	.mpc_frame_vme		(mpc_frame_vme),					// Out MPC frame latch strobe for VME
 	.mpc0_frame0_vme	(mpc0_frame0_vme[MXFRAME-1:0]),	// Out	MPC best muon 1st frame
 	.mpc0_frame1_vme	(mpc0_frame1_vme[MXFRAME-1:0]),	// Out	MPC best buon 2nd frame
 	.mpc1_frame0_vme	(mpc1_frame0_vme[MXFRAME-1:0]),	// Out	MPC second best muon 1st frame
@@ -3338,12 +3339,13 @@
       .mpc_oe				(mpc_oe),						// Out	MPC output enable, 1=en
 
       // TMB Ports: Status
-      .mpc0_frame0_vme		(mpc0_frame0_vme[MXFRAME-1:0]),	// In	MPC best muon 1st frame
-      .mpc0_frame1_vme		(mpc0_frame1_vme[MXFRAME-1:0]),	// In	MPC best buon 2nd frame
-      .mpc1_frame0_vme		(mpc1_frame0_vme[MXFRAME-1:0]),	// In	MPC second best muon 1st frame
-      .mpc1_frame1_vme		(mpc1_frame1_vme[MXFRAME-1:0]),	// In	MPC second best buon 2nd frame
-      .mpc_accept_vme			(mpc_accept_vme[1:0]),			// In	MPC accept response
-      .mpc_reserved_vme		(mpc_reserved_vme[1:0]),		// In	MPC reserved response
+      .mpc_frame_vme    (mpc_frame_vme),					      // In MPC frame latch strobe for VME
+      .mpc0_frame0_vme  (mpc0_frame0_vme[MXFRAME-1:0]),	// In	MPC best muon 1st frame
+      .mpc0_frame1_vme  (mpc0_frame1_vme[MXFRAME-1:0]),	// In	MPC best buon 2nd frame
+      .mpc1_frame0_vme  (mpc1_frame0_vme[MXFRAME-1:0]),	// In	MPC second best muon 1st frame
+      .mpc1_frame1_vme  (mpc1_frame1_vme[MXFRAME-1:0]),	// In	MPC second best buon 2nd frame
+      .mpc_accept_vme   (mpc_accept_vme[1:0]),			    // In	MPC accept response
+      .mpc_reserved_vme (mpc_reserved_vme[1:0]),		    // In	MPC reserved response
 
       // TMB Ports: MPC Injector Control
       .mpc_inject			(mpc_inject),					// Out	Start MPC test pattern injector

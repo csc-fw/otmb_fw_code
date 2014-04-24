@@ -571,6 +571,7 @@
 	mpc_oe,
 
 // TMB Ports: Status
+  mpc_frame_vme,
 	mpc0_frame0_vme,
 	mpc0_frame1_vme,
 	mpc1_frame0_vme,
@@ -1788,12 +1789,13 @@
 	output					mpc_oe;					// MPC output enable, 1=en
 
 // TMB Ports: Status
-	input	[MXFRAME-1:0]	mpc0_frame0_vme;		// MPC best muon 1st frame
-	input	[MXFRAME-1:0]	mpc0_frame1_vme;		// MPC best buon 2nd frame
-	input	[MXFRAME-1:0]	mpc1_frame0_vme;		// MPC second best muon 1st frame
-	input	[MXFRAME-1:0]	mpc1_frame1_vme;		// MPC second best buon 2nd frame
-	input	[1:0]			mpc_accept_vme;			// MPC accept response
-	input	[1:0]			mpc_reserved_vme;		// MPC reserved response
+	input              mpc_frame_vme;    // In MPC frame latch strobe for VME
+	input	[MXFRAME-1:0]	mpc0_frame0_vme;  // MPC best muon 1st frame
+	input	[MXFRAME-1:0]	mpc0_frame1_vme;  // MPC best buon 2nd frame
+	input	[MXFRAME-1:0]	mpc1_frame0_vme;  // MPC second best muon 1st frame
+	input	[MXFRAME-1:0]	mpc1_frame1_vme;  // MPC second best buon 2nd frame
+	input	[1:0]         mpc_accept_vme;   // MPC accept response
+	input	[1:0]         mpc_reserved_vme; // MPC reserved response
 
 // TMB Ports: MPC Injector Control
 	output					mpc_inject;				// Start MPC test pattern injector
@@ -2309,7 +2311,7 @@
   
   reg  [15:0] mpc_frames_fifo_ctrl_wr;
   wire [15:0] mpc_frames_fifo_ctrl_rd;
-  wire [63:0] mpc_frames_fifo_wr;
+  
   wire [63:0]	mpc_frames_fifo_rd;
   wire [15:0]	mpc0_frame0_fifo_rd;
   wire [15:0]	mpc0_frame1_fifo_rd;
@@ -3395,7 +3397,6 @@
 	.prom_clk		(vsm_prom_clk),			// Out	prom_ctrl[0]
 	.prom_oe		(vsm_prom_oe),			// Out	prom_ctrl[1]
 	.prom_nce		(vsm_prom_nce),			// Out	prom_ctrl[2]
-// VME
 	.vmesm_oe		(vsm_oe),				// Out	Enable vme mux
 	.adr			(vsm_adr[23:0]),		// Out	VME register address
 	.data			(vsm_data[15:0]),		// Out	VME data from PROM
@@ -5176,11 +5177,47 @@
 	assign mpc0_frame1_rd[15:0]		= mpc0_frame1_vme[15:0];	// R	2nd in time, 1st muon
 	assign mpc1_frame0_rd[15:0]		= mpc1_frame0_vme[15:0];	// R	1st in time, 2nd muon
 	assign mpc1_frame1_rd[15:0]		= mpc1_frame1_vme[15:0];	// R	2nd in time, 2nd muon
-  
-  assign mpc_frames_fifo_wr[15:0]  = mpc0_frame0_vme[15:0];
-  assign mpc_frames_fifo_wr[31:16] = mpc0_frame0_vme[15:0];
-  assign mpc_frames_fifo_wr[47:32] = mpc0_frame0_vme[15:0];
-  assign mpc_frames_fifo_wr[63:48] = mpc0_frame0_vme[15:0];
+
+// Assign MPC frames to input of FIFO
+  wire [63:0] mpc_frames_fifo_wr;
+  assign      mpc_frames_fifo_wr[15:0]  = mpc0_frame0_vme[15:0];
+  assign      mpc_frames_fifo_wr[31:16] = mpc0_frame1_vme[15:0];
+  assign      mpc_frames_fifo_wr[47:32] = mpc1_frame0_vme[15:0];
+  assign      mpc_frames_fifo_wr[63:48] = mpc1_frame1_vme[15:0];
+
+// Power-up defaults
+	initial begin
+	  mpc_frames_fifo_ctrl_wr[0] = 1'b1; // FIFO write control register set in VME. Default = 1
+	  mpc_frames_fifo_ctrl_wr[1] = 1'b0; // FIFO read control register set in VME. After reading one "event" from FIFO the register resets to 0. Default = 0.
+	end
+
+// Set "FIFO write enable" for one clock if MPC frame latch and FIFO write control register set in VME
+// Note: mpc_frame_vme is stroboscope - it is 1 only for one clock when MPC frames latch
+  wire mpc_frames_fifo_ctrl_wr_en;
+  assign mpc_frames_fifo_ctrl_wr_en = ( mpc_frames_fifo_ctrl_wr[0] ) ? mpc_frame_vme : 1'b0;
+
+// Set "read enable" for one clock to read exactly one event from FIFO
+  reg mpc_frames_fifo_ctrl_rd_en;
+  reg fifo_rd_en_1;
+  reg fifo_rd_en_2;
+  initial begin
+	  mpc_frames_fifo_ctrl_rd_en<=1'b0;
+	  fifo_rd_en_1 <= 1'b0;
+	  fifo_rd_en_2 <= 1'b0;
+	end
+  always @(posedge clock) begin
+    fifo_rd_en_1<=mpc_frames_fifo_ctrl_wr[1];
+    fifo_rd_en_2<=fifo_rd_en_1;
+    if ( fifo_rd_en_1 && !fifo_rd_en_2 ) begin
+      mpc_frames_fifo_ctrl_rd_en<=1'b1;
+    end
+    else if ( fifo_rd_en_1 && fifo_rd_en_2 ) begin
+      mpc_frames_fifo_ctrl_rd_en<=1'b0;
+      fifo_rd_en_1 <= 1'b0;
+	    fifo_rd_en_2 <= 1'b0;
+//	    mpc_frames_fifo_ctrl_wr[1] <= 1'b0;
+    end
+  end
   
   wire mpc_frames_fifo_ctrl_full;
   wire mpc_frames_fifo_ctrl_wr_ack;
@@ -5189,18 +5226,6 @@
   wire mpc_frames_fifo_ctrl_prog_full;
   wire mpc_frames_fifo_ctrl_sbiterr;
   wire mpc_frames_fifo_ctrl_dbiterr;
-  
-  wire mpc_frames_fifo_ctrl_wr_en;
-  wire mpc_frames_fifo_ctrl_rd_en;
-  
-  // Power-up defaults
-	initial begin
-	mpc_frames_fifo_ctrl_wr[0] = 1'b1;
-	mpc_frames_fifo_ctrl_wr[1] = 1'b1;
-	end
-  
-  assign mpc_frames_fifo_ctrl_wr_en = mpc_frames_fifo_ctrl_wr[0];
-  assign mpc_frames_fifo_ctrl_rd_en = mpc_frames_fifo_ctrl_wr[1];
   
   fifo_EventStorage ufifo_EventStorage
   (
@@ -5224,6 +5249,8 @@
   assign mpc1_frame0_fifo_rd[15:0] = mpc_frames_fifo_rd[47:32];
   assign mpc1_frame1_fifo_rd[15:0] = mpc_frames_fifo_rd[63:48];
   
+  assign mpc_frames_fifo_ctrl_rd[0] = mpc_frames_fifo_ctrl_wr[0];
+  assign mpc_frames_fifo_ctrl_rd[1] = mpc_frames_fifo_ctrl_wr[1];
   assign mpc_frames_fifo_ctrl_rd[2] = mpc_frames_fifo_ctrl_full;
   assign mpc_frames_fifo_ctrl_rd[3] = mpc_frames_fifo_ctrl_wr_ack;
   assign mpc_frames_fifo_ctrl_rd[4] = mpc_frames_fifo_ctrl_overflow;
@@ -6899,7 +6926,7 @@
 	if (wr_delay1_int)				delay1_int_wr			<=	d[15:0];
 	if (wr_sync_err_ctrl)			sync_err_ctrl_wr		<=	d[15:0];
 	if (wr_cfeb_badbits_ctrl)		cfeb_badbits_ctrl_wr	<=	d[15:0];
-	if (wr_cfeb_v6_badbits_ctrl)	cfeb_v6_badbits_ctrl_wr	<=	d[15:0];
+	if (wr_cfeb_v6_badbits_ctrl) cfeb_v6_badbits_ctrl_wr	<=	d[15:0];
 	if (wr_cfeb_badbits_nbx)		cfeb_badbits_nbx_wr		<=	d[15:0];
 	if (wr_alct_startup_delay)		alct_startup_delay_wr	<=	d[15:0];
 	if (wr_virtex6_snap12_qpll)		virtex6_snap12_qpll_wr	<=	d[15:0];

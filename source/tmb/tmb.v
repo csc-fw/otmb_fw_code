@@ -233,6 +233,7 @@
 
 // VME Status
   event_clear_vme,
+  mpc_frame_vme,
   mpc0_frame0_vme,
   mpc0_frame1_vme,
   mpc1_frame0_vme,
@@ -536,6 +537,7 @@
 
 // VME Status
   input          event_clear_vme;  // Event clear for aff,clct,mpc vme diagnostic registers
+  output          mpc_frame_vme;    // MPC frame latch
   output  [MXFRAME-1:0]  mpc0_frame0_vme;  // MPC best muon 1st frame
   output  [MXFRAME-1:0]  mpc0_frame1_vme;  // MPC best buon 2nd frame
   output  [MXFRAME-1:0]  mpc1_frame0_vme;  // MPC second best muon 1st frame
@@ -1442,20 +1444,22 @@
   wr_avail_xmpc <= wr_avail_rtmb_dly;
   mpc_frame_ff  <= trig_mpc_rtmb_dly;            // Pipeline strobes
 
-  {mpc1_frame0_ff,mpc0_frame0_ff} <= mpc_frame0_dly;    // Pulsed copy of LCTs for header
+  {mpc1_frame0_ff,mpc0_frame0_ff} <= mpc_frame0_dly; // Pulsed copy of LCTs for header
   {mpc1_frame1_ff,mpc0_frame1_ff} <= mpc_frame1_dly;
   end
 
 // Latch MPC output words for VME
+  reg mpc_frame_vme = 1'b0;
   always @(posedge clock) begin
-  if (event_clear_vme) begin
-  {mpc1_frame0_vme,mpc0_frame0_vme} <= 0;
-  {mpc1_frame1_vme,mpc0_frame1_vme} <= 0;
-  end
-  else if (trig_mpc_rtmb_dly) begin
-  {mpc1_frame0_vme,mpc0_frame0_vme} <= mpc_frame0_dly;  // Latched copy of LCTs for VME
-  {mpc1_frame1_vme,mpc0_frame1_vme} <= mpc_frame1_dly;
-  end
+    if (event_clear_vme) begin
+      {mpc1_frame0_vme,mpc0_frame0_vme} <= 0;
+      {mpc1_frame1_vme,mpc0_frame1_vme} <= 0;
+    end
+    else if (trig_mpc_rtmb_dly) begin
+      mpc_frame_vme <= trig_mpc_rtmb_dly; // Pipeline strobes: report to VME that MPC words are latched
+      {mpc1_frame0_vme,mpc0_frame0_vme} <= mpc_frame0_dly; // Latched copy of LCTs for VME
+      {mpc1_frame1_vme,mpc0_frame1_vme} <= mpc_frame1_dly;
+    end
   end
 
 // Transmit multiplexed MPC data at 80MHz, invert for GTLP drivers
