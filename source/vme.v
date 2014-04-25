@@ -1063,7 +1063,7 @@
 	parameter ADR_MPC0_FRAME1_FIFO	= 9'h17E;	// MPC0 Frame 1 Data sent to MPC
 	parameter ADR_MPC1_FRAME0_FIFO	= 9'h180;	// MPC1 Frame 0 Data sent to MPC
 	parameter ADR_MPC1_FRAME1_FIFO	= 9'h182;	// MPC1 Frame 1 Data sent to MPC
-	parameter ADR_MPC_FRAMES_FIFO_CTRL	= 9'h184;	// 
+	parameter ADR_MPC_FRAMES_FIFO_CTRL	= 9'h184;	// MPC Frames FIFO control
   
 	parameter ADR_MPC_INJ			= 9'h90;	// MPC Injector Control
 	parameter ADR_MPC_RAM_ADR		= 9'h92;	// MPC Injector RAM address
@@ -2312,7 +2312,6 @@
   reg  [15:0] mpc_frames_fifo_ctrl_wr;
   wire [15:0] mpc_frames_fifo_ctrl_rd;
   
-  wire [63:0]	mpc_frames_fifo_rd;
   wire [15:0]	mpc0_frame0_fifo_rd;
   wire [15:0]	mpc0_frame1_fifo_rd;
   wire [15:0]	mpc1_frame0_fifo_rd;
@@ -5178,6 +5177,12 @@
 	assign mpc1_frame0_rd[15:0]		= mpc1_frame0_vme[15:0];	// R	1st in time, 2nd muon
 	assign mpc1_frame1_rd[15:0]		= mpc1_frame1_vme[15:0];	// R	2nd in time, 2nd muon
 
+// Power-up defaults
+	initial begin
+	  mpc_frames_fifo_ctrl_wr[0] = 1'b1; // FIFO write control register set in VME. Default = 1
+	  mpc_frames_fifo_ctrl_wr[1] = 1'b0; // FIFO read control register set in VME. After reading one "event" from FIFO the register resets to 0. Default = 0.
+	end
+
 // Assign MPC frames to input of FIFO
   wire [63:0] mpc_frames_fifo_wr;
   assign      mpc_frames_fifo_wr[15:0]  = mpc0_frame0_vme[15:0];
@@ -5185,16 +5190,11 @@
   assign      mpc_frames_fifo_wr[47:32] = mpc1_frame0_vme[15:0];
   assign      mpc_frames_fifo_wr[63:48] = mpc1_frame1_vme[15:0];
 
-// Power-up defaults
-	initial begin
-	  mpc_frames_fifo_ctrl_wr[0] = 1'b1; // FIFO write control register set in VME. Default = 1
-	  mpc_frames_fifo_ctrl_wr[1] = 1'b0; // FIFO read control register set in VME. After reading one "event" from FIFO the register resets to 0. Default = 0.
-	end
-
-// Set "FIFO write enable" for one clock if MPC frame latch and FIFO write control register set in VME
+// Set "FIFO write enable" for one clock if MPC frame latch
 // Note: mpc_frame_vme is stroboscope - it is 1 only for one clock when MPC frames latch
   wire mpc_frames_fifo_ctrl_wr_en;
-  assign mpc_frames_fifo_ctrl_wr_en = ( mpc_frames_fifo_ctrl_wr[0] ) ? mpc_frame_vme : 1'b0;
+//  assign mpc_frames_fifo_ctrl_wr_en = ( mpc_frames_fifo_ctrl_wr[0] ) ? mpc_frame_vme : 1'b0; // YP FIXME!  Use FIFO write control register set in VME to disable writing to FIFO
+  assign mpc_frames_fifo_ctrl_wr_en = mpc_frame_vme;
 
 // Set "read enable" for one clock to read exactly one event from FIFO
   reg mpc_frames_fifo_ctrl_rd_en;
@@ -5211,13 +5211,12 @@
     if ( fifo_rd_en_1 && !fifo_rd_en_2 ) begin
       mpc_frames_fifo_ctrl_rd_en<=1'b1;
     end
-    else if ( fifo_rd_en_1 && fifo_rd_en_2 ) begin
+    else begin
       mpc_frames_fifo_ctrl_rd_en<=1'b0;
-      fifo_rd_en_1 <= 1'b0;
-	    fifo_rd_en_2 <= 1'b0;
-//	    mpc_frames_fifo_ctrl_wr[1] <= 1'b0;
     end
   end
+  
+  wire [63:0]	mpc_frames_fifo_rd;
   
   wire mpc_frames_fifo_ctrl_full;
   wire mpc_frames_fifo_ctrl_wr_ack;
@@ -5227,21 +5226,21 @@
   wire mpc_frames_fifo_ctrl_sbiterr;
   wire mpc_frames_fifo_ctrl_dbiterr;
   
-  fifo_EventStorage ufifo_EventStorage
+  fifo_MPCFrames ufifo_MPCFrames
   (
-  .clk(clock),
-  .rst(global_reset),
-  .din(mpc_frames_fifo_wr),
-  .wr_en(mpc_frames_fifo_ctrl_wr_en),
-  .rd_en(mpc_frames_fifo_ctrl_rd_en),
-  .dout(mpc_frames_fifo_rd),
-  .full(mpc_frames_fifo_ctrl_full),
-  .wr_ack(mpc_frames_fifo_ctrl_wr_ack),
-  .overflow(mpc_frames_fifo_ctrl_overflow),
-  .empty(mpc_frames_fifo_ctrl_empty),
-  .prog_full(mpc_frames_fifo_ctrl_prog_full),
-  .sbiterr(mpc_frames_fifo_ctrl_sbiterr),
-  .dbiterr(mpc_frames_fifo_ctrl_dbiterr)
+  .clk(       clock                          ),
+  .rst(       global_reset                   ),
+  .din(       mpc_frames_fifo_wr             ),
+  .wr_en(     mpc_frames_fifo_ctrl_wr_en     ),
+  .rd_en(     mpc_frames_fifo_ctrl_rd_en     ),
+  .dout(      mpc_frames_fifo_rd             ),
+  .full(      mpc_frames_fifo_ctrl_full      ),
+  .wr_ack(    mpc_frames_fifo_ctrl_wr_ack    ),
+  .overflow(  mpc_frames_fifo_ctrl_overflow  ),
+  .empty(     mpc_frames_fifo_ctrl_empty     ),
+  .prog_full( mpc_frames_fifo_ctrl_prog_full ),
+  .sbiterr(   mpc_frames_fifo_ctrl_sbiterr   ),
+  .dbiterr(   mpc_frames_fifo_ctrl_dbiterr   )
   );
   
   assign mpc0_frame0_fifo_rd[15:0] = mpc_frames_fifo_rd[15:0];

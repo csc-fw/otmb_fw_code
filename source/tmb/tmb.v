@@ -1449,14 +1449,14 @@
   end
 
 // Latch MPC output words for VME
-  reg mpc_frame_vme = 1'b0;
+  reg mpc_frame_vme = 0;
   always @(posedge clock) begin
+    mpc_frame_vme <= trig_mpc_rtmb_dly; // Pipeline strobes: report to VME that MPC words are latched
     if (event_clear_vme) begin
       {mpc1_frame0_vme,mpc0_frame0_vme} <= 0;
       {mpc1_frame1_vme,mpc0_frame1_vme} <= 0;
     end
     else if (trig_mpc_rtmb_dly) begin
-      mpc_frame_vme <= trig_mpc_rtmb_dly; // Pipeline strobes: report to VME that MPC words are latched
       {mpc1_frame0_vme,mpc0_frame0_vme} <= mpc_frame0_dly; // Latched copy of LCTs for VME
       {mpc1_frame1_vme,mpc0_frame1_vme} <= mpc_frame1_dly;
     end
