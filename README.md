@@ -9,22 +9,31 @@
 Official firmware for the Optical Trigger MotherBoard (OTMB) for
 the ME1/1 station of the CMS muon endcap detector.
 
-This repository contains the source code and 4 ISE project files:
+This repository contains the source code and default ISE project file:
+
 - otmb_virtex6.xise: Production, ISE 14.5
-- otmb_preprod_145/otmb_prod_145.xise: Pre-production, ISE 14.5
-- otmb_prod_124/otmb_prod_124.xise: Production, ISE 12.4
-- otmb_preprod_124/otmb_prod_124.xise: Pre-production, ISE 12.4
 
-The difference between production and pre-production firmware is
-the .UCF file included in the project. 
-- For pre-production: dmb_tx40 -> pin C9,  dmb_tx39 -> pin W32
-- For production:     dmb_tx40 -> pin W32, dmb_tx39 -> pin C9
+The difference between "Production" and "Pre-Production" versions is
+in the file source/otmb_pinout.ucf, where different values for the
+parameters "dmb_tx<39>" and "dmb_tx<40>" might be set:
 
-The difference between the ISE 14.5 and 12.4 projects is in the file
-gtx_rx_buf_bypass.v, where they have different values for the
-parameter GTX_POWER_SAVE. 
-ISE 14.5 allows to bypass the RX Delay Aligner, thus saving some
-power consumption.
+- NET "dmb_tx<40>"	LOC = "W32"; # Production:     I/O_440
+- NET "dmb_tx<39>"	LOC = "C9";  # Production:     I/O_441
+
+- NET "dmb_tx<40>"	LOC = "C9";  # Pre-production: I/O_440
+- NET "dmb_tx<39>"	LOC = "W32"; # Pre-production: I/O_441
+
+Default version is "Production".
+
+The difference between the ISE 14.5 and 12.4 versions is in the file
+./source/cfeb/gtx_rx_buf_bypass.v, where different values for the
+parameter "GTX_POWER_SAVE" might be set:
+
+- .GTX_POWER_SAVE (10'b0000010000)  // For ISE 12.4: do not bypass the RX Delay Aligner
+- .GTX_POWER_SAVE (10'b0000110000)  // For ISE 14.5: bypass the RX Delay Aligner
+ 
+Default version is ISE 14.5 which allows to bypass the RX Delay Aligner,
+thus saving some power consumption.
 
 ### Simulation
 The file otmb_virtex6.mpf is a ModelSim project file.
