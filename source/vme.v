@@ -905,7 +905,7 @@
 	parameter CFEB_MUONIC		=  1'b1;			// Floats CFEB boards in clock-space with independent time-of-flight delay
 	parameter CCB_BX0_EMULATOR	=  1'b0;			// Turns on bx0 emulator at power up, must be 0 for all CERN versions
 
-	`include "firmware_version.v"
+	`include "../firmware_version.v"
 
 	initial begin
 	$display ("vme.FIRMWARE_TYPE    = %H",FIRMWARE_TYPE);

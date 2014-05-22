@@ -1,5 +1,7 @@
 `timescale 1ns / 1ps
-`include "firmware_version.v"
+
+`include "../firmware_version.v"
+
 //`define DEBUG_OTMB_VIRTEX6 1
 //-------------------------------------------------------------------------------------------------------------------
 //	otmb_virtex6:	Top Level

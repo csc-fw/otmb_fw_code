@@ -234,7 +234,7 @@ module pattern_finder (
 //-------------------------------------------------------------------------------------------------------------------
 // Load global definitions
 //-------------------------------------------------------------------------------------------------------------------
-`include "firmware_version.v"
+`include "../firmware_version.v"
 `ifdef CSC_TYPE_C initial $display ("CSC_TYPE_C=%H",`CSC_TYPE_C); `endif // Normal   ME1B, reversed ME1A
 `ifdef CSC_TYPE_D initial $display ("CSC_TYPE_D=%H",`CSC_TYPE_D); `endif // Reversed ME1B, normal   ME1A
 
