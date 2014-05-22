@@ -25,6 +25,7 @@
 	clock_2x,
 	clock_lac,
 	clock_vme,
+	clock_1mhz,
 
 // Phase delayed clocks
 	clock_alct_rxd,
@@ -109,6 +110,7 @@
 	output				clock_2x;				// 80MHz commutator clock
 	output				clock_lac;				// 40MHz logic accessible clock
 	output				clock_vme;				// 10MHz global VME clock 1/4x
+	output				clock_1mhz;				// 1MHz BPI_ctrl Timer clock 1/40x
 
 // Phase delayed clocks
 	output				clock_alct_rxd;			// 40MHz ALCT  receive  data clock 1x
@@ -122,9 +124,9 @@
 	output				clock_cfeb6_rxd;		// 40MHz CFEB6 receive  data clock 1x
 
 // Global reset
-	input				mmcm_reset;				// PLL reset input for simulation
-	input				global_reset_en;		// Enable global reset on lock_lost
-	output				global_reset;			// Global reset, asserted until main DLL locks
+	input				mmcm_reset;		// PLL reset input for simulation
+	input				global_reset_en;	// Enable global reset on lock_lost.  JG: on by default
+	output				global_reset;		// Global reset, asserted until main DLL locks
 	output				clock_lock_lost_err;	// 40MHz main clock lost lock FF
 
 // Clock DCM lock status
@@ -174,15 +176,13 @@
 // Global clock buffers
 //------------------------------------------------------------------------------------------------------------------
 // PLL feedback and fanout buffers
-   // JRG:  exchange names CLOCK --> CLOCK_FB   and   CLOCK_DPS --> CLOCK
-   wire clock_fb;  // JRG:  new signal name.
-   assign clock = clock_dps;  // JRG: added this new assign for CLOCK
-	BUFG  ubufg_pll_1x    (.I(clock_mmcm    ),.O(clock_fb           ));  // JRG: changed CLOCK here to CLOCK_FB
+   // JRG:  exchange names CLOCK_DPS --> CLOCK
+   assign clock_dps = clock;  // JRG: added this new assign for CLOCK
+	BUFG  ubufg_pll_1x    (.I(clock_mmcm    ),.O(clock           ));
 	IBUFG uibufg_19p      (.I(tmb_clock0    ),.O(tmb_clock0_ibufg));
-//	BUFG  ubufg_pll_1x    (.I(clock_mmcm    ),.O(clock           ));  // JRG: original def for CLOCK
 	BUFG  ubufg_pll_2x    (.I(clock_2x_mmcm ),.O(clock_2x        ));
 	BUFG  ubufg_pll_vme   (.I(clock_vme_mmcm),.O(clock_vme       ));
-	BUFG  ubufg_pll_dps   (.I(clock_dps_mmcm),.O(clock_dps       ));
+//	BUFG  ubufg_pll_dps   (.I(clock_dps_mmcm),.O(clock_dps       ));  // JRG: just use clock
 	BUFG  ubufg_pll_lac   (.I(clock_90_mmcm ),.O(clock_90        ));
    
 
@@ -239,7 +239,7 @@
 	.CLKFBSTOPPED			(),					// Out	1-bit Feedback clock stopped
 	.CLKINSTOPPED			(),					// Out	1-bit Input    clock stopped
 
-	.CLKFBIN				(clock_fb),		// In	1-bit Feedback clock input
+	.CLKFBIN				(clock),		// In	1-bit Feedback clock input == Main 40 MHz LHC Clock!
 	.CLKFBOUT				(clock_mmcm),		// Out	1-bit Feedback clock output
 	.CLKFBOUTB				(),				// Out	1-bit Inverted CLKFBOUT
 
@@ -247,7 +247,7 @@
 	.CLKOUT0B				(),				// Out	1-bit CLKOUT0 Inverted
 	.CLKOUT1				(clock_vme_mmcm),	// Out	1-bit CLKOUT1
 	.CLKOUT1B				(),				// Out	1-bit CLKOUT1 Inverted
-	.CLKOUT2				(clock_dps_mmcm),	// Out	1-bit CLKOUT2
+	.CLKOUT2				(),	// Out	1-bit CLKOUT2
 	.CLKOUT2B				(),				// Out	1-bit CLKOUT2 Inverted
 	.CLKOUT3				(clock_90_mmcm),	// Out	1-bit CLKOUT3
 	.CLKOUT3B				(),				// Out	1-bit CLKOUT3 Inverted
@@ -279,6 +279,96 @@
 	.D	(1'b1),			// In	Data
 	.R	(clock_90),		// In	Synchronous reset
 	.S	(1'b0));		// In	Synchronous set
+
+//------------------------------------------------------------------------------------------------------------------
+// JRG: create a 1 MHz clock based on clock_vme
+	wire [3:0] cdly  = 4'd4;  // set the delay (delay=n+1) required to get the desired clock division: 4+1=500ns ==> 1usec period
+	SRL16E  #(.INIT(16'h0000)  // Initial Value of Shift Register
+	  ) u1mhz (.CLK(clock_vme),.CE(~mmcm_reset),.D(~clock_1mhz_i),.A0(cdly[0]),.A1(cdly[1]),.A2(cdly[2]),.A3(cdly[3]),.Q(clock_1mhz_i));
+	BUFG  ubufg_1mhz    (.I(clock_1mhz_i),.O(clock_1mhz)); // take this 1 mhz clock to BPI_ctrl Timer logic
+/* /------------------------------------------------------------------------------------------------------------------
+   wire clock_10mhz_mmcm;  // JRG:  new signal name.
+	BUFG  ubufg_pll_1mhz    (.I(clock_1mhz_mmcm),.O(clock_1mhz)); // take this 1 mhz clock to BPI_ctrl Timer logic
+	MMCM_ADV # (
+	.CLKIN1_PERIOD			(100.0),		// Primary   input clock period in ns to ps resolution (i.e. 33.333 is 30 MHz)
+	.CLKIN2_PERIOD			(),			// Secondary input clock period in ns to ps resolution (i.e. 33.333 is 30 MHz)
+	.REF_JITTER1			(0.010),	// Primary   reference input jitter in UI (0.000-0.999)
+	.REF_JITTER2			(),			// Secondary reference input jitter in UI (0.000-0.999)
+
+	.CLKOUT4_CASCADE		(0),		// Cascade CLKOUT4 counter with CLKOUT6 (TRUE/FALSE)
+	.CLOCK_HOLD				(0),	// Hold VCO Frequency (TRUE/FALSE)
+	.COMPENSATION			("ZHOLD"),	// "ZHOLD", "INTERNAL", "EXTERNAL", "CASCADE" or "BUF_IN" 
+	.STARTUP_WAIT			(0),		// Not supported. Must be set to FALSE
+
+	.DIVCLK_DIVIDE			(1),		// Master division value (1-80)
+	.CLKFBOUT_PHASE			(0.000),	// Phase offset degrees of CLKFB (0.00-360.00)
+	.CLKFBOUT_USE_FINE_PS	(0),			// Fine phase shift enable (TRUE/FALSE)
+
+	.CLKOUT0_DUTY_CYCLE		(0.500),	// Duty cycle (0.01-0.99)
+	.CLKOUT0_PHASE			(0.000),	// Phase offset degrees of CLKFB (0.00-360.00) -57.6 degrees = -4ns
+	.CLKOUT0_USE_FINE_PS	(0),			// Fine phase shift enable (TRUE/FALSE)
+
+	.CLKOUT1_DUTY_CYCLE		(0.500),	// Duty cycle (0.01-0.99)
+	.CLKOUT1_PHASE			(0.000),	// Phase offset degrees of CLKFB (0.00-360.00)
+	.CLKOUT1_USE_FINE_PS	(0),			// Fine phase shift enable (TRUE/FALSE)
+
+	.CLKOUT2_DUTY_CYCLE		(0.500),	// Duty cycle (0.01-0.99)
+	.CLKOUT2_PHASE			(0.000),	// Phase offset degrees of CLKFB (0.00-360.00)
+	.CLKOUT2_USE_FINE_PS	(0),			// Fine phase shift enable (TRUE/FALSE)
+
+	.CLKOUT3_DUTY_CYCLE		(0.500),	// Duty cycle (0.01-0.99)
+	.CLKOUT3_PHASE			(0.000),	// Phase offset degrees of CLKFB (0.00-360.00)
+	.CLKOUT3_USE_FINE_PS	(0),			// Fine phase shift enable (TRUE/FALSE)
+
+	.BANDWIDTH				("OPTIMIZED"),		// Jitter programming ("HIGH","LOW","OPTIMIZED")
+	.CLKFBOUT_MULT_F		(10.000),			// Multiply all CLKOUT (5.0-64.0)		1x   40MHz clock
+	.CLKOUT0_DIVIDE_F		(100.00),			        // Divide amount (1.000-128.000) 	      1/10x   1MHz clock
+	.CLKOUT1_DIVIDE			(10),				// Divide amount (1.000-128.000) 		1x   10MHz clock
+	.CLKOUT2_DIVIDE			(10),				// Divide amount (1.000-128.000) 		1x   10MHz clock
+	.CLKOUT3_DIVIDE			(10)				// Divide amount (1.000-128.000) 		1x   10MHz clock
+
+	) ummcm_1mhz (
+
+	.CLKIN1					(clock_vme),	// In	1-bit Primary clock
+ 	.CLKIN2					(1'b0),			// In	1-bit Secondary clock
+	.CLKINSEL				(1'b1),			// In	1-bit Clock select: 1=primary 0=secondary
+        
+	.RST					(mmcm_reset),		// In	1-bit Reset
+	.PWRDWN					(1'b0),			// In	1-bit Power-down
+	.LOCKED					(lock_clock1mhz),	// Out	1-bit LOCK status
+	.CLKFBSTOPPED			(),					// Out	1-bit Feedback clock stopped
+	.CLKINSTOPPED			(),					// Out	1-bit Input    clock stopped
+
+	.CLKFBIN				(clock_10mhz_mmcm),		// In	1-bit Feedback clock input
+	.CLKFBOUT				(clock_10mhz_mmcm),		// Out	1-bit Feedback clock output
+	.CLKFBOUTB				(),				// Out	1-bit Inverted CLKFBOUT
+
+	.CLKOUT0				(clock_1mhz_mmcm),	        // Out	1-bit CLKOUT0
+	.CLKOUT0B				(),				// Out	1-bit CLKOUT0 Inverted
+	.CLKOUT1				(),	                        // Out	1-bit CLKOUT1
+	.CLKOUT1B				(),				// Out	1-bit CLKOUT1 Inverted
+	.CLKOUT2				(),	                        // Out	1-bit CLKOUT2
+	.CLKOUT2B				(),				// Out	1-bit CLKOUT2 Inverted
+	.CLKOUT3				(),	                        // Out	1-bit CLKOUT3
+	.CLKOUT3B				(),				// Out	1-bit CLKOUT3 Inverted
+	.CLKOUT4				(),				// Out	1-bit CLKOUT4
+	.CLKOUT5				(),				// Out	1-bit CLKOUT5
+	.CLKOUT6				(),				// Out	1-bit CLKOUT6
+
+	.DCLK					(1'b0),			// In	1-bit DRP clock Dynamic Reconfiguaration Port
+	.DEN					(1'b0),			// In	1-bit DRP enable
+	.DWE					(),				// In	1-bit DRP write enable
+	.DADDR					(7'h0),			// In	7-bit DRP address
+	.DI						(16'h0),	// In  16-bit DRP data
+	.DO						(),			// Out 16-bit DRP data
+	.DRDY					(),				// Out	1-bit DRP ready
+ 
+	.PSCLK					(),				// In	1-bit Phase shift clock
+	.PSEN					(),				// In	1-bit Phase shift enable
+  	.PSINCDEC				(),				// In	1-bit Phase shift increment/decrement
+	.PSDONE					()				// Out	1-bit Phase shift done
+ 	);
+*/
 
 //------------------------------------------------------------------------------------------------------------------
 // Phase step ROMs translate 256 steps per cycle into 1400 steps per cycle
@@ -450,11 +540,11 @@
 	wire first_lock = (lock_tmb_clock0 || startup_done);
 
 	always @(posedge clock) begin
-	startup_done	<=	first_lock;												// Latches  on 1st dll lock
-	global_reset	<= !first_lock || (!lock_tmb_clock0 && global_reset_en);	// Re-fires on lock lost
+	startup_done	<=	first_lock;						// Latches  on 1st dll lock
+	global_reset	<= !first_lock || (!lock_tmb_clock0 && global_reset_en);	// Re-fires on lock lost, enabled by default
 	end
 
-	assign clock_lock_lost_err = (!global_reset && !lock_tmb_clock0);			// Latches  on lock lost in sync module
+	assign clock_lock_lost_err = (!global_reset && !lock_tmb_clock0);		// Latches on lock lost in sync module
 
 //------------------------------------------------------------------------------------------------------------------
 // Pseudo-locked status for unused clock inputs, DDR FFs q0+q1 should add to 1 if clock is running

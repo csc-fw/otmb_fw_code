@@ -15,6 +15,7 @@
 // VME Clock Port Map
 	clock,
 	clock_vme,
+	clock_1mhz,
 	clock_lock_lost_err,
 	ttc_resync,
 	global_reset,
@@ -89,6 +90,12 @@
 	jsm_busy,
 	tck_fpga,
 
+// BPI flash ports
+	flash_ctrl,    // [3:0] JRG, goes up for I/O match to UCF with FCS,FOE,FWE,FLATCH = fcs,_ccb_tx14,_ccb_tx26,_ccb_tx3
+        flash_ctrl_dualuse,    // [2:0] JRG, goes down to bpi_interface for MUX with FOE,FWE,FLATCH
+	bpi_ad_out,
+	bpi_active,
+
 // 3D3444
 	ddd_clock,
 	ddd_adr_latch,
@@ -118,6 +125,8 @@
 	led_fp_nl1a,
 	led_bd_in,
 	led_fp_out,
+	led_tmb,     // goes to BPI logic
+	led_tmb_out, // comes from BPI logic
 
 // Status: Power Supply Comparator Port Map
 	vstat_5p0v,
@@ -1227,12 +1236,13 @@
 // Ports
 //------------------------------------------------------------------------------------------------------------------
 // VME Clock Port Map
-	input					clock;					// TMB 40MHz clock
-	input					clock_vme;				// VME 10MHz clock
+	input					clock;			// TMB 40MHz clock
+	input					clock_vme;		// VME 10MHz clock
+        input 					clock_1mhz;		// In	1MHz BPI_ctrl Timer clock
 	input					clock_lock_lost_err;	// TMB 40MHz main clock lost lock FF
-	input					ttc_resync;				// Purge l1a processing stack
-	input					global_reset;			// Global reset
-	output					global_reset_en;		// Enable global reset on lock_lost
+	input					ttc_resync;		// Purge l1a processing stack
+	input					global_reset;		// Global reset
+	output					global_reset_en;	// Enable global reset on lock_lost.  JG: on by default
 
 // Firmware Version Ports
 	input	[MXCFEB-1:0]	cfeb_exists;			// CFEBs instantiated in this version
@@ -1245,64 +1255,70 @@
 
 // VME Bus Input Port Map
 `define IO (*IOB="true"*)
-	inout	[15:0]			d_vme;					// VME data 	D16
-`IO	input	[23:1]			a;						// VME Address	A24
-`IO	input	[5:0]			am;						// Address modifier
-`IO	input					_lword;					// Long word
-`IO	input					_as;					// Address Strobe
-`IO	input					_write;					// Write strobe
-`IO	input					_ds1;					// Data Strobe
-`IO	input					_sysclk;				// VME System clock
-`IO	input					_ds0;					// Data Strobe
-`IO	input					_sysfail;				// System fail
-`IO	input					_sysreset;				// System reset
-`IO	input					_acfail;				// AC power fail
-`IO	input					_iack;					// Interrupt acknowledge
-	input					_iackin;				// Interrupt in, daisy chain
-`IO	input	[4:0]			_ga;					// Geographic address
-`IO	input					_gap;					// Geographic address parity
-`IO	input					_local;					// Local Addressing: 0=using HexSw, 1=using backplane /GA
+	inout	[15:0]	d_vme;		// VME data 	D16
+`IO	input	[23:1]	a;		// VME Address	A24
+`IO	input	[5:0]	am;		// Address modifier
+`IO	input		_lword;		// Long word
+`IO	input		_as;		// Address Strobe
+`IO	input		_write;		// Write strobe, Data Direction: 0=VME Write (read from backplane), 1=VME Read (write to backplane)
+`IO	input		_ds1;		// Data Strobe
+`IO	input		_sysclk;	// VME System clock
+`IO	input		_ds0;		// Data Strobe
+`IO	input		_sysfail;	// System fail
+`IO	input		_sysreset;	// System reset
+`IO	input		_acfail;	// AC power fail
+`IO	input		_iack;		// Interrupt acknowledge
+	input		_iackin;	// Interrupt in, daisy chain
+`IO	input	[4:0]	_ga;		// Geographic address
+`IO	input		_gap;		// Geographic address parity
+`IO	input		_local;		// Local Addressing: 0=using HexSw, 1=using backplane /GA
 
 // VME Bus Output Port Map
-	output					_oe;					// Output enable: 0=D16 drives out to VME backplane
-	output					dir;					// Out	Data Direction: 0=read from backplane, 1=write to backplane
-`IO	output					dtack;					// Data acknowledge
-	output					iackout;				// Interrupt out daisy chain
-	output					berr;					// Bus error
-	output					irq;					// Interrupt request
-`IO	output					ready;					// Ready: 1=FPGA logic is up, disconnects bootstrap logic hardware
+	output		_oe;		// Output enable: 0=D16 drives out to VME backplane
+	output		dir;		// Out:  1=VME-->TMB (VME write), 0=TMB-->VME (VME read)
+`IO	output		dtack;		// Data acknowledge
+	output		iackout;	// Interrupt out daisy chain
+	output		berr;		// Bus error
+	output		irq;		// Interrupt request
+`IO	output		ready;		// Ready: 1=FPGA logic is up, disconnects bootstrap logic hardware
 
 // Loop-Back Control Port Map
-	output					cfeb_oe;				// 1=Enable CFEB LVDS drivers
-	output					alct_loop;				// 1=ALCT loopback mode
-	output					alct_rxoe;				// 1=Enable RAT ALCT LVDS receivers
-	output					alct_txoe;				// 1=Enable RAT ALCT LVDS drivers
-	output					rpc_loop;				// 1=RPC loopback mode no   RAT
-	output					rpc_loop_tmb;			// 1=RPC loopback mode with RAT
-	output					dmb_loop;				// 1=DMB loopback mode
-	output					_dmb_oe;				// 0=Enable DMB drivers
-	output					gtl_loop;				// 1=GTL loopback mode
-	output					_gtl_oe;				// 0=Enable GTL drivers
-	output					gtl_loop_lcl;			// copy for ccb.v
+	output		cfeb_oe;	// 1=Enable CFEB LVDS drivers
+	output		alct_loop;	// 1=ALCT loopback mode
+	output		alct_rxoe;	// 1=Enable RAT ALCT LVDS receivers
+	output		alct_txoe;	// 1=Enable RAT ALCT LVDS drivers
+	output		rpc_loop;	// 1=RPC loopback mode no   RAT
+	output		rpc_loop_tmb;	// 1=RPC loopback mode with RAT
+	output		dmb_loop;	// 1=DMB loopback mode
+	output		_dmb_oe;	// 0=Enable DMB drivers
+	output		gtl_loop;	// 1=GTL loopback mode
+	output		_gtl_oe;	// 0=Enable GTL drivers
+	output		gtl_loop_lcl;	// copy for ccb.v
 
 // User JTAG Port Map
-	inout					tck_usr;				// User JTAG tck
-	inout					tms_usr;				// User JTAG tms
-	inout					tdi_usr;				// User JTAG tdi
-	input					tdo_usr;				// User JTAG tdo
-	inout	[3:0]			sel_usr;				// Select JTAG chain: 00=ALCT, 01=Mez FPGA+PROMs, 10=User PROMs, 11=Readback
-	output					sel_fpga_chain;			// sel_usr[3:0]==4'hC
+	inout		tck_usr;	// User JTAG tck
+	inout		tms_usr;	// User JTAG tms
+	inout		tdi_usr;	// User JTAG tdi
+	input		tdo_usr;	// User JTAG tdo
+	inout	[3:0]	sel_usr;	// Select JTAG chain: 00=ALCT, 01=Mez FPGA+PROMs, 10=User PROMs, 11=Readback
+	output		sel_fpga_chain;		// sel_usr[3:0]==4'hC
 
 // PROM Port Map
-	inout	[7:0]			prom_led;				// PROM data, shared with 2 PROMs and on-board LEDs
-	output					prom0_clk;				// PROM 0 clock
-	output					prom0_oe;				// 1=Output enable, 0= Reset address
-	output					_prom0_ce;				// 0=Chip enable
-	output					prom1_clk;				// PROM 1 clock
-	output					prom1_oe;				// 1=Output enable, 0= Reset address
-	output					_prom1_ce;				// 0=Chip enable
-	output					jsm_busy;				// State machine busy writing
-	input					tck_fpga;				// TCK from FPGA JTAG chain 
+	inout	[7:0]	prom_led;	// PROM data, shared with 2 PROMs and on-board LEDs
+	output		prom0_clk;	// PROM 0 clock
+	output		prom0_oe;	// 1=Output enable, 0= Reset address
+	output		_prom0_ce;	// 0=Chip enable
+	output		prom1_clk;	// PROM 1 clock
+	output		prom1_oe;	// 1=Output enable, 0= Reset address
+	output		_prom1_ce;	// 0=Chip enable
+	output		jsm_busy;	// State machine busy writing
+	input		tck_fpga;	// TCK from FPGA JTAG chain 
+
+// BPI flash ports
+        output  [3:0] 	flash_ctrl;    // JRG, goes up for I/O match to UCF with FCS,FOE,FWE,FLATCH = fcs,_ccb_tx14,_ccb_tx26,_ccb_tx3
+        input   [2:0] 	flash_ctrl_dualuse;    // JRG, goes down to bpi_interface for MUX with FOE,FWE,FLATCH
+        output [22:0] 	bpi_ad_out;
+        output 		bpi_active;
 
 // 3D3444
 	output					ddd_clock;				// ddd clock
@@ -1333,6 +1349,8 @@
 	input					led_fp_nl1a;			// NL1A	Red		L1A did not arrive in window
 	input	[7:0]			led_bd_in;				// On-Board LEDs
 	output	[7:0]			led_fp_out;				// Front Panel LEDs (on board LEDs are connected to prom_led)
+	input	[15:0]	led_tmb;     // goes to BPI logic
+	inout	[15:0]	led_tmb_out; // comes from BPI logic
 
 // Status: Power Supply Comparator Port Map
 	input					vstat_5p0v;				// Voltage Comparator +5.0V, 1=OK
@@ -2073,18 +2091,18 @@
 	input					r12_fok;				// Serial interface status
 
 // Virtex-6 GTX receiver
-	output	[MXCFEB-1:0]	gtx_rx_enable;			// Enable GTX optical input, you should disable copper via mask_all
-	output	[MXCFEB-1:0]	gtx_rx_reset;			// Reset this GTX
+	output	[MXCFEB-1:0]	gtx_rx_enable;		// Enable GTX optical input, you should disable copper via mask_all
+	output	[MXCFEB-1:0]	gtx_rx_reset;		// Reset this GTX
 	output	[MXCFEB-1:0]	gtx_rx_reset_err_cnt;	// Reset PRBS test error counters
 	output	[MXCFEB-1:0]	gtx_rx_en_prbs_test;	// Select random input test data mode
 
 	input	[MXCFEB-1:0]	gtx_rx_start;			// Set when the DCFEB Start Pattern is present
-	input	[MXCFEB-1:0]	gtx_rx_fc;				// Flags when Rx sees "FC" code (sent by Tx) for latency measurement
+	input	[MXCFEB-1:0]	gtx_rx_fc;			// Flags when Rx sees "FC" code (sent by Tx) for latency measurement
 	input	[MXCFEB-1:0]	gtx_rx_valid;			// Valid data detected on link
 	input	[MXCFEB-1:0]	gtx_rx_match;			// PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
 	input	[MXCFEB-1:0]	gtx_rx_sync_done;		// Use these to determine gtx_ready
 	input	[MXCFEB-1:0]	gtx_rx_pol_swap;		// GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
-	input	[MXCFEB-1:0]	gtx_rx_err;				// PRBS test detects an error
+	input	[MXCFEB-1:0]	gtx_rx_err;			// PRBS test detects an error
 
 // Virtex-6 GTX error counters
 	input	[15:0]			gtx_rx_err_count0;		// Error count on this fiber channel
@@ -2716,8 +2734,9 @@
 //---------------------------------------------------------------------------------------------------------------------
 //	Power-up Section
 //---------------------------------------------------------------------------------------------------------------------
-// Power-up goes high on first clock rising edge after DCM locks
-	wire [3:0] pdly      = 5;	// Power-up reset delay
+// Power-up goes high on first clock rising edge after DCM locks...
+//  JG: power_up is in fact held low by  global_reset  until  lock_tmb_clock0  is set
+	wire [3:0] pdly      = 5;	// Power-up reset delay (after global_reset is released)
 	reg	       power_up  = 0;
 	reg  [1:0] power_up2 = 0;
 	wire       powerupq;
@@ -2729,10 +2748,10 @@
 	reg ccb_status_tri = 1;	// synthesis attribute KEEP of ccb_status_tri is "true";
 
 	wire   power_up_latch = powerupq | power_up;
-	wire   ready_int      = power_up;					// Fabric ff
+	wire   ready_int      = power_up;			// Fabric ff
 	assign tmb_cfg_done	  = power_up & power_up2[1];	// Force LUT insertion to create a single source
-	wire   power_up_reset = global_reset & global_reset_en;
-	assign mez_busy       = ~mez_done;					// Available for future use
+        wire   power_up_reset = global_reset & global_reset_en; // global reset is enabled at least once, and by default reasserted on lock_lost
+	assign mez_busy       = ~mez_done;			// Available for future use
 
 	always @(posedge clock_vme) begin
 	if (power_up_reset) begin
@@ -2763,17 +2782,17 @@
 
 	alct_startup ualct_startup
 	(
-	.clock				(clock),					// In	40 MHz clock
-	.global_reset		(global_reset),				// In	Global reset
-	.power_up			(power_up),					// In	DLL clock lock, we wait for it
-	.vme_ready			(vsm_ready),				// In	TMB VME registers loaded from PROM
+	.clock				(clock),		// In	40 MHz clock
+	.global_reset		(global_reset),			// In	Global reset
+	.power_up			(power_up),		// In	DLL clock lock, we wait for it
+	.vme_ready			(vsm_ready),		// In	TMB VME registers loaded from PROM
 	.alct_startup_delay	(alct_startup_delay[15:0]),	// In	Msec to wait for ALCT FPGA after TMB is up: 212-100=112msec for Spartan-6 on ALCT
 
-	.alct_startup_msec	(alct_startup_msec),		// Out	Msec pulse
-	.alct_wait_dll		(alct_wait_dll),			// Out	Waiting for TMB DLL lock
-	.alct_wait_vme		(alct_wait_vme),			// Out	Out	Waiting for TMB VME load from user PROM
-	.alct_wait_cfg		(alct_wait_cfg),			// Out	Waiting for ALCT FPGA to configure from mez PROM
-	.alct_startup_done	(alct_startup_done)			// Out	ALCT FPGA should be configured by now
+	.alct_startup_msec	(alct_startup_msec),	// Out	Msec pulse
+	.alct_wait_dll		(alct_wait_dll),	// Out	Waiting for TMB DLL lock
+	.alct_wait_vme		(alct_wait_vme),	// Out	Waiting for TMB VME load from user PROM
+	.alct_wait_cfg		(alct_wait_cfg),	// Out	Waiting for ALCT FPGA to configure from mez PROM
+	.alct_startup_done	(alct_startup_done)	// Out	ALCT FPGA should be configured by now
 	);
 
 //------------------------------------------------------------------------------------------------------------------
@@ -2782,30 +2801,30 @@
 // VME input IOB FFs
 	(*IOB="true" *) reg	[23:1]	a_vme		= 0;
 	(*IOB="true" *) reg	[5:0]	am_vme		= 0;
-	(*IOB="true" *) reg	[4:0]	nga			= 1;
-	(*IOB="true" *) reg			ngap		= 1;
-	(*IOB="true" *) reg			niack		= 1;
-	(*IOB="true" *) reg			nlword		= 1;
-	(*IOB="true" *) reg			nds0		= 1;
-	(*IOB="true" *) reg			nds1		= 1;
-	(*IOB="true" *) reg			nas			= 1;
-	(*IOB="true" *) reg			nwrite		= 1;
-	(*IOB="true" *) reg			nsysclk		= 1;
-	(*IOB="true" *) reg			nsysfail	= 1;
-	(*IOB="true" *) reg			nsysreset	= 1;
-	(*IOB="true" *) reg			nacfail		= 1;
-	(*IOB="false"*) reg			nlocal		= 1;	// clock domain conflict precludes IOB ff for vme_geo[6]
+	(*IOB="true" *) reg	[4:0]	nga		= 1;
+	(*IOB="true" *) reg		ngap		= 1;
+	(*IOB="true" *) reg		niack		= 1;
+	(*IOB="true" *) reg		nlword		= 1;
+	(*IOB="true" *) reg		nds0		= 1;
+	(*IOB="true" *) reg		nds1		= 1;
+	(*IOB="true" *) reg		nas		= 1;
+	(*IOB="true" *) reg		nwrite		= 1;
+	(*IOB="true" *) reg		nsysclk		= 1;
+	(*IOB="true" *) reg		nsysfail	= 1;
+	(*IOB="true" *) reg		nsysreset	= 1;
+	(*IOB="true" *) reg		nacfail		= 1;
+	(*IOB="false"*) reg		nlocal		= 1;	// clock domain conflict precludes IOB ff for vme_geo[6]
 
 	always @(posedge clock_vme) begin
 	a_vme		<=	 a;
 	am_vme		<=	 am;
-	nga			<=	_ga;
+	nga		<=	_ga;
 	ngap		<=	_gap;
 	niack		<=	_iack;	
 	nlword		<=	_lword;
 	nds0		<=	_ds0;
 	nds1		<=	_ds1;
-	nas			<=	_as;
+	nas		<=	_as;
 	nwrite		<=	_write;
 	nsysclk		<=	_sysclk;
 	nsysfail	<=	_sysfail;
@@ -2830,11 +2849,11 @@
 	wire local		= ~nlocal;
 
 // Match VME Address and Address Mode
-	wire slot_match   = (a_vme[23:19] == ga[4:0]);										// A[] matches this board's VME slot
-	wire global_match = (a_vme[23:19] == ADR_TMB_GLOBAL);								// A[] matches TMB global address
-	wire brcst_match  = (a_vme[23:19] == ADR_BROADCAST);								// A[] matches broadcast address
-	wire boot_match   = (a_vme[18:16] == 3'b111);										// A[] matches hardware bootstrap address
-	wire am_match     = (am_vme=='h39 || am_vme=='h3D) && iack==0;						// 39=A24 non-priv mode, 3D=A24 supervisor mode
+	wire slot_match   = (a_vme[23:19] == ga[4:0]);			// A[] matches this board's VME slot
+	wire global_match = (a_vme[23:19] == ADR_TMB_GLOBAL);		// A[] matches TMB global address
+	wire brcst_match  = (a_vme[23:19] == ADR_BROADCAST);		// A[] matches broadcast address
+	wire boot_match   = (a_vme[18:16] == 3'b111);			// A[] matches hardware bootstrap address
+	wire am_match     = (am_vme=='h39 || am_vme=='h3D) && iack==0;	// 39=A24 non-priv mode, 3D=A24 supervisor mode
 	wire bd_accessed  = (global_match || slot_match || brcst_match) && am_match;		// Board accessed, for LED display only 
 	wire bd_match     = (global_match || slot_match || brcst_match) && am_match && !boot_match;	// Board is selected
 
@@ -2846,29 +2865,31 @@
 	end
 
 // DTACK data acknowledge IOB FF, xst automatically creates a duplicate in fabric for feedback signal
-	reg dtack     = 0;	// IOB copy
+	reg dtack     = 0;	// IOB copy  JRG: Check polarity!
 	reg dtack_int = 0;	// Fabric copy
 
 	always @(posedge clock_vme) begin
-	dtack      <= bd_sel & ds0;		// IOB    flip flop has no feedback path
-	dtack_int  <= bd_sel & ds0;		// Fabric flip flop has feedback to logic
+	dtack      <= bd_sel & ds0 & (!bpi_dev | !bpi_dtack);	// IOB   flip flop has no feedback path, now include BPI
+	dtack_int  <= bd_sel & ds0 & (!bpi_dev | !bpi_dtack);	// Fabric flip flop has feedback to logic, now include BPI
+//	dtack      <= bd_sel & ds0;		// IOB    flip flop has no feedback path
+//	dtack_int  <= bd_sel & ds0;		// Fabric flip flop has feedback to logic
 	end
 
 // Construct read and write strobes
 	wire vsm_ds0;
 
 	wire read    = !write;
-	wire dir     = !(bd_sel && ds0 && read);							// 1=VME-->TMB (write), 0=TMB--VME (read)
-	wire _oe     = !(bd_sel && ds0);									// 0=Enable VME d[15:0] buffer
-	wire fpga_oe = !_oe && !dir;										// 1=enable fpga outputs to bus driver ICs when dir==0
+	wire dir     = !(bd_sel && ds0 && read);	// 1=VME-->TMB (write), 0=TMB-->VME (read)
+	wire _oe     = !(bd_sel && ds0);		// 0=Enable VME d[15:0] buffer
+	wire fpga_oe = !_oe && !dir;			// 1=enable fpga outputs to VME bus driver ICs (when dir==0)
 
 	wire clk_en  = (ds0 && write && !dtack_int && bd_sel) || vsm_ds0;	// 1=enable register for writing
-	wire adr_cap =  ds0 && write && !dtack_int;							// 1=capture VME address for debug readback
+	wire adr_cap =  ds0 && write && !dtack_int;				// 1=capture VME address for debug readback
 
 // Interrupts
-	assign iackout = (~_iackin) & ~iack;								// Pass interrupt daisy chain
-	assign irq     = 0;													// Interrupt request not implemented
-	assign berr    = 0;													// Bus error not implemented
+	assign iackout = (~_iackin) & ~iack;					// Pass interrupt daisy chain
+	assign irq     = 0;							// Interrupt request not implemented
+	assign berr    = 0;							// Bus error not implemented
 
 //------------------------------------------------------------------------------------------------------------------
 // VME Read-Data Multiplexer
@@ -3288,11 +3309,12 @@
 //------------------------------------------------------------------------------------------------------------------
 // VME Bidirectional Data Bus
 //------------------------------------------------------------------------------------------------------------------
-	wire [15:0] vsm_data;
+	wire [15:0] vsm_data, data_send;
 	wire [15:0] d;
 	
-	assign d_vme   = (fpga_oe) ? data_out       : {16{1'bz}};	// transmit to backplane, else float
-	assign d[15:0] = (vsm_oe ) ? vsm_data[15:0] : d_vme[15:0];	// insert backplane or prom data to write
+	assign d_vme   = (fpga_oe) ? data_send       : {16{1'bz}};	  // transmit to backplane, else float
+	assign data_send = (bpi_dev) ? bpi_outdata[15:0] : data_out[15:0]; // select bpi data or vme_reg data to send
+	assign d[15:0] = (vsm_oe) ? vsm_data[15:0] : d_vme[15:0];	  // insert backplane or prom data to write
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_VMESM0=DA	VME State Machine Control Register
@@ -3343,7 +3365,7 @@
 	wire [2:0]	jsm_format_sm_vec,	jsm_format_sm_vec_new,	jsm_format_sm_vec_old;
 	wire [1:0]	jsm_jtag_sm_vec,	jsm_jtag_sm_vec_new,	jsm_jtag_sm_vec_old;
 
-	wire   vme_ready        = ready_int;
+	wire   vme_ready        = ready_int;  // JG: this is really just power_up!
 	wire   vsm_autostart    = AUTO_VME;
 
 	assign vmesm0_rd[0]		= vsm_start;				// RW	Manual cycle start command
@@ -3384,34 +3406,34 @@
 	vmesm uvmesm
 	(
 // Control
-	.clock			(clock),				// In	40 MHz clock
+	.clock			(clock),		// In	40 MHz clock
 	.global_reset	(global_reset),			// In	Global reset
-	.power_up		(power_up),				// In	DLL clock lock, we wait for it
-	.vme_ready		(vme_ready),			// In	TMB VME registers finished loading with defaults
-	.start			(vsm_start),			// In	Cycle start command
-	.autostart		(AUTO_VME),				// In	Enable automatic power-up
+	.power_up		(power_up),		// In	DLL clock lock, we wait for it
+	.vme_ready		(vme_ready),		// In	TMB VME registers finished loading with defaults.  JG: really just power_up
+	.start			(vsm_start),		// In	Cycle start command
+	.autostart		(AUTO_VME),		// In	Enable automatic power-up
 	.throttle		(vsm_throttle[3:0]),	// In	PROM read-speed control, 0=fastest
 // PROM
 	.prom_data		(vsm_prom_data[7:0]),	// In	prom_data[7:0]
-	.prom_clk		(vsm_prom_clk),			// Out	prom_ctrl[0]
-	.prom_oe		(vsm_prom_oe),			// Out	prom_ctrl[1]
-	.prom_nce		(vsm_prom_nce),			// Out	prom_ctrl[2]
-	.vmesm_oe		(vsm_oe),				// Out	Enable vme mux
-	.adr			(vsm_adr[23:0]),		// Out	VME register address
-	.data			(vsm_data[15:0]),		// Out	VME data from PROM
-	.ds0			(vsm_ds0),				// Out	VME stobe
+	.prom_clk		(vsm_prom_clk),		// Out	prom_ctrl[0]
+	.prom_oe		(vsm_prom_oe),		// Out	prom_ctrl[1]
+	.prom_nce		(vsm_prom_nce),		// Out	prom_ctrl[2]
+	.vmesm_oe		(vsm_oe),		// Out	Enable vme mux
+	.adr			(vsm_adr[23:0]),	// Out	VME register address
+	.data			(vsm_data[15:0]),	// Out	VME data from PROM
+	.ds0			(vsm_ds0),		// Out	VME stobe
 // Status
-	.sreset			(vsm_sreset),			// In	Status signal reset
-	.busy			(vsm_busy),				// Out	State machine busy
+	.sreset			(vsm_sreset),		// In	Status signal reset
+	.busy			(vsm_busy),		// Out	State machine busy
 	.busy_extend	(vsm_busy_extend),		// Out	State machine busy extended to hold off jtagsm
-	.aborted		(vsm_aborted),			// Out	State machine aborted reading PROM
-	.cksum_ok		(vsm_cksum_ok),			// Out	Check-sum  matches PROM contents
-	.wdcnt_ok		(vsm_wdcnt_ok),			// Out	Word count matches PROM contents
-	.vmesm_ok		(vsm_ok),				// Out	Machine ran without errors
-	.wdcnt			(vsm_wdcnt[15:0]),		// Out	Word count
-	.cksum			(vsm_cksum[7:0]),		// Out	Check sum
-	.fmt_err		(vsm_fmt_err[4:0]),		// Out	PROM data structure error
-	.nvme_writes	(vsm_nvme_writes[7:0])	// Out	Number of vme addresses written
+	.aborted		(vsm_aborted),		// Out	State machine aborted reading PROM
+	.cksum_ok		(vsm_cksum_ok),		// Out	Check-sum  matches PROM contents
+	.wdcnt_ok		(vsm_wdcnt_ok),		// Out	Word count matches PROM contents
+	.vmesm_ok		(vsm_ok),		// Out	Machine ran without errors
+	.wdcnt			(vsm_wdcnt[15:0]),	// Out	Word count
+	.cksum			(vsm_cksum[7:0]),	// Out	Check sum
+	.fmt_err		(vsm_fmt_err[4:0]),	// Out	PROM data structure error
+	.nvme_writes	(vsm_nvme_writes[7:0])	        // Out	Number of vme addresses written
 	);
 //------------------------------------------------------------------------------------------------------------------
 // ADR_IDREG0=00	ID Register 0, Readonly
@@ -4366,72 +4388,72 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
 	initial begin
-	mod_cfg_wr[0]					= 0;							// 1=Front Panel LEDs sourced from VME register
-	mod_cfg_wr[1]					= 0;							// 1=FP LED Cylon mode, cool
-	mod_cfg_wr[2]					= 1;							// 1=Flash in trigger_stop mode
-	mod_cfg_wr[3]					= 0;							// 1=On-Board    LEDs sourced from VME register
-	mod_cfg_wr[4]					= 0;							// 1=BD LED Cylon mode, cool
-	mod_cfg_wr[11:5]				= 0;							// Readonly
-	mod_cfg_wr[12]					= 1;							// 1=Enable global reset on lock_lost
-	mod_cfg_wr[15:13]				= 0;							// Readonly
+	mod_cfg_wr[0]		= 0;		// 1=Front Panel LEDs sourced from VME register
+	mod_cfg_wr[1]		= 0;		// 1=FP LED Cylon mode, cool
+	mod_cfg_wr[2]		= 1;		// 1=Flash in trigger_stop mode
+	mod_cfg_wr[3]		= 0;		// 1=On-Board    LEDs sourced from VME register
+	mod_cfg_wr[4]		= 0;		// 1=BD LED Cylon mode, cool
+	mod_cfg_wr[11:5]	= 0;		// Readonly
+	mod_cfg_wr[12]		= 1;		// 1=Enable global reset on lock_lost
+	mod_cfg_wr[15:13]	= 0;		// Readonly
 	end
 
-	assign led_fp_src_vme			= mod_cfg_wr[0];				// RW	1=Front Panel LEDs sourced from VME register
-	assign led_fp_cylon				= mod_cfg_wr[1];				// RW	1=Front Panel LEDs Cylon mode, cool
-	assign led_flash_on_stop		= mod_cfg_wr[2];				// RW	1=Flash front panel in trigger_stop mode
-	assign led_bd_src_vme			= mod_cfg_wr[3];				// RW	1=On-Board    LEDs sourced from VME register
-	assign led_bd_cylon				= mod_cfg_wr[4];				// RW	1=On-Board    LEDs Cylon mode, cool
-	assign global_reset_en			= mod_cfg_wr[12];				// RW	Enable global reset on lock_lost
+	assign led_fp_src_vme		= mod_cfg_wr[0];	// RW	1=Front Panel LEDs sourced from VME register
+	assign led_fp_cylon		= mod_cfg_wr[1];	// RW	1=Front Panel LEDs Cylon mode, cool
+	assign led_flash_on_stop	= mod_cfg_wr[2];	// RW	1=Flash front panel in trigger_stop mode
+	assign led_bd_src_vme		= mod_cfg_wr[3];	// RW	1=On-Board    LEDs sourced from VME register
+	assign led_bd_cylon		= mod_cfg_wr[4];	// RW	1=On-Board    LEDs Cylon mode, cool
+	assign global_reset_en		= mod_cfg_wr[12];	// RW	Enable global reset on lock_lost.  JG: on by default
 
-	assign mod_cfg_rd[4:0]			= mod_cfg_wr[4:0];				// RW	Readback
-	assign mod_cfg_rd[11:5]			= cfeb_exists[6:0];				// R	CFEBs instantiated in this firmware
-	assign mod_cfg_rd[12]			= mod_cfg_wr[12];				// RW	Readback
-	assign mod_cfg_rd[13]			= power_up;						// R	Power-up FF
-	assign mod_cfg_rd[14]			= ddd_autostart;				// R	DDD autostart
-	assign mod_cfg_rd[15]			= mez_done;						// R	Mezzanine status
+	assign mod_cfg_rd[4:0]		= mod_cfg_wr[4:0];	// RW	Readback
+	assign mod_cfg_rd[11:5]		= cfeb_exists[6:0];	// R	CFEBs instantiated in this firmware
+	assign mod_cfg_rd[12]		= mod_cfg_wr[12];	// RW	Readback
+	assign mod_cfg_rd[13]		= power_up;		// R	Power-up FF
+	assign mod_cfg_rd[14]		= ddd_autostart;	// R	DDD autostart
+	assign mod_cfg_rd[15]		= mez_done;		// R	Mezzanine status
 
-	wire   mod_cfg_sump				= (|mod_cfg_wr[15:13]) | (|mod_cfg_wr[11:5]);
+	wire   mod_cfg_sump		= (|mod_cfg_wr[15:13]) | (|mod_cfg_wr[11:5]);
 
 //------------------------------------------------------------------------------------------------------------------
 //  ADR_CCB_CFG=2A		CCB Configuration Register
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
 	initial begin
-	ccb_cfg_wr[0]					= 0;							// 1=Ignore CCB backplane inputs
-	ccb_cfg_wr[1]					= 0;							// 1=Disable CCB backplane outputs
-	ccb_cfg_wr[2]					= 0;							// 1=Enable CCB internal L1A emulator
-	ccb_cfg_wr[3]					= 0;							// 1=Enable ALCT+CLCT CCB status for CCB front panelpanel
-	ccb_cfg_wr[4]					= 0;							// 1=Enable ALCT status GTL outputs
-	ccb_cfg_wr[5]					= 0;							// 1=Enable CLCT status GTL outputs
-	ccb_cfg_wr[6]					= 0;							// 1=fire ccb_l1accept oneshot
-	ccb_cfg_wr[11:7]				= 0;							// CCB reserved signals from TMB, not used yet
-	ccb_cfg_wr[12]					= 0;							// Event counter reset, from VME
-	ccb_cfg_wr[13]					= 0;							// Bunch crossing counter reset, from VME
-	ccb_cfg_wr[14]					= 0;							// Bunch crossing zero, from VME
-	ccb_cfg_wr[15]					= CCB_BX0_EMULATOR;				// BX0 emulator enable, must be 0 for CERN versions
+	ccb_cfg_wr[0]					= 0;			// 1=Ignore CCB backplane inputs
+	ccb_cfg_wr[1]					= 0;			// 1=Disable CCB backplane outputs
+	ccb_cfg_wr[2]					= 0;			// 1=Enable CCB internal L1A emulator
+	ccb_cfg_wr[3]					= 0;			// 1=Enable ALCT+CLCT CCB status for CCB front panelpanel
+	ccb_cfg_wr[4]					= 0;			// 1=Enable ALCT status GTL outputs
+	ccb_cfg_wr[5]					= 0;			// 1=Enable CLCT status GTL outputs
+	ccb_cfg_wr[6]					= 0;			// 1=fire ccb_l1accept oneshot
+	ccb_cfg_wr[11:7]				= 0;			// CCB reserved signals from TMB, not used yet
+	ccb_cfg_wr[12]					= 0;			// Event counter reset, from VME
+	ccb_cfg_wr[13]					= 0;			// Bunch crossing counter reset, from VME
+	ccb_cfg_wr[14]					= 0;			// Bunch crossing zero, from VME
+	ccb_cfg_wr[15]					= CCB_BX0_EMULATOR;	// BX0 emulator enable, must be 0 for CERN versions
 	end
 
-	assign ccb_ignore_rx			= ccb_cfg_wr[0];				// RW	1=Ignore CCB backplane inputs
-	assign ccb_disable_tx			= ccb_cfg_wr[1];				// RW	1=Disble tranmistted CCB backplane outputs
-	assign ccb_int_l1a_en			= ccb_cfg_wr[2];				// RW	1=Enable internal l1a emualtor
-	assign ccb_status_oe_lcl		= ccb_cfg_wr[3];				// RW	1=Enable ALCT+CLCT CCB status for CCB front panel
-	assign alct_status_en			= ccb_cfg_wr[4];				// RW	1=Enable status GTL outputs
-	assign clct_status_en			= ccb_cfg_wr[5];				// RW	1=Enable status GTL outputs
-	assign l1a_vme					= ccb_cfg_wr[6];				// RW	1=fire ccb_l1accept oneshot
-	assign tmb_reserved_in[4:0]		= ccb_cfg_wr[11:7];				// W	CCB reserved signals from TMB, not used yet
+	assign ccb_ignore_rx			= ccb_cfg_wr[0];	// RW	1=Ignore CCB backplane inputs
+	assign ccb_disable_tx			= ccb_cfg_wr[1];	// RW	1=Disble tranmistted CCB backplane outputs
+	assign ccb_int_l1a_en			= ccb_cfg_wr[2];	// RW	1=Enable internal l1a emualtor
+	assign ccb_status_oe_lcl		= ccb_cfg_wr[3];	// RW	1=Enable ALCT+CLCT CCB status for CCB front panel
+	assign alct_status_en			= ccb_cfg_wr[4];	// RW	1=Enable status GTL outputs
+	assign clct_status_en			= ccb_cfg_wr[5];	// RW	1=Enable status GTL outputs
+	assign l1a_vme				= ccb_cfg_wr[6];	// RW	1=fire ccb_l1accept oneshot
+	assign tmb_reserved_in[4:0]		= ccb_cfg_wr[11:7];	// W	CCB reserved signals from TMB, not used yet
 
-	wire   vme_evcntres_vme			= ccb_cfg_wr[12];				// W	Event counter reset, from VME
-	wire   vme_bcntres_vme			= ccb_cfg_wr[13];				// W	Bunch crossing counter reset, from VME
-	wire   vme_bx0_vme				= ccb_cfg_wr[14];				// W	Bunch crossing zero, from VME
-	wire   vme_bx0_emu_en			= ccb_cfg_wr[15];				// W	BX0 emulator enable, must be 0 for CERN versions
+	wire   vme_evcntres_vme			= ccb_cfg_wr[12];	// W	Event counter reset, from VME
+	wire   vme_bcntres_vme			= ccb_cfg_wr[13];	// W	Bunch crossing counter reset, from VME
+	wire   vme_bx0_vme			= ccb_cfg_wr[14];	// W	Bunch crossing zero, from VME
+	wire   vme_bx0_emu_en			= ccb_cfg_wr[15];	// W	BX0 emulator enable, must be 0 for CERN versions
 	
-	assign ccb_cfg_rd[6:0]			= ccb_cfg_wr[6:0];				//		Readback
-	assign ccb_cfg_rd[8:7]			= tmb_reserved[1:0];			// R	Unassigned
-	assign ccb_cfg_rd[11:9]			= tmb_reserved_out[2:0];		// R	Unassigned
-	assign ccb_cfg_rd[12]			= tmb_hard_reset;				// R	Reload TMB  FPGA
-	assign ccb_cfg_rd[13]			= alct_hard_reset;				// R	Reload ALCT FPGA
-	assign ccb_cfg_rd[14]			= alct_adb_pulse_sync;			// R	ALCT synchronous  test pulse
-	assign ccb_cfg_rd[15]			= alct_adb_pulse_async;			// R	ALCT asynchronous test pulse
+	assign ccb_cfg_rd[6:0]			= ccb_cfg_wr[6:0];		//		Readback
+	assign ccb_cfg_rd[8:7]			= tmb_reserved[1:0];		// R	Unassigned
+	assign ccb_cfg_rd[11:9]			= tmb_reserved_out[2:0];	// R	Unassigned
+	assign ccb_cfg_rd[12]			= tmb_hard_reset;		// R	Reload TMB  FPGA
+	assign ccb_cfg_rd[13]			= alct_hard_reset;		// R	Reload ALCT FPGA
+	assign ccb_cfg_rd[14]			= alct_adb_pulse_sync;		// R	ALCT synchronous  test pulse
+	assign ccb_cfg_rd[15]			= alct_adb_pulse_async;		// R	ALCT asynchronous test pulse
 
 	assign	ccb_status_oe = (ccb_status_tri) ? 1'bz: ccb_status_oe_lcl;	// 1=CCB output enable
 
@@ -4444,70 +4466,70 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
 	initial begin
-	ccb_trig_wr[0]					= 1'b0;							// 1=Request ccb l1a on alct ext_trig
-	ccb_trig_wr[1]					= 1'b0;							// 1=Request ccb l1a on clct ext_trig
-	ccb_trig_wr[2]					= 1'b1;							// 1=Request ccb l1a on sequencer trigger
-	ccb_trig_wr[3]					= 1'b0;							// 1=Fire alct_ext_trig oneshot
-	ccb_trig_wr[4]					= 1'b0;							// 1=Fire clct_ext_trig oneshot
-	ccb_trig_wr[5]					= 1'b0;							// 1=clct_ext_trig fires alct and alct fires clct_trig, DC level
-	ccb_trig_wr[6]					= 1'b0;							// 1=Allow clct_ext_trigger_ccb even if ccb_ignore_rx=1
-	ccb_trig_wr[7]					= 1'b0;							// 1=ignore ttc trig_start/stop commands
-	ccb_trig_wr[15:8]				= 8'd114;						// Internal L1A delay (not same as sequencer internal)
+	ccb_trig_wr[0]					= 1'b0;		// 1=Request ccb l1a on alct ext_trig
+	ccb_trig_wr[1]					= 1'b0;		// 1=Request ccb l1a on clct ext_trig
+	ccb_trig_wr[2]					= 1'b1;		// 1=Request ccb l1a on sequencer trigger
+	ccb_trig_wr[3]					= 1'b0;		// 1=Fire alct_ext_trig oneshot
+	ccb_trig_wr[4]					= 1'b0;		// 1=Fire clct_ext_trig oneshot
+	ccb_trig_wr[5]					= 1'b0;		// 1=clct_ext_trig fires alct and alct fires clct_trig, DC level
+	ccb_trig_wr[6]					= 1'b0;		// 1=Allow clct_ext_trigger_ccb even if ccb_ignore_rx=1
+	ccb_trig_wr[7]					= 1'b0;		// 1=ignore ttc trig_start/stop commands
+	ccb_trig_wr[15:8]				= 8'd114;	// Internal L1A delay (not same as sequencer internal)
 	end
 
-	assign alct_ext_trig_l1aen		= ccb_trig_wr[0];				// RW	1=Request ccb l1a on clct ext_trig
-	assign clct_ext_trig_l1aen		= ccb_trig_wr[1];				// RW	1=Request ccb l1a on alct ext_trig
-	assign seq_trig_l1aen			= ccb_trig_wr[2];				// RW	1=Request ccb l1a on alct sequencer trig
-	assign alct_ext_trig_vme		= ccb_trig_wr[3];				// RW	1=Fire alct_ext_trig oneshot
-	assign clct_ext_trig_vme		= ccb_trig_wr[4];				// RW	1=Fire clct_ext_trig oneshot
-	assign ext_trig_both			= ccb_trig_wr[5];				// RW	1=clct_ext_trig fires alct and alct fires clct_trig, DC level
-	assign ccb_allow_ext_bypass		= ccb_trig_wr[6];				// RW	1=Allow clct_ext_trigger_ccb even if ccb_ignore_rx=1
-	assign ccb_ignore_startstop		= ccb_trig_wr[7];				// RW	1=ignore ttc trig_start/stop commands
-	assign l1a_delay_vme[7:0]		= ccb_trig_wr[15:8];			// RW	Internal L1A delay
-	assign ccb_trig_rd[15:0]		= ccb_trig_wr[15:0];			// 		Readback
+	assign alct_ext_trig_l1aen		= ccb_trig_wr[0];	// RW	1=Request ccb l1a on clct ext_trig
+	assign clct_ext_trig_l1aen		= ccb_trig_wr[1];	// RW	1=Request ccb l1a on alct ext_trig
+	assign seq_trig_l1aen			= ccb_trig_wr[2];	// RW	1=Request ccb l1a on alct sequencer trig
+	assign alct_ext_trig_vme		= ccb_trig_wr[3];	// RW	1=Fire alct_ext_trig oneshot
+	assign clct_ext_trig_vme		= ccb_trig_wr[4];	// RW	1=Fire clct_ext_trig oneshot
+	assign ext_trig_both			= ccb_trig_wr[5];	// RW	1=clct_ext_trig fires alct and alct fires clct_trig, DC level
+	assign ccb_allow_ext_bypass		= ccb_trig_wr[6];	// RW	1=Allow clct_ext_trigger_ccb even if ccb_ignore_rx=1
+	assign ccb_ignore_startstop		= ccb_trig_wr[7];	// RW	1=ignore ttc trig_start/stop commands
+	assign l1a_delay_vme[7:0]		= ccb_trig_wr[15:8];	// RW	Internal L1A delay
+	assign ccb_trig_rd[15:0]		= ccb_trig_wr[15:0];	// 		Readback
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_CCB_STAT0=2E		CCB Status Register, Readonly
 //------------------------------------------------------------------------------------------------------------------
-	assign ccb_stat0_rd[7:0]		= ccb_cmd[7:0];					// R	CCB command word
-	assign ccb_stat0_rd[8]			= ccb_clock40_enable;			// R	Enable 40MHz clock
-	assign ccb_stat0_rd[9]			= ccb_reserved[0];				// R	ccb_ttcrx_ready
-	assign ccb_stat0_rd[10]			= ccb_reserved[1];				// R	ccb_qpll_locked
-	assign ccb_stat0_rd[11]			= ccb_reserved[2];				// R	Unassigned
-	assign ccb_stat0_rd[12]			= ccb_reserved[3];				// R	Unassigned
-	assign ccb_stat0_rd[13]			= ccb_reserved[4];				// R	Unassigned
-	assign ccb_stat0_rd[14]			= ccb_bcntres;					// R	Bunch crossing counter reset, backplane
-	assign ccb_stat0_rd[15]			= ccb_bx0;						// R	Bunch crossing 0 from backplane
+	assign ccb_stat0_rd[7:0]		= ccb_cmd[7:0];		// R	CCB command word
+	assign ccb_stat0_rd[8]			= ccb_clock40_enable;	// R	Enable 40MHz clock
+	assign ccb_stat0_rd[9]			= ccb_reserved[0];	// R	ccb_ttcrx_ready
+	assign ccb_stat0_rd[10]			= ccb_reserved[1];	// R	ccb_qpll_locked
+	assign ccb_stat0_rd[11]			= ccb_reserved[2];	// R	Unassigned
+	assign ccb_stat0_rd[12]			= ccb_reserved[3];	// R	Unassigned
+	assign ccb_stat0_rd[13]			= ccb_reserved[4];	// R	Unassigned
+	assign ccb_stat0_rd[14]			= ccb_bcntres;		// R	Bunch crossing counter reset, backplane
+	assign ccb_stat0_rd[15]			= ccb_bx0;		// R	Bunch crossing 0 from backplane
 
 //------------------------------------------------------------------------------------------------------------------
 //  ADR_ALCT_CFG=30		ALCT Configuration Register
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
 	initial begin
-	alct_cfg_wr[0]					= 0;							// RW	1=Enable alct_ext_trig   from CCB
-	alct_cfg_wr[1]					= 0;							// RW	1=Enable alct_ext_inject from CCB
-	alct_cfg_wr[2]					= 0;							// RW	1=Assert alct_ext_trig
-	alct_cfg_wr[3]					= 0;							// RW	1=Assert alct_ext_inject
-	alct_cfg_wr[7:4]				= 0;							// RW	ALCT Sequencer command
-	alct_cfg_wr[8]					= 1;							// RW	1=connect ccb_clock40_enable to alct_clock_en_vme
-	alct_cfg_wr[9]					= 0;							// RW	alct_clock_en_vme (unless [8]=1)
-	alct_cfg_wr[10]					= 0;							// RO	alct_muonic conditional compile
-	alct_cfg_wr[11]					= 0;							// RO	cfeb_muonic conditional compile
-	alct_cfg_wr[15:12]				= 0;							// RW	Free
+	alct_cfg_wr[0]					= 0;	// RW	1=Enable alct_ext_trig   from CCB
+	alct_cfg_wr[1]					= 0;	// RW	1=Enable alct_ext_inject from CCB
+	alct_cfg_wr[2]					= 0;	// RW	1=Assert alct_ext_trig
+	alct_cfg_wr[3]					= 0;	// RW	1=Assert alct_ext_inject
+	alct_cfg_wr[7:4]				= 0;	// RW	ALCT Sequencer command
+	alct_cfg_wr[8]					= 1;	// RW	1=connect ccb_clock40_enable to alct_clock_en_vme
+	alct_cfg_wr[9]					= 0;	// RW	alct_clock_en_vme (unless [8]=1)
+	alct_cfg_wr[10]					= 0;	// RO	alct_muonic conditional compile
+	alct_cfg_wr[11]					= 0;	// RO	cfeb_muonic conditional compile
+	alct_cfg_wr[15:12]				= 0;	// RW	Free
 	end
 
-	assign cfg_alct_ext_trig_en		= alct_cfg_wr[0];				// RW	1=Enable alct_ext_trig   from CCB
-	assign cfg_alct_ext_inject_en	= alct_cfg_wr[1];				// RW	1=Enable alct_ext_inject from CCB
-	assign cfg_alct_ext_trig		= alct_cfg_wr[2];				// RW	1=Assert alct_ext_trig
-	assign cfg_alct_ext_inject		= alct_cfg_wr[3];				// RW	1=Assert alct_ext_inject
-	assign alct_seq_cmd[3:0]		= alct_cfg_wr[7:4];				// RW	ALCT Sequencer command
-	wire   alct_clock_use_ccb		= alct_cfg_wr[8];				// RW   1=alct sees ccb_clock40_enable,0 sees [9]
-	wire   alct_clock_use_vme		= alct_cfg_wr[9];				// RW	alct_clock_en_vme (unless [8]=1)
+	assign cfg_alct_ext_trig_en		= alct_cfg_wr[0];	// RW	1=Enable alct_ext_trig   from CCB
+	assign cfg_alct_ext_inject_en	= alct_cfg_wr[1];		// RW	1=Enable alct_ext_inject from CCB
+	assign cfg_alct_ext_trig		= alct_cfg_wr[2];	// RW	1=Assert alct_ext_trig
+	assign cfg_alct_ext_inject		= alct_cfg_wr[3];	// RW	1=Assert alct_ext_inject
+	assign alct_seq_cmd[3:0]		= alct_cfg_wr[7:4];	// RW	ALCT Sequencer command
+	wire   alct_clock_use_ccb		= alct_cfg_wr[8];	// RW   1=alct sees ccb_clock40_enable,0 sees [9]
+	wire   alct_clock_use_vme		= alct_cfg_wr[9];	// RW	alct_clock_en_vme (unless [8]=1)
 
-	assign alct_cfg_rd[9:0]			= alct_cfg_wr[9:0];				// RW	Readback
-	assign alct_cfg_rd[10]			= ALCT_MUONIC;					// RO	Floats ALCT board  in clock-space with independent time-of-flight delay
-	assign alct_cfg_rd[11]			= CFEB_MUONIC;					// RO	Floats CFEB boards in clock-space with independent time-of-flight delay
-	assign alct_cfg_rd[15:12]		= alct_cfg_wr[15:12];			// RW	Readback
+	assign alct_cfg_rd[9:0]			= alct_cfg_wr[9:0];	// RW	Readback
+	assign alct_cfg_rd[10]			= ALCT_MUONIC;		// RO	Floats ALCT board  in clock-space with independent time-of-flight delay
+	assign alct_cfg_rd[11]			= CFEB_MUONIC;		// RO	Floats CFEB boards in clock-space with independent time-of-flight delay
+	assign alct_cfg_rd[15:12]		= alct_cfg_wr[15:12];	// RW	Readback
 
 	assign alct_clock_en_vme		= (alct_clock_use_ccb) ? ccb_clock40_enable : alct_clock_use_vme;		// Select ALCT 40MHz clock en
 
@@ -5938,15 +5960,15 @@
 //------------------------------------------------------------------------------------------------------------------
 // CLCT Bunch crossing register at pretrigger
 	assign bxn_clct_rd[11:0]	= bxn_clct_vme[11:0];	// CLCT BXN at pre-trigger
-	assign bxn_clct_rd[15:12]	= 0;					// Unassigned
+	assign bxn_clct_rd[15:12]	= 0;				// Unassigned
 
 // ALCT Bunch crossing register
 	assign bxn_alct_rd[4:0]		= bxn_alct_vme[4:0];	// ALCT BXN at alct valid pattern flag
-	assign bxn_alct_rd[15:5]	= 0;					// Unassigned
+	assign bxn_alct_rd[15:5]	= 0;				// Unassigned
 
 // CLCT Bunch crossing register at L1A
 	assign bxn_l1a_rd[11:0]		= bxn_l1a_vme[11:0];	// CLCT BXN at L1A
-	assign bxn_l1a_rd[15:12]	= 0;					// Unassigned
+	assign bxn_l1a_rd[15:12]	= 0;				// Unassigned
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_LAYER_TRIG=F0	Layer Trigger Mode Register
@@ -6998,6 +7020,138 @@
 	cfeb_v6_badbits_ctrl_sump	|
 	virtex6_extend_sump
 	;
+
+
+   	reg ds0_r=0;
+	always @(posedge clock or posedge global_reset) begin
+	   if (global_reset) ds0_r <= 0; // consider if ds0 should be registered or use the raw input... rise on time & fall early?
+	   else   ds0_r <= ds0;
+	end
+        wire bpi_dev = (bd_sel & (a_vme[18:15] == 4'h5));
+        wire [9:0]	bpi_cmd = (a_vme[11:2]);
+        wire [15:0]	bpi_fifo_dout;
+        wire [10:0]	bpi_fifo_cnt;
+        wire [15:0]	bpi_stat;
+        wire [31:0]	bpi_time;
+        wire [15:0]	bpi_outdata;  // out to VME
+        wire [15:0]	bpi_cmd_fifo_data;  // out
+        wire bpi_dtack, bpi_rst, bpi_we, bpi_re, bpi_dsbl, bpi_enbl;
+ 
+
+ BPI_PORT bpi_vme (
+	.CLK (clock),             // 40MHz clock
+	.RST (global_reset),      // system reset
+   // VME selection/control
+	.DEVICE (bpi_dev),         // 1 bit indicating this device has been selected... JRG: choose any available OTMB adr range
+	.STROBE (ds0),          // Data strobe synchronized to rising or falling edge of clock and asynchronously cleared
+	.COMMAND (bpi_cmd),       // [9:0] command portion of VME address... JRG: assume it is address bits 11:2?
+	.WRITE_B (nwrite),        // VME read/write_bar
+	.INDATA (d),              // [15:0] data from VME writes to be provided to BPI interface
+	.OUTDATA (bpi_outdata),   // out data from BPI interface to VME buss for reads
+	.DTACK_B (bpi_dtack),     // out DTACK_bar to VME  ^^^JG: All Good^^^
+   // BPI controls...  JRG: what modules do these connect with?
+	.BPI_RST (bpi_rst),                     // out Resets BPI interface state machines
+	.BPI_CMD_FIFO_DATA (bpi_cmd_fifo_data), // out Data for command FIFO
+	.BPI_WE (bpi_we),                       // out Command FIFO write enable  (pulse one clock cycle for one write)
+	.BPI_RE (bpi_re),                       // out Read back FIFO read enable  (pulse one clock cycle for one read)
+	.BPI_DSBL (bpi_dsbl),                   // out Disable parsing of BPI commands in the command FIFO (while being filled)
+	.BPI_ENBL (bpi_enbl),                   // out Enable  parsing of BPI commands in the command FIFO
+	.BPI_RBK_FIFO_DATA (bpi_fifo_dout),     // in [15:0] Data on output of the Read back FIFO
+	.BPI_RBK_WRD_CNT (bpi_fifo_cnt),        // in [10:0] Word count of the Read back FIFO (number of available reads)
+	.BPI_STATUS (bpi_stat),                 // in [15:0] FIFO status bits and latest value of the PROM status register. 
+	.BPI_TIMER (bpi_time)                   // in [31:0] General timer
+ );
+
+ BPI_ctrl  #(   .USE_CHIPSCOPE (0)  )
+   bpi_engine (    // also has two FIFOs
+	.CLK (clock),        // in 40 MHz clock
+	.CLK1MHZ (clock_1mhz),         // in  1 MHz clock for timers
+	.RST (bpi_rst),      // in 
+	 // Interface Signals to/from VME interface
+	.BPI_CMD_FIFO_DATA (bpi_cmd_fifo_data), // in [15:0] Data for command FIFO
+	.BPI_WE (bpi_we),              // in Command FIFO write enable  (pulse one clock cycle for one write)
+	.BPI_RE (bpi_re),              // in Read back FIFO read enable  (pulse one clock cycle for one read)
+	.BPI_DSBL (bpi_dsbl),          // in Disable parsing of BPI commands in the command FIFO (while being filled)
+	.BPI_ENBL (bpi_enbl),          // in Enable  parsing of BPI commands in the command FIFO
+	.BPI_RBK_FIFO_DATA (bpi_fifo_dout), // out [15:0] Data on output of the Read back FIFO
+	.BPI_RBK_WRD_CNT (bpi_fifo_cnt),    // out [10:0] Word count of the Read back FIFO (number of available reads)
+	.BPI_STATUS (bpi_stat),        // out [15:0] FIFO status bits and latest value of the PROM status register. 
+	.BPI_TIMER (bpi_time),         // out [31:0] General timer
+	 // Signals to/from low level BPI interface
+	.BPI_BUSY (bpi_busy),           // in 
+	.BPI_DATA_FROM (bpi_data_from[15:0]), // in [15:0] 
+	.BPI_LOAD_DATA (bpi_load_data), // in 
+	.BPI_ACTIVE (bpi_active),   // out 
+	.BPI_OP (bpi_op[1:0]),           // out [1:0] 
+	.BPI_ADDR (bpi_addr[22:0]),       // out [22:0] 
+	.BPI_DATA_TO (bpi_data_to[15:0]),   // out [15:0] 
+	.BPI_EXECUTE (bpi_execute)  // out 
+ );
+
+
+//   wire      bpi_busy, bpi_load_data, bpi_execute; // JRG, all done
+   wire [15:0] bpi_data_from;  // JRG, all done
+   wire [15:0] bpi_data_to;    // JRG, all done
+   wire [22:0] bpi_addr;  // JRG, all done
+   wire  [1:0] bpi_op;    // JRG, all done
+
+    bpi_interface bpi_busctrl (
+    .CLK (clock),      // in 40 MHz clock
+    .RST (bpi_rst),    // in  -- JRG: from BPI_VME
+    .ADDR (bpi_addr[22:0]),  // in [22:0] Bank/Array Address  -- JRG: from BPI_CTRL
+    .CMD_DATA_OUT (bpi_data_to[15:0]), // in [15:0] Command or Data being written to FLASH device  -- JRG: from BPI_CTRL
+    .OP (bpi_op[1:0]),      // in [1:0] Operation: 00-standby, 01-write, 10-read, 11-not allowed(standby)  -- JRG: from BPI_CTRL
+    .EXECUTE (bpi_execute),      // in  -- JRG: from BPI_CTRL
+    .DATA_IN (bpi_data_from[15:0]),    // out [15:0] Data read from FLASH device  -- JRG: to BPI_CTRL
+    .LOAD_DATA (bpi_load_data),  // out Clock enable signal for capturing Data read from FLASH device  -- JRG: to BPI_CTRL
+    .BUSY (bpi_busy),            // out Operation in progress signal (not ready)  -- JRG: to BPI_CTRL
+	// signals for Dual purpose data lines
+    .BPI_ACTIVE (bpi_active),    // in set to 1 when data lines are for BPI communications  -- JRG: from BPI_CTRL
+    .DUAL_DATA (led_tmb),    // in [15:0] Data provided for non BPI communications -- JRG: probably should be TMB signals for LEDs
+	 // external connections cooresponding to I/O pins
+    .BPI_AD (bpi_ad_out),    // out [22:0]  JRG, what is this?
+// JRG: do I use this access port to define the IO pins in ref to UCF?  I think yes...
+    .CFG_DAT (led_tmb_out),   // inout [15:0]  JRG, what is this?  Probably should match it to LED bus (16) named in UCF, take out to TOP
+// JRG, not needed:   output RS0,
+// JRG, not needed:   output RS1,
+//    .FCS_B (prm_fcs),    // out, take to otmb_top
+//    .FOE_B (prm_foe),    // out, take to otmb_top
+//    .FWE_B (prm_fwe),    // out, take to otmb_top
+//    .FLATCH_B (prm_load), // out, take to otmb_top
+    .FLASH_CTRL (flash_ctrl),   // out [3:0] ~fcs, ~foe, ~fwe, ~latch_adr
+    .FLASH_CTRL_DUALUSE (flash_ctrl_dualuse)   // in [2:0] ~foe, ~fwe, ~latch_adr
+    );
+
+/*
+BPI use cases we've got to handle for OTMB
+------------------------------------------
+  External Prom_Adr bus:   [23 bits, keep this I/O buffer control in TMB modules, uses obuf_ff at 40 MHz]
+    -driven by TMB logic [DMB_Tx data with i/o register]  (use bpi_dev signal from TMB VME decode as the MUX switch for this?)
+    -also driven by BPI_ctrl via bpi_interface?   Will a 25 ns i/o register delay on this mess up BPI transactions?
+       -->  What Adr signal do I pass out from BPI code and hand to TMB "DMB_Tx" mux logic?
+
+
+  External Prom_Data bus:   [16 bits, this is currently low-speed for TMB LEDs... ok to have I/O control for this in BPI modules, but how?]
+    -driven by TMB logic [FP_LED control for TMB] 
+       -->  Should I pass TMB LED bits into the BPI "Dual_Data" port?
+    -also driven by BPI_ctrl via bpi_interface?
+    -and also an input for BPI_ctrl from the Prom via bpi_interface?  (needs a direction switch... does it exist already?)
+       -->  Maybe this part is handled by  data_from  and  data _to?  Then no changes would be needed here...
+
+
+ How are those things above related to these bpi_interface ports?
+    .DUAL_DATA (),    // in [15:0] Data provided for non BPI communications    Q: comes from where? purpose?  Use it for TMB LED output?
+     // external connections corresponding to I/O pins... are these only needed if TMB logic will use these pins as input?
+    .BPI_AD (),    // inout [22:0]   Q: what is this?   ignore?  TMB will drive Adr bus elsewhere (mixed with DMB_Tx data i/o register)
+    .CFG_DAT (),   // inout [15:0]   Q: what is this?   ignore?  I don't see a use for it on OTMB...
+
+
+Note:  I plan to delete the following line from bpi_interface... any bad side effects?  The Adr I/O will be driven in TMB logic.
+    IOBUF #(.DRIVE(12),.IOSTANDARD("DEFAULT"),.SLEW("SLOW")) IOBUF_BPI_AD[22:0] (.O(bpi_ad_in),.IO(BPI_AD),.I(bpi_ad_out_r),.T(bpi_dir));
+       -->  Then I guess I also have to delete the BPI_AD port as well, right?
+
+
+  */
 
 //------------------------------------------------------------------------------------------------------------------
 	endmodule

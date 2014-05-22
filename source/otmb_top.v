@@ -157,7 +157,7 @@
 	f_sdat,
 	f_fok,
 
-// PROM
+// BPI FLASH PROM
 	fcs
 	);
 //-------------------------------------------------------------------------------------------------------------------
@@ -292,7 +292,14 @@
 	output			_hard_reset_alct_fpga;
 	output			_hard_reset_tmb_fpga;
 	output			gtl_loop;
-
+	wire	[26:0]	_ccb_tx_i;
+        assign _ccb_tx[25:15] = _ccb_tx_i[25:15];
+        assign _ccb_tx[13:4]  = _ccb_tx_i[13:4];
+        assign _ccb_tx[2:0]   = _ccb_tx_i[2:0];
+        assign _ccb_tx[14] = (bpi_active) ? flash_ctrl[2] : _ccb_tx_i[14]; // Flash Prom foe
+        assign _ccb_tx[26] = (bpi_active) ? flash_ctrl[1] : _ccb_tx_i[26]; // Flash Prom fwe
+        assign _ccb_tx[3]  = (bpi_active) ? flash_ctrl[0] : _ccb_tx_i[3];  // Flash Prom latch
+   
 // VME
 	inout	[15:0]	vme_d;
 	input	[23:1]	vme_a;
@@ -336,7 +343,6 @@
 	input			adc_io3_dout;
 	output			smb_clk;
 	output			mez_busy;
-	output	[7:0]	led_fp;
 
 // General Purpose I/Os
 	inout			gp_io0;			// jtag_fgpa0 tdo (out) shunted to gp_io1, usually
@@ -348,15 +354,19 @@
 	output			gp_io6;			// _write on mezzanine card, use only as an FPGA output
 	output			gp_io7;			// _cs    on mezzanine card, use only as an FPGA output// General Purpose I/Os
 
-// Mezzanine Test Points
-	output			meztp20;
-	output			meztp21;
-	output			meztp22;
-	output			meztp23;
-	output			meztp24;
-	output			meztp25;
-	output			meztp26;
-	output			meztp27;
+// Mezzanine Test Points (JRG: used to be 8 outputs, now inout for BPI access to XCF128 Flash Prom)
+	inout			meztp20;
+	inout			meztp21;
+	inout			meztp22;
+	inout			meztp23;
+	inout			meztp24;
+	inout			meztp25;
+	inout			meztp26;
+	inout			meztp27;
+	wire	[15:0]	led_tmb;     // goes to BPI logic
+//	wire	[15:0]	led_tmb_out; // comes from BPI logic  { meztp(8),led_fp(8) }
+   assign led_tmb[15:0] = {mez_led[7:0],led_fp_tmb[7:0]};  // send this to BPI logic
+   
 
 // Deprecated
 	wire tmb_clock0d = !alct_rxclockd;	// Replaced by LHCLK_P|N
@@ -365,7 +375,11 @@
 	input	[8:7]	set_sw;
 	output	[9:1]	testled;
 	input			reset;
-
+// JRG, orig:	output	[7:0]	led_fp;
+	inout	[7:0]	led_fp;
+	wire	[7:0]	led_fp_tmb;
+	wire	[7:0]	mez_led;
+   
 // CERN QPLL
 	input			clk40p;			// 40 MHz from QPLL
 	input			clk40n;			// 40 MHz from QPLL
@@ -401,8 +415,12 @@
 	input			f_sdat;
 	input			f_fok;
 
-// PROM
+// BPI FLASH PROM
 	output			fcs;
+        wire [22:0] 	bpi_ad_out;
+        wire 		bpi_active;
+        wire     [3:0] 	flash_ctrl;
+        assign fcs = flash_ctrl[3];
 
 //-------------------------------------------------------------------------------------------------------------------
 // Display definitions in synth log
@@ -477,6 +495,7 @@
 	.clock_2x		(clock_2x),		// Out	80MHz commutator clock
 	.clock_lac		(clock_lac),		// Out	40MHz logic accessible clock
 	.clock_vme		(clock_vme),		// Out	10MHz global VME clock
+	.clock_1mhz		(clock_1mhz),		// Out	1MHz BPI_ctrl Timer clock
 
 // Phase delayed clocks
 	.clock_alct_txd		(clock_alct_txd),	// Out	40MHz ALCT transmit data clock 1x
@@ -491,7 +510,7 @@
 
 // Global reset
 	.mmcm_reset		(1'b0),			// In	PLL reset input for simulation
-	.global_reset_en	(global_reset_en),	// In	Enable global reset on lock_lost
+	.global_reset_en	(global_reset_en),	// In	Enable global reset on lock_lost.  JG: on by default
 	.global_reset		(global_reset),		// Out	Global reset
 	.clock_lock_lost_err	(clock_lock_lost_err),	// Out	40MHz main clock lost lock
 
@@ -541,7 +560,6 @@
 	IBUFDS_GTXE1 uclk160 (.I(clk160p),.IB(clk160n),.O(clock_160),.ODIV2(),.CEB(1'b0));						// 160MHz from QPLL for GTX
 
 
-	assign fcs = 1;			// PROM
 	assign t12_sclk	= 1'b1;	// Snap12 Transmitter
 
 //------------------------------------------------------------------------------------------------------------------
@@ -586,7 +604,7 @@
 	.clock					(clock),					// In	40MHz clock without DDD delay
 	.global_reset			(global_reset),				// In	Global reset
 	._ccb_rx				(_ccb_rx[50:0]),			// In	GTLP data from CCB, inverted
-	._ccb_tx				(_ccb_tx[26:0]),			// Out	GTLP data to   CCB, inverted
+	._ccb_tx				(_ccb_tx_i[26:0]),			// Out	GTLP data to   CCB, inverted
 
 // VME Control Ports
 	.ccb_ignore_rx			(ccb_ignore_rx),			// In	Ignore CCB backplane inputs
@@ -1626,6 +1644,8 @@
 	.alct_dmb		(alct_dmb[18:0]),			// In	ALCT to DMB
 	.dmb_tx_reserved	(dmb_tx_reserved[2:0]),			// In	DMB backplane reserved
 	.dmb_tx			(dmb_tx[MXDMB-1:0]),			// Out	DAQMB backplane connector
+        .bpi_ad_out   (bpi_ad_out),  // in [22:0]
+        .bpi_active   (bpi_active),  // in
 
 // ALCT Status
 	.alct_cfg_done		(alct_cfg_done),			// In	ALCT FPGA configuration done
@@ -2676,14 +2696,14 @@
 
 
 
-	assign meztp20 = ~|link_had_err;    // blue OFF.  was ~alct_wait_cfg
-	assign meztp21 = ~l_tmbclk0_lock;   // green
-	assign meztp22 = lock_tmb_clock0;   // yellow
-	assign meztp23 = ~tmbclk0_locklost; // red
-	assign meztp24 = ~l_qpll_lock;   // green
-	assign meztp25 = qpll_lock;      // yellow
-	assign meztp26 = ~qpll_locklost; // red
-	assign meztp27 = ~|link_good;    // green DIM.  --NAND this later?  was sump
+	assign mez_led[0] = ~|link_had_err;    // blue OFF.  was ~alct_wait_cfg
+	assign mez_led[1] = ~l_tmbclk0_lock;   // green
+	assign mez_led[2] = lock_tmb_clock0;   // yellow
+	assign mez_led[3] = ~tmbclk0_locklost; // red
+	assign mez_led[4] = ~l_qpll_lock;   // green
+	assign mez_led[5] = qpll_lock;      // yellow
+	assign mez_led[6] = ~qpll_locklost; // red
+	assign mez_led[7] = ~|link_good;    // green DIM.  --NAND this later?  was sump
 
 //	assign meztp20 = alct_startup_msec;	
 //	assign meztp21 = alct_wait_dll;
@@ -2781,12 +2801,13 @@
    vme uvme
      (
       // Clock
-      .clock			(clock),			// In	TMB 40MHz clock
-      .clock_vme		(clock_vme),			// In	VME 10MHz clock
-      .clock_lock_lost_err	(clock_lock_lost_err),		// In	40MHz main clock lost lock FF
-      .ttc_resync		(ttc_resync),			// In	TTC resync
-      .global_reset		(global_reset),			// In	Global reset
-      .global_reset_en		(global_reset_en),	// Out	Enable global reset on lock_lost
+      .clock			(clock),		// In	TMB 40MHz clock
+      .clock_vme		(clock_vme),		// In	VME 10MHz clock
+      .clock_1mhz		(clock_1mhz),		// In	1MHz BPI_ctrl Timer clock
+      .clock_lock_lost_err	(clock_lock_lost_err),	// In	40MHz main clock lost lock FF
+      .ttc_resync		(ttc_resync),		// In	TTC resync
+      .global_reset		(global_reset),		// In	Global reset
+      .global_reset_en		(global_reset_en),	// Out	Enable global reset on lock_lost.  JG: on by default
 
       // Firmware version
       .cfeb_exists		(cfeb_exists[MXCFEB-1:0]),	// In	CFEBs instantiated in this version
@@ -2857,6 +2878,12 @@
       .jsm_busy			(jsm_busy),						// Out	State machine busy writing
       .tck_fpga			(tck_fpga),						// Out	TCK from FPGA JTAG chain
 
+      // BPI FLASH PROM
+      .flash_ctrl (flash_ctrl[3:0]),  // out [3:0] JRG, goes up for I/O match to UCF with FCS,FOE,FWE,FLATCH = fcs,_ccb_tx14,_ccb_tx26,_ccb_tx3
+      .flash_ctrl_dualuse ({alct_status[5],tmb_reserved_in[4],clct_status[3]}),    // in [2:0] JRG, goes down to bpi_interface for MUX with FOE,FWE,FLATCH
+      .bpi_ad_out (bpi_ad_out),  // out [22:0]
+      .bpi_active (bpi_active),  // out
+
       // 3D3444
       .ddd_clock			(ddd_clock),					// Out	ddd clock
       .ddd_adr_latch			(ddd_adr_latch),				// Out	ddd address latch
@@ -2885,7 +2912,10 @@
       .led_fp_nmat			(led_nomatch),					// In	NMAT	Amber	ALCT or CLCT but no match
       .led_fp_nl1a			(led_nol1a_flush),				// In	NL1A	Red		L1A did not arrive in window
       .led_bd_in			(led_bd[7:0]),					// In	On-Board LEDs
-      .led_fp_out			(led_fp[7:0]),					// Out	Front Panel LEDs (on board LEDs are connected to prom_led)
+// JRG, orig:      .led_fp_out			(led_fp[7:0]),					// Out	Front Panel LEDs (on board LEDs are connected to prom_led)
+      .led_fp_out			(led_fp_tmb[7:0]),					// Out	Front Panel LEDs (on board LEDs are connected to prom_led)
+      .led_tmb                  (led_tmb[15:0]),     // goes to BPI logic
+      .led_tmb_out              ({meztp27,meztp26,meztp25,meztp24,meztp23,meztp22,meztp21,meztp20,led_fp[7:0]}), // comes from BPI logic
 
       // Status: Power Supply Comparator
       .vstat_5p0v			(vstat[0]),						// In	Voltage Comparator +5.0V, 1=OK

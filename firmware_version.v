@@ -4,7 +4,7 @@
 // Firmware version global definitions
 	`define FIRMWARE_TYPE		04'hC		// C=Normal CLCT/TMB, D=Debug PCB loopback version
 	`define VERSION				04'hE		// Version revision number, A=TMB2004 and earlier, E=TMB2005E production
-	`define MONTHDAY			16'h0425	// Version date
+	`define MONTHDAY			16'h0504	// Version date
 	`define YEAR				16'h2014	// Version year
 
 	`define AUTO_VME			01'h1		// Automatically initialize VME registers from PROM data,   0=do not
@@ -56,6 +56,9 @@
 //                      in clock_ctrl.v: exchange names CLOCK --> CLOCK_FB   and   CLOCK_DPS --> CLOCK
 //	02/16/2014	tuned logic for clock_lac & changed inputs to ODDR's for ALCT Tx (now "Same Edge")
 //      04/03/2014  	merge my changes with Yuriy's code for extended MPC results register in VME
+//      04/25/2014      Yuri's version with working "last 512 events" storage & readout via VME
+//      04/28/2014      first version with BPI engine implemented for firmware download to Flash prom via VME
+//      05/04/2014      new verion to test download function.... no logic changes --JRG: DriveDoneHigh, Config=40MHz
 //---------------------------------------------------------------------------------------------------------------------------------------
 //	End Global Definitions
 //---------------------------------------------------------------------------------------------------------------------------------------

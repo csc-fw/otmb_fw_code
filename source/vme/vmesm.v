@@ -585,45 +585,45 @@
 //--------------------------------------------------------------------------------------------
 	always @(posedge clock) begin
 	if		(global_reset) vme_sm <= wait_dll;
-	else if	(sreset)       vme_sm <= idle;
+	else if	(sreset)       vme_sm <= idle;     //  JG: sets idle_prom
 	else begin
 
 	case (vme_sm)
 	
-	wait_dll:										// Wait for FPGA DLLs to lock
-	 if (power_up_ff)	vme_sm <= wait_vme;			// FPGA is ready
+	wait_dll:						// Wait for FPGA DLLs to lock
+	 if (power_up_ff)	vme_sm <= wait_vme;		// FPGA is ready
 
-	wait_vme:										// Wait for VME registers to load
-	 if (vme_ready_ff)								// VME defaults loaded from FFs
+	wait_vme:						// Wait for VME registers to load
+	 if (vme_ready_ff)					// VME defaults loaded from FFs
 	 begin
-	 if (autostart)		vme_sm <= init;				// Start cycle if autostart enabled
-	 else				vme_sm <= idle;				// Otherwise stay idle
+	 if (autostart)		vme_sm <= init;			// Start cycle if autostart enabled
+	 else				vme_sm <= idle;		// Otherwise stay idle.  JG: sets idle_prom
 	 end
 
-	idle:											// Wait for VME command to program, power down PROM
-	 if (start_ff)		vme_sm <= init;				// Start arrived
+	idle:							// Wait for VME command to program, power down PROM
+	 if (start_ff)		vme_sm <= init;			// Start arrived
 
 	init:
-	 if (init_done)		vme_sm <= reset_adr;		// Power up PROM, 2uS delay
+	 if (init_done)		vme_sm <= reset_adr;		// Power up PROM, 2uS delay.  JG: sets clear_adr
 
 	reset_adr:
 	 if (reset_done)	vme_sm <= prom_taccess;		// Reset PROM address, 250nS delay
 	
-	prom_taccess:		vme_sm <= latch_prom;		// Relase reset, wait for output to assert 10ns minimum
+	prom_taccess:		vme_sm <= latch_prom;		// Relase reset, wait for output to assert 10ns minimum.  JG: sets next_adr
 
-	latch_prom:			vme_sm <= inc_adr;			// Latch PROM data
+	latch_prom:			vme_sm <= inc_adr;	// Latch PROM data
 
-	inc_adr:										// Increment PROM address
-	 if (prom_end)		vme_sm <= unstart;			// First-word marker missing or hit end of PROM data
+	inc_adr:						// Increment PROM address
+	 if (prom_end)		vme_sm <= unstart;		// First-word marker missing or hit end of PROM data.  JG: sets idle_prom
 	 else 
-	 if (throttle_en)	vme_sm <= persist;			// PROM reads at slower speed
-	 else				vme_sm <= latch_prom;		// PROM reads at full speed
+	 if (throttle_en)	vme_sm <= persist;		// PROM reads at slower speed
+	 else				vme_sm <= latch_prom;	// PROM reads at full speed.  JG: sets next_adr again
 
 	persist:
-	 if (throttle_done)	vme_sm <= latch_prom;		// PROM read-speed decrease
+	 if (throttle_done)	vme_sm <= latch_prom;		// PROM read-speed decrease.  JG: sets next_adr again after a fixed delay.
 
 	unstart:
-	 if(!start_ff)		vme_sm <= idle;				// Wait for VME write command to go away
+	 if(!start_ff)		vme_sm <= idle;			// Wait for VME write command to go away.  JG: sets idle_prom
 
 	default				vme_sm <= wait_dll;
 	endcase
