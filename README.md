@@ -1,5 +1,10 @@
- OTMB firmware
-================================================================
+ OTMB_VIRTEX6
+ 
+ Original author: Jonathan Kubik (UCLA)
+ Current developers: Yuriy Pakhotin (Texas A&M), Jason Gilmore (Texas A&M)
+ 
+======================================================================
+
 Official firmware for the Optical Trigger MotherBoard (OTMB) for
 the ME1/1 station of the CMS muon endcap detector.
 
