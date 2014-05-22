@@ -1,6 +1,7 @@
- OTMB_VIRTEX6
+## OTMB_VIRTEX6
  
  Original author: Jonathan Kubik (UCLA)
+ 
  Current developers: Yuriy Pakhotin (Texas A&M), Jason Gilmore (Texas A&M)
  
 ======================================================================
