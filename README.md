@@ -14,7 +14,7 @@ This repository contains the source code and default ISE project file:
 - otmb_virtex6.xise: Production, ISE 14.5
 
 The difference between "Production" and "Pre-Production" versions is
-in the file source/otmb_pinout.ucf, where different values for the
+in the file ./source/otmb_pinout.ucf, where different values for the
 parameters "dmb_tx<39>" and "dmb_tx<40>" might be set:
 
 - NET "dmb_tx<40>"	LOC = "W32"; # Production:     I/O_440

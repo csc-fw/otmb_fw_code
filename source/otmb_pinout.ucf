@@ -510,10 +510,16 @@ NET "dmb_tx<43>"	LOC = "T31";	# I/O_437
 NET "dmb_tx<42>"	LOC = "B8";	# I/O_438  prom_adr5
 NET "dmb_tx<41>"	LOC = "C10";	# I/O_439  prom_adr13
 
-#NET "dmb_tx<40>"	LOC = "C9";	# Pre-production: I/O_440
-#NET "dmb_tx<39>"	LOC = "W32";	# Pre-production: I/O_441
-NET "dmb_tx<40>"	LOC = "W32";	# Production: I/O_440
-NET "dmb_tx<39>"	LOC = "C9";	# Production: I/O_441  prom_adr11
+
+# Uncoment the following two lines for "Pre-production" version
+#NET "dmb_tx<40>"	LOC = "C9";  # Pre-production: I/O_440
+#NET "dmb_tx<39>"	LOC = "W32"; # Pre-production: I/O_441
+
+# Coment the following two lines for "Production" version
+NET "dmb_tx<40>"	LOC = "W32"; # Production: I/O_440
+NET "dmb_tx<39>"	LOC = "C9";  # Production: I/O_441  prom_adr11
+
+
 NET "dmb_tx<38>"	LOC = "C8";	# I/O_442  prom_adr4
 NET "dmb_tx<37>"	LOC = "D10";	# I/O_443  prom_adr12
 NET "dmb_tx<36>"	LOC = "D9";	# I/O_444  prom_adr10
