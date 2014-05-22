@@ -150,8 +150,8 @@
         // Share RX PLL parameter
         .GTX_TX_CLK_SOURCE           ("TXPLL"),
         // Save power parameter
-     //    .GTX_POWER_SAVE              (10'b0000010000)  // MFS: For ISE 12.4: do not bypass the RX Delay Aligner
-	 .GTX_POWER_SAVE              (10'b0000110000)	// MFS: For ISE 14.5: bypass the RX Delay Aligner
+//        .GTX_POWER_SAVE (10'b0000010000)  // MFS: For ISE 12.4: do not bypass the RX Delay Aligner
+        .GTX_POWER_SAVE (10'b0000110000)	// MFS: For ISE 14.5: bypass the RX Delay Aligner
          // JK set POWER_SAVE bits [5:4]=2'b11 per http://www.xilinx.com/support/answers/39430.htm
 	)
 	gtx0_cmp_rx_buf_bypass_i
