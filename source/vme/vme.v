@@ -94,7 +94,7 @@
 	flash_ctrl,    // [3:0] JRG, goes up for I/O match to UCF with FCS,FOE,FWE,FLATCH = fcs,_ccb_tx14,_ccb_tx26,_ccb_tx3
         flash_ctrl_dualuse,    // [2:0] JRG, goes down to bpi_interface for MUX with FOE,FWE,FLATCH
 	bpi_ad_out,
-	bpi_active,
+	bpi_active, bpi_dev, bpi_rst, bpi_dsbl, bpi_enbl, bpi_we, bpi_dtack, bpi_rd_stat, bpi_re,
 
 // 3D3444
 	ddd_clock,
@@ -1318,7 +1318,7 @@
         output  [3:0] 	flash_ctrl;    // JRG, goes up for I/O match to UCF with FCS,FOE,FWE,FLATCH = fcs,_ccb_tx14,_ccb_tx26,_ccb_tx3
         input   [2:0] 	flash_ctrl_dualuse;    // JRG, goes down to bpi_interface for MUX with FOE,FWE,FLATCH
         output [22:0] 	bpi_ad_out;
-        output 		bpi_active;
+        output 		bpi_active, bpi_dev, bpi_rst, bpi_dsbl, bpi_enbl, bpi_we, bpi_dtack, bpi_rd_stat, bpi_re;
 
 // 3D3444
 	output					ddd_clock;				// ddd clock
@@ -7035,7 +7035,7 @@
         wire [31:0]	bpi_time;
         wire [15:0]	bpi_outdata;  // out to VME
         wire [15:0]	bpi_cmd_fifo_data;  // out
-        wire bpi_dtack, bpi_rst, bpi_we, bpi_re, bpi_dsbl, bpi_enbl;
+        wire bpi_dtack, bpi_rst, bpi_we, bpi_re, bpi_dsbl, bpi_enbl, bpi_rd_stat;
  
 
  BPI_PORT bpi_vme (
@@ -7056,6 +7056,7 @@
 	.BPI_RE (bpi_re),                       // out Read back FIFO read enable  (pulse one clock cycle for one read)
 	.BPI_DSBL (bpi_dsbl),                   // out Disable parsing of BPI commands in the command FIFO (while being filled)
 	.BPI_ENBL (bpi_enbl),                   // out Enable  parsing of BPI commands in the command FIFO
+	.BPI_RD_STATUS (bpi_rd_stat),           // out Read BPI interface status register command received
 	.BPI_RBK_FIFO_DATA (bpi_fifo_dout),     // in [15:0] Data on output of the Read back FIFO
 	.BPI_RBK_WRD_CNT (bpi_fifo_cnt),        // in [10:0] Word count of the Read back FIFO (number of available reads)
 	.BPI_STATUS (bpi_stat),                 // in [15:0] FIFO status bits and latest value of the PROM status register. 

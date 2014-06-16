@@ -1,7 +1,5 @@
 `timescale 1ns / 1ps
-
 `include "../firmware_version.v"
-
 //`define DEBUG_OTMB_VIRTEX6 1
 //-------------------------------------------------------------------------------------------------------------------
 //	otmb_virtex6:	Top Level
@@ -420,7 +418,7 @@
 // BPI FLASH PROM
 	output			fcs;
         wire [22:0] 	bpi_ad_out;
-        wire 		bpi_active;
+        wire 		bpi_active, bpi_dev, bpi_rst, bpi_dsbl, bpi_enbl, bpi_we, bpi_dtack, bpi_rd_stat, bpi_re;
         wire     [3:0] 	flash_ctrl;
         assign fcs = flash_ctrl[3];
 
@@ -557,8 +555,8 @@
 // Optical receivers
 //-------------------------------------------------------------------------------------------------------------------
 // Clock input buffers
-	IBUFGDS #(.DIFF_TERM(1 ),.IOSTANDARD("LVDS_25")) uclk40  (.I(clk40p ),.IB(clk40n ),.O(clk40 ));	//  40MHz from QPLL
-	IBUFGDS #(.DIFF_TERM(0),.IOSTANDARD("DEFAULT")) uclk125 (.I(clk125p),.IB(clk125n),.O(clk125));	// 125MHz from xtal
+	IBUFGDS #(.DIFF_TERM("TRUE"),.IOSTANDARD("LVDS_25")) uclk40  (.I(clk40p ),.IB(clk40n ),.O(clk40 ));	//  40MHz from QPLL
+	IBUFGDS #(.DIFF_TERM("FALSE"),.IOSTANDARD("DEFAULT")) uclk125 (.I(clk125p),.IB(clk125n),.O(clk125));	// 125MHz from xtal
 	IBUFDS_GTXE1 uclk160 (.I(clk160p),.IB(clk160n),.O(clock_160),.ODIV2(),.CEB(1'b0));						// 160MHz from QPLL for GTX
 
 
@@ -2641,18 +2639,19 @@
 
      assign mez_busy = (raw_mez_busy | alct_startup_msec | alct_wait_dll | alct_startup_done | alct_wait_vme | alct_wait_cfg);
 
-        assign testled[7] = set_sw[8] ? alct_txd_posneg : link_good[6];
-        assign testled[6] = link_good[5];
-        assign testled[5] = set_sw[8] ? alct_rxd_posneg : link_good[4];
-        assign testled[4] = link_good[3];
+// JRG: if set_sw8 & 7 are both low, put BPI debug signals on the "testled" test points
+        assign testled[7] = set_sw[8] ? alct_txd_posneg : (!set_sw[7] ? bpi_enbl : link_good[6]);
+        assign testled[6] = (!set_sw[7] ? bpi_dsbl : link_good[5]);
+        assign testled[5] = set_sw[8] ? alct_rxd_posneg : (!set_sw[7] ? bpi_rst : link_good[4]);
+        assign testled[4] = (!set_sw[7] ? bpi_dev : link_good[3]);
 //      assign testled[MXCFEB:4] = link_good[MXCFEB-1:3];
 //	reg	[3:1]	testled_r;
 //        assign testled[3] = link_good[2] || ((set_sw == 2'b01) && clock_alct_txd);
 //        assign testled[2] = link_good[1] || ((set_sw == 2'b01) && clock_alct_rxd);
 //        assign testled[1] = link_good[0] || ((set_sw == 2'b01) && clock);
 //        assign testled[3:1] = testled_r[3:1];
-        assign testled[8] = &link_good || ((set_sw == 2'b01) && alct_wait_cfg);
-        assign testled[9] = (|link_bad) || ((set_sw == 2'b01) && sump);
+        assign testled[8] = (!set_sw[7] ? bpi_we : (&link_good || ((set_sw == 2'b01) && alct_wait_cfg)));
+        assign testled[9] = (!set_sw[7] ? bpi_dtack : (|link_bad) || ((set_sw == 2'b01) && sump));
 
 
 	ODDR #(
@@ -2664,8 +2663,8 @@
 	.CE	(1'b1),			// In	1-bit clock enable input
 	.S	(1'b0),			// In	1-bit set
 	.R	(1'b0),			// In	1-bit reset
-	.D1	(set_sw[8] ? 1'b1 : link_good[2]),	// In	1-bit data input tx on positive edge
-	.D2	(set_sw[8] ? 1'b0 : link_good[2]),	// In	1-bit data input tx on negative edge
+	.D1	(set_sw[8] ? 1'b1 : (!set_sw[7] ? bpi_active : link_good[2])),	// In	1-bit data input tx on positive edge
+	.D2	(set_sw[8] ? 1'b0 : (!set_sw[7] ? bpi_active : link_good[2])),	// In	1-bit data input tx on negative edge
 	.Q	(testled[3]));		// Out	1-bit DDR output
 
 
@@ -2674,12 +2673,15 @@
 	.INIT         (1'b0),			// Initial value of Q: 1'b0 or 1'b1
 	.SRTYPE       ("SYNC")			// Set/Reset type: "SYNC" or "ASYNC" 
 	) test_led_2 (
-	.C	(clock_alct_rxd),	// In	1-bit clock input
+//	.C	(clock_alct_rxd),	// In	1-bit clock input
+	.C	(clock_1mhz),	// In	1-bit clock input... 1MHz is for BPI_ctrl Timer
 	.CE	(1'b1),			// In	1-bit clock enable input
 	.S	(1'b0),			// In	1-bit set
 	.R	(1'b0),			// In	1-bit reset
-	.D1	(set_sw[8] ? 1'b1 : link_good[1]),	// In	1-bit data input tx on positive edge
-	.D2	(set_sw[8] ? 1'b0 : link_good[1]),	// In	1-bit data input tx on negative edge
+//	.D1	(set_sw[8] ? 1'b1 : link_good[1]),	// In	1-bit data input tx on positive edge
+//	.D2	(set_sw[8] ? 1'b0 : link_good[1]),	// In	1-bit data input tx on negative edge
+	.D1	(1'b1),	// In	1-bit data input tx on positive edge
+	.D2	(1'b0),	// In	1-bit data input tx on negative edge
 	.Q	(testled[2]));		// Out	1-bit DDR output
 
 
@@ -2692,8 +2694,8 @@
 	.CE	(1'b1),			// In	1-bit clock enable input
 	.S	(1'b0),			// In	1-bit set
 	.R	(1'b0),			// In	1-bit reset
-	.D1	(set_sw[8] ? 1'b1 : link_good[0]),	// In	1-bit data input tx on positive edge
-	.D2	(set_sw[8] ? 1'b0 : link_good[0]),	// In	1-bit data input tx on negative edge
+	.D1	(set_sw[8] ? 1'b1 : (!set_sw[7] ? bpi_rd_status : link_good[0])), // In   1-bit data input tx on positive edge
+	.D2	(set_sw[8] ? 1'b0 : (!set_sw[7] ? bpi_rd_status : link_good[0])), // In   1-bit data input tx on negative edge
 	.Q	(testled[1]));		// Out	1-bit DDR output
 
 
@@ -2885,6 +2887,14 @@
       .flash_ctrl_dualuse ({alct_status[5],tmb_reserved_in[4],clct_status[3]}),    // in [2:0] JRG, goes down to bpi_interface for MUX with FOE,FWE,FLATCH
       .bpi_ad_out (bpi_ad_out),  // out [22:0]
       .bpi_active (bpi_active),  // out
+      .bpi_dev      (bpi_dev),   // out
+      .bpi_rst      (bpi_rst),   // out
+      .bpi_dsbl     (bpi_dsbl),  // out
+      .bpi_enbl     (bpi_enbl),  // out
+      .bpi_we       (bpi_we),    // out
+      .bpi_dtack    (bpi_dtack), // out
+      .bpi_rd_stat  (bpi_rd_stat),  // out
+      .bpi_re       (bpi_re),    // out
 
       // 3D3444
       .ddd_clock			(ddd_clock),					// Out	ddd clock

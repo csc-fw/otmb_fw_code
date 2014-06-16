@@ -29,13 +29,15 @@
 //   0x038     14     Read BPI interface status register (16 bits)
 //   0x03C     15     Read timer low order bits 15:0
 //   0x040     16     Read timer high order bits 31:16
-//////////////////////////////////////////////////////////////////////////////////
+// Commands written into FIFO.... 19, 1A, 1B, 1C:  timer_start, timer_stop, timer_reset, clear_status
+//   load_adr (17),  prom_unlock (14),  block_erase (0A)
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 module BPI_PORT(
 	input CLK,                       // 40MHz clock
 	input RST,                       // system reset
    // VME selection/control
-	input DEVICE,                    // 1 bit indicating this device has been selected... JRG: choose any available OTMB adr range
+	input DEVICE,                    // 1 bit indicating this device has been selected... JRG: choose any available OTMB adr range: 28000h base
 	input STROBE,                    // Data strobe synchronized to rising or falling edge of clock and asynchronously cleared
 	input [9:0] COMMAND,             // command portion of VME address... JRG: assume it is address bits 11:2?
 	input WRITE_B,                   // read/write_bar
@@ -49,6 +51,7 @@ module BPI_PORT(
 	output reg BPI_RE,                   // Read back FIFO read enable  (pulse one clock cycle for one read)
 	output reg BPI_DSBL,                 // Disable parsing of BPI commands in the command FIFO (while being filled)
 	output reg BPI_ENBL,                 // Enable  parsing of BPI commands in the command FIFO
+	output reg BPI_RD_STATUS,            // Read BPI interface status register command received
 	input [15:0] BPI_RBK_FIFO_DATA,  // Data on output of the Read back FIFO
 	input [10:0] BPI_RBK_WRD_CNT,    // Word count of the Read back FIFO (number of available reads)
 	input [15:0] BPI_STATUS,         // FIFO status bits and latest value of the PROM status register. 
@@ -123,6 +126,7 @@ begin
 	BPI_ENBL <= lead_0 && (COMMAND == 10'h00A);
 	BPI_WE <= lead_0 && (COMMAND == 10'h00B);
 	BPI_RE <= lead_0 && (COMMAND == 10'h00C);
+	BPI_RD_STATUS <= lead_0 && (COMMAND == 10'h00E);
 end
 
 always @(posedge CLK or posedge RST)

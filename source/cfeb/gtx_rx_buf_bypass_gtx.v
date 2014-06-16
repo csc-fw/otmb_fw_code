@@ -26,7 +26,7 @@
 // rights to the materials distributed herewith. Except as
 // otherwise provided in a valid license issued to you by
 // Xilinx, and to the maximum extent permitted by applicable
-// law: (1) THESE MATERIALS ARE MADE AVAILABLE "AS IS" AND
+// law: ("TRUE") THESE MATERIALS ARE MADE AVAILABLE "AS IS" AND
 // WITH ALL FAULTS, AND XILINX HEREBY DISCLAIMS ALL WARRANTIES
 // AND CONDITIONS, EXPRESS, IMPLIED, OR STATUTORY, INCLUDING
 // BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, NON-
@@ -172,7 +172,7 @@ module GTX_RX_BUF_BYPASS_GTX #
         (
             //_______________________ Simulation-Only Attributes __________________
     
-            .SIM_RECEIVER_DETECT_PASS   (1),
+            .SIM_RECEIVER_DETECT_PASS   ("TRUE"),
             
             .SIM_TX_ELEC_IDLE_LEVEL     ("X"),
     
@@ -184,7 +184,7 @@ module GTX_RX_BUF_BYPASS_GTX #
 
            //--------------------------TX PLL----------------------------
             .TX_CLK_SOURCE                          (GTX_TX_CLK_SOURCE),
-            .TX_OVERSAMPLE_MODE                     (0),
+            .TX_OVERSAMPLE_MODE                     ("FALSE"),
             .TXPLL_COM_CFG                          (24'h21680a),
             .TXPLL_CP_CFG                           (8'h0D),
             .TXPLL_DIVSEL_FB                        (2),
@@ -195,11 +195,11 @@ module GTX_RX_BUF_BYPASS_GTX #
             .TX_CLK25_DIVIDER                       (7),
             .TXPLL_SATA                             (2'b00),
             .TX_TDCC_CFG                            (2'b11),
-            .PMA_CAS_CLK_EN                         (0),
+            .PMA_CAS_CLK_EN                         ("FALSE"),
             .POWER_SAVE                             (GTX_POWER_SAVE),
 
            //-----------------------TX Interface-------------------------
-            .GEN_TXUSRCLK                           (1),
+            .GEN_TXUSRCLK                           ("TRUE"),
             .TX_DATA_WIDTH                          (20),
             .TX_USRCLK_CFG                          (6'h00),
             .TXOUTCLK_CTRL                          ("TXOUTCLKPCS"),
@@ -208,9 +208,9 @@ module GTX_RX_BUF_BYPASS_GTX #
            //------------TX Buffering and Phase Alignment----------------
             .TX_PMADATA_OPT                         (1'b0),
             .PMA_TX_CFG                             (20'h80082),
-            .TX_BUFFER_USE                          (1),
+            .TX_BUFFER_USE                          ("TRUE"),
             .TX_BYTECLK_CFG                         (6'h00),
-            .TX_EN_RATE_RESET_BUF                   (1),
+            .TX_EN_RATE_RESET_BUF                   ("TRUE"),
             .TX_XCLK_SEL                            ("TXOUT"),
             .TX_DLYALIGN_CTRINC                     (4'b0100),
             .TX_DLYALIGN_LPFINC                     (4'b0110),
@@ -219,14 +219,14 @@ module GTX_RX_BUF_BYPASS_GTX #
 
            //-----------------------TX Gearbox---------------------------
             .GEARBOX_ENDEC                          (3'b000),
-            .TXGEARBOX_USE                          (0),
+            .TXGEARBOX_USE                          ("FALSE"),
 
            //--------------TX Driver and OOB Signalling------------------
             .TX_DRIVE_MODE                          ("DIRECT"),
             .TX_IDLE_ASSERT_DELAY                   (3'b100),
             .TX_IDLE_DEASSERT_DELAY                 (3'b010),
-            .TXDRIVE_LOOPBACK_HIZ                   (0),
-            .TXDRIVE_LOOPBACK_PD                    (0),
+            .TXDRIVE_LOOPBACK_HIZ                   ("FALSE"),
+            .TXDRIVE_LOOPBACK_PD                    ("FALSE"),
 
            //------------TX Pipe Control for PCI Express/SATA------------
             .COM_BURST_VAL                          (4'b1111),
@@ -246,7 +246,7 @@ module GTX_RX_BUF_BYPASS_GTX #
             .TX_MARGIN_LOW_4                        (7'b1000000),
 
            //--------------------------RX PLL----------------------------
-            .RX_OVERSAMPLE_MODE                     (0),
+            .RX_OVERSAMPLE_MODE                     ("FALSE"),
             .RXPLL_COM_CFG                          (24'h21680a),
             .RXPLL_CP_CFG                           (8'h0D),
             .RXPLL_DIVSEL_FB                        (2),
@@ -257,26 +257,26 @@ module GTX_RX_BUF_BYPASS_GTX #
             .RX_CLK25_DIVIDER                       (7),
 
            //-----------------------RX Interface-------------------------
-            .GEN_RXUSRCLK                           (1),
+            .GEN_RXUSRCLK                           ("TRUE"),
             .RX_DATA_WIDTH                          (20),
             .RXRECCLK_CTRL                          ("RXRECCLKPMA_DIV2"),
             .RXRECCLK_DLY                           (10'b0000000000),
             .RXUSRCLK_DLY                           (16'h0000),
 
            //--------RX Driver,OOB signalling,Coupling and Eq.,CDR-------
-            .AC_CAP_DIS                             (1),
+            .AC_CAP_DIS                             ("TRUE"),
             .CDR_PH_ADJ_TIME                        (5'b10100),
             .OOBDETECT_THRESHOLD                    (3'b011),
             .PMA_CDR_SCAN                           (27'h640404C),
             .PMA_RX_CFG                             (25'h05ce008),
-            .RCV_TERM_GND                           (0),
-            .RCV_TERM_VTTRX                         (1),
-            .RX_EN_IDLE_HOLD_CDR                    (0),
-            .RX_EN_IDLE_RESET_FR                    (0),
-            .RX_EN_IDLE_RESET_PH                    (0),
+            .RCV_TERM_GND                           ("FALSE"),
+            .RCV_TERM_VTTRX                         ("TRUE"),
+            .RX_EN_IDLE_HOLD_CDR                    ("FALSE"),
+            .RX_EN_IDLE_RESET_FR                    ("FALSE"),
+            .RX_EN_IDLE_RESET_PH                    ("FALSE"),
             .TX_DETECT_RX_CFG                       (14'h1832),
             .TERMINATION_CTRL                       (5'b00000),
-            .TERMINATION_OVRD                       (0),
+            .TERMINATION_OVRD                       ("FALSE"),
             .CM_TRIM                                (2'b01),
             .PMA_RXSYNC_CFG                         (7'h00),
             .PMA_CFG                                (76'h0040000040000000003),
@@ -286,7 +286,7 @@ module GTX_RX_BUF_BYPASS_GTX #
            //------------RX Decision Feedback Equalizer(DFE)-------------
             .DFE_CAL_TIME                           (5'b01100),
             .DFE_CFG                                (8'b00011011),
-            .RX_EN_IDLE_HOLD_DFE                    (1),
+            .RX_EN_IDLE_HOLD_DFE                    ("TRUE"),
             .RX_EYE_OFFSET                          (8'h4C),
             .RX_EYE_SCANMODE                        (2'b00),
 
@@ -296,34 +296,34 @@ module GTX_RX_BUF_BYPASS_GTX #
            //----------------Comma Detection and Alignment---------------
             .ALIGN_COMMA_WORD                       (2),
             .COMMA_10B_ENABLE                       (10'b0001111111),
-            .COMMA_DOUBLE                           (0),
-            .DEC_MCOMMA_DETECT                      (1),
-            .DEC_PCOMMA_DETECT                      (1),
-            .DEC_VALID_COMMA_ONLY                   (0),
+            .COMMA_DOUBLE                           ("FALSE"),
+            .DEC_MCOMMA_DETECT                      ("TRUE"),
+            .DEC_PCOMMA_DETECT                      ("TRUE"),
+            .DEC_VALID_COMMA_ONLY                   ("FALSE"),
             .MCOMMA_10B_VALUE                       (10'b1010000011),
-            .MCOMMA_DETECT                          (1),
+            .MCOMMA_DETECT                          ("TRUE"),
             .PCOMMA_10B_VALUE                       (10'b0101111100),
-            .PCOMMA_DETECT                          (1),
-            .RX_DECODE_SEQ_MATCH                    (1),
+            .PCOMMA_DETECT                          ("TRUE"),
+            .RX_DECODE_SEQ_MATCH                    ("TRUE"),
             .RX_SLIDE_AUTO_WAIT                     (5),
             .RX_SLIDE_MODE                          ("OFF"),
-            .SHOW_REALIGN_COMMA                     (1),
+            .SHOW_REALIGN_COMMA                     ("TRUE"),
 
            //---------------RX Loss-of-sync State Machine----------------
             .RX_LOS_INVALID_INCR                    (8),
             .RX_LOS_THRESHOLD                       (128),
-            .RX_LOSS_OF_SYNC_FSM                    (1),
+            .RX_LOSS_OF_SYNC_FSM                    ("TRUE"),
 
            //-----------------------RX Gearbox---------------------------
-            .RXGEARBOX_USE                          (0),
+            .RXGEARBOX_USE                          ("FALSE"),
 
            //-----------RX Elastic Buffer and Phase alignment------------
-            .RX_BUFFER_USE                          (0),
-            .RX_EN_IDLE_RESET_BUF                   (0),
-            .RX_EN_MODE_RESET_BUF                   (1),
-            .RX_EN_RATE_RESET_BUF                   (1),
-            .RX_EN_REALIGN_RESET_BUF                (0),
-            .RX_EN_REALIGN_RESET_BUF2               (0),
+            .RX_BUFFER_USE                          ("FALSE"),
+            .RX_EN_IDLE_RESET_BUF                   ("FALSE"),
+            .RX_EN_MODE_RESET_BUF                   ("TRUE"),
+            .RX_EN_RATE_RESET_BUF                   ("TRUE"),
+            .RX_EN_REALIGN_RESET_BUF                ("FALSE"),
+            .RX_EN_REALIGN_RESET_BUF2               ("FALSE"),
             .RX_FIFO_ADDR_MODE                      ("FULL"),
             .RX_IDLE_HI_CNT                         (4'b1000),
             .RX_IDLE_LO_CNT                         (4'b0000),
@@ -337,11 +337,11 @@ module GTX_RX_BUF_BYPASS_GTX #
            //----------------------Clock Correction----------------------
             .CLK_COR_ADJ_LEN                        (1),
             .CLK_COR_DET_LEN                        (1),
-            .CLK_COR_INSERT_IDLE_FLAG               (0),
-            .CLK_COR_KEEP_IDLE                      (0),
+            .CLK_COR_INSERT_IDLE_FLAG               ("FALSE"),
+            .CLK_COR_KEEP_IDLE                      ("FALSE"),
             .CLK_COR_MAX_LAT                        (16),
             .CLK_COR_MIN_LAT                        (14),
-            .CLK_COR_PRECEDENCE                     (1),
+            .CLK_COR_PRECEDENCE                     ("TRUE"),
             .CLK_COR_REPEAT_WAIT                    (0),
             .CLK_COR_SEQ_1_1                        (10'b0100000000),
             .CLK_COR_SEQ_1_2                        (10'b0100000000),
@@ -353,13 +353,13 @@ module GTX_RX_BUF_BYPASS_GTX #
             .CLK_COR_SEQ_2_3                        (10'b0100000000),
             .CLK_COR_SEQ_2_4                        (10'b0100000000),
             .CLK_COR_SEQ_2_ENABLE                   (4'b1111),
-            .CLK_COR_SEQ_2_USE                      (0),
-            .CLK_CORRECT_USE                        (0),
+            .CLK_COR_SEQ_2_USE                      ("FALSE"),
+            .CLK_CORRECT_USE                        ("FALSE"),
 
            //----------------------Channel Bonding----------------------
             .CHAN_BOND_1_MAX_SKEW                   (1),
             .CHAN_BOND_2_MAX_SKEW                   (1),
-            .CHAN_BOND_KEEP_ALIGN                   (0),
+            .CHAN_BOND_KEEP_ALIGN                   ("FALSE"),
             .CHAN_BOND_SEQ_1_1                      (10'b0000000000),
             .CHAN_BOND_SEQ_1_2                      (10'b0000000000),
             .CHAN_BOND_SEQ_1_3                      (10'b0000000000),
@@ -371,9 +371,9 @@ module GTX_RX_BUF_BYPASS_GTX #
             .CHAN_BOND_SEQ_2_4                      (10'b0000000000),
             .CHAN_BOND_SEQ_2_CFG                    (5'b00000),
             .CHAN_BOND_SEQ_2_ENABLE                 (4'b1111),
-            .CHAN_BOND_SEQ_2_USE                    (0),
+            .CHAN_BOND_SEQ_2_USE                    ("FALSE"),
             .CHAN_BOND_SEQ_LEN                      (1),
-            .PCI_EXPRESS_MODE                       (0),
+            .PCI_EXPRESS_MODE                       ("FALSE"),
 
            //-----------RX Attributes for PCI Express/SATA/SAS----------
             .SAS_MAX_COMSAS                         (52),

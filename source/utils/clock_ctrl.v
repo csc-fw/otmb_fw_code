@@ -195,30 +195,30 @@
 	.REF_JITTER1			(0.010),	// Primary   reference input jitter in UI (0.000-0.999)
 	.REF_JITTER2			(),			// Secondary reference input jitter in UI (0.000-0.999)
 
-	.CLKOUT4_CASCADE		(0),		// Cascade CLKOUT4 counter with CLKOUT6 (TRUE/FALSE)
-	.CLOCK_HOLD				(0),	// Hold VCO Frequency (TRUE/FALSE)
+	.CLKOUT4_CASCADE		("FALSE"),		// Cascade CLKOUT4 counter with CLKOUT6 (TRUE/FALSE)
+	.CLOCK_HOLD				("FALSE"),	// Hold VCO Frequency (TRUE/FALSE)
 	.COMPENSATION			("ZHOLD"),	// "ZHOLD", "INTERNAL", "EXTERNAL", "CASCADE" or "BUF_IN" 
-	.STARTUP_WAIT			(0),		// Not supported. Must be set to FALSE
+	.STARTUP_WAIT			("FALSE"),		// Not supported. Must be set to FALSE
 
 	.DIVCLK_DIVIDE			(1),		// Master division value (1-80)
 	.CLKFBOUT_PHASE			(0.000),	// Phase offset degrees of CLKFB (0.00-360.00)
-	.CLKFBOUT_USE_FINE_PS	(0),			// Fine phase shift enable (TRUE/FALSE)
+	.CLKFBOUT_USE_FINE_PS("FALSE"),			// Fine phase shift enable (TRUE/FALSE)
 
 	.CLKOUT0_DUTY_CYCLE		(0.500),	// Duty cycle (0.01-0.99)
 	.CLKOUT0_PHASE			(0.000),	// Phase offset degrees of CLKFB (0.00-360.00) -57.6 degrees = -4ns
-	.CLKOUT0_USE_FINE_PS	(0),			// Fine phase shift enable (TRUE/FALSE)
+	.CLKOUT0_USE_FINE_PS	("FALSE"),			// Fine phase shift enable (TRUE/FALSE)
 
 	.CLKOUT1_DUTY_CYCLE		(0.500),	// Duty cycle (0.01-0.99)
 	.CLKOUT1_PHASE			(0.000),	// Phase offset degrees of CLKFB (0.00-360.00)
-	.CLKOUT1_USE_FINE_PS	(0),			// Fine phase shift enable (TRUE/FALSE)
+	.CLKOUT1_USE_FINE_PS	("FALSE"),			// Fine phase shift enable (TRUE/FALSE)
 
 	.CLKOUT2_DUTY_CYCLE		(0.500),	// Duty cycle (0.01-0.99)
 	.CLKOUT2_PHASE			(0.000),	// Phase offset degrees of CLKFB (0.00-360.00)
-	.CLKOUT2_USE_FINE_PS	(0),			// Fine phase shift enable (TRUE/FALSE)
+	.CLKOUT2_USE_FINE_PS	("FALSE"),			// Fine phase shift enable (TRUE/FALSE)
 
 	.CLKOUT3_DUTY_CYCLE		(0.500),	// Duty cycle (0.01-0.99)
 	.CLKOUT3_PHASE			(90.000),	// Phase offset degrees of CLKFB (0.00-360.00)
-	.CLKOUT3_USE_FINE_PS	(0),			// Fine phase shift enable (TRUE/FALSE)
+	.CLKOUT3_USE_FINE_PS	("FALSE"),			// Fine phase shift enable (TRUE/FALSE)
 
 	.BANDWIDTH				("OPTIMIZED"),		// Jitter programming ("HIGH","LOW","OPTIMIZED")
 	.CLKFBOUT_MULT_F		(25.000),			// Multiply all CLKOUT (5.0-64.0)		1x   40MHz clock
@@ -295,30 +295,30 @@
 	.REF_JITTER1			(0.010),	// Primary   reference input jitter in UI (0.000-0.999)
 	.REF_JITTER2			(),			// Secondary reference input jitter in UI (0.000-0.999)
 
-	.CLKOUT4_CASCADE		(0),		// Cascade CLKOUT4 counter with CLKOUT6 (TRUE/FALSE)
-	.CLOCK_HOLD				(0),	// Hold VCO Frequency (TRUE/FALSE)
+	.CLKOUT4_CASCADE		("FALSE"),		// Cascade CLKOUT4 counter with CLKOUT6 (TRUE/FALSE)
+	.CLOCK_HOLD				("FALSE"),	// Hold VCO Frequency (TRUE/FALSE)
 	.COMPENSATION			("ZHOLD"),	// "ZHOLD", "INTERNAL", "EXTERNAL", "CASCADE" or "BUF_IN" 
-	.STARTUP_WAIT			(0),		// Not supported. Must be set to FALSE
+	.STARTUP_WAIT			("FALSE"),		// Not supported. Must be set to FALSE
 
 	.DIVCLK_DIVIDE			(1),		// Master division value (1-80)
 	.CLKFBOUT_PHASE			(0.000),	// Phase offset degrees of CLKFB (0.00-360.00)
-	.CLKFBOUT_USE_FINE_PS	(0),			// Fine phase shift enable (TRUE/FALSE)
+	.CLKFBOUT_USE_FINE_PS("FALSE"),			// Fine phase shift enable (TRUE/FALSE)
 
 	.CLKOUT0_DUTY_CYCLE		(0.500),	// Duty cycle (0.01-0.99)
 	.CLKOUT0_PHASE			(0.000),	// Phase offset degrees of CLKFB (0.00-360.00) -57.6 degrees = -4ns
-	.CLKOUT0_USE_FINE_PS	(0),			// Fine phase shift enable (TRUE/FALSE)
+	.CLKOUT0_USE_FINE_PS	("FALSE"),			// Fine phase shift enable (TRUE/FALSE)
 
 	.CLKOUT1_DUTY_CYCLE		(0.500),	// Duty cycle (0.01-0.99)
 	.CLKOUT1_PHASE			(0.000),	// Phase offset degrees of CLKFB (0.00-360.00)
-	.CLKOUT1_USE_FINE_PS	(0),			// Fine phase shift enable (TRUE/FALSE)
+	.CLKOUT1_USE_FINE_PS	("FALSE"),			// Fine phase shift enable (TRUE/FALSE)
 
 	.CLKOUT2_DUTY_CYCLE		(0.500),	// Duty cycle (0.01-0.99)
 	.CLKOUT2_PHASE			(0.000),	// Phase offset degrees of CLKFB (0.00-360.00)
-	.CLKOUT2_USE_FINE_PS	(0),			// Fine phase shift enable (TRUE/FALSE)
+	.CLKOUT2_USE_FINE_PS	("FALSE"),			// Fine phase shift enable (TRUE/FALSE)
 
 	.CLKOUT3_DUTY_CYCLE		(0.500),	// Duty cycle (0.01-0.99)
 	.CLKOUT3_PHASE			(0.000),	// Phase offset degrees of CLKFB (0.00-360.00)
-	.CLKOUT3_USE_FINE_PS	(0),			// Fine phase shift enable (TRUE/FALSE)
+	.CLKOUT3_USE_FINE_PS	("FALSE"),			// Fine phase shift enable (TRUE/FALSE)
 
 	.BANDWIDTH				("OPTIMIZED"),		// Jitter programming ("HIGH","LOW","OPTIMIZED")
 	.CLKFBOUT_MULT_F		(10.000),			// Multiply all CLKOUT (5.0-64.0)		1x   40MHz clock
@@ -453,18 +453,18 @@
 	.REF_JITTER1		(0.010),	// Primary   reference input jitter in UI (0.000-0.999)
 	.REF_JITTER2		(),		// Secondary reference input jitter in UI (0.000-0.999)
 
-	.CLKOUT4_CASCADE	(0),		// Cascade CLKOUT4 counter with CLKOUT6 (TRUE/FALSE)
-	.CLOCK_HOLD		(0),	        // Hold VCO Frequency (TRUE/FALSE)
+	.CLKOUT4_CASCADE	("FALSE"),		// Cascade CLKOUT4 counter with CLKOUT6 (TRUE/FALSE)
+	.CLOCK_HOLD		("FALSE"),	        // Hold VCO Frequency (TRUE/FALSE)
 	.COMPENSATION		("ZHOLD"),	// "ZHOLD", "INTERNAL", "EXTERNAL", "CASCADE" or "BUF_IN" 
-	.STARTUP_WAIT		(0),		// Not supported. Must be set to FALSE
+	.STARTUP_WAIT		("FALSE"),		// Not supported. Must be set to FALSE
 
 	.DIVCLK_DIVIDE		(1),		// Master division value (1-80). Fvco = CLKIN1_PERIOD x CLKFBOUT_MULT_F / DIVCLK_DIVIDE
 	.CLKFBOUT_PHASE		(0.000),	// Phase offset degrees of CLKFB (0.00-360.00)
-	.CLKFBOUT_USE_FINE_PS	(0),			// Fine phase shift enable (TRUE/FALSE)
+	.CLKFBOUT_USE_FINE_PS("FALSE"),			// Fine phase shift enable (TRUE/FALSE)
 
 	.CLKOUT0_DUTY_CYCLE	(0.500),	// Duty cycle (0.01-0.99)
 	.CLKOUT0_PHASE		(0.000),	// Phase offset degrees of CLKFB (0.00-360.00)
-	.CLKOUT0_USE_FINE_PS	(1),		// Fine phase shift enable (TRUE/FALSE)
+	.CLKOUT0_USE_FINE_PS	("TRUE"),		// Fine phase shift enable (TRUE/FALSE)
 
 	.BANDWIDTH		("OPTIMIZED"),	// Jitter programming ("HIGH","LOW","OPTIMIZED")     (note: 600MHz < Fvco < 1200Mhz)
 	.CLKFBOUT_MULT_F	(25.000),	// Multiply all CLKOUT (5.0-64.0)	25x  40MHz clock = 1000 MHz Vco:  1nsec
