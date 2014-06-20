@@ -241,8 +241,12 @@ module otmb_virtex6_top_isim_v1;
 		.f_fok(f_fok), 
 		.fcs(fcs)
 	);
-
+	
+	always
+			#25 tmb_clock0 = ~tmb_clock0; // 25 ns -> 40 MHz
+	
 	initial begin
+		$display($time, "<< Starting the Simulation >>");
 		// Initialize Inputs
 		cfeb0_rx = 0;
 		cfeb1_rx = 0;
@@ -292,20 +296,18 @@ module otmb_virtex6_top_isim_v1;
 		f_sclk = 0;
 		f_sdat = 0;
 		f_fok = 0;
-
+		
 		// Wait 100 ns for global reset to finish
-		#100;
+//		#100;
         
 		// Add stimulus here
 		
+		$display($time, "<< Finishing the Simulation >>");
 	end
-
-//		reg [3:0] my_count = 4'b0;
-		
-//		wire clk;
-//		always clk = #25 ~clk; // 40 MHz
-		
-//		my_count <= my_count + 1;
+	
+	initial begin
+		$monitor($time, "  tmb_clock0 = %b", tmb_clock0);
+	end
       
 endmodule
 

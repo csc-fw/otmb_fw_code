@@ -124,7 +124,7 @@
 	.INIT_57			(16'h0000),			// Alarm register 7
 
 	.SIM_DEVICE			("VIRTEX6"),		// Must be set to VIRTEX6
-	.SIM_MONITOR_FILE	("gtx_sysmon.txt")	// Analog simulation data file name
+	.SIM_MONITOR_FILE	("../source/vme/gtx_sysmon.txt")	// Analog simulation data file name
 
 	) usysmon (
 
