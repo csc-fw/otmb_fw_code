@@ -56,7 +56,7 @@
 //-------------------------------------------------------------------------------------------------------------------
 // Clocks
 	input			clock;		//  40 MHz fabric clock
-	input			clock_iob;	//  40 MHZ iob clock
+	input			clock_iob;	//  40 MHZ iob clock from phaser
 	input			clock_160;	// 160 MHz from QPLL for GTX reference clock
         input 			ttc_resync;	// use this to clear the link status monitor
 
@@ -105,6 +105,7 @@
 	wire [3:0]	cew;
 	wire [3:1]	nonzero_word;
 	wire [47:0]	comp_dat;
+	wire [47:0]	prompt_dat;
 
 // GTX instance
 	gtx_comp_fiber_in ugtx_comp_fiber_in
@@ -119,7 +120,8 @@
 	.STRT_MTCH			(rx_start),				// Out	Gets set when the Start Pattern is present, N/A for me.  To TP for debug only.  --sw8,7
 	.VALID				(rx_valid),				// Out	Send this output to TP (only valid after StartMtch has come by)
 	.MATCH				(rx_match),				// Out	Send this output to TP  AND use for counting errors. VALID="should match" when true, !MATCH is an error
-	.RCV_DATA			(comp_dat[47:0]),		// Out	48 bit comp. data output
+	.RCV_DATA			(comp_dat[47:0]),		// Out	48 bit comp. data output; stable for 25ns
+	.PROMPT_DATA			(prompt_dat[47:0]),		// Out	48 bit comp. data output, but 6.25ns sooner; only good for 6.25ns though!
 	.NONZERO_WORD		(nonzero_word[3:1]),	// Out
 	.CEW0				(cew[0]),				// Out	Access four phases of 40 MHz cycle, frame separated output from GTX
 	.CEW1				(cew[1]),				// Out
@@ -166,9 +168,9 @@
 // JRG	      rst_errcount_r <= gtx_rx_reset_err_cnt;
 	      rst_errcount_r <= 0;
 
-	      if (cew[0]) begin			// Store comparator data using received fiber clock
-		 comp_dat_r   <= comp_dat;
-	      end
+	      if (cew[0]) begin		  // Store comparator data using received fiber clock
+		 comp_dat_r <= comp_dat;  // JRG: could we save a BX here by using PROMPT_DAT to load this reg on CEW3?
+	      end     // JRG:  ...probably not.  Using comp_dat directly is likely the best we can do; skip comp_dat_r?
 
 	      if (rst_errcount_r) begin		// Error counter reset
 		 prbs_errcount <= 0;
@@ -187,9 +189,9 @@
 	   end		// close not reset case
 	end		// close always
 
-//-------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
 // Fabric clock time domain transition WITHOUT muonic timing
-//-------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
 	reg	[47:0]	gtx_rx_data_raw	= 0;
 	reg		gtx_rx_start	= 0;
 	reg		gtx_rx_fc	= 0;
@@ -198,7 +200,8 @@
 	reg		gtx_rx_sync_done= 0;
 	reg		gtx_rx_err	= 0;
 	reg	[15:0]	gtx_rx_err_count = 0;
-	
+       	reg             posneg_ff = 0;
+   
 	always @(posedge clock) begin
 	   if (clear_sync) begin
 	      gtx_rx_data_raw[47:0] <= 0;
@@ -211,7 +214,7 @@
 	      gtx_rx_err_count	<= 0;
 	   end
 	   else begin
-	      gtx_rx_data_raw[47:0] <= comp_dat_r[47:0];
+	      gtx_rx_data_raw[47:0] <= comp_dat_r[47:0];  // JRG: for optimal timing use comp_dat, not gtx_rx_data_raw
 	      gtx_rx_start	<= rx_start;
 	      gtx_rx_fc		<= rx_fc;
 	      gtx_rx_valid	<= rx_valid;
@@ -219,25 +222,44 @@
 	      gtx_rx_sync_done	<= rx_sync_done;
 	      gtx_rx_err	<= err;
 	      gtx_rx_err_count[15:0] <= (gtx_rx_en_prbs_test) ? prbs_errcount[15:0] : {8'h00,link_errcount[7:0]};
+	      posneg_ff <= posneg;
 //	      if (gtx_rx_en_prbs_test) gtx_rx_err_count[15:0] <= prbs_errcount[15:0];
 //	      else gtx_rx_err_count[15:0] <= {8'h00,link_errcount[7:0]};
 	   end // else: !if(clear_sync)
 	end // always @ (posedge clock)
-   
+
 
 // Delay data n-bx to compensate for osu cable length error
 	wire [47:0] gtx_rx_data_srl;
-	reg  [3:0]  dly=0;
+	wire [47:0] comp_dat_sel;
+	reg  [47:0] comp_dat_neg;
+	reg  [47:0] comp_dat_phaser;
+	reg  [3:0]  idly=0;  // JRG, simple phase delay selector
+	reg  [3:0]  dly=0;   // JRG, complex phase delay selector
 	reg         dly_is_0=0;
 	
 	always @(posedge clock) begin
-	dly      <=  delay_is-4'd1;		// Pointer to clct SRL data accounts for SLR 1bx latency
-	dly_is_0 <= (delay_is == 0);	// Use direct input if delay is 0 beco 1st SRL output has 1bx overhead
+	   idly     <=  delay_is;	// Pointer to clct SRL, integer 1-16 clock delay for comparator data
+	   dly      <=  delay_is-4'd1;	// Pointer to clct SRL data that accounts for SLR 1bx minimum (0-15 bx)
+	   dly_is_0 <= (delay_is == 0);	// may use direct input if delay is 0; 1st SRL output has 1bx overhead
 	end
 
-	srl16e_bbl #(48) udcfebdly (.clock(clock),.ce(1'b1),.adr(dly),.d(gtx_rx_data_raw[47:0]),.q(gtx_rx_data_srl[47:0]));
+// JRG: add custom muonic CLCT logic
+	always @(posedge clock_iob) begin
+	   comp_dat_phaser[47:0] <= comp_dat[47:0];  // JRG: bring data into phase-tuned time domain
+	end
 
-	assign gtx_rx_data[47:0] = (dly_is_0) ? gtx_rx_data_raw[47:0] : gtx_rx_data_srl[47:0];
+	always @(negedge clock) begin
+	   comp_dat_neg[47:0] <= comp_dat_phaser[47:0];  // JRG: provide data on the neg edge if needed, to SRL
+	end
+	assign comp_dat_sel[47:0] = (posneg_ff) ? comp_dat_neg[47:0] : comp_dat_phaser[47:0];
+
+
+//  JRG: for muonic timing use comp_dat_r, not gtx_rx_data_raw; also force a minimum single clock delay (no zero bypass)
+// old	srl16e_bbl #(48) udcfebdly (.clock(clock),.ce(1'b1),.adr(dly),.d(gtx_rx_data_raw[47:0]),.q(gtx_rx_data_srl[47:0]));
+// old	assign gtx_rx_data[47:0] = (dly_is_0) ? gtx_rx_data_raw[47:0] : gtx_rx_data_srl[47:0];
+	srl16e_bbl #(48) udcfebdly (.clock(clock),.ce(1'b1),.adr(idly),.d(comp_dat_sel[47:0]),.q(gtx_rx_data[47:0]));
+
 
 // Unused muonic signals
 	reg muonic_sump=0;

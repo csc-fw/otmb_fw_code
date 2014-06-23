@@ -4,7 +4,7 @@
 // Firmware version global definitions
 	`define FIRMWARE_TYPE		04'hC		// C=Normal CLCT/TMB, D=Debug PCB loopback version
 	`define VERSION				04'hE		// Version revision number, A=TMB2004 and earlier, E=TMB2005E production
-	`define MONTHDAY			16'h0605	// Version date
+	`define MONTHDAY			16'h0623	// Version date
 	`define YEAR				16'h2014	// Version year
 
 	`define AUTO_VME			01'h1		// Automatically initialize VME registers from PROM data,   0=do not
@@ -59,6 +59,8 @@
 //      04/25/2014      Yuri's version with working "last 512 events" storage & readout via VME
 //      04/28/2014      first version with BPI engine implemented for firmware download to Flash prom via VME
 //      05/04/2014      new verion to test download function.... no logic changes --JRG: DriveDoneHigh, Config=40MHz
+//      06/20/2014      adding muoninc logic again into cfeb gtx_optical modules
+//      06/23/2014      returning clock_ctrl CFEB phase shifters to UCLA standard: 9 shifters total instead of just 4
 //---------------------------------------------------------------------------------------------------------------------------------------
 //	End Global Definitions
 //---------------------------------------------------------------------------------------------------------------------------------------

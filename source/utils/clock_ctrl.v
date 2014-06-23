@@ -90,7 +90,8 @@
 //------------------------------------------------------------------------------------------------------------------
 // Generic
 //------------------------------------------------------------------------------------------------------------------
-	parameter MXDPS=4;							// 2 ALCT + 1 DCFEB(me1/1b)+ 1 DCFEB(me1/1a)
+	parameter MXDPS=9;	// JRG: UCLA sets to 9, I prefer 4 to save BUFGs.  2 ALCT + 1 DCFEB(me1/1b)+ 1 DCFEB(me1/1a) + 5 others?
+//	parameter MXDPS=4;	// JRG: UCLA sets to 9, I prefer 4 to save BUFGs.  2 ALCT + 1 DCFEB(me1/1b)+ 1 DCFEB(me1/1a) + 5 others?
 
 //------------------------------------------------------------------------------------------------------------------
 // Ports
@@ -404,47 +405,62 @@
 	assign dps_phase[1][10:0] = rom[dps1_phase[7:0]];
 	assign dps_phase[2][10:0] = rom[dps2_phase[7:0]];
 	assign dps_phase[3][10:0] = rom[dps3_phase[7:0]];
-/*
+
+/* JRG: delete these 5 to save several BUFG elements: */
 	assign dps_phase[4][10:0] = rom[dps4_phase[7:0]];
 	assign dps_phase[5][10:0] = rom[dps5_phase[7:0]];
 	assign dps_phase[6][10:0] = rom[dps6_phase[7:0]];
 	assign dps_phase[7][10:0] = rom[dps7_phase[7:0]];
 	assign dps_phase[8][10:0] = rom[dps8_phase[7:0]];
-*/
 
 	assign dps0_sm_vec[2:0]   = dps_sm_vec[0][2:0];
 	assign dps1_sm_vec[2:0]   = dps_sm_vec[1][2:0];
 	assign dps2_sm_vec[2:0]   = dps_sm_vec[2][2:0];
 	assign dps3_sm_vec[2:0]   = dps_sm_vec[3][2:0];
+
+/* JRG: use these 5 to save several BUFG elements: 
 	assign dps4_sm_vec[2:0]   = 0;
 	assign dps5_sm_vec[2:0]   = 0;
 	assign dps6_sm_vec[2:0]   = 0;
 	assign dps7_sm_vec[2:0]   = 0;
 	assign dps8_sm_vec[2:0]   = 0;
-/*
+*/
+
+/* JRG: delete these 5 to save several BUFG elements: */
    	assign dps4_sm_vec[2:0]   = dps_sm_vec[4][2:0];
 	assign dps5_sm_vec[2:0]   = dps_sm_vec[5][2:0];
 	assign dps6_sm_vec[2:0]   = dps_sm_vec[6][2:0];
 	assign dps7_sm_vec[2:0]   = dps_sm_vec[7][2:0];
 	assign dps8_sm_vec[2:0]   = dps_sm_vec[8][2:0];
-*/
+
 	assign clock_alct_rxd     = dps_clock[0];
 	assign clock_alct_txd     = dps_clock[1];
 	assign clock_cfeb0_rxd    = dps_clock[2];
+
+/* JRG: delete these 6 to save several BUFG elements: */
+	assign clock_cfeb1_rxd    = dps_clock[3];
+	assign clock_cfeb2_rxd    = dps_clock[4];
+	assign clock_cfeb3_rxd    = dps_clock[5];
+	assign clock_cfeb4_rxd    = dps_clock[6];
+	assign clock_cfeb5_rxd    = dps_clock[7];
+	assign clock_cfeb6_rxd    = dps_clock[8];
+
+/* JRG: use these 6 to save several BUFG elements: 
 	assign clock_cfeb1_rxd    = dps_clock[2];
 	assign clock_cfeb2_rxd    = dps_clock[2];
 	assign clock_cfeb3_rxd    = dps_clock[2];
 	assign clock_cfeb4_rxd    = dps_clock[3];
 	assign clock_cfeb5_rxd    = dps_clock[3];
 	assign clock_cfeb6_rxd    = dps_clock[3];
+*/
 
 // PLL phase shifters
 	genvar i;
 	generate
-	for (i=0; i<=MXDPS-1; i=i+1) begin: dps   // JRG: changed MXDPS to 4 (not 9)
+	for (i=0; i<=MXDPS-1; i=i+1) begin: dps   // JRG: change MXDPS to 4 (not 9) to save several BUFG elements
 
-//	assign dps_clock_fbi[i] = dps_clock_fbo[i];
-	BUFG ubufg_fb(.I(dps_clock_fbo[i]), .O(dps_clock_fbi[i]));
+	assign dps_clock_fbi[i] = dps_clock_fbo[i]; // JRG, use this to save several BUFG elements, but shifts timing by few nsec
+//	BUFG ubufg_fb(.I(dps_clock_fbo[i]), .O(dps_clock_fbi[i])); // JRG, use this to have "perfect" timing, uses more BUFG elements
 	BUFG ubufg_out(.I(dps_clock_out[i]), .O(dps_clock[i]));
 
 	MMCM_ADV # (

@@ -27,6 +27,7 @@
 	VALID,
 	MATCH,
 	RCV_DATA,
+	PROMPT_DATA,
 	NONZERO_WORD,
 	CEW0,
 	CEW1,
@@ -64,6 +65,7 @@
 	output			VALID;
 	output			MATCH;
 	output	[47:0]	RCV_DATA;
+	output	[47:0]	PROMPT_DATA;
 	output	[3:1]	NONZERO_WORD;
 	output			CEW0;
 	output			CEW1;
@@ -277,6 +279,8 @@
    assign link_bad = err_count[7]; // needs to be output
    assign errcount = err_count[7:0]; // can be a useful output
    assign link_had_err = (link_err | mon_rst); // output, signals the link had a problem or was never alive
+
+   assign PROMPT_DATA[47:0]  = {cmp_rx_data,w2_reg,w1_reg};
 
      always @(posedge CMP_RX_CLK160) begin
 	CEW1	<= sync_match;  // k-word comma, this is true at "zero" so "one" is ON next clock
