@@ -222,7 +222,6 @@
 	      gtx_rx_sync_done	<= rx_sync_done;
 	      gtx_rx_err	<= err;
 	      gtx_rx_err_count[15:0] <= (gtx_rx_en_prbs_test) ? prbs_errcount[15:0] : {8'h00,link_errcount[7:0]};
-	      posneg_ff <= posneg;
 //	      if (gtx_rx_en_prbs_test) gtx_rx_err_count[15:0] <= prbs_errcount[15:0];
 //	      else gtx_rx_err_count[15:0] <= {8'h00,link_errcount[7:0]};
 	   end // else: !if(clear_sync)
@@ -231,34 +230,35 @@
 
 // Delay data n-bx to compensate for osu cable length error
 	wire [47:0] gtx_rx_data_srl;
-	wire [47:0] comp_dat_sel;
-	reg  [47:0] comp_dat_neg;
+	wire [47:0] comp_dat_mux;
+	reg  [47:0] comp_dat_180;
 	reg  [47:0] comp_dat_phaser;
 	reg  [3:0]  idly=0;  // JRG, simple phase delay selector
 	reg  [3:0]  dly=0;   // JRG, complex phase delay selector
 	reg         dly_is_0=0;
 	
-	always @(posedge clock) begin
+	always @(negedge clock) begin // JRG: comp data goes out on FALLING LHC_CLOCK edge (~clock) to save .5BX latency
 	   idly     <=  delay_is;	// Pointer to clct SRL, integer 1-16 clock delay for comparator data
 	   dly      <=  delay_is-4'd1;	// Pointer to clct SRL data that accounts for SLR 1bx minimum (0-15 bx)
 	   dly_is_0 <= (delay_is == 0);	// may use direct input if delay is 0; 1st SRL output has 1bx overhead
+	   posneg_ff <= posneg;
 	end
 
-// JRG: add custom muonic CLCT logic
+// JRG: add custom muonic CLCT logic. Note that comparator data leaves this module on FALLING LHC_CLOCK edge (~clock)
 	always @(posedge clock_iob) begin
 	   comp_dat_phaser[47:0] <= comp_dat[47:0];  // JRG: bring data into phase-tuned time domain
 	end
 
-	always @(negedge clock) begin
-	   comp_dat_neg[47:0] <= comp_dat_phaser[47:0];  // JRG: provide data on the neg edge if needed, to SRL
+	always @(posedge clock) begin
+	   comp_dat_180[47:0] <= comp_dat_phaser[47:0];  // JRG: push data to opposite lhc clock edge (if needed) for SRL
 	end
-	assign comp_dat_sel[47:0] = (posneg_ff) ? comp_dat_neg[47:0] : comp_dat_phaser[47:0];
+	assign comp_dat_mux[47:0] = (posneg_ff) ? comp_dat_180[47:0] : comp_dat_phaser[47:0];
 
 
 //  JRG: for muonic timing use comp_dat_r, not gtx_rx_data_raw; also force a minimum single clock delay (no zero bypass)
 // old	srl16e_bbl #(48) udcfebdly (.clock(clock),.ce(1'b1),.adr(dly),.d(gtx_rx_data_raw[47:0]),.q(gtx_rx_data_srl[47:0]));
 // old	assign gtx_rx_data[47:0] = (dly_is_0) ? gtx_rx_data_raw[47:0] : gtx_rx_data_srl[47:0];
-	srl16e_bbl #(48) udcfebdly (.clock(clock),.ce(1'b1),.adr(idly),.d(comp_dat_sel[47:0]),.q(gtx_rx_data[47:0]));
+	srl16e_bbl #(48) udcfebdly (.clock(~clock),.ce(1'b1),.adr(idly),.d(comp_dat_mux[47:0]),.q(gtx_rx_data[47:0])); // JRG: comp data leaves module on FALLING LHC_CLOCK edge (~clock)
 
 
 // Unused muonic signals
