@@ -28,10 +28,10 @@ module bpi_interface(
     output [15:0] DATA_IN,      //Data read from FLASH device -- JRG: goes to BPI_CTRL
     output LOAD_DATA,           //Clock enable signal for capturing Data read from FLASH device -- JRG: goes to BPI_CTRL
     output BUSY,                //Operation in progress signal (not ready) -- JRG: goes to BPI_CTRL
-	// signals for Dual purpose data lines
+  // signals for Dual purpose data lines
     input BPI_ACTIVE,           // set to 1 when data lines are for BPI communications -- JRG: comes from BPI_CTRL
     input [15:0] DUAL_DATA,     // Data provided for non BPI communications -- JRG: should probably come from TMB LED logic
-	 // external connections cooresponding to I/O pins
+   // external connections cooresponding to I/O pins
 //    inout [22:0] BPI_AD,  // JRG, what is this?
     output [22:0] BPI_AD,   // JRG, this is the selected BPI address
     inout [15:0] CFG_DAT,  // JRG, what is this?  probably goes out to define IO pins at higher level (16 LED pins)
@@ -133,18 +133,18 @@ end
   
 BPI_intrf_FSM 
 BPI_intrf_FSM1(
-	.BUSY(BUSY),
-	.CAP(capture),
-	.E(fcs),
-	.G(foe),
-	.L(flatch_addr),
-	.LOAD(LOAD_DATA_I),
-	.W(fwe),
-	.CLK(CLK),
-	.EXECUTE(EXECUTE),
-	.READ(read),
-	.RST(RST),
-	.WRITE(write)
+  .BUSY(BUSY),
+  .CAP(capture),
+  .E(fcs),
+  .G(foe),
+  .L(flatch_addr),
+  .LOAD(LOAD_DATA_I),
+  .W(fwe),
+  .CLK(CLK),
+  .EXECUTE(EXECUTE),
+  .READ(read),
+  .RST(RST),
+  .WRITE(write)
 );
 
 endmodule

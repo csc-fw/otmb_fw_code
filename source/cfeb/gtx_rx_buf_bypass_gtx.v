@@ -79,7 +79,7 @@ module GTX_RX_BUF_BYPASS_GTX #
 
 //JK set POWER_SAVE bits [5:4]=2'b11 per http://www.xilinx.com/support/answers/39430.htm
 //  Commented out because this doesn't stop the MAP warnings
-//	parameter [9:0] GTX_POWER_SAVE = {4'b0000,2'b11,4'b0000}
+//  parameter [9:0] GTX_POWER_SAVE = {4'b0000,2'b11,4'b0000}
 
 )
 (
@@ -121,7 +121,7 @@ module GTX_RX_BUF_BYPASS_GTX #
     output          TXN_OUT,
     output          TXP_OUT,
 
-	output			sump
+  output      sump
 );
 
 
@@ -143,11 +143,11 @@ module GTX_RX_BUF_BYPASS_GTX #
     wire    [1:0]   rxrundisp_float_i;
 
 // JK
-	assign sump =
-	(|rxchariscomma_float_i)	|
-	(|rxcharisk_float_i)		|
-	(|rxdisperr_float_i)		|
-	(|rxnotintable_float_i);
+  assign sump =
+  (|rxchariscomma_float_i)  |
+  (|rxcharisk_float_i)    |
+  (|rxdisperr_float_i)    |
+  (|rxnotintable_float_i);
 
 // 
 //********************************* Main Body of Code**************************

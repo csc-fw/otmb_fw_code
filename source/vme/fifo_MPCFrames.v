@@ -11,12 +11,12 @@
 // \   \  /  \ 
 //  \___\/\___\
 //             
-// Command	: -w -sim -ofmt verilog /home/pakhotin/Work/CMS_My_Service_Work/CSC/TMB_Firmware/2014-02-07_FIFO_Core_Generator/FIFO_3/_cg/my_fifo.ngc /home/pakhotin/Work/CMS_My_Service_Work/CSC/TMB_Firmware/2014-02-07_FIFO_Core_Generator/FIFO_3/_cg/my_fifo.v 
-// Device	: 6vlx240tff1156-1
-// Input file	: /home/pakhotin/Work/CMS_My_Service_Work/CSC/TMB_Firmware/2014-02-07_FIFO_Core_Generator/FIFO_3/_cg/my_fifo.ngc
-// Output file	: /home/pakhotin/Work/CMS_My_Service_Work/CSC/TMB_Firmware/2014-02-07_FIFO_Core_Generator/FIFO_3/_cg/my_fifo.v
-// # of Modules	: 2
-// Design Name	: my_fifo
+// Command  : -w -sim -ofmt verilog /home/pakhotin/Work/CMS_My_Service_Work/CSC/TMB_Firmware/2014-02-07_FIFO_Core_Generator/FIFO_3/_cg/my_fifo.ngc /home/pakhotin/Work/CMS_My_Service_Work/CSC/TMB_Firmware/2014-02-07_FIFO_Core_Generator/FIFO_3/_cg/my_fifo.v 
+// Device  : 6vlx240tff1156-1
+// Input file  : /home/pakhotin/Work/CMS_My_Service_Work/CSC/TMB_Firmware/2014-02-07_FIFO_Core_Generator/FIFO_3/_cg/my_fifo.ngc
+// Output file  : /home/pakhotin/Work/CMS_My_Service_Work/CSC/TMB_Firmware/2014-02-07_FIFO_Core_Generator/FIFO_3/_cg/my_fifo.v
+// # of Modules  : 2
+// Design Name  : my_fifo
 // Xilinx        : /home/pakhotin/Work/Programs/Xilinx/14.5/ISE_DS/ISE/
 //             
 // Purpose:    
@@ -507,17 +507,17 @@ module glbl ();
     assign (weak1, weak0) PRLD = PRLD_int;
 
     initial begin
-	GSR_int = 1'b1;
-	PRLD_int = 1'b1;
-	#(ROC_WIDTH)
-	GSR_int = 1'b0;
-	PRLD_int = 1'b0;
+  GSR_int = 1'b1;
+  PRLD_int = 1'b1;
+  #(ROC_WIDTH)
+  GSR_int = 1'b0;
+  PRLD_int = 1'b0;
     end
 
     initial begin
-	GTS_int = 1'b1;
-	#(TOC_WIDTH)
-	GTS_int = 1'b0;
+  GTS_int = 1'b1;
+  #(TOC_WIDTH)
+  GTS_int = 1'b0;
     end
 
 endmodule
