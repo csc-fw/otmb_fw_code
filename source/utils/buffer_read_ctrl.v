@@ -235,6 +235,8 @@
 `endif
   );
 
+  initial $display($time, " buffer_read_ctrl begin");
+
 //------------------------------------------------------------------------------------------------------------------
 // Constants
 //------------------------------------------------------------------------------------------------------------------
@@ -791,19 +793,46 @@
 
 // Readout sequence map selects RPC order according to RPC hit list, ie 11 reads out RPCs 0,1 and 01 reads 0 
   reg [MXRPCB-1:0] rpcptr [MXRPC-1:0];
-
+  
+  integer i_test;
+  integer n_test;
+  
+  integer j;
+	initial j=0;
   always @* begin
-  i=0;
-  n=0;
-  while (i<=MXRPC-1) begin
-  rpcptr[i]=0;
-  if (rd_list_rpc[i]) begin
-   rpcptr[n]=i[0];
-   n=n+1;
-   end
-   i=i+1;
+    i_test=0;
+    n_test=0;
+    j=j+1;
+//    $display($time, " buffer_read_ctrl MXRPC = %d", MXRPC);
+    while (i_test<=MXRPC-1) begin
+      rpcptr[i_test]=0;
+      $display($time, " buffer_read_ctrl j=%d, MXRPC = %d, i_test = %d, rd_list_rpc[i_test] = %d", j, MXRPC, i_test, rd_list_rpc[i_test]);
+      if (rd_list_rpc[i_test]) begin
+        rpcptr[n_test]=i_test[0];
+        n_test=n_test+1;
+      end
+      i_test=i_test+1;
+    end
   end
-  end
+  
+  
+//  integer j;
+//	initial j=0;
+//  always @* begin
+//    i=0;
+//    n=0;
+//    j=j+1;
+////    $display($time, " buffer_read_ctrl MXRPC = %d", MXRPC);
+//    while (i<=MXRPC-1) begin
+//      rpcptr[i]=0;
+//      $display($time, " buffer_read_ctrl j=%d, MXRPC = %d, i = %d, rd_list_rpc[i] = %d", j, MXRPC, i, rd_list_rpc[i]);
+//      if (rd_list_rpc[i]) begin
+//        rpcptr[n]=i[0];
+//        n=n+1;
+//      end
+//      i=i+1;
+//    end
+//  end
 
   wire [MXRPCB-1:0] rpc_sel = rpcptr[rpc_cnt];
 
@@ -1142,6 +1171,8 @@
   rpc_ram_rdata_ff <= rpc_ram_rdata;
   end
 `endif
+
+  initial $display($time, " buffer_read_ctrl end");
 
 //------------------------------------------------------------------------------------------------------------------
   endmodule

@@ -2640,18 +2640,18 @@
      assign mez_busy = (raw_mez_busy | alct_startup_msec | alct_wait_dll | alct_startup_done | alct_wait_vme | alct_wait_cfg);
 
 // JRG: if set_sw8 & 7 are both low, put BPI debug signals on the "testled" test points
-        assign testled[7] = set_sw[8] ? alct_txd_posneg : (!set_sw[7] ? bpi_enbl : link_good[6]);
-        assign testled[6] = (!set_sw[7] ? bpi_dsbl : link_good[5]);
-        assign testled[5] = set_sw[8] ? alct_rxd_posneg : (!set_sw[7] ? bpi_rst : link_good[4]);
-        assign testled[4] = (!set_sw[7] ? bpi_dev : link_good[3]);
-//      assign testled[MXCFEB:4] = link_good[MXCFEB-1:3];
-//  reg  [3:1]  testled_r;
-//        assign testled[3] = link_good[2] || ((set_sw == 2'b01) && clock_alct_txd);
-//        assign testled[2] = link_good[1] || ((set_sw == 2'b01) && clock_alct_rxd);
-//        assign testled[1] = link_good[0] || ((set_sw == 2'b01) && clock);
-//        assign testled[3:1] = testled_r[3:1];
-        assign testled[8] = (!set_sw[7] ? bpi_we : (&link_good || ((set_sw == 2'b01) && alct_wait_cfg)));
-        assign testled[9] = (!set_sw[7] ? bpi_dtack : (|link_bad) || ((set_sw == 2'b01) && sump));
+    assign testled[7] =   set_sw[8] ? alct_txd_posneg : (!set_sw[7] ? bpi_enbl : link_good[6]);
+    assign testled[6] = (!set_sw[7] ? bpi_dsbl        :                          link_good[5]);
+    assign testled[5] =   set_sw[8] ? alct_rxd_posneg : (!set_sw[7] ? bpi_rst  : link_good[4]);
+    assign testled[4] = (!set_sw[7] ? bpi_dev         :                          link_good[3]);
+//    assign testled[MXCFEB:4] = link_good[MXCFEB-1:3];
+//    reg  [3:1]  testled_r;
+//    assign testled[3] = link_good[2] || ((set_sw == 2'b01) && clock_alct_txd);
+//    assign testled[2] = link_good[1] || ((set_sw == 2'b01) && clock_alct_rxd);
+//    assign testled[1] = link_good[0] || ((set_sw == 2'b01) && clock);
+//    assign testled[3:1] = testled_r[3:1];
+    assign testled[8] = (!set_sw[7] ? bpi_we    : (&link_good || ((set_sw == 2'b01) && alct_wait_cfg)));
+    assign testled[9] = (!set_sw[7] ? bpi_dtack : (|link_bad) || ((set_sw == 2'b01) && sump));
 
 
   ODDR #(
@@ -2823,32 +2823,32 @@
       .odmb_data  (odmb_data),  // In  ODMB data
 
       // VME Bus Input
-      .d_vme      (vme_d[15:0]),          // Bi  VME data   D16
-      .a      (vme_a[23:1]),      // In  VME Address  A24
-      .am      (vme_am[5:0]),      // In  Address modifier
-      ._lword      (_vme_cmd[0]),      // In  Long word
-      ._as      (_vme_cmd[1]),      // In  Address Strobe
-      ._write      (_vme_cmd[2]),      // In  Write strobe
-      ._ds1      (_vme_cmd[3]),      // In  Data Strobe
-      ._sysclk      (_vme_cmd[4]),      // In  VME System clock
-      ._ds0      (_vme_cmd[5]),      // In  Data Strobe
-      ._sysfail      (_vme_cmd[6]),      // In  System fail
-      ._sysreset    (_vme_cmd[7]),      // In  System reset
-      ._acfail      (_vme_cmd[8]),      // In  AC power fail
-      ._iack      (_vme_cmd[9]),      // In  Interrupt acknowledge
-      ._iackin      (_vme_cmd[10]),      // In  Interrupt in, daisy chain
-      ._ga      (_vme_geo[4:0]),    // In  Geographic address
-      ._gap      (_vme_geo[5]),      // In  Geographic address parity
-      ._local      (_vme_geo[6]),      // In  Local Addressing: 0=using HexSw, 1=using backplane /GA
+      .d_vme     (vme_d[15:0]),   // Bi  VME data D16
+      .a         (vme_a[23:1]),   // In  VME Address A24
+      .am        (vme_am[5:0]),   // In  Address modifier
+      ._lword    (_vme_cmd[0]),   // In  Long word
+      ._as       (_vme_cmd[1]),   // In  Address Strobe
+      ._write    (_vme_cmd[2]),   // In  Write strobe
+      ._ds1      (_vme_cmd[3]),   // In  Data Strobe
+      ._sysclk   (_vme_cmd[4]),   // In  VME System clock
+      ._ds0      (_vme_cmd[5]),   // In  Data Strobe
+      ._sysfail  (_vme_cmd[6]),   // In  System fail
+      ._sysreset (_vme_cmd[7]),   // In  System reset
+      ._acfail   (_vme_cmd[8]),   // In  AC power fail
+      ._iack     (_vme_cmd[9]),   // In  Interrupt acknowledge
+      ._iackin   (_vme_cmd[10]),  // In  Interrupt in, daisy chain
+      ._ga       (_vme_geo[4:0]), // In  Geographic address
+      ._gap      (_vme_geo[5]),   // In  Geographic address parity
+      ._local    (_vme_geo[6]),   // In  Local Addressing: 0=using HexSw, 1=using backplane /GA
 
       // VME Bus Output
-      ._oe      (vme_reply[0]),    // Out  Output enable: 0=D16 drives out to VME backplane
-      .dir      (vme_reply[1]),    // Out  Data Direction: 0=read from backplane, 1=write to backplane
-      .dtack      (vme_reply[2]),    // Out  Data acknowledge
-      .iackout      (vme_reply[3]),    // Out  Interrupt out daisy chain
-      .berr      (vme_reply[4]),    // Out  Bus error
-      .irq      (vme_reply[5]),    // Out  Interrupt request
-      .ready      (vme_reply[6]),    // Out  Ready: 1=FPGA logic is up, disconnects bootstrap logic hardware
+      ._oe     (vme_reply[0]), // Out Output enable: 0=D16 drives out to VME backplane
+      .dir     (vme_reply[1]), // Out Data Direction: 0=read from backplane, 1=write to backplane
+      .dtack   (vme_reply[2]), // Out Data acknowledge
+      .iackout (vme_reply[3]), // Out Interrupt out daisy chain
+      .berr    (vme_reply[4]), // Out Bus error
+      .irq     (vme_reply[5]), // Out Interrupt request
+      .ready   (vme_reply[6]), // Out Ready: 1=FPGA logic is up, disconnects bootstrap logic hardware
 
       // Loop-Back Control
       .cfeb_oe      (cfeb_oe),    // Out  1=Enable CFEB LVDS drivers

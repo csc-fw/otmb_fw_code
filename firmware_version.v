@@ -2,27 +2,27 @@
 //  OTMB_VIRTEX6 Virtex-6 Global Definitions
 //---------------------------------------------------------------------------------------------------------------------------------------
 // Firmware version global definitions
-  `define FIRMWARE_TYPE    04'hC    // C=Normal CLCT/TMB, D=Debug PCB loopback version
-  `define VERSION        04'hE    // Version revision number, A=TMB2004 and earlier, E=TMB2005E production
-  `define MONTHDAY      16'h0626  // Version date
-  `define YEAR        16'h2014  // Version year
+  `define FIRMWARE_TYPE 04'hC    // C=Normal CLCT/TMB, D=Debug PCB loopback version
+  `define VERSION       04'hE    // Version revision number, A=TMB2004 and earlier, E=TMB2005E production
+  `define MONTHDAY      16'h0917 // Version date
+  `define YEAR          16'h2014 // Version year
 
-  `define AUTO_VME      01'h1    // Automatically initialize VME registers from PROM data,   0=do not
-  `define AUTO_JTAG      01'h1    // Automatically initialize JTAG chain from PROM data,      0=do not
-  `define AUTO_PHASER      01'h1    // Automatically initialize PHASER machines from PROM data, 0=do not
-  `define ALCT_MUONIC      01'h1    // Floats ALCT board  in clock-space with independent time-of-flight delay
-  `define CFEB_MUONIC      01'h1    // Floats CFEB boards in clock-space with independent time-of-flight delay
-  `define CCB_BX0_EMULATOR  01'h0    // Turns on bx0 emulator at power up, must be 0 for all CERN versions
+  `define AUTO_VME         01'h1 // Automatically initialize VME registers from PROM data,   0=do not
+  `define AUTO_JTAG        01'h1 // Automatically initialize JTAG chain from PROM data,      0=do not
+  `define AUTO_PHASER      01'h1 // Automatically initialize PHASER machines from PROM data, 0=do not
+  `define ALCT_MUONIC      01'h1 // Floats ALCT board  in clock-space with independent time-of-flight delay
+  `define CFEB_MUONIC      01'h1 // Floats CFEB boards in clock-space with independent time-of-flight delay
+  `define CCB_BX0_EMULATOR 01'h0 // Turns on bx0 emulator at power up, must be 0 for all CERN versions
 
-  `define VIRTEX6        04'h6    // FPGA type is Virtex6
-  `define MEZCARD        04'hD    // Mezzanine Card: D=Virtex6
-  `define ISE_VERSION      16'h1460  // ISE Compiler version
-//  `define FPGAID        16'h6195  // FPGA Type 6195 XC6VLX195T
-  `define FPGAID        16'h6240  // FPGA Type 6240 XC6VLX240T
+  `define VIRTEX6      04'h6    // FPGA type is Virtex6
+  `define MEZCARD      04'hD    // Mezzanine Card: D=Virtex6
+  `define ISE_VERSION  16'h1460 // ISE Compiler version
+//  `define FPGAID     16'h6195 // FPGA Type 6195 XC6VLX195T
+  `define FPGAID       16'h6240 // FPGA Type 6240 XC6VLX240T
 
 // Conditional compile flags: Enable only one CSC_TYPE
-  `define CSC_TYPE_C      04'hC    // Normal   ME1B: ME1B   chambers facing toward IR.    ME1B hs =!reversed, ME1A hs = reversed
-//  `define CSC_TYPE_D      04'hD    // Reversed ME1B: ME1B   chambers facing away from IR. ME1B hs = reversed, ME1A hs =!reversed
+  `define CSC_TYPE_C  04'hC // Normal   ME1B: ME1B   chambers facing toward IR.    ME1B hs =!reversed, ME1A hs = reversed
+//  `define CSC_TYPE_D  04'hD    // Reversed ME1B: ME1B   chambers facing away from IR. ME1B hs = reversed, ME1A hs =!reversed
 
 // Revision log
 //  02/08/2013  Initial Virtex-6 specific

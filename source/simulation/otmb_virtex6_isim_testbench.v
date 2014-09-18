@@ -6,7 +6,7 @@
 //
 // Create Date:   16:37:24 06/06/2014
 // Design Name:   otmb_virtex6
-// Module Name:   /home/pakhotin/Work/CMS_My_Service_Work/CSC/TMB_Firmware/2014-06-05_OTMB_BPI_Interface_Debug/otmb_fw_code/source/simulation/otmb_virtex6_top_isim_v1.v
+// Module Name:   /home/pakhotin/Work/CMS_My_Service_Work/CSC/TMB_Firmware/2014-06-05_OTMB_BPI_Interface_Debug/otmb_fw_code/source/simulation/otmb_virtex6_isim_testbench.v
 // Project Name:  otmb_virtex6
 // Target Device:  
 // Tool versions:  
@@ -22,7 +22,7 @@
 // 
 ////////////////////////////////////////////////////////////////////////////////
 
-module otmb_virtex6_top_isim_v1;
+module otmb_virtex6_isim_testbench;
 
   // Inputs
   reg [23:0] cfeb0_rx;
@@ -114,6 +114,9 @@ module otmb_virtex6_top_isim_v1;
 
   // Bidirs
   wire [15:0] vme_d;
+  reg [15:0] vme_d_reg;
+  assign vme_d = vme_d_reg;
+  
   wire [3:1] jtag_usr;
   wire [3:0] sel_usr;
   wire [7:0] prom_led;
@@ -243,10 +246,25 @@ module otmb_virtex6_top_isim_v1;
   );
   
   always
-      #25 tmb_clock0 = ~tmb_clock0; // 25 ns -> 40 MHz
-  
+		#12.5 tmb_clock0 = ~tmb_clock0; // 25 ns -> 40 MHz
+	
+	always
+		#12.5 tmb_clock1 = ~tmb_clock1; // 25 ns -> 40 MHz
+	
+	always
+		#12.5 alct_rxclock = ~alct_rxclock; // 25 ns -> 40 MHz
+	
+	always
+		#12.5 alct_rxclockd = ~alct_rxclockd; // 25 ns -> 40 MHz
+	
+	always
+		#12.5 mpc_clock = ~mpc_clock; // 25 ns -> 40 MHz
+	
+	always
+		#12.5 dcc_clock = ~dcc_clock; // 25 ns -> 40 MHz
+	
   initial begin
-    $display($time, "<< Starting the Simulation >>");
+    $display($time, " Starting the Initialization");
     // Initialize Inputs
     cfeb0_rx = 0;
     cfeb1_rx = 0;
@@ -260,16 +278,34 @@ module otmb_virtex6_top_isim_v1;
     rpc_dsn = 0;
     _ccb_rx = 0;
     vme_a = 0;
-    vme_am = 0;
-    _vme_cmd = 0;
-    _vme_geo = 0;
+    
+    vme_am = 'h39; // Address modifier: 39=A24 non-priv mode, 3D=A24 supervisor mode
+    
+    
+    _vme_cmd = 11'b01000100000;
+    //  _lword    (_vme_cmd[0]),      // In  Long word
+    //  _as       (_vme_cmd[1]),      // In  Address Strobe
+    //  _write    (_vme_cmd[2]),      // In  Write strobe
+    //  _ds1      (_vme_cmd[3]),      // In  Data Strobe
+    //  _sysclk   (_vme_cmd[4]),      // In  VME System clock
+    //  _ds0      (_vme_cmd[5]),      // In  Data Strobe
+    //  _sysfail  (_vme_cmd[6]),      // In  System fail
+    //  _sysreset (_vme_cmd[7]),      // In  System reset
+    //  _acfail   (_vme_cmd[8]),      // In  AC power fail
+    //  _iack     (_vme_cmd[9]),      // In  Interrupt acknowledge
+    //  _iackin   (_vme_cmd[10]),     // In  Interrupt in, daisy chain
+    
+    _vme_geo[4:0] = 5'b11111; // VME logic is negative. This matches to used geo address of the board = 0000000
+    
     jtag_usr0_tdo = 0;
-    tmb_clock0 = 0;
-    tmb_clock1 = 0;
-    alct_rxclock = 0;
-    alct_rxclockd = 0;
-    mpc_clock = 0;
-    dcc_clock = 0;
+    
+    tmb_clock0    = 1; // set all initial clocks to 1 to avoid 12.5 ns delay at start
+    tmb_clock1    = 1;
+    alct_rxclock  = 1;
+    alct_rxclockd = 1;
+    mpc_clock     = 1;
+    dcc_clock     = 1;
+    
     ddd_serial_out = 0;
     mez_done = 0;
     vstat = 0;
@@ -277,7 +313,9 @@ module otmb_virtex6_top_isim_v1;
     adc_io3_dout = 0;
     gp_io4 = 0;
     set_sw = 0;
+    
     reset = 0;
+    
     clk40p = 0;
     clk40n = 0;
     clk160p = 0;
@@ -297,16 +335,59 @@ module otmb_virtex6_top_isim_v1;
     f_sdat = 0;
     f_fok = 0;
     
-    // Wait 100 ns for global reset to finish
-//    #100;
-        
-    // Add stimulus here
+    @( posedge tmb_clock0 );
+    $display($time, "  1 display tmb_clock0 = %b", tmb_clock0);
     
-    $display($time, "<< Finishing the Simulation >>");
+    // Wait 3000 ns for global reset to finish
+    #3000;
+    
+    $display($time, " Finishing the Initialization");
+//    $stop;
+  end
+  
+  always @( posedge tmb_clock0 ) begin
+    $display($time, "  2 display tmb_clock0 = %b", tmb_clock0);
+  end
+  
+  // Stimulus to BPI interface through VME
+  initial begin
+  	
+  	#3100;
+    
+    vme_a = 24'h28020; // Reset BPI interface state machines
+    vme_d_reg = 16'h0000;
+       
+    #500;
+    
+    vme_a = 24'h28038; // Read BPI interface status register (16 bits)
+    
+  end
+  
+  // Stimilus to emulate VME data strobe
+  initial begin
+    
+    #3100;
+    
+//    _vme_cmd[2] = 1'b1; // Write strobe
+    _vme_cmd[5] = 1'b0; // Data Strobe. VME logic is negative.
+    
+    #300;
+    
+//    _vme_cmd[2] = 1'b0; // Write strobe
+    _vme_cmd[5] = 1'b1; // Data Strobe. VME logic is negative.
+    
+    #200;
+    
+    _vme_cmd[5] = 1'b0; // Data Strobe. VME logic is negative.
+    
+    #300;
+    
+    _vme_cmd[5] = 1'b1; // Data Strobe. VME logic is negative.
+    
   end
   
   initial begin
-    $monitor($time, "  tmb_clock0 = %b", tmb_clock0);
+    $monitor($time, "  monitor tmb_clock0 = %b", tmb_clock0);
   end
       
 endmodule

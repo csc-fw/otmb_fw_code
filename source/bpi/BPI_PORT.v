@@ -43,7 +43,7 @@ module BPI_PORT(
   input WRITE_B,                   // read/write_bar
   input [15:0] INDATA,             // data from VME writes to be provided to BPI interface
   output reg [15:0] OUTDATA,       // data from BPI interface to VME buss for reads
-  output DTACK_B,                  // DTACK bar
+  output DTACK,                    // DTACK
    // BPI controls
   output reg BPI_RST,                  // Resets BPI interface state machines
   output reg [15:0] BPI_CMD_FIFO_DATA, // Data for command FIFO
@@ -68,12 +68,12 @@ wire lead_0;
 reg  lead_1;
 wire trail_0;
 
-assign DTACK_B = (busy || busy_2) ? ~dtack : 1'bz;
-assign busy    = (DEVICE && STROBE);
+assign DTACK      = (busy || busy_2) ? dtack : 1'b0;
+assign busy         = (DEVICE && STROBE);
 assign active_write = (DEVICE && !WRITE_B);
 assign active_read  = (DEVICE && WRITE_B);
-assign lead_0 = busy && !busy_1;
-assign trail_0 = !busy && busy_1;
+assign lead_0       = busy && !busy_1;
+assign trail_0      = !busy && busy_1;
 
 always @(posedge CLK or posedge RST)
 begin
@@ -81,6 +81,7 @@ begin
     OUTDATA <= 16'h0000;
   else
     if(active_read && lead_0)
+      begin
       case(COMMAND)
         10'h00C :                        // VME address 0x04030; command 12 -- Read one word from readback FIFO
           OUTDATA <= BPI_RBK_FIFO_DATA;
@@ -95,9 +96,12 @@ begin
         default :
           OUTDATA <= 16'h0000;
       endcase
+      end
     else
       OUTDATA <= OUTDATA;
 end
+
+
 always @(posedge CLK or posedge RST)
 begin
   if(RST)
@@ -118,14 +122,14 @@ end
 
 always @(posedge CLK)
 begin
-  busy_1 <= busy;
-  busy_2 <= busy_1;
-  lead_1 <= lead_0;
-  BPI_RST <= lead_0 && (COMMAND == 10'h008);
-  BPI_DSBL <= lead_0 && (COMMAND == 10'h009);
-  BPI_ENBL <= lead_0 && (COMMAND == 10'h00A);
-  BPI_WE <= lead_0 && (COMMAND == 10'h00B);
-  BPI_RE <= lead_0 && (COMMAND == 10'h00C);
+  busy_1        <= busy;
+  busy_2        <= busy_1;
+  lead_1        <= lead_0;
+  BPI_RST       <= lead_0 && (COMMAND == 10'h008);
+  BPI_DSBL      <= lead_0 && (COMMAND == 10'h009);
+  BPI_ENBL      <= lead_0 && (COMMAND == 10'h00A);
+  BPI_WE        <= lead_0 && (COMMAND == 10'h00B);
+  BPI_RE        <= lead_0 && (COMMAND == 10'h00C);
   BPI_RD_STATUS <= lead_0 && (COMMAND == 10'h00E);
 end
 

@@ -1,0 +1,603 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="./otmb_virtex6_isim_testbench_isim_beh.wdb" id="1" type="auto">
+         <top_modules>
+            <top_module name="glbl" />
+            <top_module name="hdlmacro" />
+            <top_module name="numeric_std" />
+            <top_module name="otmb_virtex6_isim_testbench" />
+            <top_module name="std_logic_1164" />
+            <top_module name="std_logic_arith" />
+            <top_module name="std_logic_unsigned" />
+            <top_module name="textio" />
+            <top_module name="vcomponents" />
+            <top_module name="vcomponents" />
+            <top_module name="vital_primitives" />
+            <top_module name="vital_timing" />
+            <top_module name="vpkg" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <WVObjectSize size="14" />
+   <wvobject fp_name="group221" type="group">
+      <obj_property name="label">inputs to uut</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/tmb_clock0" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">tmb_clock0</obj_property>
+         <obj_property name="ObjectShortName">tmb_clock0</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/_vme_geo" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">_vme_geo[6:0]</obj_property>
+         <obj_property name="ObjectShortName">_vme_geo[6:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/_vme_cmd" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">_vme_cmd[10:0]</obj_property>
+         <obj_property name="ObjectShortName">_vme_cmd[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/vme_d_reg" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">vme_d_reg[15:0]</obj_property>
+         <obj_property name="ObjectShortName">vme_d_reg[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/vme_a" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">vme_a[23:1]</obj_property>
+         <obj_property name="ObjectShortName">vme_a[23:1]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="divider380" type="divider">
+      <obj_property name="label">otmb_virtex6 uut</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">128 128 255</obj_property>
+      <obj_property name="TextColor">230 230 230</obj_property>
+   </wvobject>
+   <wvobject fp_name="group222" type="group">
+      <obj_property name="label">otmb_virtex6 uut</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/clock" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">clock</obj_property>
+         <obj_property name="ObjectShortName">clock</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/clock_vme" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">clock_vme</obj_property>
+         <obj_property name="ObjectShortName">clock_vme</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/global_reset" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">global_reset</obj_property>
+         <obj_property name="ObjectShortName">global_reset</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/vme_reply" type="array" db_ref_id="1">
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="ElementShortName">vme_reply[6:0]</obj_property>
+         <obj_property name="ObjectShortName">vme_reply[6:0]</obj_property>
+         <obj_property name="label">vme_reply[6:0]</obj_property>
+         <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/vme_reply[6]" type="logic" db_ref_id="1">
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="ElementShortName">[6]</obj_property>
+            <obj_property name="ObjectShortName">vme_reply[6]</obj_property>
+            <obj_property name="label">[6]=ready</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/vme_reply[5]" type="logic" db_ref_id="1">
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="ElementShortName">[5]</obj_property>
+            <obj_property name="ObjectShortName">vme_reply[5]</obj_property>
+            <obj_property name="label">[5]=irq</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/vme_reply[4]" type="logic" db_ref_id="1">
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="ElementShortName">[4]</obj_property>
+            <obj_property name="ObjectShortName">vme_reply[4]</obj_property>
+            <obj_property name="label">[4]=berr</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/vme_reply[3]" type="logic" db_ref_id="1">
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="ElementShortName">[3]</obj_property>
+            <obj_property name="ObjectShortName">vme_reply[3]</obj_property>
+            <obj_property name="label">[3]=iackout</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/vme_reply[2]" type="logic" db_ref_id="1">
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="ElementShortName">[2]</obj_property>
+            <obj_property name="ObjectShortName">vme_reply[2]</obj_property>
+            <obj_property name="label">[2]=dtack</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/vme_reply[1]" type="logic" db_ref_id="1">
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="ElementShortName">[1]</obj_property>
+            <obj_property name="ObjectShortName">vme_reply[1]</obj_property>
+            <obj_property name="label">[1]=dir</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/vme_reply[0]" type="logic" db_ref_id="1">
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="ElementShortName">[0]</obj_property>
+            <obj_property name="ObjectShortName">vme_reply[0]</obj_property>
+            <obj_property name="label">[0]=oe</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/bpi_dev" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">bpi_dev</obj_property>
+         <obj_property name="ObjectShortName">bpi_dev</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="divider384" type="divider">
+      <obj_property name="label">vme uvme</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">128 128 255</obj_property>
+      <obj_property name="TextColor">230 230 230</obj_property>
+   </wvobject>
+   <wvobject fp_name="group223" type="group">
+      <obj_property name="label">vme uvme</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/global_reset" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">global_reset</obj_property>
+         <obj_property name="ObjectShortName">global_reset</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/d_vme" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">d_vme[15:0]</obj_property>
+         <obj_property name="ObjectShortName">d_vme[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/a_vme" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">a_vme[23:1]</obj_property>
+         <obj_property name="ObjectShortName">a_vme[23:1]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/dtack" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">dtack</obj_property>
+         <obj_property name="ObjectShortName">dtack</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bd_match" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">bd_match</obj_property>
+         <obj_property name="ObjectShortName">bd_match</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/ds0" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">ds0</obj_property>
+         <obj_property name="ObjectShortName">ds0</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bd_sel" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">bd_sel</obj_property>
+         <obj_property name="ObjectShortName">bd_sel</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_dtack" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">bpi_dtack</obj_property>
+         <obj_property name="ObjectShortName">bpi_dtack</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">#00ff00</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_outdata" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">bpi_outdata[15:0]</obj_property>
+         <obj_property name="ObjectShortName">bpi_outdata[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_rst" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">bpi_rst</obj_property>
+         <obj_property name="ObjectShortName">bpi_rst</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_dev" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">bpi_dev</obj_property>
+         <obj_property name="ObjectShortName">bpi_dev</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">#00ff00</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="divider386" type="divider">
+      <obj_property name="label">BPI_PORT bpi_vme</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">128 128 255</obj_property>
+      <obj_property name="TextColor">230 230 230</obj_property>
+   </wvobject>
+   <wvobject fp_name="group224" type="group">
+      <obj_property name="label">BPI_PORT bpi_vme</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/CLK" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">CLK</obj_property>
+         <obj_property name="ObjectShortName">CLK</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/RST" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">RST</obj_property>
+         <obj_property name="ObjectShortName">RST</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/DEVICE" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">DEVICE</obj_property>
+         <obj_property name="ObjectShortName">DEVICE</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/STROBE" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">STROBE</obj_property>
+         <obj_property name="ObjectShortName">STROBE</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/busy" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">busy</obj_property>
+         <obj_property name="ObjectShortName">busy</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/busy_1" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">busy_1</obj_property>
+         <obj_property name="ObjectShortName">busy_1</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/busy_2" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">busy_2</obj_property>
+         <obj_property name="ObjectShortName">busy_2</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/dtack" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">dtack</obj_property>
+         <obj_property name="ObjectShortName">dtack</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/WRITE_B" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">WRITE_B</obj_property>
+         <obj_property name="ObjectShortName">WRITE_B</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/active_read" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">active_read</obj_property>
+         <obj_property name="ObjectShortName">active_read</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/lead_1" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">lead_1</obj_property>
+         <obj_property name="ObjectShortName">lead_1</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/active_write" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">active_write</obj_property>
+         <obj_property name="ObjectShortName">active_write</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/lead_0" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">lead_0</obj_property>
+         <obj_property name="ObjectShortName">lead_0</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/trail_0" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">trail_0</obj_property>
+         <obj_property name="ObjectShortName">trail_0</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/COMMAND" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">COMMAND[9:0]</obj_property>
+         <obj_property name="ObjectShortName">COMMAND[9:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/INDATA" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">INDATA[15:0]</obj_property>
+         <obj_property name="ObjectShortName">INDATA[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/OUTDATA" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">OUTDATA[15:0]</obj_property>
+         <obj_property name="ObjectShortName">OUTDATA[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/BPI_RBK_FIFO_DATA" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">BPI_RBK_FIFO_DATA[15:0]</obj_property>
+         <obj_property name="ObjectShortName">BPI_RBK_FIFO_DATA[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/BPI_RBK_WRD_CNT" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">BPI_RBK_WRD_CNT[10:0]</obj_property>
+         <obj_property name="ObjectShortName">BPI_RBK_WRD_CNT[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/BPI_STATUS" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">BPI_STATUS[15:0]</obj_property>
+         <obj_property name="ObjectShortName">BPI_STATUS[15:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/BPI_TIMER" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">BPI_TIMER[31:0]</obj_property>
+         <obj_property name="ObjectShortName">BPI_TIMER[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/BPI_RST" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">BPI_RST</obj_property>
+         <obj_property name="ObjectShortName">BPI_RST</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/BPI_CMD_FIFO_DATA" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">BPI_CMD_FIFO_DATA[15:0]</obj_property>
+         <obj_property name="ObjectShortName">BPI_CMD_FIFO_DATA[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/BPI_WE" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">BPI_WE</obj_property>
+         <obj_property name="ObjectShortName">BPI_WE</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/BPI_RE" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">BPI_RE</obj_property>
+         <obj_property name="ObjectShortName">BPI_RE</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/BPI_DSBL" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">BPI_DSBL</obj_property>
+         <obj_property name="ObjectShortName">BPI_DSBL</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/BPI_ENBL" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">BPI_ENBL</obj_property>
+         <obj_property name="ObjectShortName">BPI_ENBL</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_vme/BPI_RD_STATUS" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">BPI_RD_STATUS</obj_property>
+         <obj_property name="ObjectShortName">BPI_RD_STATUS</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="divider448" type="divider">
+      <obj_property name="label">BPI_ctrl bpi_engine</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">128 128 255</obj_property>
+      <obj_property name="TextColor">230 230 230</obj_property>
+   </wvobject>
+   <wvobject fp_name="group225" type="group">
+      <obj_property name="label">BPI_ctrl bpi_engine</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/CLK1MHZ" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">CLK1MHZ</obj_property>
+         <obj_property name="ObjectShortName">CLK1MHZ</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/local_rst" type="logic" db_ref_id="1">
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="ElementShortName">local_rst</obj_property>
+         <obj_property name="ObjectShortName">local_rst</obj_property>
+         <obj_property name="label">local_rst</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/local_rst_long" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">local_rst_long</obj_property>
+         <obj_property name="ObjectShortName">local_rst_long</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/bpi_rbk_empty" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">bpi_rbk_empty</obj_property>
+         <obj_property name="ObjectShortName">bpi_rbk_empty</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/bpi_rbk_full" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">bpi_rbk_full</obj_property>
+         <obj_property name="ObjectShortName">bpi_rbk_full</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/bpi_rbk_wena" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">bpi_rbk_wena</obj_property>
+         <obj_property name="ObjectShortName">bpi_rbk_wena</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/sr_reg" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">sr_reg[7:0]</obj_property>
+         <obj_property name="ObjectShortName">sr_reg[7:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="divider469" type="divider">
+      <obj_property name="label">BPI FIFOs</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">128 128 255</obj_property>
+      <obj_property name="TextColor">230 230 230</obj_property>
+   </wvobject>
+   <wvobject fp_name="group553" type="group">
+      <obj_property name="label">BPI_rbk_FIFO_data_i</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_rbk_FIFO_data_i/RDEN" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">RDEN</obj_property>
+         <obj_property name="ObjectShortName">RDEN</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_rbk_FIFO_data_i/RST" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">RST</obj_property>
+         <obj_property name="ObjectShortName">RST</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_rbk_FIFO_data_i/WRCLK" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">WRCLK</obj_property>
+         <obj_property name="ObjectShortName">WRCLK</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_rbk_FIFO_data_i/WREN" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">WREN</obj_property>
+         <obj_property name="ObjectShortName">WREN</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_rbk_FIFO_data_i/RDCLK" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">RDCLK</obj_property>
+         <obj_property name="ObjectShortName">RDCLK</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_rbk_FIFO_data_i/ALMOSTEMPTY" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">ALMOSTEMPTY</obj_property>
+         <obj_property name="ObjectShortName">ALMOSTEMPTY</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_rbk_FIFO_data_i/ALMOSTFULL" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">ALMOSTFULL</obj_property>
+         <obj_property name="ObjectShortName">ALMOSTFULL</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_rbk_FIFO_data_i/DO" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">DO[15:0]</obj_property>
+         <obj_property name="ObjectShortName">DO[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_rbk_FIFO_data_i/EMPTY" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">EMPTY</obj_property>
+         <obj_property name="ObjectShortName">EMPTY</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_rbk_FIFO_data_i/FULL" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">FULL</obj_property>
+         <obj_property name="ObjectShortName">FULL</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_rbk_FIFO_data_i/RDCOUNT" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">RDCOUNT[10:0]</obj_property>
+         <obj_property name="ObjectShortName">RDCOUNT[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_rbk_FIFO_data_i/RDERR" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">RDERR</obj_property>
+         <obj_property name="ObjectShortName">RDERR</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_rbk_FIFO_data_i/WRCOUNT" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">WRCOUNT[10:0]</obj_property>
+         <obj_property name="ObjectShortName">WRCOUNT[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_rbk_FIFO_data_i/WRERR" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">WRERR</obj_property>
+         <obj_property name="ObjectShortName">WRERR</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="group530" type="group">
+      <obj_property name="label">BPI_CMD_FIFO_i</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_CMD_FIFO_i/DI" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">DI[15:0]</obj_property>
+         <obj_property name="ObjectShortName">DI[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_CMD_FIFO_i/RDCLK" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">RDCLK</obj_property>
+         <obj_property name="ObjectShortName">RDCLK</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_CMD_FIFO_i/RDEN" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">RDEN</obj_property>
+         <obj_property name="ObjectShortName">RDEN</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_CMD_FIFO_i/RST" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">RST</obj_property>
+         <obj_property name="ObjectShortName">RST</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_CMD_FIFO_i/WRCLK" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">WRCLK</obj_property>
+         <obj_property name="ObjectShortName">WRCLK</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_CMD_FIFO_i/WREN" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">WREN</obj_property>
+         <obj_property name="ObjectShortName">WREN</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_CMD_FIFO_i/ALMOSTEMPTY" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">ALMOSTEMPTY</obj_property>
+         <obj_property name="ObjectShortName">ALMOSTEMPTY</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_CMD_FIFO_i/ALMOSTFULL" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">ALMOSTFULL</obj_property>
+         <obj_property name="ObjectShortName">ALMOSTFULL</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_CMD_FIFO_i/DO" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">DO[15:0]</obj_property>
+         <obj_property name="ObjectShortName">DO[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_CMD_FIFO_i/EMPTY" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">EMPTY</obj_property>
+         <obj_property name="ObjectShortName">EMPTY</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_CMD_FIFO_i/FULL" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">FULL</obj_property>
+         <obj_property name="ObjectShortName">FULL</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_CMD_FIFO_i/RDCOUNT" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">RDCOUNT[10:0]</obj_property>
+         <obj_property name="ObjectShortName">RDCOUNT[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_CMD_FIFO_i/RDERR" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">RDERR</obj_property>
+         <obj_property name="ObjectShortName">RDERR</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_CMD_FIFO_i/WRCOUNT" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">WRCOUNT[10:0]</obj_property>
+         <obj_property name="ObjectShortName">WRCOUNT[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_engine/BPI_CMD_FIFO_i/WRERR" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">WRERR</obj_property>
+         <obj_property name="ObjectShortName">WRERR</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="divider226" type="divider">
+      <obj_property name="label">BPI_intrf_FSM</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">128 128 255</obj_property>
+      <obj_property name="TextColor">230 230 230</obj_property>
+   </wvobject>
+   <wvobject fp_name="group220" type="group">
+      <obj_property name="label">BPI_intrf_FSM</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_busctrl/BPI_intrf_FSM1/CLK" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">CLK</obj_property>
+         <obj_property name="ObjectShortName">CLK</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_busctrl/BPI_intrf_FSM1/EXECUTE" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">EXECUTE</obj_property>
+         <obj_property name="ObjectShortName">EXECUTE</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_busctrl/BPI_intrf_FSM1/READ" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">READ</obj_property>
+         <obj_property name="ObjectShortName">READ</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_busctrl/BPI_intrf_FSM1/RST" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">RST</obj_property>
+         <obj_property name="ObjectShortName">RST</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_busctrl/BPI_intrf_FSM1/WRITE" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">WRITE</obj_property>
+         <obj_property name="ObjectShortName">WRITE</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_busctrl/BPI_intrf_FSM1/BUSY" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">BUSY</obj_property>
+         <obj_property name="ObjectShortName">BUSY</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_busctrl/BPI_intrf_FSM1/CAP" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">CAP</obj_property>
+         <obj_property name="ObjectShortName">CAP</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_busctrl/BPI_intrf_FSM1/W" type="logic" db_ref_id="1">
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="ElementShortName">W</obj_property>
+         <obj_property name="ObjectShortName">W</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">#00ffff</obj_property>
+         <obj_property name="label">W = FWE</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_busctrl/BPI_intrf_FSM1/E" type="logic" db_ref_id="1">
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="ElementShortName">E</obj_property>
+         <obj_property name="ObjectShortName">E</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">#00ffff</obj_property>
+         <obj_property name="label">E = FCS</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_busctrl/BPI_intrf_FSM1/G" type="logic" db_ref_id="1">
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="ElementShortName">G</obj_property>
+         <obj_property name="ObjectShortName">G</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">#00ffff</obj_property>
+         <obj_property name="label">G = FOE</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_busctrl/BPI_intrf_FSM1/L" type="logic" db_ref_id="1">
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="ElementShortName">L</obj_property>
+         <obj_property name="ObjectShortName">L</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">#00ffff</obj_property>
+         <obj_property name="label">L = Latch</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_busctrl/BPI_intrf_FSM1/LOAD" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">LOAD</obj_property>
+         <obj_property name="ObjectShortName">LOAD</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_busctrl/BPI_intrf_FSM1/state" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">state[3:0]</obj_property>
+         <obj_property name="ObjectShortName">state[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_busctrl/BPI_intrf_FSM1/nextstate" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">nextstate[3:0]</obj_property>
+         <obj_property name="ObjectShortName">nextstate[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_busctrl/BPI_intrf_FSM1/statename" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">statename[79:0]</obj_property>
+         <obj_property name="ObjectShortName">statename[79:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_busctrl/BPI_intrf_FSM1/Standby" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">Standby[3:0]</obj_property>
+         <obj_property name="ObjectShortName">Standby[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_busctrl/BPI_intrf_FSM1/Capture" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">Capture[3:0]</obj_property>
+         <obj_property name="ObjectShortName">Capture[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_busctrl/BPI_intrf_FSM1/Latch_Addr" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">Latch_Addr[3:0]</obj_property>
+         <obj_property name="ObjectShortName">Latch_Addr[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_busctrl/BPI_intrf_FSM1/Load" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">Load[3:0]</obj_property>
+         <obj_property name="ObjectShortName">Load[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_busctrl/BPI_intrf_FSM1/WE1" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">WE1[3:0]</obj_property>
+         <obj_property name="ObjectShortName">WE1[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_busctrl/BPI_intrf_FSM1/WE2" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">WE2[3:0]</obj_property>
+         <obj_property name="ObjectShortName">WE2[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_busctrl/BPI_intrf_FSM1/Wait1" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">Wait1[3:0]</obj_property>
+         <obj_property name="ObjectShortName">Wait1[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_busctrl/BPI_intrf_FSM1/Wait2" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">Wait2[3:0]</obj_property>
+         <obj_property name="ObjectShortName">Wait2[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_busctrl/BPI_intrf_FSM1/Wait3" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">Wait3[3:0]</obj_property>
+         <obj_property name="ObjectShortName">Wait3[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_testbench/uut/uvme/bpi_busctrl/BPI_intrf_FSM1/Wait4" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">Wait4[3:0]</obj_property>
+         <obj_property name="ObjectShortName">Wait4[3:0]</obj_property>
+      </wvobject>
+   </wvobject>
+</wave_config>

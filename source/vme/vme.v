@@ -92,9 +92,17 @@
 
 // BPI flash ports
   flash_ctrl,    // [3:0] JRG, goes up for I/O match to UCF with FCS,FOE,FWE,FLATCH = fcs,_ccb_tx14,_ccb_tx26,_ccb_tx3
-        flash_ctrl_dualuse,    // [2:0] JRG, goes down to bpi_interface for MUX with FOE,FWE,FLATCH
+  flash_ctrl_dualuse,    // [2:0] JRG, goes down to bpi_interface for MUX with FOE,FWE,FLATCH
   bpi_ad_out,
-  bpi_active, bpi_dev, bpi_rst, bpi_dsbl, bpi_enbl, bpi_we, bpi_dtack, bpi_rd_stat, bpi_re,
+  bpi_active,
+  bpi_dev,
+  bpi_rst,
+  bpi_dsbl,
+  bpi_enbl,
+  bpi_we,
+  bpi_dtack,
+  bpi_rd_stat,
+  bpi_re,
 
 // 3D3444
   ddd_clock,
@@ -1236,17 +1244,17 @@
 // Ports
 //------------------------------------------------------------------------------------------------------------------
 // VME Clock Port Map
-  input          clock;      // TMB 40MHz clock
-  input          clock_vme;    // VME 10MHz clock
-        input           clock_1mhz;    // In  1MHz BPI_ctrl Timer clock
-  input          clock_lock_lost_err;  // TMB 40MHz main clock lost lock FF
-  input          ttc_resync;    // Purge l1a processing stack
-  input          global_reset;    // Global reset
-  output          global_reset_en;  // Enable global reset on lock_lost.  JG: on by default
+  input  clock;               // TMB 40MHz clock
+  input  clock_vme;           // VME 10MHz clock
+  input  clock_1mhz;          // In  1MHz BPI_ctrl Timer clock
+  input  clock_lock_lost_err; // TMB 40MHz main clock lost lock FF
+  input  ttc_resync;          // Purge l1a processing stack
+  input  global_reset;        // Global reset
+  output global_reset_en;     // Enable global reset on lock_lost.  JG: on by default
 
 // Firmware Version Ports
-  input  [MXCFEB-1:0]  cfeb_exists;      // CFEBs instantiated in this version
-  output  [14:0]      revcode;        // Firmware revision code
+  input  [MXCFEB-1:0] cfeb_exists; // CFEBs instantiated in this version
+  output [14:0]       revcode;     // Firmware revision code
 
 // ODMB device
    output         bd_sel;  // Out Board selected
@@ -1315,10 +1323,10 @@
   input    tck_fpga;  // TCK from FPGA JTAG chain 
 
 // BPI flash ports
-        output  [3:0]   flash_ctrl;    // JRG, goes up for I/O match to UCF with FCS,FOE,FWE,FLATCH = fcs,_ccb_tx14,_ccb_tx26,_ccb_tx3
-        input   [2:0]   flash_ctrl_dualuse;    // JRG, goes down to bpi_interface for MUX with FOE,FWE,FLATCH
-        output [22:0]   bpi_ad_out;
-        output     bpi_active, bpi_dev, bpi_rst, bpi_dsbl, bpi_enbl, bpi_we, bpi_dtack, bpi_rd_stat, bpi_re;
+  output  [3:0] flash_ctrl;         // JRG, goes up for I/O match to UCF with FCS,FOE,FWE,FLATCH = fcs,_ccb_tx14,_ccb_tx26,_ccb_tx3
+  input   [2:0] flash_ctrl_dualuse; // JRG, goes down to bpi_interface for MUX with FOE,FWE,FLATCH
+  output [22:0] bpi_ad_out;
+  output        bpi_active, bpi_dev, bpi_rst, bpi_dsbl, bpi_enbl, bpi_we, bpi_dtack, bpi_rd_stat, bpi_re;
 
 // 3D3444
   output          ddd_clock;        // ddd clock
@@ -1340,15 +1348,15 @@
   output          _hard_reset_tmb_fpga;  // Hard Reset TMB (wire-or with power-on-reset chip)
 
 // Status: LED Port Map
-  input          led_fp_lct;        // LCT  Blue  CLCT + ALCT match
-  input          led_fp_alct;      // ALCT  Green  ALCT valid pattern
-  input          led_fp_clct;      // CLCT  Green  CLCT valid pattern
-  input          led_fp_l1a;        // L1A  Green  Level 1 Accept from CCB or internal
-  input          led_fp_invp;      // INVP  Amber  Invalid pattern after drift delay
-  input          led_fp_nmat;      // NMAT  Amber  ALCT or CLCT but no match
-  input          led_fp_nl1a;      // NL1A  Red    L1A did not arrive in window
-  input  [7:0]      led_bd_in;        // On-Board LEDs
-  output  [7:0]      led_fp_out;        // Front Panel LEDs (on board LEDs are connected to prom_led)
+  input          led_fp_lct;  // LCT  Blue  CLCT + ALCT match
+  input          led_fp_alct; // ALCT  Green  ALCT valid pattern
+  input          led_fp_clct; // CLCT  Green  CLCT valid pattern
+  input          led_fp_l1a;  // L1A  Green  Level 1 Accept from CCB or internal
+  input          led_fp_invp; // INVP  Amber  Invalid pattern after drift delay
+  input          led_fp_nmat; // NMAT  Amber  ALCT or CLCT but no match
+  input          led_fp_nl1a; // NL1A  Red    L1A did not arrive in window
+  input  [7:0]   led_bd_in;   // On-Board LEDs
+  output [7:0]   led_fp_out;  // Front Panel LEDs (on board LEDs are connected to prom_led)
   input  [15:0]  led_tmb;     // goes to BPI logic
   inout  [15:0]  led_tmb_out; // comes from BPI logic
 
@@ -2782,86 +2790,87 @@
 
   alct_startup ualct_startup
   (
-  .clock        (clock),    // In  40 MHz clock
-  .global_reset    (global_reset),      // In  Global reset
-  .power_up      (power_up),    // In  DLL clock lock, we wait for it
-  .vme_ready      (vsm_ready),    // In  TMB VME registers loaded from PROM
-  .alct_startup_delay  (alct_startup_delay[15:0]),  // In  Msec to wait for ALCT FPGA after TMB is up: 212-100=112msec for Spartan-6 on ALCT
-
-  .alct_startup_msec  (alct_startup_msec),  // Out  Msec pulse
-  .alct_wait_dll    (alct_wait_dll),  // Out  Waiting for TMB DLL lock
-  .alct_wait_vme    (alct_wait_vme),  // Out  Waiting for TMB VME load from user PROM
-  .alct_wait_cfg    (alct_wait_cfg),  // Out  Waiting for ALCT FPGA to configure from mez PROM
-  .alct_startup_done  (alct_startup_done)  // Out  ALCT FPGA should be configured by now
+    // Inputs
+    .clock              (clock),                    // In  40 MHz clock
+    .global_reset       (global_reset),             // In  Global reset
+    .power_up           (power_up),                 // In  DLL clock lock, we wait for it
+    .vme_ready          (vsm_ready),                // In  TMB VME registers loaded from PROM
+    .alct_startup_delay (alct_startup_delay[15:0]), // In  Msec to wait for ALCT FPGA after TMB is up: 212-100=112msec for Spartan-6 on ALCT
+    // Outputs
+    .alct_startup_msec (alct_startup_msec), // Out  Msec pulse
+    .alct_wait_dll     (alct_wait_dll),     // Out  Waiting for TMB DLL lock
+    .alct_wait_vme     (alct_wait_vme),     // Out  Waiting for TMB VME load from user PROM
+    .alct_wait_cfg     (alct_wait_cfg),     // Out  Waiting for ALCT FPGA to configure from mez PROM
+    .alct_startup_done (alct_startup_done)  // Out  ALCT FPGA should be configured by now
   );
 
 //------------------------------------------------------------------------------------------------------------------
 // VME Bus Logic
 //------------------------------------------------------------------------------------------------------------------
 // VME input IOB FFs
-  (*IOB="true" *) reg  [23:1]  a_vme    = 0;
-  (*IOB="true" *) reg  [5:0]  am_vme    = 0;
-  (*IOB="true" *) reg  [4:0]  nga    = 1;
-  (*IOB="true" *) reg    ngap    = 1;
-  (*IOB="true" *) reg    niack    = 1;
-  (*IOB="true" *) reg    nlword    = 1;
-  (*IOB="true" *) reg    nds0    = 1;
-  (*IOB="true" *) reg    nds1    = 1;
-  (*IOB="true" *) reg    nas    = 1;
-  (*IOB="true" *) reg    nwrite    = 1;
-  (*IOB="true" *) reg    nsysclk    = 1;
-  (*IOB="true" *) reg    nsysfail  = 1;
-  (*IOB="true" *) reg    nsysreset  = 1;
-  (*IOB="true" *) reg    nacfail    = 1;
-  (*IOB="false"*) reg    nlocal    = 1;  // clock domain conflict precludes IOB ff for vme_geo[6]
+  (*IOB="true" *) reg [23:1] a_vme     = 0;
+  (*IOB="true" *) reg [5:0]  am_vme    = 0;
+  (*IOB="true" *) reg [4:0]  nga       = 1;
+  (*IOB="true" *) reg        ngap      = 1;
+  (*IOB="true" *) reg        niack     = 1;
+  (*IOB="true" *) reg        nlword    = 1;
+  (*IOB="true" *) reg        nds0      = 1;
+  (*IOB="true" *) reg        nds1      = 1;
+  (*IOB="true" *) reg        nas       = 1;
+  (*IOB="true" *) reg        nwrite    = 1;
+  (*IOB="true" *) reg        nsysclk   = 1;
+  (*IOB="true" *) reg        nsysfail  = 1;
+  (*IOB="true" *) reg        nsysreset = 1;
+  (*IOB="true" *) reg        nacfail   = 1;
+  (*IOB="false"*) reg        nlocal    = 1;  // clock domain conflict precludes IOB ff for vme_geo[6]
 
   always @(posedge clock_vme) begin
-  a_vme    <=   a;
-  am_vme    <=   am;
-  nga    <=  _ga;
-  ngap    <=  _gap;
-  niack    <=  _iack;  
-  nlword    <=  _lword;
-  nds0    <=  _ds0;
-  nds1    <=  _ds1;
-  nas    <=  _as;
-  nwrite    <=  _write;
-  nsysclk    <=  _sysclk;
-  nsysfail  <=  _sysfail;
-  nsysreset  <=  _sysreset;
-  nacfail    <=  _acfail;
-  nlocal    <=  _local;
+    a_vme     <=   a;
+    am_vme    <=   am;
+    nga       <=  _ga;
+    ngap      <=  _gap;
+    niack     <=  _iack;  
+    nlword    <=  _lword;
+    nds0      <=  _ds0;
+    nds1      <=  _ds1;
+    nas       <=  _as;
+    nwrite    <=  _write;
+    nsysclk   <=  _sysclk;
+    nsysfail  <=  _sysfail;
+    nsysreset <=  _sysreset;
+    nacfail   <=  _acfail;
+    nlocal    <=  _local;
   end
 
 // Uninvert VME negative logic backplane signals at IOB exit
-  wire [4:0] ga  = ~nga;
-  wire gap    = ~ngap;
-  wire iack    = ~niack;  
-  wire lword    = ~nlword;
-  wire ds0    = ~nds0;
-  wire ds1    = ~nds1;
-  wire as      = ~nas;
-  wire write    = ~nwrite;
-  wire sysclk    = ~nsysclk;
-  wire sysfail  = ~nsysfail;
-  wire sysreset  = ~nsysreset;
-  wire acfail    = ~nacfail;
-  wire local    = ~nlocal;
+  wire [4:0] ga       = ~nga;
+  wire       gap      = ~ngap;
+  wire       iack     = ~niack;  
+  wire       lword    = ~nlword;
+  wire       ds0      = ~nds0;
+  wire       ds1      = ~nds1;
+  wire       as       = ~nas;
+  wire       write    = ~nwrite;
+  wire       sysclk   = ~nsysclk;
+  wire       sysfail  = ~nsysfail;
+  wire       sysreset = ~nsysreset;
+  wire       acfail   = ~nacfail;
+  wire       local    = ~nlocal;
 
 // Match VME Address and Address Mode
-  wire slot_match   = (a_vme[23:19] == ga[4:0]);      // A[] matches this board's VME slot
-  wire global_match = (a_vme[23:19] == ADR_TMB_GLOBAL);    // A[] matches TMB global address
-  wire brcst_match  = (a_vme[23:19] == ADR_BROADCAST);    // A[] matches broadcast address
-  wire boot_match   = (a_vme[18:16] == 3'b111);      // A[] matches hardware bootstrap address
-  wire am_match     = (am_vme=='h39 || am_vme=='h3D) && iack==0;  // 39=A24 non-priv mode, 3D=A24 supervisor mode
-  wire bd_accessed  = (global_match || slot_match || brcst_match) && am_match;    // Board accessed, for LED display only 
+  wire global_match = (a_vme[23:19] == ADR_TMB_GLOBAL); // A[] matches TMB global address
+  wire slot_match   = (a_vme[23:19] == ga[4:0]);        // A[] matches this board's VME slot
+  wire brcst_match  = (a_vme[23:19] == ADR_BROADCAST);  // A[] matches broadcast address
+  wire boot_match   = (a_vme[18:16] == 3'b111);         // A[] matches hardware bootstrap address
+  wire am_match     = (am_vme=='h39 || am_vme=='h3D) && iack==0;                               // 39=A24 non-priv mode, 3D=A24 supervisor mode
+  wire bd_accessed  = (global_match || slot_match || brcst_match) && am_match;                 // Board accessed, for LED display only 
   wire bd_match     = (global_match || slot_match || brcst_match) && am_match && !boot_match;  // Board is selected
 
 // Board Select FF, U102A on TMB
   reg bd_sel=0;
 
   always @(posedge clock_vme) begin
-  bd_sel <= bd_match & ds0;
+    bd_sel <= bd_match & ds0;
   end
 
 // DTACK data acknowledge IOB FF, xst automatically creates a duplicate in fabric for feedback signal
@@ -2869,10 +2878,12 @@
   reg dtack_int = 0;  // Fabric copy
 
   always @(posedge clock_vme) begin
-  dtack      <= bd_sel & ds0 & (!bpi_dev | !bpi_dtack);  // IOB   flip flop has no feedback path, now include BPI
-  dtack_int  <= bd_sel & ds0 & (!bpi_dev | !bpi_dtack);  // Fabric flip flop has feedback to logic, now include BPI
-//  dtack      <= bd_sel & ds0;    // IOB    flip flop has no feedback path
-//  dtack_int  <= bd_sel & ds0;    // Fabric flip flop has feedback to logic
+//    dtack      <= bd_sel & ds0 & (!bpi_dev | !bpi_dtack);  // IOB   flip flop has no feedback path, now include BPI
+//    dtack_int  <= bd_sel & ds0 & (!bpi_dev | !bpi_dtack);  // Fabric flip flop has feedback to logic, now include BPI
+    dtack      <= bd_sel & ds0 & (!bpi_dev | bpi_dtack);  // IOB   flip flop has no feedback path, now include BPI
+    dtack_int  <= bd_sel & ds0 & (!bpi_dev | bpi_dtack);  // Fabric flip flop has feedback to logic, now include BPI
+//    dtack      <= bd_sel & ds0;    // IOB    flip flop has no feedback path
+//    dtack_int  <= bd_sel & ds0;    // Fabric flip flop has feedback to logic
   end
 
 // Construct read and write strobes
@@ -2894,7 +2905,7 @@
 //------------------------------------------------------------------------------------------------------------------
 // VME Read-Data Multiplexer
 //------------------------------------------------------------------------------------------------------------------
-  reg  [15:0]  data_out;
+  reg  [15:0] data_out;
   wire [23:0] vsm_adr;
   wire        vsm_oe;
 
@@ -3312,10 +3323,14 @@
   wire [15:0] vsm_data, data_send;
   wire [15:0] d;
   
-  assign d_vme   = (fpga_oe) ? data_send       : {16{1'bz}};    // transmit to backplane, else float
+  assign d_vme     = (fpga_oe) ? data_send         : {16{1'bz}};     // transmit to backplane, else float
   assign data_send = (bpi_dev) ? bpi_outdata[15:0] : data_out[15:0]; // select bpi data or vme_reg data to send
-  assign d[15:0] = (vsm_oe) ? vsm_data[15:0] : d_vme[15:0];    // insert backplane or prom data to write
-
+  assign d[15:0]   = (vsm_oe)  ? vsm_data[15:0]    : d_vme[15:0];    // insert backplane or prom data to write
+  
+  initial begin
+  	$monitor($time, "  vme monitor d_vme = %h", d_vme);
+  end
+  
 //------------------------------------------------------------------------------------------------------------------
 // ADR_VMESM0=DA  VME State Machine Control Register
 // ADR_VMESM1=DC  VME State Machine Word count
@@ -3324,84 +3339,84 @@
 // ADR_VMESM4=E2  VME State Machine Expected data to be written from VME PROM
 //------------------------------------------------------------------------------------------------------------------
   initial begin
-  vmesm0_wr[0]  = 0;      // RW  Manual cycle start command
-  vmesm0_wr[1]  = 0;      // RW  Status signal reset
-  vmesm0_wr[2]  = AUTO_VME;    // R  Auto-start after hard-reset
-  vmesm0_wr[3]  = 0;      // R  State machine busy writing
-  vmesm0_wr[4]  = 0;      // R  State machine aborted reading PROM
-  vmesm0_wr[5]  = 0;      // R  Check-sum  matches PROM contents
-  vmesm0_wr[6]  = 0;      // R  Word count matches PROM contents
-  vmesm0_wr[7]  = AUTO_JTAG;  // R  JTAG SM autostart after vmesm completes
-  vmesm0_wr[8]  = 0;      // R  TMB VME registers loaded from PROM
-  vmesm0_wr[9]  = 0;      // R  Machine ran without errors
-  vmesm0_wr[10]  = 0;      // R  vsm_path_ok
-  vmesm0_wr[11]  = AUTO_PHASER;  // RW  Phaser SM autostart after vmesm completes
-  vmesm0_wr[15:12]= 0;      // RW  PROM-read speed control, 0=fastest
+    vmesm0_wr[0]     = 0;           // RW Manual cycle start command
+    vmesm0_wr[1]     = 0;           // RW Status signal reset
+    vmesm0_wr[2]     = AUTO_VME;    // R  Auto-start after hard-reset
+    vmesm0_wr[3]     = 0;           // R  State machine busy writing
+    vmesm0_wr[4]     = 0;           // R  State machine aborted reading PROM
+    vmesm0_wr[5]     = 0;           // R  Check-sum  matches PROM contents
+    vmesm0_wr[6]     = 0;           // R  Word count matches PROM contents
+    vmesm0_wr[7]     = AUTO_JTAG;   // R  JTAG SM autostart after vmesm completes
+    vmesm0_wr[8]     = 0;           // R  TMB VME registers loaded from PROM
+    vmesm0_wr[9]     = 0;           // R  Machine ran without errors
+    vmesm0_wr[10]    = 0;           // R  vsm_path_ok
+    vmesm0_wr[11]    = AUTO_PHASER; // RW Phaser SM autostart after vmesm completes
+    vmesm0_wr[15:12] = 0;           // RW PROM-read speed control, 0=fastest
   end
 
   initial begin
-  vmesm4_wr[15:0]  = 0;      // RW  vmesm over-writes this with even/odd data to test prom path
+    vmesm4_wr[15:0] = 0; // RW vmesm over-writes this with even/odd data to test prom path
   end
 
-  wire [7:0]  vsm_prom_data;
-  wire    vsm_start;
-  wire    vsm_sreset;
-  wire    vsm_jtag_auto;
-  wire    vsm_busy;
-  wire    vsm_aborted;
-  wire    vsm_cksum_ok;
-  wire    vsm_wdcnt_ok;
-  wire    vsm_ok;
-  wire    vsm_path_ok;
-  wire    vsm_phaser_auto;
+  wire [7:0] vsm_prom_data;
+  wire       vsm_start;
+  wire       vsm_sreset;
+  wire       vsm_jtag_auto;
+  wire       vsm_busy;
+  wire       vsm_aborted;
+  wire       vsm_cksum_ok;
+  wire       vsm_wdcnt_ok;
+  wire       vsm_ok;
+  wire       vsm_path_ok;
+  wire       vsm_phaser_auto;
 
   wire [3:0]  vsm_throttle;
-  wire [15:0]  vsm_wdcnt;
+  wire [15:0] vsm_wdcnt;
   wire [7:0]  vsm_cksum;
   wire [4:0]  vsm_fmt_err;
   wire [7:0]  vsm_nvme_writes;
 
-  wire [3:0]  jsm_prom_sm_vec,  jsm_prom_sm_vec_new,  jsm_prom_sm_vec_old;  // Interlopers from JSM, ran out of jsm reg bits
-  wire [2:0]  jsm_format_sm_vec,  jsm_format_sm_vec_new,  jsm_format_sm_vec_old;
-  wire [1:0]  jsm_jtag_sm_vec,  jsm_jtag_sm_vec_new,  jsm_jtag_sm_vec_old;
+  wire [3:0] jsm_prom_sm_vec,   jsm_prom_sm_vec_new,   jsm_prom_sm_vec_old;  // Interlopers from JSM, ran out of jsm reg bits
+  wire [2:0] jsm_format_sm_vec, jsm_format_sm_vec_new, jsm_format_sm_vec_old;
+  wire [1:0] jsm_jtag_sm_vec,   jsm_jtag_sm_vec_new,   jsm_jtag_sm_vec_old;
 
-  wire   vme_ready        = ready_int;  // JG: this is really just power_up!
-  wire   vsm_autostart    = AUTO_VME;
+  wire vme_ready     = ready_int;  // JG: this is really just power_up!
+  wire vsm_autostart = AUTO_VME;
 
-  assign vmesm0_rd[0]    = vsm_start;        // RW  Manual cycle start command
-  assign vmesm0_rd[1]    = vsm_sreset;        // RW  Status signal reset
-  assign vmesm0_rd[2]    = vsm_autostart;      // R  Auto-start after hard-reset
-  assign vmesm0_rd[3]    = vsm_busy;          // R  State machine busy writing
-  assign vmesm0_rd[4]    = vsm_aborted;        // R  State machine aborted reading PROM
-  assign vmesm0_rd[5]    = vsm_cksum_ok;        // R  Check-sum  matches PROM contents
-  assign vmesm0_rd[6]    = vsm_wdcnt_ok;        // R  Word count matches PROM contents
-  assign vmesm0_rd[7]    = vsm_jtag_auto;      // RW  JTAG SM autostart after vmesm completes
-  assign vmesm0_rd[8]    = vme_ready;        // R  TMB VME registers loaded from PROM
-  assign vmesm0_rd[9]    = vsm_ok;          // R  Machine ran without errors
-  assign vmesm0_rd[10]  = vsm_path_ok;        // R  PROM wrote to vmesm4 register ok
-  assign vmesm0_rd[11]  = vsm_phaser_auto;      // RW  Phaser SM autostart after vmesm completes
-  assign vmesm0_rd[15:12]  = vsm_throttle[3:0];    // RW  PROM-read speed control, 0=fastest
+  assign vmesm0_rd[0]     = vsm_start;         // RW Manual cycle start command
+  assign vmesm0_rd[1]     = vsm_sreset;        // RW Status signal reset
+  assign vmesm0_rd[2]     = vsm_autostart;     // R  Auto-start after hard-reset
+  assign vmesm0_rd[3]     = vsm_busy;          // R  State machine busy writing
+  assign vmesm0_rd[4]     = vsm_aborted;       // R  State machine aborted reading PROM
+  assign vmesm0_rd[5]     = vsm_cksum_ok;      // R  Check-sum  matches PROM contents
+  assign vmesm0_rd[6]     = vsm_wdcnt_ok;      // R  Word count matches PROM contents
+  assign vmesm0_rd[7]     = vsm_jtag_auto;     // RW JTAG SM autostart after vmesm completes
+  assign vmesm0_rd[8]     = vme_ready;         // R  TMB VME registers loaded from PROM
+  assign vmesm0_rd[9]     = vsm_ok;            // R  Machine ran without errors
+  assign vmesm0_rd[10]    = vsm_path_ok;       // R  PROM wrote to vmesm4 register ok
+  assign vmesm0_rd[11]    = vsm_phaser_auto;   // RW Phaser SM autostart after vmesm completes
+  assign vmesm0_rd[15:12] = vsm_throttle[3:0]; // RW PROM-read speed control, 0=fastest
 
-  assign vsm_start    = vmesm0_wr[0];        // RW  Manual cycle start command
-  assign vsm_sreset    = vmesm0_wr[1];        // RW  Status signal reset
-  assign vsm_jtag_auto  = vmesm0_wr[7];        // RW  JTAG SM autostart after vmesm completes
-  assign vsm_phaser_auto  = vmesm0_wr[11];      // RW  Phaser SM autostart after vmesm completes
-  assign vsm_throttle[3:0]= vmesm0_wr[15:12];      // RW  PROM-read speed control, 0=fastest
+  assign vsm_start         = vmesm0_wr[0];     // RW Manual cycle start command
+  assign vsm_sreset        = vmesm0_wr[1];     // RW Status signal reset
+  assign vsm_jtag_auto     = vmesm0_wr[7];     // RW JTAG SM autostart after vmesm completes
+  assign vsm_phaser_auto   = vmesm0_wr[11];    // RW Phaser SM autostart after vmesm completes
+  assign vsm_throttle[3:0] = vmesm0_wr[15:12]; // RW PROM-read speed control, 0=fastest
 
-  assign vmesm1_rd[15:0]  = vsm_wdcnt[15:0];      // R  Word count
+  assign vmesm1_rd[15:0] = vsm_wdcnt[15:0]; // R  Word count
   
-  assign vmesm2_rd[7:0]  = vsm_cksum[7:0];      // R  Check sum
-  assign vmesm2_rd[12:8]  = vsm_fmt_err[4:0];      // R  PROM data structure error
-  assign vmesm2_rd[14:13]  = jsm_jtag_sm_vec[1:0];    // R  JSM JTAG format  State Machine status vector
-  assign vmesm2_rd[15]  = 0;            // R  Unassigned
+  assign vmesm2_rd[7:0]   = vsm_cksum[7:0];       // R  Check sum
+  assign vmesm2_rd[12:8]  = vsm_fmt_err[4:0];     // R  PROM data structure error
+  assign vmesm2_rd[14:13] = jsm_jtag_sm_vec[1:0]; // R  JSM JTAG format  State Machine status vector
+  assign vmesm2_rd[15]    = 0;                    // R  Unassigned
 
-  assign vmesm3_rd[7:0]  = vsm_nvme_writes[7:0];    // R  Number of vme addresses written
-  assign vmesm3_rd[11:8]  = jsm_prom_sm_vec[3:0];    // R  JSM PROM control State Machine status vector
-  assign vmesm3_rd[14:12]  = jsm_format_sm_vec[2:0];  // R  JSM JTAG format  State Machine status vector
-  assign vmesm3_rd[15]  = 0;            // R  Unassigned
+  assign vmesm3_rd[7:0]   = vsm_nvme_writes[7:0];   // R Number of vme addresses written
+  assign vmesm3_rd[11:8]  = jsm_prom_sm_vec[3:0];   // R JSM PROM control State Machine status vector
+  assign vmesm3_rd[14:12] = jsm_format_sm_vec[2:0]; // R JSM JTAG format  State Machine status vector
+  assign vmesm3_rd[15]    = 0;                      // R Unassigned
 
-  assign vmesm4_rd[15:0]  = vmesm4_wr[15:0];      // R  vmesm writes to this register to check prom data path
-  assign vsm_path_ok     =(vmesm4_wr==16'h55AA);    // R  Expected data to be written from VME PROM
+  assign vmesm4_rd[15:0] = vmesm4_wr[15:0];      // R vmesm writes to this register to check prom data path
+  assign vsm_path_ok     =(vmesm4_wr==16'h55AA); // R Expected data to be written from VME PROM
 
   vmesm uvmesm
   (
@@ -7022,71 +7037,74 @@
   ;
 
 
-     reg ds0_r=0;
+  reg ds0_r=0;
   always @(posedge clock or posedge global_reset) begin
-     if (global_reset) ds0_r <= 0; // consider if ds0 should be registered or use the raw input... rise on time & fall early?
-     else   ds0_r <= ds0;
+    if (global_reset) ds0_r <= 0; // consider if ds0 should be registered or use the raw input... rise on time & fall early?
+    else   ds0_r <= ds0;
   end
-        wire bpi_dev = (bd_sel & (a_vme[18:15] == 4'h5));
-        wire [9:0]  bpi_cmd = (a_vme[11:2]);
-        wire [15:0]  bpi_fifo_dout;
-        wire [10:0]  bpi_fifo_cnt;
-        wire [15:0]  bpi_stat;
-        wire [31:0]  bpi_time;
-        wire [15:0]  bpi_outdata;  // out to VME
-        wire [15:0]  bpi_cmd_fifo_data;  // out
-        wire bpi_dtack, bpi_rst, bpi_we, bpi_re, bpi_dsbl, bpi_enbl, bpi_rd_stat;
+  
+//  wire bpi_dev = (bd_sel & (a_vme[18:15] == 4'h5));
+  wire bpi_dev = (bd_sel & (a_vme[18:16] == 3'h5)); // YAP: a_vme is [23:1], for bpi_dev address we use 3 bits: [18:16]
+//  wire [9:0]  bpi_cmd = (a_vme[11:2]);
+  wire [9:0]  bpi_cmd = (a_vme[12:3]); // YAP: a_vme is [23:1], for bpi_command we need to shift 2 bit left
+  wire [15:0]  bpi_fifo_dout;
+  wire [10:0]  bpi_fifo_cnt;
+  wire [15:0]  bpi_stat;
+  wire [31:0]  bpi_time;
+  wire [15:0]  bpi_outdata;  // out to VME
+  wire [15:0]  bpi_cmd_fifo_data;  // out
+  wire bpi_dtack, bpi_rst, bpi_we, bpi_re, bpi_dsbl, bpi_enbl, bpi_rd_stat;
  
 
  BPI_PORT bpi_vme (
-  .CLK (clock),             // 40MHz clock
-  .RST (global_reset),      // system reset
+  .CLK (clock),        // 40MHz clock
+  .RST (global_reset), // system reset
    // VME selection/control
-  .DEVICE (bpi_dev),         // 1 bit indicating this device has been selected... JRG: choose any available OTMB adr range
-  .STROBE (ds0),          // Data strobe synchronized to rising or falling edge of clock and asynchronously cleared
-  .COMMAND (bpi_cmd),       // [9:0] command portion of VME address... JRG: assume it is address bits 11:2?
-  .WRITE_B (nwrite),        // VME read/write_bar
-  .INDATA (d),              // [15:0] data from VME writes to be provided to BPI interface
-  .OUTDATA (bpi_outdata),   // out data from BPI interface to VME buss for reads
-  .DTACK_B (bpi_dtack),     // out DTACK_bar to VME  ^^^JG: All Good^^^
+  .DEVICE  (bpi_dev),     // 1 bit indicating this device has been selected... JRG: choose any available OTMB adr range
+  .STROBE  (ds0),         // Data strobe synchronized to rising or falling edge of clock and asynchronously cleared
+  .COMMAND (bpi_cmd),     // [9:0] command portion of VME address... JRG: assume it is address bits 11:2?
+  .WRITE_B (nwrite),      // VME read/write_bar
+  .INDATA  (d),           // [15:0] data from VME writes to be provided to BPI interface
+  .OUTDATA (bpi_outdata), // out data from BPI interface to VME buss for reads
+  .DTACK (bpi_dtack),   // out DTACK to VME  ^^^JG: All Good^^^
    // BPI controls...  JRG: what modules do these connect with?
-  .BPI_RST (bpi_rst),                     // out Resets BPI interface state machines
+  .BPI_RST           (bpi_rst),           // out Resets BPI interface state machines
   .BPI_CMD_FIFO_DATA (bpi_cmd_fifo_data), // out Data for command FIFO
-  .BPI_WE (bpi_we),                       // out Command FIFO write enable  (pulse one clock cycle for one write)
-  .BPI_RE (bpi_re),                       // out Read back FIFO read enable  (pulse one clock cycle for one read)
-  .BPI_DSBL (bpi_dsbl),                   // out Disable parsing of BPI commands in the command FIFO (while being filled)
-  .BPI_ENBL (bpi_enbl),                   // out Enable  parsing of BPI commands in the command FIFO
-  .BPI_RD_STATUS (bpi_rd_stat),           // out Read BPI interface status register command received
+  .BPI_WE            (bpi_we),            // out Command FIFO write enable  (pulse one clock cycle for one write)
+  .BPI_RE            (bpi_re),            // out Read back FIFO read enable  (pulse one clock cycle for one read)
+  .BPI_DSBL          (bpi_dsbl),          // out Disable parsing of BPI commands in the command FIFO (while being filled)
+  .BPI_ENBL          (bpi_enbl),          // out Enable  parsing of BPI commands in the command FIFO
+  .BPI_RD_STATUS     (bpi_rd_stat),       // out Read BPI interface status register command received
   .BPI_RBK_FIFO_DATA (bpi_fifo_dout),     // in [15:0] Data on output of the Read back FIFO
-  .BPI_RBK_WRD_CNT (bpi_fifo_cnt),        // in [10:0] Word count of the Read back FIFO (number of available reads)
-  .BPI_STATUS (bpi_stat),                 // in [15:0] FIFO status bits and latest value of the PROM status register. 
-  .BPI_TIMER (bpi_time)                   // in [31:0] General timer
+  .BPI_RBK_WRD_CNT   (bpi_fifo_cnt),      // in [10:0] Word count of the Read back FIFO (number of available reads)
+  .BPI_STATUS        (bpi_stat),          // in [15:0] FIFO status bits and latest value of the PROM status register. 
+  .BPI_TIMER         (bpi_time)           // in [31:0] General timer
  );
 
  BPI_ctrl  #(   .USE_CHIPSCOPE (0)  )
-   bpi_engine (    // also has two FIFOs
-  .CLK (clock),        // in 40 MHz clock
-  .CLK1MHZ (clock_1mhz),         // in  1 MHz clock for timers
-  .RST (bpi_rst),      // in 
+   bpi_engine (          // also has two FIFOs
+  .CLK (clock),          // in 40 MHz clock
+  .CLK1MHZ (clock_1mhz), // in  1 MHz clock for timers
+  .RST (bpi_rst),        // in 
    // Interface Signals to/from VME interface
   .BPI_CMD_FIFO_DATA (bpi_cmd_fifo_data), // in [15:0] Data for command FIFO
-  .BPI_WE (bpi_we),              // in Command FIFO write enable  (pulse one clock cycle for one write)
-  .BPI_RE (bpi_re),              // in Read back FIFO read enable  (pulse one clock cycle for one read)
-  .BPI_DSBL (bpi_dsbl),          // in Disable parsing of BPI commands in the command FIFO (while being filled)
-  .BPI_ENBL (bpi_enbl),          // in Enable  parsing of BPI commands in the command FIFO
-  .BPI_RBK_FIFO_DATA (bpi_fifo_dout), // out [15:0] Data on output of the Read back FIFO
-  .BPI_RBK_WRD_CNT (bpi_fifo_cnt),    // out [10:0] Word count of the Read back FIFO (number of available reads)
-  .BPI_STATUS (bpi_stat),        // out [15:0] FIFO status bits and latest value of the PROM status register. 
-  .BPI_TIMER (bpi_time),         // out [31:0] General timer
+  .BPI_WE (bpi_we),                       // in Command FIFO write enable  (pulse one clock cycle for one write)
+  .BPI_RE (bpi_re),                       // in Read back FIFO read enable  (pulse one clock cycle for one read)
+  .BPI_DSBL (bpi_dsbl),                   // in Disable parsing of BPI commands in the command FIFO (while being filled)
+  .BPI_ENBL (bpi_enbl),                   // in Enable  parsing of BPI commands in the command FIFO
+  .BPI_RBK_FIFO_DATA (bpi_fifo_dout),     // out [15:0] Data on output of the Read back FIFO
+  .BPI_RBK_WRD_CNT (bpi_fifo_cnt),        // out [10:0] Word count of the Read back FIFO (number of available reads)
+  .BPI_STATUS (bpi_stat),                 // out [15:0] FIFO status bits and latest value of the PROM status register. 
+  .BPI_TIMER (bpi_time),                  // out [31:0] General timer
    // Signals to/from low level BPI interface
-  .BPI_BUSY (bpi_busy),           // in 
-  .BPI_DATA_FROM (bpi_data_from[15:0]), // in [15:0] 
-  .BPI_LOAD_DATA (bpi_load_data), // in 
-  .BPI_ACTIVE (bpi_active),   // out 
-  .BPI_OP (bpi_op[1:0]),           // out [1:0] 
-  .BPI_ADDR (bpi_addr[22:0]),       // out [22:0] 
-  .BPI_DATA_TO (bpi_data_to[15:0]),   // out [15:0] 
-  .BPI_EXECUTE (bpi_execute)  // out 
+  .BPI_BUSY (bpi_busy),                   // in 
+  .BPI_DATA_FROM (bpi_data_from[15:0]),   // in [15:0] 
+  .BPI_LOAD_DATA (bpi_load_data),         // in 
+  .BPI_ACTIVE (bpi_active),               // out 
+  .BPI_OP (bpi_op[1:0]),                  // out [1:0] 
+  .BPI_ADDR (bpi_addr[22:0]),             // out [22:0] 
+  .BPI_DATA_TO (bpi_data_to[15:0]),       // out [15:0] 
+  .BPI_EXECUTE (bpi_execute)              // out 
  );
 
 
