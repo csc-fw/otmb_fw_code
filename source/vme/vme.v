@@ -7051,10 +7051,10 @@
     else   ds0_r <= ds0;
   end
   
-//  wire        bpi_dev = (bd_sel & (a_vme[17:15] == 3'h5)); // a_vme is [23:1], for bpi_dev address we use 3 bits: [17:15]
-  wire        bpi_dev = (bd_sel & (a_vme[18:16] == 3'h5));   // a_vme is [23:1], for bpi_dev address we use 3 bits: [18:16]
-//  wire [9:0]  bpi_cmd = (a_vme[11:2]);                     // a_vme is [23:1], for bpi_command we use 10 bits: [11:2]
-  wire [9:0]  bpi_cmd = (a_vme[12:3]);                       // a_vme is [23:1], for bpi_command we use 10 bits: [12:3]
+  wire        bpi_dev = (bd_sel & (a_vme[17:15] == 3'h5)); // a_vme is [23:1], for bpi_dev address we use 3 bits: [17:15] <-- this correctly works in real hardware
+//  wire        bpi_dev = (bd_sel & (a_vme[18:16] == 3'h5));   // a_vme is [23:1], for bpi_dev address we use 3 bits: [18:16] <-- this correctly works in simulation
+  wire [9:0]  bpi_cmd = (a_vme[11:2]);                     // a_vme is [23:1], for bpi_command we use 10 bits: [11:2] <-- this correctly works in real hardware
+//  wire [9:0]  bpi_cmd = (a_vme[12:3]);                       // a_vme is [23:1], for bpi_command we use 10 bits: [12:3] <-- this correctly works in simulation
   wire [15:0] bpi_fifo_dout;
   wire [10:0] bpi_fifo_cnt;
   wire [15:0] bpi_stat;
