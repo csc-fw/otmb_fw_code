@@ -24,7 +24,7 @@
 
 module otmb_virtex6_isim_testbench;
 
-  // Inputs
+  // Inputs to the Unit Under Test (UUT): otmb_virtex6
   reg [23:0] cfeb0_rx;
   reg [23:0] cfeb1_rx;
   reg [23:0] cfeb2_rx;
@@ -36,10 +36,26 @@ module otmb_virtex6_isim_testbench;
   reg rpc_smbrx;
   reg rpc_dsn;
   reg [50:0] _ccb_rx;
-  reg [23:1] vme_a;
-  reg [5:0] vme_am;
+//  reg [23:1] vme_a; // this is now wire connection between VME_sim_master and OTMB
+  wire [23:1] vme_a;
+//  reg [5:0] vme_am;
+  wire [5:0] vme_am; // this is now wire connection between VME_sim_master and OTMB
   reg [10:0] _vme_cmd;
-  reg [6:0] _vme_geo;
+  wire [10:0] _vme_cmd_wire;
+  assign _vme_cmd_wire[10] = _vme_cmd[10]; //  _iackin   (_vme_cmd[10]),     // In to VME Interrupt in, daisy chain
+//  assign _vme_cmd_wire[9]  = _vme_cmd[9];  //  _iack     (_vme_cmd[9]),      // In to VME Interrupt acknowledge
+  assign _vme_cmd_wire[8]  = _vme_cmd[8];  //  _acfail   (_vme_cmd[8]),      // In to VME AC power fail
+  assign _vme_cmd_wire[7]  = _vme_cmd[7];  //  _sysreset (_vme_cmd[7]),      // In to VME System reset
+//  assign _vme_cmd_wire[6]  = _vme_cmd[6];  //  _sysfail  (_vme_cmd[6]),      // In to VME System fail
+//  assign _vme_cmd_wire[5]  = _vme_cmd[5];  //  _ds0      (_vme_cmd[5]),      // In to VME Data Strobe
+  assign _vme_cmd_wire[4]  = _vme_cmd[4];  //  _sysclk   (_vme_cmd[4]),      // In to VME VME System clock
+//  assign _vme_cmd_wire[3]  = _vme_cmd[3];  //  _ds1      (_vme_cmd[3]),      // In to VME Data Strobe
+//  assign _vme_cmd_wire[2]  = _vme_cmd[2];  //  _write    (_vme_cmd[2]),      // In to VME Write strobe
+//  assign _vme_cmd_wire[1]  = _vme_cmd[1];  //  _as       (_vme_cmd[1]),      // In to VME Address Strobe
+//  assign _vme_cmd_wire[0]  = _vme_cmd[0];  //  _lword    (_vme_cmd[0]),      // In to VME Long word
+  
+//  reg [6:0] _vme_geo; // this is now wire connection between VME_sim_master and OTMB
+  wire [6:0] _vme_geo;
   reg jtag_usr0_tdo;
   reg tmb_clock0;
   reg tmb_clock1;
@@ -74,7 +90,7 @@ module otmb_virtex6_isim_testbench;
   reg f_sdat;
   reg f_fok;
 
-  // Outputs
+  // Outputs from the Unit Under Test (UUT): otmb_virtex6
   wire [4:0] cfeb_clock_en;
   wire cfeb_oe;
   wire [17:5] alct_txa;
@@ -102,21 +118,18 @@ module otmb_virtex6_isim_testbench;
   wire ddd_serial_in;
   wire [2:0] adc_io;
   wire smb_clk;
-  wire mez_busy;
+  wire mez_tp10_busy;
   wire gp_io5;
   wire gp_io6;
   wire gp_io7;
-  wire [9:1] testled;
+  wire [9:1] mez_tp;
   wire qpll_nrst;
   wire t12_sclk;
   wire r12_sclk;
-  wire fcs;
+  wire bpi_cs;
 
   // Bidirs
   wire [15:0] vme_d;
-  reg [15:0] vme_d_reg;
-  assign vme_d = vme_d_reg;
-  
   wire [3:1] jtag_usr;
   wire [3:0] sel_usr;
   wire [7:0] prom_led;
@@ -128,15 +141,15 @@ module otmb_virtex6_isim_testbench;
   wire gp_io1;
   wire gp_io2;
   wire gp_io3;
-  wire meztp20;
-  wire meztp21;
-  wire meztp22;
-  wire meztp23;
-  wire meztp24;
-  wire meztp25;
-  wire meztp26;
-  wire meztp27;
-
+  wire led_mezD1;
+  wire led_mezD2;
+  wire led_mezD3;
+  wire led_mezD4;
+  wire led_mezD5;
+  wire led_mezD6;
+  wire led_mezD7;
+  wire led_mezD8;
+	
   // Instantiate the Unit Under Test (UUT)
   otmb_virtex6 uut (
     .cfeb0_rx(cfeb0_rx), 
@@ -170,11 +183,12 @@ module otmb_virtex6_isim_testbench;
     ._hard_reset_tmb_fpga(_hard_reset_tmb_fpga), 
     .gtl_loop(gtl_loop), 
     .vme_d(vme_d), 
-    .vme_a(vme_a), 
-    .vme_am(vme_am), 
-    ._vme_cmd(_vme_cmd), 
-    ._vme_geo(_vme_geo), 
-    .vme_reply(vme_reply), 
+    .vme_a(vme_a),         // input from VME sim master
+    .vme_am(vme_am),       // input from VME sim master
+//    ._vme_cmd(_vme_cmd), // now the input pertially coming from VME sim master
+    ._vme_cmd(_vme_cmd_wire), // input (partially) from VME sim master
+    ._vme_geo(_vme_geo),   // input from VME sim master
+    .vme_reply(vme_reply), // vme_reply[2] output to VME sim master
     .jtag_usr(jtag_usr), 
     .jtag_usr0_tdo(jtag_usr0_tdo), 
     .sel_usr(sel_usr), 
@@ -200,7 +214,7 @@ module otmb_virtex6_isim_testbench;
     .adc_io(adc_io), 
     .adc_io3_dout(adc_io3_dout), 
     .smb_clk(smb_clk), 
-    .mez_busy(mez_busy), 
+    .mez_tp10_busy(mez_tp10_busy), 
     .led_fp(led_fp), 
     .gp_io0(gp_io0), 
     .gp_io1(gp_io1), 
@@ -210,16 +224,16 @@ module otmb_virtex6_isim_testbench;
     .gp_io5(gp_io5), 
     .gp_io6(gp_io6), 
     .gp_io7(gp_io7), 
-    .meztp20(meztp20), 
-    .meztp21(meztp21), 
-    .meztp22(meztp22), 
-    .meztp23(meztp23), 
-    .meztp24(meztp24), 
-    .meztp25(meztp25), 
-    .meztp26(meztp26), 
-    .meztp27(meztp27), 
+    .led_mezD1(led_mezD1), 
+    .led_mezD2(led_mezD2), 
+    .led_mezD3(led_mezD3), 
+    .led_mezD4(led_mezD4), 
+    .led_mezD5(led_mezD5), 
+    .led_mezD6(led_mezD6), 
+    .led_mezD7(led_mezD7), 
+    .led_mezD8(led_mezD8), 
     .set_sw(set_sw), 
-    .testled(testled), 
+    .mez_tp(mez_tp), 
     .reset(reset), 
     .clk40p(clk40p), 
     .clk40n(clk40n), 
@@ -242,8 +256,171 @@ module otmb_virtex6_isim_testbench;
     .f_sclk(f_sclk), 
     .f_sdat(f_sdat), 
     .f_fok(f_fok), 
-    .fcs(fcs)
+    .bpi_cs(bpi_cs)
   );
+
+	// Additional buses for sim units
+	reg         clk;
+	reg         rst;
+	wire        rstn = ~rst;
+	reg         go;
+	reg         stop;
+	reg         mode;
+	reg [9:0]   cmd_n;
+	// Connection between VME and test_controller
+	wire        vme_cmd;     // from test_controller to VME
+	wire        vme_cmd_rd;  // from VME to test_controller
+	wire [23:1] vme_addr;    // from test_controller to VME
+	wire        vme_wr;      // from test_controller to VME
+	wire [15:0] vme_wr_data; // from test_controller to VME
+	wire        vme_rd;      // from test_controller to VME
+	wire [15:0] vme_rd_data; // from VME to test_controller
+	// Connection between file_handler and test_controller
+	wire        start;            // from file_handler to test_controller
+	wire [31:0] vme_cmd_reg;      // from file_handler to test_controller
+	wire [31:0] vme_dat_reg_in;   // from file_handler to test_controller
+	wire [31:0] vme_dat_mem_in;   // from test_controller to file_handler
+	wire        vme_mem_rden;     // from test_controller to file_handler
+	wire        vme_dat_mem_wren; // from test_controller to file_handler
+	//Connection between VME and OTMB
+	wire [15:0] indata;  // from OTMB to VME
+  wire [15:0] outdata; // from VME to OTMB
+  wire oe_b;
+  IOBUF #(.DRIVE(12),.IOSTANDARD("DEFAULT"),.SLEW("SLOW")) IOBUF_VME_D[15:0] (.O(outdata),.IO(vme_d),.I(indata),.T(oe_b));
+  
+  // Instantiate vme_sim_master module
+  vme_sim_master uvme_sim_master (
+  	.clk(clk),      // input 25 ns
+  	.rstn(rstn),    // input
+  	.sw_reset(rst), // input
+  	// to/from test_controller
+  	.vme_cmd(vme_cmd),         // input from test_controller
+  	.vme_cmd_rd(vme_cmd_rd),   // output to test_controller
+  	.vme_addr(vme_addr),       // input from test_controller
+  	.vme_wr(vme_wr),           // input from test_controller
+  	.vme_wr_data(vme_wr_data), // input from test_controller
+  	.vme_rd(vme_rd),           // input from test_controller
+  	.vme_rd_data(vme_rd_data), // output to test_controller
+  	// to/from OTMB
+  	.dtack(vme_reply[2]),       // input from OTMB
+  	.oe_b(oe_b),                // trigger direction of data to/from OTMB
+  	.data_in(outdata),          // input from OTMB
+  	.data_out(indata),          // output to OTMB
+  	.addr(vme_a),               // output to OTMB
+  	.ga(_vme_geo),              // output to OTMB
+  	.am(vme_am),                // output to OTMB
+  	.lword(_vme_cmd_wire[0]),   // output to OTMB
+  	.as(_vme_cmd_wire[1]),      // output to OTMB
+  	.write_b(_vme_cmd_wire[2]), // output to OTMB
+  	.ds1(_vme_cmd_wire[3]),     // output to OTMB
+  	.ds0(_vme_cmd_wire[5]),     // output to OTMB
+  	.sysfail(_vme_cmd_wire[6]), // output to OTMB
+  	.iack(_vme_cmd_wire[9])     // output to OTMB
+  );
+  
+  // Instantiate file_handler module
+  file_handler ufile_handler (
+    .clk(clk), // input 25 ns
+    // to/from test_controller
+    .start(start),                    // output to test_controller
+    .vme_cmd_reg(vme_cmd_reg),        // output to test_controller
+    .vme_dat_reg_in(vme_dat_reg_in),  // output to test_controller
+    .vme_dat_reg_out(vme_dat_mem_in), // input from test_controller
+    .vme_cmd_rd(vme_mem_rden),        // input from test_controller
+    .vme_dat_wr(vme_dat_mem_wren)     // input from test_controller
+  );
+  
+  // Instantiate test_controller module
+  test_controller utest_controller (
+  	.clk(clk),      // input 25 ns
+  	.rstn(rstn),    // input
+  	.sw_reset(rst), // input
+  	.tc_enable(go), // input
+  	.stop(stop),    // input
+  	.mode(mode),    // input "1" = read commands from file
+  	.cmd_n(cmd_n),  // input "0000000000"
+  	// to/from VME
+  	.vme_cmd(vme_cmd),         // output to VME
+  	.vme_cmd_rd(vme_cmd_rd),   // input from VME
+  	.vme_addr(vme_addr),       // output to VME
+  	.vme_wr(vme_wr),           // output to VME
+  	.vme_wr_data(vme_wr_data), // output to VME
+  	.vme_rd(vme_rd),           // output to VME
+  	.vme_rd_data(vme_rd_data), // input from VME
+  	// to/from file_handler
+  	.start(start),                      // input from file_handler
+  	.vme_cmd_reg(vme_cmd_reg),          // input from file_handler
+  	.vme_cmd_mem_out(vme_cmd_reg),      // input from file_handler
+  	.vme_dat_reg_in(vme_dat_reg_in),    // input from file_handler
+  	.vme_dat_mem_out(vme_dat_reg_in),   // input from file_handler
+  	.vme_dat_mem_in(vme_dat_mem_in),    // output to file_handler
+  	.vme_mem_rden(vme_mem_rden),        // output to file_handler
+  	.vme_dat_mem_wren(vme_dat_mem_wren) // output to file_handler
+  );
+  
+  // PROM communication
+//	reg        prom_we_b;
+	wire        prom_we_b     = _ccb_tx[26];
+  wire        prom_cs_b     = bpi_cs;
+  wire        prom_oe_b     = _ccb_tx[14];
+  wire        prom_le_b     = _ccb_tx[3];
+  wire [22:0] prom_addr;
+  assign      prom_addr[0]  = dmb_tx[7];
+  assign      prom_addr[1]  = dmb_tx[6];
+  assign      prom_addr[2]  = dmb_tx[26];
+  assign      prom_addr[3]  = dmb_tx[22];
+  assign      prom_addr[4]  = dmb_tx[38];
+  assign      prom_addr[5]  = dmb_tx[42];
+  assign      prom_addr[6]  = dmb_tx[34];
+  assign      prom_addr[7]  = dmb_tx[35];
+  assign      prom_addr[8]  = dmb_tx[46];
+  assign      prom_addr[9]  = dmb_tx[47];
+  assign      prom_addr[10] = dmb_tx[36];
+  assign      prom_addr[11] = dmb_tx[39];
+  assign      prom_addr[12] = dmb_tx[37];
+  assign      prom_addr[13] = dmb_tx[41];
+  assign      prom_addr[14] = dmb_tx[31];
+  assign      prom_addr[15] = dmb_tx[30];
+  assign      prom_addr[16] = dmb_tx[14];
+  assign      prom_addr[17] = dmb_tx[10];
+  assign      prom_addr[18] = dmb_tx[0];
+  assign      prom_addr[19] = dmb_tx[1];
+  assign      prom_addr[20] = dmb_tx[18];
+  assign      prom_addr[21] = dmb_tx[19];
+  assign      prom_addr[22] = dmb_tx[11];
+  wire [15:0] prom_data;
+  assign      prom_data[0]  = led_fp[0];
+  assign      prom_data[1]  = led_fp[1];
+  assign      prom_data[2]  = led_fp[2];
+  assign      prom_data[3]  = led_fp[3];
+  assign      prom_data[4]  = led_fp[4];
+  assign      prom_data[5]  = led_fp[5];
+  assign      prom_data[6]  = led_fp[6];
+  assign      prom_data[7]  = led_fp[7];
+  assign      prom_data[8]  = led_mezD1;
+  assign      prom_data[9]  = led_mezD2;
+  assign      prom_data[10] = led_mezD3;
+  assign      prom_data[11] = led_mezD4;
+  assign      prom_data[12] = led_mezD5;
+  assign      prom_data[13] = led_mezD6;
+  assign      prom_data[14] = led_mezD7;
+  assign      prom_data[15] = led_mezD8;
+  
+  // Instantiate prom_sim module
+  prom_sim uprom_sim (
+  	.clk(clk),
+    .rst(rst),
+    // to/from OTMB
+    .we_b(prom_we_b), // input from OTMB
+    .cs_b(prom_cs_b), // input from OTMB
+    .oe_b(prom_oe_b), // input from OTMB
+    .le_b(prom_le_b), // input from OTMB
+    .addr(prom_addr), // input from OTMB
+    .data(prom_data)  // input/output from/to OTMB
+  );
+  
+  always
+		#12.5 clk = ~clk; // 25 ns -> 40 MHz Clock for additional sim units
   
   always
 		#12.5 tmb_clock0 = ~tmb_clock0; // 25 ns -> 40 MHz
@@ -265,6 +442,7 @@ module otmb_virtex6_isim_testbench;
 	
   initial begin
     $display($time, " Starting the Initialization");
+    
     // Initialize Inputs
     cfeb0_rx = 0;
     cfeb1_rx = 0;
@@ -277,29 +455,24 @@ module otmb_virtex6_isim_testbench;
     rpc_smbrx = 0;
     rpc_dsn = 0;
     _ccb_rx = 0;
-    vme_a = 0;
     
-    vme_am = 'h39; // Address modifier: 39=A24 non-priv mode, 3D=A24 supervisor mode
-    
-    
-    _vme_cmd = 11'b01000100000;
-    //  _lword    (_vme_cmd[0]),      // In  Long word
-    //  _as       (_vme_cmd[1]),      // In  Address Strobe
-    //  _write    (_vme_cmd[2]),      // In  Write strobe
-    //  _ds1      (_vme_cmd[3]),      // In  Data Strobe
-    //  _sysclk   (_vme_cmd[4]),      // In  VME System clock
-    //  _ds0      (_vme_cmd[5]),      // In  Data Strobe
-    //  _sysfail  (_vme_cmd[6]),      // In  System fail
-    //  _sysreset (_vme_cmd[7]),      // In  System reset
-    //  _acfail   (_vme_cmd[8]),      // In  AC power fail
-    //  _iack     (_vme_cmd[9]),      // In  Interrupt acknowledge
-    //  _iackin   (_vme_cmd[10]),     // In  Interrupt in, daisy chain
-    
-    _vme_geo[4:0] = 5'b11111; // VME logic is negative. This matches to used geo address of the board = 0000000
+    // VME cmd - inverted logic
+    _vme_cmd[10] = 1; //  _iackin    (_vme_cmd[10]),     // In to VME Interrupt in, daisy chain
+//  _vme_cmd[9]  = 0;  //  _iack     (_vme_cmd[9]),      // In to VME Interrupt acknowledge     <-- coming from vme_sim_master
+    _vme_cmd[8]  = 1;  //  _acfail   (_vme_cmd[8]),      // In to VME AC power fail
+    _vme_cmd[7]  = 1;  //  _sysreset (_vme_cmd[7]),      // In to VME System reset
+//  _vme_cmd[6]  = 0;  //  _sysfail  (_vme_cmd[6]),      // In to VME System fail               <-- coming from vme_sim_master
+//  _vme_cmd[5]  = 0;  //  _ds0      (_vme_cmd[5]),      // In to VME Data Strobe               <-- coming from vme_sim_master
+    _vme_cmd[4]  = 1;  //  _sysclk   (_vme_cmd[4]),      // In to VME VME System clock
+//  _vme_cmd[3]  = 0;  //  _ds1      (_vme_cmd[3]),      // In to VME Data Strobe               <-- coming from vme_sim_master
+//  _vme_cmd[2]  = 0;  //  _write    (_vme_cmd[2]),      // In to VME Write strobe              <-- coming from vme_sim_master
+//  _vme_cmd[1]  = 0;  //  _as       (_vme_cmd[1]),      // In to VME Address Strobe            <-- coming from vme_sim_master
+//  _vme_cmd[0]  = 0;  //  _lword    (_vme_cmd[0]),      // In to VME Long word                 <-- coming from vme_sim_master
     
     jtag_usr0_tdo = 0;
     
-    tmb_clock0    = 1; // set all initial clocks to 1 to avoid 12.5 ns delay at start
+    clk           = 1; // set all initial clocks to 1 to avoid 12.5 ns delay at start
+    tmb_clock0    = 1;
     tmb_clock1    = 1;
     alct_rxclock  = 1;
     alct_rxclockd = 1;
@@ -312,7 +485,10 @@ module otmb_virtex6_isim_testbench;
     _t_crit = 0;
     adc_io3_dout = 0;
     gp_io4 = 0;
-    set_sw = 0;
+    
+    // switches on board to connect mezanine board test points (labelled holes D1-D8) to BPI signals
+    set_sw[7] = 0;
+    set_sw[8] = 0;
     
     reset = 0;
     
@@ -335,60 +511,41 @@ module otmb_virtex6_isim_testbench;
     f_sdat = 0;
     f_fok = 0;
     
-    @( posedge tmb_clock0 );
-    $display($time, "  1 display tmb_clock0 = %b", tmb_clock0);
-    
-    // Wait 3000 ns for global reset to finish
-    #3000;
-    
     $display($time, " Finishing the Initialization");
+    
+//    @( posedge tmb_clock0 );
+//    $display($time, "  1 display tmb_clock0 = %b", tmb_clock0);
+    
 //    $stop;
   end
   
-  always @( posedge tmb_clock0 ) begin
-    $display($time, "  2 display tmb_clock0 = %b", tmb_clock0);
+  // Stimulus to reset units
+  initial begin
+  	// Reset units
+  	rst = 0;
+  	#200;
+  	$display($time, " Starting the Reset");
+  	rst = 1;
+  	#3000;
+  	rst = 0;
+  	$display($time, " Finishing the Reset");
   end
   
-  // Stimulus to BPI interface through VME
+  // Stimulus for test_controller to go and stop
   initial begin
+  	go    = 0;
+  	stop  = 0;
+  	mode  = 1; // "1" = read commands from file
+  	cmd_n = 10'b0000000000; // all zeroes - some default value
   	
-  	#3100;
-    
-    vme_a = 24'h28020; // Reset BPI interface state machines
-    vme_d_reg = 16'h0000;
-       
-    #500;
-    
-    vme_a = 24'h28038; // Read BPI interface status register (16 bits)
-    
+  	#4000; // in original UCSB code it is 15us (yes, microseconds)
+  	$display($time, " Starting the Sequence of Commands");
+  	go = 1;
   end
   
-  // Stimilus to emulate VME data strobe
-  initial begin
-    
-    #3100;
-    
-//    _vme_cmd[2] = 1'b1; // Write strobe
-    _vme_cmd[5] = 1'b0; // Data Strobe. VME logic is negative.
-    
-    #300;
-    
-//    _vme_cmd[2] = 1'b0; // Write strobe
-    _vme_cmd[5] = 1'b1; // Data Strobe. VME logic is negative.
-    
-    #200;
-    
-    _vme_cmd[5] = 1'b0; // Data Strobe. VME logic is negative.
-    
-    #300;
-    
-    _vme_cmd[5] = 1'b1; // Data Strobe. VME logic is negative.
-    
-  end
-  
-  initial begin
-    $monitor($time, "  monitor tmb_clock0 = %b", tmb_clock0);
-  end
+//  initial begin
+//    $monitor($time, "  monitor tmb_clock0 = %b", tmb_clock0);
+//  end
       
 endmodule
 
