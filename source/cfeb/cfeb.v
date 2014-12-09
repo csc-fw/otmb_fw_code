@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-`include "../../firmware_version.v"
+`include "../otmb_virtex6_fw_version.v"
 
 //`define DEBUG_CFEB 1
 //-------------------------------------- bufferless raw hits version ------------------------------------------------
