@@ -36,6 +36,5 @@ Default version is ISE 14.5 which allows to bypass the RX Delay Aligner,
 thus saving some power consumption.
 
 ### Simulation
-The file otmb_virtex6.mpf is a ModelSim project file.
 The folder source/simulation contains a test bench, as well as a
 file handler and VME emulator, for the OTMB firmware simulation.
