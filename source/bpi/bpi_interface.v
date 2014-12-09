@@ -131,8 +131,7 @@ end
    end
    
   
-BPI_intrf_FSM 
-BPI_intrf_FSM1(
+BPI_intrf_FSM BPI_intrf_FSM1(
   .BUSY(BUSY),
   .CAP(capture),
   .E(fcs),

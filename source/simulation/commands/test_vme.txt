@@ -1,10 +1,12 @@
-R  1	0  Read firmware type
-R  2  	0  Read firmware version
-R  a1EE  0  Read ODMB
-W  1EE  1  Set ODMB_SEL
-W  21EE  16  Set NWORDS_DUMMY
-r  21EE  16  Read NWORDS_DUMMY
-W  11EE  1  Request data
-R  1EE  0  Read ODMB_SEL
-R  1EE  0  Read ODMB_SEL
-R  1EE  0  Read ODMB_SEL
+W  28020	aa  BPI Reset
+W  28028	bb  BPI Enable
+W  2802c  1a  BPI PROM Timer Stop
+W  2802c  1b  BPI PROM Timer Reset
+W  28020	aa  BPI Reset
+W  2802c  19  BPI PROM Timer Start
+W  2802c  1c  BPI PROM Clear Status
+W  2802c  17  BPI PROM Load Address 1
+W  2802c  00  BPI PROM Load Address 2
+W  2802c  17  BPI PROM Load Address 1
+W  2802c  00  BPI PROM Load Address 2
+W  2802c  14  BPI PROM Block Unlock

@@ -19,11 +19,11 @@
 # 12/04/2012 Implement main clock constraint
 #----------------------------------------------------------------------------------------------------------
 #NET "NOT-dmb_tx<11>"	LOC = "AG23";	# NOT-I/O_469  **this is RS1, which is shorted to prom_adr22 and driven by pin AL9
-NET "_ccb_tx<26>"	LOC = "AF23";	# I/O_1  **prom_fwe  FWE, also tmb_reserved_in4 to CCB, but it's just a slow VME test signal
+NET "_ccb_tx<26>"	LOC = "AF23";	# I/O_1  ** Dual use output: BPI Flash PROM Write Enable, also tmb_reserved_in4 to CCB, but it's just a slow VME test signal
 NET "_ccb_tx<0>"	LOC = "AE29";	# I/O_2
 NET "_ccb_tx<1>"	LOC = "AF31";	# I/O_3
 NET "_ccb_tx<2>"	LOC = "AE31";	# I/O_4
-NET "_ccb_tx<3>"	LOC = "AC23";	# I/O_5  **prom_load  LOAD  or  LATCH, also clct_status3 to CCB front panel
+NET "_ccb_tx<3>"	LOC = "AC23";	# I/O_5  ** Dual use output: BPI Flash PROM Latch Enable, also clct_status3 to CCB front panel
 NET "_ccb_tx<4>"	LOC = "AF29";	# I/O_6
 NET "_ccb_tx<5>"	LOC = "AG30";	# I/O_7
 NET "_ccb_tx<6>"	LOC = "AD24";	# I/O_8
@@ -35,7 +35,7 @@ NET "_ccb_tx<11>"	LOC = "AB23";	# I/O_13
 NET "_ccb_tx<12>"	LOC = "AD29";	# I/O_14
 NET "_ccb_tx<13>"	LOC = "AC27";	# I/O_15
 #NET "NOT-dmb_tx<19>"	LOC = "AA23";	# NOT-I/O_461 **this is RS0, which is shorted to prom_adr21 and driven by pin AF9
-NET "_ccb_tx<14>"	LOC = "AA24";	# I/O_16  **prom_foe  FOE, also alct_status5 to CCB front panel
+NET "_ccb_tx<14>"	LOC = "AA24";	# I/O_16  ** Dual use output: BPI Flash PROM Output Enable, also alct_status5 to CCB front panel
 NET "_ccb_tx<15>"	LOC = "AD22";	# I/O_17
 NET "_ccb_tx<16>"	LOC = "AF28";	# I/O_18
 NET "_ccb_tx<17>"	LOC = "AE28";	# I/O_19
@@ -494,8 +494,8 @@ NET "_mpc_tx<14>"	LOC = "R26";	# I/O_424
 NET "_mpc_tx<15>"	LOC = "P30";	# I/O_425
 
 NET "dmb_tx<48>"	LOC = "R33";	# I/O_426
-NET "dmb_tx<47>"	LOC = "A9";	# I/O_427  prom_adr9
-NET "dmb_tx<46>"	LOC = "A8";	# I/O_428  prom_adr8
+NET "dmb_tx<47>"	LOC = "A9";	  # I/O_427 ** Dual use output: BPI Flash PROM Address Input A09
+NET "dmb_tx<46>"	LOC = "A8";	  # I/O_428 ** Dual use output: BPI Flash PROM Address Input A08
 NET "dmb_tx<45>"	LOC = "R34";	# I/O_429
 NET "dmb_tx<44>"	LOC = "T33";	# I/O_430
 
@@ -507,52 +507,50 @@ NET "dmb_rx<1>"		LOC = "W31";	# I/O_435*
 NET "dmb_rx<0>"		LOC = "U33";	# I/O_436
 
 NET "dmb_tx<43>"	LOC = "T31";	# I/O_437
-NET "dmb_tx<42>"	LOC = "B8";	# I/O_438  prom_adr5
-NET "dmb_tx<41>"	LOC = "C10";	# I/O_439  prom_adr13
-
+NET "dmb_tx<42>"	LOC = "B8";	  # I/O_438 ** Dual use output: BPI Flash PROM Address Input A05
+NET "dmb_tx<41>"	LOC = "C10";	# I/O_439 ** Dual use output: BPI Flash PROM Address Input A13
 
 # Uncoment the following two lines for "Pre-production" version
-#NET "dmb_tx<40>"	LOC = "C9";  # Pre-production: I/O_440
-#NET "dmb_tx<39>"	LOC = "W32"; # Pre-production: I/O_441
+#NET "dmb_tx<40>"	LOC = "C9";    # Pre-production: I/O_440
+#NET "dmb_tx<39>"	LOC = "W32";   # Pre-production: I/O_441
 
 # Coment the following two lines for "Production" version
-NET "dmb_tx<40>"	LOC = "W32"; # Production: I/O_440
-NET "dmb_tx<39>"	LOC = "C9";  # Production: I/O_441  prom_adr11
+NET "dmb_tx<40>"	LOC = "W32";  # Production: I/O_440
+NET "dmb_tx<39>"	LOC = "C9";   # Production: I/O_441  ** Dual use output: BPI Flash PROM Address Input A11
 
-
-NET "dmb_tx<38>"	LOC = "C8";	# I/O_442  prom_adr4
-NET "dmb_tx<37>"	LOC = "D10";	# I/O_443  prom_adr12
-NET "dmb_tx<36>"	LOC = "D9";	# I/O_444  prom_adr10
-NET "dmb_tx<35>"	LOC = "E8";	# I/O_445  prom_adr7
-NET "dmb_tx<34>"	LOC = "E9";	# I/O_446  prom_adr6
+NET "dmb_tx<38>"	LOC = "C8";	  # I/O_442 Flash PROM Address Input A04
+NET "dmb_tx<37>"	LOC = "D10";	# I/O_443  ** Dual use output: BPI Flash PROM Address Input A12
+NET "dmb_tx<36>"	LOC = "D9";	  # I/O_444  ** Dual use output: BPI Flash PROM Address Input A10
+NET "dmb_tx<35>"	LOC = "E8";	  # I/O_445  ** Dual use output: BPI Flash PROM Address Input A07
+NET "dmb_tx<34>"	LOC = "E9";	  # I/O_446  ** Dual use output: BPI Flash PROM Address Input A06
 NET "dmb_tx<33>"	LOC = "Y34";	# I/O_447
 NET "dmb_tx<32>"	LOC = "W34";	# I/O_448
-NET "dmb_tx<31>"	LOC = "F10";	# I/O_449  prom_adr14
-NET "dmb_tx<30>"	LOC = "F9";	# I/O_450  prom_adr15
+NET "dmb_tx<31>"	LOC = "F10";	# I/O_449  ** Dual use output: BPI Flash PROM Address Input A14
+NET "dmb_tx<30>"	LOC = "F9";	  # I/O_450  ** Dual use output: BPI Flash PROM Address Input A15
 NET "dmb_tx<29>"	LOC = "Y32";	# I/O_451
 NET "dmb_tx<28>"	LOC = "Y33";	# I/O_452
-NET "dmb_tx<27>"	LOC = "AD9";	# I/O_453  prom_adr25 --not used???
-NET "dmb_tx<26>"	LOC = "AC9";	# I/O_454  prom_adr2
+NET "dmb_tx<27>"	LOC = "AD9";	# I/O_453
+NET "dmb_tx<26>"	LOC = "AC9";	# I/O_454  ** Dual use output: BPI Flash PROM Address Input A02
 NET "dmb_tx<25>"	LOC = "AA33";	# I/O_455
 NET "dmb_tx<24>"	LOC = "AA34";	# I/O_456
-NET "dmb_tx<23>"	LOC = "AE9";	# I/O_457  prom_adr24 --not used???
-NET "dmb_tx<22>"	LOC = "AD10";	# I/O_458  prom_adr3
+NET "dmb_tx<23>"	LOC = "AE9";	# I/O_457  
+NET "dmb_tx<22>"	LOC = "AD10";	# I/O_458  ** Dual use output: BPI Flash PROM Address Input A03
 NET "dmb_tx<21>"	LOC = "AC34";	# I/O_459
 NET "dmb_tx<20>"	LOC = "AB33";	# I/O_460
-NET "dmb_tx<19>"	LOC = "AF9";	# I/O_461  prom_adr21 & connected to rs0 pin AA23
-NET "dmb_tx<18>"	LOC = "AF10";	# I/O_462  prom_adr20
+NET "dmb_tx<19>"	LOC = "AF9";	# I/O_461  ** Dual use output: BPI Flash PROM Address Input A21 & connected to rs0 pin AA23
+NET "dmb_tx<18>"	LOC = "AF10";	# I/O_462  ** Dual use output: BPI Flash PROM Address Input A20
 NET "dmb_tx<17>"	LOC = "AD32";	# I/O_463
 NET "dmb_tx<16>"	LOC = "AC33";	# I/O_464
-NET "dmb_tx<15>"	LOC = "AK9";	# I/O_465  prom_adr23 --not used???
-NET "dmb_tx<14>"	LOC = "AH8";	# I/O_466  prom_adr16
+NET "dmb_tx<15>"	LOC = "AK9";	# I/O_465
+NET "dmb_tx<14>"	LOC = "AH8";	# I/O_466  ** Dual use output: BPI Flash PROM Address Input A16
 NET "dmb_tx<13>"	LOC = "AE34";	# I/O_467
 NET "dmb_tx<12>"	LOC = "AD34";	# I/O_468
-NET "dmb_tx<11>"	LOC = "AL9";	# I/O_469  prom_adr22 & connected to rs1 pin AG23
-NET "dmb_tx<10>"	LOC = "AG8";	# I/O_470  prom_adr17
+NET "dmb_tx<11>"	LOC = "AL9";	# I/O_469  ** Dual use output: BPI Flash PROM Address Input A22 & connected to rs1 pin AG23
+NET "dmb_tx<10>"	LOC = "AG8";	# I/O_470  ** Dual use output: BPI Flash PROM Address Input A17
 NET "dmb_tx<9>"		LOC = "AE32";	# I/O_471
 NET "dmb_tx<8>"		LOC = "AE33";	# I/O_472
-NET "dmb_tx<7>"		LOC = "AL8";	# I/O_473  prom_adr0
-NET "dmb_tx<6>"		LOC = "AK8";	# I/O_474  prom_adr1
+NET "dmb_tx<7>"		LOC = "AL8";	# I/O_473  ** Dual use output: BPI Flash PROM Address Input A00
+NET "dmb_tx<6>"		LOC = "AK8";	# I/O_474  ** Dual use output: BPI Flash PROM Address Input A01
 NET "dmb_tx<5>"		LOC = "AF33";	# I/O_475
 NET "dmb_tx<4>"		LOC = "AF34";	# I/O_476
 
@@ -596,23 +594,22 @@ NET "_mpc_tx<26>"	LOC = "N27";	# I/O_511
 
 NET "dmb_tx<3>"		LOC = "AG33";	# I/O_512
 NET "dmb_tx<2>"		LOC = "Y31";	# I/O_513
-NET "dmb_tx<1>"		LOC = "AN9";	# I/O_514  prom_adr19
-NET "dmb_tx<0>"		LOC = "AP9";	# I/O_515  prom_adr18
+NET "dmb_tx<1>"		LOC = "AN9";	# I/O_514  ** Dual use output: BPI Flash PROM Address Input A19
+NET "dmb_tx<0>"		LOC = "AP9";	# I/O_515  ** Dual use output: BPI Flash PROM Address Input A18
 NET "_ccb_rx<36>"	LOC = "AA28";	# I/O_516
 
 NET "gp_io5"   		LOC = "V30";	# I/O_517	TP_INIT
 NET "gp_io6"   		LOC = "W30";	# I/O_518	TP_WR
 NET "gp_io7"   		LOC = "W29";	# I/O_519	TP_CS
-#ET "mez_busy" 		LOC = "AA8";	# I/O_520	BUSY	Not a user IO on Virtex6, assigned to testled[10]
 
-NET "led_fp<0>"		LOC = "AF24";	# I/O_521	D0
-NET "led_fp<1>"		LOC = "AF25";	# I/O_522	D1
-NET "led_fp<2>"		LOC = "W24";	# I/O_523	D2
-NET "led_fp<3>"		LOC = "V24";	# I/O_524	D3
-NET "led_fp<4>"		LOC = "H24";	# I/O_525	D4
-NET "led_fp<5>"		LOC = "H25";	# I/O_526	D5
-NET "led_fp<6>"		LOC = "P24";	# I/O_527	D6
-NET "led_fp<7>"		LOC = "R24";	# I/O_528	D7
+NET "led_fp<0>"		LOC = "AF24";	# I/O_521	** Dual use output: BPI Flash PROM Data D00
+NET "led_fp<1>"		LOC = "AF25";	# I/O_522	** Dual use output: BPI Flash PROM Data D01
+NET "led_fp<2>"		LOC = "W24";	# I/O_523	** Dual use output: BPI Flash PROM Data D02
+NET "led_fp<3>"		LOC = "V24";	# I/O_524	** Dual use output: BPI Flash PROM Data D03
+NET "led_fp<4>"		LOC = "H24";	# I/O_525	** Dual use output: BPI Flash PROM Data D04
+NET "led_fp<5>"		LOC = "H25";	# I/O_526	** Dual use output: BPI Flash PROM Data D05
+NET "led_fp<6>"		LOC = "P24";	# I/O_527	** Dual use output: BPI Flash PROM Data D06
+NET "led_fp<7>"		LOC = "R24";	# I/O_528	** Dual use output: BPI Flash PROM Data D07
 
 NET "tmb_clock0"  	LOC = "B31";	# GCLK19P
 NET "tmb_clock1"  	LOC = "K24";	# GCLK1-6P
@@ -628,16 +625,26 @@ NET "dcc_clock"   	LOC = "H28";	# GCLK3-2P
 #NET "tdo"			LOC = "AC8";	# TDO
 #NET "tms"			LOC = "AF8";	# TMS_Pr
 
-# These are 8 SMT LEDs on the Mez driven by the high-order Prom data input bits d[15:8]
-#    The LEDs are labelled  "D1-D8" on te Mez board, with colors bgyrgyrg
-NET "meztp20"		LOC = "G23"; # d8	mez_tp1 = LED "D1" [blue]
-NET "meztp21"		LOC = "H23"; # d9	mez_tp2 = LED "D2" [green]
-NET "meztp22"		LOC = "N24"; # d10	mez_tp3 = LED "D3" [yellow]  ~tmbclk0_lock
-NET "meztp23"		LOC = "N23"; # d11	mez_tp4 = LED "D4" [red]     tmbclk0_lock-was-lost
-NET "meztp24"		LOC = "F23"; # d12	mez_tp5 = LED "D5" [green]
-NET "meztp25"		LOC = "F24"; # d13	mez_tp6 = LED "D6" [yellow]  ~qpll_lock
-NET "meztp26"		LOC = "L24"; # d14	mez_tp7 = LED "D7" [red]     qpll_lock-was-lost
-NET "meztp27"		LOC = "M23"; # d15	mez_tp8 = LED "D8" [green]
+# Mezanine Board LEDs
+#   These are 8 SMT LEDs on the Mez board driven by the high-order Prom data bits d[15:8]
+#   The LEDs are labelled  "D1-D8" on the Mez board, with colors bgyrgyrg
+NET "led_mezD1"		LOC = "G23"; # ** IO Dual use: bidirectional BPI Flash PROM Data D08 and also output to Mezanine Test Point LED "D1" [blue]
+NET "led_mezD2"		LOC = "H23"; # ** IO Dual use: bidirectional BPI Flash PROM Data D09 and also output to Mezanine Test Point LED "D2" [green]
+NET "led_mezD3"		LOC = "N24"; # ** IO Dual use: bidirectional BPI Flash PROM Data D10 and also output to Mezanine Test Point LED "D3" [yellow]
+NET "led_mezD4"		LOC = "N23"; # ** IO Dual use: bidirectional BPI Flash PROM Data D11 and also output to Mezanine Test Point LED "D4" [red] tmbclk0_lock-was-lost 
+NET "led_mezD5"		LOC = "F23"; # ** IO Dual use: bidirectional BPI Flash PROM Data D12 and also output to Mezanine Test Point LED "D5" [green]
+NET "led_mezD6"		LOC = "F24"; # ** IO Dual use: bidirectional BPI Flash PROM Data D13 and also output to Mezanine Test Point LED "D6" [yellow] ~qpll_lock
+NET "led_mezD7"		LOC = "L24"; # ** IO Dual use: bidirectional BPI Flash PROM Data D14 and also output to Mezanine Test Point LED "D7" [red] qpll_lock-was-lost
+NET "led_mezD8"		LOC = "M23"; # ** IO Dual use: bidirectional BPI Flash PROM Data D15 and also output to Mezanine Test Point LED "D8" [green]
+# Change name of the NETs (see above)
+#NET "meztp20"		LOC = "G23"; # ** Dual use output: BPI Flash PROM Data D08 and also Mezanine Test Point LED "D1" [blue]
+#NET "meztp21"		LOC = "H23"; # ** Dual use output: BPI Flash PROM Data D09 and also Mezanine Test Point LED "D2" [green]
+#NET "meztp22"		LOC = "N24"; # ** Dual use output: BPI Flash PROM Data D10 and also Mezanine Test Point LED "D3" [yellow]
+#NET "meztp23"		LOC = "N23"; # ** Dual use output: BPI Flash PROM Data D11 and also Mezanine Test Point LED "D4" [red] tmbclk0_lock-was-lost 
+#NET "meztp24"		LOC = "F23"; # ** Dual use output: BPI Flash PROM Data D12 and also Mezanine Test Point LED "D5" [green]
+#NET "meztp25"		LOC = "F24"; # ** Dual use output: BPI Flash PROM Data D13 and also Mezanine Test Point LED "D6" [yellow] ~qpll_lock
+#NET "meztp26"		LOC = "L24"; # ** Dual use output: BPI Flash PROM Data D14 and also Mezanine Test Point LED "D7" [red] qpll_lock-was-lost
+#NET "meztp27"		LOC = "M23"; # ** Dual use output: BPI Flash PROM Data D15 and also Mezanine Test Point LED "D8" [green]
 
 #----------------------------------------------------------------------------------------------------------
 # Virtex6 Mezzanine Specific IOs
@@ -646,18 +653,18 @@ NET "meztp27"		LOC = "M23"; # d15	mez_tp8 = LED "D8" [green]
 NET "set_sw<7>"		LOC = "U25";
 NET "set_sw<8>"		LOC = "U26";
 
-# LEDs
-NET "testled<1>"	LOC = "T29"; # These 10 are NOT LEDs on the mez, but go to
-NET "testled<2>"	LOC = "R31"; #   labelled holes on the mez board board.  We
-NET "testled<3>"	LOC = "T26"; #   can use these I/O as testpoints, etc.
-NET "testled<4>"	LOC = "R29";
-NET "testled<5>"	LOC = "R27";
-NET "testled<6>"	LOC = "T30";
-NET "testled<7>"	LOC = "U28";
-NET "testled<8>"	LOC = "T28";
-NET "testled<9>"	LOC = "T25";
-#ET "testled<10>"	LOC = "U27"; # reallocated for mez_busy...
-NET "mez_busy"		LOC = "U27"; #  note the actual FPGA Busy only goes to the Baseboard
+# Mezanine board test points
+NET "mez_tp<1>"	LOC = "T29"; # These 10 are NOT LEDs on the mezanine board, but go to
+NET "mez_tp<2>"	LOC = "R31"; #   labelled holes on the mez board board.  We
+NET "mez_tp<3>"	LOC = "T26"; #   can use these I/O as testpoints, etc.
+NET "mez_tp<4>"	LOC = "R29";
+NET "mez_tp<5>"	LOC = "R27";
+NET "mez_tp<6>"	LOC = "T30";
+NET "mez_tp<7>"	LOC = "U28";
+NET "mez_tp<8>"	LOC = "T28";
+NET "mez_tp<9>"	LOC = "T25";
+#ET "mez_tp<10>"	LOC = "U27"; # reallocated for mez_busy...
+NET "mez_tp10_busy"		LOC = "U27"; #  note the actual FPGA Busy only goes to the Baseboard
 
 # CERN QPLL
 NET "clk40p"		LOC = "A10" | IOSTANDARD = "LVDS_25";  # Differential 40 MHz from QPLL, aka lhc_ckp
@@ -690,10 +697,10 @@ NET "f_sclk"		LOC = "W27";
 NET "f_sdat"		LOC = "R32";
 NET "f_fok"			LOC = "K23";
 
-# PROM
-NET "fcs"			LOC = "Y24";  #   **prom_fcs  FCS
-#NET "FOE"			LOC = "AA24";
-#NET "FWE"			LOC = "AF23";
+# BPI FLASH PROM
+NET "bpi_cs" LOC = "Y24"; # // BPI Flash PROM Chip Enable
+#NET "FOE"	 LOC = "AA24";
+#NET "FWE"   LOC = "AF23";
 
 
 #-------------------------------------------------------------------------------------------------------------------
@@ -842,7 +849,7 @@ NET "smb_data"				SLEW=FAST | DRIVE=4;
 NET "mez_sn"				SLEW=FAST | DRIVE=4;
 NET "adc_io<*>"				SLEW=FAST | DRIVE=4;
 NET "smb_clk"				SLEW=FAST | DRIVE=4;
-NET "mez_busy"				SLEW=FAST | DRIVE=4;
+NET "mez_tp10_busy"				SLEW=FAST | DRIVE=4;
 NET "led_fp<*>"				SLEW=FAST | DRIVE=4;
 
 # General Purpose I/Os
@@ -855,14 +862,14 @@ NET "gp_io6"				SLEW=FAST | DRIVE=4;
 NET "gp_io7"				SLEW=FAST | DRIVE=4;
 
 # Mezzanine Test Points
-NET "meztp20"				SLEW=FAST | DRIVE=4;
-NET "meztp21"				SLEW=FAST | DRIVE=4;
-NET "meztp22"				SLEW=FAST | DRIVE=4;
-NET "meztp23"				SLEW=FAST | DRIVE=4;
-NET "meztp24"				SLEW=FAST | DRIVE=4;
-NET "meztp25"				SLEW=FAST | DRIVE=4;
-NET "meztp26"				SLEW=FAST | DRIVE=4;
-NET "meztp27"				SLEW=FAST | DRIVE=4;
+NET "led_mezD1"				SLEW=FAST | DRIVE=4;
+NET "led_mezD2"				SLEW=FAST | DRIVE=4;
+NET "led_mezD3"				SLEW=FAST | DRIVE=4;
+NET "led_mezD4"				SLEW=FAST | DRIVE=4;
+NET "led_mezD5"				SLEW=FAST | DRIVE=4;
+NET "led_mezD6"				SLEW=FAST | DRIVE=4;
+NET "led_mezD7"				SLEW=FAST | DRIVE=4;
+NET "led_mezD8"				SLEW=FAST | DRIVE=4;
 
 #----------------------------------------------------------------------------------------------------------
 # Timing

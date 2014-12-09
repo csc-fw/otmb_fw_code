@@ -91,7 +91,7 @@
   tck_fpga,
 
 // BPI flash ports
-  flash_ctrl,    // [3:0] JRG, goes up for I/O match to UCF with FCS,FOE,FWE,FLATCH = fcs,_ccb_tx14,_ccb_tx26,_ccb_tx3
+  flash_ctrl,    // [3:0] JRG, goes up for I/O match to UCF with FCS,FOE,FWE,FLATCH = bpi_cs,_ccb_tx14,_ccb_tx26,_ccb_tx3
   flash_ctrl_dualuse,    // [2:0] JRG, goes down to bpi_interface for MUX with FOE,FWE,FLATCH
   bpi_ad_out,
   bpi_active,
@@ -1326,7 +1326,15 @@
   output  [3:0] flash_ctrl;         // JRG, goes up for I/O match to UCF with FCS,FOE,FWE,FLATCH = fcs,_ccb_tx14,_ccb_tx26,_ccb_tx3
   input   [2:0] flash_ctrl_dualuse; // JRG, goes down to bpi_interface for MUX with FOE,FWE,FLATCH
   output [22:0] bpi_ad_out;
-  output        bpi_active, bpi_dev, bpi_rst, bpi_dsbl, bpi_enbl, bpi_we, bpi_dtack, bpi_rd_stat, bpi_re;
+  output        bpi_active;
+  output        bpi_dev;
+  output        bpi_rst;
+  output        bpi_dsbl;
+  output        bpi_enbl;
+  output        bpi_we;
+  output        bpi_dtack;
+  output        bpi_rd_stat;
+  output        bpi_re;
 
 // 3D3444
   output          ddd_clock;        // ddd clock
@@ -3328,7 +3336,7 @@
   assign d[15:0]   = (vsm_oe)  ? vsm_data[15:0]    : d_vme[15:0];    // insert backplane or prom data to write
   
   initial begin
-  	$monitor($time, "  vme monitor d_vme = %h", d_vme);
+  	$monitor($time, "  VME Monitor: address = 0x%h data = 0x%h", a, d_vme);
   end
   
 //------------------------------------------------------------------------------------------------------------------
@@ -7043,103 +7051,108 @@
     else   ds0_r <= ds0;
   end
   
-//  wire bpi_dev = (bd_sel & (a_vme[18:15] == 4'h5));
-  wire bpi_dev = (bd_sel & (a_vme[18:16] == 3'h5)); // YAP: a_vme is [23:1], for bpi_dev address we use 3 bits: [18:16]
-//  wire [9:0]  bpi_cmd = (a_vme[11:2]);
-  wire [9:0]  bpi_cmd = (a_vme[12:3]); // YAP: a_vme is [23:1], for bpi_command we need to shift 2 bit left
-  wire [15:0]  bpi_fifo_dout;
-  wire [10:0]  bpi_fifo_cnt;
-  wire [15:0]  bpi_stat;
-  wire [31:0]  bpi_time;
-  wire [15:0]  bpi_outdata;  // out to VME
-  wire [15:0]  bpi_cmd_fifo_data;  // out
-  wire bpi_dtack, bpi_rst, bpi_we, bpi_re, bpi_dsbl, bpi_enbl, bpi_rd_stat;
- 
+//  wire        bpi_dev = (bd_sel & (a_vme[17:15] == 3'h5)); // a_vme is [23:1], for bpi_dev address we use 3 bits: [17:15]
+  wire        bpi_dev = (bd_sel & (a_vme[18:16] == 3'h5));   // a_vme is [23:1], for bpi_dev address we use 3 bits: [18:16]
+//  wire [9:0]  bpi_cmd = (a_vme[11:2]);                     // a_vme is [23:1], for bpi_command we use 10 bits: [11:2]
+  wire [9:0]  bpi_cmd = (a_vme[12:3]);                       // a_vme is [23:1], for bpi_command we use 10 bits: [12:3]
+  wire [15:0] bpi_fifo_dout;
+  wire [10:0] bpi_fifo_cnt;
+  wire [15:0] bpi_stat;
+  wire [31:0] bpi_time;
+  wire [15:0] bpi_outdata;       // out to VME
+  wire [15:0] bpi_cmd_fifo_data; // out
+  wire        bpi_dtack;
+  wire        bpi_rst;
+  wire        bpi_we;
+  wire        bpi_re;
+  wire        bpi_dsbl;
+  wire        bpi_enbl;
+  wire        bpi_rd_stat;
+  
+  wire        bpi_busy;      // JRG, all done
+  wire        bpi_load_data; // JRG, all done
+  wire        bpi_execute;   // JRG, all done
+  wire [15:0] bpi_data_from; // JRG, all done
+  wire [15:0] bpi_data_to;   // JRG, all done
+  wire [22:0] bpi_addr;      // JRG, all done
+  wire  [1:0] bpi_op;        // JRG, all done
 
- BPI_PORT bpi_vme (
-  .CLK (clock),        // 40MHz clock
-  .RST (global_reset), // system reset
-   // VME selection/control
-  .DEVICE  (bpi_dev),     // 1 bit indicating this device has been selected... JRG: choose any available OTMB adr range
-  .STROBE  (ds0),         // Data strobe synchronized to rising or falling edge of clock and asynchronously cleared
-  .COMMAND (bpi_cmd),     // [9:0] command portion of VME address... JRG: assume it is address bits 11:2?
-  .WRITE_B (nwrite),      // VME read/write_bar
-  .INDATA  (d),           // [15:0] data from VME writes to be provided to BPI interface
-  .OUTDATA (bpi_outdata), // out data from BPI interface to VME buss for reads
-  .DTACK (bpi_dtack),   // out DTACK to VME  ^^^JG: All Good^^^
-   // BPI controls...  JRG: what modules do these connect with?
-  .BPI_RST           (bpi_rst),           // out Resets BPI interface state machines
-  .BPI_CMD_FIFO_DATA (bpi_cmd_fifo_data), // out Data for command FIFO
-  .BPI_WE            (bpi_we),            // out Command FIFO write enable  (pulse one clock cycle for one write)
-  .BPI_RE            (bpi_re),            // out Read back FIFO read enable  (pulse one clock cycle for one read)
-  .BPI_DSBL          (bpi_dsbl),          // out Disable parsing of BPI commands in the command FIFO (while being filled)
-  .BPI_ENBL          (bpi_enbl),          // out Enable  parsing of BPI commands in the command FIFO
-  .BPI_RD_STATUS     (bpi_rd_stat),       // out Read BPI interface status register command received
-  .BPI_RBK_FIFO_DATA (bpi_fifo_dout),     // in [15:0] Data on output of the Read back FIFO
-  .BPI_RBK_WRD_CNT   (bpi_fifo_cnt),      // in [10:0] Word count of the Read back FIFO (number of available reads)
-  .BPI_STATUS        (bpi_stat),          // in [15:0] FIFO status bits and latest value of the PROM status register. 
-  .BPI_TIMER         (bpi_time)           // in [31:0] General timer
- );
+  BPI_PORT bpi_vme (
+    .CLK (clock),        // 40MHz clock
+    .RST (global_reset), // system reset
+     // VME selection/control
+    .DEVICE  (bpi_dev),     // 1 bit indicating this device has been selected... JRG: choose any available OTMB adr range
+    .STROBE  (ds0),         // Data strobe synchronized to rising or falling edge of clock and asynchronously cleared
+    .COMMAND (bpi_cmd),     // [9:0] command portion of VME address... JRG: assume it is address bits 11:2?
+    .WRITE_B (nwrite),      // VME read/write_bar
+    .INDATA  (d),           // [15:0] data from VME writes to be provided to BPI interface
+    .OUTDATA (bpi_outdata), // out data from BPI interface to VME buss for reads
+    .DTACK   (bpi_dtack),   // out DTACK to VME  ^^^JG: All Good^^^
+     // BPI controls...  JRG: what modules do these connect with?
+    .BPI_RST           (bpi_rst),           // out Resets BPI interface state machines
+    .BPI_CMD_FIFO_DATA (bpi_cmd_fifo_data), // out Data for command FIFO
+    .BPI_WE            (bpi_we),            // out Command FIFO write enable  (pulse one clock cycle for one write)
+    .BPI_RE            (bpi_re),            // out Read-back FIFO read enable  (pulse one clock cycle for one read)
+    .BPI_DSBL          (bpi_dsbl),          // out Disable parsing of BPI commands in the command FIFO (while being filled)
+    .BPI_ENBL          (bpi_enbl),          // out Enable  parsing of BPI commands in the command FIFO
+    .BPI_RD_STATUS     (bpi_rd_stat),       // out Read BPI interface status register command received
+    .BPI_RBK_FIFO_DATA (bpi_fifo_dout),     // in [15:0] Data on output of the Read-back FIFO
+    .BPI_RBK_WRD_CNT   (bpi_fifo_cnt),      // in [10:0] Word count of the Read-back FIFO (number of available reads)
+    .BPI_STATUS        (bpi_stat),          // in [15:0] FIFO status bits and latest value of the PROM status register. 
+    .BPI_TIMER         (bpi_time)           // in [31:0] General timer
+  );
 
- BPI_ctrl  #(   .USE_CHIPSCOPE (0)  )
-   bpi_engine (          // also has two FIFOs
-  .CLK (clock),          // in 40 MHz clock
-  .CLK1MHZ (clock_1mhz), // in  1 MHz clock for timers
-  .RST (bpi_rst),        // in 
-   // Interface Signals to/from VME interface
-  .BPI_CMD_FIFO_DATA (bpi_cmd_fifo_data), // in [15:0] Data for command FIFO
-  .BPI_WE (bpi_we),                       // in Command FIFO write enable  (pulse one clock cycle for one write)
-  .BPI_RE (bpi_re),                       // in Read back FIFO read enable  (pulse one clock cycle for one read)
-  .BPI_DSBL (bpi_dsbl),                   // in Disable parsing of BPI commands in the command FIFO (while being filled)
-  .BPI_ENBL (bpi_enbl),                   // in Enable  parsing of BPI commands in the command FIFO
-  .BPI_RBK_FIFO_DATA (bpi_fifo_dout),     // out [15:0] Data on output of the Read back FIFO
-  .BPI_RBK_WRD_CNT (bpi_fifo_cnt),        // out [10:0] Word count of the Read back FIFO (number of available reads)
-  .BPI_STATUS (bpi_stat),                 // out [15:0] FIFO status bits and latest value of the PROM status register. 
-  .BPI_TIMER (bpi_time),                  // out [31:0] General timer
-   // Signals to/from low level BPI interface
-  .BPI_BUSY (bpi_busy),                   // in 
-  .BPI_DATA_FROM (bpi_data_from[15:0]),   // in [15:0] 
-  .BPI_LOAD_DATA (bpi_load_data),         // in 
-  .BPI_ACTIVE (bpi_active),               // out 
-  .BPI_OP (bpi_op[1:0]),                  // out [1:0] 
-  .BPI_ADDR (bpi_addr[22:0]),             // out [22:0] 
-  .BPI_DATA_TO (bpi_data_to[15:0]),       // out [15:0] 
-  .BPI_EXECUTE (bpi_execute)              // out 
- );
+  BPI_ctrl  #( .USE_CHIPSCOPE (0) ) bpi_engine (  // also has two FIFOs
+    .CLK     (clock),      // in 40 MHz clock
+    .CLK1MHZ (clock_1mhz), // in  1 MHz clock for timers
+    .RST     (bpi_rst),    // in 
+     // Interface Signals to/from VME interface
+    .BPI_CMD_FIFO_DATA (bpi_cmd_fifo_data), // in [15:0] Data for command FIFO
+    .BPI_WE            (bpi_we),            // in Command FIFO write enable  (pulse one clock cycle for one write)
+    .BPI_RE            (bpi_re),            // in Read back FIFO read enable  (pulse one clock cycle for one read)
+    .BPI_DSBL          (bpi_dsbl),          // in Disable parsing of BPI commands in the command FIFO (while being filled)
+    .BPI_ENBL          (bpi_enbl),          // in Enable  parsing of BPI commands in the command FIFO
+    .BPI_RBK_FIFO_DATA (bpi_fifo_dout),     // out [15:0] Data on output of the Read back FIFO
+    .BPI_RBK_WRD_CNT   (bpi_fifo_cnt),      // out [10:0] Word count of the Read back FIFO (number of available reads)
+    .BPI_STATUS        (bpi_stat),          // out [15:0] FIFO status bits and latest value of the PROM status register. 
+    .BPI_TIMER         (bpi_time),          // out [31:0] General timer
+     // Signals to/from low level BPI interface
+    .BPI_BUSY      (bpi_busy),            // in 
+    .BPI_DATA_FROM (bpi_data_from[15:0]), // in [15:0] 
+    .BPI_LOAD_DATA (bpi_load_data),       // in 
+    .BPI_ACTIVE    (bpi_active),          // Out "BPI Active set to 1 when data lines are for BPI communications": going to BPI_CTRL and to otmb_virtex6_top then to sequencer and to outside trough mez_tp[3]
+    .BPI_OP        (bpi_op[1:0]),         // out [1:0] 
+    .BPI_ADDR      (bpi_addr[22:0]),      // out [22:0] 
+    .BPI_DATA_TO   (bpi_data_to[15:0]),   // out [15:0] 
+    .BPI_EXECUTE   (bpi_execute)          // out 
+  );
 
-
-//   wire      bpi_busy, bpi_load_data, bpi_execute; // JRG, all done
-   wire [15:0] bpi_data_from;  // JRG, all done
-   wire [15:0] bpi_data_to;    // JRG, all done
-   wire [22:0] bpi_addr;  // JRG, all done
-   wire  [1:0] bpi_op;    // JRG, all done
-
-    bpi_interface bpi_busctrl (
-    .CLK (clock),      // in 40 MHz clock
-    .RST (bpi_rst),    // in  -- JRG: from BPI_VME
-    .ADDR (bpi_addr[22:0]),  // in [22:0] Bank/Array Address  -- JRG: from BPI_CTRL
-    .CMD_DATA_OUT (bpi_data_to[15:0]), // in [15:0] Command or Data being written to FLASH device  -- JRG: from BPI_CTRL
-    .OP (bpi_op[1:0]),      // in [1:0] Operation: 00-standby, 01-write, 10-read, 11-not allowed(standby)  -- JRG: from BPI_CTRL
-    .EXECUTE (bpi_execute),      // in  -- JRG: from BPI_CTRL
-    .DATA_IN (bpi_data_from[15:0]),    // out [15:0] Data read from FLASH device  -- JRG: to BPI_CTRL
-    .LOAD_DATA (bpi_load_data),  // out Clock enable signal for capturing Data read from FLASH device  -- JRG: to BPI_CTRL
-    .BUSY (bpi_busy),            // out Operation in progress signal (not ready)  -- JRG: to BPI_CTRL
-  // signals for Dual purpose data lines
-    .BPI_ACTIVE (bpi_active),    // in set to 1 when data lines are for BPI communications  -- JRG: from BPI_CTRL
-    .DUAL_DATA (led_tmb),    // in [15:0] Data provided for non BPI communications -- JRG: probably should be TMB signals for LEDs
-   // external connections cooresponding to I/O pins
-    .BPI_AD (bpi_ad_out),    // out [22:0]  JRG, what is this?
-// JRG: do I use this access port to define the IO pins in ref to UCF?  I think yes...
-    .CFG_DAT (led_tmb_out),   // inout [15:0]  JRG, what is this?  Probably should match it to LED bus (16) named in UCF, take out to TOP
+  bpi_interface bpi_busctrl (
+    .CLK          (clock),               // in 40 MHz clock
+    .RST          (bpi_rst),             // in  -- JRG: from BPI_VME
+    .ADDR         (bpi_addr[22:0]),      // in [22:0] Bank/Array Address  -- JRG: from BPI_CTRL
+    .CMD_DATA_OUT (bpi_data_to[15:0]),   // in [15:0] Command or Data being written to FLASH device  -- JRG: from BPI_CTRL
+    .OP           (bpi_op[1:0]),         // in [1:0] Operation: 00-standby, 01-write, 10-read, 11-not allowed(standby)  -- JRG: from BPI_CTRL
+    .EXECUTE      (bpi_execute),         // in  -- JRG: from BPI_CTRL
+    .DATA_IN      (bpi_data_from[15:0]), // out [15:0] Data read from FLASH device  -- JRG: to BPI_CTRL
+    .LOAD_DATA    (bpi_load_data),       // out Clock enable signal for capturing Data read from FLASH device  -- JRG: to BPI_CTRL
+    .BUSY         (bpi_busy),            // out Operation in progress signal (not ready)  -- JRG: to BPI_CTRL
+    // signals for Dual purpose data lines
+    .BPI_ACTIVE (bpi_active), // In "BPI Active set to 1 when data lines are for BPI communications": coming from BPI_CTRL
+    .DUAL_DATA  (led_tmb),    // in [15:0] Data provided for non BPI communications -- JRG: probably should be TMB signals for LEDs
+    // external connections cooresponding to I/O pins
+    .BPI_AD     (bpi_ad_out),    // out [22:0]  JRG, what is this?
+    // JRG: do I use this access port to define the IO pins in ref to UCF?  I think yes...
+    .CFG_DAT    (led_tmb_out),   // inout [15:0]  JRG, what is this?  Probably should match it to LED bus (16) named in UCF, take out to TOP
 // JRG, not needed:   output RS0,
 // JRG, not needed:   output RS1,
-//    .FCS_B (prm_fcs),    // out, take to otmb_top
-//    .FOE_B (prm_foe),    // out, take to otmb_top
-//    .FWE_B (prm_fwe),    // out, take to otmb_top
+//    .FCS_B    (prm_fcs),  // out, take to otmb_top
+//    .FOE_B    (prm_foe),  // out, take to otmb_top
+//    .FWE_B    (prm_fwe),  // out, take to otmb_top
 //    .FLATCH_B (prm_load), // out, take to otmb_top
-    .FLASH_CTRL (flash_ctrl),   // out [3:0] ~fcs, ~foe, ~fwe, ~latch_adr
-    .FLASH_CTRL_DUALUSE (flash_ctrl_dualuse)   // in [2:0] ~foe, ~fwe, ~latch_adr
-    );
+    .FLASH_CTRL         (flash_ctrl),        // out [3:0] ~fcs, ~foe, ~fwe, ~latch_adr
+    .FLASH_CTRL_DUALUSE (flash_ctrl_dualuse) // in [2:0] ~foe, ~fwe, ~latch_adr
+  );
 
 /*
 BPI use cases we've got to handle for OTMB

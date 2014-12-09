@@ -100,26 +100,27 @@
   adc_io,
   adc_io3_dout,
   smb_clk,
-  mez_busy,
+  mez_tp10_busy,
   led_fp,
 
 // General Purpose
   gp_io0,gp_io1,gp_io2,gp_io3,
   gp_io4,gp_io5,gp_io6,gp_io7,
 
-// Mezzanine Test Points
-  meztp20,
-  meztp21,
-  meztp22,
-  meztp23,
-  meztp24,
-  meztp25,
-  meztp26,
-  meztp27,
+// These are 8 SMT LEDs on the Mez driven by the high-order Prom data bits d[15:8]
+// The LEDs are labelled  "D1-D8" on te Mez board, with colors bgyrgyrg
+  led_mezD1, // IO was meztp20
+  led_mezD2, // IO was meztp21
+  led_mezD3, // IO was meztp22
+  led_mezD4, // IO was meztp23
+  led_mezD5, // IO was meztp24
+  led_mezD6, // IO was meztp25
+  led_mezD7, // IO was meztp26
+  led_mezD8, // IO was meztp27
 
 // Switches & LEDS
   set_sw,
-  testled,
+  mez_tp,
   reset,
 
 // CERN QPLL
@@ -157,8 +158,8 @@
   f_sdat,
   f_fok,
 
-// BPI FLASH PROM
-  fcs
+// BPI Flash PROM
+  bpi_cs // BPI Flash PROM Chip Enable
   );
 //-------------------------------------------------------------------------------------------------------------------
 //  Array Size Declarations
@@ -286,20 +287,20 @@
   output  [3:0]  rpc_tx;
 
 // CCB
-  input  [50:0]  _ccb_rx;
-  output  [26:0]  _ccb_tx;
-  output      ccb_status_oe;
-  output      _hard_reset_alct_fpga;
-  output      _hard_reset_tmb_fpga;
-  output      gtl_loop;
-  wire  [26:0]  _ccb_tx_i;
-        assign _ccb_tx[25:15] = _ccb_tx_i[25:15];
-        assign _ccb_tx[13:4]  = _ccb_tx_i[13:4];
-        assign _ccb_tx[2:0]   = _ccb_tx_i[2:0];
-        assign _ccb_tx[14] = (bpi_active) ? flash_ctrl[2] : _ccb_tx_i[14]; // Flash Prom foe
-        assign _ccb_tx[26] = (bpi_active) ? flash_ctrl[1] : _ccb_tx_i[26]; // Flash Prom fwe
-        assign _ccb_tx[3]  = (bpi_active) ? flash_ctrl[0] : _ccb_tx_i[3];  // Flash Prom latch
-   
+  input  [50:0] _ccb_rx;
+  output [26:0] _ccb_tx;
+  output        ccb_status_oe;
+  output        _hard_reset_alct_fpga;
+  output        _hard_reset_tmb_fpga;
+  output        gtl_loop;
+  wire   [26:0] _ccb_tx_i;
+  assign _ccb_tx[26]    = (bpi_active) ? flash_ctrl[1] : _ccb_tx_i[26]; // Dual use output: BPI Flash PROM Write Enable
+  assign _ccb_tx[25:15] = _ccb_tx_i[25:15];
+  assign _ccb_tx[14]    = (bpi_active) ? flash_ctrl[2] : _ccb_tx_i[14]; // Dual use output: BPI Flash PROM Output Enable
+  assign _ccb_tx[13:4]  = _ccb_tx_i[13:4];
+  assign _ccb_tx[2:0]   = _ccb_tx_i[2:0];
+  assign _ccb_tx[3]     = (bpi_active) ? flash_ctrl[0] : _ccb_tx_i[3];  // Dual use output: BPI Flash PROM Latch Enable
+
 // VME
   inout  [15:0]  vme_d;
   input  [23:1]  vme_a;
@@ -342,7 +343,7 @@
   output  [2:0]  adc_io;
   input      adc_io3_dout;
   output      smb_clk;
-  output      mez_busy;
+  output      mez_tp10_busy; // "Mezanine busy" output to test point 10 (hole on mezanine board)
 
 // General Purpose I/Os
   inout      gp_io0;      // jtag_fgpa0 tdo (out) shunted to gp_io1, usually
@@ -354,26 +355,25 @@
   output      gp_io6;      // _write on mezzanine card, use only as an FPGA output
   output      gp_io7;      // _cs    on mezzanine card, use only as an FPGA output// General Purpose I/Os
 
-// Mezzanine Test Points (JRG: used to be 8 outputs, now inout for BPI access to XCF128 Flash Prom)
-  inout      meztp20;
-  inout      meztp21;
-  inout      meztp22;
-  inout      meztp23;
-  inout      meztp24;
-  inout      meztp25;
-  inout      meztp26;
-  inout      meztp27;
-  wire  [15:0]  led_tmb;     // goes to BPI logic
+// Mezzanine Test Points (JRG: used to be 8 outputs, now inout for BPI access to XCF128 Flash PROM)
+  inout        led_mezD1; // was meztp20
+  inout        led_mezD2; // was meztp21;
+  inout        led_mezD3; // was meztp22;
+  inout        led_mezD4; // was meztp23;
+  inout        led_mezD5; // was meztp24;
+  inout        led_mezD6; // was meztp25;
+  inout        led_mezD7; // was meztp26;
+  inout        led_mezD8; // was meztp27;
+  wire  [15:0] led_tmb;                                  // goes to BPI logic
+  assign led_tmb[15:0] = {mez_led[7:0],led_fp_tmb[7:0]}; // goes to BPI logic
 //  wire  [15:0]  led_tmb_out; // comes from BPI logic  { meztp(8),led_fp(8) }
-   assign led_tmb[15:0] = {mez_led[7:0],led_fp_tmb[7:0]};  // send this to BPI logic
-   
 
 // Deprecated
   wire tmb_clock0d = !alct_rxclockd;  // Replaced by LHCLK_P|N
 
 // Switches & LEDS
   input  [8:7]  set_sw;
-  output  [9:1]  testled;
+  output  [9:1]  mez_tp;
   input      reset;
 // JRG, orig:  output  [7:0]  led_fp;
   inout  [7:0]  led_fp;
@@ -416,34 +416,43 @@
   input      f_fok;
 
 // BPI FLASH PROM
-  output      fcs;
-        wire [22:0]   bpi_ad_out;
-        wire     bpi_active, bpi_dev, bpi_rst, bpi_dsbl, bpi_enbl, bpi_we, bpi_dtack, bpi_rd_stat, bpi_re;
-        wire     [3:0]   flash_ctrl;
-        assign fcs = flash_ctrl[3];
+  output       bpi_cs;
+  wire   [3:0] flash_ctrl;
+  assign bpi_cs = flash_ctrl[3];
+  
+  wire   [22:0] bpi_ad_out;  // "BPI Flash PROM Address": coming from vme, going to sequencer then sequencer connects it to dmb_tx if bpi_active
+  wire          bpi_active;  // "BPI Active set to 1 when data lines are for BPI communications": coming from vme, going to sequencer and to outside trough mez_tp[3]
+  wire          bpi_dev;     // BPI Device Selected: going to outside through mez_tp[4]
+  wire          bpi_rst;     // BPI Reset: going to outside through mez_tp[5]
+  wire          bpi_dsbl;    // BPI Disable: going to outside through mez_tp[6]
+  wire          bpi_enbl;    // BPI Enable: going to outside through mez_tp[7]
+  wire          bpi_we;      // BPI Write Enable: going to outside through mez_tp[8]
+  wire          bpi_dtack;   // BPI Data Acknowledge: coming from vme, going to outside through mez_tp[9]
+  wire          bpi_rd_stat; // "Read BPI interface status register command received": going to outside through mez_tp[1]
+  wire          bpi_re;      // "BPI Read-back FIFO read enable": currently not connected (connect to mez_tp[2]?)
 
 //-------------------------------------------------------------------------------------------------------------------
 // Display definitions in synth log
 //-------------------------------------------------------------------------------------------------------------------
 // Display
-  `ifdef FIRMWARE_TYPE    initial  $display ("FIRMWARE_TYPE %H", `FIRMWARE_TYPE);  `endif
-  `ifdef VERSION        initial  $display ("VERSION       %H", `VERSION      );  `endif
-  `ifdef MONTHDAY        initial  $display ("MONTHDAY      %H", `MONTHDAY     );  `endif
-  `ifdef YEAR         initial  $display ("YEAR          %H", `YEAR         );  `endif
-  `ifdef FPGAID         initial  $display ("FPGAID        %H", `FPGAID       );  `endif
-  `ifdef ISE_VERSION      initial  $display ("ISE_VERSION   %H", `ISE_VERSION  );  `endif
-  `ifdef MEZCARD        initial  $display ("MEZCARD       %H", `MEZCARD      );  `endif
+  `ifdef FIRMWARE_TYPE  initial $display ("FIRMWARE_TYPE %H", `FIRMWARE_TYPE);  `endif
+  `ifdef VERSION        initial $display ("VERSION       %H", `VERSION      );  `endif
+  `ifdef MONTHDAY       initial $display ("MONTHDAY      %H", `MONTHDAY     );  `endif
+  `ifdef YEAR           initial $display ("YEAR          %H", `YEAR         );  `endif
+  `ifdef FPGAID         initial $display ("FPGAID        %H", `FPGAID       );  `endif
+  `ifdef ISE_VERSION    initial $display ("ISE_VERSION   %H", `ISE_VERSION  );  `endif
+  `ifdef MEZCARD        initial $display ("MEZCARD       %H", `MEZCARD      );  `endif
   `ifdef VIRTEX6        initial $display ("VIRTEX6       %H", `VIRTEX6      );  `endif
 
-  `ifdef AUTO_VME       initial  $display ("AUTO_VME      %H", `AUTO_VME     );  `endif
-  `ifdef AUTO_JTAG      initial  $display ("AUTO_JTAG     %H", `AUTO_JTAG    );  `endif
-  `ifdef AUTO_PHASER      initial  $display ("AUTO_PHASER   %H", `AUTO_PHASER  );  `endif
+  `ifdef AUTO_VME       initial $display ("AUTO_VME      %H", `AUTO_VME     );  `endif
+  `ifdef AUTO_JTAG      initial $display ("AUTO_JTAG     %H", `AUTO_JTAG    );  `endif
+  `ifdef AUTO_PHASER    initial $display ("AUTO_PHASER   %H", `AUTO_PHASER  );  `endif
 
-  `ifdef ALCT_MUONIC      initial  $display ("ALCT_MUONIC   %H", `ALCT_MUONIC  );  `endif
-  `ifdef CFEB_MUONIC      initial  $display ("CFEB_MUONIC   %H", `CFEB_MUONIC  );  `endif
+  `ifdef ALCT_MUONIC    initial $display ("ALCT_MUONIC   %H", `ALCT_MUONIC  );  `endif
+  `ifdef CFEB_MUONIC    initial $display ("CFEB_MUONIC   %H", `CFEB_MUONIC  );  `endif
 
-  `ifdef CSC_TYPE_C      initial  $display ("CSC_TYPE_C    %H", `CSC_TYPE_C   );  `endif      
-  `ifdef CSC_TYPE_D      initial  $display ("CSC_TYPE_D    %H", `CSC_TYPE_D   );  `endif      
+  `ifdef CSC_TYPE_C     initial $display ("CSC_TYPE_C    %H", `CSC_TYPE_C   );  `endif      
+  `ifdef CSC_TYPE_D     initial $display ("CSC_TYPE_D    %H", `CSC_TYPE_D   );  `endif      
 
 //-------------------------------------------------------------------------------------------------------------------
 // Clock DCM Instantiation
@@ -1369,9 +1378,10 @@
   .hs_layer_or    (hs_layer_or[MXLY-1:0])        // Out  Layer ORs
   );
 
-//-------------------------------------------------------------------------------------------------------------------
-//  Sequencer Instantiation
-//-------------------------------------------------------------------------------------------------------------------
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//  Begin: Sequencer Signals
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//
   wire  [MXCFEBB-1:0]  cfeb_adr;
   wire  [MXTBIN-1:0]  cfeb_tbin;
   wire  [7:0]      cfeb_rawhits;
@@ -1459,7 +1469,7 @@
   wire  [3:0]      tmb_match_pri;
   wire  [MXCFEB-1:0]  tmb_aff_list;      // Active CFEBs for CLCT used in TMB match
 
-// Buffer Arrays
+// Sequencer Buffer Arrays
   wire [MXFMODE-1:0]    fifo_mode;
 
   wire [MXTBIN-1:0]    fifo_tbins_cfeb;    // Number FIFO time bins to read out
@@ -1483,7 +1493,7 @@
   wire [MXBADR-1+1:0]    buf_fence_cnt_peak;    // Peak number of fences in fence RAM
   wire [7:0]        buf_display;      // Buffer fraction in use display
 
-// RPC Sequencer Readout Control
+// Sequencer RPC Sequencer Readout Control
   wire  [MXRPC-1:0]    rpc_exists;        // RPC Readout list
   wire  [MXRPC-1:0]   rd_list_rpc;      // List of RPCs to read out
   wire  [MXRPCB-1+1:0]  rd_nrpcs;        // Number of RPCs in rpc_list (0 or 1-to-2 depending on CSC type)
@@ -1497,7 +1507,7 @@
   wire  [MXTBIN-1:0]  rpc_tbinbxn;      // FIFO dump RPC tbin or bxn for DMB
   wire  [7:0]      rpc_rawhits;      // FIFO dump RPC pad hits, 8 of 16 per cycle
 
-// Scope
+// Sequencer Scope
   wire  [2:0]      scp_rpc0_bxn;      // RPC0 bunch crossing number
   wire  [2:0]      scp_rpc1_bxn;      // RPC1 bunch crossing number
   wire  [3:0]      scp_rpc0_nhits;      // RPC0 number of pads hit
@@ -1509,19 +1519,19 @@
   wire  [8:0]      scp_radr;        // Extended to 512 addresses 7/23/2007
   wire  [15:0]      scp_rdata;
 
-// Miniscope
+// Sequencer Miniscope
   wire  [RAM_WIDTH*2-1:0]  mini_rdata;      // FIFO dump miniscope
   wire  [RAM_WIDTH*2-1:0]  fifo_wdata_mini;  // FIFO RAM write data
   wire  [RAM_ADRB-1:0]    rd_mini_offset;    // RAM address rd_fifo_adr offset for miniscope read out
   wire  [RAM_ADRB-1:0]    wr_mini_offset;    // RAM address offset for miniscope write
 
-// Blockedbits
+// Sequencer Blockedbits
   wire  [MXCFEB-1:0]  rd_list_bcb;      // List of CFEBs to read out
   wire  [MXCFEBB-1:0]  rd_ncfebs_bcb;      // Number of CFEBs in bcb_list (0 to 5)
   wire  [11:0]      bcb_blkbits;      // CFEB blocked bits frame data
   wire  [MXCFEBB-1:0]  bcb_cfeb_adr;      // CFEB ID  
 
-// Header Counters
+// Sequencer Header Counters
   wire  [MXCNTVME-1:0]  pretrig_counter;    // Pre-trigger counter
   wire  [MXCNTVME-1:0]  clct_counter;      // CLCT counter
   wire  [MXCNTVME-1:0]  trig_counter;      // TMB trigger counter
@@ -1530,42 +1540,48 @@
   wire  [MXL1ARX-1:0]  readout_counter;    // Readout counter
   wire  [MXORBIT-1:0]  orbit_counter;      // Orbit counter
 
-// Revcode
+// Sequencer Revcode
   wire  [14:0]      revcode;
 
-// Parity errors
+// Sequencer Parity errors
   wire  [MXCFEB-1:0]  perr_cfeb;
   wire  [MXCFEB-1:0]  perr_cfeb_ff;
   wire  [48:0]      perr_ram_ff;      // Mapped bad parity RAMs, 6x7=42 cfebs + 5 rpcs + 2 miniscope
 
-// VME debug register latches
+// Sequencer VME debug register latches
   wire  [MXBADR-1:0]  deb_wr_buf_adr;      // Buffer write address at last pretrig
   wire  [MXBADR-1:0]  deb_buf_push_adr;    // Queue push address at last push
   wire  [MXBADR-1:0]  deb_buf_pop_adr;    // Queue pop  address at last pop
   wire  [MXBDATA-1:0]  deb_buf_push_data;    // Queue push data at last push
   wire  [MXBDATA-1:0]  deb_buf_pop_data;    // Queue pop  data at last pop
+// -----------------------------------------------------------------------------
+// End: Sequencer Module
+// -----------------------------------------------------------------------------
 
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//  Begin: Sequencer Module
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   sequencer usequencer (
-// CCB
-  .clock      (clock),        // In  40MHz TMB main clock
-  .global_reset    (global_reset),        // In  Global reset
-  .clock_lock_lost_err  (clock_lock_lost_err),      // In  40MHz main clock lost lock FF
-  .ccb_l1accept    (ccb_l1accept),        // In  Level 1 Accept
-  .ccb_evcntres    (ccb_evcntres),        // In  Event counter (L1A) reset command
-  .ttc_bx0    (ttc_bx0),        // In  Bunch crossing 0 flag
-  .ttc_resync    (ttc_resync),        // In  TTC resync
-  .ttc_bxreset    (ttc_bxreset),        // In  Reset bxn
-  .ttc_orbit_reset  (ttc_orbit_reset),      // In  Reset orbit counter
-  .fmm_trig_stop    (fmm_trig_stop),      // In  Stop clct trigger sequencer
-  .sync_err    (sync_err),        // In  Sync error OR of enabled error types
-  .clct_bx0_sync_err  (clct_bx0_sync_err),      // Out  TMB  clock pulse count err bxn!=0+offset at ttc_bx0 arrival
+// Sequencer CCB Ports
+  .clock               (clock),               // In  40MHz TMB main clock
+  .global_reset        (global_reset),        // In  Global reset
+  .clock_lock_lost_err (clock_lock_lost_err), // In  40MHz main clock lost lock FF
+  .ccb_l1accept        (ccb_l1accept),        // In  Level 1 Accept
+  .ccb_evcntres        (ccb_evcntres),        // In  Event counter (L1A) reset command
+  .ttc_bx0             (ttc_bx0),             // In  Bunch crossing 0 flag
+  .ttc_resync          (ttc_resync),          // In  TTC resync
+  .ttc_bxreset         (ttc_bxreset),         // In  Reset bxn
+  .ttc_orbit_reset     (ttc_orbit_reset),     // In  Reset orbit counter
+  .fmm_trig_stop       (fmm_trig_stop),       // In  Stop clct trigger sequencer
+  .sync_err            (sync_err),            // In  Sync error OR of enabled error types
+  .clct_bx0_sync_err   (clct_bx0_sync_err),   // Out TMB  clock pulse count err bxn!=0+offset at ttc_bx0 arrival
 
-// ALCT
+// Sequencer ALCT Ports
   .alct_active_feb  (alct_active_feb),      // In  ALCT Pattern trigger
   .alct0_valid    (alct0_valid),        // In  ALCT has valid LCT
   .alct1_valid    (alct1_valid),        // In  ALCT has valid LCT
 
-// External Triggers
+// Sequencer External Triggers
   .alct_adb_pulse_sync  (alct_adb_pulse_sync),      // In  ADB Test pulse trigger
   .dmb_ext_trig    (dmb_ext_trig),        // In  DMB Calibration trigger
   .clct_ext_trig    (clct_ext_trig),      // In  CLCT External trigger from CCB
@@ -1573,7 +1589,7 @@
   .vme_ext_trig    (vme_ext_trig),        // In  External trigger from VME
   .ext_trig_inject  (ext_trig_inject),      // In  Changes clct_ext_trig to fire pattern injector
 
-// External Trigger Enables
+// Sequencer External Trigger Enables
   .clct_pat_trig_en  (clct_pat_trig_en),      // In  Allow CLCT Pattern pre-triggers
   .alct_pat_trig_en  (alct_pat_trig_en),      // In  Allow ALCT Pattern pre-trigger
   .alct_match_trig_en  (alct_match_trig_en),      // In  Allow CLCT*ALCT Pattern pre-trigger
@@ -1594,7 +1610,7 @@
   .sync_err_stops_pretrig  (sync_err_stops_pretrig),    // In  Sync error stops CLCT pre-triggers
   .sync_err_stops_readout  (sync_err_stops_readout),    // In  Sync error stops L1A readouts
 
-// External Trigger Delays
+// Sequencer External Trigger Delays
   .alct_pre_trig_dly  (alct_pre_trig_dly[MXEXTDLY-1:0]),  // In  ALCT pre      trigger delay
   .alct_pat_trig_dly  (alct_pat_trig_dly[MXEXTDLY-1:0]),  // In  ALCT pattern  trigger delay
   .adb_ext_trig_dly  (adb_ext_trig_dly[MXEXTDLY-1:0]),  // In  ADB  external trigger delay
@@ -1602,7 +1618,7 @@
   .clct_ext_trig_dly  (clct_ext_trig_dly[MXEXTDLY-1:0]),  // In  CLCT external trigger delay
   .alct_ext_trig_dly  (alct_ext_trig_dly[MXEXTDLY-1:0]),  // In  ALCT external trigger delay
 
-// CLCT/RPC/RAT Pattern Injector
+// Sequencer CLCT/RPC/RAT Pattern Injector
   .inj_trig_vme    (inj_trig_vme),        // In  Start pattern injector
   .injector_mask_cfeb  (injector_mask_cfeb[MXCFEB-1:0]),  // In  Enable CFEB(n) for injector trigger
   .injector_mask_rat  (injector_mask_rat),      // In  Enable RAT for injector trigger
@@ -1612,13 +1628,13 @@
   .injector_go_rat  (injector_go_rat),      // Out  Start RAT     pattern injector
   .injector_go_rpc  (injector_go_rpc),      // Out  Start RPC     pattern injector
 
-// Status from CFEBs
+// Sequencer Status from CFEBs
   .triad_skip    (triad_skip[MXCFEB-1:0]),    // In  Triads skipped
   .triad_tp    (triad_tp[MXCFEB-1:0]),      // In  Triad test point at raw hits RAM input
   .cfeb_badbits_found  (cfeb_badbits_found[MXCFEB-1:0]),  // In  CFEB[n] has at least 1 bad bit
   .cfeb_badbits_blocked  (cfeb_badbits_blocked),      // In  A CFEB had bad bits that were blocked
 
-// Pattern Finder PreTrigger Ports
+// Sequencer Pattern Finder PreTrigger Ports
   .cfeb_hit    (cfeb_hit[MXCFEB-1:0]),      // In  This CFEB has a pattern over pre-trigger threshold
   .cfeb_active    (cfeb_active[MXCFEB-1:0]),    // In  CFEBs marked for DMB readout
 
@@ -1626,7 +1642,7 @@
   .cfeb_layer_or    (cfeb_layer_or[MXLY-1:0]),    // In  OR of hstrips on each layer
   .cfeb_nlayers_hit  (cfeb_nlayers_hit[MXHITB-1:0]),    // In  Number of CSC layers hit
 
-// Pattern Finder CLCT results
+// Sequencer Pattern Finder CLCT results
   .hs_hit_1st    (hs_hit_1st[MXHITB-1:0]),    // In  1st CLCT pattern hits
   .hs_pid_1st    (hs_pid_1st[MXPIDB-1:0]),    // In  1st CLCT pattern ID
   .hs_key_1st    (hs_key_1st[MXKEYBX-1:0]),    // In  1st CLCT key 1/2-strip
@@ -1640,24 +1656,24 @@
   .hs_nlayers_hit    (hs_nlayers_hit[MXHITB-1:0]),    // In  Number of layers hit
   .hs_layer_or    (hs_layer_or[MXLY-1:0]),    // In  Layer ORs
 
-// DMB Ports
-  .alct_dmb    (alct_dmb[18:0]),      // In  ALCT to DMB
-  .dmb_tx_reserved  (dmb_tx_reserved[2:0]),      // In  DMB backplane reserved
-  .dmb_tx      (dmb_tx[MXDMB-1:0]),      // Out  DAQMB backplane connector
-        .bpi_ad_out   (bpi_ad_out),  // in [22:0]
-        .bpi_active   (bpi_active),  // in
+// Sequencer DMB Ports
+  .alct_dmb        (alct_dmb[18:0]),       // In  ALCT to DMB
+  .dmb_tx_reserved (dmb_tx_reserved[2:0]), // In  DMB backplane reserved
+  .dmb_tx          (dmb_tx[MXDMB-1:0]),    // Out if "BPI Active" then to "BPI Flash PROM Address connector", else to "DMB backplane connector": going to outside
+  .bpi_ad_out      (bpi_ad_out),           // In  [22:0] BPI Flash PROM Address: coming from vme
+  .bpi_active      (bpi_active),           // In  BPI Active: coming from vme
 
-// ALCT Status
+// Sequencer ALCT Status
   .alct_cfg_done    (alct_cfg_done),      // In  ALCT FPGA configuration done
 
-// CSC Orientation Ports
+// Sequencer CSC Orientation Ports
   .csc_me1ab    (csc_me1ab),        // In  1=ME1A or ME1B CSC type
   .stagger_hs_csc    (stagger_hs_csc),      // In  1=Staggered CSC, 0=non-staggered
   .reverse_hs_csc    (reverse_hs_csc),      // In  1=Reverse staggered CSC, non-me1
   .reverse_hs_me1a  (reverse_hs_me1a),      // In  1=reverse me1a hstrips prior to pattern sorting
   .reverse_hs_me1b  (reverse_hs_me1b),      // In  1=reverse me1b hstrips prior to pattern sorting
 
-// CLCT VME Configuration Ports
+// Sequencer CLCT VME Configuration Ports
   .clct_blanking    (clct_blanking),      // In  clct_blanking=1 clears clcts with 0 hits
   .bxn_offset_pretrig  (bxn_offset_pretrig[MXBXN-1:0]),  // In  BXN offset at reset, for pretrig bxn
   .bxn_offset_l1a    (bxn_offset_l1a[MXBXN-1:0]),    // In  BXN offset at reset, for L1A bxn
@@ -1729,21 +1745,21 @@
   .bxn_clct_vme    (bxn_clct_vme[MXBXN-1:0]),    // Out  CLCT BXN at pre-trigger
   .bxn_l1a_vme    (bxn_l1a_vme[MXBXN-1:0]),    // Out  CLCT BXN at L1A
 
-// RPC VME Configuration Ports
+// Sequencer RPC VME Configuration Ports
   .rpc_exists    (rpc_exists[MXRPC-1:0]),    // In  RPC Readout list
   .rpc_read_enable  (rpc_read_enable),      // In  1 Enable RPC Readout
   .fifo_tbins_rpc    (fifo_tbins_rpc[MXTBIN-1:0]),    // In  Number RPC FIFO time bins to read out
   .fifo_pretrig_rpc  (fifo_pretrig_rpc[MXTBIN-1:0]),    // In  Number RPC FIFO time bins before pretrigger
 
-// Status signals to CCB front panel
+// Sequencer Status signals to CCB front panel
   .clct_status    (clct_status[8:0]),      // Out  Array of stat_ signals for CCB
 
-// Scintillator Veto
+// Sequencer Scintillator Veto
   .scint_veto_clr    (scint_veto_clr),      // In  Clear scintillator veto ff
   .scint_veto    (scint_veto),        // Out  Scintillator veto for FAST Sites
   .scint_veto_vme    (scint_veto_vme),      // Out  Scintillator veto for FAST Sites, VME copy
 
-// Front Panel CLCT LEDs:
+// Sequencer Front Panel CLCT LEDs:
   .led_lct    (led_lct),        // Out  LCT    Blue  LCT match
   .led_alct    (led_alct),        // Out  ALCT  Green  ALCT valid pattern
   .led_clct    (led_clct),        // Out  CLCT  Green  CLCT valid pattern
@@ -1752,10 +1768,10 @@
   .led_nomatch    (led_nomatch),        // Out  NMAT  Amber  ALCT or CLCT but no match
   .led_nol1a_flush  (led_nol1a_flush),      // Out  NL1A  Red    L1A did not arrive in window
 
-// On Board LEDs
+// Sequencer On Board LEDs
   .led_bd      (led_bd[7:0]),        // Out  On-board LEDs
 
-// Buffer Write Control
+// Sequencer Buffer Write Control
   .buf_reset    (buf_reset),        // Out  Free all buffer space
   .buf_push    (buf_push),        // Out  Allocate write buffer
   .buf_push_adr    (buf_push_adr[MXBADR-1:0]),    // Out  Address of write buffer to allocate  
@@ -1764,15 +1780,15 @@
   .wr_buf_ready    (wr_buf_ready),        // In  Write buffer is ready
   .wr_buf_adr    (wr_buf_adr[MXBADR-1:0]),    // In  Current address of header write buffer
 
-// Fence buffer adr and data at head of queue
+// Sequencer Fence buffer adr and data at head of queue
   .buf_queue_adr    (buf_queue_adr[MXBADR-1:0]),    // In  Buffer address of fence queued for readout
   .buf_queue_data    (buf_queue_data[MXBDATA-1:0]),    // In  Data associated with queue adr
 
-// Buffer Read Control
+// Sequencer Buffer Read Control
   .buf_pop    (buf_pop),        // Out  Specified buffer is to be released
   .buf_pop_adr    (buf_pop_adr[MXBADR-1:0]),    // Out  Address of read buffer to release
 
-// Buffer Status
+// Sequencer Buffer Status
   .buf_q_full    (buf_q_full),        // In  All raw hits ram in use, ram writing must stop
   .buf_q_empty    (buf_q_empty),        // In  No fences remain on buffer stack
   .buf_q_ovf_err    (buf_q_ovf_err),      // In  Tried to push when stack full
@@ -1785,20 +1801,20 @@
   .buf_fence_cnt_peak  (buf_fence_cnt_peak[MXBADR-1+1:0]),  // In  Peak number of fences in fence RAM
   .buf_display    (buf_display[7:0]),      // In  Buffer fraction in use display
 
-// CFEB Sequencer Readout Control
+// Sequencer CFEB Sequencer Readout Control
   .rd_start_cfeb    (rd_start_cfeb),      // Out  Initiates a FIFO readout
   .rd_abort_cfeb    (rd_abort_cfeb),      // Out  Abort FIFO dump
   .rd_list_cfeb    (rd_list_cfeb[MXCFEB-1:0]),    // Out  List of CFEBs to read out
   .rd_ncfebs    (rd_ncfebs[MXCFEBB-1:0]),    // Out  Number of CFEBs in feb_list (4 or 5 depending on CSC type)
   .rd_fifo_adr    (rd_fifo_adr[RAM_ADRB-1:0]),    // Out  RAM address at pre-trig, must be valid 1bx before rd_start
 
-// CFEB Blockedbits Readout Control
+// Sequencer CFEB Blockedbits Readout Control
   .rd_start_bcb    (rd_start_bcb),        // Out  Start readout sequence
   .rd_abort_bcb    (rd_abort_bcb),        // Out  Cancel readout
   .rd_list_bcb    (rd_list_bcb[MXCFEB-1:0]),    // Out  List of CFEBs to read out
   .rd_ncfebs_bcb    (rd_ncfebs_bcb[MXCFEBB-1:0]),    // Out  Number of CFEBs in bcb_list (0 to 5)
 
-// RPC Sequencer Readout Control
+// Sequencer RPC Sequencer Readout Control
   .rd_start_rpc    (rd_start_rpc),        // Out  Start readout sequence
   .rd_abort_rpc    (rd_abort_rpc),        // Out  Cancel readout
   .rd_list_rpc    (rd_list_rpc[MXRPC-1:0]),    // Out  List of RPCs to read out
@@ -1806,7 +1822,7 @@
   .rd_rpc_offset    (rd_rpc_offset[RAM_ADRB-1:0]),    // Out  RAM address rd_fifo_adr offset for rpc read out
   .clct_pretrig    (clct_pretrig),        // Out  Pre-trigger marker at (clct_sm==pretrig)
 
-// CFEB Sequencer Frame
+// Sequencer CFEB Sequencer Frame
   .cfeb_first_frame  (cfeb_first_frame),      // In  First frame valid 2bx after rd_start
   .cfeb_last_frame  (cfeb_last_frame),      // In  Last frame valid 1bx after busy goes down
   .cfeb_adr    (cfeb_adr[MXCFEBB-1:0]),    // In  FIFO dump CFEB ID
@@ -1814,7 +1830,7 @@
   .cfeb_rawhits    (cfeb_rawhits[7:0]),      // In  Layer data from FIFO
   .cfeb_fifo_busy    (cfeb_fifo_busy),      // In  Readout busy sending data to sequencer, goes down 1bx
 
-// CFEB Blockedbits Frame
+// Sequencer CFEB Blockedbits Frame
   .bcb_read_enable  (bcb_read_enable),      // In  Enable blocked bits in readout
   .bcb_first_frame  (bcb_first_frame),      // In  First frame valid 2bx after rd_start
   .bcb_last_frame    (bcb_last_frame),      // In  Last frame valid 1bx after busy goes down
@@ -1822,7 +1838,7 @@
   .bcb_cfeb_adr    (bcb_cfeb_adr[MXCFEBB-1:0]),    // In  CFEB ID  
   .bcb_fifo_busy    (bcb_fifo_busy),      // In  Readout busy sending data to sequencer, goes down 1bx early
 
-// RPC Sequencer Frame
+// Sequencer RPC Sequencer Frame
   .rpc_first_frame  (rpc_first_frame),      // In  First frame valid 2bx after rd_start
   .rpc_last_frame    (rpc_last_frame),      // In  Last frame valid 1bx after busy goes down
   .rpc_adr    (rpc_adr[MXRPCB-1:0]),      // In  FIFO dump RPC ID
@@ -1830,7 +1846,7 @@
   .rpc_rawhits    (rpc_rawhits[7:0]),      // In  FIFO dump RPC pad hits, 8 of 16 per cycle
   .rpc_fifo_busy    (rpc_fifo_busy),      // In  Readout busy sending data to sequencer, goes down 1bx
 
-// CLCT Raw Hits RAM
+// Sequencer CLCT Raw Hits RAM
   .dmb_wr      (dmb_wr),        // In  Raw hits RAM VME write enable
   .dmb_reset    (dmb_reset),        // In  Raw hits RAM VME address reset
   .dmb_adr    (dmb_adr[MXRAMADR-1:0]),    // In  Raw hits RAM VME read/write address
@@ -1840,7 +1856,7 @@
   .dmb_busy    (dmb_busy),        // Out  Raw hits RAM VME busy writing DMB data
   .read_sm_xdmb    (read_sm_xdmb),        // Out  TMB sequencer starting a readout
 
-// TMB-Sequencer Pipelines
+// Sequencer TMB-Sequencer Pipelines
   .wr_adr_xtmb    (wr_adr_xtmb[MXBADR-1:0]),    // Out  Buffer write address after drift time
   .wr_adr_rtmb    (wr_adr_rtmb[MXBADR-1:0]),    // In  Buffer write address at TMB matching time
   .wr_adr_xmpc    (wr_adr_xmpc[MXBADR-1:0]),    // In  Buffer write address at MPC xmit to sequencer
@@ -1856,7 +1872,7 @@
   .wr_avail_xmpc    (wr_avail_xmpc),      // In  Buffer available at MPC xmit to sequencer
   .wr_avail_rmpc    (wr_avail_rmpc),      // In  Buffer available at MPC received
 
-// TMB LCT Match results
+// Sequencer TMB LCT Match results
   .clct0_xtmb    (clct0_xtmb[MXCLCT-1:0]),    // Out  First  CLCT
   .clct1_xtmb    (clct1_xtmb[MXCLCT-1:0]),    // Out  Second CLCT
   .clctc_xtmb    (clctc_xtmb[MXCLCTC-1:0]),    // Out  Common to CLCT0/1 to TMB
@@ -1897,7 +1913,7 @@
   .tmb_alctb    (tmb_alctb[4:0]),      // In  ALCT bxn latched at trigger
   .tmb_alcte    (tmb_alcte[1:0]),      // In  ALCT ecc error syndrome latched at trigger
 
-// MPC Status
+// Sequencer MPC Status
   .mpc_frame_ff    (mpc_frame_ff),        // In  MPC frame latch strobe
   .mpc0_frame0_ff    (mpc0_frame0_ff[MXFRAME-1:0]),    // In  MPC best muon 1st frame
   .mpc0_frame1_ff    (mpc0_frame1_ff[MXFRAME-1:0]),    // In  MPC best buon 2nd frame
@@ -1911,23 +1927,23 @@
   .mpc_accept_ff    (mpc_accept_ff[1:0]),      // In  MPC muon accept response, latched
   .mpc_reserved_ff  (mpc_reserved_ff[1:0]),      // In  MPC reserved
 
-// TMB Status
+// Sequencer TMB Status
   .alct0_vpf_tprt    (alct0_vpf_tprt),      // In  Timing test point, unbuffered real time for internal scope
   .alct1_vpf_tprt    (alct1_vpf_tprt),      // In  Timing test point
   .clct_vpf_tprt    (clct_vpf_tprt),      // In  Timing test point
   .clct_window_tprt  (clct_window_tprt),      // In  Timing test point
 
-// Firmware Version
+// Sequencer Firmware Version
   .revcode    (revcode[14:0]),      // In  Firmware revision code
 
-// RPC/ALCT Scope
+// Sequencer RPC/ALCT Scope
   .scp_rpc0_bxn    (scp_rpc0_bxn[2:0]),      // In  RPC0 bunch crossing number
   .scp_rpc1_bxn    (scp_rpc1_bxn[2:0]),      // In  RPC1 bunch crossing number
   .scp_rpc0_nhits    (scp_rpc0_nhits[3:0]),      // In  RPC0 number of pads hit
   .scp_rpc1_nhits    (scp_rpc1_nhits[3:0]),      // In  RPC1 number of pads hit
   .scp_alct_rx    (scp_alct_rx[55:0]),      // In  ALCT received signals to scope
 
-// Scope
+// Sequencer Scope
   .scp_runstop    (scp_runstop),        // In  1=run 0=stop
   .scp_auto    (scp_auto),        // In  Sequencer readout mode
   .scp_ch_trig_en    (scp_ch_trig_en),      // In  Enable channel triggers
@@ -1943,7 +1959,7 @@
   .scp_trig_done    (scp_trig_done),      // Out  Trigger done, ready for readout 
   .scp_rdata    (scp_rdata[15:0]),      // Out  Recorded channel data
 
-// Miniscope
+// Sequencer Miniscope
   .mini_read_enable  (mini_read_enable),      // In  Enable Miniscope readout
   .mini_fifo_busy    (mini_fifo_busy),      // In  Readout busy sending data to sequencer, goes down 1bx early
   .mini_first_frame  (mini_first_frame),      // In  First frame valid 2bx after rd_start
@@ -1952,12 +1968,12 @@
   .fifo_wdata_mini  (fifo_wdata_mini[RAM_WIDTH*2-1:0]),  // Out  Miniscope FIFO RAM write data
   .wr_mini_offset    (wr_mini_offset[RAM_ADRB-1:0]),    // Out  RAM address offset for miniscope write
 
-// Mini Sequencer Readout Control
+// Sequencer Mini Sequencer Readout Control
   .rd_start_mini    (rd_start_mini),      // Out  Start readout sequence
   .rd_abort_mini    (rd_abort_mini),      // Out  Cancel readout
   .rd_mini_offset    (rd_mini_offset[RAM_ADRB-1:0]),    // Out  RAM address rd_fifo_adr offset for miniscope read out
 
-// Trigger/Readout Counters
+// Sequencer Trigger/Readout Counters
   .cnt_all_reset    (cnt_all_reset),      // In  Trigger/Readout counter reset
   .cnt_stop_on_ovf  (cnt_stop_on_ovf),      // In  Stop all counters if any overflows
   .cnt_non_me1ab_en  (cnt_non_me1ab_en),      // In  Allow clct pretrig counters count non me1ab
@@ -2018,7 +2034,7 @@
   .event_counter64  (event_counter64[MXCNTVME-1:0]),  // Out
   .event_counter65  (event_counter65[MXCNTVME-1:0]),  // Out
 
-// Header Counters
+// Sequencer Header Counters
   .hdr_clear_on_resync  (hdr_clear_on_resync),      // In  Clear header counters on ttc_resync
   .pretrig_counter  (pretrig_counter[MXCNTVME-1:0]),  // Out  Pre-trigger counter
   .clct_counter    (clct_counter[MXCNTVME-1:0]),    // Out  CLCT counter
@@ -2028,23 +2044,27 @@
   .readout_counter  (readout_counter[MXL1ARX-1:0]),    // Out  Readout counter
   .orbit_counter    (orbit_counter[MXORBIT-1:0]),    // Out  Orbit counter
 
-// Parity Errors
+// Sequencer Parity Errors
   .perr_pulse    (perr_pulse),        // In  Parity error pulse for counting
   .perr_cfeb_ff    (perr_cfeb_ff[MXCFEB-1:0]),    // In  CFEB RAM parity error, latched
   .perr_rpc_ff    (perr_rpc_ff),        // In  RPC  RAM parity error, latched
   .perr_mini_ff    (perr_mini_ff),        // In  Mini RAM parity error, latched
   .perr_ff    (perr_ff),        // In  Parity error summary,  latched
 
-// VME debug register latches
+// Sequencer VME debug register latches
   .deb_wr_buf_adr    (deb_wr_buf_adr[MXBADR-1:0]),    // Out  Buffer write address at last pretrig
   .deb_buf_push_adr  (deb_buf_push_adr[MXBADR-1:0]),    // Out  Queue push address at last push
   .deb_buf_pop_adr  (deb_buf_pop_adr[MXBADR-1:0]),    // Out  Queue pop  address at last pop
   .deb_buf_push_data  (deb_buf_push_data[MXBDATA-1:0]),  // Out  Queue push data at last push
   .deb_buf_pop_data  (deb_buf_pop_data[MXBDATA-1:0]),  // Out  Queue pop  data at last pop
 
-// Sump
+// Sequencer Sump
   .sequencer_sump    (sequencer_sump)      // Out  Unused signals
   );
+// -----------------------------------------------------------------------------
+// End: Sequencer Module
+// -----------------------------------------------------------------------------
+
 
 //-------------------------------------------------------------------------------------------------------------------
 //  RPC Instantiation
@@ -2637,23 +2657,23 @@
      end // always @ (posedge clock or posedge ttc_resync)
 
 
-     assign mez_busy = (raw_mez_busy | alct_startup_msec | alct_wait_dll | alct_startup_done | alct_wait_vme | alct_wait_cfg);
+     assign mez_tp10_busy = (raw_mez_busy | alct_startup_msec | alct_wait_dll | alct_startup_done | alct_wait_vme | alct_wait_cfg);
 
-// JRG: if set_sw8 & 7 are both low, put BPI debug signals on the "testled" test points
-    assign testled[7] =   set_sw[8] ? alct_txd_posneg : (!set_sw[7] ? bpi_enbl : link_good[6]);
-    assign testled[6] = (!set_sw[7] ? bpi_dsbl        :                          link_good[5]);
-    assign testled[5] =   set_sw[8] ? alct_rxd_posneg : (!set_sw[7] ? bpi_rst  : link_good[4]);
-    assign testled[4] = (!set_sw[7] ? bpi_dev         :                          link_good[3]);
-//    assign testled[MXCFEB:4] = link_good[MXCFEB-1:3];
+// JRG: if set_sw8 & 7 are both low, put BPI debug signals on the mezanine test points
+    assign mez_tp[9] = (!set_sw[7] ? bpi_dtack       : (|link_bad) || ((set_sw == 2'b01) && sump));
+    assign mez_tp[8] = (!set_sw[7] ? bpi_we          : (&link_good || ((set_sw == 2'b01) && alct_wait_cfg)));
+    assign mez_tp[7] =   set_sw[8] ? alct_txd_posneg : (!set_sw[7] ? bpi_enbl : link_good[6]);
+    assign mez_tp[6] = (!set_sw[7] ? bpi_dsbl        :                          link_good[5]);
+    assign mez_tp[5] =   set_sw[8] ? alct_rxd_posneg : (!set_sw[7] ? bpi_rst  : link_good[4]);
+    assign mez_tp[4] = (!set_sw[7] ? bpi_dev         :                          link_good[3]);
+//    assign mez_tp[MXCFEB:4] = link_good[MXCFEB-1:3];
 //    reg  [3:1]  testled_r;
-//    assign testled[3] = link_good[2] || ((set_sw == 2'b01) && clock_alct_txd);
-//    assign testled[2] = link_good[1] || ((set_sw == 2'b01) && clock_alct_rxd);
-//    assign testled[1] = link_good[0] || ((set_sw == 2'b01) && clock);
-//    assign testled[3:1] = testled_r[3:1];
-    assign testled[8] = (!set_sw[7] ? bpi_we    : (&link_good || ((set_sw == 2'b01) && alct_wait_cfg)));
-    assign testled[9] = (!set_sw[7] ? bpi_dtack : (|link_bad) || ((set_sw == 2'b01) && sump));
-
-
+//    assign mez_tp[3] = link_good[2] || ((set_sw == 2'b01) && clock_alct_txd);
+//    assign mez_tp[2] = link_good[1] || ((set_sw == 2'b01) && clock_alct_rxd);
+//    assign mez_tp[1] = link_good[0] || ((set_sw == 2'b01) && clock);
+//    assign mez_tp[3:1] = testled_r[3:1];
+  
+  
   ODDR #(
   .DDR_CLK_EDGE ("OPPOSITE_EDGE"),  // "OPPOSITE_EDGE" or "SAME_EDGE" 
   .INIT         (1'b0),      // Initial value of Q: 1'b0 or 1'b1
@@ -2665,7 +2685,7 @@
   .R  (1'b0),      // In  1-bit reset
   .D1  (set_sw[8] ? 1'b1 : (!set_sw[7] ? bpi_active : link_good[2])),  // In  1-bit data input tx on positive edge
   .D2  (set_sw[8] ? 1'b0 : (!set_sw[7] ? bpi_active : link_good[2])),  // In  1-bit data input tx on negative edge
-  .Q  (testled[3]));    // Out  1-bit DDR output
+  .Q  (mez_tp[3]));    // Out  1-bit DDR output
 
 
   ODDR #(
@@ -2682,7 +2702,7 @@
 //  .D2  (set_sw[8] ? 1'b0 : link_good[1]),  // In  1-bit data input tx on negative edge
   .D1  (1'b1),  // In  1-bit data input tx on positive edge
   .D2  (1'b0),  // In  1-bit data input tx on negative edge
-  .Q  (testled[2]));    // Out  1-bit DDR output
+  .Q  (mez_tp[2]));    // Out  1-bit DDR output
 
 
   ODDR #(
@@ -2694,9 +2714,9 @@
   .CE  (1'b1),      // In  1-bit clock enable input
   .S  (1'b0),      // In  1-bit set
   .R  (1'b0),      // In  1-bit reset
-  .D1  (set_sw[8] ? 1'b1 : (!set_sw[7] ? bpi_rd_status : link_good[0])), // In   1-bit data input tx on positive edge
-  .D2  (set_sw[8] ? 1'b0 : (!set_sw[7] ? bpi_rd_status : link_good[0])), // In   1-bit data input tx on negative edge
-  .Q  (testled[1]));    // Out  1-bit DDR output
+  .D1  (set_sw[8] ? 1'b1 : (!set_sw[7] ? bpi_rd_stat : link_good[0])), // In   1-bit data input tx on positive edge
+  .D2  (set_sw[8] ? 1'b0 : (!set_sw[7] ? bpi_rd_stat : link_good[0])), // In   1-bit data input tx on negative edge
+  .Q  (mez_tp[1]));    // Out  1-bit DDR output
 
 
 
@@ -2805,22 +2825,22 @@
    vme uvme
      (
       // Clock
-      .clock      (clock),    // In  TMB 40MHz clock
-      .clock_vme    (clock_vme),    // In  VME 10MHz clock
-      .clock_1mhz    (clock_1mhz),    // In  1MHz BPI_ctrl Timer clock
-      .clock_lock_lost_err  (clock_lock_lost_err),  // In  40MHz main clock lost lock FF
-      .ttc_resync    (ttc_resync),    // In  TTC resync
-      .global_reset    (global_reset),    // In  Global reset
-      .global_reset_en    (global_reset_en),  // Out  Enable global reset on lock_lost.  JG: on by default
+      .clock               (clock),               // In  TMB 40MHz clock
+      .clock_vme           (clock_vme),           // In  VME 10MHz clock
+      .clock_1mhz          (clock_1mhz),          // In  1MHz BPI_ctrl Timer clock
+      .clock_lock_lost_err (clock_lock_lost_err), // In  40MHz main clock lost lock FF
+      .ttc_resync          (ttc_resync),          // In  TTC resync
+      .global_reset        (global_reset),        // In  Global reset
+      .global_reset_en     (global_reset_en),     // Out Enable global reset on lock_lost.  JG: on by default
 
       // Firmware version
-      .cfeb_exists    (cfeb_exists[MXCFEB-1:0]),  // In  CFEBs instantiated in this version
-      .revcode      (revcode[14:0]),  // Out  Firmware revision code
+      .cfeb_exists (cfeb_exists[MXCFEB-1:0]), // In  CFEBs instantiated in this version
+      .revcode     (revcode[14:0]),           // Out Firmware revision code
 
       // ODMB device
-      .bd_sel    (bd_sel),  // Out Board selected
-      .odmb_sel          (odmb_sel),  // In  ODMB mode selected
-      .odmb_data  (odmb_data),  // In  ODMB data
+      .bd_sel    (bd_sel),    // Out Board selected
+      .odmb_sel  (odmb_sel),  // In  ODMB mode selected
+      .odmb_data (odmb_data), // In  ODMB data
 
       // VME Bus Input
       .d_vme     (vme_d[15:0]),   // Bi  VME data D16
@@ -2851,69 +2871,71 @@
       .ready   (vme_reply[6]), // Out Ready: 1=FPGA logic is up, disconnects bootstrap logic hardware
 
       // Loop-Back Control
-      .cfeb_oe      (cfeb_oe),    // Out  1=Enable CFEB LVDS drivers
-      .alct_loop    (alct_loop),    // Out  1=ALCT loopback mode
-      .alct_rxoe    (alct_rxoe),    // Out  1=Enable RAT ALCT LVDS receivers
-      .alct_txoe    (alct_txoe),    // Out  1=Enable RAT ALCT LVDS drivers
-      .rpc_loop      (rpc_loop),    // Out  1=RPC loopback mode no   RAT
-      .rpc_loop_tmb      (rpc_loop_tmb),  // Out  1=RPC loopback mode with RAT
-      .dmb_loop      (dmb_loop),    // Out  1=DMB loopback mode
-      ._dmb_oe      (_dmb_oe),    // Out  0=Enable DMB drivers
-      .gtl_loop      (gtl_loop),            // Out  1=GTL loopback mode
-      ._gtl_oe      (_gtl_oe),            // Out  0=Enable GTL drivers
-      .gtl_loop_lcl      (gtl_loop_lcl),          // Out  copy for ccb.v
+      .cfeb_oe      (cfeb_oe),      // Out 1=Enable CFEB LVDS drivers
+      .alct_loop    (alct_loop),    // Out 1=ALCT loopback mode
+      .alct_rxoe    (alct_rxoe),    // Out 1=Enable RAT ALCT LVDS receivers
+      .alct_txoe    (alct_txoe),    // Out 1=Enable RAT ALCT LVDS drivers
+      .rpc_loop     (rpc_loop),     // Out 1=RPC loopback mode no   RAT
+      .rpc_loop_tmb (rpc_loop_tmb), // Out 1=RPC loopback mode with RAT
+      .dmb_loop     (dmb_loop),     // Out 1=DMB loopback mode
+      ._dmb_oe      (_dmb_oe),      // Out 0=Enable DMB drivers
+      .gtl_loop     (gtl_loop),     // Out 1=GTL loopback mode
+      ._gtl_oe      (_gtl_oe),      // Out 0=Enable GTL drivers
+      .gtl_loop_lcl (gtl_loop_lcl), // Out copy for ccb.v
 
       // User JTAG
-      .tck_usr      (jtag_usr[3]),          // IO  User JTAG tck
-      .tms_usr      (jtag_usr[2]),          // IO  User JTAG tms
-      .tdi_usr      (jtag_usr[1]),          // IO  User JTAG tdi
-      .tdo_usr      (jtag_usr0_tdo),        // In  User JTAG tdo
-      .sel_usr      (sel_usr[3:0]),          // IO  Select JTAG chain: 00=ALCT, 01=Mez FPGA+PROMs, 10=User PROMs, 11=Readback
-      .sel_fpga_chain      (sel_fpga_chain),        // Out  sel_usr[3:0]==4'hC
+      .tck_usr        (jtag_usr[3]),    // IO  User JTAG tck
+      .tms_usr        (jtag_usr[2]),    // IO  User JTAG tms
+      .tdi_usr        (jtag_usr[1]),    // IO  User JTAG tdi
+      .tdo_usr        (jtag_usr0_tdo),  // In  User JTAG tdo
+      .sel_usr        (sel_usr[3:0]),   // IO  Select JTAG chain: 00=ALCT, 01=Mez FPGA+PROMs, 10=User PROMs, 11=Readback
+      .sel_fpga_chain (sel_fpga_chain), // Out sel_usr[3:0]==4'hC
 
       // PROM
-      .prom_led      (prom_led[7:0]),        // Out  Bi  PROM data, shared with 2 PROMs and on-board LEDs
-      .prom0_clk      (prom_ctrl[0]),          // Out  PROM 0 clock
-      .prom0_oe      (prom_ctrl[1]),          // Out  1=Output enable, 0= Reset address
-      ._prom0_ce      (prom_ctrl[2]),          // Out  0=Chip enable
-      .prom1_clk      (prom_ctrl[3]),          // Out  PROM 1 clock
-      .prom1_oe      (prom_ctrl[4]),          // Out  1=Output enable, 0= Reset address
-      ._prom1_ce      (prom_ctrl[5]),          // Out  0=Chip enable
-      .jsm_busy      (jsm_busy),            // Out  State machine busy writing
-      .tck_fpga      (tck_fpga),            // Out  TCK from FPGA JTAG chain
+      .prom_led  (prom_led[7:0]), // Out Bi  PROM data, shared with 2 PROMs and on-board LEDs
+      .prom0_clk (prom_ctrl[0]),  // Out PROM 0 clock
+      .prom0_oe  (prom_ctrl[1]),  // Out 1=Output enable, 0= Reset address
+      ._prom0_ce (prom_ctrl[2]),  // Out 0=Chip enable
+      .prom1_clk (prom_ctrl[3]),  // Out PROM 1 clock
+      .prom1_oe  (prom_ctrl[4]),  // Out 1=Output enable, 0= Reset address
+      ._prom1_ce (prom_ctrl[5]),  // Out 0=Chip enable
+      .jsm_busy  (jsm_busy),      // Out State machine busy writing
+      .tck_fpga  (tck_fpga),      // Out TCK from FPGA JTAG chain
 
-      // BPI FLASH PROM
-      .flash_ctrl (flash_ctrl[3:0]),  // out [3:0] JRG, goes up for I/O match to UCF with FCS,FOE,FWE,FLATCH = fcs,_ccb_tx14,_ccb_tx26,_ccb_tx3
-      .flash_ctrl_dualuse ({alct_status[5],tmb_reserved_in[4],clct_status[3]}),    // in [2:0] JRG, goes down to bpi_interface for MUX with FOE,FWE,FLATCH
-      .bpi_ad_out (bpi_ad_out),  // out [22:0]
-      .bpi_active (bpi_active),  // out
-      .bpi_dev      (bpi_dev),   // out
-      .bpi_rst      (bpi_rst),   // out
-      .bpi_dsbl     (bpi_dsbl),  // out
-      .bpi_enbl     (bpi_enbl),  // out
-      .bpi_we       (bpi_we),    // out
-      .bpi_dtack    (bpi_dtack), // out
-      .bpi_rd_stat  (bpi_rd_stat),  // out
-      .bpi_re       (bpi_re),    // out
+      // VME BPI Flash PROM
+      .flash_ctrl         (flash_ctrl[3:0]),     // out [3:0] JRG, goes up for I/O match to UCF with FCS,FOE,FWE,FLATCH = bpi_cs,_ccb_tx14,_ccb_tx26,_ccb_tx3
+      .flash_ctrl_dualuse ({ alct_status[5],     // in  [2:0] JRG, goes down to bpi_interface for MUX with FOE,FWE,FLATCH
+                             tmb_reserved_in[4], 
+                             clct_status[3]}),   
+      .bpi_ad_out         (bpi_ad_out),          // Out [22:0] BPI Flash PROM Address: going to sequencer
+      .bpi_active         (bpi_active),          // Out BPI Active: going to sequencer and to outside through mez_tp[3]
+      .bpi_dev            (bpi_dev),             // Out BPI Device Selected: going to outside through mez_tp[4]
+      .bpi_rst            (bpi_rst),             // Out BPI Reset: going to outside through mez_tp[5]
+      .bpi_dsbl           (bpi_dsbl),            // Out BPI Disable: going to outside through mez_tp[6]
+      .bpi_enbl           (bpi_enbl),            // Out BPI Enable: going to outside through mez_tp[7]
+      .bpi_we             (bpi_we),              // Out BPI Write Enable: going to outside through mez_tp[8]
+      .bpi_dtack          (bpi_dtack),           // Out BPI Data Acknowledge: going to outside through mez_tp[9]
+      .bpi_rd_stat        (bpi_rd_stat),         // Out "Read BPI interface status register command received": going to outside through mez_tp[1]
+      .bpi_re             (bpi_re),              // Out "BPI Read-back FIFO read enable": currently not connected
 
       // 3D3444
-      .ddd_clock      (ddd_clock),          // Out  ddd clock
-      .ddd_adr_latch      (ddd_adr_latch),        // Out  ddd address latch
-      .ddd_serial_in      (ddd_serial_in),        // Out  ddd serial data
-      .ddd_serial_out      (ddd_serial_out),        // In  ddd serial readback
+      .ddd_clock      (ddd_clock),      // Out  ddd clock
+      .ddd_adr_latch  (ddd_adr_latch),  // Out  ddd address latch
+      .ddd_serial_in  (ddd_serial_in),  // Out  ddd serial data
+      .ddd_serial_out (ddd_serial_out), // In  ddd serial readback
 
       // Clock Single Step
-      .step_alct      (step[0]),            // Out  Single step ALCT clock
-      .step_dmb      (step[1]),            // Out  Single step DMB  clock
-      .step_rpc      (step[2]),            // Out  Single step RPC  clock
-      .step_cfeb      (step[3]),            // Out  Single step CFEB clock
-      .step_run      (step[4]),            // Out  1= Single step clocks, 0 = 40MHz clocks
-      .cfeb_clock_en      (cfeb_clock_en[4:0]),      // Out  1=Enable CFEB LVDS clock drivers
-      .alct_clock_en      (alct_clock_en),        // Out  1=Enable ALCT LVDS clock driver
+      .step_alct     (step[0]),            // Out Single step ALCT clock
+      .step_dmb      (step[1]),            // Out Single step DMB  clock
+      .step_rpc      (step[2]),            // Out Single step RPC  clock
+      .step_cfeb     (step[3]),            // Out Single step CFEB clock
+      .step_run      (step[4]),            // Out 1= Single step clocks, 0 = 40MHz clocks
+      .cfeb_clock_en (cfeb_clock_en[4:0]), // Out 1=Enable CFEB LVDS clock drivers
+      .alct_clock_en (alct_clock_en),      // Out 1=Enable ALCT LVDS clock driver
 
       // Hard Resets
-      ._hard_reset_alct_fpga    (_hard_reset_alct_fpga),    // Out  Hard Reset ALCT
-      ._hard_reset_tmb_fpga    (_hard_reset_tmb_fpga),      // Out  Hard Reset TMB (wire-or with power-on-reset chip)
+      ._hard_reset_alct_fpga (_hard_reset_alct_fpga), // Out Hard Reset ALCT
+      ._hard_reset_tmb_fpga  (_hard_reset_tmb_fpga),  // Out Hard Reset TMB (wire-or with power-on-reset chip)
 
       // Status: LED
       .led_fp_lct      (led_lct),            // In  LCT    Blue  CLCT + ALCT match
@@ -2926,8 +2948,9 @@
       .led_bd_in      (led_bd[7:0]),          // In  On-Board LEDs
 // JRG, orig:      .led_fp_out      (led_fp[7:0]),          // Out  Front Panel LEDs (on board LEDs are connected to prom_led)
       .led_fp_out      (led_fp_tmb[7:0]),          // Out  Front Panel LEDs (on board LEDs are connected to prom_led)
-      .led_tmb                  (led_tmb[15:0]),     // goes to BPI logic
-      .led_tmb_out              ({meztp27,meztp26,meztp25,meztp24,meztp23,meztp22,meztp21,meztp20,led_fp[7:0]}), // comes from BPI logic
+      .led_tmb                  (led_tmb[15:0]),     // In goes to BPI logic
+      .led_tmb_out              ({led_mezD8,led_mezD7,led_mezD6,led_mezD5,led_mezD4,led_mezD3,led_mezD2,led_mezD1,led_fp[7:0]}), // IO comes from BPI logic
+//      .led_tmb_out              ({meztp27,meztp26,meztp25,meztp24,meztp23,meztp22,meztp21,meztp20,led_fp[7:0]}), // IO comes from BPI logic
 
       // Status: Power Supply Comparator
       .vstat_5p0v      (vstat[0]),            // In  Voltage Comparator +5.0V, 1=OK
@@ -3705,7 +3728,7 @@
          alct_wait_vme    |
          (|gtx_rx_sump)    |
 //         (|set_sw)      |
-//         (|testled)      |
+//         (|mez_tp)      |
          reset        |
          clk40        |
          clk125        |

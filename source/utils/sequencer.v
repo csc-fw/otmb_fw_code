@@ -476,9 +476,9 @@
 // DMB
   alct_dmb,
   dmb_tx_reserved,
-  dmb_tx,
-        bpi_ad_out,  // in [22:0]
-        bpi_active,  // in
+  dmb_tx,      // Out going to outside: if "BPI Active" then to "BPI Flash PROM Address connector", else to "DMB backplane connector"
+  bpi_ad_out,  // In coming from vme:   [22:0] BPI Flash PROM Address
+  bpi_active,  // In coming from vme:   BPI Active
 
 // ALCT Status
   alct_cfg_done,
@@ -1141,10 +1141,10 @@
 
 // DMB Ports
   input  [18:0]      alct_dmb;        // ALCT to DMB
-  input  [2:0]      dmb_tx_reserved;    // DMB backplane reserved
-  output  [MXDMB-1:0]    dmb_tx;          // DMB backplane connector
-        input   [22:0]    bpi_ad_out;
-        input       bpi_active;
+  input  [2:0]       dmb_tx_reserved; // DMB backplane reserved
+  output [MXDMB-1:0] dmb_tx;          // going to outside: if "BPI Active" then to "BPI Flash PROM Address connector", else to "DMB backplane connector"
+  input  [22:0]      bpi_ad_out;      // coming from vme:  [22:0] BPI Flash PROM Address
+  input              bpi_active;      // coming from vme:  BPI Active
 
 // ALCT Status
   input          alct_cfg_done;      // ALCT FPGA configuration done
@@ -4263,92 +4263,60 @@
 // Output to DMB via IOB FFs, async load outputs nowrite mode until startup done, do not specify initial state else xst chokes
   reg [MXDMB-1:0] dmb_tx={8'h00,1'b1,6'h00,1'b1,33'h000000000}; // synthesis attribute IOB of dmb_tx is "true";
 
-   always @(posedge clock or posedge startup_blank) begin
-      if (startup_blank) begin        // async preset
-   dmb_tx[14: 0]  <= 0;        // clct data
-   dmb_tx[29:15]  <= 0;        // alct data
-   dmb_tx[30]  <= 0;        // DDU special
-   dmb_tx[31]  <= 0;        // DMB last
-   dmb_tx[32]  <= 0;        // DMB first
-   dmb_tx[33]  <= 1;        // DMB /wr
-   dmb_tx[34]  <= 0;        // DMB active cfeb flag
-   dmb_tx[39:35]  <= 0;        // DMB active cfeb list
-   dmb_tx[40]  <= 1;        // ALCT _wr_fifo
-   dmb_tx[41]  <= 0;        // ALCT ddu_special
-   dmb_tx[42]  <= 0;        // ALCT last frame
-   dmb_tx[43]  <= 0;        // ALCT first frame
-   dmb_tx[45:44]  <= 0;        // DMB active cfeb list
-   dmb_tx[48:46]  <= 0;        // Unassigned
-      end
-      else begin          // sync load
-//       bpi_ad_out,  // in [22:0]
-//       bpi_active,  // in
-// dmb_tx[]  <=  (bpi_active) ? bpi_ad_out[] :   ;
-    dmb_tx[1:0]  <= (bpi_active) ? bpi_ad_out[19:18] : dmb_ffdly[1:0];    // fifo data   ** 1,0
-   dmb_tx[5:2]  <= dmb_ffdly[5:2];    // fifo data
-   dmb_tx[6]  <= (bpi_active) ? bpi_ad_out[1] : dmb_ffdly[6];    // fifo data   ** YES: 7,6 -> 0,1
-   dmb_tx[7]  <= (bpi_active) ? bpi_ad_out[0] : dmb_ffdly[7];    // fifo data   ** YES: 7,6 -> 0,1
-   dmb_tx[9:8]  <= dmb_ffdly[9:8];    // fifo data
-   dmb_tx[10]  <= (bpi_active) ? bpi_ad_out[17] : dmb_ffdly[10];    // fifo data   **
-   dmb_tx[11]  <= (bpi_active) ? bpi_ad_out[22] : dmb_ffdly[11];    // fifo data   **
-   dmb_tx[13:12]  <= dmb_ffdly[13:12];    // fifo data
-   dmb_tx[14]  <= (bpi_active) ? bpi_ad_out[16] : dmb_ffdly[14];    // fifo data   **
-   dmb_tx[17:15]  <= alct_dmb[2:0];    // alct data
-   dmb_tx[19:18]  <= (bpi_active) ? bpi_ad_out[21:20] : alct_dmb[4:3];    // alct data   ** 4,3
-   dmb_tx[21:20]  <= alct_dmb[6:5];    // alct data
-   dmb_tx[22]  <= (bpi_active) ? bpi_ad_out[3] : alct_dmb[7];    // alct data   **
-   dmb_tx[25:23]  <= alct_dmb[10:8];    // alct data
-   dmb_tx[26]  <= (bpi_active) ? bpi_ad_out[2] : alct_dmb[11];    // alct data   **
-   dmb_tx[29:27]  <= alct_dmb[14:12];    // alct data
-   dmb_tx[30]  <= (bpi_active) ? bpi_ad_out[15] : dmb_ffdly[15];    // DDU special **
-   dmb_tx[31]  <= (bpi_active) ? bpi_ad_out[14] : dmb_ffdly[16];    // DMB last    **
-   dmb_tx[32]  <= dmb_dav;      // DMB data available
-   dmb_tx[33]  <= dmb_ffdly[18];    // DMB /wr
-   dmb_tx[34]  <= (bpi_active) ? bpi_ad_out[6] : active_feb_flag;    // DMB active cfeb flag  **
-   dmb_tx[35]  <= (bpi_active) ? bpi_ad_out[7] : active_feb_list[0];  // DMB active cfeb list  **
-   dmb_tx[36]  <= (bpi_active) ? bpi_ad_out[10] : active_feb_list[1];  // DMB active cfeb list  **
-   dmb_tx[37]  <= (bpi_active) ? bpi_ad_out[12] : active_feb_list[2];  // DMB active cfeb list  **
-   dmb_tx[38]  <= (bpi_active) ? bpi_ad_out[4] : active_feb_list[3];  // DMB active cfeb list  **
-   dmb_tx[39]  <= (bpi_active) ? bpi_ad_out[11] : active_feb_list[4];  // DMB active cfeb list  **
-   dmb_tx[40]  <= alct_dmb[18];    // ALCT _wr_fifo
-   dmb_tx[41]  <= (bpi_active) ? bpi_ad_out[13] : alct_dmb[15];    // ALCT ddu_special  **
-   dmb_tx[42]  <= (bpi_active) ? bpi_ad_out[5] : alct_dmb[16];    // ALCT last frame   **
-   dmb_tx[43]  <= alct_dmb[17];    // ALCT first frame
-   dmb_tx[45:44]  <= active_feb_list[6:5];  // DMB active cfeb list
-   dmb_tx[46]  <= (bpi_active) ? bpi_ad_out[8] : dmb_tx_reserved[0];  // Unassigned   **
-   dmb_tx[47]  <= (bpi_active) ? bpi_ad_out[9] : dmb_tx_reserved[1];  // Unassigned   **
-   dmb_tx[48]  <= dmb_tx_reserved[2];  // Unassigned
-      end
-   end
-/*
-tx  adr
-47  9
-46  8
-42  5
-41  13
-39  11
-38  4
-37  12
-36  10
-35  7
-34  6
-31  14
-30  15
- 27  25??
-26  2
- 23  24??
-22  3
-19  21
-18  20
- 15  23??
-14  16
-11  22
-10  17
-7   0
-6   1
-1   19
-0   18
-   */
+  always @(posedge clock or posedge startup_blank) begin
+    if (startup_blank) begin     // async preset
+      dmb_tx[14: 0] <= 0;        // CLCT data
+      dmb_tx[29:15] <= 0;        // ALCT data
+      dmb_tx[30]    <= 0;        // DDU special
+      dmb_tx[31]    <= 0;        // DMB last
+      dmb_tx[32]    <= 0;        // DMB first
+      dmb_tx[33]    <= 1;        // DMB /wr
+      dmb_tx[34]    <= 0;        // DMB active cfeb flag
+      dmb_tx[39:35] <= 0;        // DMB active cfeb list
+      dmb_tx[40]    <= 1;        // ALCT _wr_fifo
+      dmb_tx[41]    <= 0;        // ALCT ddu_special
+      dmb_tx[42]    <= 0;        // ALCT last frame
+      dmb_tx[43]    <= 0;        // ALCT first frame
+      dmb_tx[45:44] <= 0;        // DMB active cfeb list
+      dmb_tx[48:46] <= 0;        // Unassigned
+    end
+    else begin          // if "BPI Active" then to "BPI Flash PROM Address connector", else to "DMB backplane connector"
+      dmb_tx[1:0]   <= (bpi_active) ? bpi_ad_out[19:18] : dmb_ffdly[1:0];       // fifo data   ** 1,0
+      dmb_tx[5:2]   <=                                    dmb_ffdly[5:2];       // fifo data
+      dmb_tx[6]     <= (bpi_active) ? bpi_ad_out[1]     : dmb_ffdly[6];         // fifo data   ** YES: 7,6 -> 0,1
+      dmb_tx[7]     <= (bpi_active) ? bpi_ad_out[0]     : dmb_ffdly[7];         // fifo data   ** YES: 7,6 -> 0,1
+      dmb_tx[9:8]   <=                                    dmb_ffdly[9:8];       // fifo data
+      dmb_tx[10]    <= (bpi_active) ? bpi_ad_out[17]    : dmb_ffdly[10];        // fifo data   **
+      dmb_tx[11]    <= (bpi_active) ? bpi_ad_out[22]    : dmb_ffdly[11];        // fifo data   **
+      dmb_tx[13:12] <=                                    dmb_ffdly[13:12];     // fifo data
+      dmb_tx[14]    <= (bpi_active) ? bpi_ad_out[16]    : dmb_ffdly[14];        // fifo data   **
+      dmb_tx[17:15] <=                                    alct_dmb[2:0];        // alct data
+      dmb_tx[19:18] <= (bpi_active) ? bpi_ad_out[21:20] : alct_dmb[4:3];        // alct data   ** 4,3
+      dmb_tx[21:20] <=                                    alct_dmb[6:5];        // alct data
+      dmb_tx[22]    <= (bpi_active) ? bpi_ad_out[3]     : alct_dmb[7];          // alct data   **
+      dmb_tx[25:23] <=                                    alct_dmb[10:8];       // alct data
+      dmb_tx[26]    <= (bpi_active) ? bpi_ad_out[2]     : alct_dmb[11];         // alct data   **
+      dmb_tx[29:27] <=                                    alct_dmb[14:12];      // alct data
+      dmb_tx[30]    <= (bpi_active) ? bpi_ad_out[15]    : dmb_ffdly[15];        // DDU special **
+      dmb_tx[31]    <= (bpi_active) ? bpi_ad_out[14]    : dmb_ffdly[16];        // DMB last    **
+      dmb_tx[32]    <=                                    dmb_dav;              // DMB data available
+      dmb_tx[33]    <=                                    dmb_ffdly[18];        // DMB /wr
+      dmb_tx[34]    <= (bpi_active) ? bpi_ad_out[6]     : active_feb_flag;      // DMB active cfeb flag  **
+      dmb_tx[35]    <= (bpi_active) ? bpi_ad_out[7]     : active_feb_list[0];   // DMB active cfeb list  **
+      dmb_tx[36]    <= (bpi_active) ? bpi_ad_out[10]    : active_feb_list[1];   // DMB active cfeb list  **
+      dmb_tx[37]    <= (bpi_active) ? bpi_ad_out[12]    : active_feb_list[2];   // DMB active cfeb list  **
+      dmb_tx[38]    <= (bpi_active) ? bpi_ad_out[4]     : active_feb_list[3];   // DMB active cfeb list  **
+      dmb_tx[39]    <= (bpi_active) ? bpi_ad_out[11]    : active_feb_list[4];   // DMB active cfeb list  **
+      dmb_tx[40]    <=                                    alct_dmb[18];         // ALCT _wr_fifo
+      dmb_tx[41]    <= (bpi_active) ? bpi_ad_out[13]    : alct_dmb[15];         // ALCT ddu_special  **
+      dmb_tx[42]    <= (bpi_active) ? bpi_ad_out[5]     : alct_dmb[16];         // ALCT last frame   **
+      dmb_tx[43]    <=                                    alct_dmb[17];         // ALCT first frame
+      dmb_tx[45:44] <=                                    active_feb_list[6:5]; // DMB active cfeb list
+      dmb_tx[46]    <= (bpi_active) ? bpi_ad_out[8]     : dmb_tx_reserved[0];   // Unassigned   **
+      dmb_tx[47]    <= (bpi_active) ? bpi_ad_out[9]     : dmb_tx_reserved[1];   // Unassigned   **
+      dmb_tx[48]    <=                                    dmb_tx_reserved[2];   // Unassigned
+    end
+  end
 
 //------------------------------------------------------------------------------------------------------------------
 // Scope Input Signals Section
