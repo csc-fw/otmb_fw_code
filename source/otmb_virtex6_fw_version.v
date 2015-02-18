@@ -4,8 +4,8 @@
 // Firmware version global definitions
   `define FIRMWARE_TYPE 04'hC    // C=Normal CLCT/TMB, D=Debug PCB loopback version
   `define VERSION       04'hE    // Version revision number, A=TMB2004 and earlier, E=TMB2005E production
-  `define MONTHDAY      16'h1209 // Version date
-  `define YEAR          16'h2014 // Version year
+  `define MONTHDAY      16'h0218 // Version date
+  `define YEAR          16'h2015 // Version year
 
   `define AUTO_VME         01'h1 // Automatically initialize VME registers from PROM data,   0=do not
   `define AUTO_JTAG        01'h1 // Automatically initialize JTAG chain from PROM data,      0=do not
@@ -62,6 +62,26 @@
 //      06/20/2014      adding muoninc logic again into cfeb gtx_optical modules
 //      06/23/2014      returning clock_ctrl CFEB phase shifters to UCLA standard: 9 shifters total instead of just 4
 //      06/24/2014      comp data leaves gtx_optical module on Falling edge of LHC Clock to save .5 BX latency
+//      12/10/2014      change GTX & comp data to use CLOCK instead of recclk or phaser clock; turn off gtx POWER_SAVE bit 5; enable GTX_RXRESET
+//      12/15/2014      change GTX_RX_SYNC to conform with UG366, create clock_4x for GTX_USR & add MMCM_LOCK req.
+//      12/17/2014      change VME registers 146 & 148, added MMCM & QPLL lock-lost monitoring
+//      12/18/2014      reduce DPS clocks from 9 to 4 (only 2 DCFEB clocks now), change RXDLYALIGNDISABLE logic in GTX_RX_SYNC
+//      12/19/2014      RXDLYALIGNDISABLE set HIGH in GTX_RX_SYNC; GTX VME Reset now used for GTX_RX_SYNC_RST, !Enable drives GTX_RESET
+//      12/20/2014      RXDLYALIGNDISABLE is driven Low for a while inside GTX_RX_SYNC
+//      12/22/2014      GTX error monitor resets fixed (use !RX_SYNC_DONE); include 1 MHz clock in main MMCM using CLKOUT4_CASCADE with CLKOUT6
+//      12/23/2014      improve GTX error monitor resets (now all synchronous)
+//      12/26/2014      RXDLYALIGNDISABLE set HIGH again in GTX_RX_SYNC
+//      01/08/2015      RXDLYALIGNDISABLE is driven Low for a while as before; fix default of bit0 for gtx_rx_enable_cfeb[i] to be High
+//      01/09/2015      RXDLYALIGNDISABLE is driven Low ALWAYS!
+//      01/10/2015      Still RXDLYALIGNDISABLE is driven Low ALWAYS! Added Adr186-192 to read out startup time to complete various stages
+//      01/13/2015      Now RXDLYALIGNDISABLE is driven High ALWAYS!  Fixed a minor "bug" in clock_ctrl.v  (1-b0 typo)
+//      01/14/2015      Now RXDLYALIGNDISABLE is driven Low for a while as before; modified power_up logic to always wait for lock_tmb_clock0
+//      01/15/2015      Debug TMB startup timer for ALCT jtag config, now stops at jsm_ok
+//      01/18/2015      Testing fast6count logic in vme Adr 186, and it seems to work!  Adr 186 should be reused or not used from now on 
+//      01/19/2015      Revert GTX dlyalign and sync methods to the "standard" method (affects 4 gtx...v files), but keep just 4 phaser clocks;
+//	                  also improved startup timer resolution from 400ns to 100ns
+//      01/20/2015      Convert timing control registers 16A, 16C, 11E for cfebs 5/6 to control me11a and me11b cfebs respectively
 //---------------------------------------------------------------------------------------------------------------------------------------
 //  End Global Definitions
 //---------------------------------------------------------------------------------------------------------------------------------------
+

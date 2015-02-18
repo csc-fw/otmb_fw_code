@@ -14,11 +14,27 @@
 //  04/12/2013  Produce the first stable, functional version for use at Cern (but Muonic timing disabled)
 //  
 //-------------------------------------------------------------------------------------------------------------------
+//  A note about clocks for the production OTMB:     (JRG, 12/2014)
+//    from the PCB, signal "clock05p" = io_197 --> CCLK and pin B31, while "tmb_clock0" = io_600 --> QPLL gives LHC_CLK on A10/B10. 
+//    in the code, tmb_clock0 is really "tmb_clock05p" from pin B31, a stoppable clock from the CCB.
+//    in the code, tmb_clock0 is the main clock that drives the mmcm's & the TMB "clock" used everywhere in the TMB logic
+//    in the code, clk40 is the differential "LHC_CLK" from QPLL based on "tmb_clock0" but Not Used for any logic!
+//    in the code, clk_160 is the 4x differential clock from QPLL based on "tmb_clock0" used for GTX references.
+//    enabling the RPC clock on the baseboard DDD chip causes ALCT communication problems, so we keep it disabled.
+//    in the code, we do not use these DDD clocks: 
+//      tmb_clock0d    // In  40MHz clock bypasses 3D3444, NOT CONNECTED, but functionally covered by clk40 from the QPLL
+//      tmb_clock1     // In  40MHz clock with 3D3444 delay, UNUSED but available on pin K24
+//      alct_rxclock   // In  40MHz clock with 3D3444 delay, UNUSED but available on pin L23 as alct_rxclk aka rx-clk
+//      alct_rxclockd  // In  40MHz clock with 3D3444 delay, UNUSED but available on pin V23 as alct_rxclk1p aka rxclockd
+//      mpc_clock      // In  40MHz clock with 3D3444 delay, UNUSED but available on pin K12 as mpc_clk
+//      dcc_clock      // In  40MHz clock with 3D3444 delay, UNUSED but available on pin H28 as dcc-clk
+//  
+//-------------------------------------------------------------------------------------------------------------------
 //  Port Declarations
 //-------------------------------------------------------------------------------------------------------------------
   module otmb_virtex6
   (
-// CFEB
+// CFEB 
   cfeb0_rx,
   cfeb1_rx,
   cfeb2_rx,
@@ -371,7 +387,8 @@
 //  wire  [15:0]  led_tmb_out; // comes from BPI logic  { meztp(8),led_fp(8) }
 
 // Deprecated
-  wire tmb_clock0d = !alct_rxclockd;  // Replaced by LHCLK_P|N
+  wire tmb_clock0d = clk40;  // Replaced by LHCLK_P|N
+//  wire tmb_clock0d = !alct_rxclockd;  // Replaced by LHCLK_P|N
 
 // Switches & LEDS
   input  [8:7]  set_sw;
@@ -489,28 +506,30 @@
 
   wire [MXCFEB-1:0]  clock_cfeb_rxd;
 
+  IBUFG uibufg_19p      (.I(tmb_clock0    ),.O(tmb_clock0_ibufg));
   clock_ctrl uclock_ctrl
   (
 // Clock inputs
-   .tmb_clock0    (tmb_clock0),    // In  40MHz clock bypasses 3D3444 and loads Mez PROMs, chip bottom
-   .tmb_clock0d    (tmb_clock0d),    // In  40MHz clock bypasses 3D3444 and loads Mez PROMs, chip top
-  .tmb_clock1    (tmb_clock1),    // In  40MHz clock with 3D3444 delay
-  .alct_rxclock    (alct_rxclock),    // In  40MHz ALCT receive data clock with 3D3444 delay, chip bottom
-  .alct_rxclockd    (alct_rxclockd),  // In  40MHz ALCT receive data clock with 3D3444 delay, chip top
-  .mpc_clock    (mpc_clock),    // In  40MHz MPC clock
-  .dcc_clock    (dcc_clock),    // In  40MHz Duty cycle corrected clock with 3D3444 delay
+  .tmb_clock0_ibufg (tmb_clock0_ibufg),    // In  40MHz clock bypasses 3D3444 and loads Mez PROMs, chip bottom
+  .tmb_clock0d   (tmb_clock0d),   // In  40MHz clock bypasses 3D3444 and loads Mez PROMs, chip top, UNUSED
+  .tmb_clock1    (tmb_clock1),    // In  40MHz clock with 3D3444 delay, UNUSED
+  .alct_rxclock  (alct_rxclock),  // In  40MHz ALCT receive data clock with 3D3444 delay, chip bottom, UNUSED
+  .alct_rxclockd (alct_rxclockd), // In  40MHz ALCT receive data clock with 3D3444 delay, chip top, UNUSED
+  .mpc_clock     (mpc_clock),     // In  40MHz MPC clock, UNUSED
+  .dcc_clock     (dcc_clock),     // In  40MHz Duty cycle corrected clock with 3D3444 delay, UNUSED
   .rpc_sig    (gp_io4),    // In  40MHz Unused
 
 // Main clock outputs
-  .clock      (clock),    // Out  40MHz global TMB clock
-  .clock_2x    (clock_2x),    // Out  80MHz commutator clock
-  .clock_lac    (clock_lac),    // Out  40MHz logic accessible clock
-  .clock_vme    (clock_vme),    // Out  10MHz global VME clock
-  .clock_1mhz    (clock_1mhz),    // Out  1MHz BPI_ctrl Timer clock
+  .clock       (clock),      // Out  40MHz global TMB clock
+  .clock_2x    (clock_2x),   // Out  80MHz commutator clock
+  .clock_4x    (clock_4x),   // Out  160MHz = 4 * TMB clock for GTX_RXUSRCLK
+  .clock_lac    (clock_lac), // Out  40MHz logic accessible clock
+  .clock_vme    (clock_vme), // Out  10MHz global VME clock
+  .clock_1mhz   (clock_1mhz),  // Out  1MHz BPI_ctrl Timer clock
 
 // Phase delayed clocks
-  .clock_alct_txd    (clock_alct_txd),  // Out  40MHz ALCT transmit data clock 1x
-  .clock_alct_rxd    (clock_alct_rxd),  // Out  40MHz ALCT receive  data clock 1x
+  .clock_alct_txd    (clock_alct_txd),    // Out  40MHz ALCT transmit data clock 1x
+  .clock_alct_rxd    (clock_alct_rxd),    // Out  40MHz ALCT receive  data clock 1x
   .clock_cfeb0_rxd  (clock_cfeb_rxd[0]),  // Out  40MHz CFEB receive  data clock 1x
   .clock_cfeb1_rxd  (clock_cfeb_rxd[1]),  // Out  40MHz CFEB receive  data clock 1x
   .clock_cfeb2_rxd  (clock_cfeb_rxd[2]),  // Out  40MHz CFEB receive  data clock 1x
@@ -521,7 +540,7 @@
 
 // Global reset
   .mmcm_reset    (1'b0),      // In  PLL reset input for simulation
-  .global_reset_en  (global_reset_en),  // In  Enable global reset on lock_lost.  JG: on by default
+  .global_reset_en  (global_reset_en),  // In  Enable global reset on lock_lost.  JG: used to be ON by default
   .global_reset    (global_reset),    // Out  Global reset
   .clock_lock_lost_err  (clock_lock_lost_err),  // Out  40MHz main clock lost lock
 
@@ -1019,13 +1038,13 @@
   wire        cfeb5_rxd_posneg;
   wire        cfeb6_rxd_posneg;
 
-  assign cfeb_rxd_posneg[0] = cfeb0_rxd_posneg;
-  assign cfeb_rxd_posneg[1] = cfeb1_rxd_posneg;
-  assign cfeb_rxd_posneg[2] = cfeb2_rxd_posneg;
-  assign cfeb_rxd_posneg[3] = cfeb3_rxd_posneg;
-  assign cfeb_rxd_posneg[4] = cfeb4_rxd_posneg;
-  assign cfeb_rxd_posneg[5] = cfeb5_rxd_posneg;
-  assign cfeb_rxd_posneg[6] = cfeb6_rxd_posneg;
+  assign cfeb_rxd_posneg[0] = cfeb6_rxd_posneg; // JGhere: use B-side value "cfeb6"
+  assign cfeb_rxd_posneg[1] = cfeb6_rxd_posneg; //   another B-side
+  assign cfeb_rxd_posneg[2] = cfeb6_rxd_posneg; //   another B-side
+  assign cfeb_rxd_posneg[3] = cfeb6_rxd_posneg; //   another B-side
+  assign cfeb_rxd_posneg[4] = cfeb5_rxd_posneg; // JGhere: use A-side value "cfeb5"
+  assign cfeb_rxd_posneg[5] = cfeb5_rxd_posneg; //   another A-side
+  assign cfeb_rxd_posneg[6] = cfeb5_rxd_posneg; //   another A-side
 
 // Injector Ports
   wire  [MXCFEB-1:0]  mask_all;
@@ -1104,22 +1123,23 @@
   end
 
 // Optical receiver status
-  wire  [MXCFEB-1:0]  gtx_rx_enable;    // In  Enables GTX optical input, disables copper SCSI
-  wire  [MXCFEB-1:0]  gtx_rx_reset;    // In  Reset this GTX
+  wire  [MXCFEB-1:0]  gtx_rx_enable; // In  Enable/Unreset GTX optical input, disables copper SCSI
+  wire  [MXCFEB-1:0]  gtx_rx_reset;  // In  Reset this GTX rx_sync module
   wire  [MXCFEB-1:0]  gtx_rx_reset_err_cnt;  // In  Resets the PRBS test error counters
   wire  [MXCFEB-1:0]  gtx_rx_en_prbs_test;  // In  Select random input test data mode
-  wire  [MXCFEB-1:0]  gtx_rx_start;    // Out  Set when the DCFEB Start Pattern is present
-  wire  [MXCFEB-1:0]  gtx_rx_fc;    // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
-  wire  [MXCFEB-1:0]  gtx_rx_valid;    // Out  Valid data detected on link
-  wire  [MXCFEB-1:0]  gtx_rx_match;    // Out  PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
+  wire  [MXCFEB-1:0]  gtx_rx_start;  // Out  Set when the DCFEB Start Pattern is present
+  wire  [MXCFEB-1:0]  gtx_rx_fc;     // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
+  wire  [MXCFEB-1:0]  gtx_rx_valid;  // Out  Valid data detected on link
+  wire  [MXCFEB-1:0]  gtx_rx_match;  // Out  PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
+  wire  [MXCFEB-1:0]  gtx_rx_rst_done;   // Out  These get set before rxsync cycle begins
   wire  [MXCFEB-1:0]  gtx_rx_sync_done;  // Out  Use these to determine gtx_ready
-  wire  [MXCFEB-1:0]  gtx_rx_pol_swap;  // Out  GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
+  wire  [MXCFEB-1:0]  gtx_rx_pol_swap;   // Out  GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
   wire  [MXCFEB-1:0]  gtx_rx_err;    // Out  PRBS test detects an error
-  wire  [MXCFEB-1:0]  gtx_rx_sump;    // Out  Unused signals
+  wire  [MXCFEB-1:0]  gtx_rx_sump;   // Out  Unused signals
   wire  [15:0]    gtx_rx_err_count [MXCFEB-1:0];  // Out  Error count on this fiber channel
-  wire  [MXCFEB-1:0]  link_had_err;   // link stability monitor: error happened at least once
-  wire  [MXCFEB-1:0]  link_good;      // link stability monitor: always good, no errors since last resync
-  wire  [MXCFEB-1:0]  link_bad;       // link stability monitor: errors happened over 100 times
+  wire  [MXCFEB-1:0]  link_had_err;  // link stability monitor: error happened at least once
+  wire  [MXCFEB-1:0]  link_good;     // link stability monitor: always good, no errors since last resync
+  wire  [MXCFEB-1:0]  link_bad;      // link stability monitor: errors happened over 100 times
 
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -1134,7 +1154,9 @@
   cfeb #(.ICFEB(icfeb)) ucfeb
   (
 // Clock
-  .clock          (clock),              // In  40MHz TMB system clock
+  .clock          (clock),              // In  40MHz TMB system clock from MMCM
+  .clk_lock       (lock_tmb_clock0),    // In  40MHz TMB system clock MMCM locked
+  .clock_4x       (clock_4x),           // In  4*40MHz TMB system clock from MMCM
   .clock_cfeb_rxd      (clock_cfeb_rxd[icfeb]),      // In  CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
   .cfeb_rxd_posneg    (cfeb_rxd_posneg[icfeb]),      // In  CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
   .cfeb_rxd_int_delay    (cfeb_rxd_int_delay[icfeb][3:0]),  // In  Interstage delay, integer bx
@@ -1199,35 +1221,36 @@
   .ly5hs          (cfeb_ly5hs[icfeb][MXHS-1:0]),    // Out  Decoded 1/2-strip pulses
 
 // Status
-  .demux_tp_1st      (demux_tp_1st[icfeb]),        // Out  Demultiplexer test point first-in-time
-  .demux_tp_2nd      (demux_tp_2nd[icfeb]),        // Out  Demultiplexer test point second-in-time
-  .triad_tp        (triad_tp[icfeb]),      // Out  Triad test point at raw hits RAM input
-  .parity_err_cfeb    (parity_err_cfeb[icfeb][MXLY-1:0]),  // Out  Raw hits RAM parity error detected
-  .cfeb_sump        (cfeb_sump[icfeb]),    // Out  Unused signals wot must be connected
+  .demux_tp_1st    (demux_tp_1st[icfeb]), // Out  Demultiplexer test point first-in-time
+  .demux_tp_2nd    (demux_tp_2nd[icfeb]), // Out  Demultiplexer test point second-in-time
+  .triad_tp        (triad_tp[icfeb]),     // Out  Triad test point at raw hits RAM input
+  .parity_err_cfeb (parity_err_cfeb[icfeb][MXLY-1:0]),  // Out  Raw hits RAM parity error detected
+  .cfeb_sump       (cfeb_sump[icfeb]),    // Out  Unused signals wot must be connected
 
 // SNAP12 optical receiver
-  .clock_160        (clock_160),      // In  160 MHz from QPLL for GTX reference clock
-  .qpll_lock        (qpll_lock),      // In  QPLL locked 
-  .rxp          (rxp[icfeb]),      // In  SNAP12+ fiber input for GTX
-  .rxn          (rxn[icfeb]),      // In  SNAP12- fiber input for GTX
+  .clock_160    (clock_160),  // In  160 MHz from QPLL for GTX reference clock
+  .qpll_lock    (qpll_lock),  // In  QPLL locked 
+  .rxp          (rxp[icfeb]), // In  SNAP12+ fiber input for GTX
+  .rxn          (rxn[icfeb]), // In  SNAP12- fiber input for GTX
 
 // Optical receiver status
-  .gtx_rx_enable      (gtx_rx_enable[icfeb]),    // In  Enables GTX optical input, disables copper SCSI
-  .gtx_rx_reset      (gtx_rx_reset[icfeb]),    // In  Reset this GTX
-  .gtx_rx_reset_err_cnt  (gtx_rx_reset_err_cnt[icfeb]),    // In  Resets the PRBS test error counters
-  .gtx_rx_en_prbs_test  (gtx_rx_en_prbs_test[icfeb]),    // In  Select random input test data mode
-  .gtx_rx_start      (gtx_rx_start[icfeb]),    // Out  Set when the DCFEB Start Pattern is present
-  .gtx_rx_fc        (gtx_rx_fc[icfeb]),  // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
-  .gtx_rx_valid      (gtx_rx_valid[icfeb]),    // Out  Valid data detected on link
-  .gtx_rx_match      (gtx_rx_match[icfeb]),    // Out  PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
-  .gtx_rx_sync_done    (gtx_rx_sync_done[icfeb]),    // Out  Use these to determine gtx_ready
-  .gtx_rx_pol_swap    (gtx_rx_pol_swap[icfeb]),    // Out  GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
-  .gtx_rx_err        (gtx_rx_err[icfeb]),    // Out  PRBS test detects an error
-  .gtx_rx_err_count    (gtx_rx_err_count[icfeb][15:0]),  // Out  Error count on this fiber channel
-        .link_had_err (link_had_err[icfeb]),  // link stability monitor: error happened at least once
-        .link_good (link_good[icfeb]),        // link stability monitor: always good, no errors since last resync
-  .link_bad (link_bad[icfeb]),          // link stability monitor: errors happened over 100 times
-  .gtx_rx_sump      (gtx_rx_sump[icfeb])      // Out  Unused signals
+  .gtx_rx_enable   (gtx_rx_enable[icfeb]), // In  Enable/Unreset GTX optical input, disables copper SCSI
+  .gtx_rx_reset    (gtx_rx_reset[icfeb]),  // In  Reset this GTX rx_sync module
+  .gtx_rx_reset_err_cnt (gtx_rx_reset_err_cnt[icfeb]), // In  Resets the PRBS test error counters
+  .gtx_rx_en_prbs_test  (gtx_rx_en_prbs_test[icfeb]),  // In  Select random input test data mode
+  .gtx_rx_start    (gtx_rx_start[icfeb]),  // Out  Set when the DCFEB Start Pattern is present
+  .gtx_rx_fc       (gtx_rx_fc[icfeb]),     // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
+  .gtx_rx_valid    (gtx_rx_valid[icfeb]),  // Out  Valid data detected on link
+  .gtx_rx_match    (gtx_rx_match[icfeb]),  // Out  PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
+  .gtx_rx_rst_done  (gtx_rx_rst_done[icfeb]),  // Out  These get set before rxsync cycle begins
+  .gtx_rx_sync_done (gtx_rx_sync_done[icfeb]), // Out  Use these to determine gtx_ready
+  .gtx_rx_pol_swap  (gtx_rx_pol_swap[icfeb]),  // Out  GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
+  .gtx_rx_err       (gtx_rx_err[icfeb]),       // Out  PRBS test detects an error
+  .gtx_rx_err_count (gtx_rx_err_count[icfeb][15:0]),  // Out  Error count on this fiber channel
+  .link_had_err     (link_had_err[icfeb]),     // link stability monitor: error happened at least once
+  .link_good        (link_good[icfeb]),        // link stability monitor: always good, no errors since last resync
+  .link_bad         (link_bad[icfeb]),         // link stability monitor: errors happened over 100 times
+  .gtx_rx_sump      (gtx_rx_sump[icfeb])  // Out  Unused signals
 
 // Debug Ports
   );
@@ -2638,24 +2661,34 @@
 
 
    reg        l_tmbclk0_lock = 0;
-   reg        tmbclk0_locklost = 0;
    reg        l_qpll_lock = 0;
+   reg        tmbmmcm_locklost = 0;
+   reg  [7:0] tmbmmcm_locklost_cnt = 8'h00;
    reg        qpll_locklost = 0;
+   reg  [7:0] qpll_locklost_cnt = 8'h00;
    
    always @(posedge clock or posedge ttc_resync) // things that use lhc_clk w/Reset
      begin
-  if (ttc_resync) begin
-     l_tmbclk0_lock <= 0;    // use lhc_clk to monitor tmbclk0_lock
-     tmbclk0_locklost <= 0;
-     l_qpll_lock <= 0;    // use lhc_clk to monitor qpll_lock
-     qpll_locklost <= 0;
-  end
-  else begin
-     if (lock_tmb_clock0) l_tmbclk0_lock <= 1;
-     if (l_tmbclk0_lock & (!lock_tmb_clock0)) tmbclk0_locklost <= 1;
-     if (lock_tmb_clock0 & qpll_lock) l_qpll_lock <= 1;  // wait for startup-powerup first
-     if (l_qpll_lock & (!qpll_lock)) qpll_locklost <= 1;
-  end
+	if (ttc_resync || cnt_all_reset) begin // added OR with counter reset
+	   l_tmbclk0_lock <= 0;    // use lhc_clk to monitor tmbclk0_lock
+	   tmbmmcm_locklost <= 0;
+	   tmbmmcm_locklost_cnt <= 8'h00;
+	   l_qpll_lock <= 0;    // use lhc_clk to monitor qpll_lock
+	   qpll_locklost <= 0;
+	   qpll_locklost_cnt <= 8'h00;
+	end
+	else begin
+	   if (lock_tmb_clock0) l_tmbclk0_lock <= 1;
+	   if (l_tmbclk0_lock & (!lock_tmb_clock0)) begin
+	      tmbmmcm_locklost <= 1;
+	      if (!(&tmbmmcm_locklost_cnt[7:2])) tmbmmcm_locklost_cnt <= tmbmmcm_locklost_cnt + 1'b1; // count errors "up to FC"
+	   end
+	   if (lock_tmb_clock0 & qpll_lock) l_qpll_lock <= 1;  // wait for startup-powerup first
+	   if (l_qpll_lock & (!qpll_lock)) begin
+	      qpll_locklost <= 1;
+	      if (!(&qpll_locklost_cnt[7:2])) qpll_locklost_cnt <= qpll_locklost_cnt + 1'b1; // count errors "up to FC"
+	   end
+	end
      end // always @ (posedge clock or posedge ttc_resync)
 
 
@@ -2725,7 +2758,7 @@
   assign mez_led[0] = ~|link_had_err;    // blue OFF.  was ~alct_wait_cfg
   assign mez_led[1] = ~l_tmbclk0_lock;   // green
   assign mez_led[2] = lock_tmb_clock0;   // yellow
-  assign mez_led[3] = ~tmbclk0_locklost; // red
+  assign mez_led[3] = ~tmbmmcm_locklost; // red
   assign mez_led[4] = ~l_qpll_lock;   // green
   assign mez_led[5] = qpll_lock;      // yellow
   assign mez_led[6] = ~qpll_locklost; // red
@@ -2830,10 +2863,11 @@
       .clock               (clock),               // In  TMB 40MHz clock
       .clock_vme           (clock_vme),           // In  VME 10MHz clock
       .clock_1mhz          (clock_1mhz),          // In  1MHz BPI_ctrl Timer clock
+      .tmb_clock0_ibufg    (tmb_clock0_ibufg),    // In  Raw 40MHz clock from CCB
       .clock_lock_lost_err (clock_lock_lost_err), // In  40MHz main clock lost lock FF
       .ttc_resync          (ttc_resync),          // In  TTC resync
       .global_reset        (global_reset),        // In  Global reset
-      .global_reset_en     (global_reset_en),     // Out Enable global reset on lock_lost.  JG: on by default
+      .global_reset_en     (global_reset_en),     // Out Enable global reset on lock_lost.  JG: used to be ON by default
 
       // Firmware version
       .cfeb_exists (cfeb_exists[MXCFEB-1:0]), // In  CFEBs instantiated in this version
@@ -2981,13 +3015,17 @@
 
       // Clock DCM lock status
       .lock_tmb_clock0    (lock_tmb_clock0),        // In  DCM lock status
-      .lock_tmb_clock0d    (lock_tmb_clock0d),        // In  DCM lock status
-      .lock_alct_rxclockd    (lock_alct_rxclockd),      // In  DCM lock status
-      .lock_mpc_clock      (lock_mpc_clock),        // In  DCM lock status
-      .lock_dcc_clock      (lock_dcc_clock),        // In  DCM lock status
+      .lock_tmb_clock0d   (lock_tmb_clock0d),       // In  DCM lock status
+      .lock_alct_rxclockd (lock_alct_rxclockd),     // In  DCM lock status
+      .lock_mpc_clock     (lock_mpc_clock),         // In  DCM lock status
+      .lock_dcc_clock     (lock_dcc_clock),         // In  DCM lock status
       .lock_rpc_rxalt1    (lock_rpc_rxalt1),        // In  DCM lock status
       .lock_tmb_clock1    (lock_tmb_clock1),        // In  DCM lock status
-      .lock_alct_rxclock    (lock_alct_rxclock),      // In  DCM lock status
+      .lock_alct_rxclock  (lock_alct_rxclock),      // In  DCM lock status
+      .tmbmmcm_locklost   (tmbmmcm_locklost),       // MMCM lock-lost history
+      .tmbmmcm_locklost_cnt (tmbmmcm_locklost_cnt),
+      .qpll_locklost      (qpll_locklost),          // QPLL lock-lost history
+      .qpll_locklost_cnt  (qpll_locklost_cnt),
 
       // Status: Configuration State
       .tmb_cfg_done      (tmb_cfg_done),          // Out  TMB reports ready
@@ -3685,20 +3723,21 @@
       .r12_fok      (r12_fok),              // In  Serial interface status
 
       // Virtex-6 GTX receiver
-      .gtx_rx_enable      (gtx_rx_enable[MXCFEB-1:0]),    // Out  Enables GTX optical input, disables copper SCSI
-      .gtx_rx_reset      (gtx_rx_reset[MXCFEB-1:0]),      // Out  Reset this GTX
-      .gtx_rx_reset_err_cnt    (gtx_rx_reset_err_cnt[MXCFEB-1:0]),  // Out  Resets the PRBS test error counters
-      .gtx_rx_en_prbs_test    (gtx_rx_en_prbs_test[MXCFEB-1:0]),  // Out  Select random input test data mode
-      .gtx_rx_start      (gtx_rx_start[MXCFEB-1:0]),      // In  Set when the DCFEB Start Pattern is present
-      .gtx_rx_fc      (gtx_rx_fc[MXCFEB-1:0]),      // In  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
-      .gtx_rx_valid      (gtx_rx_valid[MXCFEB-1:0]),      // In  Valid data detected on link
-      .gtx_rx_match      (gtx_rx_match[MXCFEB-1:0]),      // In  PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
-      .gtx_rx_sync_done    (gtx_rx_sync_done[MXCFEB-1:0]),    // In  Use these to determine gtx_ready
-      .gtx_rx_pol_swap    (gtx_rx_pol_swap[MXCFEB-1:0]),    // In  GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
-      .gtx_rx_err      (gtx_rx_err[MXCFEB-1:0]),      // In  PRBS test detects an error
-      .gtx_link_had_err (link_had_err[MXCFEB-1:0]),  // link stability monitor: error happened at least once
-      .gtx_link_good (link_good[MXCFEB-1:0]),        // link stability monitor: always good, no errors since last resync
-      .gtx_link_bad (link_bad[MXCFEB-1:0]),          // link stability monitor: errors happened over 100 times
+      .gtx_rx_enable  (gtx_rx_enable[MXCFEB-1:0]), // Out  Enable/Unreset GTX optical input, disables copper SCSI
+      .gtx_rx_reset   (gtx_rx_reset[MXCFEB-1:0]),  // Out  Reset this GTX rx_sync module
+      .gtx_rx_reset_err_cnt (gtx_rx_reset_err_cnt[MXCFEB-1:0]),  // Out  Resets the PRBS test error counters
+      .gtx_rx_en_prbs_test  (gtx_rx_en_prbs_test[MXCFEB-1:0]),  // Out  Select random input test data mode
+      .gtx_rx_start   (gtx_rx_start[MXCFEB-1:0]),  // In  Set when the DCFEB Start Pattern is present
+      .gtx_rx_fc      (gtx_rx_fc[MXCFEB-1:0]),     // In  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
+      .gtx_rx_valid   (gtx_rx_valid[MXCFEB-1:0]),  // In  Valid data detected on link
+      .gtx_rx_match   (gtx_rx_match[MXCFEB-1:0]),  // In  PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
+      .gtx_rx_rst_done  (gtx_rx_rst_done[MXCFEB-1:0]),  // In  These get set before rxsync cycle begins
+      .gtx_rx_sync_done (gtx_rx_sync_done[MXCFEB-1:0]), // In  Use these to determine gtx_ready
+      .gtx_rx_pol_swap  (gtx_rx_pol_swap[MXCFEB-1:0]),  // In  GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
+      .gtx_rx_err       (gtx_rx_err[MXCFEB-1:0]),       // In  PRBS test detects an error
+      .gtx_link_had_err (link_had_err[MXCFEB-1:0]), // link stability monitor: error happened at least once
+      .gtx_link_good (link_good[MXCFEB-1:0]),       // link stability monitor: always good, no errors since last resync
+      .gtx_link_bad  (link_bad[MXCFEB-1:0]),        // link stability monitor: errors happened over 100 times
       
       // Virtex-6 GTX error counters
       .gtx_rx_err_count0    (gtx_rx_err_count[0][15:0]),    // In  Error count on this fiber channel
@@ -3732,7 +3771,6 @@
 //         (|set_sw)      |
 //         (|mez_tp)      |
          reset        |
-         clk40        |
          clk125        |
          t12_sdat      |
          t12_nfault      |

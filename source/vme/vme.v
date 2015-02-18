@@ -16,6 +16,7 @@
   clock,
   clock_vme,
   clock_1mhz,
+  tmb_clock0_ibufg,
   clock_lock_lost_err,
   ttc_resync,
   global_reset,
@@ -26,9 +27,9 @@
   revcode,
 
 // ODMB device
-      bd_sel,
-      odmb_sel,
-      odmb_data,
+  bd_sel,
+  odmb_sel,
+  odmb_data,
 
 // VME Bus Input Port Map
   d_vme,
@@ -169,6 +170,10 @@
   lock_rpc_rxalt1,
   lock_tmb_clock1,
   lock_alct_rxclock,
+  tmbmmcm_locklost,
+  tmbmmcm_locklost_cnt,
+  qpll_locklost,
+  qpll_locklost_cnt,
 
 // Status: Configuration State
   tmb_cfg_done,
@@ -876,6 +881,7 @@
   gtx_rx_fc,
   gtx_rx_valid,
   gtx_rx_match,
+  gtx_rx_rst_done,
   gtx_rx_sync_done,
   gtx_rx_pol_swap,
   gtx_rx_err,
@@ -1081,6 +1087,14 @@
   parameter ADR_MPC1_FRAME0_FIFO  = 9'h180;  // MPC1 Frame 0 Data sent to MPC
   parameter ADR_MPC1_FRAME1_FIFO  = 9'h182;  // MPC1 Frame 1 Data sent to MPC
   parameter ADR_MPC_FRAMES_FIFO_CTRL  = 9'h184;  // MPC Frames FIFO control
+
+  parameter ADR_TMB_MMCM_LOCK_TIME = 9'h186; // Read MMCM lock time
+  parameter ADR_TMB_POWER_UP_TIME  = 9'h188; // Read tmb power-up time
+  parameter ADR_TMB_LOAD_CFG_TIME  = 9'h18A; // Read tmb config time
+  parameter ADR_ALCT_PHASER_LOCK_TIME = 9'h18C;  // Read alct clocks lock time
+  parameter ADR_ALCT_LOAD_CFG_TIME = 9'h18E; // Read alct configure time
+  parameter ADR_GTX_RST_DONE_TIME  = 9'h190; // Read gtx rx reset done time
+  parameter ADR_GTX_SYNC_DONE_TIME = 9'h192; // Read gtx rx sync done time
   
   parameter ADR_MPC_INJ      = 9'h90;  // MPC Injector Control
   parameter ADR_MPC_RAM_ADR    = 9'h92;  // MPC Injector RAM address
@@ -1225,8 +1239,8 @@
   parameter ADR_V6_CFEB6_BADBITS_LY23  = 9'h166;  // CFEB6 Bad Bit Array
   parameter ADR_V6_CFEB6_BADBITS_LY45  = 9'h168;  // CFEB6 Bad Bit Array
 
-  parameter ADR_V6_PHASER7    = 9'h16A;  // Phaser 7 cfeb5_rxd phase
-  parameter ADR_V6_PHASER8    = 9'h16C;  // Phaser 8 cfeb6_rxd phase
+  parameter ADR_V6_PHASER7    = 9'h16A;  // Phaser 7 cfeb5_rxd phase "ME1/1A-side"
+  parameter ADR_V6_PHASER8    = 9'h16C;  // Phaser 8 cfeb6_rxd phase "ME1/1B-side"
 
   parameter ADR_V6_HCM501      = 9'h16E;  // CFEB5 Ly0,Ly1 Hot Channel Mask
   parameter ADR_V6_HCM523      = 9'h170;  // CFEB5 Ly2,Ly3 Hot Channel Mask
@@ -1246,11 +1260,12 @@
 // VME Clock Port Map
   input  clock;               // TMB 40MHz clock
   input  clock_vme;           // VME 10MHz clock
-  input  clock_1mhz;          // In  1MHz BPI_ctrl Timer clock
+  input  clock_1mhz;          // 1MHz BPI_ctrl Timer clock
+  input  tmb_clock0_ibufg;    // Raw 40MHz clock from CCB
   input  clock_lock_lost_err; // TMB 40MHz main clock lost lock FF
   input  ttc_resync;          // Purge l1a processing stack
   input  global_reset;        // Global reset
-  output global_reset_en;     // Enable global reset on lock_lost.  JG: on by default
+  output global_reset_en;     // Enable global reset on lock_lost.  JG: used to be ON by default
 
 // Firmware Version Ports
   input  [MXCFEB-1:0] cfeb_exists; // CFEBs instantiated in this version
@@ -1394,13 +1409,17 @@
 
 // Status: Clock DCM lock
   input          lock_tmb_clock0;    // DCM lock status
-  input          lock_tmb_clock0d;    // DCM lock status
-  input          lock_alct_rxclockd;    // DCM lock status
-  input          lock_mpc_clock;      // DCM lock status
-  input          lock_dcc_clock;      // DCM lock status
+  input          lock_tmb_clock0d;   // DCM lock status
+  input          lock_alct_rxclockd; // DCM lock status
+  input          lock_mpc_clock;     // DCM lock status
+  input          lock_dcc_clock;     // DCM lock status
   input          lock_rpc_rxalt1;    // DCM lock status
   input          lock_tmb_clock1;    // DCM lock status
-  input          lock_alct_rxclock;    // DCM lock status
+  input          lock_alct_rxclock;  // DCM lock status
+  input 	 tmbmmcm_locklost;   // MMCM lock-lost history
+  input  [7:0]	 tmbmmcm_locklost_cnt;
+  input 	 qpll_locklost;      // QPLL lock-lost history
+  input  [7:0]	 qpll_locklost_cnt;
 
 // Status: Configuration State
   output          tmb_cfg_done;      // TMB reports ready
@@ -2112,13 +2131,14 @@
   output  [MXCFEB-1:0]  gtx_rx_reset_err_cnt;  // Reset PRBS test error counters
   output  [MXCFEB-1:0]  gtx_rx_en_prbs_test;  // Select random input test data mode
 
-  input  [MXCFEB-1:0]  gtx_rx_start;      // Set when the DCFEB Start Pattern is present
-  input  [MXCFEB-1:0]  gtx_rx_fc;      // Flags when Rx sees "FC" code (sent by Tx) for latency measurement
-  input  [MXCFEB-1:0]  gtx_rx_valid;      // Valid data detected on link
-  input  [MXCFEB-1:0]  gtx_rx_match;      // PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
-  input  [MXCFEB-1:0]  gtx_rx_sync_done;    // Use these to determine gtx_ready
-  input  [MXCFEB-1:0]  gtx_rx_pol_swap;    // GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
-  input  [MXCFEB-1:0]  gtx_rx_err;      // PRBS test detects an error
+  input  [MXCFEB-1:0]  gtx_rx_start;     // Set when the DCFEB Start Pattern is present
+  input  [MXCFEB-1:0]  gtx_rx_fc;        // Flags when Rx sees "FC" code (sent by Tx) for latency measurement
+  input  [MXCFEB-1:0]  gtx_rx_valid;     // Valid data detected on link
+  input  [MXCFEB-1:0]  gtx_rx_match;     // PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
+  input  [MXCFEB-1:0]  gtx_rx_rst_done;  // These get set before rxsync cycle begins
+  input  [MXCFEB-1:0]  gtx_rx_sync_done; // Use these to determine gtx_ready
+  input  [MXCFEB-1:0]  gtx_rx_pol_swap;  // GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
+  input  [MXCFEB-1:0]  gtx_rx_err;       // PRBS test detects an error
 
 // Virtex-6 GTX error counters
   input  [15:0]      gtx_rx_err_count0;    // Error count on this fiber channel
@@ -2345,7 +2365,17 @@
   
   reg  [15:0] mpc_frames_fifo_ctrl_wr;
   wire [15:0] mpc_frames_fifo_ctrl_rd;
-  
+
+// counters to monitor startup timing...
+//   Read bits 20:5 or 19:4 or 17:2 to VME... 800 or 400 or 100 ns resolution, counts to 52.4 or 26.2 or 6.5 ms
+  wire  [15:0] tmb_mmcm_lock_time_rd = {11'b00000000000,fast_sum[4:0]};   // Adr 186 --JGhere, test: count bits in phaser_lock + alct_load_cfg
+  wire  [15:0] tmb_power_up_time_rd = tmb_power_up_time[17:2];     // Adr 188
+  wire  [15:0] tmb_load_cfg_time_rd = tmb_load_cfg_time[17:2];     // Adr 18A
+  wire  [15:0] alct_phaser_lock_time_rd = alct_phaser_lock_time[17:2]; // Adr 18C
+  wire  [15:0] alct_load_cfg_time_rd = alct_load_cfg_time[17:2];   // Adr 18E -- time after alct_config_wait
+  wire  [15:0] gtx_rst_done_time_rd = gtx_rst_done_time[17:2];     // Adr 190 -- does not wait for cfeb phaser lock?
+  wire  [15:0] gtx_sync_done_time_rd = gtx_sync_done_time[17:2];   // Adr 192 -- does not wait for cfeb phaser lock?
+
   wire [15:0]  mpc0_frame0_fifo_rd;
   wire [15:0]  mpc0_frame1_fifo_rd;
   wire [15:0]  mpc1_frame0_fifo_rd;
@@ -2576,23 +2606,23 @@
   wire  [15:0]  cfeb6_badbits_ly23_rd;
   wire  [15:0]  cfeb6_badbits_ly45_rd;
 
-  reg    [15:0]  alct_startup_delay_wr;
+  reg   [15:0]  alct_startup_delay_wr;
   wire  [15:0]  alct_startup_delay_rd;
   wire  [15:0]  alct_startup_status_rd;
 
-  reg    [15:0]  virtex6_snap12_qpll_wr;
+  reg   [15:0]  virtex6_snap12_qpll_wr;
   wire  [15:0]  virtex6_snap12_qpll_rd;
 
-  reg    [15:0]  virtex6_gtx_rx_all_wr;
+  reg   [15:0]  virtex6_gtx_rx_all_wr;
   wire  [15:0]  virtex6_gtx_rx_all_rd;
 
-  reg    [15:0]  virtex6_gtx_rx_wr [MXCFEB-1:0];
+  reg   [15:0]  virtex6_gtx_rx_wr [MXCFEB-1:0];
   wire  [15:0]  virtex6_gtx_rx_rd [MXCFEB-1:0];
 
-  reg    [15:0]  virtex6_sysmon_wr;
+  reg   [15:0]  virtex6_sysmon_wr;
   wire  [15:0]  virtex6_sysmon_rd;
 
-  reg    [15:0]  virtex6_extend_wr;
+  reg   [15:0]  virtex6_extend_wr;
   wire  [15:0]  virtex6_extend_rd;
 
 //------------------------------------------------------------------------------------------------------------------
@@ -2751,44 +2781,118 @@
 //  Power-up Section
 //---------------------------------------------------------------------------------------------------------------------
 // Power-up goes high on first clock rising edge after DCM locks...
-//  JG: power_up is in fact held low by  global_reset  until  lock_tmb_clock0  is set
+//  JG: power_up is in fact held low until  lock_tmb_clock0  is set
   wire [3:0] pdly      = 5;  // Power-up reset delay (after global_reset is released)
-  reg         power_up  = 0;
+  reg        power_up  = 0;
   reg  [1:0] power_up2 = 0;
   wire       powerupq;
 
   SRL16E upowerup (.CLK(clock),.CE(~power_up),.D(1'b1),.A0(pdly[0]),.A1(pdly[1]),.A2(pdly[2]),.A3(pdly[3]),.Q(powerupq));
 
 // FPGA Ready, disconnects boostrap logic hardware
-  reg  ready          = 0;  // IOB ff ready to boot register
+  reg  ready         = 0;  // IOB ff ready to boot register
   reg ccb_status_tri = 1;  // synthesis attribute KEEP of ccb_status_tri is "true";
 
-  wire   power_up_latch = powerupq | power_up;
+  wire   power_up_latch = (powerupq & lock_tmb_clock0) | power_up; // JGhere, inserted requirement here for clock0 to lock
   wire   ready_int      = power_up;      // Fabric ff
-  assign tmb_cfg_done    = power_up & power_up2[1];  // Force LUT insertion to create a single source
-        wire   power_up_reset = global_reset & global_reset_en; // global reset is enabled at least once, and by default reasserted on lock_lost
+  assign tmb_cfg_done   = power_up & power_up2[1];  // Force LUT insertion to create a single source
+  wire   power_up_reset = global_reset & global_reset_en; // global reset is enabled at least once; JG: default used to be "reassert on lock_lost" too
   assign mez_busy       = ~mez_done;      // Available for future use
 
   always @(posedge clock_vme) begin
-  if (power_up_reset) begin
-  power_up     <= 0;
-  ready      <= 0;
-  ccb_status_tri  <= 0;
-  end
-  else begin
-  power_up     <= power_up_latch;          // Internal ff init
-  ready      <= power_up_latch;          // send ready to boot register
-  ccb_status_tri  <=!power_up_latch;          // ccb status tri stated until powerup done
-  end
+     if (power_up_reset) begin
+	power_up   <= 0;
+	ready      <= 0;
+	ccb_status_tri  <= 0;
+     end
+     else begin
+	power_up   <= power_up_latch;          // Internal ff init
+	ready      <= power_up_latch;          // send ready to boot register
+	ccb_status_tri  <= !power_up_latch;    // ccb status tri stated until powerup done
+     end
   end
 
   always @(posedge clock) begin            // 2bx later for prom_led
-  power_up2[0] <= power_up;
-  power_up2[1] <= power_up2[0];
+     power_up2[0] <= power_up;
+     power_up2[1] <= power_up2[0];
   end
 
 // ISE hack
   // synthesis attribute IOB  of ccb_status_tri            is "false";
+
+// counters to monitor startup timing...
+//   Read bits 20:5 or 19:4 or 17:2 to VME... 800 or 400 or 100 ns resolution, counts to 52.4 or 26.2 or 6.5 ms
+  reg  [23:0]  tmb_mmcm_lock_time = 24'h000000;    // Adr 186 --probably the same as power-up time -->> 144
+  reg  [23:0]  tmb_power_up_time = 24'h000000;     // Adr 188 -->> 144
+  reg  [23:0]  tmb_load_cfg_time = 24'h000000;     // Adr 18A -->> 187
+  reg  [23:0]  alct_phaser_lock_time = 24'h000000; // Adr 18C -->> 1169 = 469 usec. during alct_config_wait?
+  reg  [23:0]  alct_load_cfg_time = 24'h000000;    // Adr 18E -- time after alct_config_wait, 653
+  reg  [23:0]  gtx_rst_done_time = 24'h000000;     // Adr 190 -->> 273 (doesn't need a fiber?)
+  reg  [23:0]  gtx_sync_done_time = 24'h000000;    // Adr 192 -->> 307 (doesn't need a fiber?)
+  reg   [1:0]  ldps_busy = 2'b00;      // permanently set after first alct phaser lock cycle
+  reg          mmcm_firstlock = 1'b0;  // permanently set after first mmcm lock
+  reg          gtx_rst_completed = 1'b0;  // permanently set after first gtx_rst is completed
+  reg          gtx_sync_completed = 1'b0; // permanently set after first gtx_sync is completed
+  reg          jsm_cfg_done = 1'b0;    // permanently set after first alct jtag configure cycle is completed
+
+  always @(posedge tmb_clock0_ibufg) begin
+    if (lock_tmb_clock0) mmcm_firstlock <= 1'b1;      // so it will only time the first mmcm lock cycle
+    if (!lock_tmb_clock0 && !mmcm_firstlock && (tmb_mmcm_lock_time[17:10] != 8'hFF)) tmb_mmcm_lock_time <= tmb_mmcm_lock_time + 1'b1;
+    if (!power_up && (tmb_power_up_time[17:10] != 8'hFF)) tmb_power_up_time <= tmb_power_up_time + 1'b1;
+    if (!vsm_ready && (tmb_load_cfg_time[17:10] != 8'hFF)) tmb_load_cfg_time <= tmb_load_cfg_time + 1'b1; // time until TMB is ready
+
+    if (dps_busy[0]) ldps_busy[0] <= 1'b1;
+    if (dps_busy[1]) ldps_busy[1] <= 1'b1;
+    if (!alct_phaser_done && (alct_phaser_lock_time[17:10] != 8'hFF)) alct_phaser_lock_time <= alct_phaser_lock_time + 1'b1; // time until TMB clocks for alct are ready
+
+// JRG, note that alct_startup_done means alct is ready to receive jtag cfg data.  use  jsm_ok  to indicate cfg is done!
+    if (jsm_ok) jsm_cfg_done <= 1'b1;
+    if (!jsm_cfg_done && alct_startup_done && (alct_load_cfg_time[17:10] != 8'hFF)) alct_load_cfg_time <= alct_load_cfg_time + 1'b1; // time to send alct config data after alct fpga is ready for it; for total delay add alct_startup_delay and the longer of power_up_time or tmb_load_cfg_time
+
+    if (gtx_rst_done) gtx_rst_completed <= 1'b1;      // so it will only time the first reset cycle
+    if (!gtx_rst_completed && (gtx_rst_done_time[17:10] != 8'hFF)) gtx_rst_done_time <= gtx_rst_done_time + 1'b1;
+
+    if (virtex6_gtx_rx_all_rd[3]) gtx_sync_completed <= 1'b1;      // so it will only time the first sync cycle
+    if (!gtx_sync_completed && (gtx_sync_done_time[17:10] != 8'hFF)) gtx_sync_done_time <= gtx_sync_done_time + 1'b1;
+
+    fast_sum <= absum + cdsum;   // Adr 186 --JGhere, test: count bits in phaser_lock + alct_load_cfg
+  end
+
+  assign alct_phaser_done =  ( !(|dps_busy[1:0]) && (&ldps_busy[1:0]) );  // so it will only time the first alct dps phaser cycle
+  assign gtx_rst_done = &gtx_rx_rst_done;
+
+  reg [4:0] fast_sum = 0;
+  wire [2:0] sa = fast6count(alct_phaser_lock_time[7:2]);
+  wire [2:0] sb = fast6count(alct_phaser_lock_time[13:8]);
+  wire [2:0] sc = fast6count(alct_load_cfg_time[7:2]);
+  wire [2:0] sd = fast6count(alct_load_cfg_time[13:8]);
+  wire [3:0] absum = sa + sb;
+  wire [3:0] cdsum = sc + sd;
+   
+  function [2:0] fast6count;
+     input [5:0] s;
+     begin
+	fast6count[0] = ^s[5:0];   // an odd number of bits are set
+	fast6count[1] = s==6'b111111 |  // all 6 set, or exactly 3, or exactly 2
+// set 3 out of 6, 20 ways :
+          ( s==6'b000111 | s==6'b111000 | 
+	    s==6'b001011 | s==6'b001101 | s==6'b001110  |  s==6'b010011 | s==6'b010101 | s==6'b010110  |  s==6'b100011 | s==6'b100101 | s==6'b100110 | 
+	    s==6'b011001 | s==6'b011010 | s==6'b011100  |  s==6'b101001 | s==6'b101010 | s==6'b101100  |  s==6'b110001 | s==6'b110010 | s==6'b110100 ) |
+// set 2 out of 6, 15 ways :
+          ( s==6'b000011 | s==6'b000101 | s==6'b000110  |  s==6'b001001 | s==6'b001010 | s==6'b001100  | 
+	    s==6'b010001 | s==6'b010010 | s==6'b010100 | s==6'b011000 | 
+	    s==6'b100001 | s==6'b100010 | s==6'b100100 | s==6'b101000 | s==6'b110000 );
+	fast6count[2] = s==6'b111111 |  // all 6 set, or exactly 4, or exactly 5
+// set 4 out of 6, 15 ways :
+          ( s==6'b111100 | s==6'b111010 | s==6'b111001  |  s==6'b110110 | s==6'b110101 | s==6'b110011  | 
+	    s==6'b101110 | s==6'b101101 | s==6'b101011 | s==6'b100111 | 
+	    s==6'b011110 | s==6'b011101 | s==6'b011011 | s==6'b010111 | s==6'b001111 ) |
+// set 4 out of 6, 15 ways :
+          ( s==6'b111110 | s==6'b111101 | s==6'b111011  |  s==6'b110111 | s==6'b101111 | s==6'b011111 );
+     end
+  endfunction
+
+
 
 //------------------------------------------------------------------------------------------------------------------
 // Startup wait for Spartan-6: 33,761,696 cfg bits/8 = 4220212 clocks 20MHz = 8440424 40MHz = 210.60msec for LHC 40.078414MHz
@@ -2878,7 +2982,7 @@
   reg bd_sel=0;
 
   always @(posedge clock_vme) begin
-    bd_sel <= bd_match & ds0;
+     bd_sel <= bd_match & ds0;
   end
 
 // DTACK data acknowledge IOB FF, xst automatically creates a duplicate in fabric for feedback signal
@@ -2888,8 +2992,8 @@
   always @(posedge clock_vme) begin
 //    dtack      <= bd_sel & ds0 & (!bpi_dev | !bpi_dtack);  // IOB   flip flop has no feedback path, now include BPI
 //    dtack_int  <= bd_sel & ds0 & (!bpi_dev | !bpi_dtack);  // Fabric flip flop has feedback to logic, now include BPI
-    dtack      <= bd_sel & ds0 & (!bpi_dev | bpi_dtack);  // IOB   flip flop has no feedback path, now include BPI
-    dtack_int  <= bd_sel & ds0 & (!bpi_dev | bpi_dtack);  // Fabric flip flop has feedback to logic, now include BPI
+     dtack      <= bd_sel & ds0 & (!bpi_dev | bpi_dtack);  // IOB   flip flop has no feedback path, now include BPI
+     dtack_int  <= bd_sel & ds0 & (!bpi_dev | bpi_dtack);  // Fabric flip flop has feedback to logic, now include BPI
 //    dtack      <= bd_sel & ds0;    // IOB    flip flop has no feedback path
 //    dtack_int  <= bd_sel & ds0;    // Fabric flip flop has feedback to logic
   end
@@ -3015,6 +3119,15 @@
   ADR_MPC1_FRAME1_FIFO:    data_out  <= mpc1_frame1_fifo_rd;
   
   ADR_MPC_FRAMES_FIFO_CTRL: data_out  <= mpc_frames_fifo_ctrl_rd;
+
+  ADR_TMB_MMCM_LOCK_TIME: data_out  <= tmb_mmcm_lock_time_rd;    // Adr 186 --probably the same as power-up time
+  ADR_TMB_POWER_UP_TIME:  data_out  <= tmb_power_up_time_rd;     // Adr 188
+  ADR_TMB_LOAD_CFG_TIME:  data_out  <= tmb_load_cfg_time_rd;     // Adr 18A
+  ADR_ALCT_PHASER_LOCK_TIME: data_out  <= alct_phaser_lock_time_rd; // Adr 18C
+  ADR_ALCT_LOAD_CFG_TIME: data_out  <= alct_load_cfg_time_rd;    // Adr 18E -- time after alct_config_wait
+  ADR_GTX_RST_DONE_TIME:  data_out  <= gtx_rst_done_time_rd;     // Adr 190
+  ADR_GTX_SYNC_DONE_TIME: data_out  <= gtx_sync_done_time_rd;    // Adr 192
+
   
   ADR_MPC_INJ:      data_out  <= mpc_inj_rd;
   ADR_MPC_RAM_ADR:    data_out  <= mpc_ram_adr_rd;  
@@ -3332,7 +3445,7 @@
   wire [15:0] d;
   
   assign d_vme     = (fpga_oe) ? data_send         : {16{1'bz}};     // transmit to backplane, else float
-  assign data_send = (bpi_dev) ? bpi_outdata[15:0] : data_out[15:0]; // select bpi data or vme_reg data to send
+  assign data_send = (bpi_dev) ? bpi_outdata[15:0] : data_out[15:0]; // JGhere, select bpi data or vme_reg data to send
   assign d[15:0]   = (vsm_oe)  ? vsm_data[15:0]    : d_vme[15:0];    // insert backplane or prom data to write
   
   initial begin
@@ -3363,7 +3476,7 @@
   end
 
   initial begin
-    vmesm4_wr[15:0] = 0; // RW vmesm over-writes this with even/odd data to test prom path
+     vmesm4_wr[15:0] = 0; // RW vmesm over-writes this with even/odd data to test prom path
   end
 
   wire [7:0] vsm_prom_data;
@@ -3399,7 +3512,7 @@
   assign vmesm0_rd[5]     = vsm_cksum_ok;      // R  Check-sum  matches PROM contents
   assign vmesm0_rd[6]     = vsm_wdcnt_ok;      // R  Word count matches PROM contents
   assign vmesm0_rd[7]     = vsm_jtag_auto;     // RW JTAG SM autostart after vmesm completes
-  assign vmesm0_rd[8]     = vme_ready;         // R  TMB VME registers loaded from PROM
+  assign vmesm0_rd[8]     = vsm_ready;         // R  TMB VME registers loaded from PROM. JGhere: was vme_ready, so now it's correct
   assign vmesm0_rd[9]     = vsm_ok;            // R  Machine ran without errors
   assign vmesm0_rd[10]    = vsm_path_ok;       // R  PROM wrote to vmesm4 register ok
   assign vmesm0_rd[11]    = vsm_phaser_auto;   // RW Phaser SM autostart after vmesm completes
@@ -3429,34 +3542,34 @@
   vmesm uvmesm
   (
 // Control
-  .clock      (clock),    // In  40 MHz clock
-  .global_reset  (global_reset),      // In  Global reset
-  .power_up    (power_up),    // In  DLL clock lock, we wait for it
-  .vme_ready    (vme_ready),    // In  TMB VME registers finished loading with defaults.  JG: really just power_up
-  .start      (vsm_start),    // In  Cycle start command
-  .autostart    (AUTO_VME),    // In  Enable automatic power-up
-  .throttle    (vsm_throttle[3:0]),  // In  PROM read-speed control, 0=fastest
+   .clock      (clock),    // In  40 MHz clock
+   .global_reset  (global_reset),      // In  Global reset
+   .power_up    (power_up),    // In  DLL clock lock, we wait for it
+   .vme_ready    (vme_ready),    // In  TMB VME registers finished setting defaults.  JG: really just power_up
+   .start      (vsm_start),    // In  Cycle start command
+   .autostart    (AUTO_VME),    // In  Enable automatic power-up
+   .throttle    (vsm_throttle[3:0]),  // In  PROM read-speed control, 0=fastest
 // PROM
-  .prom_data    (vsm_prom_data[7:0]),  // In  prom_data[7:0]
-  .prom_clk    (vsm_prom_clk),    // Out  prom_ctrl[0]
-  .prom_oe    (vsm_prom_oe),    // Out  prom_ctrl[1]
-  .prom_nce    (vsm_prom_nce),    // Out  prom_ctrl[2]
-  .vmesm_oe    (vsm_oe),    // Out  Enable vme mux
-  .adr      (vsm_adr[23:0]),  // Out  VME register address
-  .data      (vsm_data[15:0]),  // Out  VME data from PROM
-  .ds0      (vsm_ds0),    // Out  VME stobe
+   .prom_data    (vsm_prom_data[7:0]),  // In  prom_data[7:0]
+   .prom_clk    (vsm_prom_clk),    // Out  prom_ctrl[0]
+   .prom_oe    (vsm_prom_oe),    // Out  prom_ctrl[1]
+   .prom_nce    (vsm_prom_nce),    // Out  prom_ctrl[2]
+   .vmesm_oe    (vsm_oe),    // Out  Enable vme mux
+   .adr      (vsm_adr[23:0]),  // Out  VME register address
+   .data      (vsm_data[15:0]),  // Out  VME data from PROM
+   .ds0      (vsm_ds0),    // Out  VME stobe
 // Status
-  .sreset      (vsm_sreset),    // In  Status signal reset
-  .busy      (vsm_busy),    // Out  State machine busy
-  .busy_extend  (vsm_busy_extend),    // Out  State machine busy extended to hold off jtagsm
-  .aborted    (vsm_aborted),    // Out  State machine aborted reading PROM
-  .cksum_ok    (vsm_cksum_ok),    // Out  Check-sum  matches PROM contents
-  .wdcnt_ok    (vsm_wdcnt_ok),    // Out  Word count matches PROM contents
-  .vmesm_ok    (vsm_ok),    // Out  Machine ran without errors
-  .wdcnt      (vsm_wdcnt[15:0]),  // Out  Word count
-  .cksum      (vsm_cksum[7:0]),  // Out  Check sum
-  .fmt_err    (vsm_fmt_err[4:0]),  // Out  PROM data structure error
-  .nvme_writes  (vsm_nvme_writes[7:0])          // Out  Number of vme addresses written
+   .sreset      (vsm_sreset),    // In  Status signal reset
+   .busy      (vsm_busy),    // Out  State machine busy
+   .busy_extend  (vsm_busy_extend),    // Out  State machine busy extended to hold off jtagsm
+   .aborted    (vsm_aborted),    // Out  State machine aborted reading PROM
+   .cksum_ok    (vsm_cksum_ok),    // Out  Check-sum  matches PROM contents
+   .wdcnt_ok    (vsm_wdcnt_ok),    // Out  Word count matches PROM contents
+   .vmesm_ok    (vsm_ok),    // Out  Machine ran without errors
+   .wdcnt      (vsm_wdcnt[15:0]),  // Out  Word count
+   .cksum      (vsm_cksum[7:0]),  // Out  Check sum
+   .fmt_err    (vsm_fmt_err[4:0]),  // Out  PROM data structure error
+   .nvme_writes  (vsm_nvme_writes[7:0])          // Out  Number of vme addresses written
   );
 //------------------------------------------------------------------------------------------------------------------
 // ADR_IDREG0=00  ID Register 0, Readonly
@@ -3511,8 +3624,8 @@
 //           Capture last VME write address. Readonly, for backplane loopback testing
 //------------------------------------------------------------------------------------------------------------------
   initial begin
-  vme_adr0_wr = 16'h0000;
-  vme_adr1_wr = 16'h0000;
+     vme_adr0_wr = 16'h0000;
+     vme_adr1_wr = 16'h0000;
   end
 
   wire [15:0]  vme_adr0_cap;
@@ -3525,11 +3638,11 @@
   assign vme_adr1_cap[13: 8]  = am_vme[5:0];
 
   always @(posedge clock_vme) begin
-  if (wr_adr_cap)
-  begin
-  vme_adr0_wr <= vme_adr0_cap;
-  vme_adr1_wr <= vme_adr1_cap;
-  end
+     if (wr_adr_cap)
+       begin
+	  vme_adr0_wr <= vme_adr0_cap;
+	  vme_adr1_wr <= vme_adr1_cap;
+       end
   end
 
   assign vme_adr0_rd[15:0] = vme_adr0_wr[15:0];
@@ -3556,12 +3669,12 @@
 
 // Overwritable defaults
   initial begin
-  tmb_loop_wr[1:0]      = 0;        // Not used
-  tmb_loop_wr[2]        = 1'b1;        // 1=Enable RAT ALCT LVDS receivers
-  tmb_loop_wr[3]        = 1'b1;        // 1=Enable RAT ALCT LVDS drivers
-  tmb_loop_wr[5:4]      = 0;        // Not used
-  tmb_loop_wr[6]        = 1'b0;        // 1=PC Loop-back  (with RAT)
-  tmb_loop_wr[15:7]      = 0;        // Not used
+     tmb_loop_wr[1:0]      = 0;        // Not used
+     tmb_loop_wr[2]        = 1'b1;        // 1=Enable RAT ALCT LVDS receivers
+     tmb_loop_wr[3]        = 1'b1;        // 1=Enable RAT ALCT LVDS drivers
+     tmb_loop_wr[5:4]      = 0;        // Not used
+     tmb_loop_wr[6]        = 1'b0;        // 1=PC Loop-back  (with RAT)
+     tmb_loop_wr[15:7]      = 0;        // Not used
   end
 
   assign  cfeb_oe        = tmb_loop_ro[0];  // 1=CFEB output enable
@@ -3591,7 +3704,7 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  usr_jtag_wr[15:0] = 16'h0000;
+     usr_jtag_wr[15:0] = 16'h0000;
   end
 
   wire [7:0] jsm_prom_data;
@@ -3613,18 +3726,18 @@
   reg [3:0] sel_usr_mux;
 
   always @* begin
-  if (jsm_busy && vsm_jtag_auto && jsm_jtag_oe) begin
-  tdi_usr_mux      <= jsm_usr_jtag[0];
-  tms_usr_mux      <= jsm_usr_jtag[1];
-  tck_usr_mux      <= jsm_usr_jtag[2];
-  sel_usr_mux[3:0] <= jsm_usr_jtag[6:3];
-  end
-  else begin
-  tdi_usr_mux     <= usr_jtag_wr[0];
-  tms_usr_mux     <= usr_jtag_wr[1];
-  tck_usr_mux     <= usr_jtag_wr[2];
-  sel_usr_mux[3:0] <= usr_jtag_wr[6:3];
-  end
+     if (jsm_busy && vsm_jtag_auto && jsm_jtag_oe) begin
+	tdi_usr_mux      <= jsm_usr_jtag[0];
+	tms_usr_mux      <= jsm_usr_jtag[1];
+	tck_usr_mux      <= jsm_usr_jtag[2];
+	sel_usr_mux[3:0] <= jsm_usr_jtag[6:3];
+     end
+     else begin
+	tdi_usr_mux     <= usr_jtag_wr[0];
+	tms_usr_mux     <= usr_jtag_wr[1];
+	tck_usr_mux     <= usr_jtag_wr[2];
+	sel_usr_mux[3:0] <= usr_jtag_wr[6:3];
+     end
   end
 
 // Circumvent xst inability to reg an inout signal
@@ -3654,15 +3767,15 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  prom_wr[7:0]  = 8'hCD;    // PROM data shared with on-board LEDs
-  prom_wr[8]    = 1'b0;      // PROM0 clock  
-  prom_wr[9]    = 1'b0;      // PROM0 output enable
-  prom_wr[10]    = 1'b1;      // PROM0 /chip_enable
-  prom_wr[11]    = 1'b0;      // PROM1 clock
-  prom_wr[12]    = 1'b0;      // PROM1 output enable
-  prom_wr[13]    = 1'b1;      // PROM1 /chip_enable
-  prom_wr[14]    = 1'b0;      // 0=on-board LED vector is PROM data souce
-  prom_wr[15]    = 0;
+     prom_wr[7:0]  = 8'hCD;    // PROM data shared with on-board LEDs
+     prom_wr[8]    = 1'b0;      // PROM0 clock  
+     prom_wr[9]    = 1'b0;      // PROM0 output enable
+     prom_wr[10]    = 1'b1;      // PROM0 /chip_enable
+     prom_wr[11]    = 1'b0;      // PROM1 clock
+     prom_wr[12]    = 1'b0;      // PROM1 output enable
+     prom_wr[13]    = 1'b1;      // PROM1 /chip_enable
+     prom_wr[14]    = 1'b0;      // 0=on-board LED vector is PROM data souce
+     prom_wr[15]    = 0;
   end
 
   reg  [7:0] prom_mux;
@@ -3670,10 +3783,10 @@
   wire      led_bd_src;
 
   always @* begin    // Prom data mux
-  if    (vsm_busy)    prom_mux <= led_bd_out;
-  else if (jsm_busy)    prom_mux <= led_bd_out;
-  else if (led_bd_src)   prom_mux <= prom_wr[7:0];
-  else           prom_mux <= led_bd_out;
+     if    (vsm_busy)    prom_mux <= led_bd_out;
+     else if (jsm_busy)    prom_mux <= led_bd_out;
+     else if (led_bd_src)   prom_mux <= prom_wr[7:0];
+     else           prom_mux <= led_bd_out;
   end
 
   assign prom_led = (prom0_oe || prom1_oe  || !power_up2[1] || jsm_busy || vsm_busy) ? 8'hzz : prom_mux;  // Read prom a when prom_oe=1
@@ -3686,30 +3799,30 @@
   reg  _prom1_ce;
 
   always @* begin
-  if (vsm_busy) begin
-  prom0_clk  <= vsm_prom_clk;
-  prom0_oe  <= vsm_prom_oe;
-  _prom0_ce  <= vsm_prom_nce;
-  prom1_clk  <= 0;
-  prom1_oe  <= 1;
-  _prom1_ce  <= 1;
-  end
-  else if (jsm_busy) begin
-  prom0_clk  <= 0;
-  prom0_oe  <= 1;
-  _prom0_ce  <= 1;
-  prom1_clk  <= jsm_prom_clk;
-  prom1_oe  <= jsm_prom_oe;
-  _prom1_ce  <= jsm_prom_nce;
-  end
-  else begin
-  prom0_clk  <= prom_wr[8];
-  prom0_oe  <= prom_wr[9];
-  _prom0_ce  <= (power_up) ? prom_wr[10] : 1'b1;
-  prom1_clk  <= prom_wr[11];
-  prom1_oe  <= prom_wr[12];
-  _prom1_ce  <= (power_up) ? prom_wr[13] : 1'b1;
-  end
+     if (vsm_busy) begin
+	prom0_clk  <= vsm_prom_clk;
+	prom0_oe  <= vsm_prom_oe;
+	_prom0_ce  <= vsm_prom_nce;
+	prom1_clk  <= 0;
+	prom1_oe  <= 1;
+	_prom1_ce  <= 1;
+     end
+     else if (jsm_busy) begin
+	prom0_clk  <= 0;
+	prom0_oe  <= 1;
+	_prom0_ce  <= 1;
+	prom1_clk  <= jsm_prom_clk;
+	prom1_oe  <= jsm_prom_oe;
+	_prom1_ce  <= jsm_prom_nce;
+     end
+     else begin
+	prom0_clk  <= prom_wr[8];
+	prom0_oe  <= prom_wr[9];
+	_prom0_ce  <= (power_up) ? prom_wr[10] : 1'b1;
+	prom1_clk  <= prom_wr[11];
+	prom1_oe  <= prom_wr[12];
+	_prom1_ce  <= (power_up) ? prom_wr[13] : 1'b1;
+     end
   end
 
   assign led_bd_src= prom_wr[14];  // 0=prom data bus carries on-board LED data
@@ -3726,12 +3839,12 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  jtagsm0_wr[0]    = 0;  // RW  Manual cycle start command
-  jtagsm0_wr[1]    = 0;  // RW  Status signal reset
-  jtagsm0_wr[2]    = 0;  // RW  1=select new JTAG format, 0=select old format
-  jtagsm0_wr[10:3]  = 0;  // R  Readonly
-  jtagsm0_wr[11]    = 0;  // RW  1=disable writes to adr_usr_jtag
-  jtagsm0_wr[15:12]  = 0;  // RW  JTAG speed control, 0=fastest
+     jtagsm0_wr[0]    = 0;  // RW  Manual cycle start command
+     jtagsm0_wr[1]    = 0;  // RW  Status signal reset
+     jtagsm0_wr[2]    = 0;  // RW  1=select new JTAG format, 0=select old format
+     jtagsm0_wr[10:3]  = 0;  // R  Readonly
+     jtagsm0_wr[11]    = 0;  // RW  1=disable writes to adr_usr_jtag
+     jtagsm0_wr[15:12]  = 0;  // RW  JTAG speed control, 0=fastest
   end
 
   wire [15:0]  jsm_wdcnt,    jsm_wdcnt_new,    jsm_wdcnt_old;
@@ -3749,7 +3862,7 @@
   wire jsm_header_ok;
   wire jsm_chain_ok;
 
-  assign vsm_ready    = !vsm_busy_extend && vme_ready;
+  assign vsm_ready    = !vsm_busy_extend && vme_ready; // JGhere, THIS indicates that TMB VME registers loaded from PROM
   wire   vsm_ready_s6    = vsm_ready && alct_startup_done;
   wire   tck_fpga_gated  = tck_fpga  && !global_reset;  // Prevent ISE from trying to put 2 FFs into 1 IOB
 
@@ -3767,7 +3880,7 @@
   assign jtagsm0_rd[5]  = jsm_cksum_ok;    // R  Check-sum  matches PROM contents
   assign jtagsm0_rd[6]  = jsm_wdcnt_ok;    // R  Word count matches PROM contents
   assign jtagsm0_rd[7]  = jsm_tck_fpga_ok;  // R  FPGA jtag tck detected
-  assign jtagsm0_rd[8]  = vme_ready;    // R  TMB VME registers loaded from PROM
+  assign jtagsm0_rd[8]  = vsm_ready;    // R  TMB VME registers loaded from PROM.  JGhere: was vme_ready, so now it's correct
   assign jtagsm0_rd[9]  = jsm_ok;      // R  JTAG state machine completed without errors
   assign jtagsm0_rd[10]  = jsm_jtag_oe;    // R  Enable jtag drivers else tri-state
   assign jtagsm0_rd[11]  = wr_usr_jtag_dis;  // RW  1=disable writes to adr_usr_jtag
@@ -3791,43 +3904,43 @@
   jtagsm_new ujtagsm_new
   (  
 // Control
-  .clock      (clock),            // In  40MHz clock
-  .global_reset  (global_reset),          // In  Global reset
-  .power_up    (power_up),            // In  DCM clock lock, we wait for it
-  .vme_ready    (vsm_ready_s6),          // In  TMB VME registers loaded from PROM
-  .start      (jsm_start_new),        // In  Cycle start command
-  .autostart    (jsm_autostart_new),      // In  Enable automatic power-up
-  .throttle    (jsm_throttle[3:0]),      // In  JTAG speed control, 0=fastest
+     .clock      (clock),            // In  40MHz clock
+     .global_reset  (global_reset),          // In  Global reset
+     .power_up    (power_up),            // In  DCM clock lock, we wait for it
+     .vme_ready    (vsm_ready_s6),          // In  TMB VME registers loaded from PROM. JGhere, and alct fpga wait completed
+     .start      (jsm_start_new),        // In  Cycle start command
+     .autostart    (jsm_autostart_new),      // In  Enable automatic power-up
+     .throttle    (jsm_throttle[3:0]),      // In  JTAG speed control, 0=fastest
 // PROM
-  .prom_data    (jsm_prom_data[7:0]),      // In  prom_data[7:0]
-  .prom_clk    (jsm_prom_clk_new),        // Out  prom_ctrl[3]
-  .prom_oe    (jsm_prom_oe_new),        // Out  prom_ctrl[4]
-  .prom_nce    (jsm_prom_nce_new),        // Out  prom_ctrl[5]
+     .prom_data    (jsm_prom_data[7:0]),      // In  prom_data[7:0]
+     .prom_clk    (jsm_prom_clk_new),        // Out  prom_ctrl[3]
+     .prom_oe    (jsm_prom_oe_new),        // Out  prom_ctrl[4]
+     .prom_nce    (jsm_prom_nce_new),        // Out  prom_ctrl[5]
 //JTAG
-  .jtag_oe    (jsm_jtag_oe_new),        // Out  Enable jtag drivers else tri-state
-  .tdi      (jsm_usr_jtag_new[0]),      // Out  jtag_usr[1]
-  .tms      (jsm_usr_jtag_new[1]),      // Out  jtag_usr[2]
-  .tck      (jsm_usr_jtag_new[2]),      // Out  jtag_usr[3]
-  .sel      (jsm_usr_jtag_new[6:3]),    // Out  sel_usr[3:0]
+     .jtag_oe    (jsm_jtag_oe_new),        // Out  Enable jtag drivers else tri-state
+     .tdi      (jsm_usr_jtag_new[0]),      // Out  jtag_usr[1]
+     .tms      (jsm_usr_jtag_new[1]),      // Out  jtag_usr[2]
+     .tck      (jsm_usr_jtag_new[2]),      // Out  jtag_usr[3]
+     .sel      (jsm_usr_jtag_new[6:3]),    // Out  sel_usr[3:0]
 // Status
-  .sreset      (jsm_sreset),          // In  Status signal reset
-  .tck_fpga    (tck_fpga_gated),          // In  TCK from FPGA JTAG chain 
-  .busy      (jsm_busy_new),          // Out  State machine busy writing
-  .aborted    (jsm_aborted_new),        // Out  State machine abend signal
-  .header_ok    (jsm_header_ok_new),      // Out  Header marker found where expected
-  .chain_ok    (jsm_chain_ok_new),        // Out  Chain  marker found where expected
-  .tckcnt_ok    (jsm_tckcnt_ok_new),      // Out  State machine sent correct number of TCKs to jtag
-  .cksum_ok    (jsm_cksum_ok_new),        // Out  Check-sum  matches PROM contents
-  .wdcnt_ok    (jsm_wdcnt_ok_new),        // Out  Word count matches PROM contents
-  .tck_fpga_ok  (jsm_tck_fpga_ok_new),      // Out  FPGA jtag tck detected
-  .end_ok      (jsm_end_ok_new),        // Out  End marker detected
-  .jtagsm_ok    (jsm_ok_new),          // Out  JTAG state machine completed without errors
-  .wdcnt      (jsm_wdcnt_new[15:0]),      // Out  Word count
-  .cksum      (jsm_cksum_new[7:0]),      // Out  Check sum
-  .tck_fpga_cnt  (tck_fpga_cnt_new[3:0]),    // Out  fpga jtag tck counter
-  .prom_sm_vec  (jsm_prom_sm_vec_new[3:0]),    // Out  PROM control State Machine status vector
-  .format_sm_vec  (jsm_format_sm_vec_new[2:0]),  // Out  Data format  State Machine status vector
-  .jtag_sm_vec  (jsm_jtag_sm_vec_new[1:0])    // Out  JTAG signal  State Machine status vector
+     .sreset      (jsm_sreset),          // In  Status signal reset
+     .tck_fpga    (tck_fpga_gated),          // In  TCK from FPGA JTAG chain 
+     .busy      (jsm_busy_new),          // Out  State machine busy writing
+     .aborted    (jsm_aborted_new),        // Out  State machine abend signal
+     .header_ok    (jsm_header_ok_new),      // Out  Header marker found where expected
+     .chain_ok    (jsm_chain_ok_new),        // Out  Chain  marker found where expected
+     .tckcnt_ok    (jsm_tckcnt_ok_new),      // Out  State machine sent correct number of TCKs to jtag
+     .cksum_ok    (jsm_cksum_ok_new),        // Out  Check-sum  matches PROM contents
+     .wdcnt_ok    (jsm_wdcnt_ok_new),        // Out  Word count matches PROM contents
+     .tck_fpga_ok  (jsm_tck_fpga_ok_new),      // Out  FPGA jtag tck detected
+     .end_ok      (jsm_end_ok_new),        // Out  End marker detected
+     .jtagsm_ok    (jsm_ok_new),          // Out  JTAG state machine completed without errors
+     .wdcnt      (jsm_wdcnt_new[15:0]),      // Out  Word count
+     .cksum      (jsm_cksum_new[7:0]),      // Out  Check sum
+     .tck_fpga_cnt  (tck_fpga_cnt_new[3:0]),    // Out  fpga jtag tck counter
+     .prom_sm_vec  (jsm_prom_sm_vec_new[3:0]),    // Out  PROM control State Machine status vector
+     .format_sm_vec  (jsm_format_sm_vec_new[2:0]),  // Out  Data format  State Machine status vector
+     .jtag_sm_vec  (jsm_jtag_sm_vec_new[1:0])    // Out  JTAG signal  State Machine status vector
   );
 
 //------------------------------------------------------------------------------------------------------------------
@@ -3839,43 +3952,43 @@
   jtagsm_old ujtagsm_old
   (  
 // Control
-  .clock      (clock),            // In  40MHz clock
-  .global_reset  (global_reset),          // In  Global reset
-  .power_up    (power_up),            // In  DCM clock lock, we wait for it
-  .vme_ready    (vsm_ready_s6),          // In  TMB VME registers loaded from PROM
-  .start      (jsm_start_old),        // In  Cycle start command
-  .autostart    (jsm_autostart_old),      // In  Enable automatic power-up
-  .throttle    (jsm_throttle[3:0]),      // In  JTAG speed control, 0=fastest
+     .clock      (clock),            // In  40MHz clock
+     .global_reset  (global_reset),          // In  Global reset
+     .power_up    (power_up),            // In  DCM clock lock, we wait for it
+     .vme_ready    (vsm_ready_s6),          // In  TMB VME registers loaded from PROM. JGhere, and alct fpga wait completed
+     .start      (jsm_start_old),        // In  Cycle start command
+     .autostart    (jsm_autostart_old),      // In  Enable automatic power-up
+     .throttle    (jsm_throttle[3:0]),      // In  JTAG speed control, 0=fastest
 // PROM
-  .prom_data    (jsm_prom_data[7:0]),      // In  prom_data[7:0]
-  .prom_clk    (jsm_prom_clk_old),        // Out  prom_ctrl[3]
-  .prom_oe    (jsm_prom_oe_old),        // Out  prom_ctrl[4]
-  .prom_nce    (jsm_prom_nce_old),        // Out  prom_ctrl[5]
+     .prom_data    (jsm_prom_data[7:0]),      // In  prom_data[7:0]
+     .prom_clk    (jsm_prom_clk_old),        // Out  prom_ctrl[3]
+     .prom_oe    (jsm_prom_oe_old),        // Out  prom_ctrl[4]
+     .prom_nce    (jsm_prom_nce_old),        // Out  prom_ctrl[5]
 //JTAG
-  .jtag_oe    (jsm_jtag_oe_old),        // Out  Enable jtag drivers else tri-state
-  .tdi      (jsm_usr_jtag_old[0]),      // Out  jtag_usr[1]
-  .tms      (jsm_usr_jtag_old[1]),      // Out  jtag_usr[2]
-  .tck      (jsm_usr_jtag_old[2]),      // Out  jtag_usr[3]
-  .sel      (jsm_usr_jtag_old[6:3]),    // Out  sel_usr[3:0]
+     .jtag_oe    (jsm_jtag_oe_old),        // Out  Enable jtag drivers else tri-state
+     .tdi      (jsm_usr_jtag_old[0]),      // Out  jtag_usr[1]
+     .tms      (jsm_usr_jtag_old[1]),      // Out  jtag_usr[2]
+     .tck      (jsm_usr_jtag_old[2]),      // Out  jtag_usr[3]
+     .sel      (jsm_usr_jtag_old[6:3]),    // Out  sel_usr[3:0]
 // Status
-  .sreset      (jsm_sreset),          // In  Status signal reset
-  .tck_fpga    (tck_fpga_gated),        // In  TCK from FPGA JTAG chain 
-  .busy      (jsm_busy_old),          // Out  State machine busy writing
-  .aborted    (jsm_aborted_old),        // Out  State machine abend signal
-  .header_ok    (jsm_header_ok_old),      // Out  Header marker found where expected
-  .chain_ok    (jsm_chain_ok_old),        // Out  Chain  marker found where expected
-  .tckcnt_ok    (jsm_tckcnt_ok_old),      // Out  State machine sent correct number of TCKs to jtag
-  .cksum_ok    (jsm_cksum_ok_old),        // Out  Check-sum  matches PROM contents
-  .wdcnt_ok    (jsm_wdcnt_ok_old),        // Out  Word count matches PROM contents
-  .tck_fpga_ok  (jsm_tck_fpga_ok_old),      // Out  FPGA jtag tck detected
-  .end_ok      (jsm_end_ok_old),        // Out  End marker detected
-  .jtagsm_ok    (jsm_ok_old),          // Out  JTAG state machine completed without errors
-  .wdcnt      (jsm_wdcnt_old[15:0]),      // Out  Word count
-  .cksum      (jsm_cksum_old[7:0]),      // Out  Check sum
-  .tck_fpga_cnt  (tck_fpga_cnt_old[3:0]),    // Out  fpga jtag tck counter
-  .prom_sm_vec  (jsm_prom_sm_vec_old[3:0]),    // Out  PROM control State Machine status vector
-  .format_sm_vec  (jsm_format_sm_vec_old[2:0]),  // Out  Data format  State Machine status vector
-  .jtag_sm_vec  (jsm_jtag_sm_vec_old[1:0])    // Out  JTAG signal  State Machine status vector
+     .sreset      (jsm_sreset),          // In  Status signal reset
+     .tck_fpga    (tck_fpga_gated),        // In  TCK from FPGA JTAG chain 
+     .busy      (jsm_busy_old),          // Out  State machine busy writing
+     .aborted    (jsm_aborted_old),        // Out  State machine abend signal
+     .header_ok    (jsm_header_ok_old),      // Out  Header marker found where expected
+     .chain_ok    (jsm_chain_ok_old),        // Out  Chain  marker found where expected
+     .tckcnt_ok    (jsm_tckcnt_ok_old),      // Out  State machine sent correct number of TCKs to jtag
+     .cksum_ok    (jsm_cksum_ok_old),        // Out  Check-sum  matches PROM contents
+     .wdcnt_ok    (jsm_wdcnt_ok_old),        // Out  Word count matches PROM contents
+     .tck_fpga_ok  (jsm_tck_fpga_ok_old),      // Out  FPGA jtag tck detected
+     .end_ok      (jsm_end_ok_old),        // Out  End marker detected
+     .jtagsm_ok    (jsm_ok_old),          // Out  JTAG state machine completed without errors
+     .wdcnt      (jsm_wdcnt_old[15:0]),      // Out  Word count
+     .cksum      (jsm_cksum_old[7:0]),      // Out  Check sum
+     .tck_fpga_cnt  (tck_fpga_cnt_old[3:0]),    // Out  fpga jtag tck counter
+     .prom_sm_vec  (jsm_prom_sm_vec_old[3:0]),    // Out  PROM control State Machine status vector
+     .format_sm_vec  (jsm_format_sm_vec_old[2:0]),  // Out  Data format  State Machine status vector
+     .jtag_sm_vec  (jsm_jtag_sm_vec_old[1:0])    // Out  JTAG signal  State Machine status vector
   );
 
 // JTAGsm PROM signal multiplexer
@@ -3909,13 +4022,13 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  dddsm_wr[0]        = 0;          // Start  ddd state machine
-  dddsm_wr[1]        = 0;          // Manual ddd_clock
-  dddsm_wr[2]        = 1;          // Manual ddd_adr_latch, active low
-  dddsm_wr[3]        = 0;          // Manual ddd_serial_in (out from fpga to ddd)
-  dddsm_wr[4]        = 0;          // Readonly
-  dddsm_wr[5]        = 1;          // Auto start
-  dddsm_wr[15:6]      = 0;          // Readonly
+     dddsm_wr[0]        = 0;          // Start  ddd state machine
+     dddsm_wr[1]        = 0;          // Manual ddd_clock
+     dddsm_wr[2]        = 1;          // Manual ddd_adr_latch, active low
+     dddsm_wr[3]        = 0;          // Manual ddd_serial_in (out from fpga to ddd)
+     dddsm_wr[4]        = 0;          // Readonly
+     dddsm_wr[5]        = 1;          // Auto start
+     dddsm_wr[15:6]      = 0;          // Readonly
   end
 
   wire   ddd_clock_sm;
@@ -3961,22 +4074,22 @@
 //------------------------------------------------------------------------------------------------------------------
 // 3D3444 Power-up Default Delays, 2ns steps
   initial begin
-  dddoe_wr[15:0]  = 16'h0FFF;      // Output enable, 0FFF=enable all
+     dddoe_wr[15:0]  = 16'h0FFF;      // Output enable, 0FFF=enable all
 
-  ddd0_wr[3:0]  = 4'd0;        // Ch 0:  ALCT  tof clock ALCT time of flight offset  9m=17ns, 10m= 5ns, add 12ns/meter,modulo25
-  ddd0_wr[7:4]  = 4'd01;      // Ch 1:  ALCT  txd clock ALCT transmit delay      9m= 3ns, 10m=15ns, add 12ns/meter,modulo25
-  ddd0_wr[11:8]  = 4'd06;      // Ch 2:  DMB   tx  clock from CERN timing tests 6/2009
-  ddd0_wr[15:12]  = 4'd09;      // Ch 3:  RPC   tx  clock
+     ddd0_wr[3:0]  = 4'd0;        // Ch 0:  ALCT  tof clock ALCT time of flight offset  9m=17ns, 10m= 5ns, add 12ns/meter,modulo25
+     ddd0_wr[7:4]  = 4'd01;      // Ch 1:  ALCT  txd clock ALCT transmit delay      9m= 3ns, 10m=15ns, add 12ns/meter,modulo25
+     ddd0_wr[11:8]  = 4'd06;      // Ch 2:  DMB   tx  clock from CERN timing tests 6/2009
+     ddd0_wr[15:12]  = 4'd09;      // Ch 3:  RPC   tx  clock
 
-  ddd1_wr[3:0]  = 4'd00;      // Ch 4:  ALCT  rxd clock ALCT receive delay (was tmb1 clock)
-  ddd1_wr[7:4]  = 4'd00;      // Ch 5:  CFEB  rxd clock CFEB receive delay (was mpc)
-  ddd1_wr[11:8]  = 4'd00;      // Ch 6:  CFEB  tof clock (was dcc)
-  ddd1_wr[15:12]  = 4'd07;      // Ch 7:  CFEB0 rx  clock 15ns nom
+     ddd1_wr[3:0]  = 4'd00;      // Ch 4:  ALCT  rxd clock ALCT receive delay (was tmb1 clock)
+     ddd1_wr[7:4]  = 4'd00;      // Ch 5:  CFEB  rxd clock CFEB receive delay (was mpc)
+     ddd1_wr[11:8]  = 4'd00;      // Ch 6:  CFEB  tof clock (was dcc)
+     ddd1_wr[15:12]  = 4'd07;      // Ch 7:  CFEB0 rx  clock 15ns nom
 
-  ddd2_wr[3:0]  = 4'd07;      // Ch 8:  CFEB1 rx  clock
-  ddd2_wr[7:4]  = 4'd07;      // Ch 9:  CFEB2 rx  clock
-  ddd2_wr[11:8]  = 4'd07;      // Ch10:  CFEB3 rx  clock
-  ddd2_wr[15:12]  = 4'd07;      // Ch11:  CFEB4 rx  clock
+     ddd2_wr[3:0]  = 4'd07;      // Ch 8:  CFEB1 rx  clock
+     ddd2_wr[7:4]  = 4'd07;      // Ch 9:  CFEB2 rx  clock
+     ddd2_wr[11:8]  = 4'd07;      // Ch10:  CFEB3 rx  clock
+     ddd2_wr[15:12]  = 4'd07;      // Ch11:  CFEB4 rx  clock
   end
 
   assign ddd0_rd[15:0]   = ddd0_wr[15:0];
@@ -3987,36 +4100,36 @@
 // TMB DDD 3D3444 delay chip bank automatic power-up initialization
   ddd_tmb uddd_tmb
   (  
-  .clock      (clock),      // In  Delay chip data clock
-  .global_reset  (global_reset),    // In  Global reset
-  .power_up    (power_up),      // In  DCM clock lock, we wait for it
-  .vme_ready    (vsm_ready_s6),    // In  VME registers loaded from prom
-  .start      (ddd_start_vme),  // In  Cycle start command
-  .autostart_en  (ddd_autostart),  // In  Enable automatic power-up
-  .oe        (dddoe_wr[11:0]),   // In  Output enables 12'hFFF=enable al
+     .clock      (clock),      // In  Delay chip data clock
+     .global_reset  (global_reset),    // In  Global reset
+     .power_up    (power_up),      // In  DCM clock lock, we wait for it
+     .vme_ready    (vsm_ready_s6),    // In  VME registers loaded from prom. JGhere, and alct fpga wait completed
+     .start      (ddd_start_vme),  // In  Cycle start command
+     .autostart_en  (ddd_autostart),  // In  Enable automatic power-up
+     .oe        (dddoe_wr[11:0]),   // In  Output enables 12'hFFF=enable al
 
-  .delay_ch0    (ddd0_wr[3:0]),    // In  Channel  0 delay steps
-  .delay_ch1    (ddd0_wr[7:4]),    // In  Channel  1 delay steps
-  .delay_ch2    (ddd0_wr[11:8]),  // In  Channel  2 delay steps
-  .delay_ch3    (ddd0_wr[15:12]),  // In  Channel  3 delay steps
+     .delay_ch0    (ddd0_wr[3:0]),    // In  Channel  0 delay steps
+     .delay_ch1    (ddd0_wr[7:4]),    // In  Channel  1 delay steps
+     .delay_ch2    (ddd0_wr[11:8]),  // In  Channel  2 delay steps
+     .delay_ch3    (ddd0_wr[15:12]),  // In  Channel  3 delay steps
 
-  .delay_ch4    (ddd1_wr[3:0]),    // In  Channel  4 delay steps
-  .delay_ch5    (ddd1_wr[7:4]),    // In  Channel  5 delay steps
-  .delay_ch6    (ddd1_wr[11:8]),  // In  Channel  6 delay steps
-  .delay_ch7    (ddd1_wr[15:12]),  // In  Channel  7 delay steps
+     .delay_ch4    (ddd1_wr[3:0]),    // In  Channel  4 delay steps
+     .delay_ch5    (ddd1_wr[7:4]),    // In  Channel  5 delay steps
+     .delay_ch6    (ddd1_wr[11:8]),  // In  Channel  6 delay steps
+     .delay_ch7    (ddd1_wr[15:12]),  // In  Channel  7 delay steps
 
-  .delay_ch8    (ddd2_wr[3:0]),    // In  Channel  8 delay steps
-  .delay_ch9    (ddd2_wr[7:4]),    // In  Channel  9 delay steps
-  .delay_ch10    (ddd2_wr[11:8]),  // In  Channel 10 delay steps
-  .delay_ch11    (ddd2_wr[15:12]),  // In  Channel 11 delay steps
+     .delay_ch8    (ddd2_wr[3:0]),    // In  Channel  8 delay steps
+     .delay_ch9    (ddd2_wr[7:4]),    // In  Channel  9 delay steps
+     .delay_ch10    (ddd2_wr[11:8]),  // In  Channel 10 delay steps
+     .delay_ch11    (ddd2_wr[15:12]),  // In  Channel 11 delay steps
 
-  .serial_clock  (ddd_clock_sm),    // Out  3D3444 clock
-  .serial_out    (ddd_serial_in_sm),  // Out  3D3444 data
-  .adr_latch    (ddd_adr_latch_sm),  // Out  3D3444 adr strobe
-  .serial_in    (ddd_serial_out),  // In  3D3444 verify
+     .serial_clock  (ddd_clock_sm),    // Out  3D3444 clock
+     .serial_out    (ddd_serial_in_sm),  // Out  3D3444 data
+     .adr_latch    (ddd_adr_latch_sm),  // Out  3D3444 adr strobe
+     .serial_in    (ddd_serial_out),  // In  3D3444 verify
 
-  .busy      (ddd_busy),      // Out  State machine busy writing
-  .verify_ok    (ddd_verify_ok)    // Out  Data readback verified OK
+     .busy      (ddd_busy),      // Out  State machine busy writing
+     .verify_ok    (ddd_verify_ok)    // Out  Data readback verified OK
   );
 
 //------------------------------------------------------------------------------------------------------------------
@@ -4024,13 +4137,13 @@
 //------------------------------------------------------------------------------------------------------------------
 // RAT Control power-up defaults
   initial begin
-  rat_control_wr[0]      = 0;          // RW  rpc_sync
-  rat_control_wr[1]      = 0;          // RW  rpc_posneg
-  rat_control_wr[2]      = 0;          // RW  rpc_lptmb,    unused
-  rat_control_wr[3]      = 0;          // RW  rpc_free_tx0
-  rat_control_wr[4]      = 1;          // RW  rpc_dsn_en,   unused
-  rat_control_wr[5]      = 0;          // RW  rat_clk_mode, unused
-  rat_control_wr[15:6]    = 0;          //    Unassigned
+     rat_control_wr[0]      = 0;          // RW  rpc_sync
+     rat_control_wr[1]      = 0;          // RW  rpc_posneg
+     rat_control_wr[2]      = 0;          // RW  rpc_lptmb,    unused
+     rat_control_wr[3]      = 0;          // RW  rpc_free_tx0
+     rat_control_wr[4]      = 1;          // RW  rpc_dsn_en,   unused
+     rat_control_wr[5]      = 0;          // RW  rat_clk_mode, unused
+     rat_control_wr[15:6]    = 0;          //    Unassigned
   end
 
   assign rpc_sync        = rat_control_wr[0];  // RW  Sync mode
@@ -4045,17 +4158,17 @@
 //------------------------------------------------------------------------------------------------------------------
 // RAT DDD 3D3444 State Machine defaults
   initial begin
-  dddrsm_wr[0]    = 0;      // Start  ddd state machine
-  dddrsm_wr[1]    = 0;      // Manual ddd_clock
-  dddrsm_wr[2]    = 1;      // Manual ddd_adr_latch, active low
-  dddrsm_wr[3]    = 0;      // Manual ddd_serial_in (out from fpga to ddd)
-  dddrsm_wr[4]    = 0;      // Serial data from 3d3444
-  dddrsm_wr[5]    = 1;      // Auto start
-  dddrsm_wr[7:6]    = 0;      // Readonly
-  dddrsm_wr[11:8]    = 4'b0011;    // dddr_oe[3:0] output enables
-  dddrsm_wr[12]    = 1;      // 1=start RAT machine when starting TMB machine
-  dddrsm_wr[13]    = 1;      // 1=use negative clock edge to latch verify data, 0=posedge
-  dddrsm_wr[15:14]  = 3;      // Delay before latching verify data
+     dddrsm_wr[0]    = 0;      // Start  ddd state machine
+     dddrsm_wr[1]    = 0;      // Manual ddd_clock
+     dddrsm_wr[2]    = 1;      // Manual ddd_adr_latch, active low
+     dddrsm_wr[3]    = 0;      // Manual ddd_serial_in (out from fpga to ddd)
+     dddrsm_wr[4]    = 0;      // Serial data from 3d3444
+     dddrsm_wr[5]    = 1;      // Auto start
+     dddrsm_wr[7:6]    = 0;      // Readonly
+     dddrsm_wr[11:8]    = 4'b0011;    // dddr_oe[3:0] output enables
+     dddrsm_wr[12]    = 1;      // 1=start RAT machine when starting TMB machine
+     dddrsm_wr[13]    = 1;      // 1=use negative clock edge to latch verify data, 0=posedge
+     dddrsm_wr[15:14]  = 3;      // Delay before latching verify data
   end
 
 // RAT DDD 3D3444 State Machine Control
@@ -4114,8 +4227,8 @@
   reg dddr_sdo1_ff = 0;
   
   always @(posedge clock) begin  // Sync to local clock
-  dddr_sdo0_ff <= dddr_sdo0;
-  dddr_sdo1_ff <= dddr_sdo1;  
+     dddr_sdo0_ff <= dddr_sdo0;
+     dddr_sdo1_ff <= dddr_sdo1;  
   end
 
   assign dddr_serial_out  = (dddr_rxphase) ? dddr_sdo1_ff : dddr_sdo0_ff;
@@ -4137,10 +4250,10 @@
 //------------------------------------------------------------------------------------------------------------------
 // RAT DDD 3D3444 State Machine defaults// RAT DDD 3D3444 Delay Register
   initial begin
-  dddr_wr[3:0]  = 4'h3;  // default 3
-  dddr_wr[7:4]  = 4'h3;  // default 3
-  dddr_wr[11:8]  = 4'h0;
-  dddr_wr[15:12]  = 4'h0;
+     dddr_wr[3:0]  = 4'h3;  // default 3
+     dddr_wr[7:4]  = 4'h3;  // default 3
+     dddr_wr[11:8]  = 4'h0;
+     dddr_wr[15:12]  = 4'h0;
   end
 
   assign dddr_rd[15:0] = dddr_wr[15:0];
@@ -4148,24 +4261,24 @@
 // RAT DDD 3D3444 delay chip programming
   ddd_rat uddd_rat
   (
-  .clock      (clock),        // In  Delay chip data clock
-  .global_reset  (global_reset),      // In  Global reset
-  .power_up    (power_up),        // In  DCM clock lock, we wait for it
-  .vme_ready    (vsm_ready),      // In  VME registers loaded
-  .start      (dddr_start),      // In  Cycle start command
-  .autostart_en  (dddr_autostart),    // In  Enable automatic power-up
-  .oe        (dddr_oe[3:0]),     // In  Output enables 4'hF=enable all
-  .verify_dly    (dddr_verify_dly[1:0]),  // In  Delay before latching verify data
-  .delay_ch0    (dddr_wr[3:0]),      // In  Channel  0 delay steps
-  .delay_ch1    (dddr_wr[7:4]),      // In  Channel  0 delay steps
-  .delay_ch2    (dddr_wr[11:8]),    // In  Channel  0 delay steps
-  .delay_ch3    (dddr_wr[15:12]),    // In  Channel  0 delay steps
-  .serial_clock  (dddr_clock_sm),    // Out  3D3444 clock
-  .serial_out    (dddr_serial_in_sm),  // Out  3D3444 data
-  .adr_latch    (dddr_adr_latch_sm),  // Out  3D3444 adr strobe
-  .serial_in    (dddr_serial_out),    // In  3D3444 verify
-  .busy      (dddr_busy),      // Out  State machine busy writing
-  .verify_ok    (dddr_verify_ok)    // Out  Data readback verified OK
+   .clock      (clock),        // In  Delay chip data clock
+   .global_reset  (global_reset),      // In  Global reset
+   .power_up    (power_up),        // In  DCM clock lock, we wait for it
+   .vme_ready    (vsm_ready),      // In  VME registers loaded
+   .start      (dddr_start),      // In  Cycle start command
+   .autostart_en  (dddr_autostart),    // In  Enable automatic power-up
+   .oe        (dddr_oe[3:0]),     // In  Output enables 4'hF=enable all
+   .verify_dly    (dddr_verify_dly[1:0]),  // In  Delay before latching verify data
+   .delay_ch0    (dddr_wr[3:0]),      // In  Channel  0 delay steps
+   .delay_ch1    (dddr_wr[7:4]),      // In  Channel  0 delay steps
+   .delay_ch2    (dddr_wr[11:8]),    // In  Channel  0 delay steps
+   .delay_ch3    (dddr_wr[15:12]),    // In  Channel  0 delay steps
+   .serial_clock  (dddr_clock_sm),    // Out  3D3444 clock
+   .serial_out    (dddr_serial_in_sm),  // Out  3D3444 data
+   .adr_latch    (dddr_adr_latch_sm),  // Out  3D3444 adr strobe
+   .serial_in    (dddr_serial_out),    // In  3D3444 verify
+   .busy      (dddr_busy),      // Out  State machine busy writing
+   .verify_ok    (dddr_verify_ok)    // Out  Data readback verified OK
   );
 
 //------------------------------------------------------------------------------------------------------------------
@@ -4173,20 +4286,20 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin  // synthesis attribute IOB of step_wr is "false";
-  step_wr[ 0]    = 1'b0;      // Step ALCT clock
-  step_wr[ 1]    = 1'b0;      // Step DMB clock
-  step_wr[ 2]    = 1'b0;      // Step RPC clock
-  step_wr[ 3]    = 1'b0;      // Step CFEB clock
-  step_wr[ 4]    = 1'b0;      // 0= Run, 1=Step clocks
-  step_wr[ 5]    = 1'b1;      // 1=Enable CFEB0 Clock
-  step_wr[ 6]    = 1'b1;      // 1=Enable CFEB1 Clock
-  step_wr[ 7]    = 1'b1;      // 1=Enable CFEB2 Clock
-  step_wr[ 8]    = 1'b1;      // 1=Enable CFEB3 Clock
-  step_wr[ 9]    = 1'b1;      // 1=Enable CFEB4 Clock    IOB clock contention with alct_txa[17]
-  step_wr[10]    = 1'b1;      // 1=Enable ALCT Clocks    IOB clock contention with alct_txb[19]
-  step_wr[11]    = 1'b1;      // 1=Disable ALCT Hard Reset
-  step_wr[12]    = 1'b1;      // 1=Disable TMB  Hard Reset
-  step_wr[15:13]  = 0;
+     step_wr[ 0]    = 1'b0;      // Step ALCT clock
+     step_wr[ 1]    = 1'b0;      // Step DMB clock
+     step_wr[ 2]    = 1'b0;      // Step RPC clock
+     step_wr[ 3]    = 1'b0;      // Step CFEB clock
+     step_wr[ 4]    = 1'b0;      // 0= Run, 1=Step clocks
+     step_wr[ 5]    = 1'b1;      // 1=Enable CFEB0 Clock
+     step_wr[ 6]    = 1'b1;      // 1=Enable CFEB1 Clock
+     step_wr[ 7]    = 1'b1;      // 1=Enable CFEB2 Clock
+     step_wr[ 8]    = 1'b1;      // 1=Enable CFEB3 Clock
+     step_wr[ 9]    = 1'b1;      // 1=Enable CFEB4 Clock    IOB clock contention with alct_txa[17]
+     step_wr[10]    = 1'b1;      // 1=Enable ALCT Clocks    IOB clock contention with alct_txb[19]
+     step_wr[11]    = 1'b1;      // 1=Disable ALCT Hard Reset
+     step_wr[12]    = 1'b1;      // 1=Disable TMB  Hard Reset
+     step_wr[15:13]  = 0;
   end
 
   assign step_alct           = step_wr[0]; 
@@ -4207,8 +4320,8 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  led_wr[ 7:0] = 8'hAB;                // Front panel LEDs
-  led_wr[15:8] = 8'hCD;                // On-board LEDs shared with PROM data bus
+     led_wr[ 7:0] = 8'hAB;                // Front panel LEDs
+     led_wr[15:8] = 8'hCD;                // On-board LEDs shared with PROM data bus
   end
 
 // LED Signals
@@ -4235,26 +4348,26 @@
   wire cylon_cnt_done = cylon_cnt[MXCYLON-1];
 
   always @(posedge clock) begin
-  if (!cylon_cnt_done) cylon_cnt <= cylon_cnt+1'b1;
+     if (!cylon_cnt_done) cylon_cnt <= cylon_cnt+1'b1;
   end
 
   always @(posedge clock) begin
-  pup_cylon <= pup_cylon || cylon_cnt_done;
+     pup_cylon <= pup_cylon || cylon_cnt_done;
   end
 
 // LED display Register
   always @* begin
-  if    (led_fp_src_vme)  led_fp_out <= led_wr[7:0];  // VME sources LED pattern
-  else if  (led_fp_cylon)    led_fp_out <= cylon_one;  // cylon pattern from cfg
-  else if (!pup_cylon)    led_fp_out <= cylon_one;  // cylon pattern at power up
-  else            led_fp_out <= led_fp_in;  // normal mode
+     if    (led_fp_src_vme)  led_fp_out <= led_wr[7:0];  // VME sources LED pattern
+     else if  (led_fp_cylon)    led_fp_out <= cylon_one;  // cylon pattern from cfg
+     else if (!pup_cylon)    led_fp_out <= cylon_one;  // cylon pattern at power up
+     else            led_fp_out <= led_fp_in;  // normal mode
   end
 
   always @* begin
-  if    (led_bd_src_vme)  led_bd_out <= led_wr[15:8];  // VME sources LED pattern
-  else if  (led_bd_cylon)    led_bd_out <= cylon_one;  // cylon pattern
-  else if (!pup_cylon)    led_bd_out <= cylon_one;  // cylon pattern at power up
-  else            led_bd_out <= led_bd_in;  // normal mode
+     if    (led_bd_src_vme)  led_bd_out <= led_wr[15:8];  // VME sources LED pattern
+     else if  (led_bd_cylon)    led_bd_out <= cylon_one;  // cylon pattern
+     else if (!pup_cylon)    led_bd_out <= cylon_one;  // cylon pattern at power up
+     else            led_bd_out <= led_bd_in;  // normal mode
   end
 
   assign led_rd[ 7:0] = led_fp_out;
@@ -4264,7 +4377,7 @@
   reg bd_acc_ff=0;
 
   always @(posedge clock_vme) begin
-  bd_acc_ff <= bd_accessed & ds0;
+     bd_acc_ff <= bd_accessed & ds0;
   end
 
   x_flashsm #(21) uflash_vme (bd_acc_ff,1'b0,clock,led_fp_vme);
@@ -4290,14 +4403,14 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  adc_wr[5:0]      = 0;      // Readonly
-  adc_wr[6]      = 1'b0;      // VADC serial clock
-  adc_wr[7]      = 1'b0;      // VADC serial data
-  adc_wr[8]      = 1'b1;      // VADC /chip select
-  adc_wr[9]      = 1'b0;      // TADC serial clock
-  adc_wr[10]      = 1'b1;      // TADC serial data
-  adc_wr[11]      = 1'b0;      // TADC serial data from RAT
-  adc_wr[15:12]    = 0;
+     adc_wr[5:0]      = 0;      // Readonly
+     adc_wr[6]      = 1'b0;      // VADC serial clock
+     adc_wr[7]      = 1'b0;      // VADC serial data
+     adc_wr[8]      = 1'b1;      // VADC /chip select
+     adc_wr[9]      = 1'b0;      // TADC serial clock
+     adc_wr[10]      = 1'b1;      // TADC serial data
+     adc_wr[11]      = 1'b0;      // TADC serial data from RAT
+     adc_wr[15:12]    = 0;
   end
 
   wire smb_data_in;
@@ -4334,18 +4447,18 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  dsn_wr[0]      = 1'b0;    // TMB Digital Serial SM Start
-  dsn_wr[1]      = 1'b0;    // TMB Digital Serial Write Pulse
-  dsn_wr[2]      = 1'b0;    // TMB Digital Serial Init Pulse
-  dsn_wr[4:3]      = 0;
-  dsn_wr[5]      = 1'b0;    // MEZ Digital Serial SM Start
-  dsn_wr[6]      = 1'b0;    // MEZ Digital Serial Write Pulse
-  dsn_wr[7]      = 1'b0;    // MEZ Digital Serial Init Pulse
-  dsn_wr[9:8]      = 0;
-  dsn_wr[10]      = 1'b0;    // RAT Digital Serial SM Start
-  dsn_wr[11]      = 1'b0;    // RAT Digital Serial Write Pulse
-  dsn_wr[12]      = 1'b0;    // RAT Digital Serial Init Pulse
-  dsn_wr[15:13]    = 0;
+     dsn_wr[0]      = 1'b0;    // TMB Digital Serial SM Start
+     dsn_wr[1]      = 1'b0;    // TMB Digital Serial Write Pulse
+     dsn_wr[2]      = 1'b0;    // TMB Digital Serial Init Pulse
+     dsn_wr[4:3]      = 0;
+     dsn_wr[5]      = 1'b0;    // MEZ Digital Serial SM Start
+     dsn_wr[6]      = 1'b0;    // MEZ Digital Serial Write Pulse
+     dsn_wr[7]      = 1'b0;    // MEZ Digital Serial Init Pulse
+     dsn_wr[9:8]      = 0;
+     dsn_wr[10]      = 1'b0;    // RAT Digital Serial SM Start
+     dsn_wr[11]      = 1'b0;    // RAT Digital Serial Write Pulse
+     dsn_wr[12]      = 1'b0;    // RAT Digital Serial Init Pulse
+     dsn_wr[15:13]    = 0;
   end
 
   wire tmb_sn_start  =  dsn_wr[0];
@@ -4411,14 +4524,14 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  mod_cfg_wr[0]    = 0;    // 1=Front Panel LEDs sourced from VME register
-  mod_cfg_wr[1]    = 0;    // 1=FP LED Cylon mode, cool
-  mod_cfg_wr[2]    = 1;    // 1=Flash in trigger_stop mode
-  mod_cfg_wr[3]    = 0;    // 1=On-Board    LEDs sourced from VME register
-  mod_cfg_wr[4]    = 0;    // 1=BD LED Cylon mode, cool
-  mod_cfg_wr[11:5]  = 0;    // Readonly
-  mod_cfg_wr[12]    = 1;    // 1=Enable global reset on lock_lost
-  mod_cfg_wr[15:13]  = 0;    // Readonly
+     mod_cfg_wr[0]    = 0;    // 1=Front Panel LEDs sourced from VME register
+     mod_cfg_wr[1]    = 0;    // 1=FP LED Cylon mode, cool
+     mod_cfg_wr[2]    = 1;    // 1=Flash in trigger_stop mode
+     mod_cfg_wr[3]    = 0;    // 1=On-Board    LEDs sourced from VME register
+     mod_cfg_wr[4]    = 0;    // 1=BD LED Cylon mode, cool
+     mod_cfg_wr[11:5]  = 0;    // Readonly
+     mod_cfg_wr[12]    = 0;    // 1=Enable global reset on lock_lost. JRG, for mmcm_lock_lost resets: was 1, now 0 for testing
+     mod_cfg_wr[15:13]  = 0;    // Readonly
   end
 
   assign led_fp_src_vme    = mod_cfg_wr[0];  // RW  1=Front Panel LEDs sourced from VME register
@@ -4426,7 +4539,7 @@
   assign led_flash_on_stop  = mod_cfg_wr[2];  // RW  1=Flash front panel in trigger_stop mode
   assign led_bd_src_vme    = mod_cfg_wr[3];  // RW  1=On-Board    LEDs sourced from VME register
   assign led_bd_cylon    = mod_cfg_wr[4];  // RW  1=On-Board    LEDs Cylon mode, cool
-  assign global_reset_en    = mod_cfg_wr[12];  // RW  Enable global reset on lock_lost.  JG: on by default
+  assign global_reset_en    = mod_cfg_wr[12];  // RW  Enable global reset on lock_lost.  JG: used to be ON by default
 
   assign mod_cfg_rd[4:0]    = mod_cfg_wr[4:0];  // RW  Readback
   assign mod_cfg_rd[11:5]    = cfeb_exists[6:0];  // R  CFEBs instantiated in this firmware
@@ -4442,18 +4555,18 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  ccb_cfg_wr[0]          = 0;      // 1=Ignore CCB backplane inputs
-  ccb_cfg_wr[1]          = 0;      // 1=Disable CCB backplane outputs
-  ccb_cfg_wr[2]          = 0;      // 1=Enable CCB internal L1A emulator
-  ccb_cfg_wr[3]          = 0;      // 1=Enable ALCT+CLCT CCB status for CCB front panelpanel
-  ccb_cfg_wr[4]          = 0;      // 1=Enable ALCT status GTL outputs
-  ccb_cfg_wr[5]          = 0;      // 1=Enable CLCT status GTL outputs
-  ccb_cfg_wr[6]          = 0;      // 1=fire ccb_l1accept oneshot
-  ccb_cfg_wr[11:7]        = 0;      // CCB reserved signals from TMB, not used yet
-  ccb_cfg_wr[12]          = 0;      // Event counter reset, from VME
-  ccb_cfg_wr[13]          = 0;      // Bunch crossing counter reset, from VME
-  ccb_cfg_wr[14]          = 0;      // Bunch crossing zero, from VME
-  ccb_cfg_wr[15]          = CCB_BX0_EMULATOR;  // BX0 emulator enable, must be 0 for CERN versions
+     ccb_cfg_wr[0]          = 0;      // 1=Ignore CCB backplane inputs
+     ccb_cfg_wr[1]          = 0;      // 1=Disable CCB backplane outputs
+     ccb_cfg_wr[2]          = 0;      // 1=Enable CCB internal L1A emulator
+     ccb_cfg_wr[3]          = 0;      // 1=Enable ALCT+CLCT CCB status for CCB front panelpanel
+     ccb_cfg_wr[4]          = 0;      // 1=Enable ALCT status GTL outputs
+     ccb_cfg_wr[5]          = 0;      // 1=Enable CLCT status GTL outputs
+     ccb_cfg_wr[6]          = 0;      // 1=fire ccb_l1accept oneshot
+     ccb_cfg_wr[11:7]        = 0;      // CCB reserved signals from TMB, not used yet
+     ccb_cfg_wr[12]          = 0;      // Event counter reset, from VME
+     ccb_cfg_wr[13]          = 0;      // Bunch crossing counter reset, from VME
+     ccb_cfg_wr[14]          = 0;      // Bunch crossing zero, from VME
+     ccb_cfg_wr[15]          = CCB_BX0_EMULATOR;  // BX0 emulator enable, must be 0 for CERN versions
   end
 
   assign ccb_ignore_rx      = ccb_cfg_wr[0];  // RW  1=Ignore CCB backplane inputs
@@ -4489,15 +4602,15 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  ccb_trig_wr[0]          = 1'b0;    // 1=Request ccb l1a on alct ext_trig
-  ccb_trig_wr[1]          = 1'b0;    // 1=Request ccb l1a on clct ext_trig
-  ccb_trig_wr[2]          = 1'b1;    // 1=Request ccb l1a on sequencer trigger
-  ccb_trig_wr[3]          = 1'b0;    // 1=Fire alct_ext_trig oneshot
-  ccb_trig_wr[4]          = 1'b0;    // 1=Fire clct_ext_trig oneshot
-  ccb_trig_wr[5]          = 1'b0;    // 1=clct_ext_trig fires alct and alct fires clct_trig, DC level
-  ccb_trig_wr[6]          = 1'b0;    // 1=Allow clct_ext_trigger_ccb even if ccb_ignore_rx=1
-  ccb_trig_wr[7]          = 1'b0;    // 1=ignore ttc trig_start/stop commands
-  ccb_trig_wr[15:8]        = 8'd114;  // Internal L1A delay (not same as sequencer internal)
+     ccb_trig_wr[0]          = 1'b0;    // 1=Request ccb l1a on alct ext_trig
+     ccb_trig_wr[1]          = 1'b0;    // 1=Request ccb l1a on clct ext_trig
+     ccb_trig_wr[2]          = 1'b1;    // 1=Request ccb l1a on sequencer trigger
+     ccb_trig_wr[3]          = 1'b0;    // 1=Fire alct_ext_trig oneshot
+     ccb_trig_wr[4]          = 1'b0;    // 1=Fire clct_ext_trig oneshot
+     ccb_trig_wr[5]          = 1'b0;    // 1=clct_ext_trig fires alct and alct fires clct_trig, DC level
+     ccb_trig_wr[6]          = 1'b0;    // 1=Allow clct_ext_trigger_ccb even if ccb_ignore_rx=1
+     ccb_trig_wr[7]          = 1'b0;    // 1=ignore ttc trig_start/stop commands
+     ccb_trig_wr[15:8]        = 8'd114;  // Internal L1A delay (not same as sequencer internal)
   end
 
   assign alct_ext_trig_l1aen    = ccb_trig_wr[0];  // RW  1=Request ccb l1a on clct ext_trig
@@ -4514,31 +4627,31 @@
 //------------------------------------------------------------------------------------------------------------------
 // ADR_CCB_STAT0=2E    CCB Status Register, Readonly
 //------------------------------------------------------------------------------------------------------------------
-  assign ccb_stat0_rd[7:0]    = ccb_cmd[7:0];    // R  CCB command word
+  assign ccb_stat0_rd[7:0]    = ccb_cmd[7:0];     // R  CCB command word
   assign ccb_stat0_rd[8]      = ccb_clock40_enable;  // R  Enable 40MHz clock
   assign ccb_stat0_rd[9]      = ccb_reserved[0];  // R  ccb_ttcrx_ready
-  assign ccb_stat0_rd[10]      = ccb_reserved[1];  // R  ccb_qpll_locked
-  assign ccb_stat0_rd[11]      = ccb_reserved[2];  // R  Unassigned
-  assign ccb_stat0_rd[12]      = ccb_reserved[3];  // R  Unassigned
-  assign ccb_stat0_rd[13]      = ccb_reserved[4];  // R  Unassigned
-  assign ccb_stat0_rd[14]      = ccb_bcntres;    // R  Bunch crossing counter reset, backplane
-  assign ccb_stat0_rd[15]      = ccb_bx0;    // R  Bunch crossing 0 from backplane
+  assign ccb_stat0_rd[10]     = ccb_reserved[1];  // R  ccb_qpll_locked
+  assign ccb_stat0_rd[11]     = ccb_reserved[2];  // R  Unassigned
+  assign ccb_stat0_rd[12]     = ccb_reserved[3];  // R  Unassigned
+  assign ccb_stat0_rd[13]     = ccb_reserved[4];  // R  Unassigned
+  assign ccb_stat0_rd[14]     = ccb_bcntres;      // R  Bunch crossing counter reset, backplane
+  assign ccb_stat0_rd[15]     = ccb_bx0;          // R  Bunch crossing 0 from backplane
 
 //------------------------------------------------------------------------------------------------------------------
 //  ADR_ALCT_CFG=30    ALCT Configuration Register
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  alct_cfg_wr[0]          = 0;  // RW  1=Enable alct_ext_trig   from CCB
-  alct_cfg_wr[1]          = 0;  // RW  1=Enable alct_ext_inject from CCB
-  alct_cfg_wr[2]          = 0;  // RW  1=Assert alct_ext_trig
-  alct_cfg_wr[3]          = 0;  // RW  1=Assert alct_ext_inject
-  alct_cfg_wr[7:4]        = 0;  // RW  ALCT Sequencer command
-  alct_cfg_wr[8]          = 1;  // RW  1=connect ccb_clock40_enable to alct_clock_en_vme
-  alct_cfg_wr[9]          = 0;  // RW  alct_clock_en_vme (unless [8]=1)
-  alct_cfg_wr[10]          = 0;  // RO  alct_muonic conditional compile
-  alct_cfg_wr[11]          = 0;  // RO  cfeb_muonic conditional compile
-  alct_cfg_wr[15:12]        = 0;  // RW  Free
+     alct_cfg_wr[0]          = 0;  // RW  1=Enable alct_ext_trig   from CCB
+     alct_cfg_wr[1]          = 0;  // RW  1=Enable alct_ext_inject from CCB
+     alct_cfg_wr[2]          = 0;  // RW  1=Assert alct_ext_trig
+     alct_cfg_wr[3]          = 0;  // RW  1=Assert alct_ext_inject
+     alct_cfg_wr[7:4]        = 0;  // RW  ALCT Sequencer command
+     alct_cfg_wr[8]          = 1;  // RW  1=connect ccb_clock40_enable to alct_clock_en_vme
+     alct_cfg_wr[9]          = 0;  // RW  alct_clock_en_vme (unless [8]=1)
+     alct_cfg_wr[10]          = 0;  // RO  alct_muonic conditional compile
+     alct_cfg_wr[11]          = 0;  // RO  cfeb_muonic conditional compile
+     alct_cfg_wr[15:12]        = 0;  // RW  Free
   end
 
   assign cfg_alct_ext_trig_en    = alct_cfg_wr[0];  // RW  1=Enable alct_ext_trig   from CCB
@@ -4561,13 +4674,13 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  alct_inj_wr[0]          = 1'b0;              // 1=Blank received ALCT data
-  alct_inj_wr[1]          = 1'b0;              // 1=Start ALCT injector
-  alct_inj_wr[2]          = 1'b0;              // 1=Start ALCT injector with clct inject command
-  alct_inj_wr[3]          = 1'b0;              // 1=Link  ALCT injector to CFEB injector RAM
-  alct_inj_wr[4]          = 1'b0;              // 1=Link  L1A  injector to CFEB injector RAM
-  alct_inj_wr[9:5]        = 5'd13;            // Injector delay, was d8 in pre-rat firmware
-  alct_inj_wr[15:10]        = 0;
+     alct_inj_wr[0]          = 1'b0;              // 1=Blank received ALCT data
+     alct_inj_wr[1]          = 1'b0;              // 1=Start ALCT injector
+     alct_inj_wr[2]          = 1'b0;              // 1=Start ALCT injector with clct inject command
+     alct_inj_wr[3]          = 1'b0;              // 1=Link  ALCT injector to CFEB injector RAM
+     alct_inj_wr[4]          = 1'b0;              // 1=Link  L1A  injector to CFEB injector RAM
+     alct_inj_wr[9:5]        = 5'd13;            // Injector delay, was d8 in pre-rat firmware
+     alct_inj_wr[15:10]        = 0;
   end
 
   assign alct_clear        = alct_inj_wr[0];        // RW  1=Blank received data
@@ -4585,7 +4698,7 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  alct0_inj_wr[15:0]        = 16'h0877;            // ALCT0 Injected, Q=3,Key=7,BXN=1
+     alct0_inj_wr[15:0]        = 16'h0877;            // ALCT0 Injected, Q=3,Key=7,BXN=1
   end
 
   assign alct0_inj[15:0]      = alct0_inj_wr[15:0];      // RW  Injected ALCT0
@@ -4596,7 +4709,7 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  alct1_inj_wr[15:0]        = 16'h0BD5;            // ALCT1 Injected Q=2,Key=61,BXN=1
+     alct1_inj_wr[15:0]        = 16'h0BD5;            // ALCT1 Injected Q=2,Key=61,BXN=1
   end
 
   assign alct1_inj[15:0]      = alct1_inj_wr[15:0];      // RW  Injected ALCT1
@@ -6117,9 +6230,9 @@
 // ADR_CCB_STAT1=FC  CCB Status Register, Readonly
 //------------------------------------------------------------------------------------------------------------------
 //  CCB TTC lock status
-  assign ccb_stat1_rd[0]    = ccb_ttcrx_lock_never;        // Lock never achieved
-  assign ccb_stat1_rd[1]    = ccb_ttcrx_lost_ever;        // Lock was lost at least once
-  assign ccb_stat1_rd[2]    = ccb_qpll_lock_never;        // Lock never achieved
+  assign ccb_stat1_rd[0]    = ccb_ttcrx_lock_never;      // Lock never achieved
+  assign ccb_stat1_rd[1]    = ccb_ttcrx_lost_ever;       // Lock was lost at least once
+  assign ccb_stat1_rd[2]    = ccb_qpll_lock_never;       // Lock never achieved
   assign ccb_stat1_rd[3]    = ccb_qpll_lost_ever;        // Lock was lost at least once
   assign ccb_stat1_rd[15:4]  = 0;                // Free
 
@@ -6254,8 +6367,8 @@
 // ADR_PHASER4    = 0x116 DCM Phase Shifter Register: CFEB2 rxd
 // ADR_PHASER5    = 0x118 DCM Phase Shifter Register: CFEB3 rxd
 // ADR_PHASER6    = 0x11A DCM Phase Shifter Register: CFEB4 rxd
-// ADR_V6_PHASER7 = 0x16A DCM Phase Shifter Register: CFEB5 rxd
-// ADR_V6_PHASER8 = 0x16C DCM Phase Shifter Register: CFEB6 rxd
+// ADR_V6_PHASER7 = 0x16A DCM Phase Shifter Register: CFEB5 rxd "ME1/1A-side"
+// ADR_V6_PHASER8 = 0x16C DCM Phase Shifter Register: CFEB6 rxd "ME1/1B-side"
 //------------------------------------------------------------------------------------------------------------------
   wire [MXDPS-1:0] dps_fire_vme;
 
@@ -6305,47 +6418,52 @@
 
 // Phaser 2: CFEB0 rxd
   initial begin
-  phaser2_wr[0]          = 0;              // RW  Set new phase, software sets then unsets  
-  phaser2_wr[1]          = 0;              // RW  Reset current phase to 32
-  phaser2_wr[6:2]          = 0;              // R  Readonly
-  phaser2_wr[7]          = 0;              // RW  Posneg
-  phaser2_wr[13:8]        = 32;              // RW  Phase to set, 0-63
+  phaser2_wr[0]           = 0;              // RW  Set new phase, software sets then unsets  
+  phaser2_wr[1]           = 0;              // RW  Reset current phase to 32
+  phaser2_wr[6:2]         = 0;              // R  Readonly
+  phaser2_wr[7]           = 0;              // RW  Posneg
+  phaser2_wr[13:8]        = 32;             // RW  Phase to set, 0-63
   phaser2_wr[14]          = 0;              // RW  Phase quarter cycle shift
   phaser2_wr[15]          = 0;              // RW  Phase half    cycle shift
   end
 
-  assign dps_fire_vme[2]      = phaser2_wr[0];        // RW  Set new phase, software sets then unsets
-  assign dps_reset[2]        = phaser2_wr[1];        // RW  Reset current phase to 32
-  assign cfeb0_rxd_posneg      = phaser2_wr[7];        // RW  Posneg
-  assign dps2_phase[7:0]      = phaser2_wr[15:8];        // RW  Phase to set, 0-255
+// JGhere: for OTMB, ME1/1a uses dps2 (with values from phaser 7) and  ME1/1b uses dps3 (with values from phaser 8) 
+//   JRG, so dps2 write values come from phaser 7 instead of phaser 2
+  assign dps_fire_vme[2]      = phaser7_wr[0];        // RW  Set new phase, software sets then unsets
+  assign dps_reset[2]         = phaser7_wr[1];        // RW  Reset current phase to 32
+  assign cfeb0_rxd_posneg     = phaser7_wr[7];        // RW  Posneg
+  assign dps2_phase[7:0]      = phaser7_wr[15:8];     // RW  Phase to set, 0-255
 
-  assign phaser2_rd[1:0]      = phaser2_wr[1:0];        // RW  Readback
-  assign phaser2_rd[2]      = dps_busy[2];          // R  Phase shifter busy
-  assign phaser2_rd[3]      = dps_lock[2];          // R  DCM lock status
-  assign phaser2_rd[6:4]      = dps2_sm_vec[2:0];        // R  Phase shifter machine state
-  assign phaser2_rd[15:7]      = phaser2_wr[15:7];        // RW  Readback
+// JRG: readbacks from phaser 2-6 are meaningless; for 2 & 3 you should look at phaser 7 & 8 
+  assign phaser2_rd[1:0]      = phaser2_wr[1:0];      // RW  Readback
+  assign phaser2_rd[2]        = dps_busy[2];          // R  Phase shifter busy
+  assign phaser2_rd[3]        = dps_lock[2];          // R  DCM lock status
+  assign phaser2_rd[6:4]      = dps2_sm_vec[2:0];     // R  Phase shifter machine state
+  assign phaser2_rd[15:7]     = phaser2_wr[15:7];     // RW  Readback
 
 // Phaser 3: CFEB1 rxd
   initial begin
-  phaser3_wr[0]          = 0;              // RW  Set new phase, software sets then unsets  
-  phaser3_wr[1]          = 0;              // RW  Reset current phase to 32
-  phaser3_wr[6:2]          = 0;              // R  Readonly
-  phaser3_wr[7]          = 0;              // RW  Posneg
-  phaser3_wr[13:8]        = 32;              // RW  Phase to set, 0-63
+  phaser3_wr[0]           = 0;              // RW  Set new phase, software sets then unsets  
+  phaser3_wr[1]           = 0;              // RW  Reset current phase to 32
+  phaser3_wr[6:2]         = 0;              // R  Readonly
+  phaser3_wr[7]           = 0;              // RW  Posneg
+  phaser3_wr[13:8]        = 32;             // RW  Phase to set, 0-63
   phaser3_wr[14]          = 0;              // RW  Phase quarter cycle shift
   phaser3_wr[15]          = 0;              // RW  Phase half    cycle shift
   end
 
-  assign dps_fire_vme[3]      = phaser3_wr[0];        // RW  Set new phase, software sets then unsets
-  assign dps_reset[3]        = phaser3_wr[1];        // RW  Reset current phase to 32
-  assign cfeb1_rxd_posneg      = phaser3_wr[7];        // RW  Posneg
-  assign dps3_phase[7:0]      = phaser3_wr[15:8];        // RW  Phase to set, 0-255
+//   JRG, dps3 write values come from phaser 8 instead of phaser 3
+  assign dps_fire_vme[3]      = phaser8_wr[0];        // RW  Set new phase, software sets then unsets
+  assign dps_reset[3]         = phaser8_wr[1];        // RW  Reset current phase to 32
+  assign cfeb1_rxd_posneg     = phaser8_wr[7];        // RW  Posneg
+  assign dps3_phase[7:0]      = phaser8_wr[15:8];     // RW  Phase to set, 0-255
 
-  assign phaser3_rd[1:0]      = phaser3_wr[1:0];        // RW  Readback
-  assign phaser3_rd[2]      = dps_busy[3];          // R  Phase shifter busy
-  assign phaser3_rd[3]      = dps_lock[3];          // R  DCM lock status
-  assign phaser3_rd[6:4]      = dps3_sm_vec[2:0];        // R  Phase shifter machine state
-  assign phaser3_rd[15:7]      = phaser3_wr[15:7];        // RW  Readback
+// JRG: readbacks from phaser 2-6 are meaningless; for 2 & 3 you should look at phaser 7 & 8 
+  assign phaser3_rd[1:0]      = phaser3_wr[1:0];      // RW  Readback
+  assign phaser3_rd[2]        = dps_busy[3];          // R  Phase shifter busy
+  assign phaser3_rd[3]        = dps_lock[3];          // R  DCM lock status
+  assign phaser3_rd[6:4]      = dps3_sm_vec[2:0];     // R  Phase shifter machine state
+  assign phaser3_rd[15:7]     = phaser3_wr[15:7];     // RW  Readback
 
 // Phaser 4: CFEB2 rxd
   initial begin
@@ -6358,11 +6476,13 @@
   phaser4_wr[15]          = 0;              // RW  Phase half    cycle shift
   end
 
+// JRG: dps4-8 do not exist anymore, and phaser 4-6 do nothing
   assign dps_fire_vme[4]      = phaser4_wr[0];        // RW  Set new phase, software sets then unsets
   assign dps_reset[4]        = phaser4_wr[1];        // RW  Reset current phase to 32
   assign cfeb2_rxd_posneg      = phaser4_wr[7];        // RW  Posneg
   assign dps4_phase[7:0]      = phaser4_wr[15:8];        // RW  Phase to set, 0-255
 
+// JRG: readbacks from phaser 2-6 are meaningless
   assign phaser4_rd[1:0]      = phaser4_wr[1:0];        // RW  Readback
   assign phaser4_rd[2]      = dps_busy[4];          // R  Phase shifter busy
   assign phaser4_rd[3]      = dps_lock[4];          // R  DCM lock status
@@ -6380,11 +6500,13 @@
   phaser5_wr[15]          = 0;              // RW  Phase half    cycle shift
   end
 
+// JRG: dps4-8 do not exist anymore, and phaser 4-6 do nothing
   assign dps_fire_vme[5]      = phaser5_wr[0];        // RW  Set new phase, software sets then unsets
   assign dps_reset[5]        = phaser5_wr[1];        // RW  Reset current phase to 32
   assign cfeb3_rxd_posneg      = phaser5_wr[7];        // RW  Posneg
   assign dps5_phase[7:0]      = phaser5_wr[15:8];        // RW  Phase to set, 0-255
 
+// JRG: readbacks from phaser 2-6 are meaningless
   assign phaser5_rd[1:0]      = phaser5_wr[1:0];        // RW  Readback
   assign phaser5_rd[2]      = dps_busy[5];          // R  Phase shifter busy
   assign phaser5_rd[3]      = dps_lock[5];          // R  DCM lock status
@@ -6402,60 +6524,65 @@
   phaser6_wr[15]          = 0;              // RW  Phase half    cycle shift
   end
 
+// JRG: dps4-8 do not exist anymore, and phaser 4-6 do nothing
   assign dps_fire_vme[6]      = phaser6_wr[0];        // RW  Set new phase, software sets then unsets
   assign dps_reset[6]        = phaser6_wr[1];        // RW  Reset current phase to 32
   assign cfeb4_rxd_posneg      = phaser6_wr[7];        // RW  Posneg
   assign dps6_phase[7:0]      = phaser6_wr[15:8];        // RW  Phase to set, 0-255
 
+// JRG: readbacks from phaser 2-6 are meaningless
   assign phaser6_rd[1:0]      = phaser6_wr[1:0];        // RW  Readback
   assign phaser6_rd[2]      = dps_busy[6];          // R  Phase shifter busy
   assign phaser6_rd[3]      = dps_lock[6];          // R  DCM lock status
   assign phaser6_rd[6:4]      = dps6_sm_vec[2:0];        // R  Phase shifter machine state
   assign phaser6_rd[15:7]      = phaser6_wr[15:7];        // RW  Readback
 
-// Phaser 7: cfeb5 rxd  Virtex-6 only
+// Phaser 7: cfeb5 rxd  Virtex-6 only "ME1/1A-side"
   initial begin
   phaser7_wr[0]          = 0;              // RW  Set new phase, software sets then unsets  
   phaser7_wr[1]          = 0;              // RW  Reset current phase to 32
-  phaser7_wr[6:2]          = 0;              // R  Readonly
+  phaser7_wr[6:2]        = 0;              // R  Readonly
   phaser7_wr[7]          = 0;              // RW  Posneg
-  phaser7_wr[13:8]        = 32;              // RW  Phase to set, 0-63
-  phaser7_wr[14]          = 0;              // RW  Phase quarter cycle shift
-  phaser7_wr[15]          = 0;              // RW  Phase half    cycle shift
+  phaser7_wr[13:8]       = 32;             // RW  Phase to set, 0-63
+  phaser7_wr[14]         = 0;              // RW  Phase quarter cycle shift
+  phaser7_wr[15]         = 0;              // RW  Phase half    cycle shift
   end
 
   assign dps_fire_vme[7]      = phaser7_wr[0];        // RW  Set new phase, software sets then unsets
-  assign dps_reset[7]        = phaser7_wr[1];        // RW  Reset current phase to 32
-  assign cfeb5_rxd_posneg      = phaser7_wr[7];        // RW  Posneg
-  assign dps7_phase[7:0]      = phaser7_wr[15:8];        // RW  Phase to set, 0-255
+  assign dps_reset[7]         = phaser7_wr[1];        // RW  Reset current phase to 32
+  assign cfeb5_rxd_posneg     = phaser7_wr[7];        // RW  Posneg    // JGhere: apply this value for all A-side cfebs
+  assign dps7_phase[7:0]      = phaser7_wr[15:8];     // RW  Phase to set, 0-255
 
-  assign phaser7_rd[1:0]      = phaser7_wr[1:0];        // RW  Readback
-  assign phaser7_rd[2]      = dps_busy[7];          // R  Phase shifter busy
-  assign phaser7_rd[3]      = dps_lock[7];          // R  DCM lock status
-  assign phaser7_rd[6:4]      = dps7_sm_vec[2:0];        // R  Phase shifter machine state
-  assign phaser7_rd[15:7]      = phaser7_wr[15:7];        // RW  Readback
+// JGhere: for OTMB, ME1/1a uses dps2 (with values from phaser 7) and  ME1/1b uses dps3 (with values from phaser 8) 
+//   JRG, so phaser7 read values come from dps2 instead of dps7 (which no longer exists)
+  assign phaser7_rd[1:0]      = phaser7_wr[1:0];      // RW  Readback
+  assign phaser7_rd[2]        = dps_busy[2];          // R  Phase shifter busy
+  assign phaser7_rd[3]        = dps_lock[2];          // R  DCM lock status
+  assign phaser7_rd[6:4]      = dps2_sm_vec[2:0];     // R  Phase shifter machine state
+  assign phaser7_rd[15:7]     = phaser7_wr[15:7];     // RW  Readback
 
-// Phaser 8: cfeb6 rxd  Virtex-6 only
+// Phaser 8: cfeb6 rxd  Virtex-6 only "ME1/1B-side"
   initial begin
   phaser8_wr[0]          = 0;              // RW  Set new phase, software sets then unsets  
   phaser8_wr[1]          = 0;              // RW  Reset current phase to 32
-  phaser8_wr[6:2]          = 0;              // R  Readonly
+  phaser8_wr[6:2]        = 0;              // R  Readonly
   phaser8_wr[7]          = 0;              // RW  Posneg
-  phaser8_wr[13:8]        = 32;              // RW  Phase to set, 0-63
-  phaser8_wr[14]          = 0;              // RW  Phase quarter cycle shift
-  phaser8_wr[15]          = 0;              // RW  Phase half    cycle shift
+  phaser8_wr[13:8]       = 32;             // RW  Phase to set, 0-63
+  phaser8_wr[14]         = 0;              // RW  Phase quarter cycle shift
+  phaser8_wr[15]         = 0;              // RW  Phase half    cycle shift
   end
 
   assign dps_fire_vme[8]      = phaser8_wr[0];        // RW  Set new phase, software sets then unsets
-  assign dps_reset[8]        = phaser8_wr[1];        // RW  Reset current phase to 32
-  assign cfeb6_rxd_posneg      = phaser8_wr[7];        // RW  Posneg
-  assign dps8_phase[7:0]      = phaser8_wr[15:8];        // RW  Phase to set, 0-255
+  assign dps_reset[8]         = phaser8_wr[1];        // RW  Reset current phase to 32
+  assign cfeb6_rxd_posneg     = phaser8_wr[7];        // RW  Posneg    // JGhere: apply this value for all B-side cfebs
+  assign dps8_phase[7:0]      = phaser8_wr[15:8];     // RW  Phase to set, 0-255
 
-  assign phaser8_rd[1:0]      = phaser8_wr[1:0];        // RW  Readback
-  assign phaser8_rd[2]      = dps_busy[8];          // R  Phase shifter busy
-  assign phaser8_rd[3]      = dps_lock[8];          // R  DCM lock status
-  assign phaser8_rd[6:4]      = dps8_sm_vec[2:0];        // R  Phase shifter machine state
-  assign phaser8_rd[15:7]      = phaser8_wr[15:7];        // RW  Readback
+//   JRG, phaser8 read values come from dps3 instead of dps8 (which no longer exists)
+  assign phaser8_rd[1:0]      = phaser8_wr[1:0];      // RW  Readback
+  assign phaser8_rd[2]        = dps_busy[3];          // R  Phase shifter busy
+  assign phaser8_rd[3]        = dps_lock[3];          // R  DCM lock status
+  assign phaser8_rd[6:4]      = dps3_sm_vec[2:0];     // R  Phase shifter machine state
+  assign phaser8_rd[15:7]     = phaser8_wr[15:7];     // RW  Readback
 
 // Phaser autostart after vmesm completes reading user PROM
   wire fire_phaser_auto_d = vsm_phaser_auto & vsm_ready & power_up;
@@ -6472,14 +6599,20 @@
   initial begin
   delay0_int_wr[3:0]        = 0;              // RW  CFEB0 Interstage delay  
   delay0_int_wr[7:4]        = 0;              // RW  CFEB1 Interstage delay  
-  delay0_int_wr[11:8]        = 0;              // RW  CFEB2 Interstage delay  
+  delay0_int_wr[11:8]       = 0;              // RW  CFEB2 Interstage delay  
   delay0_int_wr[15:12]      = 0;              // RW  CFEB3 Interstage delay  
   end
-
+/*
   assign cfeb0_rxd_int_delay[3:0]  = delay0_int_wr[3:0];      // RW  CFEB0 Interstage delay
   assign cfeb1_rxd_int_delay[3:0]  = delay0_int_wr[7:4];      // RW  CFEB1 Interstage delay
-  assign cfeb2_rxd_int_delay[3:0]  = delay0_int_wr[11:8];      // RW  CFEB2 Interstage delay
-  assign cfeb3_rxd_int_delay[3:0]  = delay0_int_wr[15:12];      // RW  CFEB3 Interstage delay
+  assign cfeb2_rxd_int_delay[3:0]  = delay0_int_wr[11:8];     // RW  CFEB2 Interstage delay
+  assign cfeb3_rxd_int_delay[3:0]  = delay0_int_wr[15:12];    // RW  CFEB3 Interstage delay
+*/
+// JGhere, new shared delay values for ME1/1b side:
+  assign cfeb0_rxd_int_delay[3:0]  = delay1_int_wr[11:8];     // RW  CFEB0 Interstage delay
+  assign cfeb1_rxd_int_delay[3:0]  = delay1_int_wr[11:8];     // RW  CFEB1 Interstage delay
+  assign cfeb2_rxd_int_delay[3:0]  = delay1_int_wr[11:8];     // RW  CFEB2 Interstage delay
+  assign cfeb3_rxd_int_delay[3:0]  = delay1_int_wr[11:8];     // RW  CFEB3 Interstage delay
 
   assign delay0_int_rd[15:0]    = delay0_int_wr[15:0];      //    Readback
 
@@ -6487,13 +6620,17 @@
   initial begin
   delay1_int_wr[3:0]        = 0;              // RW  CFEB4 Interstage delay  
   delay1_int_wr[7:4]        = 0;              // RW  CFEB5 Interstage delay    
-  delay1_int_wr[11:8]        = 0;              // RW  CFEB6 Interstage delay  
+  delay1_int_wr[11:8]       = 0;              // RW  CFEB6 Interstage delay  
   delay1_int_wr[15:12]      = 0;              // RW  Free
   end
 
-  assign cfeb4_rxd_int_delay[3:0]  = delay1_int_wr[3:0];      // RW  CFEB4 Interstage delay
-  assign cfeb5_rxd_int_delay[3:0] = delay1_int_wr[7:4];      // RW  CFEB5 Interstage delay
-  assign cfeb6_rxd_int_delay[3:0] = delay1_int_wr[11:8];      // RW  CFEB6 Interstage delay
+//  assign cfeb4_rxd_int_delay[3:0]  = delay1_int_wr[3:0];      // RW  CFEB4 Interstage delay
+//  assign cfeb5_rxd_int_delay[3:0]  = delay1_int_wr[7:4];      // RW  CFEB5 Interstage delay
+//  assign cfeb6_rxd_int_delay[3:0]  = delay1_int_wr[11:8];     // RW  CFEB6 Interstage delay
+// JGhere, new shared delay values for ME1/1a side:
+  assign cfeb4_rxd_int_delay[3:0] = delay1_int_wr[7:4];      // RW  CFEB4 Interstage delay
+  assign cfeb5_rxd_int_delay[3:0] = delay1_int_wr[7:4];      // RW  CFEB4 Interstage delay
+  assign cfeb6_rxd_int_delay[3:0] = delay1_int_wr[7:4];      // RW  CFEB4 Interstage delay
 
   assign delay1_int_rd[15:0]    = delay1_int_wr[15:0];      //    Readback
 
@@ -6662,47 +6799,52 @@
 //------------------------------------------------------------------------------------------------------------------
 // ADR_ALCT_STARTUP_STATUS = 0x146 ALCT startup machine status, Reaonly
 //------------------------------------------------------------------------------------------------------------------
-  assign alct_startup_status_rd[0]  = global_reset;          // R  Global reset
-  assign alct_startup_status_rd[1]  = power_up;            // R  DLL clock lock, we wait for it
+  assign alct_startup_status_rd[0]  = global_reset;       // R  Global reset
+  assign alct_startup_status_rd[1]  = power_up;           // R  DLL clock lock, we wait for it
   assign alct_startup_status_rd[2]  = vsm_ready;          // R  TMB VME registers loaded from PROM
-  assign alct_startup_status_rd[3]  = alct_startup_msec;      // R  Msec pulse
-  assign alct_startup_status_rd[4]  = alct_wait_dll;        // R  Waiting for TMB DLL lock
-  assign alct_startup_status_rd[5]  = alct_wait_vme;        // R  Waiting for TMB VME load from user PROM
-  assign alct_startup_status_rd[6]  = alct_wait_cfg;        // R  Waiting for ALCT FPGA to configure from mez PROM
-  assign alct_startup_status_rd[7]  = alct_startup_done;      // R  ALCT FPGA should be configured by now
-  assign alct_startup_status_rd[15:8]  = 0;               // R  Unassigned
+  assign alct_startup_status_rd[3]  = alct_startup_msec;  // R  Msec pulse
+  assign alct_startup_status_rd[4]  = alct_wait_dll;      // R  Waiting for TMB DLL lock
+  assign alct_startup_status_rd[5]  = alct_wait_vme;      // R  Waiting for TMB VME load from user PROM
+  assign alct_startup_status_rd[6]  = alct_wait_cfg;      // R  Waiting for ALCT FPGA to configure from mez PROM
+  assign alct_startup_status_rd[7]  = alct_startup_done;  // R  ALCT FPGA should be configured by now
+  assign alct_startup_status_rd[15:8] = tmbmmcm_locklost_cnt[7:0]; // R  TMB MMCM lock-lost count
+//  assign alct_startup_status_rd[15:8]  = 0;             // R  Unassigned
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_V6_SNAP12_QPLL = 0x148
 //------------------------------------------------------------------------------------------------------------------
   initial begin
 // QPLL status
-  virtex6_snap12_qpll_wr[0]      = 1;      // RW  nReset QPLL, 0=reset
-  virtex6_snap12_qpll_wr[1]      = 0;      // R  QPLL locked status
-  virtex6_snap12_qpll_wr[2]      = 0;      // R  QPLL error status
-  virtex6_snap12_qpll_wr[3]      = 0;      // RW  Unused
-
+  virtex6_snap12_qpll_wr[0]      = 1;     // RW  nReset QPLL, 0=reset
+  virtex6_snap12_qpll_wr[1]      = 0;     // R  QPLL locked status
+  virtex6_snap12_qpll_wr[2]      = 0;     // R  QPLL error status
+  virtex6_snap12_qpll_wr[3]      = 0;     // R  QPLL lock-lost history
 // SNAP12 rx serial interface
-  virtex6_snap12_qpll_wr[4]      = 1;      // RW  Serial interface clock, drive high
-  virtex6_snap12_qpll_wr[5]      = 0;      // R  Serial interface data
-  virtex6_snap12_qpll_wr[6]      = 0;      // R  Serial interface status
-  virtex6_snap12_qpll_wr[15:7]    = 0;              // RW  Unused
+  virtex6_snap12_qpll_wr[4]      = 1;     // RW  Serial interface clock, drive high
+  virtex6_snap12_qpll_wr[5]      = 0;     // R  Serial interface data
+  virtex6_snap12_qpll_wr[6]      = 0;     // R  Serial interface status
+// QPLL & TMB MMCM status
+  virtex6_snap12_qpll_wr[7]      = 0;     // R  TMB MMCM lock lost history
+  virtex6_snap12_qpll_wr[15:8]   = 0;     // R  QPLL lock-lost count
   end
 
   assign qpll_nrst          = virtex6_snap12_qpll_wr[0];    // RW  nReset QPLL, 0=reset
-  assign r12_sclk            = virtex6_snap12_qpll_wr[4];    // RW  Serial interface clock, drive high
-
-  assign virtex6_snap12_qpll_rd[0]  = qpll_nrst;        // RW  nReset QPLL, 0=reset
-  assign virtex6_snap12_qpll_rd[1]  = qpll_lock;        // R  QPLL locked status
+  assign r12_sclk           = virtex6_snap12_qpll_wr[4];    // RW  Serial interface clock, drive high
+  assign virtex6_snap12_qpll_rd[0]  = qpll_nrst;       // RW  nReset QPLL, 0=reset
+  assign virtex6_snap12_qpll_rd[1]  = qpll_lock;       // R  QPLL locked status
   assign virtex6_snap12_qpll_rd[2]  = qpll_err;        // R  QPLL error status
-  assign virtex6_snap12_qpll_rd[3]  = virtex6_snap12_qpll_wr[3];    // RW  Unused
-  assign virtex6_snap12_qpll_rd[4]  = r12_sclk;        // RW  Serial interface clock, drive high
-  assign virtex6_snap12_qpll_rd[5]  = r12_sdat;        // R  Serial interface data
-  assign virtex6_snap12_qpll_rd[6]  = r12_fok;        // R  Serial interface status
-  assign virtex6_snap12_qpll_rd[15:7]  = virtex6_snap12_qpll_wr[15:7];    // RW  Unused
+  assign virtex6_snap12_qpll_rd[3]  = qpll_locklost;   // R  QPLL lock-lost history
+//  assign virtex6_snap12_qpll_rd[3]  = virtex6_snap12_qpll_wr[3];    // RW  Unused
+  assign virtex6_snap12_qpll_rd[4] = r12_sclk;         // RW  Serial interface clock, drive high
+  assign virtex6_snap12_qpll_rd[5] = r12_sdat;         // R  Serial interface data
+  assign virtex6_snap12_qpll_rd[6] = r12_fok;          // R  Serial interface status
+  assign virtex6_snap12_qpll_rd[7] = tmbmmcm_locklost; // R  TMB MMCM lock lost history
+  assign virtex6_snap12_qpll_rd[15:8] = qpll_locklost_cnt[7:0];   // R  QPLL lock-lost count
+//  assign virtex6_snap12_qpll_rd[15:7]  = virtex6_snap12_qpll_wr[15:7];    // RW  Unused
 
-  wire virtex6_snap12_qpll_sump    = (|virtex6_snap12_qpll_wr[2:1]) |  // R  Unused write bits
-                      (|virtex6_snap12_qpll_wr[6:5]);
+   wire virtex6_snap12_qpll_sump   = 0;  // R  Unused write bits
+//  wire virtex6_snap12_qpll_sump    = (|virtex6_snap12_qpll_wr[2:1]) | (|virtex6_snap12_qpll_wr[6:5]);
+
 //------------------------------------------------------------------------------------------------------------------
 // ADR_V6_GTX_RX_ALL = 0x14A
 //------------------------------------------------------------------------------------------------------------------
@@ -6710,28 +6852,27 @@
   parameter gtx_rx_enable_default = 1;
 
   initial begin
-  virtex6_gtx_rx_all_wr[0]      = gtx_rx_enable_default;  // RW  Enable all GTX optical inputs, you should disable copper via mask_all
-  virtex6_gtx_rx_all_wr[1]      = 0;        // RW  Reset  all GTX
-        virtex6_gtx_rx_all_wr[2] = 0;           // RW   JRG: now this is Select all PRBS inputs test mode
-//      virtex6_gtx_rx_all_wr[2] = 0;           // RW   JRG: was Reset  all PRBS test error counters
-//      virtex6_gtx_rx_all_wr[3] = 0;           // RW   JRG: was Select all PRBS inputs test mode
-        virtex6_gtx_rx_all_wr[10:3] = 0;        // R    Readonly
-        virtex6_gtx_rx_all_wr[15:11] = 0;       // RW   JRG: Unused until recent changes
-
+     virtex6_gtx_rx_all_wr[0] = gtx_rx_enable_default;  // RW  Enable/Unreset all GTX optical inputs; you should disable copper via mask_all
+     virtex6_gtx_rx_all_wr[1] = 0;      // RW  Reset  all GTX rx_sync modules
+     virtex6_gtx_rx_all_wr[2] = 0;      // RW   JRG: now this is Select all PRBS inputs test mode
+//      virtex6_gtx_rx_all_wr[2] = 0;     // RW   JRG: was Reset  all PRBS test error counters
+//      virtex6_gtx_rx_all_wr[3] = 0;     // RW   JRG: was Select all PRBS inputs test mode
+     virtex6_gtx_rx_all_wr[10:3] = 0;   // R    Readonly
+     virtex6_gtx_rx_all_wr[15:11] = 0;  // RW   JRG: Unused until recent changes
   end
 
-  wire   gtx_rx_enable_all      = virtex6_gtx_rx_all_wr[0];  // RW  Enable all GTX optical inputs, you should disable copper via mask_all
-  wire   gtx_rx_reset_all        = virtex6_gtx_rx_all_wr[1];  // RW  Reset all GTX
-      wire   gtx_rx_reset_err_cnt_all = 0;    // RW   JRG: this will NEVER Reset all PRBS test error counters
+   wire   gtx_rx_enable_all = virtex6_gtx_rx_all_wr[0];  // RW  Enable/Unreset all GTX optical inputs; you should disable copper via mask_all
+   wire  gtx_rx_reset_all  = virtex6_gtx_rx_all_wr[1];   // RW  Reset all GTX
+   wire  gtx_rx_reset_err_cnt_all = 0;    // RW   JRG: this will NEVER Reset all PRBS test error counters
 //    wire   gtx_rx_reset_err_cnt_all = virtex6_gtx_rx_all_wr[2];     // RW   Reset all PRBS test error counters
 //    wire   gtx_rx_en_prbs_test_all  = virtex6_gtx_rx_all_wr[3];     // RW   Select all  random input test data mode
-      wire   gtx_rx_en_prbs_test_all  = virtex6_gtx_rx_all_wr[2];     // RW   JRG: was bit3; Select all  random input test data mode
+   wire  gtx_rx_en_prbs_test_all  = virtex6_gtx_rx_all_wr[2];  // RW   JRG: was bit3; Select all  random input test data mode
 
-      assign virtex6_gtx_rx_all_rd[2:0] = virtex6_gtx_rx_all_wr[2:0]; // RW   Readback. JRG: changed these around; it was 4 bits, now 3 bits == PRBS test enable, Reset GTX, Enable GTX
-      assign virtex6_gtx_rx_all_rd[3] = &gtx_rx_sync_done[MXCFEB-1:0];        // R    JRG: this changed... rx_sync_done (bit8) moved here (OR all gtx_ready)   ---> new: AND these bits
-      assign virtex6_gtx_rx_all_rd[4] = &gtx_link_good[MXCFEB-1:0];   // R    link stability monitor: TRUE indicates the link has been stable for at least 15 BX on a link   ---> new: AND these bits
-      assign virtex6_gtx_rx_all_rd[5] = |gtx_link_had_err[MXCFEB-1:0];        // R    link stability monitor: TRUE indicates an error happened at least once on a link
-      assign virtex6_gtx_rx_all_rd[6] = |gtx_link_bad[MXCFEB-1:0];            // R    link stability monitor: TRUE indicates that errors happened over 100 times on a link
+      assign virtex6_gtx_rx_all_rd[2:0] = virtex6_gtx_rx_all_wr[2:0]; // RW   Readback. JRG: changed these around; it was 4 bits, now 3 bits == PRBS test enable, Reset GTX rx_sync, Enable/Unreset GTX
+      assign virtex6_gtx_rx_all_rd[3] = &gtx_rx_sync_done[MXCFEB-1:0];// R    JRG: this changed... rx_sync_done (bit8) moved here (AND all gtx_ready)
+      assign virtex6_gtx_rx_all_rd[4] = &gtx_link_good[MXCFEB-1:0];   // R    link stability monitor: TRUE indicates all links have been stable for at least 15 BX
+      assign virtex6_gtx_rx_all_rd[5] = |gtx_link_had_err[MXCFEB-1:0];// R    link stability monitor: TRUE indicates an error happened at least once on a link
+      assign virtex6_gtx_rx_all_rd[6] = |gtx_link_bad[MXCFEB-1:0];    // R    link stability monitor: TRUE indicates that errors happened over 100 times on a link
 //    assign virtex6_gtx_rx_all_rd[4] = |gtx_rx_start[MXCFEB-1:0];    // R    JRG: not useful! -- Set when the DCFEB Start Pattern is present
 //    assign virtex6_gtx_rx_all_rd[5] = |gtx_rx_fc[MXCFEB-1:0];       // R    JRG: not useful! -- Flags when Rx sees "FC" code (sent by Tx) for latency measurement
 //    assign virtex6_gtx_rx_all_rd[6] = |gtx_rx_valid[MXCFEB-1:0];    // R    JRG: not useful! -- Valid data detected on link
@@ -6739,7 +6880,7 @@
       assign virtex6_gtx_rx_all_rd[7] = |gtx_rx_pol_swap[MXCFEB-1:0]; // R    JRG: was bit9, and not very useful to read this signal -- GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes that are corrected within the GTX module
 //    assign virtex6_gtx_rx_all_rd[10]= |gtx_rx_err[MXCFEB-1:0];      // R    PRBS test detects an error
 
-      assign virtex6_gtx_rx_all_rd[15:8]      =  (gtx_rx_err_count_all[11:8]==4'h0) ? gtx_rx_err_count_all[7:0] : 8'hFE; // R JRG: a sum of all GTX error counts, full scale set at hex FE
+      assign virtex6_gtx_rx_all_rd[15:8] = (gtx_rx_err_count_all[11:8]==4'h0) ? gtx_rx_err_count_all[7:0] : 8'hFE; // R JRG: a sum of all GTX error counts, full scale set at hex FE
 
 
 //    assign virtex6_gtx_rx_all_rd[15:11] = virtex6_gtx_rx_all_wr[15:11]; // RW       JRG: was Unused
@@ -6760,42 +6901,39 @@
   for (idcfeb=0; idcfeb<MXCFEB; idcfeb=idcfeb+1) begin: gen_gtx_rx
 
   initial begin
-  virtex6_gtx_rx_wr[idcfeb][0]      = 0;              // RW  Enable GTX optical input, you should disable copper via mask_all
-
-        virtex6_gtx_rx_wr[idcfeb][1]                    = 0;    // RW   Reset this GTX. JRG: 0 & 1 should be combined, consider this later... if you hold RESET true it's really the same as a Disable, so when false it's like an Enable
-//      virtex6_gtx_rx_wr[idcfeb][2]                    = 0;    // RW   JRG: not useful! -- Reset PRBS test error counters
-//      virtex6_gtx_rx_wr[idcfeb][3]                    = 0;    // RW   was enable PRBS inputs test mode
-        virtex6_gtx_rx_wr[idcfeb][2]                    = 0;    // RW   JRG: moved from bit3 to bit2 -- Enable PRBS inputs test mode
-        virtex6_gtx_rx_wr[idcfeb][10:3]                 = 0;    // R    Readonly.  JRG: was [10:4]
-        virtex6_gtx_rx_wr[idcfeb][15:11]                = 0;    // RW   JRG: Unused until recent changes
+     virtex6_gtx_rx_wr[idcfeb][0]      = gtx_rx_enable_default; // RW  Enable/Unreset GTX optical input, you should disable copper via mask_all
+     virtex6_gtx_rx_wr[idcfeb][1]      = 0; // RW  Reset this GTX rx_sync. JRG: 0 & 1 should be combined, consider this later... if you hold RESET true it's really the same as a Disable, so when false it's like an Enable
+//     virtex6_gtx_rx_wr[idcfeb][2]      = 0; // RW  JRG: not useful! -- Reset PRBS test error counters
+//     virtex6_gtx_rx_wr[idcfeb][3]      = 0; // RW  was enable PRBS inputs test mode
+     virtex6_gtx_rx_wr[idcfeb][2]      = 0; // RW  JRG: moved from bit3 to bit2 -- Enable PRBS inputs test mode
+     virtex6_gtx_rx_wr[idcfeb][10:3]   = 0; // R   Readonly.  JRG: was [10:4]
+     virtex6_gtx_rx_wr[idcfeb][15:11]  = 0; // RW  JRG: Unused until recent changes
   end
 
-  assign gtx_rx_enable[idcfeb]      = virtex6_gtx_rx_wr[idcfeb][0] | gtx_rx_enable_all;  // RW  Enable GTX optical input, you should disable copper via mask_all
-  assign gtx_rx_reset[idcfeb]      = virtex6_gtx_rx_wr[idcfeb][1] | gtx_rx_reset_all;  // RW  Reset this GTX
+     assign gtx_rx_enable[idcfeb] = virtex6_gtx_rx_wr[idcfeb][0] | gtx_rx_enable_all; // RW  Enable GTX optical input, you should disable copper via mask_all
+     assign gtx_rx_reset[idcfeb]  = virtex6_gtx_rx_wr[idcfeb][1] | gtx_rx_reset_all;  // RW  Reset this GTX rx_sync
 
-//      assign gtx_rx_reset_err_cnt[idcfeb]             = virtex6_gtx_rx_wr[idcfeb][2] | gtx_rx_reset_err_cnt_all;      // RW   Reset PRBS test error counters
-        assign gtx_rx_reset_err_cnt[idcfeb]             = gtx_rx_reset_err_cnt_all;     // RW   JRG: just the ALL case will Reset PRBS test error counters
-//      assign gtx_rx_en_prbs_test[idcfeb]              = virtex6_gtx_rx_wr[idcfeb][3] | gtx_rx_en_prbs_test_all;       // RW   Select random input test data mode
-        assign gtx_rx_en_prbs_test[idcfeb]              = virtex6_gtx_rx_wr[idcfeb][2] | gtx_rx_en_prbs_test_all;       // RW   Select random input test data mode
+//    assign gtx_rx_reset_err_cnt[idcfeb] = virtex6_gtx_rx_wr[idcfeb][2] | gtx_rx_reset_err_cnt_all; // RW   Reset PRBS test error counters
+     assign gtx_rx_reset_err_cnt[idcfeb]  = gtx_rx_reset_err_cnt_all;     // RW   JRG: just the ALL case will Reset PRBS test error counters
+//    assign gtx_rx_en_prbs_test[idcfeb]  = virtex6_gtx_rx_wr[idcfeb][3] | gtx_rx_en_prbs_test_all;  // RW   Select random input test data mode
+     assign gtx_rx_en_prbs_test[idcfeb]   = virtex6_gtx_rx_wr[idcfeb][2] | gtx_rx_en_prbs_test_all;  // RW   Select random input test data mode
 
-        assign virtex6_gtx_rx_rd[idcfeb][2:0]   = virtex6_gtx_rx_wr[idcfeb][2:0]|virtex6_gtx_rx_all_wr[2:0]; // RW      Readback. JRG: changed these around; it was 4 bits, now 3 bits == PRBS test enable, Reset GTX, Enable GTX  ---> new: OR these bits with virtex6_gtx_rx_all_wr[2:0]
-        assign virtex6_gtx_rx_rd[idcfeb][3]     = gtx_rx_sync_done[idcfeb];     // R    JRG: this changed... rx_sync_done moved here (gtx_ready)
-        assign virtex6_gtx_rx_rd[idcfeb][4]     = gtx_link_good[idcfeb];        // R    link stability monitor: TRUE indicates the link has been stable for at least 15 BX on this link
-        assign virtex6_gtx_rx_rd[idcfeb][5]     = gtx_link_had_err[idcfeb];     // R    link stability monitor: TRUE indicates an error happened at least once on this link
-        assign virtex6_gtx_rx_rd[idcfeb][6]     = gtx_link_bad[idcfeb];         // R    link stability monitor: TRUE indicates that errors happened over 100 times on this link
+     assign virtex6_gtx_rx_rd[idcfeb][2:0] = virtex6_gtx_rx_wr[idcfeb][2:0]|virtex6_gtx_rx_all_wr[2:0]; // RW  Readback. JRG: changed these around; it was 4 bits, now 3 bits == PRBS test enable, Reset GTX rx_sync, Enable/Unreset GTX  ---> new: OR these bits with virtex6_gtx_rx_all_wr[2:0]
+     assign virtex6_gtx_rx_rd[idcfeb][3] = gtx_rx_sync_done[idcfeb]; // R    JRG: this changed... rx_sync_done moved here (gtx_ready)
+     assign virtex6_gtx_rx_rd[idcfeb][4] = gtx_link_good[idcfeb];    // R    link stability monitor: TRUE indicates this link has been stable for at least 15 BX
+     assign virtex6_gtx_rx_rd[idcfeb][5] = gtx_link_had_err[idcfeb]; // R    link stability monitor: TRUE indicates an error happened at least once on this link
+     assign virtex6_gtx_rx_rd[idcfeb][6] = gtx_link_bad[idcfeb];     // R    link stability monitor: TRUE indicates that errors happened over 100 times on this link
 
-// orig       assign virtex6_gtx_rx_rd[idcfeb][4]             = gtx_rx_start[idcfeb];         // R    JRG: not useful! -- Set when the DCFEB Start Pattern is present
-// orig       assign virtex6_gtx_rx_rd[idcfeb][5]             = gtx_rx_fc[idcfeb];            // R    JRG: not useful! -- Flags when Rx sees "FC" code (sent by Tx) for latency measurement
-// orig       assign virtex6_gtx_rx_rd[idcfeb][6]             = gtx_rx_valid[idcfeb];         // R    JRG: not useful! -- Valid data detected on link
-// orig       assign virtex6_gtx_rx_rd[idcfeb][7]             = gtx_rx_match[idcfeb];         // R    JRG: not useful! -- PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
-        assign virtex6_gtx_rx_rd[idcfeb][7]             = gtx_rx_pol_swap[idcfeb];      // R    JRG: was bit9, and not very useful to read this signal -- GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes that are corrected within the GTX module
-        assign virtex6_gtx_rx_rd[idcfeb][15:8]          =  gtx_rx_err_count[idcfeb];    // R    JRG: constructed this 8-bit array set above
+// orig    assign virtex6_gtx_rx_rd[idcfeb][4] = gtx_rx_start[idcfeb]; // R    JRG: not useful! -- Set when the DCFEB Start Pattern is present
+// orig    assign virtex6_gtx_rx_rd[idcfeb][5] = gtx_rx_fc[idcfeb];    // R    JRG: not useful! -- Flags when Rx sees "FC" code (sent by Tx) for latency measurement
+// orig    assign virtex6_gtx_rx_rd[idcfeb][6] = gtx_rx_valid[idcfeb]; // R    JRG: not useful! -- Valid data detected on link
+// orig    assign virtex6_gtx_rx_rd[idcfeb][7] = gtx_rx_match[idcfeb]; // R    JRG: not useful! -- PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
 
-//      assign virtex6_gtx_rx_rd[idcfeb][10]    = gtx_rx_err[idcfeb];                   // R    JRG: not useful! -- PRBS test detects an error
-//      assign virtex6_gtx_rx_rd[idcfeb][15:11] = virtex6_gtx_rx_wr[idcfeb][15:11];     // RW   JRG: was Unused
-
-        assign virtex6_gtx_rx_sump[idcfeb]              = |virtex6_gtx_rx_wr[idcfeb][10:3];     // R    Unused write bits. JRG: used to be [10:4]
-
+        assign virtex6_gtx_rx_rd[idcfeb][7]    = gtx_rx_pol_swap[idcfeb];      // R  JRG: was bit9, and not very useful to read this signal -- GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes that are corrected within the GTX module
+        assign virtex6_gtx_rx_rd[idcfeb][15:8] =  gtx_rx_err_count[idcfeb];    // R  JRG: constructed this 8-bit array set above
+//      assign virtex6_gtx_rx_rd[idcfeb][10]    = gtx_rx_err[idcfeb];               // R    JRG: not useful! -- PRBS test detects an error
+//      assign virtex6_gtx_rx_rd[idcfeb][15:11] = virtex6_gtx_rx_wr[idcfeb][15:11]; // RW   JRG: was Unused
+        assign virtex6_gtx_rx_sump[idcfeb] = |virtex6_gtx_rx_wr[idcfeb][10:3]; // R  Unused write bits. JRG: used to be [10:4]
   end
   endgenerate
 
@@ -6973,15 +7111,15 @@
   if (wr_cfeb_v6_badbits_ctrl) cfeb_v6_badbits_ctrl_wr  <=  d[15:0];
   if (wr_cfeb_badbits_nbx)    cfeb_badbits_nbx_wr    <=  d[15:0];
   if (wr_alct_startup_delay)    alct_startup_delay_wr  <=  d[15:0];
-  if (wr_virtex6_snap12_qpll)    virtex6_snap12_qpll_wr  <=  d[15:0];
-  if (wr_virtex6_gtx_rx_all)    virtex6_gtx_rx_all_wr  <=  d[15:0];
-  if (wr_virtex6_gtx_rx[0])    virtex6_gtx_rx_wr[0]  <=  d[15:0];
-  if (wr_virtex6_gtx_rx[1])    virtex6_gtx_rx_wr[1]  <=  d[15:0];
-  if (wr_virtex6_gtx_rx[2])    virtex6_gtx_rx_wr[2]  <=  d[15:0];
-  if (wr_virtex6_gtx_rx[3])    virtex6_gtx_rx_wr[3]  <=  d[15:0];
-  if (wr_virtex6_gtx_rx[4])    virtex6_gtx_rx_wr[4]  <=  d[15:0];
-  if (wr_virtex6_gtx_rx[5])    virtex6_gtx_rx_wr[5]  <=  d[15:0];
-  if (wr_virtex6_gtx_rx[6])    virtex6_gtx_rx_wr[6]  <=  d[15:0];  
+  if (wr_virtex6_snap12_qpll) virtex6_snap12_qpll_wr <=  d[15:0];
+  if (wr_virtex6_gtx_rx_all)  virtex6_gtx_rx_all_wr  <=  d[15:0];
+  if (wr_virtex6_gtx_rx[0])   virtex6_gtx_rx_wr[0] <=  d[15:0];
+  if (wr_virtex6_gtx_rx[1])   virtex6_gtx_rx_wr[1] <=  d[15:0];
+  if (wr_virtex6_gtx_rx[2])   virtex6_gtx_rx_wr[2] <=  d[15:0];
+  if (wr_virtex6_gtx_rx[3])   virtex6_gtx_rx_wr[3] <=  d[15:0];
+  if (wr_virtex6_gtx_rx[4])   virtex6_gtx_rx_wr[4] <=  d[15:0];
+  if (wr_virtex6_gtx_rx[5])   virtex6_gtx_rx_wr[5] <=  d[15:0];
+  if (wr_virtex6_gtx_rx[6])   virtex6_gtx_rx_wr[6] <=  d[15:0];  
   if (wr_virtex6_sysmon)      virtex6_sysmon_wr    <=  d[15:0];
   if (wr_virtex6_extend)      virtex6_extend_wr    <=  d[15:0];
   if (wr_mpc_frames_fifo_ctrl) mpc_frames_fifo_ctrl_wr <= d[15:0];
@@ -7188,3 +7326,4 @@ Note:  I plan to delete the following line from bpi_interface... any bad side ef
 //------------------------------------------------------------------------------------------------------------------
   endmodule
 //------------------------------------------------------------------------------------------------------------------
+

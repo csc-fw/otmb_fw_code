@@ -108,6 +108,8 @@
   (
 // Clock
   clock,
+  clk_lock,    // In  40MHz TMB system clock MMCM locked
+  clock_4x,
   clock_cfeb_rxd,
   cfeb_rxd_posneg,
   cfeb_rxd_int_delay,
@@ -191,6 +193,7 @@
   gtx_rx_fc,
   gtx_rx_valid,
   gtx_rx_match,
+  gtx_rx_rst_done,
   gtx_rx_sync_done,
   gtx_rx_pol_swap,
   gtx_rx_err,
@@ -241,7 +244,9 @@
 // CFEB Ports
 //------------------------------------------------------------------------------------------------------------------
 // Clock
-  input          clock;          // 40MHz TMB system clock
+  input          clock;       // 40MHz TMB system clock
+  input 	 clk_lock;    // In  40MHz TMB system clock MMCM locked
+  input          clock_4x;          // 4*40MHz TMB system clock
   input          clock_cfeb_rxd;      // 40MHz iob ddr clock
   input          cfeb_rxd_posneg;    // CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
   input  [3:0]      cfeb_rxd_int_delay;    // Interstage delay, integer bx
@@ -317,23 +322,24 @@
   input          rxn;          // SNAP12- fiber input for GTX
 
 // Optical receiver status
-  input          gtx_rx_enable;      // Enables GTX optical input, disables copper SCSI
-  input          gtx_rx_reset;      // Reset GTX receiver
-  input          gtx_rx_reset_err_cnt;  // Resets the PRBS test error counters
+  input          gtx_rx_enable;   // Enable/Unreset GTX_RX optical input, disables copper SCSI
+  input          gtx_rx_reset;    // Reset GTX receiver rx_sync module
+  input          gtx_rx_reset_err_cnt; // Resets the PRBS test error counters
   input          gtx_rx_en_prbs_test;  // Select random input test data mode
-  output          gtx_rx_start;      // Set when the DCFEB Start Pattern is present
-  output          gtx_rx_fc;        // Flags when Rx sees "FC" code (sent by Tx) for latency measurement
-  output          gtx_rx_valid;      // Valid data detected on link
-  output          gtx_rx_match;      // PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
+  output          gtx_rx_start;   // Set when the DCFEB Start Pattern is present
+  output          gtx_rx_fc;      // Flags when Rx sees "FC" code (sent by Tx) for latency measurement
+  output          gtx_rx_valid;   // Valid data detected on link
+  output          gtx_rx_match;   // PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
+  output          gtx_rx_rst_done;     // This has to complete before rxsync can start
   output          gtx_rx_sync_done;    // Use these to determine gtx_ready
-  output          gtx_rx_pol_swap;    // GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
-  output          gtx_rx_err;        // PRBS test detects an error
-  output  [15:0]      gtx_rx_err_count;    // Error count on this fiber channel
-  output          gtx_rx_sump;      // Unused signals
+  output          gtx_rx_pol_swap;     // GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
+  output          gtx_rx_err;          // PRBS test detects an error
+  output  [15:0]  gtx_rx_err_count;    // Error count on this fiber channel
+  output          gtx_rx_sump;    // Unused signals
 
   output link_had_err; // link stability monitor: error happened at least once
-  output link_good; // link stability monitor: always good, no errors since last resync
-  output link_bad; // link stability monitor: errors happened over 100 times
+  output link_good;    // link stability monitor: always good, no errors since last resync
+  output link_bad;     // link stability monitor: errors happened over 100 times
 
 // Debug
 `ifdef DEBUG_CFEB
@@ -369,11 +375,11 @@
   reg      ready  = 0;
   reg      tready = 0;
 
-  SRL16E upup (.CLK(clock),.CE(!power_up),.D(1'b1),.A0(pdly[0]),.A1(pdly[1]),.A2(pdly[2]),.A3(pdly[3]),.Q(power_up));
+  SRL16E upup (.CLK(clock),.CE(!power_up & clk_lock),.D(1'b1),.A0(pdly[0]),.A1(pdly[1]),.A2(pdly[2]),.A3(pdly[3]),.Q(power_up));
 
   always @(posedge clock) begin
-  ready  <= power_up && !(global_reset || ttc_resync);
-  tready <= power_up && !(global_reset || triad_clr  || ttc_resync);
+     ready  <= power_up && !(global_reset || ttc_resync);
+     tready <= power_up && !(global_reset || triad_clr  || ttc_resync);
   end
 
   wire reset  = !ready;  // injector state machine reset
@@ -389,38 +395,40 @@
   gtx_optical_rx ugtx_optical_rx
   (
 // Clocks
-  .clock          (clock),          // In  40  MHz fabric clock
-  .clock_iob        (clock_cfeb_rxd),      // In  40  MHZ iob clock
-  .clock_160        (clock_160),        // In  160 MHz from QPLL for GTX reference clock
-  .ttc_resync        (ttc_resync),        // use this to clear the link status monitor
+  .clock       (clock),           // In  40  MHz fabric clock
+  .clock_4x    (clock_4x),        // In  4*40  MHz fabric clock
+  .clock_iob   (clock_cfeb_rxd),  // In  40  MHZ iob clock
+  .clock_160   (clock_160),       // In  160 MHz from QPLL for GTX reference clock
+  .ttc_resync  (ttc_resync),      // use this to clear the link status monitor
 
 // Muonic
-  .clear_sync        (~gtx_rx_enable),      // In  Clear sync stages
-  .posneg          (cfeb_rxd_posneg),      // In  Select inter-stage clock 0 or 180 degrees
-  .delay_is        (cfeb_rxd_int_delay[3:0]),  // In  Interstage delay
+  .clear_sync  (~gtx_rx_enable),  // In  Clear sync stages, use this to freeze GTX_RX in Reset state
+  .posneg      (cfeb_rxd_posneg), // In  Select inter-stage clock 0 or 180 degrees
+  .delay_is    (cfeb_rxd_int_delay[3:0]),  // In  Interstage delay
   
 // SNAP12 optical receiver
-  .qpll_lock        (qpll_lock),        // In  QPLL locked 
+  .clocks_rdy (qpll_lock & clk_lock), // In  QPLL & MMCM locked 
   .rxp          (rxp),            // In  SNAP12+ fiber input for GTX
   .rxn          (rxn),            // In  SNAP12- fiber input for GTX
-  .gtx_rx_pol_swap    (gtx_rx_pol_swap),      // In  Inputs 5,6 [ie icfeb 4,5] have swapped rx board routes
+  .gtx_rx_pol_swap (gtx_rx_pol_swap), // In  Inputs 5,6 [ie icfeb 4,5] have swapped rx board routes
 
 // Optical receiver status
-  .gtx_rx_reset      (gtx_rx_reset),        // In  Reset GTX
-  .gtx_rx_reset_err_cnt  (gtx_rx_reset_err_cnt),    // In  Resets the PRBS test error counters
-  .gtx_rx_en_prbs_test  (gtx_rx_en_prbs_test),    // In  Select random input test data mode
-  .gtx_rx_start      (gtx_rx_start),        // Out  Set when the DCFEB Start Pattern is present
-  .gtx_rx_fc        (gtx_rx_fc),        // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
-  .gtx_rx_valid      (gtx_rx_valid),        // Out  Valid data detected on link
-  .gtx_rx_match      (gtx_rx_match),        // Out  PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
-  .gtx_rx_sync_done    (gtx_rx_sync_done),      // Out  Use these to determine gtx_ready
-  .gtx_rx_err        (gtx_rx_err),        // Out  PRBS test detects an error
-  .gtx_rx_err_count    (gtx_rx_err_count[15:0]),  // Out  Error count on this fiber channel
-  .gtx_rx_data      (gtx_rx_data[47:0]),    // Out  DCFEB comparator data
-        .link_had_err (link_had_err),
-        .link_good (link_good),
-  .link_bad (link_bad),
-  .gtx_rx_sump      (gtx_rx_sump)        // Unused signals
+  .gtx_rx_reset      (gtx_rx_reset), // In  Reset GTX rx_sync module
+  .gtx_rx_reset_err_cnt (gtx_rx_reset_err_cnt), // In  Resets the PRBS test error counters
+  .gtx_rx_en_prbs_test  (gtx_rx_en_prbs_test),  // In  Select random input test data mode
+  .gtx_rx_start      (gtx_rx_start), // Out  Set when the DCFEB Start Pattern is present
+  .gtx_rx_fc         (gtx_rx_fc),    // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
+  .gtx_rx_valid      (gtx_rx_valid), // Out  Valid data detected on link
+  .gtx_rx_match      (gtx_rx_match), // Out  PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
+  .gtx_rx_rst_done   (gtx_rx_rst_done),         // Out  These get set before rxsync
+  .gtx_rx_sync_done  (gtx_rx_sync_done),        // Out  Use these to determine gtx_ready
+  .gtx_rx_err        (gtx_rx_err),   // Out  PRBS test detects an error
+  .gtx_rx_err_count  (gtx_rx_err_count[15:0]),  // Out  Error count on this fiber channel
+  .gtx_rx_data       (gtx_rx_data[47:0]),       // Out  DCFEB comparator data
+  .link_had_err (link_had_err),
+  .link_good    (link_good),
+  .link_bad     (link_bad),
+  .gtx_rx_sump  (gtx_rx_sump)        // Unused signals
   );
 
 // Map DCFEB Signal names into Triad names per BB email:{L2,L4,L6,L5,L1,L3} --> {L1,L3,L5,L4,L0,L2}in TMB convention
@@ -438,8 +446,8 @@
   reg demux_tp_2nd = 0;
 
   always @(posedge clock) begin
-  demux_tp_1st <= triad_s0[0][0];  // Layer 0 ds 0  1st in time
-  demux_tp_2nd <= triad_s0[3][0];  // Layer 3 ds 0 2nd in time
+     demux_tp_1st <= triad_s0[0][0];  // Layer 0 ds 0  1st in time
+     demux_tp_2nd <= triad_s0[3][0];  // Layer 3 ds 0 2nd in time
   end
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -483,14 +491,14 @@
   initial inj_sm = pass;
 
   always @(posedge clock) begin
-  if   (reset)                     inj_sm <= pass;
-  else begin
-  case (inj_sm)
-  pass:    if (inject           ) inj_sm <= injecting;
-  injecting:  if (inj_tbin_cnt_done) inj_sm <= pass;
-  default                            inj_sm <= pass;
-  endcase
-  end
+     if   (reset)                     inj_sm <= pass;
+     else begin
+	case (inj_sm)
+	  pass:    if (inject           ) inj_sm <= injecting;
+	  injecting:  if (inj_tbin_cnt_done) inj_sm <= pass;
+	  default                            inj_sm <= pass;
+	endcase
+     end
   end
 
 // Injector Time Bin Counter
@@ -498,8 +506,8 @@
   wire [9:0]  inj_tbin_adr;  // Injector adr runs 0-1023
 
   always @(posedge clock) begin
-  if    (inj_sm==pass     ) inj_tbin_cnt <= 0;          // Sync  load
-  else if  (inj_sm==injecting) inj_tbin_cnt <= inj_tbin_cnt+1'b1;  // Sync  count
+     if    (inj_sm==pass     ) inj_tbin_cnt <= 0;          // Sync  load
+     else if  (inj_sm==injecting) inj_tbin_cnt <= inj_tbin_cnt+1'b1;  // Sync  count
   end
 
   assign inj_tbin_cnt_done = (inj_tbin_cnt==inj_last_tbin);    // Counter may wrap past 1024 ram adr limit
@@ -509,8 +517,8 @@
   reg pass_ff=1;
 
   always @(posedge clock) begin
-  if (reset) pass_ff <= 1'b1;
-  else       pass_ff <= (inj_sm == pass);
+     if (reset) pass_ff <= 1'b1;
+     else       pass_ff <= (inj_sm == pass);
   end
 
 // Injector RAM: 3 RAMs each 2 layers x 8 triads wide x 1024 tbins deep
@@ -579,12 +587,12 @@
   reg [17:0] inj_rdata;
 
   always @(inj_rdataa[0] or inj_ren) begin
-  case (inj_ren[2:0])
-  3'b001:  inj_rdata <= inj_rdataa[0];
-  3'b010:  inj_rdata <= inj_rdataa[1];
-  3'b100:  inj_rdata <= inj_rdataa[2];
-  default  inj_rdata <= inj_rdataa[0];
-  endcase
+     case (inj_ren[2:0])
+       3'b001:  inj_rdata <= inj_rdataa[0];
+       3'b010:  inj_rdata <= inj_rdataa[1];
+       3'b100:  inj_rdata <= inj_rdataa[2];
+       default  inj_rdata <= inj_rdataa[0];
+     endcase
   end
 
   assign inj_ramout[1:0] = inj_ramoutb[0][1:0];
@@ -614,9 +622,9 @@
   reg      single_bx_mode = 0;
 
   always @(posedge clock) begin
-  cfeb_badbits_block_ena  <= cfeb_badbits_block;
-  cfeb_badbits_nbx_minus1  <= cfeb_badbits_nbx-1'b1;
-  single_bx_mode      <= cfeb_badbits_nbx==1;
+     cfeb_badbits_block_ena  <= cfeb_badbits_block;
+     cfeb_badbits_nbx_minus1  <= cfeb_badbits_nbx-1'b1;
+     single_bx_mode      <= cfeb_badbits_nbx==1;
   end
 
 // Periodic check pulse counter
@@ -625,9 +633,9 @@
   wire check_cnt_ena = (check_cnt < cfeb_badbits_nbx_minus1);
   
   always @(posedge clock) begin
-  if      (cfeb_badbits_reset) check_cnt <= 0;
-  else if (check_cnt_ena     ) check_cnt <= check_cnt+1'b1;
-  else                         check_cnt <= 0;
+     if      (cfeb_badbits_reset) check_cnt <= 0;
+     else if (check_cnt_ena     ) check_cnt <= check_cnt+1'b1;
+     else                         check_cnt <= 0;
   end
 
   wire check_pulse = (check_cnt==0);
@@ -638,34 +646,32 @@
   genvar ids;
   genvar ily;
   generate
-  for (ids=0; ids<MXDS; ids=ids+1) begin: ckbitds
-  for (ily=0; ily<MXLY; ily=ily+1) begin: ckbitly
-
-  cfeb_bit_check ucfeb_bit_check (
-  .clock      (clock),        // 40MHz main clock
-  .reset      (cfeb_badbits_reset),  // Clear stuck bit FFs
-  .check_pulse  (check_pulse),      // Periodic checking
-  .single_bx_mode  (single_bx_mode),    // Check for single bx pulses    
-  .bit_in      (triad_s1[ily][ids]),  // Bit to check
-  .bit_bad    (badbits[ily][ids]));  // Bit went bad flag
-
-  end
-  end
+     for (ids=0; ids<MXDS; ids=ids+1) begin: ckbitds
+	for (ily=0; ily<MXLY; ily=ily+1) begin: ckbitly
+	   cfeb_bit_check ucfeb_bit_check (
+		.clock      (clock),        // 40MHz main clock
+		.reset      (cfeb_badbits_reset),  // Clear stuck bit FFs
+		.check_pulse  (check_pulse),      // Periodic checking
+		.single_bx_mode  (single_bx_mode),    // Check for single bx pulses    
+		.bit_in      (triad_s1[ily][ids]),  // Bit to check
+		.bit_bad    (badbits[ily][ids]) );  // Bit went bad flag
+	end
+     end
   endgenerate
 
 // Summary badbits for this CFEB
   reg cfeb_badbits_found=0;
 
   wire cfeb_badbits_or =
-  (|badbits[0][7:0])|
-  (|badbits[1][7:0])|
-  (|badbits[2][7:0])|
-  (|badbits[3][7:0])|
-  (|badbits[4][7:0])|
-  (|badbits[5][7:0]);
+       (|badbits[0][7:0])|
+       (|badbits[1][7:0])|
+       (|badbits[2][7:0])|
+       (|badbits[3][7:0])|
+       (|badbits[4][7:0])|
+       (|badbits[5][7:0]);
 
   always @(posedge clock) begin
-  cfeb_badbits_found <= cfeb_badbits_or;
+     cfeb_badbits_found <= cfeb_badbits_or;
   end
 
 // Blocked triad bits list, 1=blocked 0=ok to tuse
@@ -726,7 +732,7 @@
   for (ily=0; ily<=MXLY-1; ily=ily+1) begin: raw
   RAMB18E1 #(                        // Virtex6
   .RAM_MODE      ("TDP"),              // SDP or TDP
-   .READ_WIDTH_A    (0),                // 0,1,2,4,9,18,36 Read/write width per port
+  .READ_WIDTH_A    (0),                // 0,1,2,4,9,18,36 Read/write width per port
   .WRITE_WIDTH_A    (9),                // 0,1,2,4,9,18
   .READ_WIDTH_B    (9),                // 0,1,2,4,9,18
   .WRITE_WIDTH_B    (0),                // 0,1,2,4,9,18,36
@@ -787,8 +793,8 @@
   reg  [3:0]  persist  = 0;
 
   always @(posedge clock) begin
-  persist   <=   triad_persist-1'b1;
-  persist1 <=  (triad_persist==1 || triad_persist==0);
+     persist  <=   triad_persist-1'b1;
+     persist1 <=  (triad_persist==1 || triad_persist==0);
   end
 
 // Instantiate mxly*mxds = 48 triad decoders
@@ -796,11 +802,11 @@
   wire [MXHS-1:0] hs    [MXLY-1:0];  // Decoded 1/2-strip pulses
 
   generate
-  for (ily=0; ily<=MXLY-1; ily=ily+1) begin: ily_loop
-  for (ids=0; ids<=MXDS-1; ids=ids+1) begin: ids_loop
-  triad_decode utriad(clock,treset,persist,persist1,triad_s2[ily][ids],hs[ily][3+ids*4:ids*4],tskip[ily][ids]);
-  end
-  end
+     for (ily=0; ily<=MXLY-1; ily=ily+1) begin: ily_loop
+	for (ids=0; ids<=MXDS-1; ids=ids+1) begin: ids_loop
+	   triad_decode utriad(clock,treset,persist,persist1,triad_s2[ily][ids],hs[ily][3+ids*4:ids*4],tskip[ily][ids]);
+	end
+     end
   endgenerate
 
   assign triad_skip = (|tskip[0]) | (|tskip[1]) | (|tskip[2]) | (|tskip[3]) | (|tskip[4]) | (|tskip[5]);
@@ -823,11 +829,11 @@
 // Injector State Machine ASCII display
   reg[71:0] inj_sm_dsp;
   always @* begin
-  case (inj_sm)
-  pass:    inj_sm_dsp <= "pass     ";
-  injecting:  inj_sm_dsp <= "injecting";
-  default    inj_sm_dsp <= "pass     ";
-  endcase
+     case (inj_sm)
+       pass:    inj_sm_dsp <= "pass     ";
+       injecting:  inj_sm_dsp <= "injecting";
+       default    inj_sm_dsp <= "pass     ";
+     endcase
   end
 
 // Raw hits RAM outputs

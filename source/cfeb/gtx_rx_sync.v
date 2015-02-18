@@ -198,15 +198,21 @@ module GTX_RX_SYNC
 
     //_______________ Assign the phase align ports into the GTX _______________
 
-    assign RXDLYALIGNRESET   = 1'b0;
-    assign RXENPMAPHASEALIGN = !begin_r & !align_reset_r;
-    assign RXPMASETPHASE     = phase_align_r;
-    assign RXDLYALIGNDISABLE = 1'b0;
-    assign RXDLYALIGNOVERRIDE = 1'b1;
+//    assign RXDLYALIGNRESET    = align_reset_r; // JRG, was 1'b0;
+    assign RXDLYALIGNRESET    = 1'b0;
+
+    assign RXENPMAPHASEALIGN  = !begin_r & !align_reset_r;
+    assign RXPMASETPHASE      = phase_align_r;
+
+//    assign RXDLYALIGNDISABLE  = begin_r | ready_r; // JRG, does this even work?  was 1'b0. 
+//    assign RXDLYALIGNDISABLE  = 1'b1; // begin_r | ready_r; // JRG, is this best?  was 1'b0. 
+    assign RXDLYALIGNDISABLE  = 1'b0; // Xilinx does not recommend this, but it was set to this...
+
+//    assign RXDLYALIGNOVERRIDE = 1'b1; // JGhere, used to be 1'b0, set to 1 for rx_dlyalign testing
+    assign RXDLYALIGNOVERRIDE = 1'b0; // JGhere, used to be 1'b0, disables rx_dlyalign
 
     //_______________________ Assign the sync_done port _______________________
-    
+
     assign SYNC_DONE = ready_r;
-    
-    
+
 endmodule
