@@ -1038,13 +1038,13 @@
   wire        cfeb5_rxd_posneg;
   wire        cfeb6_rxd_posneg;
 
-  assign cfeb_rxd_posneg[0] = cfeb0_rxd_posneg;  // JGhere: use B-side value "cfeb6"
-  assign cfeb_rxd_posneg[1] = cfeb1_rxd_posneg;  //   another B-side
-  assign cfeb_rxd_posneg[2] = cfeb2_rxd_posneg;  //   another B-side
-  assign cfeb_rxd_posneg[3] = cfeb3_rxd_posneg;  //   another B-side
-  assign cfeb_rxd_posneg[4] = cfeb4_rxd_posneg;  // JGhere: use A-side value "cfeb5"
+  assign cfeb_rxd_posneg[0] = cfeb6_rxd_posneg;  // JGhere: use B-side value "cfeb6"
+  assign cfeb_rxd_posneg[1] = cfeb6_rxd_posneg;  //   another B-side
+  assign cfeb_rxd_posneg[2] = cfeb6_rxd_posneg;  //   another B-side
+  assign cfeb_rxd_posneg[3] = cfeb6_rxd_posneg;  //   another B-side
+  assign cfeb_rxd_posneg[4] = cfeb5_rxd_posneg;  // JGhere: use A-side value "cfeb5"
   assign cfeb_rxd_posneg[5] = cfeb5_rxd_posneg;  //   another A-side
-  assign cfeb_rxd_posneg[6] = cfeb6_rxd_posneg;  //   another A-side
+  assign cfeb_rxd_posneg[6] = cfeb5_rxd_posneg;  //   another A-side
 
 // Injector Ports
   wire  [MXCFEB-1:0]  mask_all;
@@ -1254,8 +1254,8 @@
   .rxn          (rxn[icfeb]), // In  SNAP12- fiber input for GTX
 
 // Optical receiver status
-  .gtx_rx_enable   (gtx_rx_enable[icfeb] & ready_phaser[icfeb]), // In  Enable/Unreset GTX optical input; disables copper SCSI? JRG, hold off enable until pds phaser is done and ready
-//  .gtx_rx_enable   (gtx_rx_enable[icfeb]), // In  Enable/Unreset GTX optical input; disables copper SCSI?
+//  .gtx_rx_enable   (gtx_rx_enable[icfeb] & ready_phaser[icfeb]), // In  Enable/Unreset GTX optical input; disables copper SCSI? JRG, hold off enable until pds phaser is done and ready
+  .gtx_rx_enable   (gtx_rx_enable[icfeb]), // In  Enable/Unreset GTX optical input; disables copper SCSI?
   .gtx_rx_reset    (gtx_rx_reset[icfeb] | auto_gtx_reset),  // In  Reset this GTX rx & sync module; auto reset all if any take too long to phase lock
 //  .gtx_rx_reset    (gtx_rx_reset[icfeb]),  // In  Reset this GTX rx & sync module
   .gtx_rx_reset_err_cnt (gtx_rx_reset_err_cnt[icfeb]), // In  Resets the PRBS test error counters
