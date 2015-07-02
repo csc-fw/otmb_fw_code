@@ -248,10 +248,12 @@
      posneg_ff <= posneg;
   end
 
+  wire ignore_link = !link_good | link_bad; // jghere: this is new, to keep bad links from contaminating the triads == hot comps
+   
 // JRG: add custom muonic CLCT logic. Note that comparator data leaves this module on FALLING LHC_CLOCK edge (~clock)
   always @(posedge clock_iob) begin  // JRG, comment this for test with no recclk or phaser clocks in use
-//  always @(posedge clock) begin  // JGhere, comment this for "normal" running with phaser clock controls
-     comp_dat_phaser[47:0] <= comp_dat[47:0];  // JRG: bring data into phase-tuned time domain
+     if (!ignore_link) comp_dat_phaser[47:0] <= comp_dat[47:0];  // JRG: bring data into phase-tuned time domain
+     else comp_dat_phaser[47:0] <= 0;  // JRG: bring data into phase-tuned time domain
   end
 
   always @(posedge clock) begin

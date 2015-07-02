@@ -4,7 +4,7 @@
 // Firmware version global definitions
   `define FIRMWARE_TYPE 04'hC    // C=Normal CLCT/TMB, D=Debug PCB loopback version
   `define VERSION       04'hE    // Version revision number, A=TMB2004 and earlier, E=TMB2005E production
-  `define MONTHDAY      16'h0412 // Version date
+  `define MONTHDAY      16'h0530 // Version date
   `define YEAR          16'h2015 // Version year
 
   `define AUTO_VME         01'h1 // Automatically initialize VME registers from PROM data,   0=do not
@@ -90,6 +90,7 @@
 //      04/10/2015      Deactivate changes to l_qpll_lock too -- this works!
 //      04/11/2015      Reactivate changes from 04/06 04/08 -- this works!
 //      04/12/2015      Activate auto-reset for GTX if they don't lock within 1.638 ms
+//      05/30/2015      Keep bad links from contaminating the triads == hot comps: triads load zeroes if !link_good OR link_bad
 //---------------------------------------------------------------------------------------------------------------------------------------
 //  End Global Definitions
 //---------------------------------------------------------------------------------------------------------------------------------------
