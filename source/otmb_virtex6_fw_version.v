@@ -4,7 +4,7 @@
 // Firmware version global definitions
   `define FIRMWARE_TYPE 04'hC    // C=Normal CLCT/TMB, D=Debug PCB loopback version
   `define VERSION       04'hE    // Version revision number, A=TMB2004 and earlier, E=TMB2005E production
-  `define MONTHDAY      16'h0602 // Version date
+  `define MONTHDAY      16'h0605 // Version date
   `define YEAR          16'h2015 // Version year
 
   `define AUTO_VME         01'h1 // Automatically initialize VME registers from PROM data,   0=do not
@@ -92,7 +92,7 @@
 //      04/12/2015      Activate auto-reset for GTX if they don't lock within 1.638 ms
 //      05/30/2015      Keep bad links from contaminating the triads == hot comps: triads load zeroes if !link_good OR link_bad
 //      06/02/2015      Undo phaser clocks delay on GTX links to return to Jan 2015 version behavior
-//         Rev2			Fixed posneg bug in top level, recompile on cmslab2 
+//      06/05/2015      Disconnect  auto_gtx_reset  to return to Jan 2015 version behavior, Fixed A-side vs B-side cfeb values in digital phase shifters
 //---------------------------------------------------------------------------------------------------------------------------------------
 //  End Global Definitions
 //---------------------------------------------------------------------------------------------------------------------------------------
