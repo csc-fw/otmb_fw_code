@@ -4,7 +4,7 @@
 // Firmware version global definitions
   `define FIRMWARE_TYPE 04'hC    // C=Normal CLCT/TMB, D=Debug PCB loopback version
   `define VERSION       04'hE    // Version revision number, A=TMB2004 and earlier, E=TMB2005E production
-  `define MONTHDAY      16'h0605 // Version date
+  `define MONTHDAY      16'h0609 // Version date
   `define YEAR          16'h2015 // Version year
 
   `define AUTO_VME         01'h1 // Automatically initialize VME registers from PROM data,   0=do not
@@ -21,8 +21,8 @@
   `define FPGAID       16'h6240 // FPGA Type 6240 XC6VLX240T
 
 // Conditional compile flags: Enable only one CSC_TYPE
-  `define CSC_TYPE_C  04'hC // Normal   ME1B: ME1B   chambers facing toward IR.    ME1B hs =!reversed, ME1A hs = reversed
-//  `define CSC_TYPE_D  04'hD    // Reversed ME1B: ME1B   chambers facing away from IR. ME1B hs = reversed, ME1A hs =!reversed
+//  `define CSC_TYPE_C  04'hC // Normal   ME1B: ME1B   chambers facing toward IR.    ME1B hs =!reversed, ME1A hs = reversed
+  `define CSC_TYPE_D  04'hD    // Reversed ME1B: ME1B   chambers facing away from IR. ME1B hs = reversed, ME1A hs =!reversed
 
 // Revision log
 //  02/08/2013  Initial Virtex-6 specific
@@ -91,8 +91,7 @@
 //      04/11/2015      Reactivate changes from 04/06 04/08 -- this works!
 //      04/12/2015      Activate auto-reset for GTX if they don't lock within 1.638 ms
 //      05/30/2015      Keep bad links from contaminating the triads == hot comps: triads load zeroes if !link_good OR link_bad
-//      06/02/2015      Undo phaser clocks delay on GTX links to return to Jan 2015 version behavior
-//      06/05/2015      Disconnect  auto_gtx_reset  to return to Jan 2015 version behavior, Fixed A-side vs B-side cfeb values in digital phase shifters
+//  	06/09/2015	Fixed bug in posneg logic in top-level file
 //---------------------------------------------------------------------------------------------------------------------------------------
 //  End Global Definitions
 //---------------------------------------------------------------------------------------------------------------------------------------

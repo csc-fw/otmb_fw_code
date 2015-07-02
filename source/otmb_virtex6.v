@@ -1254,10 +1254,10 @@
   .rxn          (rxn[icfeb]), // In  SNAP12- fiber input for GTX
 
 // Optical receiver status
-//  .gtx_rx_enable   (gtx_rx_enable[icfeb] & ready_phaser[icfeb]), // In  Enable/Unreset GTX optical input; disables copper SCSI? JRG, hold off enable until pds phaser is done and ready
-  .gtx_rx_enable   (gtx_rx_enable[icfeb]), // In  Enable/Unreset GTX optical input; disables copper SCSI?
-//  .gtx_rx_reset    (gtx_rx_reset[icfeb] | auto_gtx_reset),  // In  Reset this GTX rx & sync module; auto reset all if any take too long to phase lock
-  .gtx_rx_reset    (gtx_rx_reset[icfeb]),  // In  Reset this GTX rx & sync module
+  .gtx_rx_enable   (gtx_rx_enable[icfeb] & ready_phaser[icfeb]), // In  Enable/Unreset GTX optical input; disables copper SCSI? JRG, hold off enable until pds phaser is done and ready
+//  .gtx_rx_enable   (gtx_rx_enable[icfeb]), // In  Enable/Unreset GTX optical input; disables copper SCSI?
+  .gtx_rx_reset    (gtx_rx_reset[icfeb] | auto_gtx_reset),  // In  Reset this GTX rx & sync module; auto reset all if any take too long to phase lock
+//  .gtx_rx_reset    (gtx_rx_reset[icfeb]),  // In  Reset this GTX rx & sync module
   .gtx_rx_reset_err_cnt (gtx_rx_reset_err_cnt[icfeb]), // In  Resets the PRBS test error counters
   .gtx_rx_en_prbs_test  (gtx_rx_en_prbs_test[icfeb]),  // In  Select random input test data mode
   .gtx_rx_start    (gtx_rx_start[icfeb]),  // Out  Set when the DCFEB Start Pattern is present
