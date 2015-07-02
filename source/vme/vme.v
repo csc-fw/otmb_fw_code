@@ -895,9 +895,13 @@
   gtx_rx_err_count5,
   gtx_rx_err_count6,
 
-        gtx_link_had_err,  // link stability monitor: error happened at least once
-        gtx_link_good,     // link stability monitor: always good, no errors since last resync
+  gtx_link_had_err,  // link stability monitor: error happened at least once
+  gtx_link_good,     // link stability monitor: always good, no errors since last resync
   gtx_link_bad,      // link stability monitor: errors happened over 100 times
+
+  comp_phaser_a_ready,
+  comp_phaser_b_ready,
+  auto_gtx_reset,
 
 // Sump
   vme_sump
@@ -991,8 +995,9 @@
 //------------------------------------------------------------------------------------------------------------------
 // VME Addresses
 //------------------------------------------------------------------------------------------------------------------
-  parameter ADR_TMB_GLOBAL    = 'd26;    // Slot number to address all TMBs in parallel
-  parameter ADR_BROADCAST      = 'd27;    // Slot number to address all peripheral crate modules
+//  parameter ADR_TMB_GLOBAL    = 'd26;    // Slot number to address all TMBs in parallel
+  parameter ADR_TMB_GLOBAL    = 'd30;    // Slot number to address all OTMBs in parallel
+  parameter ADR_BROADCAST     = 'd27;    // Slot number to address all peripheral crate modules
 
   parameter ADR_IDREG0      = 9'h00;  // ID Register 0
   parameter ADR_IDREG1      = 9'h02;  // ID Register 1
@@ -1088,7 +1093,7 @@
   parameter ADR_MPC1_FRAME1_FIFO  = 9'h182;  // MPC1 Frame 1 Data sent to MPC
   parameter ADR_MPC_FRAMES_FIFO_CTRL  = 9'h184;  // MPC Frames FIFO control
 
-  parameter ADR_TMB_MMCM_LOCK_TIME = 9'h186; // Read MMCM lock time
+  parameter ADR_TMB_SPECIAL_COUNT = 9'h186; // Used to Read MMCM lock time, now just whatever we need it for!
   parameter ADR_TMB_POWER_UP_TIME  = 9'h188; // Read tmb power-up time
   parameter ADR_TMB_LOAD_CFG_TIME  = 9'h18A; // Read tmb config time
   parameter ADR_ALCT_PHASER_LOCK_TIME = 9'h18C;  // Read alct clocks lock time
@@ -2153,6 +2158,10 @@
   input  [MXCFEB-1:0]  gtx_link_good;      // link stability monitor: always good, no errors since last resync
   input  [MXCFEB-1:0]  gtx_link_bad;       // link stability monitor: errors happened over 100 times
 
+  output    comp_phaser_a_ready;
+  output    comp_phaser_b_ready;
+  output    auto_gtx_reset;
+
 // Sump
   output          vme_sump;        // Unused signals
 
@@ -2368,12 +2377,13 @@
 
 // counters to monitor startup timing...
 //   Read bits 20:5 or 19:4 or 17:2 to VME... 800 or 400 or 100 ns resolution, counts to 52.4 or 26.2 or 6.5 ms
-  wire  [15:0] tmb_mmcm_lock_time_rd = {11'b00000000000,fast_sum[4:0]};   // Adr 186 --JGhere, test: count bits in phaser_lock + alct_load_cfg
+  wire  [15:0] tmb_special_count_rd = tck_mez_cnt[15:0]; // was used for {11'b00000000000,fast_sum[4:0]};   // Adr 186 -- test: count bits in phaser_lock + alct_load_cfg
   wire  [15:0] tmb_power_up_time_rd = tmb_power_up_time[17:2];     // Adr 188
   wire  [15:0] tmb_load_cfg_time_rd = tmb_load_cfg_time[17:2];     // Adr 18A
   wire  [15:0] alct_phaser_lock_time_rd = alct_phaser_lock_time[17:2]; // Adr 18C
   wire  [15:0] alct_load_cfg_time_rd = alct_load_cfg_time[17:2];   // Adr 18E -- time after alct_config_wait
-  wire  [15:0] gtx_rst_done_time_rd = gtx_rst_done_time[17:2];     // Adr 190 -- does not wait for cfeb phaser lock?
+  wire  [15:0] gtx_rst_done_time_rd = comp_phaser_lock_time[17:2];     // Adr 190  JRG, changed for 04062015 version... change name later!
+//  wire  [15:0] gtx_rst_done_time_rd = gtx_rst_done_time[17:2];     // old Adr 190 -- does not wait for cfeb phaser lock?
   wire  [15:0] gtx_sync_done_time_rd = gtx_sync_done_time[17:2];   // Adr 192 -- does not wait for cfeb phaser lock?
 
   wire [15:0]  mpc0_frame0_fifo_rd;
@@ -2822,44 +2832,64 @@
 
 // counters to monitor startup timing...
 //   Read bits 20:5 or 19:4 or 17:2 to VME... 800 or 400 or 100 ns resolution, counts to 52.4 or 26.2 or 6.5 ms
-  reg  [23:0]  tmb_mmcm_lock_time = 24'h000000;    // Adr 186 --probably the same as power-up time -->> 144
+//  reg  [23:0]  tmb_mmcm_lock_time = 24'h000000;    // Adr 186 --probably the same as power-up time -->> 144
   reg  [23:0]  tmb_power_up_time = 24'h000000;     // Adr 188 -->> 144
   reg  [23:0]  tmb_load_cfg_time = 24'h000000;     // Adr 18A -->> 187
   reg  [23:0]  alct_phaser_lock_time = 24'h000000; // Adr 18C -->> 1169 = 469 usec. during alct_config_wait?
   reg  [23:0]  alct_load_cfg_time = 24'h000000;    // Adr 18E -- time after alct_config_wait, 653
-  reg  [23:0]  gtx_rst_done_time = 24'h000000;     // Adr 190 -->> 273 (doesn't need a fiber?)
+  reg  [23:0]  comp_phaser_lock_time = 24'h000000; // Adr ??? use this to replace Adr 190
+  reg  [23:0]  gtx_rst_done_time = 24'h000000;     // was Adr 190 -->> 273 (doesn't need a fiber?)
   reg  [23:0]  gtx_sync_done_time = 24'h000000;    // Adr 192 -->> 307 (doesn't need a fiber?)
-  reg   [1:0]  ldps_busy = 2'b00;      // permanently set after first alct phaser lock cycle
+  reg   [3:0]  ldps_busy = 4'h0;      // permanently set after first mmcm phaser lock cycle is completed
   reg          mmcm_firstlock = 1'b0;  // permanently set after first mmcm lock
   reg          gtx_rst_completed = 1'b0;  // permanently set after first gtx_rst is completed
   reg          gtx_sync_completed = 1'b0; // permanently set after first gtx_sync is completed
   reg          jsm_cfg_done = 1'b0;    // permanently set after first alct jtag configure cycle is completed
+  reg          alct_phaser_done_r = 1'b0;    // permanently set after first alct dps phaser lock cycle  is complete
+  reg          comp_phaser2_done_r = 1'b0;    // permanently set after first comp dps phaser lock cycle  is complete
+  reg          comp_phaser3_done_r = 1'b0;    // permanently set after first comp dps phaser lock cycle  is complete
+  reg          gtx_sync_too_long = 1'b0;
 
   always @(posedge tmb_clock0_ibufg) begin
     if (lock_tmb_clock0) mmcm_firstlock <= 1'b1;      // so it will only time the first mmcm lock cycle
-    if (!lock_tmb_clock0 && !mmcm_firstlock && (tmb_mmcm_lock_time[17:10] != 8'hFF)) tmb_mmcm_lock_time <= tmb_mmcm_lock_time + 1'b1;
+//    if (!lock_tmb_clock0 && !mmcm_firstlock && (tmb_mmcm_lock_time[17:10] != 8'hFF)) tmb_mmcm_lock_time <= tmb_mmcm_lock_time + 1'b1;
     if (!power_up && (tmb_power_up_time[17:10] != 8'hFF)) tmb_power_up_time <= tmb_power_up_time + 1'b1;
     if (!vsm_ready && (tmb_load_cfg_time[17:10] != 8'hFF)) tmb_load_cfg_time <= tmb_load_cfg_time + 1'b1; // time until TMB is ready
 
-    if (dps_busy[0]) ldps_busy[0] <= 1'b1;
-    if (dps_busy[1]) ldps_busy[1] <= 1'b1;
-    if (!alct_phaser_done && (alct_phaser_lock_time[17:10] != 8'hFF)) alct_phaser_lock_time <= alct_phaser_lock_time + 1'b1; // time until TMB clocks for alct are ready
+    if (phaser0_rd[2]) ldps_busy[0] <= 1'b1; // phaser 0 and 1 are for ALCT (dps 0,1)
+    if (phaser1_rd[2]) ldps_busy[1] <= 1'b1;
+    if (phaser7_rd[2]) ldps_busy[2] <= 1'b1; // phaser 7 and 8 are for comparator fiber links from DCFEBs (dps 2,3)
+    if (phaser8_rd[2]) ldps_busy[3] <= 1'b1;
+    if (!alct_phaser_done_r) alct_phaser_done_r <= alct_phaser_done;
+    if (!comp_phaser2_done_r) comp_phaser2_done_r <= comp_phaser2_done;
+    if (!comp_phaser3_done_r) comp_phaser3_done_r <= comp_phaser3_done;
+     
+    if (!alct_phaser_done_r && (alct_phaser_lock_time[17:10] != 8'hFF)) alct_phaser_lock_time <= alct_phaser_lock_time + 1'b1; // time until TMB clocks for alct are ready and locked
+    if ( (!comp_phaser2_done_r | !comp_phaser3_done_r) && (comp_phaser_lock_time[17:10] != 8'hFF)) comp_phaser_lock_time <= comp_phaser_lock_time + 1'b1; // time until TMB clocks for comp are ready and locked
+    gtx_sync_too_long  <=  (~|gtx_sync_done_time[15:10]) & (|gtx_sync_done_time[17:16]); // gtx s.b. done before 800us, so reset at 1638us and release at 1664us... repeats cycle 2 more times if needed at 3276 and 4915us
 
 // JRG, note that alct_startup_done means alct is ready to receive jtag cfg data.  use  jsm_ok  to indicate cfg is done!
     if (jsm_ok) jsm_cfg_done <= 1'b1;
     if (!jsm_cfg_done && alct_startup_done && (alct_load_cfg_time[17:10] != 8'hFF)) alct_load_cfg_time <= alct_load_cfg_time + 1'b1; // time to send alct config data after alct fpga is ready for it; for total delay add alct_startup_delay and the longer of power_up_time or tmb_load_cfg_time
 
-    if (gtx_rst_done) gtx_rst_completed <= 1'b1;      // so it will only time the first reset cycle
-    if (!gtx_rst_completed && (gtx_rst_done_time[17:10] != 8'hFF)) gtx_rst_done_time <= gtx_rst_done_time + 1'b1;
+    if (gtx_rst_done) gtx_rst_completed <= 1'b1;      // so it will only time the first reset cycle completion
+    if (!gtx_rst_completed && (gtx_rst_done_time[17:10] != 8'hFF)) gtx_rst_done_time <= gtx_rst_done_time + 1'b1; // note: reset is followed by sync
 
-    if (virtex6_gtx_rx_all_rd[3]) gtx_sync_completed <= 1'b1;      // so it will only time the first sync cycle
-    if (!gtx_sync_completed && (gtx_sync_done_time[17:10] != 8'hFF)) gtx_sync_done_time <= gtx_sync_done_time + 1'b1;
+    if (virtex6_gtx_rx_all_rd[3]) gtx_sync_completed <= 1'b1;      // so it will only time the first sync cycle completion
+    if (!gtx_sync_completed && (gtx_sync_done_time[17:10] != 8'hFF)) gtx_sync_done_time <= gtx_sync_done_time + 1'b1; // note: sync comes after reset
 
     fast_sum <= absum + cdsum;   // Adr 186 --JGhere, test: count bits in phaser_lock + alct_load_cfg
   end
 
-  assign alct_phaser_done =  ( !(|dps_busy[1:0]) && (&ldps_busy[1:0]) );  // so it will only time the first alct dps phaser cycle
+  assign alct_phaser_done =  ( !(|dps_busy[1:0]) && (&ldps_busy[1:0]) && (&dps_lock[1:0]) );  //  use to time the first alct dps phaser cycle
+  assign comp_phaser2_done =  ( (!dps_busy[2]) && ldps_busy[2] && dps_lock[2]  );  // use to time the first comp dps phaser2 cycle
+  assign comp_phaser3_done =  ( (!dps_busy[3]) && ldps_busy[3] && dps_lock[3]  );  // use to time the first comp dps phaser3 cycle
   assign gtx_rst_done = &gtx_rx_rst_done;
+
+  assign comp_phaser_a_ready =   comp_phaser2_done_r;    // permanently set after first comp dps phaser lock cycle  is complete
+  assign comp_phaser_b_ready =   comp_phaser3_done_r;    // permanently set after first comp dps phaser lock cycle  is complete
+  assign auto_gtx_reset = gtx_sync_too_long;  // gtx did not sync after hard reset, so force a gtx reset
+
 
   reg [4:0] fast_sum = 0;
   wire [2:0] sa = fast6count(alct_phaser_lock_time[7:2]);
@@ -3120,7 +3150,7 @@
   
   ADR_MPC_FRAMES_FIFO_CTRL: data_out  <= mpc_frames_fifo_ctrl_rd;
 
-  ADR_TMB_MMCM_LOCK_TIME: data_out  <= tmb_mmcm_lock_time_rd;    // Adr 186 --probably the same as power-up time
+  ADR_TMB_SPECIAL_COUNT: data_out  <= tmb_special_count_rd;    // Adr 186 used to Read MMCM lock time, now just whatever we need it for!
   ADR_TMB_POWER_UP_TIME:  data_out  <= tmb_power_up_time_rd;     // Adr 188
   ADR_TMB_LOAD_CFG_TIME:  data_out  <= tmb_load_cfg_time_rd;     // Adr 18A
   ADR_ALCT_PHASER_LOCK_TIME: data_out  <= alct_phaser_lock_time_rd; // Adr 18C
@@ -3894,6 +3924,29 @@
   assign jtagsm2_rd[13]  = jsm_end_ok;    // R  prom end flag detected
   assign jtagsm2_rd[14]  = jsm_header_ok;  // R  Header marker found where expected
   assign jtagsm2_rd[15]  = jsm_chain_ok;    // R  Chain  marker found where expected
+
+
+// JRG:  MEZ JTAG TCK counter to check when software sends TCKs to the JTAG input (will not catch hardware glitches via boot reg, etc)
+   reg [15:0] tck_mez_cnt = 0;
+   reg [1:0]  tck_mez_ff  = 0;
+
+   always @(posedge clock) begin
+      if (cnt_all_reset)  begin   //use  ttc_resync?
+	 tck_mez_cnt <= 0;
+	 tck_mez_ff  <= 0;
+      end
+      else
+	if (tck_mez_cnt_en) tck_mez_cnt <= tck_mez_cnt+1'b1;
+      if (sel_usr[3:2] == 2'h1) begin  // mez jtag bus is selected
+	 tck_mez_ff[0]  <= jsm_usr_jtag_new[2]; // tck_mez;
+	 tck_mez_ff[1]  <= tck_mez_ff[0];
+      end
+   end
+
+   wire tck_mez_cnt_done = (tck_mez_cnt[15:10]==6'h3F);        // Stop counter at "FC" full scale so it won't wrap
+   wire tck_mez_ticked   =  !tck_mez_ff[1]  &&  tck_mez_ff[0];    // tck transitioned 0-to-1
+   wire tck_mez_cnt_en   =  tck_mez_ticked && !tck_mez_cnt_done;
+
 
 //------------------------------------------------------------------------------------------------------------------
 // New jtagsm uses compact ALCT User PROM data format

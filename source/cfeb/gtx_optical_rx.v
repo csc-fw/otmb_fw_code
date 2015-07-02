@@ -64,7 +64,7 @@
   input    ttc_resync; // use this to clear the link status monitor
 
 // Muonic
-  input    clear_sync; // Clear sync stages, use this to freeze GTX in Reset state
+  input    clear_sync; // Clear sync stages, use this to put GTX in Reset state
   input    posneg;     // Select inter-stage clock 0 or 180 degrees
   input  [3:0]  delay_is; // Interstage delay
 
@@ -99,8 +99,8 @@
 // GTX resets
   assign gtx_rx_rst_done = rx_rst_done;
   wire rx_sync_done;
-  wire gtx_ready = clocks_rdy && rx_sync_done;
-  wire rst       = gtx_rx_reset || !clocks_rdy;   // use this to reset GTX_RX_SYNC module
+  wire gtx_ready = clocks_rdy & rx_sync_done;
+  wire rst       = gtx_rx_reset | !clocks_rdy;   // use this to reset GTX_RX_SYNC module... JRG, will soon use for GTX_RX Reset as well
 
 // Received clock time domain
   wire [3:0]  cew;
@@ -111,8 +111,8 @@
 // GTX instance
   gtx_comp_fiber_in ugtx_comp_fiber_in
   (
-  .RST         (rst),       // In  use this to reset GTX_RX_SYNC module
-  .GTX_DISABLE (clear_sync | !clocks_rdy),  // In  use this to freeze GTX_RX in Reset state
+  .RST         (rst),       // In  use this to reset GTX_RX & SYNC module... 
+  .GTX_DISABLE (clear_sync | !clocks_rdy),  // In  use this to put GTX_RX in Reset state
   .CLOCK_4X    (clock_4x),  // In  4 * global TMB clock
   .ttc_resync  (ttc_resync),  // use this to clear the link status monitor
   .CMP_RX_N    (rxn),         // In  SNAP12- fiber input for GTX
@@ -151,7 +151,8 @@
 // Signals in received clock domain
   reg  [47:0]  comp_dat_r    = 0;
   reg     rst_errcount_r  = 0;
-  wire [7:0] link_errcount;
+
+        wire [7:0]  link_errcount;
    
   assign snap_wait = !(rx_sync_done & clocks_rdy);  // Allow pattern checks when RX is ready
 
@@ -172,12 +173,12 @@
         rst_errcount_r <= 0;
 
         if (cew[0]) begin      // Store comparator data using received fiber clock
-	   comp_dat_r <= comp_dat;  // JRG: could we save a BX here by using PROMPT_DAT to load this reg on CEW3?
+     comp_dat_r <= comp_dat;  // JRG: could we save a BX here by using PROMPT_DAT to load this reg on CEW3?
         end     // JRG:  ...probably not.  Using comp_dat directly is likely the best we can do; skip comp_dat_r?
 
         if (rst_errcount_r) begin    // Error counter reset
-	   prbs_errcount <= 0;
-	   err  <= 0;
+     prbs_errcount <= 0;
+     err  <= 0;
         end
 
         else if (gtx_rx_en_prbs_test & cew[0] & !snap_wait & gtx_ready) begin  // Wait 3000 clocks after Reset
@@ -206,7 +207,7 @@
          reg             posneg_ff = 0;
    
   always @(posedge clock) begin
-     if (clear_sync) begin
+     if (clear_sync) begin  // JRG:  OR gtx_rx_reset??
         gtx_rx_data_raw[47:0] <= 0;
         gtx_rx_start  <= 0;
         gtx_rx_fc    <= 0;
@@ -248,7 +249,7 @@
   end
 
 // JRG: add custom muonic CLCT logic. Note that comparator data leaves this module on FALLING LHC_CLOCK edge (~clock)
-  always @(posedge clock_iob) begin  // JGhere, comment this for tests with no recclk or phaser clocks in use
+  always @(posedge clock_iob) begin  // JRG, comment this for test with no recclk or phaser clocks in use
 //  always @(posedge clock) begin  // JGhere, comment this for "normal" running with phaser clock controls
      comp_dat_phaser[47:0] <= comp_dat[47:0];  // JRG: bring data into phase-tuned time domain
   end

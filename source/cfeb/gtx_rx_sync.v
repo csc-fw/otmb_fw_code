@@ -208,8 +208,8 @@ module GTX_RX_SYNC
 //    assign RXDLYALIGNDISABLE  = 1'b1; // begin_r | ready_r; // JRG, is this best?  was 1'b0. 
     assign RXDLYALIGNDISABLE  = 1'b0; // Xilinx does not recommend this, but it was set to this...
 
-//    assign RXDLYALIGNOVERRIDE = 1'b1; // JGhere, used to be 1'b0, set to 1 for rx_dlyalign testing
-    assign RXDLYALIGNOVERRIDE = 1'b0; // JGhere, used to be 1'b0, disables rx_dlyalign
+//    assign RXDLYALIGNOVERRIDE = 1'b1; // JGhere, used to be 1'b0, set it to 1 for rx_dlyalign testing
+    assign RXDLYALIGNOVERRIDE = 1'b0; // JGhere, used to be hardcoded 1'b0 at upper level, disables rx_dlyalign
 
     //_______________________ Assign the sync_done port _______________________
 

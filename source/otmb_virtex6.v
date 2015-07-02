@@ -1038,13 +1038,13 @@
   wire        cfeb5_rxd_posneg;
   wire        cfeb6_rxd_posneg;
 
-  assign cfeb_rxd_posneg[0] = cfeb6_rxd_posneg; // JGhere: use B-side value "cfeb6"
-  assign cfeb_rxd_posneg[1] = cfeb6_rxd_posneg; //   another B-side
-  assign cfeb_rxd_posneg[2] = cfeb6_rxd_posneg; //   another B-side
-  assign cfeb_rxd_posneg[3] = cfeb6_rxd_posneg; //   another B-side
-  assign cfeb_rxd_posneg[4] = cfeb5_rxd_posneg; // JGhere: use A-side value "cfeb5"
-  assign cfeb_rxd_posneg[5] = cfeb5_rxd_posneg; //   another A-side
-  assign cfeb_rxd_posneg[6] = cfeb5_rxd_posneg; //   another A-side
+  assign cfeb_rxd_posneg[0] = cfeb0_rxd_posneg;  // JGhere: use B-side value "cfeb6"
+  assign cfeb_rxd_posneg[1] = cfeb1_rxd_posneg;  //   another B-side
+  assign cfeb_rxd_posneg[2] = cfeb2_rxd_posneg;  //   another B-side
+  assign cfeb_rxd_posneg[3] = cfeb3_rxd_posneg;  //   another B-side
+  assign cfeb_rxd_posneg[4] = cfeb4_rxd_posneg;  // JGhere: use A-side value "cfeb5"
+  assign cfeb_rxd_posneg[5] = cfeb5_rxd_posneg;  //   another A-side
+  assign cfeb_rxd_posneg[6] = cfeb6_rxd_posneg;  //   another A-side
 
 // Injector Ports
   wire  [MXCFEB-1:0]  mask_all;
@@ -1124,7 +1124,7 @@
 
 // Optical receiver status
   wire  [MXCFEB-1:0]  gtx_rx_enable; // In  Enable/Unreset GTX optical input, disables copper SCSI
-  wire  [MXCFEB-1:0]  gtx_rx_reset;  // In  Reset this GTX rx_sync module
+  wire  [MXCFEB-1:0]  gtx_rx_reset;  // In  Reset this GTX rx & sync module
   wire  [MXCFEB-1:0]  gtx_rx_reset_err_cnt;  // In  Resets the PRBS test error counters
   wire  [MXCFEB-1:0]  gtx_rx_en_prbs_test;  // In  Select random input test data mode
   wire  [MXCFEB-1:0]  gtx_rx_start;  // Out  Set when the DCFEB Start Pattern is present
@@ -1140,17 +1140,35 @@
   wire  [MXCFEB-1:0]  link_had_err;  // link stability monitor: error happened at least once
   wire  [MXCFEB-1:0]  link_good;     // link stability monitor: always good, no errors since last resync
   wire  [MXCFEB-1:0]  link_bad;      // link stability monitor: errors happened over 100 times
+  wire  [MXCFEB-1:0]  ready_phaser;    // phaser dps done and ready status
+  wire 	ready_phaser_a, ready_phaser_b, auto_gtx_reset;
+   
+   reg 	 gtx_wait = 1'b1;
+   reg [15:0] gtx_wait_count = 0;
 
+   always @(posedge clock) // things that use lhc_clk wo/Reset
+     begin
+	if ( gtx_wait & (ready_phaser_a | ready_phaser_b) ) gtx_wait_count <= gtx_wait_count + 1'b1;
+	gtx_wait <= !gtx_wait_count[14];  // goes to zero after 409 usec
+     end
+
+  assign  ready_phaser[0] = !gtx_wait & ready_phaser_b;
+  assign  ready_phaser[1] = !gtx_wait & ready_phaser_b;
+  assign  ready_phaser[2] = !gtx_wait & ready_phaser_b;
+  assign  ready_phaser[3] = !gtx_wait & ready_phaser_b;
+  assign  ready_phaser[4] = !gtx_wait & ready_phaser_a;
+  assign  ready_phaser[5] = !gtx_wait & ready_phaser_a;
+  assign  ready_phaser[6] = !gtx_wait & ready_phaser_a;
 
 //-------------------------------------------------------------------------------------------------------------------
 // CFEB Instantiation
 //-------------------------------------------------------------------------------------------------------------------
+ //     .auto_gtx_reset (auto_gtx_reset),   // new In
   genvar icfeb;
   generate
   for (icfeb=0; icfeb<=MXCFEB-1; icfeb=icfeb+1) begin: gencfeb
+     assign cfeb_exists[icfeb] = 1;                // Existence flag
 
-  assign cfeb_exists[icfeb] = 1;                // Existence flag
-  
   cfeb #(.ICFEB(icfeb)) ucfeb
   (
 // Clock
@@ -1160,6 +1178,7 @@
   .clock_cfeb_rxd      (clock_cfeb_rxd[icfeb]),      // In  CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
   .cfeb_rxd_posneg    (cfeb_rxd_posneg[icfeb]),      // In  CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
   .cfeb_rxd_int_delay    (cfeb_rxd_int_delay[icfeb][3:0]),  // In  Interstage delay, integer bx
+//      .phaser_ready (ready_phaser[icfeb]),   // new In
 
 // Resets
   .global_reset      (global_reset),            // In  Global reset
@@ -1229,13 +1248,16 @@
 
 // SNAP12 optical receiver
   .clock_160    (clock_160),  // In  160 MHz from QPLL for GTX reference clock
-  .qpll_lock    (qpll_lock),  // In  QPLL locked 
+//  .qpll_lock    (l_qpll_lock & l_tmbclk0_lock),  //  In  QPLL has been locked, good to wait for startup-powerup... was real-time direct qpll_lock
+  .qpll_lock    (qpll_lock),  //  In  QPLL has been locked, good to wait for startup-powerup... was real-time direct qpll_lock
   .rxp          (rxp[icfeb]), // In  SNAP12+ fiber input for GTX
   .rxn          (rxn[icfeb]), // In  SNAP12- fiber input for GTX
 
 // Optical receiver status
-  .gtx_rx_enable   (gtx_rx_enable[icfeb]), // In  Enable/Unreset GTX optical input, disables copper SCSI
-  .gtx_rx_reset    (gtx_rx_reset[icfeb]),  // In  Reset this GTX rx_sync module
+  .gtx_rx_enable   (gtx_rx_enable[icfeb] & ready_phaser[icfeb]), // In  Enable/Unreset GTX optical input; disables copper SCSI? JRG, hold off enable until pds phaser is done and ready
+//  .gtx_rx_enable   (gtx_rx_enable[icfeb]), // In  Enable/Unreset GTX optical input; disables copper SCSI?
+  .gtx_rx_reset    (gtx_rx_reset[icfeb] | auto_gtx_reset),  // In  Reset this GTX rx & sync module; auto reset all if any take too long to phase lock
+//  .gtx_rx_reset    (gtx_rx_reset[icfeb]),  // In  Reset this GTX rx & sync module
   .gtx_rx_reset_err_cnt (gtx_rx_reset_err_cnt[icfeb]), // In  Resets the PRBS test error counters
   .gtx_rx_en_prbs_test  (gtx_rx_en_prbs_test[icfeb]),  // In  Select random input test data mode
   .gtx_rx_start    (gtx_rx_start[icfeb]),  // Out  Set when the DCFEB Start Pattern is present
@@ -2670,22 +2692,22 @@
    always @(posedge clock or posedge ttc_resync) // things that use lhc_clk w/Reset
      begin
 	if (ttc_resync || cnt_all_reset) begin // added OR with counter reset
-	   l_tmbclk0_lock <= 0;    // use lhc_clk to monitor tmbclk0_lock
+	   l_tmbclk0_lock <= 0;    // JRG, Coment this? use lhc_clk to monitor tmbclk0_lock
 	   tmbmmcm_locklost <= 0;
 	   tmbmmcm_locklost_cnt <= 8'h00;
-	   l_qpll_lock <= 0;    // use lhc_clk to monitor qpll_lock
+	   l_qpll_lock <= 0;    // JRG, Coment this? use lhc_clk to monitor qpll_lock
 	   qpll_locklost <= 0;
 	   qpll_locklost_cnt <= 8'h00;
 	end
 	else begin
-	   if (lock_tmb_clock0) l_tmbclk0_lock <= 1;
+	   if (lock_tmb_clock0) l_tmbclk0_lock <= 1'b1;
 	   if (l_tmbclk0_lock & (!lock_tmb_clock0)) begin
-	      tmbmmcm_locklost <= 1;
+	      tmbmmcm_locklost <= 1'b1;
 	      if (!(&tmbmmcm_locklost_cnt[7:2])) tmbmmcm_locklost_cnt <= tmbmmcm_locklost_cnt + 1'b1; // count errors "up to FC"
 	   end
-	   if (lock_tmb_clock0 & qpll_lock) l_qpll_lock <= 1;  // wait for startup-powerup first
+	   if (qpll_lock) l_qpll_lock <= 1'b1;  // wait for startup-powerup
 	   if (l_qpll_lock & (!qpll_lock)) begin
-	      qpll_locklost <= 1;
+	      qpll_locklost <= 1'b1;
 	      if (!(&qpll_locklost_cnt[7:2])) qpll_locklost_cnt <= qpll_locklost_cnt + 1'b1; // count errors "up to FC"
 	   end
 	end
@@ -3724,7 +3746,7 @@
 
       // Virtex-6 GTX receiver
       .gtx_rx_enable  (gtx_rx_enable[MXCFEB-1:0]), // Out  Enable/Unreset GTX optical input, disables copper SCSI
-      .gtx_rx_reset   (gtx_rx_reset[MXCFEB-1:0]),  // Out  Reset this GTX rx_sync module
+      .gtx_rx_reset   (gtx_rx_reset[MXCFEB-1:0]),  // Out  Reset this GTX rx & sync module
       .gtx_rx_reset_err_cnt (gtx_rx_reset_err_cnt[MXCFEB-1:0]),  // Out  Resets the PRBS test error counters
       .gtx_rx_en_prbs_test  (gtx_rx_en_prbs_test[MXCFEB-1:0]),  // Out  Select random input test data mode
       .gtx_rx_start   (gtx_rx_start[MXCFEB-1:0]),  // In  Set when the DCFEB Start Pattern is present
@@ -3747,6 +3769,10 @@
       .gtx_rx_err_count4    (gtx_rx_err_count[4][15:0]),    // In  Error count on this fiber channel
       .gtx_rx_err_count5    (gtx_rx_err_count[5][15:0]),    // In  Error count on this fiber channel
       .gtx_rx_err_count6    (gtx_rx_err_count[6][15:0]),    // In  Error count on this fiber channel
+
+      .comp_phaser_a_ready (ready_phaser_a),   // Out
+      .comp_phaser_b_ready (ready_phaser_b),  // Out
+      .auto_gtx_reset (auto_gtx_reset),   // Out
 
       // Sump  
       .vme_sump      (vme_sump)              // Out  Unused signals

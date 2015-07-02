@@ -12,8 +12,8 @@
 //-------------------------------------------------------------------------------------------------------------------
 	module gtx_comp_fiber_in
 	(
-	RST,         // use this to reset GTX_RX_SYNC module
-        GTX_DISABLE, // In  use this to freeze GTX_RX in Reset state
+	RST,         // use this to reset GTX_RX & SYNC module... 
+        GTX_DISABLE, // In  use this to put GTX_RX in Reset state
 	CLOCK_4X,
 	ttc_resync,
 	CMP_RX_N,
@@ -56,7 +56,7 @@
 	input			RST;
 	input			GTX_DISABLE;
 	input			CLOCK_4X;
-        input 			ttc_resync;	// use this to clear the link status monitor
+                        input 			ttc_resync;	// use this to clear the link status monitor
 	input			CMP_RX_N;
 	input			CMP_RX_P;
 //	output			CMP_TDIS;
@@ -167,9 +167,9 @@
 //----------------------------------------------------------------------------
 // primary         160.000            0.010
 //-------------------------------------------------------------------------------------------------------------------
-
 	BUFG rxrecclk_bufg (.I(cmp_rx_recclk), .O(CMP_RX_CLK160)); // JGhere, comment this for rx_dlyalign testing. Also, better to use BUFR, but not enough.
 //	assign CMP_RX_CLK160 = CLOCK_4X; // JGhere, use this for rx_dlyalign testing
+
 
 // GTX0  (X0Y12)
 	GTX_RX_BUF_BYPASS # 
@@ -210,7 +210,10 @@
 	.GTX0_RXLOSSOFSYNC_OUT          (cmp_rx_lossofsync),
 
 //  Receive Ports - RX PLL Ports
-	.GTX0_GTXRXRESET_IN             (GTX_DISABLE | cmp_gtxrxreset),
+//	.GTX0_GTXRXRESET_IN             (cmp_gtxrxreset), // JRG, need to OR with RST I think...
+// JRG, this should be good:	.GTX0_GTXRXRESET_IN             (GTX_DISABLE | cmp_gtxrxreset), // JRG, need to OR with RST I think...
+// JRG, this probably is good:
+ 	.GTX0_GTXRXRESET_IN             (RST | GTX_DISABLE | cmp_gtxrxreset),
 	.GTX0_MGTREFCLKRX_IN            (CMP_RX_REFCLK),
 	.GTX0_PLLRXRESET_IN             (1'b0),
 	.RX_POLARITY_IN                 (RX_POLARITY_SWAP),
@@ -218,8 +221,8 @@
 	.GTX0_RXRESETDONE_OUT           (cmp_rx_resetdone),
 
 // Transmit Ports - TX Driver and OOB signaling
-	.GTX0_TXN_OUT                  (), // (CMP_TX_N),
-	.GTX0_TXP_OUT                  (), // (CMP_TX_P),
+	.GTX0_TXN_OUT                   (),  // (CMP_TX_N),
+	.GTX0_TXP_OUT                   (),  // (CMP_TX_P),
 	.sump		(sump_crbp)
 	);
 
@@ -247,7 +250,9 @@
 	.RESET			(rx_sync_rst)		// In
 	);
 
-	assign rx_sync_rst = RST | !cmp_rxresetdone_r2;
+//	assign rx_sync_rst = !cmp_rxresetdone_r2;
+// JRG, this should be good:
+ 	assign rx_sync_rst = RST | !cmp_rxresetdone_r2;
 
 	always @(posedge CMP_RX_CLK160 or negedge cmp_rx_resetdone) begin
 	   if(!cmp_rx_resetdone) begin
@@ -507,15 +512,16 @@
 //-------------------------------------------------------------------------------------------------------------------
 // Unused signals
 //-------------------------------------------------------------------------------------------------------------------
-	assign sump = CLOCK_4X | 
-	sump_crbp					|
-//	CMP_TX_N					|
-//	CMP_TX_P					|
-	(|cmp_rx_isc[1:0])			|
+	assign sump =  CLOCK_4X |   // needed when assign for clock_4x above is not used
+	rx_dlyalignoverride 		| 
+	sump_crbp			|
+//	CMP_TX_N			|
+//	CMP_TX_P			|
+	(|cmp_rx_isc[1:0])		|
 	(|cmp_rx_disperr[1:0])		|
 	(|rx_dly_align_mon[7:0])	|
 	(cmp_rx_lossofsync[0])	|
-	cmp_rx_commadet				|
+	cmp_rx_commadet			|
 	cmp_rx_pll_lock;
 
 	endmodule

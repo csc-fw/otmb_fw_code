@@ -317,7 +317,7 @@
 
 // SNAP12 optical receiver
   input          clock_160;        // 160 MHz from QPLL for GTX reference clock
-  input          qpll_lock;        // QPLL locked
+  input          qpll_lock;        // QPLL was locked
   input          rxp;          // SNAP12+ fiber input for GTX
   input          rxn;          // SNAP12- fiber input for GTX
 
@@ -402,18 +402,19 @@
   .ttc_resync  (ttc_resync),      // use this to clear the link status monitor
 
 // Muonic
-  .clear_sync  (~gtx_rx_enable),  // In  Clear sync stages, use this to freeze GTX_RX in Reset state
+  .clear_sync  (~gtx_rx_enable),  // In  Clear sync stages, use this to put GTX_RX in Reset state
   .posneg      (cfeb_rxd_posneg), // In  Select inter-stage clock 0 or 180 degrees
   .delay_is    (cfeb_rxd_int_delay[3:0]),  // In  Interstage delay
   
 // SNAP12 optical receiver
-  .clocks_rdy (qpll_lock & clk_lock), // In  QPLL & MMCM locked 
+//  .clocks_rdy (qpll_lock), // In  QPLL & MMCM were locked after power-up... AND is done at top level in l_qpll_lock logic; was AND of real-time lock signals
+  .clocks_rdy (qpll_lock & clk_lock), // In  QPLL & MMCM are locked
   .rxp          (rxp),            // In  SNAP12+ fiber input for GTX
   .rxn          (rxn),            // In  SNAP12- fiber input for GTX
   .gtx_rx_pol_swap (gtx_rx_pol_swap), // In  Inputs 5,6 [ie icfeb 4,5] have swapped rx board routes
 
 // Optical receiver status
-  .gtx_rx_reset      (gtx_rx_reset), // In  Reset GTX rx_sync module
+  .gtx_rx_reset      (gtx_rx_reset), // In  Reset GTX rx & sync module... 
   .gtx_rx_reset_err_cnt (gtx_rx_reset_err_cnt), // In  Resets the PRBS test error counters
   .gtx_rx_en_prbs_test  (gtx_rx_en_prbs_test),  // In  Select random input test data mode
   .gtx_rx_start      (gtx_rx_start), // Out  Set when the DCFEB Start Pattern is present

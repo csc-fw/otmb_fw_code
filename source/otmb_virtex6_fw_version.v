@@ -4,7 +4,7 @@
 // Firmware version global definitions
   `define FIRMWARE_TYPE 04'hC    // C=Normal CLCT/TMB, D=Debug PCB loopback version
   `define VERSION       04'hE    // Version revision number, A=TMB2004 and earlier, E=TMB2005E production
-  `define MONTHDAY      16'h0120 // Version date
+  `define MONTHDAY      16'h0412 // Version date
   `define YEAR          16'h2015 // Version year
 
   `define AUTO_VME         01'h1 // Automatically initialize VME registers from PROM data,   0=do not
@@ -81,6 +81,15 @@
 //      01/19/2015      Revert GTX dlyalign and sync methods to the "standard" method (affects 4 gtx...v files), but keep just 4 phaser clocks;
 //	                  also improved startup timer resolution from 400ns to 100ns
 //      01/20/2015      Convert timing control registers 16A, 16C, 11E for cfebs 5/6 to control me11a and me11b cfebs respectively
+//      04/05/2015      Count JTAG TCK ticks for the main FPGA JTAG bus (jtag_mez) and read it via my special count register adr 186
+//                        also change the TMB Broadcast adress to dec 30 (was 26) (not tested until 04/07, ok)
+//      04/06/2015      Add Timer for comp_phaser_lock time & read it via Adr 190 (not tested until 04/07, ok)
+//      04/07/2015      Make gtx resync command do the GTX RX Reset as well; (does it self-toggle, or S/W does it?)
+//      04/08/2015      Added not-active machinery to hold GTX reset until phasers lock + 409 usec; later enable reset for GTX if they don't lock within 1.638 ms
+//      04/09/2015      Deactivate changes from 04/07 and 04/08 as a test
+//      04/10/2015      Deactivate changes to l_qpll_lock too -- this works!
+//      04/11/2015      Reactivate changes from 04/06 04/08 -- this works!
+//      04/12/2015      Activate auto-reset for GTX if they don't lock within 1.638 ms
 //---------------------------------------------------------------------------------------------------------------------------------------
 //  End Global Definitions
 //---------------------------------------------------------------------------------------------------------------------------------------
