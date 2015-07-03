@@ -886,7 +886,26 @@
   gtx_rx_pol_swap,
   gtx_rx_err,
 
+//rdk
+  gem_rx_enable,
+  gem_rx_reset,
+  gem_rx_reset_err_cnt,
+  gem_rx_en_prbs_test,
+ // gem_rx_start,
+ // gem_rx_fc,
+  gem_rx_valid,
+ // gem_rx_match,
+  gem_rx_rst_done,
+  gem_rx_sync_done,
+  gem_rx_pol_swap,
+  gem_rx_err,
+
 // Virtex-6 GTX error counters
+  gem_rx_err_count0, //rdk
+  gem_rx_err_count1,
+  gem_rx_err_count2,
+  gem_rx_err_count3,
+
   gtx_rx_err_count0,
   gtx_rx_err_count1,
   gtx_rx_err_count2,
@@ -898,6 +917,11 @@
   gtx_link_had_err,  // link stability monitor: error happened at least once
   gtx_link_good,     // link stability monitor: always good, no errors since last resync
   gtx_link_bad,      // link stability monitor: errors happened over 100 times
+
+  gem_link_had_err,  //rdk	link stability monitor: error happened at least once
+  gem_link_good,     //rdk 	link stability monitor: always good, no errors since last resync
+  gem_link_bad,      //rdk 	link stability monitor: errors happened over 100 times
+
 
   comp_phaser_a_ready,
   comp_phaser_b_ready,
@@ -999,265 +1023,272 @@
   parameter ADR_TMB_GLOBAL    = 'd30;    // Slot number to address all OTMBs in parallel
   parameter ADR_BROADCAST     = 'd27;    // Slot number to address all peripheral crate modules
 
-  parameter ADR_IDREG0      = 9'h00;  // ID Register 0
-  parameter ADR_IDREG1      = 9'h02;  // ID Register 1
-  parameter ADR_IDREG2      = 9'h04;  // ID Register 2
-  parameter ADR_IDREG3      = 9'h06;  // ID Register 3
+  parameter ADR_IDREG0      = 10'h00;  // ID Register 0
+  parameter ADR_IDREG1      = 10'h02;  // ID Register 1
+  parameter ADR_IDREG2      = 10'h04;  // ID Register 2
+  parameter ADR_IDREG3      = 10'h06;  // ID Register 3
 
-  parameter ADR_VME_STATUS    = 9'h08;  // VME Status Register
-  parameter ADR_VME_ADR0      = 9'h0A;  // VME Address read-back
-  parameter ADR_VME_ADR1      = 9'h0C;  // VME Address read-back
+  parameter ADR_VME_STATUS    = 10'h08;  // VME Status Register
+  parameter ADR_VME_ADR0      = 10'h0A;  // VME Address read-back
+  parameter ADR_VME_ADR1      = 10'h0C;  // VME Address read-back
 
-  parameter ADR_LOOPBK      = 9'h0E;  // Loop-back Register
-  parameter ADR_USR_JTAG      = 9'h10;  // User JTAG
-  parameter ADR_PROM      = 9'h12;  // PROM
+  parameter ADR_LOOPBK      = 10'h0E;  // Loop-back Register
+  parameter ADR_USR_JTAG      = 10'h10;  // User JTAG
+  parameter ADR_PROM      = 10'h12;  // PROM
 
-  parameter ADR_DDDSM      = 9'h14;  // 3D3444 State Machine Register + Clock DCMs
-  parameter ADR_DDD0      = 9'h16;  // 3D3444 chip 0
-  parameter ADR_DDD1      = 9'h18;  // 3D3444 chip 1
-  parameter ADR_DDD2      = 9'h1A;  // 3D3444 chip 2
-  parameter ADR_DDDOE      = 9'h1C;  // 3D3444 channel enables
-  parameter ADR_RATCTRL      = 9'h1E;  // RAT Module control
+  parameter ADR_DDDSM      = 10'h14;  // 3D3444 State Machine Register + Clock DCMs
+  parameter ADR_DDD0      = 10'h16;  // 3D3444 chip 0
+  parameter ADR_DDD1      = 10'h18;  // 3D3444 chip 1
+  parameter ADR_DDD2      = 10'h1A;  // 3D3444 chip 2
+  parameter ADR_DDDOE      = 10'h1C;  // 3D3444 channel enables
+  parameter ADR_RATCTRL      = 10'h1E;  // RAT Module control
 
-  parameter ADR_STEP      = 9'h20;  // Step Register
-  parameter ADR_LED      = 9'h22;  // Front Panel LEDs
-  parameter ADR_ADC      = 9'h24;  // ADCs
-  parameter ADR_DSN      = 9'h26;  // Digital Serials
+  parameter ADR_STEP      = 10'h20;  // Step Register
+  parameter ADR_LED      = 10'h22;  // Front Panel LEDs
+  parameter ADR_ADC      = 10'h24;  // ADCs
+  parameter ADR_DSN      = 10'h26;  // Digital Serials
 
-  parameter ADR_MOD_CFG      = 9'h28;  // TMB Configuration
-  parameter ADR_CCB_CFG      = 9'h2A;  // CCB Configuration
-  parameter ADR_CCB_TRIG      = 9'h2C;  // CCB Trigger Control
-  parameter ADR_CCB_STAT0      = 9'h2E;  // CCB Status
+  parameter ADR_MOD_CFG      = 10'h28;  // TMB Configuration
+  parameter ADR_CCB_CFG      = 10'h2A;  // CCB Configuration
+  parameter ADR_CCB_TRIG      = 10'h2C;  // CCB Trigger Control
+  parameter ADR_CCB_STAT0      = 10'h2E;  // CCB Status
 
-  parameter ADR_ALCT_CFG      = 9'h30;  // ALCT Configuration
-  parameter ADR_ALCT_INJ      = 9'h32;  // ALCT Injector Control
-  parameter ADR_ALCT0_INJ      = 9'h34;  // ALCT Injected ALCT0
-  parameter ADR_ALCT1_INJ      = 9'h36;  // ALCT Injected ALCT1
-  parameter ADR_ALCT_STAT      = 9'h38;  // ALCT Status
-  parameter ADR_ALCT0_RCD      = 9'h3A;  // ALCT Latched LCT0
-  parameter ADR_ALCT1_RCD      = 9'h3C;  // ALCT Latched LCT1
-  parameter ADR_ALCT_FIFO0    = 9'h3E;  // ALCT FIFO word count
+  parameter ADR_ALCT_CFG      = 10'h30;  // ALCT Configuration
+  parameter ADR_ALCT_INJ      = 10'h32;  // ALCT Injector Control
+  parameter ADR_ALCT0_INJ      = 10'h34;  // ALCT Injected ALCT0
+  parameter ADR_ALCT1_INJ      = 10'h36;  // ALCT Injected ALCT1
+  parameter ADR_ALCT_STAT      = 10'h38;  // ALCT Status
+  parameter ADR_ALCT0_RCD      = 10'h3A;  // ALCT Latched LCT0
+  parameter ADR_ALCT1_RCD      = 10'h3C;  // ALCT Latched LCT1
+  parameter ADR_ALCT_FIFO0    = 10'h3E;  // ALCT FIFO word count
 
-  parameter ADR_DMB_MON      = 9'h40;  // DMB Monitored signals
+  parameter ADR_DMB_MON      = 10'h40;  // DMB Monitored signals
 
-  parameter ADR_CFEB_INJ      = 9'h42;  // CFEB Injector Control
-  parameter ADR_CFEB_INJ_ADR    = 9'h44;  // CFEB Injector RAM address
-  parameter ADR_CFEB_INJ_WDATA    = 9'h46;  // CFEB Injector Write Data
-  parameter ADR_CFEB_INJ_RDATA    = 9'h48;  // CFEB Injector Read  Data
+  parameter ADR_CFEB_INJ      = 10'h42;  // CFEB Injector Control
+  parameter ADR_CFEB_INJ_ADR    = 10'h44;  // CFEB Injector RAM address
+  parameter ADR_CFEB_INJ_WDATA    = 10'h46;  // CFEB Injector Write Data
+  parameter ADR_CFEB_INJ_RDATA    = 10'h48;  // CFEB Injector Read  Data
 
-  parameter ADR_HCM001      = 9'h4A;  // CFEB0 Ly0,Ly1 Hot Channel Mask
-  parameter ADR_HCM023      = 9'h4C;  // CFEB0 Ly2,Ly3 Hot Channel Mask
-  parameter ADR_HCM045      = 9'h4E;  // CFEB0 Ly4,Ly5 Hot Channel Mask
-  parameter ADR_HCM101      = 9'h50;  // CFEB1 Ly0,Ly1 Hot Channel Mask
-  parameter ADR_HCM123      = 9'h52;  // CFEB1 Ly2,Ly3 Hot Channel Mask
-  parameter ADR_HCM145      = 9'h54;  // CFEB1 Ly4,Ly5 Hot Channel Mask
-  parameter ADR_HCM201      = 9'h56;  // CFEB2 Ly0,Ly1 Hot Channel Mask
-  parameter ADR_HCM223      = 9'h58;  // CFEB2 Ly2,Ly3 Hot Channel Mask
-  parameter ADR_HCM245      = 9'h5A;  // CFEB2 Ly4,Ly5 Hot Channel Mask
-  parameter ADR_HCM301      = 9'h5C;  // CFEB3 Ly0,Ly1 Hot Channel Mask
-  parameter ADR_HCM323      = 9'h5E;  // CFEB3 Ly2,Ly3 Hot Channel Mask
-  parameter ADR_HCM345      = 9'h60;  // CFEB3 Ly4,Ly5 Hot Channel Mask
-  parameter ADR_HCM401      = 9'h62;  // CFEB4 Ly0,Ly1 Hot Channel Mask
-  parameter ADR_HCM423      = 9'h64;  // CFEB4 Ly2,Ly3 Hot Channel Mask
-  parameter ADR_HCM445      = 9'h66;  // CFEB4 Ly4,Ly5 Hot Channel Mask
+  parameter ADR_HCM001      = 10'h4A;  // CFEB0 Ly0,Ly1 Hot Channel Mask
+  parameter ADR_HCM023      = 10'h4C;  // CFEB0 Ly2,Ly3 Hot Channel Mask
+  parameter ADR_HCM045      = 10'h4E;  // CFEB0 Ly4,Ly5 Hot Channel Mask
+  parameter ADR_HCM101      = 10'h50;  // CFEB1 Ly0,Ly1 Hot Channel Mask
+  parameter ADR_HCM123      = 10'h52;  // CFEB1 Ly2,Ly3 Hot Channel Mask
+  parameter ADR_HCM145      = 10'h54;  // CFEB1 Ly4,Ly5 Hot Channel Mask
+  parameter ADR_HCM201      = 10'h56;  // CFEB2 Ly0,Ly1 Hot Channel Mask
+  parameter ADR_HCM223      = 10'h58;  // CFEB2 Ly2,Ly3 Hot Channel Mask
+  parameter ADR_HCM245      = 10'h5A;  // CFEB2 Ly4,Ly5 Hot Channel Mask
+  parameter ADR_HCM301      = 10'h5C;  // CFEB3 Ly0,Ly1 Hot Channel Mask
+  parameter ADR_HCM323      = 10'h5E;  // CFEB3 Ly2,Ly3 Hot Channel Mask
+  parameter ADR_HCM345      = 10'h60;  // CFEB3 Ly4,Ly5 Hot Channel Mask
+  parameter ADR_HCM401      = 10'h62;  // CFEB4 Ly0,Ly1 Hot Channel Mask
+  parameter ADR_HCM423      = 10'h64;  // CFEB4 Ly2,Ly3 Hot Channel Mask
+  parameter ADR_HCM445      = 10'h66;  // CFEB4 Ly4,Ly5 Hot Channel Mask
 
-  parameter ADR_SEQ_TRIG_EN    = 9'h68;  // Sequencer Trigger Source Enables
-  parameter ADR_SEQ_TRIG_DLY0    = 9'h6A;  // Sequencer Trigger Source Delays
-  parameter ADR_SEQ_TRIG_DLY1    = 9'h6C;  // Sequencer Trigger Source Delays
-  parameter ADR_SEQ_ID      = 9'h6E;  // Sequencer ID info
+  parameter ADR_SEQ_TRIG_EN    = 10'h68;  // Sequencer Trigger Source Enables
+  parameter ADR_SEQ_TRIG_DLY0    = 10'h6A;  // Sequencer Trigger Source Delays
+  parameter ADR_SEQ_TRIG_DLY1    = 10'h6C;  // Sequencer Trigger Source Delays
+  parameter ADR_SEQ_ID      = 10'h6E;  // Sequencer ID info
 
-  parameter ADR_SEQ_CLCT      = 9'h70;  // Sequencer CLCT Configuration
-  parameter ADR_SEQ_FIFO      = 9'h72;  // Sequencer FIFO Configuration
-  parameter ADR_SEQ_L1A      = 9'h74;  // Sequencer L1A  Configuration
-  parameter ADR_SEQ_OFFSET0    = 9'h76;  // Sequencer Counter Offsets
+  parameter ADR_SEQ_CLCT      = 10'h70;  // Sequencer CLCT Configuration
+  parameter ADR_SEQ_FIFO      = 10'h72;  // Sequencer FIFO Configuration
+  parameter ADR_SEQ_L1A      = 10'h74;  // Sequencer L1A  Configuration
+  parameter ADR_SEQ_OFFSET0    = 10'h76;  // Sequencer Counter Offsets
 
-  parameter ADR_SEQ_CLCT0      = 9'h78;  // CLCT Latched LCT0
-  parameter ADR_SEQ_CLCT1      = 9'h7A;  // CLCT Latched LCT1
-  parameter ADR_SEQ_TRIG_SRC    = 9'h7C;  // Sequencer Trigger source read
+  parameter ADR_SEQ_CLCT0      = 10'h78;  // CLCT Latched LCT0
+  parameter ADR_SEQ_CLCT1      = 10'h7A;  // CLCT Latched LCT1
+  parameter ADR_SEQ_TRIG_SRC    = 10'h7C;  // Sequencer Trigger source read
 
-  parameter ADR_DMB_RAM_ADR    = 9'h7E;  // Sequencer RAM Address
-  parameter ADR_DMB_RAM_WDATA    = 9'h80;  // Sequencer RAM Write Data
-  parameter ADR_DMB_RAM_WDCNT    = 9'h82;  // Sequencer RAM Word Count
-  parameter ADR_DMB_RAM_RDATA    = 9'h84;  // Sequencer RAM Read Data
+  parameter ADR_DMB_RAM_ADR    = 10'h7E;  // Sequencer RAM Address
+  parameter ADR_DMB_RAM_WDATA    = 10'h80;  // Sequencer RAM Write Data
+  parameter ADR_DMB_RAM_WDCNT    = 10'h82;  // Sequencer RAM Word Count
+  parameter ADR_DMB_RAM_RDATA    = 10'h84;  // Sequencer RAM Read Data
 
-  parameter ADR_TMB_TRIG      = 9'h86;  // TMB Trigger Configuration
+  parameter ADR_TMB_TRIG      = 10'h86;  // TMB Trigger Configuration
 
-  parameter ADR_MPC0_FRAME0    = 9'h88;  // MPC0 Frame 0 Data sent to MPC
-  parameter ADR_MPC0_FRAME1    = 9'h8A;  // MPC0 Frame 1 Data sent to MPC
-  parameter ADR_MPC1_FRAME0    = 9'h8C;  // MPC1 Frame 0 Data sent to MPC
-  parameter ADR_MPC1_FRAME1    = 9'h8E;  // MPC1 Frame 1 Data sent to MPC
+  parameter ADR_MPC0_FRAME0    = 10'h88;  // MPC0 Frame 0 Data sent to MPC
+  parameter ADR_MPC0_FRAME1    = 10'h8A;  // MPC0 Frame 1 Data sent to MPC
+  parameter ADR_MPC1_FRAME0    = 10'h8C;  // MPC1 Frame 0 Data sent to MPC
+  parameter ADR_MPC1_FRAME1    = 10'h8E;  // MPC1 Frame 1 Data sent to MPC
   
-  parameter ADR_MPC0_FRAME0_FIFO  = 9'h17C;  // MPC0 Frame 0 Data sent to MPC
-  parameter ADR_MPC0_FRAME1_FIFO  = 9'h17E;  // MPC0 Frame 1 Data sent to MPC
-  parameter ADR_MPC1_FRAME0_FIFO  = 9'h180;  // MPC1 Frame 0 Data sent to MPC
-  parameter ADR_MPC1_FRAME1_FIFO  = 9'h182;  // MPC1 Frame 1 Data sent to MPC
-  parameter ADR_MPC_FRAMES_FIFO_CTRL  = 9'h184;  // MPC Frames FIFO control
+  parameter ADR_MPC0_FRAME0_FIFO  = 10'h17C;  // MPC0 Frame 0 Data sent to MPC
+  parameter ADR_MPC0_FRAME1_FIFO  = 10'h17E;  // MPC0 Frame 1 Data sent to MPC
+  parameter ADR_MPC1_FRAME0_FIFO  = 10'h180;  // MPC1 Frame 0 Data sent to MPC
+  parameter ADR_MPC1_FRAME1_FIFO  = 10'h182;  // MPC1 Frame 1 Data sent to MPC
+  parameter ADR_MPC_FRAMES_FIFO_CTRL  = 10'h184;  // MPC Frames FIFO control
 
-  parameter ADR_TMB_SPECIAL_COUNT = 9'h186; // Used to Read MMCM lock time, now just whatever we need it for!
-  parameter ADR_TMB_POWER_UP_TIME  = 9'h188; // Read tmb power-up time
-  parameter ADR_TMB_LOAD_CFG_TIME  = 9'h18A; // Read tmb config time
-  parameter ADR_ALCT_PHASER_LOCK_TIME = 9'h18C;  // Read alct clocks lock time
-  parameter ADR_ALCT_LOAD_CFG_TIME = 9'h18E; // Read alct configure time
-  parameter ADR_GTX_RST_DONE_TIME  = 9'h190; // Read gtx rx reset done time
-  parameter ADR_GTX_SYNC_DONE_TIME = 9'h192; // Read gtx rx sync done time
+  parameter ADR_TMB_SPECIAL_COUNT = 10'h186; // Used to Read MMCM lock time, now just whatever we need it for!
+  parameter ADR_TMB_POWER_UP_TIME  = 10'h188; // Read tmb power-up time
+  parameter ADR_TMB_LOAD_CFG_TIME  = 10'h18A; // Read tmb config time
+  parameter ADR_ALCT_PHASER_LOCK_TIME = 10'h18C;  // Read alct clocks lock time
+  parameter ADR_ALCT_LOAD_CFG_TIME = 10'h18E; // Read alct configure time
+  parameter ADR_GTX_RST_DONE_TIME  = 10'h190; // Read gtx rx reset done time
+  parameter ADR_GTX_SYNC_DONE_TIME = 10'h192; // Read gtx rx sync done time
   
-  parameter ADR_MPC_INJ      = 9'h90;  // MPC Injector Control
-  parameter ADR_MPC_RAM_ADR    = 9'h92;  // MPC Injector RAM address
-  parameter ADR_MPC_RAM_WDATA    = 9'h94;  // MPC Injector RAM Write Data
-  parameter ADR_MPC_RAM_RDATA    = 9'h96;  // MPC Injector RAM Read  Data
+  parameter ADR_MPC_INJ      = 10'h90;  // MPC Injector Control
+  parameter ADR_MPC_RAM_ADR    = 10'h92;  // MPC Injector RAM address
+  parameter ADR_MPC_RAM_WDATA    = 10'h94;  // MPC Injector RAM Write Data
+  parameter ADR_MPC_RAM_RDATA    = 10'h96;  // MPC Injector RAM Read  Data
 
-  parameter ADR_SCP_CTRL      = 9'h98;  // Scope control
-  parameter ADR_SCP_RDATA      = 9'h9A;  // Scope read data
+  parameter ADR_SCP_CTRL      = 10'h98;  // Scope control
+  parameter ADR_SCP_RDATA      = 10'h9A;  // Scope read data
 
-  parameter ADR_CCB_CMD      = 9'h9C;  // CCB TTC Command
-  parameter ADR_BUF_STAT0      = 9'h9E;  // Buffer Status
-  parameter ADR_BUF_STAT1      = 9'hA0;  // Buffer Status
-  parameter ADR_BUF_STAT2      = 9'hA2;  // Buffer Status
-  parameter ADR_BUF_STAT3      = 9'hA4;  // Buffer Status
-  parameter ADR_BUF_STAT4      = 9'hA6;  // Buffer Status
+  parameter ADR_CCB_CMD      = 10'h9C;  // CCB TTC Command
+  parameter ADR_BUF_STAT0      = 10'h9E;  // Buffer Status
+  parameter ADR_BUF_STAT1      = 10'hA0;  // Buffer Status
+  parameter ADR_BUF_STAT2      = 10'hA2;  // Buffer Status
+  parameter ADR_BUF_STAT3      = 10'hA4;  // Buffer Status
+  parameter ADR_BUF_STAT4      = 10'hA6;  // Buffer Status
   
-  parameter ADR_ALCTFIFO1      = 9'hA8;  // ALCT Raw hits RAM Control
-  parameter ADR_ALCTFIFO2      = 9'hAA;  // ALCT Raw hits RAM data
+  parameter ADR_ALCTFIFO1      = 10'hA8;  // ALCT Raw hits RAM Control
+  parameter ADR_ALCTFIFO2      = 10'hAA;  // ALCT Raw hits RAM data
 
-  parameter ADR_SEQMOD      = 9'hAC;  // Sequencer Trigger Modifiers
-  parameter ADR_SEQSM      = 9'hAE;  // Sequencer Machine State
-  parameter ADR_SEQCLCTM      = 9'hB0;  // Sequencer CLCT msbs
-  parameter ADR_TMBTIM      = 9'hB2;  // TMB Timing
-  parameter ADR_LHC_CYCLE      = 9'hB4;  // LHC Cycle, max BXN
+  parameter ADR_SEQMOD      = 10'hAC;  // Sequencer Trigger Modifiers
+  parameter ADR_SEQSM      = 10'hAE;  // Sequencer Machine State
+  parameter ADR_SEQCLCTM      = 10'hB0;  // Sequencer CLCT msbs
+  parameter ADR_TMBTIM      = 10'hB2;  // TMB Timing
+  parameter ADR_LHC_CYCLE      = 10'hB4;  // LHC Cycle, max BXN
 
-  parameter ADR_RPC_CFG      = 9'hB6;  // RPC Configuration
-  parameter ADR_RPC_RDATA      = 9'hB8;  // RPC sync mode read data
-  parameter ADR_RPC_RAW_DELAY    = 9'hBA;  // RPC raw hits delay
-  parameter ADR_RPC_INJ      = 9'hBC;  // RPC injector control
-  parameter ADR_RPC_INJ_ADR    = 9'hBE;  // RPC injector RAM addresses
-  parameter ADR_RPC_INJ_WDATA    = 9'hC0;  // RPC injector RAM write data
-  parameter ADR_RPC_INJ_RDATA    = 9'hC2;  // RPC injector RAM read  data
-  parameter ADR_RPC_TBINS      = 9'hC4;  // RPC Time bins
-  parameter ADR_RPC0_HCM      = 9'hC6;  // RPC hot channel mask
-  parameter ADR_RPC1_HCM      = 9'hC8;  // RPC hot channel mask
+  parameter ADR_RPC_CFG      = 10'hB6;  // RPC Configuration
+  parameter ADR_RPC_RDATA      = 10'hB8;  // RPC sync mode read data
+  parameter ADR_RPC_RAW_DELAY    = 10'hBA;  // RPC raw hits delay
+  parameter ADR_RPC_INJ      = 10'hBC;  // RPC injector control
+  parameter ADR_RPC_INJ_ADR    = 10'hBE;  // RPC injector RAM addresses
+  parameter ADR_RPC_INJ_WDATA    = 10'hC0;  // RPC injector RAM write data
+  parameter ADR_RPC_INJ_RDATA    = 10'hC2;  // RPC injector RAM read  data
+  parameter ADR_RPC_TBINS      = 10'hC4;  // RPC Time bins
+  parameter ADR_RPC0_HCM      = 10'hC6;  // RPC hot channel mask
+  parameter ADR_RPC1_HCM      = 10'hC8;  // RPC hot channel mask
 
-  parameter ADR_BX0_DELAY      = 9'hCA;  // BX0 to MPC delays
-  parameter ADR_NON_TRIG_RO    = 9'hCC;  // Non-triggering readout
+  parameter ADR_BX0_DELAY      = 10'hCA;  // BX0 to MPC delays
+  parameter ADR_NON_TRIG_RO    = 10'hCC;  // Non-triggering readout
 
-  parameter ADR_SCP_TRIG      = 9'hCE;  // Scope trigger source channel
+  parameter ADR_SCP_TRIG      = 10'hCE;  // Scope trigger source channel
 
-  parameter ADR_CNT_CTRL      = 9'hD0;  // Counter control
-  parameter ADR_CNT_RDATA      = 9'hD2;  // Counter data
+  parameter ADR_CNT_CTRL      = 10'hD0;  // Counter control
+  parameter ADR_CNT_RDATA      = 10'hD2;  // Counter data
 
-  parameter ADR_JTAGSM0      = 9'hD4;  // JTAG state machine
-  parameter ADR_JTAGSM1      = 9'hD6;
-  parameter ADR_JTAGSM2      = 9'hD8;
+  parameter ADR_JTAGSM0      = 10'hD4;  // JTAG state machine
+  parameter ADR_JTAGSM1      = 10'hD6;
+  parameter ADR_JTAGSM2      = 10'hD8;
 
-  parameter ADR_VMESM0      = 9'hDA;  // VME state machine
-  parameter ADR_VMESM1      = 9'hDC;
-  parameter ADR_VMESM2      = 9'hDE;
-  parameter ADR_VMESM3      = 9'hE0;
-  parameter ADR_VMESM4      = 9'hE2;
+  parameter ADR_VMESM0      = 10'hDA;  // VME state machine
+  parameter ADR_VMESM1      = 10'hDC;
+  parameter ADR_VMESM2      = 10'hDE;
+  parameter ADR_VMESM3      = 10'hE0;
+  parameter ADR_VMESM4      = 10'hE2;
 
-  parameter ADR_DDDRSM      = 9'hE4;  // RAT 3D3444 State Machine Register
-  parameter ADR_DDDR0      = 9'hE6;  // RAT 3D3444 chip 0
+  parameter ADR_DDDRSM      = 10'hE4;  // RAT 3D3444 State Machine Register
+  parameter ADR_DDDR0      = 10'hE6;  // RAT 3D3444 chip 0
 
-  parameter ADR_UPTIME      = 9'hE8;  // Uptime counter
-  parameter ADR_BDSTATUS      = 9'hEA;  // Board status summary
+  parameter ADR_UPTIME      = 10'hE8;  // Uptime counter
+  parameter ADR_BDSTATUS      = 10'hEA;  // Board status summary
 
-  parameter ADR_BXN_CLCT      = 9'hEC;  // CLCT bxn at pretrigger
-  parameter ADR_BXN_ALCT      = 9'hEE;  // ALCT bxn at alct valid pattern flag
+  parameter ADR_BXN_CLCT      = 10'hEC;  // CLCT bxn at pretrigger
+  parameter ADR_BXN_ALCT      = 10'hEE;  // ALCT bxn at alct valid pattern flag
 
-  parameter ADR_LAYER_TRIG    = 9'hF0;  // Layer trigger mode
+  parameter ADR_LAYER_TRIG    = 10'hF0;  // Layer trigger mode
 
-  parameter ADR_ISE_VERSION    = 9'hF2;  // ISE Compiler version
-  parameter ADR_TEMP0      = 9'hF4;  // Temporary
-  parameter ADR_TEMP1      = 9'hF6;  // Temporary
-  parameter ADR_TEMP2      = 9'hF8;  // Temporary
-  parameter ADR_PARITY      = 9'hFA;  // Parity errors
+  parameter ADR_ISE_VERSION    = 10'hF2;  // ISE Compiler version
+  parameter ADR_TEMP0      = 10'hF4;  // Temporary
+  parameter ADR_TEMP1      = 10'hF6;  // Temporary
+  parameter ADR_TEMP2      = 10'hF8;  // Temporary
+  parameter ADR_PARITY      = 10'hFA;  // Parity errors
 
-  parameter ADR_CCB_STAT1      = 9'hFC;  // CCB Status
+  parameter ADR_CCB_STAT1      = 10'hFC;  // CCB Status
 
-  parameter ADR_BXN_L1A      = 9'hFE;  // CLCT bxn at L1A
-  parameter ADR_L1A_LOOKBACK    = 9'h100;  // L1A look back
-  parameter ADR_SEQ_DEBUG      = 9'h102;  // Sequencer debug latches
+  parameter ADR_BXN_L1A      = 10'hFE;  // CLCT bxn at L1A
+  parameter ADR_L1A_LOOKBACK    = 10'h100;  // L1A look back
+  parameter ADR_SEQ_DEBUG      = 10'h102;  // Sequencer debug latches
 
-  parameter ADR_ALCT_SYNC_CTRL    = 9'h104;  // ALCT sync mode control
-  parameter ADR_ALCT_SYNC_TXDATA_1ST  = 9'h106;  // ALCT sync mode transmit data, 1st in time
-  parameter ADR_ALCT_SYNC_TXDATA_2ND  = 9'h108;  // ALCT sync mode transmit data, 2nd in time
+  parameter ADR_ALCT_SYNC_CTRL    = 10'h104;  // ALCT sync mode control
+  parameter ADR_ALCT_SYNC_TXDATA_1ST  = 10'h106;  // ALCT sync mode transmit data, 1st in time
+  parameter ADR_ALCT_SYNC_TXDATA_2ND  = 10'h108;  // ALCT sync mode transmit data, 2nd in time
 
-  parameter ADR_SEQ_OFFSET1    = 9'h10A;  // Sequencer Counter Offsets continued
-  parameter ADR_MINISCOPE      = 9'h10C;  // Miniscope
+  parameter ADR_SEQ_OFFSET1    = 10'h10A;  // Sequencer Counter Offsets continued
+  parameter ADR_MINISCOPE      = 10'h10C;  // Miniscope
 
-  parameter ADR_PHASER0      = 9'h10E;  // Phaser 0 alct_rxd phase
-  parameter ADR_PHASER1      = 9'h110;  // Phaser 1 alct_txd phase
-  parameter ADR_PHASER2      = 9'h112;  // Phaser 2 cfeb0_rxd phase
-  parameter ADR_PHASER3      = 9'h114;  // Phaser 3 cfeb1_rxd phase
-  parameter ADR_PHASER4      = 9'h116;  // Phaser 4 cfeb2_rxd phase
-  parameter ADR_PHASER5      = 9'h118;  // Phaser 5 cfeb3_rxd phase
-  parameter ADR_PHASER6      = 9'h11A;  // Phaser 6 cfeb4_rxd phase
+  parameter ADR_PHASER0      = 10'h10E;  // Phaser 0 alct_rxd phase
+  parameter ADR_PHASER1      = 10'h110;  // Phaser 1 alct_txd phase
+  parameter ADR_PHASER2      = 10'h112;  // Phaser 2 cfeb0_rxd phase
+  parameter ADR_PHASER3      = 10'h114;  // Phaser 3 cfeb1_rxd phase
+  parameter ADR_PHASER4      = 10'h116;  // Phaser 4 cfeb2_rxd phase
+  parameter ADR_PHASER5      = 10'h118;  // Phaser 5 cfeb3_rxd phase
+  parameter ADR_PHASER6      = 10'h11A;  // Phaser 6 cfeb4_rxd phase
 
-  parameter ADR_DELAY0_INT    = 9'h11C;  // Interstage delays
-  parameter ADR_DELAY1_INT    = 9'h11E;  // Interstage delays
-  parameter ADR_SYNC_ERR_CTRL    = 9'h120;  // Sync error control
+  parameter ADR_DELAY0_INT    = 10'h11C;  // Interstage delays
+  parameter ADR_DELAY1_INT    = 10'h11E;  // Interstage delays
+  parameter ADR_SYNC_ERR_CTRL    = 10'h120;  // Sync error control
 
-  parameter ADR_CFEB_BADBITS_CTRL    = 9'h122;  // CFEB  Bad Bit Control/Status
-  parameter ADR_CFEB_BADBITS_TIMER  = 9'h124;  // CFEB  Bad Bit Check Interval
+  parameter ADR_CFEB_BADBITS_CTRL    = 10'h122;  // CFEB  Bad Bit Control/Status
+  parameter ADR_CFEB_BADBITS_TIMER  = 10'h124;  // CFEB  Bad Bit Check Interval
 
-  parameter ADR_CFEB0_BADBITS_LY01  = 9'h126;  // CFEB0 Bad Bit Array
-  parameter ADR_CFEB0_BADBITS_LY23  = 9'h128;  // CFEB0 Bad Bit Array
-  parameter ADR_CFEB0_BADBITS_LY45  = 9'h12A;  // CFEB0 Bad Bit Array
+  parameter ADR_CFEB0_BADBITS_LY01  = 10'h126;  // CFEB0 Bad Bit Array
+  parameter ADR_CFEB0_BADBITS_LY23  = 10'h128;  // CFEB0 Bad Bit Array
+  parameter ADR_CFEB0_BADBITS_LY45  = 10'h12A;  // CFEB0 Bad Bit Array
 
-  parameter ADR_CFEB1_BADBITS_LY01  = 9'h12C;  // CFEB1 Bad Bit Array
-  parameter ADR_CFEB1_BADBITS_LY23  = 9'h12E;  // CFEB1 Bad Bit Array
-  parameter ADR_CFEB1_BADBITS_LY45  = 9'h130;  // CFEB1 Bad Bit Array
+  parameter ADR_CFEB1_BADBITS_LY01  = 10'h12C;  // CFEB1 Bad Bit Array
+  parameter ADR_CFEB1_BADBITS_LY23  = 10'h12E;  // CFEB1 Bad Bit Array
+  parameter ADR_CFEB1_BADBITS_LY45  = 10'h130;  // CFEB1 Bad Bit Array
 
-  parameter ADR_CFEB2_BADBITS_LY01  = 9'h132;  // CFEB2 Bad Bit Array
-  parameter ADR_CFEB2_BADBITS_LY23  = 9'h134;  // CFEB2 Bad Bit Array
-  parameter ADR_CFEB2_BADBITS_LY45  = 9'h136;  // CFEB2 Bad Bit Array
+  parameter ADR_CFEB2_BADBITS_LY01  = 10'h132;  // CFEB2 Bad Bit Array
+  parameter ADR_CFEB2_BADBITS_LY23  = 10'h134;  // CFEB2 Bad Bit Array
+  parameter ADR_CFEB2_BADBITS_LY45  = 10'h136;  // CFEB2 Bad Bit Array
 
-  parameter ADR_CFEB3_BADBITS_LY01  = 9'h138;  // CFEB3 Bad Bit Array
-  parameter ADR_CFEB3_BADBITS_LY23  = 9'h13A;  // CFEB3 Bad Bit Array
-  parameter ADR_CFEB3_BADBITS_LY45  = 9'h13C;  // CFEB3 Bad Bit Array
+  parameter ADR_CFEB3_BADBITS_LY01  = 10'h138;  // CFEB3 Bad Bit Array
+  parameter ADR_CFEB3_BADBITS_LY23  = 10'h13A;  // CFEB3 Bad Bit Array
+  parameter ADR_CFEB3_BADBITS_LY45  = 10'h13C;  // CFEB3 Bad Bit Array
 
-  parameter ADR_CFEB4_BADBITS_LY01  = 9'h13E;  // CFEB4 Bad Bit Array
-  parameter ADR_CFEB4_BADBITS_LY23  = 9'h140;  // CFEB4 Bad Bit Array
-  parameter ADR_CFEB4_BADBITS_LY45  = 9'h142;  // CFEB4 Bad Bit Array
+  parameter ADR_CFEB4_BADBITS_LY01  = 10'h13E;  // CFEB4 Bad Bit Array
+  parameter ADR_CFEB4_BADBITS_LY23  = 10'h140;  // CFEB4 Bad Bit Array
+  parameter ADR_CFEB4_BADBITS_LY45  = 10'h142;  // CFEB4 Bad Bit Array
 
-  parameter ADR_ALCT_STARTUP_DELAY  = 9'h144;  // ALCT startup delay milliseconds for Spartan-6
-  parameter ADR_ALCT_STARTUP_STATUS  = 9'h146;  // ALCT startup delay machine status
+  parameter ADR_ALCT_STARTUP_DELAY  = 10'h144;  // ALCT startup delay milliseconds for Spartan-6
+  parameter ADR_ALCT_STARTUP_STATUS  = 10'h146;  // ALCT startup delay machine status
 
 // Virtex-6 Only
-  parameter ADR_V6_SNAP12_QPLL    = 9'h148;  // Virtex-6 SNAP12 Serial interface + QPLL
-  parameter ADR_V6_GTX_RX_ALL    = 9'h14A;  // Virtex-6 GTX  common control
-  parameter ADR_V6_GTX_RX0    = 9'h14C;  // Virtex-6 GTX0 control and status
-  parameter ADR_V6_GTX_RX1    = 9'h14E;  // Virtex-6 GTX1 control and status
-  parameter ADR_V6_GTX_RX2    = 9'h150;  // Virtex-6 GTX2 control and status
-  parameter ADR_V6_GTX_RX3    = 9'h152;  // Virtex-6 GTX3 control and status
-  parameter ADR_V6_GTX_RX4    = 9'h154;  // Virtex-6 GTX4 control and status
-  parameter ADR_V6_GTX_RX5    = 9'h156;  // Virtex-6 GTX5 control and status
-  parameter ADR_V6_GTX_RX6    = 9'h158;  // Virtex-6 GTX6 control and status
+  parameter ADR_V6_SNAP12_QPLL    = 10'h148;  // Virtex-6 SNAP12 Serial interface + QPLL
+  parameter ADR_V6_GTX_RX_ALL    = 10'h14A;  // Virtex-6 GTX  common control
 
-  parameter ADR_V6_SYSMON      = 9'h15A;  // Virtex-6 Sysmon ADC
 
-  parameter ADR_V6_CFEB_BADBITS_CTRL  = 9'h15C;  // CFEB  Bad Bit Control/Status
-  parameter ADR_V6_CFEB5_BADBITS_LY01  = 9'h15E;  // CFEB5 Bad Bit Array
-  parameter ADR_V6_CFEB5_BADBITS_LY23  = 9'h160;  // CFEB5 Bad Bit Array
-  parameter ADR_V6_CFEB5_BADBITS_LY45  = 9'h162;  // CFEB5 Bad Bit Array
+  parameter ADR_GEM_GTX_RX0    = 10'h300;  //rdk 	GEM GTX0 control and status
+//  parameter ADR_GEM_GTX_RX1    = 10'h;
+//  parameter ADR_GEM_GTX_RX2    = 10'h;
+//  parameter ADR_GEM_GTX_RX3    = 10'h;
 
-  parameter ADR_V6_CFEB6_BADBITS_LY01  = 9'h164;  // CFEB6 Bad Bit Array
-  parameter ADR_V6_CFEB6_BADBITS_LY23  = 9'h166;  // CFEB6 Bad Bit Array
-  parameter ADR_V6_CFEB6_BADBITS_LY45  = 9'h168;  // CFEB6 Bad Bit Array
+  parameter ADR_V6_GTX_RX0    = 10'h14C;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX_RX1    = 10'h14E;  // Virtex-6 GTX1 control and status
+  parameter ADR_V6_GTX_RX2    = 10'h150;  // Virtex-6 GTX2 control and status
+  parameter ADR_V6_GTX_RX3    = 10'h152;  // Virtex-6 GTX3 control and status
+  parameter ADR_V6_GTX_RX4    = 10'h154;  // Virtex-6 GTX4 control and status
+  parameter ADR_V6_GTX_RX5    = 10'h156;  // Virtex-6 GTX5 control and status
+  parameter ADR_V6_GTX_RX6    = 10'h158;  // Virtex-6 GTX6 control and status
 
-  parameter ADR_V6_PHASER7    = 9'h16A;  // Phaser 7 cfeb5_rxd phase "ME1/1A-side"
-  parameter ADR_V6_PHASER8    = 9'h16C;  // Phaser 8 cfeb6_rxd phase "ME1/1B-side"
+  parameter ADR_V6_SYSMON      = 10'h15A;  // Virtex-6 Sysmon ADC
 
-  parameter ADR_V6_HCM501      = 9'h16E;  // CFEB5 Ly0,Ly1 Hot Channel Mask
-  parameter ADR_V6_HCM523      = 9'h170;  // CFEB5 Ly2,Ly3 Hot Channel Mask
-  parameter ADR_V6_HCM545      = 9'h172;  // CFEB5 Ly4,Ly5 Hot Channel Mask
+  parameter ADR_V6_CFEB_BADBITS_CTRL  = 10'h15C;  // CFEB  Bad Bit Control/Status
+  parameter ADR_V6_CFEB5_BADBITS_LY01  = 10'h15E;  // CFEB5 Bad Bit Array
+  parameter ADR_V6_CFEB5_BADBITS_LY23  = 10'h160;  // CFEB5 Bad Bit Array
+  parameter ADR_V6_CFEB5_BADBITS_LY45  = 10'h162;  // CFEB5 Bad Bit Array
 
-  parameter ADR_V6_HCM601      = 9'h174;  // CFEB6 Ly0,Ly1 Hot Channel Mask
-  parameter ADR_V6_HCM623      = 9'h176;  // CFEB6 Ly2,Ly3 Hot Channel Mask
-  parameter ADR_V6_HCM645      = 9'h178;  // CFEB6 Ly4,Ly5 Hot Channel Mask
+  parameter ADR_V6_CFEB6_BADBITS_LY01  = 10'h164;  // CFEB6 Bad Bit Array
+  parameter ADR_V6_CFEB6_BADBITS_LY23  = 10'h166;  // CFEB6 Bad Bit Array
+  parameter ADR_V6_CFEB6_BADBITS_LY45  = 10'h168;  // CFEB6 Bad Bit Array
 
-  parameter ADR_V6_EXTEND      = 9'h17A;  // DCFEB 7-bit extensions
+  parameter ADR_V6_PHASER7    = 10'h16A;  // Phaser 7 cfeb5_rxd phase "ME1/1A-side"
+  parameter ADR_V6_PHASER8    = 10'h16C;  // Phaser 8 cfeb6_rxd phase "ME1/1B-side"
 
-  parameter ADR_ODMB      = 9'h1EE;  // ODMB mode: various addresses are handled inside odmb_device
+  parameter ADR_V6_HCM501      = 10'h16E;  // CFEB5 Ly0,Ly1 Hot Channel Mask
+  parameter ADR_V6_HCM523      = 10'h170;  // CFEB5 Ly2,Ly3 Hot Channel Mask
+  parameter ADR_V6_HCM545      = 10'h172;  // CFEB5 Ly4,Ly5 Hot Channel Mask
+
+  parameter ADR_V6_HCM601      = 10'h174;  // CFEB6 Ly0,Ly1 Hot Channel Mask
+  parameter ADR_V6_HCM623      = 10'h176;  // CFEB6 Ly2,Ly3 Hot Channel Mask
+  parameter ADR_V6_HCM645      = 10'h178;  // CFEB6 Ly4,Ly5 Hot Channel Mask
+
+  parameter ADR_V6_EXTEND      = 10'h17A;  // DCFEB 7-bit extensions
+
+  parameter ADR_ODMB      = 10'h1EE;  // ODMB mode: various addresses are handled inside odmb_device
 
 //------------------------------------------------------------------------------------------------------------------
 // Ports
@@ -2136,6 +2167,22 @@
   output  [MXCFEB-1:0]  gtx_rx_reset_err_cnt;  // Reset PRBS test error counters
   output  [MXCFEB-1:0]  gtx_rx_en_prbs_test;  // Select random input test data mode
 
+	//rdk
+  output [3:0] gem_rx_enable;
+  output [3:0] gem_rx_reset;
+  output [3:0] gem_rx_reset_err_cnt;
+  output [3:0] gem_rx_en_prbs_test;
+ 
+// gem_rx_start,
+// gem_rx_fc,
+  input [3:0] gem_rx_valid;
+// gem_rx_match,
+  input [3:0]  gem_rx_rst_done;
+  input [3:0]  gem_rx_sync_done;
+  input [3:0]  gem_rx_pol_swap;
+  input [3:0]  gem_rx_err;
+
+
   input  [MXCFEB-1:0]  gtx_rx_start;     // Set when the DCFEB Start Pattern is present
   input  [MXCFEB-1:0]  gtx_rx_fc;        // Flags when Rx sees "FC" code (sent by Tx) for latency measurement
   input  [MXCFEB-1:0]  gtx_rx_valid;     // Valid data detected on link
@@ -2154,6 +2201,17 @@
   input  [15:0]      gtx_rx_err_count5;    // Error count on this fiber channel
   input  [15:0]      gtx_rx_err_count6;    // Error count on this fiber channel
 
+//rdk
+  input [15:0] gem_rx_err_count0;
+  input [15:0] gem_rx_err_count1;
+  input [15:0] gem_rx_err_count2;
+  input [15:0] gem_rx_err_count3;
+
+  input  [3:0]  gem_link_had_err; 
+  input  [3:0]  gem_link_good;
+  input  [3:0]  gem_link_bad;
+
+  
   input  [MXCFEB-1:0]  gtx_link_had_err;   // link stability monitor: error happened at least once
   input  [MXCFEB-1:0]  gtx_link_good;      // link stability monitor: always good, no errors since last resync
   input  [MXCFEB-1:0]  gtx_link_bad;       // link stability monitor: errors happened over 100 times
@@ -2629,6 +2687,9 @@
   reg   [15:0]  virtex6_gtx_rx_wr [MXCFEB-1:0];
   wire  [15:0]  virtex6_gtx_rx_rd [MXCFEB-1:0];
 
+  reg	[15:0]  gem_gtx_rx_wr [3:0]; //rdk
+  wire  [15:0]  gem_gtx_rx_rd [3:0]; //rdk
+
   reg   [15:0]  virtex6_sysmon_wr;
   wire  [15:0]  virtex6_sysmon_rd;
 
@@ -2769,6 +2830,7 @@
   wire      wr_virtex6_snap12_qpll;
   wire      wr_virtex6_gtx_rx_all;
   wire [6:0]    wr_virtex6_gtx_rx;
+  wire [3:0]	wr_gem_gtx_rx; //rdk
   wire      wr_virtex6_sysmon;
   wire      wr_virtex6_extend;
   wire      wr_adr_cap;
@@ -2783,6 +2845,16 @@
          assign        gtx_rx_err_count[5][7:0] = gtx_rx_err_count5[7:0];      //      Error count on this fiber channel
          assign        gtx_rx_err_count[6][7:0] = gtx_rx_err_count6[7:0];      //      Error count on this fiber channel
        wire    [11:0]          gtx_rx_err_count_all; // R      JRG: create a sum of all GTX error counts
+
+
+//rdk
+	wire	[7:0]		gem_rx_err_count [3:0];
+	 assign        gem_rx_err_count[0][7:0] = gem_rx_err_count0[7:0];      //      Error count on this fiber channel
+         assign        gem_rx_err_count[1][7:0] = gem_rx_err_count1[7:0];      //      Error count on this fiber channel
+         assign        gem_rx_err_count[2][7:0] = gem_rx_err_count2[7:0];      //      Error count on this fiber channel
+         assign        gem_rx_err_count[3][7:0] = gem_rx_err_count3[7:0];      //      Error count on this fiber channel
+
+
 
 
   wire wr_mpc_frames_fifo_ctrl;
@@ -3051,7 +3123,8 @@
   wire [23:0] vsm_adr;
   wire        vsm_oe;
 
-  wire [8:0]  reg_adr = (vsm_oe) ? vsm_adr[8:0] : {a_vme[8:1],1'b0};  // Pad A0, multplex vme backplane with vmesm prom data
+//  wire [8:0]  reg_adr = (vsm_oe) ? vsm_adr[8:0] : {a_vme[8:1],1'b0};  // Pad A0, multplex vme backplane with vmesm prom data
+  wire [9:0]  reg_adr = (vsm_oe) ? {1'b0,vsm_adr[8:0]} : {a_vme[9:1],1'b0};  // Pad A0, multplex vme backplane with vmesm prom data
 
   always @* begin
   case (reg_adr)
@@ -3280,6 +3353,11 @@
   ADR_V6_SNAP12_QPLL:    data_out  <= virtex6_snap12_qpll_rd;
   ADR_V6_GTX_RX_ALL:    data_out  <= virtex6_gtx_rx_all_rd;
 
+  ADR_GEM_GTX_RX0:     data_out  <= gem_gtx_rx_rd[0]; //rdk
+//  ADR_GEM_GTX_RX1:     data_out  <= gem_gtx_rx_rd[1];
+//  ADR_GEM_GTX_RX2:     data_out  <= gem_gtx_rx_rd[2];
+//  ADR_GEM_GTX_RX3:     data_out  <= gem_gtx_rx_rd[3];
+
   ADR_V6_GTX_RX0:      data_out  <= virtex6_gtx_rx_rd[0];
   ADR_V6_GTX_RX1:      data_out  <= virtex6_gtx_rx_rd[1];
   ADR_V6_GTX_RX2:      data_out  <= virtex6_gtx_rx_rd[2];
@@ -3454,6 +3532,8 @@
   
   assign wr_virtex6_snap12_qpll  = (reg_adr==ADR_V6_SNAP12_QPLL    && clk_en);
   assign wr_virtex6_gtx_rx_all  = (reg_adr==ADR_V6_GTX_RX_ALL    && clk_en);
+
+  assign wr_gem_gtx_rx[0]  = (reg_adr==ADR_GEM_GTX_RX0    && clk_en); //rdk
   assign wr_virtex6_gtx_rx[0]  = (reg_adr==ADR_V6_GTX_RX0    && clk_en);
   assign wr_virtex6_gtx_rx[1]  = (reg_adr==ADR_V6_GTX_RX1    && clk_en);
   assign wr_virtex6_gtx_rx[2]  = (reg_adr==ADR_V6_GTX_RX2    && clk_en);
@@ -6977,18 +7057,52 @@
      assign virtex6_gtx_rx_rd[idcfeb][5] = gtx_link_had_err[idcfeb]; // R    link stability monitor: TRUE indicates an error happened at least once on this link
      assign virtex6_gtx_rx_rd[idcfeb][6] = gtx_link_bad[idcfeb];     // R    link stability monitor: TRUE indicates that errors happened over 100 times on this link
 
-// orig    assign virtex6_gtx_rx_rd[idcfeb][4] = gtx_rx_start[idcfeb]; // R    JRG: not useful! -- Set when the DCFEB Start Pattern is present
-// orig    assign virtex6_gtx_rx_rd[idcfeb][5] = gtx_rx_fc[idcfeb];    // R    JRG: not useful! -- Flags when Rx sees "FC" code (sent by Tx) for latency measurement
-// orig    assign virtex6_gtx_rx_rd[idcfeb][6] = gtx_rx_valid[idcfeb]; // R    JRG: not useful! -- Valid data detected on link
-// orig    assign virtex6_gtx_rx_rd[idcfeb][7] = gtx_rx_match[idcfeb]; // R    JRG: not useful! -- PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
-
-        assign virtex6_gtx_rx_rd[idcfeb][7]    = gtx_rx_pol_swap[idcfeb];      // R  JRG: was bit9, and not very useful to read this signal -- GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes that are corrected within the GTX module
+     assign virtex6_gtx_rx_rd[idcfeb][7]    = gtx_rx_pol_swap[idcfeb];      // R  JRG: was bit9, and not very useful to read this signal -- GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes that are corrected within the GTX module
         assign virtex6_gtx_rx_rd[idcfeb][15:8] =  gtx_rx_err_count[idcfeb];    // R  JRG: constructed this 8-bit array set above
 //      assign virtex6_gtx_rx_rd[idcfeb][10]    = gtx_rx_err[idcfeb];               // R    JRG: not useful! -- PRBS test detects an error
 //      assign virtex6_gtx_rx_rd[idcfeb][15:11] = virtex6_gtx_rx_wr[idcfeb][15:11]; // RW   JRG: was Unused
         assign virtex6_gtx_rx_sump[idcfeb] = |virtex6_gtx_rx_wr[idcfeb][10:3]; // R  Unused write bits. JRG: used to be [10:4]
   end
   endgenerate
+
+
+
+
+//rdk
+  wire [3:0] gem_gtx_rx_sump;	
+  genvar igem;
+  generate
+  for (igem=0; igem<1; igem=igem+1) begin: gen_gem_rx
+  initial begin
+     gem_gtx_rx_wr[igem][0]      = gtx_rx_enable_default; // RW  Enable/Unreset GTX optical input, you should disable copper via mask_all
+     gem_gtx_rx_wr[igem][1]      = 0; // RW  Reset this GTX rx_sync. JRG: 0 & 1 should be combined, consider this later... if you hold RESET true it's really the same as a Disable, so when false it's like an Enable
+     gem_gtx_rx_wr[igem][2]      = 0; // RW  JRG: moved from bit3 to bit2 -- Enable PRBS inputs test mode
+     gem_gtx_rx_wr[igem][10:3]   = 0; // R   Readonly.  JRG: was [10:4]
+     gem_gtx_rx_wr[igem][15:11]  = 0; // RW  JRG: Unused until recent changes
+  end
+
+     assign gem_rx_enable[igem] = gem_gtx_rx_wr[igem][0] | gtx_rx_enable_all; // RW  Enable GTX optical input, you should disable copper via mask_all
+     assign gem_rx_reset[igem]  = gem_gtx_rx_wr[igem][1] | gtx_rx_reset_all;  // RW  Reset this GTX rx_sync
+
+     assign gem_rx_reset_err_cnt[igem]  = gtx_rx_reset_err_cnt_all;     // RW   JRG: just the ALL case will Reset PRBS test error counters
+     assign gem_rx_en_prbs_test[igem]   = gem_gtx_rx_wr[igem][2] | gtx_rx_en_prbs_test_all;  // RW   Select random input test data mode
+
+     assign gem_gtx_rx_rd[igem][2:0] = gem_gtx_rx_wr[igem][2:0]|virtex6_gtx_rx_all_wr[2:0]; // RW  Readback. JRG: changed these around; it was 4 bits, now 3 bits == PRBS test enable, Reset GTX rx_sync, Enable/Unreset GTX  ---> new: OR these bits with virtex6_gtx_rx_all_wr[2:0]
+     assign gem_gtx_rx_rd[igem][3] = gem_rx_sync_done[igem]; // R    JRG: this changed... rx_sync_done moved here (gtx_ready)
+     assign gem_gtx_rx_rd[igem][4] = gem_link_good[igem];    // R    link stability monitor: TRUE indicates this link has been stable for at least 15 BX
+     assign gem_gtx_rx_rd[igem][5] = gem_link_had_err[igem]; // R    link stability monitor: TRUE indicates an error happened at least once on this link
+     assign gem_gtx_rx_rd[igem][6] = gem_link_bad[igem];     // R    link stability monitor: TRUE indicates that errors happened over 100 times on this link
+     assign gem_gtx_rx_rd[igem][7] = gem_rx_pol_swap[igem];      // R  JRG: was bit9, and not very useful to read this signal -- GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes that are corrected within the GTX module
+     assign gem_gtx_rx_rd[igem][15:8] =  gem_rx_err_count[igem];    // R  JRG: constructed this 8-bit array set above
+     assign gem_gtx_rx_sump[igem] = |gem_gtx_rx_wr[igem][10:3]; // R  Unused write bits. JRG: used to be [10:4]
+  end
+  endgenerate
+
+
+
+
+
+
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_V6_SYSMON = 0x15A
@@ -7166,6 +7280,7 @@
   if (wr_alct_startup_delay)    alct_startup_delay_wr  <=  d[15:0];
   if (wr_virtex6_snap12_qpll) virtex6_snap12_qpll_wr <=  d[15:0];
   if (wr_virtex6_gtx_rx_all)  virtex6_gtx_rx_all_wr  <=  d[15:0];
+  if (wr_gem_gtx_rx[0])   gem_gtx_rx_wr[0] <=  d[15:0]; //rdk
   if (wr_virtex6_gtx_rx[0])   virtex6_gtx_rx_wr[0] <=  d[15:0];
   if (wr_virtex6_gtx_rx[1])   virtex6_gtx_rx_wr[1] <=  d[15:0];
   if (wr_virtex6_gtx_rx[2])   virtex6_gtx_rx_wr[2] <=  d[15:0];

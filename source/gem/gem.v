@@ -104,7 +104,7 @@
 //  03/18/2013  Remove copper CFEB inputs
 //
 //-------------------------------------------------------------------------------------------------------------------
-  module cfeb
+  module gem
   (
 // Clock
   clock,
@@ -127,9 +127,9 @@
   inj_rwadr,
   inj_wdata,
   inj_ren,
-  inj_rdata,
-  inj_ramout,
-  inj_ramout_pulse,
+// inj_rdata,
+// inj_ramout,
+// inj_ramout_pulse,
 
 // Raw Hits FIFO RAM
   fifo_wen,
@@ -146,23 +146,27 @@
   ly4_hcm,
   ly5_hcm,
 
+   
 // Bad CFEB rx bit detection
   cfeb_badbits_reset,
   cfeb_badbits_block,
   cfeb_badbits_nbx,
-  cfeb_badbits_found,
-  cfeb_blockedbits,
+//  cfeb_badbits_found,
+//  cfeb_blockedbits,
 
+/*
   ly0_badbits,
   ly1_badbits,
   ly2_badbits,
   ly3_badbits,
   ly4_badbits,
   ly5_badbits,
-
+*/
+   
 // Triad Decoder
   triad_persist,
   triad_clr,
+/*
   triad_skip,
   ly0hs,
   ly1hs,
@@ -170,14 +174,17 @@
   ly3hs,
   ly4hs,
   ly5hs,
-
-// Status
+*/
+   
+/* Status
   demux_tp_1st,
   demux_tp_2nd,
   triad_tp,
   parity_err_cfeb,
   cfeb_sump,
-
+*/
+  gem_sump, //rdk
+   
 // SNAP12 optical receiver
   clock_160,
   qpll_lock,
@@ -189,22 +196,23 @@
   gtx_rx_reset,
   gtx_rx_reset_err_cnt,
   gtx_rx_en_prbs_test,
-  gtx_rx_start,
-  gtx_rx_fc,
-  gtx_rx_nonzero,//rdk
+//  gtx_rx_start,
+//  gtx_rx_fc,
+  gtx_rx_nonzero,
   gtx_rx_valid,
-  gtx_rx_match,
+//  gtx_rx_match,
   gtx_rx_rst_done,
   gtx_rx_sync_done,
   gtx_rx_pol_swap,
   gtx_rx_err,
   gtx_rx_err_count,
+
   link_had_err,
   link_good,
   link_bad,
   gtx_rx_sump
 
-// Debug
+/* Debug
 `ifdef DEBUG_CFEB
   ,inj_sm_dsp
   ,parity_wr
@@ -218,12 +226,12 @@
   ,fifo_rdata_lyr3
   ,fifo_rdata_lyr4
   ,fifo_rdata_lyr5
-`endif
+`endif*/
   );
 //------------------------------------------------------------------------------------------------------------------
 // Generic
 //------------------------------------------------------------------------------------------------------------------
-  parameter ICFEB      = 0;          // CFEB 0-6 passed per instance
+  parameter IGEM      = 0;          // CFEB 0-6 passed per instance
 
 //------------------------------------------------------------------------------------------------------------------
 // Bus Widths
@@ -265,10 +273,10 @@
   input  [9:0]      inj_rwadr;        // Injector RAM read/write address
   input  [17:0]      inj_wdata;        // Injector RAM write data
   input  [2:0]      inj_ren;        // Injector RAM select
-  output  [17:0]      inj_rdata;        // Injector RAM read data
-  output  [5:0]      inj_ramout;        // Injector RAM read data for ALCT and L1A
-  output          inj_ramout_pulse;    // Injector RAM is injecting
-
+//  output  [17:0]      inj_rdata;        // Injector RAM read data
+//  output  [5:0]      inj_ramout;        // Injector RAM read data for ALCT and L1A
+//  output          inj_ramout_pulse;    // Injector RAM is injecting
+   
 // Raw Hits FIFO RAM
   input          fifo_wen;        // 1=Write enable FIFO RAM
   input  [RAM_ADRB-1:0]  fifo_wadr;        // FIFO RAM write address
@@ -276,7 +284,7 @@
   input  [2:0]      fifo_sel;        // FIFO RAM read layer address 0-5
   output  [RAM_WIDTH-1:0]  fifo_rdata;        // FIFO RAM read data
 
-// Hot Channel Mask
+//  Hot Channel Mask
   input  [MXDS-1:0]    ly0_hcm;        // 1=enable DiStrip
   input  [MXDS-1:0]    ly1_hcm;        // 1=enable DiStrip
   input  [MXDS-1:0]    ly2_hcm;        // 1=enable DiStrip
@@ -284,38 +292,45 @@
   input  [MXDS-1:0]    ly4_hcm;        // 1=enable DiStrip
   input  [MXDS-1:0]    ly5_hcm;        // 1=enable DiStrip
 
+   
 // Bad CFEB rx bit detection
   input          cfeb_badbits_reset;    // Reset bad cfeb bits FFs
   input          cfeb_badbits_block;    // Allow bad bits to block triads
   input  [15:0]      cfeb_badbits_nbx;    // Cycles a bad bit must be continuously high
-  output          cfeb_badbits_found;    // This CFEB has at least 1 bad bit
-  output  [MXDS*MXLY-1:0]  cfeb_blockedbits;    // 1=CFEB rx bit blocked by hcm or went bad, packed
-
+//  output          cfeb_badbits_found;    // This CFEB has at least 1 bad bit
+//  output  [MXDS*MXLY-1:0]  cfeb_blockedbits;    // 1=CFEB rx bit blocked by hcm or went bad, packed
+  
+/* 
   output  [MXDS-1:0]    ly0_badbits;      // 1=CFEB rx bit went bad
   output  [MXDS-1:0]    ly1_badbits;      // 1=CFEB rx bit went bad
   output  [MXDS-1:0]    ly2_badbits;      // 1=CFEB rx bit went bad
   output  [MXDS-1:0]    ly3_badbits;      // 1=CFEB rx bit went bad
   output  [MXDS-1:0]    ly4_badbits;      // 1=CFEB rx bit went bad
   output  [MXDS-1:0]    ly5_badbits;      // 1=CFEB rx bit went bad
-
+*/
+   
 // Triad Decoder
   input  [3:0]      triad_persist;      // Triad 1/2-strip persistence
   input          triad_clr;        // Triad one-shot clear
-  output          triad_skip;        // Triads skipped
+/*  output          triad_skip;        // Triads skipped
   output  [MXHS-1:0]    ly0hs;
   output  [MXHS-1:0]    ly1hs;
   output  [MXHS-1:0]    ly2hs;
   output  [MXHS-1:0]    ly3hs;
   output  [MXHS-1:0]    ly4hs;
   output  [MXHS-1:0]    ly5hs;
-
-// Status
+*/
+   
+ 
+/* Status
   output          demux_tp_1st;      // Demultiplexer test point first-in-time
   output          demux_tp_2nd;      // Demultiplexer test point second-in-time
   output          triad_tp;        // Triad test point at raw hits RAM input
   output  [MXLY-1:0]    parity_err_cfeb;    // Raw hits RAM parity error detected
-  output          cfeb_sump;        // Unused signals wot must be connected
+*/  
+  output          gem_sump;        // Unused signals wot must be connected
 
+   
 // SNAP12 optical receiver
   input          clock_160;        // 160 MHz from QPLL for GTX reference clock
   input          qpll_lock;        // QPLL was locked
@@ -327,11 +342,11 @@
   input          gtx_rx_reset;    // Reset GTX receiver rx_sync module
   input          gtx_rx_reset_err_cnt; // Resets the PRBS test error counters
   input          gtx_rx_en_prbs_test;  // Select random input test data mode
-  output          gtx_rx_start;   // Set when the DCFEB Start Pattern is present
-  output          gtx_rx_fc;      // Flags when Rx sees "FC" code (sent by Tx) for latency measurement
-  output reg      gtx_rx_nonzero; //rdk all gtx_data or'ed together
+//  output          gtx_rx_start;   // Set when the DCFEB Start Pattern is present
+//  output          gtx_rx_fc;      // Flags when Rx sees "FC" code (sent by Tx) for latency measurement
+  output reg	  gtx_rx_nonzero; //rdk all gtx_tx_data or'ed together
   output          gtx_rx_valid;   // Valid data detected on link
-  output          gtx_rx_match;   // PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
+//  output          gtx_rx_match;   // PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
   output          gtx_rx_rst_done;     // This has to complete before rxsync can start
   output          gtx_rx_sync_done;    // Use these to determine gtx_ready
   output          gtx_rx_pol_swap;     // GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
@@ -343,7 +358,7 @@
   output link_good;    // link stability monitor: always good, no errors since last resync
   output link_bad;     // link stability monitor: errors happened over 100 times
 
-// Debug
+/* Debug
 `ifdef DEBUG_CFEB
   output  [71:0]      inj_sm_dsp;        // Injector state machine ascii display
   output  [MXLY-1:0]    parity_wr;
@@ -358,11 +373,12 @@
   output  [MXDS-1+1:0]  fifo_rdata_lyr4;
   output  [MXDS-1+1:0]  fifo_rdata_lyr5;
 `endif
-
+*/
+   
 //-------------------------------------------------------------------------------------------------------------------
 // Load global definitions
 //-------------------------------------------------------------------------------------------------------------------
-  initial $display ("ICFEB=%H",ICFEB);
+  initial $display ("IGEM=%H",IGEM);
 
   `ifdef CSC_TYPE_C initial $display ("CSC_TYPE_C=%H",`CSC_TYPE_C); `endif  // Normal  ME1B reversed ME1A
   `ifdef CSC_TYPE_D initial $display ("CSC_TYPE_D=%H",`CSC_TYPE_D); `endif  // Reversed ME1B normal   ME1A
@@ -392,7 +408,7 @@
 //-------------------------------------------------------------------------------------------------------------------
 // Virtex6 DCFEB optical receivers
   wire [47:0]     gtx_rx_data;
-  wire gtx_rx_pol_swap = (ICFEB==4 || ICFEB==5);
+  wire gtx_rx_pol_swap = 0;
 
   gtx_optical_rx ugtx_optical_rx
   (
@@ -448,11 +464,12 @@
   reg demux_tp_1st = 0;
   reg demux_tp_2nd = 0;
 
+
   always @(posedge clock) begin
      demux_tp_1st <= triad_s0[0][0];  // Layer 0 ds 0  1st in time
      demux_tp_2nd <= triad_s0[3][0];  // Layer 3 ds 0 2nd in time
 
-     gtx_rx_nonzero <= |gtx_rx_data[47:0]; //rdk
+     gtx_rx_nonzero <= |gtx_rx_data[47:0];
   end
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -469,8 +486,8 @@
 //        axxb26c25d26e25f26:  a straight 5-hit pattern on key 1/2-strip 26 starting in time bin 0
 //
 //
-//  DiStrip      0           1           2           3           4           5           6           7
-//  Strip      0     1     0     1     0     1     0     1     0     1     0     1     0     1     0     1  
+//  DiStrip           0           1           2           3           4           5           6           7
+//  Strip          0     1     0     1     0     1     0     1     0     1     0     1     0     1     0     1  
 //  HStrip       0  1  2  3  0  1  2  3  0  1  2  3  0  1  2  3  0  1  2  3  0  1  2  3  0  1  2  3  0  1  2  3
 //  1/2 Strip    00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
 //
@@ -599,11 +616,11 @@
        default  inj_rdata <= inj_rdataa[0];
      endcase
   end
-
+/* rdk
   assign inj_ramout[1:0] = inj_ramoutb[0][1:0];
   assign inj_ramout[3:2] = inj_ramoutb[1][1:0];
   assign inj_ramout[5:4] = inj_ramoutb[2][1:0];
-
+*/
   assign inj_ramout_pulse  = !pass_ff;
 
 // Multiplex Triads from previous stage with Injector RAM data, output to next stage
@@ -782,7 +799,7 @@
   assign parity_expect[4] = ~(^ fifo_rdata_ly[4]);
   assign parity_expect[5] = ~(^ fifo_rdata_ly[5]);
 
-  assign parity_err_cfeb[5:0] =  ~(parity_rd ~^ parity_expect);  // ~^ is bitwise equivalence operator
+//rdk  assign parity_err_cfeb[5:0] =  ~(parity_rd ~^ parity_expect);  // ~^ is bitwise equivalence operator
 
 // Multiplex Raw Hits FIFO RAM output data
   assign fifo_rdata = fifo_rdata_ly[fifo_sel];

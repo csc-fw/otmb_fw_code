@@ -170,7 +170,8 @@
 // SNAP12 receivers
   rxp,
   rxn,
-
+   xtrarxp,
+   xtrarxn,
 // Finisar
   f_sclk,
   f_sdat,
@@ -428,7 +429,10 @@
 // SNAP12 receivers
   input  [6:0]  rxp;      // SNAP12+ fiber comparator inputs for GTX
   input  [6:0]  rxn;      // SNAP12- fiber comparator inputs for GTX
+  input  [MXGEM-1:0]  xtrarxp;      // SNAP12+ fiber comparator inputs for GEM GTX
+  input  [MXGEM-1:0]  xtrarxn;      // SNAP12- fiber comparator inputs for GEM GTX
 
+  
 // Finisar
   input      f_sclk;
   input      f_sdat;
@@ -1026,6 +1030,7 @@
 //-------------------------------------------------------------------------------------------------------------------
 // CFEBs Instantiated
   wire [MXCFEB-1:0]  cfeb_exists;
+  wire [MXGEM-1:0]  gem_exists;
 
 // CFEB digital phase shifters
   wire [3:0]      cfeb_rxd_int_delay [MXCFEB-1:0];      // Interstage delay
@@ -1129,6 +1134,7 @@
   wire  [MXCFEB-1:0]  gtx_rx_en_prbs_test;  // In  Select random input test data mode
   wire  [MXCFEB-1:0]  gtx_rx_start;  // Out  Set when the DCFEB Start Pattern is present
   wire  [MXCFEB-1:0]  gtx_rx_fc;     // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
+  wire  [MXCFEB-1:0]  cfeb_rx_nonzero; //rdk Out Flags when rx sees non-zero data
   wire  [MXCFEB-1:0]  gtx_rx_valid;  // Out  Valid data detected on link
   wire  [MXCFEB-1:0]  gtx_rx_match;  // Out  PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
   wire  [MXCFEB-1:0]  gtx_rx_rst_done;   // Out  These get set before rxsync cycle begins
@@ -1142,6 +1148,26 @@
   wire  [MXCFEB-1:0]  link_bad;      // link stability monitor: errors happened over 100 times
   wire  [MXCFEB-1:0]  ready_phaser;    // phaser dps done and ready status
   wire 	ready_phaser_a, ready_phaser_b, auto_gtx_reset;
+
+// GEM receiver status
+  parameter MXGEM    =   1;        // Number of GEM fiber link inputs
+  wire  [MXGEM-1:0]  gem_rx_enable; // In  Enable/Unreset GTX optical input, disables copper SCSI
+  wire  [MXGEM-1:0]  gem_rx_reset;  // In  Reset this GTX rx & sync module
+  wire  [MXGEM-1:0]  gem_rx_reset_err_cnt;  // In  Resets the PRBS test error counters
+  wire  [MXGEM-1:0]  gem_rx_en_prbs_test;  // In  Select random input test data mode
+  wire  [MXGEM-1:0]  gem_rx_nonzero;  // Out  Nonzero data detected on link
+  wire  [MXGEM-1:0]  gem_rx_valid;  // Out  Valid data detected on link
+  wire  [MXGEM-1:0]  gem_rx_rst_done;   // Out  These get set before rxsync cycle begins
+  wire  [MXGEM-1:0]  gem_rx_sync_done;  // Out  Use these to determine gem_ready
+  wire  [MXGEM-1:0]  gem_rx_pol_swap;   // Out  GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
+  wire  [MXGEM-1:0]  gem_rx_err;    // Out  PRBS test detects an error
+  wire  [MXGEM-1:0]  gem_sump;
+  wire  [MXGEM-1:0]  gem_rx_sump;   // Out  Unused signals
+  wire  [15:0]    gem_rx_err_count [MXGEM-1:0];  // Out  Error count on this fiber channel
+  wire  [MXGEM-1:0]  gem_link_had_err;  // link stability monitor: error happened at least once
+  wire  [MXGEM-1:0]  gem_link_good;     // link stability monitor: always good, no errors since last resync
+  wire  [MXGEM-1:0]  gem_link_bad;      // link stability monitor: errors happened over 100 times
+  wire  [RAM_WIDTH-1:0] gem_fifo_rdata [MXGEM-1:0];    // GEM FIFO RAM read data
    
    reg 	 gtx_wait = 1'b1;
    reg [15:0] gtx_wait_count = 0;
@@ -1262,6 +1288,7 @@
   .gtx_rx_en_prbs_test  (gtx_rx_en_prbs_test[icfeb]),  // In  Select random input test data mode
   .gtx_rx_start    (gtx_rx_start[icfeb]),  // Out  Set when the DCFEB Start Pattern is present
   .gtx_rx_fc       (gtx_rx_fc[icfeb]),     // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
+  .gtx_rx_nonzero  (cfeb_rx_nonzero[icfeb]), //rdk Out Flags when any non-zero data passes through CFEB link
   .gtx_rx_valid    (gtx_rx_valid[icfeb]),  // Out  Valid data detected on link
   .gtx_rx_match    (gtx_rx_match[icfeb]),  // Out  PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
   .gtx_rx_rst_done  (gtx_rx_rst_done[icfeb]),  // Out  These get set before rxsync cycle begins
@@ -1278,6 +1305,128 @@
   );
   end
   endgenerate
+
+//  jghere: GEM!
+//-------------------------------------------------------------------------------------------------------------------
+// GEM Instantiation
+//-------------------------------------------------------------------------------------------------------------------
+ //     .auto_gem_reset (auto_gem_reset),   // new In
+  genvar igem;
+  generate
+  for (igem=0; igem<1; igem=igem+1) begin: gengem
+     assign gem_exists[igem] = 1;                // Existence flag
+   gem #(.IGEM(igem)) ugem
+  (
+// Clock
+  .clock          (clock),              // In  40MHz TMB system clock from MMCM
+  .clk_lock       (lock_tmb_clock0),    // In  40MHz TMB system clock MMCM locked
+  .clock_4x       (clock_4x),           // In  4*40MHz TMB system clock from MMCM
+  .clock_cfeb_rxd      (clock_cfeb_rxd[0]),      // In  CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
+  .cfeb_rxd_posneg    (cfeb_rxd_posneg[0]),      // In  CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
+  .cfeb_rxd_int_delay    (cfeb_rxd_int_delay[0][3:0]),  // In  Interstage delay, integer bx
+
+// Resets
+  .global_reset      (global_reset),            // In  Global reset
+  .ttc_resync        (ttc_resync),            // In  TTC resync
+  .mask_all        (mask_all[0]),          // In  1=Enable, 0=Turn off all cfeb inputs
+
+// Injector Ports
+  .inj_febsel        (inj_febsel[0]),        // In  1=Enable cfeb RAM write
+  .inject          (injector_go_cfeb[0]),      // In  1=Start cfeb pattern injector
+  .inj_last_tbin      (inj_last_tbin[11:0]),        // In  Last tbin, may wrap past 1024 ram adr
+  .inj_wen        (inj_wen[2:0]),            // In  1=Write enable injector RAM
+  .inj_rwadr        (inj_rwadr[9:0]),          // In  Injector RAM read/write address
+  .inj_wdata        (inj_wdata[17:0]),          // In  Injector RAM write data
+  .inj_ren        (inj_ren[2:0]),            // In  1=Read enable Injector RAM
+/*
+  .inj_rdata        (inj_rdata[icfeb][17:0]),      // Out  Injector RAM read data
+  .inj_ramout        (inj_ramout[icfeb][5:0]),      // Out  Injector RAM read data for ALCT and L1A
+  .inj_ramout_pulse    (inj_ramout_pulse[icfeb]),      // Out  Injector RAM is injecting
+*/
+   
+// Raw Hits FIFO RAM Ports
+  .fifo_wen        (fifo_wen),              // In  1=Write enable FIFO RAM
+  .fifo_wadr        (fifo_wadr[RAM_ADRB-1:0]),      // In  FIFO RAM write address
+  .fifo_radr        (fifo_radr_cfeb[RAM_ADRB-1:0]),    // In  FIFO RAM read tbin address
+  .fifo_sel        (fifo_sel_cfeb[2:0]),        // In  FIFO RAM read layer address 0-5
+  .fifo_rdata        (gem_fifo_rdata[igem][RAM_WIDTH-1:0]),  // Out  FIFO RAM read data
+
+// Hot Channel Mask Ports
+  .ly0_hcm        (cfeb_ly0_hcm[0][MXDS-1:0]),  // In  1=enable DiStrip
+  .ly1_hcm        (cfeb_ly1_hcm[0][MXDS-1:0]),  // In  1=enable DiStrip
+  .ly2_hcm        (cfeb_ly2_hcm[0][MXDS-1:0]),  // In  1=enable DiStrip
+  .ly3_hcm        (cfeb_ly3_hcm[0][MXDS-1:0]),  // In  1=enable DiStrip
+  .ly4_hcm        (cfeb_ly4_hcm[0][MXDS-1:0]),  // In  1=enable DiStrip
+  .ly5_hcm        (cfeb_ly5_hcm[0][MXDS-1:0]),  // In  1=enable DiStrip
+
+// Bad CFEB rx bit detection
+  .cfeb_badbits_reset    (cfeb_badbits_reset[0]),    // In  Reset bad cfeb bits FFs
+  .cfeb_badbits_block    (cfeb_badbits_block[0]),    // In  Allow bad bits to block triads
+  .cfeb_badbits_nbx    (cfeb_badbits_nbx[15:0]),      // In  Cycles a bad bit must be continuously high
+/*
+  .cfeb_badbits_found    (cfeb_badbits_found[icfeb]),    // Out  CFEB[n] has at least 1 bad bit
+  .cfeb_blockedbits    (cfeb_blockedbits[icfeb]),      // Out  1=CFEB rx bit blocked by hcm or went bad, packed
+
+  .ly0_badbits      (cfeb_ly0_badbits[icfeb][MXDS-1:0]),// Out  1=CFEB rx bit went bad
+  .ly1_badbits      (cfeb_ly1_badbits[icfeb][MXDS-1:0]),// Out  1=CFEB rx bit went bad
+  .ly2_badbits      (cfeb_ly2_badbits[icfeb][MXDS-1:0]),// Out  1=CFEB rx bit went bad
+  .ly3_badbits      (cfeb_ly3_badbits[icfeb][MXDS-1:0]),// Out  1=CFEB rx bit went bad
+  .ly4_badbits      (cfeb_ly4_badbits[icfeb][MXDS-1:0]),// Out  1=CFEB rx bit went bad
+  .ly5_badbits      (cfeb_ly5_badbits[icfeb][MXDS-1:0]),// Out  1=CFEB rx bit went bad
+*/
+
+// Triad Decoder Ports
+  .triad_persist      (triad_persist[3:0]),      // In  Triad 1/2-strip persistence
+  .triad_clr        (triad_clr),      // In  Triad one-shot clear
+/*
+  .triad_skip        (triad_skip[icfeb]),    // Out  Triads skipped
+
+// Triad Decoder Outputs
+  .ly0hs          (cfeb_ly0hs[icfeb][MXHS-1:0]),    // Out  Decoded 1/2-strip pulses
+  .ly1hs          (cfeb_ly1hs[icfeb][MXHS-1:0]),    // Out  Decoded 1/2-strip pulses
+  .ly2hs          (cfeb_ly2hs[icfeb][MXHS-1:0]),    // Out  Decoded 1/2-strip pulses
+  .ly3hs          (cfeb_ly3hs[icfeb][MXHS-1:0]),    // Out  Decoded 1/2-strip pulses
+  .ly4hs          (cfeb_ly4hs[icfeb][MXHS-1:0]),    // Out  Decoded 1/2-strip pulses
+  .ly5hs          (cfeb_ly5hs[icfeb][MXHS-1:0]),    // Out  Decoded 1/2-strip pulses
+   
+// Status
+  .demux_tp_1st    (demux_tp_1st[icfeb]), // Out  Demultiplexer test point first-in-time
+  .demux_tp_2nd    (demux_tp_2nd[icfeb]), // Out  Demultiplexer test point second-in-time
+  .triad_tp        (triad_tp[icfeb]),     // Out  Triad test point at raw hits RAM input
+  .parity_err_cfeb (parity_err_cfeb[icfeb][MXLY-1:0]),  // Out  Raw hits RAM parity error detected
+*/
+  .gem_sump       (gem_sump[igem]),    // Out  Unused signals wot must be connected
+
+// SNAP12 optical receiver
+  .clock_160    (clock_160),  // In  160 MHz from QPLL for GTX reference clock
+//  .qpll_lock    (l_qpll_lock & l_tmbclk0_lock),  //  In  QPLL has been locked, good to wait for startup-powerup... was real-time direct qpll_lock
+  .qpll_lock    (qpll_lock),  //  In  QPLL has been locked, good to wait for startup-powerup... was real-time direct qpll_lock
+  .rxp          (xtrarxp[0]), // In  SNAP12+ fiber input for GEM0 GTX
+  .rxn          (xtrarxn[0]), // In  SNAP12- fiber input for GEM0 GTX
+
+// Optical receiver status
+  .gtx_rx_enable   (gem_rx_enable[igem] & ready_phaser[0]), // In  Enable/Unreset GTX optical input; disables copper SCSI? JRG, hold off enable until pds phaser is done and ready
+  .gtx_rx_reset    (gem_rx_reset[igem] | auto_gtx_reset),  // In  Reset this GTX rx & sync module; auto reset all if any take too long to phase lock
+  .gtx_rx_reset_err_cnt (gem_rx_reset_err_cnt[igem]), // In  Resets the PRBS test error counters
+  .gtx_rx_en_prbs_test  (gem_rx_en_prbs_test[igem]),  // In  Select random input test data mode
+  .gtx_rx_nonzero       (gem_rx_nonzero[igem]),     // Out  Flags when Rx sees non-zero data
+  .gtx_rx_valid     (gem_rx_valid[igem]),  // Out  Valid data detected on link
+  .gtx_rx_rst_done  (gem_rx_rst_done[igem]),  // Out  These get set before rxsync cycle begins
+  .gtx_rx_sync_done (gem_rx_sync_done[igem]), // Out  Use these to determine gtx_ready
+  .gtx_rx_pol_swap  (gem_rx_pol_swap[igem]),  // Out  GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
+  .gtx_rx_err       (gem_rx_err[igem]),       // Out  PRBS test detects an error
+  .gtx_rx_err_count (gem_rx_err_count[igem][15:0]),  // Out  Error count on this fiber channel
+  .link_had_err     (gem_link_had_err[igem]),     // link stability monitor: error happened at least once
+  .link_good        (gem_link_good[igem]),        // link stability monitor: always good, no errors since last resync
+  .link_bad         (gem_link_bad[igem]),         // link stability monitor: errors happened over 100 times
+  .gtx_rx_sump      (gem_rx_sump[igem])  // Out  Unused signals
+
+// Debug Ports
+  );
+  end
+  endgenerate
+// end GEM!!
+
 
 //-------------------------------------------------------------------------------------------------------------------
 // Pattern Finder declarations, common to ME1A+ME1B+ME234
@@ -1646,7 +1795,8 @@
   .alct_ext_trig_en  (alct_ext_trig_en),      // In  Allow ALCT External pre-trigger from CCB
   .layer_trig_en    (layer_trig_en),      // In  Allow layer-wide pre-triggering
   .all_cfebs_active  (all_cfebs_active),      // In  Make all CFEBs active when triggered
-  .cfeb_en    (cfeb_en[MXCFEB-1:0]),      // In  1=Enable this CFEB for triggering + sending active feb flag
+//  .cfeb_en    (cfeb_en[MXCFEB-1:0]),      // In  1=Enable this CFEB for triggering + sending active feb flag
+  .cfeb_en    (cfeb_en[MXCFEB-1:0] & ~link_bad[MXCFEB-1:0] & link_good[MXCFEB-1:0]),      // In  1=Enable this CFEB for triggering + sending active feb flag unless fiber link is bad
   .active_feb_src    (active_feb_src),      // In  Active cfeb flag source, 0=pretrig, 1=tmb-matching ~8bx later
 
   .alct_trig_width  (alct_trig_width[3:0]),      // In  ALCT*CLCT overlap window size
@@ -1678,7 +1828,8 @@
 // Sequencer Status from CFEBs
   .triad_skip    (triad_skip[MXCFEB-1:0]),    // In  Triads skipped
   .triad_tp    (triad_tp[MXCFEB-1:0]),      // In  Triad test point at raw hits RAM input
-  .cfeb_badbits_found  (cfeb_badbits_found[MXCFEB-1:0]),  // In  CFEB[n] has at least 1 bad bit
+  .cfeb_badbits_found  (cfeb_badbits_found[MXCFEB-1:0] | link_had_err[MXCFEB-1:0]),  // In  CFEB[n] has at least 1 bad bit or fiber error detected
+//  .cfeb_badbits_found  (cfeb_badbits_found[MXCFEB-1:0]),  // In  CFEB[n] has at least 1 bad bit
   .cfeb_badbits_blocked  (cfeb_badbits_blocked),      // In  A CFEB had bad bits that were blocked
 
 // Sequencer Pattern Finder PreTrigger Ports
@@ -2776,9 +2927,34 @@
   .Q  (mez_tp[1]));    // Out  1-bit DDR output
 
 
+  reg [17:0] blink_count = 0;
+  reg [17:0] blink_cfeb_count = 0;
+  reg  blink_led = 0;
+  reg  blink_cfeb_led = 0;
 
-  assign mez_led[0] = ~|link_had_err;    // blue OFF.  was ~alct_wait_cfg
-  assign mez_led[1] = ~l_tmbclk0_lock;   // green
+  always @(posedge clock) begin
+    if (|gem_rx_nonzero) blink_led <= 1'b1;  // set signal to make a blink
+    else if (&blink_count[17:16]) blink_led <= 1'b0;  // turn off signal to make a blink
+    else blink_led <= blink_led;  // keep signal to make a blink
+
+    if (|cfeb_rx_nonzero) blink_cfeb_led <= 1'b1;
+    else if (&blink_cfeb_count[17:16]) blink_cfeb_led <= 1'b0;
+    else blink_cfeb_led <= blink_cfeb_led; 
+
+  end
+  always @(posedge clock_1mhz) begin
+    if (blink_led)  blink_count <= blink_count + 1'b1;  // counter for blink duration
+    else blink_count <= 0;
+
+    if (blink_cfeb_led) blink_cfeb_count <= blink_cfeb_count + 1'b1; 
+    else blink_cfeb_count <= 0;  
+  end
+
+
+
+
+  assign mez_led[0] = ~|link_had_err ^ blink_led;    // blue OFF.  was ~alct_wait_cfg
+  assign mez_led[1] = ~l_tmbclk0_lock ^ blink_cfeb_led;   // green
   assign mez_led[2] = lock_tmb_clock0;   // yellow
   assign mez_led[3] = ~tmbmmcm_locklost; // red
   assign mez_led[4] = ~l_qpll_lock;   // green
@@ -3774,6 +3950,26 @@
       .comp_phaser_b_ready (ready_phaser_b),  // Out
       .auto_gtx_reset (auto_gtx_reset),   // Out
 
+      // GEM GTX receiver
+      .gem_rx_enable (gem_rx_enable[MXGEM-1:0]), // Out  Enable/Unreset GTX optical input, disables copper SCSI
+      .gem_rx_reset (gem_rx_reset[MXGEM-1:0]),     // Out  Reset this GTX rx & sync module
+      .gem_rx_reset_err_cnt (gem_rx_reset_err_cnt[MXGEM-1:0]),  // Out  Resets the PRBS test error counters
+      .gem_rx_en_prbs_test (gem_rx_en_prbs_test[MXGEM-1:0]),  // Out  Select random input test data mode
+      .gem_rx_valid (gem_rx_valid[MXGEM-1:0]),    // In  Valid data detected on link
+      .gem_rx_rst_done (gem_rx_rst_done[MXGEM-1:0]),   // In  These get set before rxsync cycle begins
+      .gem_rx_sync_done (gem_rx_sync_done[MXGEM-1:0]),  // In  Use these to determine gem_ready
+      .gem_rx_pol_swap (gem_rx_pol_swap[MXGEM-1:0]),   // In  GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
+      .gem_rx_err (gem_rx_err[MXGEM-1:0]),    // In  PRBS test detects an error
+      .gem_link_had_err (gem_link_had_err[MXGEM-1:0]),  // In  link stability monitor: error happened at least once
+      .gem_link_good (gem_link_good[MXGEM-1:0]),     // In  link stability monitor: always good, no errors since last resync
+      .gem_link_bad (gem_link_bad[MXGEM-1:0]),      // In  link stability monitor: errors happened over 100 times
+
+      // GEM GTX error counters
+      .gem_rx_err_count0  (gem_rx_err_count[0][15:0]),  // In  Error count on this GEM fiber channel
+      //.gem_rx_err_count1  (gem_rx_err_count[1][15:0]),  // In  Error count on this GEM fiber channel
+      //.gem_rx_err_count2  (gem_rx_err_count[2][15:0]),  // In  Error count on this GEM fiber channel
+      //.gem_rx_err_count3  (gem_rx_err_count[3][15:0]),  // In  Error count on this GEM fiber channel
+
       // Sump  
       .vme_sump      (vme_sump)              // Out  Unused signals
       );
@@ -3809,7 +4005,7 @@
 
    // Sump
    assign sump = ccb_sump | alct_sump |   rpc_sump   | sequencer_sump | tmb_sump     | buf_sump  |
-     vme_sump | rpc_inj_sel | mini_sump | (|cfeb_sump) | inj_ram_sump   | virtex6_sump  | cfeb_rx_sump;
+     vme_sump | rpc_inj_sel | mini_sump | (|cfeb_sump) | inj_ram_sump   | virtex6_sump  | cfeb_rx_sump | gem_sump | gem_rx_sump; 
 
 
    //-------------------------------------------------------------------------------------------

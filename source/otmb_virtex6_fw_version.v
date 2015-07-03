@@ -4,7 +4,7 @@
 // Firmware version global definitions
   `define FIRMWARE_TYPE 04'hC    // C=Normal CLCT/TMB, D=Debug PCB loopback version
   `define VERSION       04'hE    // Version revision number, A=TMB2004 and earlier, E=TMB2005E production
-  `define MONTHDAY      16'h0609 // Version date
+  `define MONTHDAY      16'h0615 // Version date
   `define YEAR          16'h2015 // Version year
 
   `define AUTO_VME         01'h1 // Automatically initialize VME registers from PROM data,   0=do not
@@ -21,8 +21,8 @@
   `define FPGAID       16'h6240 // FPGA Type 6240 XC6VLX240T
 
 // Conditional compile flags: Enable only one CSC_TYPE
-//  `define CSC_TYPE_C  04'hC // Normal   ME1B: ME1B   chambers facing toward IR.    ME1B hs =!reversed, ME1A hs = reversed
-  `define CSC_TYPE_D  04'hD    // Reversed ME1B: ME1B   chambers facing away from IR. ME1B hs = reversed, ME1A hs =!reversed
+  `define CSC_TYPE_C  04'hC // Normal   ME1B: ME1B   chambers facing toward IR.    ME1B hs =!reversed, ME1A hs = reversed
+//  `define CSC_TYPE_D  04'hD    // Reversed ME1B: ME1B   chambers facing away from IR. ME1B hs = reversed, ME1A hs =!reversed
 
 // Revision log
 //  02/08/2013  Initial Virtex-6 specific
@@ -92,6 +92,13 @@
 //      04/12/2015      Activate auto-reset for GTX if they don't lock within 1.638 ms
 //      05/30/2015      Keep bad links from contaminating the triads == hot comps: triads load zeroes if !link_good OR link_bad
 //  	06/09/2015	Fixed bug in posneg logic in top-level file
+//	06/10/2015	Changed cfeb_badbits_found reporting logic (at sequencer input) to add OR with link_had_err,
+//			also changed cfeb_en to add AND with ~link_bad AND link_good
+//				>>TO-DO: Add counters for coincidence of preCLCT with ALCT/L1A
+//	06/15/2015	Added GTX rx link for a single GEM input on physical snap12 fiber 1 (xtrarxp/n on pins AP5/6),
+//			blinks Blue Mez LED when nonzero GEM data is detected
+// 			  -- created in gem.v which is basically a hacked copy of cfeb.v
+//			  -- later expand this to 4 GEM fibers on physical fibers 5-8
 //---------------------------------------------------------------------------------------------------------------------------------------
 //  End Global Definitions
 //---------------------------------------------------------------------------------------------------------------------------------------

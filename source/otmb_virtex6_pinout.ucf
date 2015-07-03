@@ -752,9 +752,9 @@ NET "rxn[6]"		LOC = R4  | IOSTANDARD = "LVDS_25";	# MGTRXN3_114
 #NET "gemrxn[3]"		LOC = AC4  | IOSTANDARD = "LVDS_25";	#
 
 #
-# Snap fiber1, unused
-#NET "xtrarxp[0]"		LOC = AP5  | IOSTANDARD = "LVDS_25";	# MTP fiber 1, Rx on GTX0
-#NET "xtrarxn[0]"		LOC = AP6  | IOSTANDARD = "LVDS_25";	#
+# Snap fiber1, only used by emulator board in some test stands
+NET "xtrarxp[0]"		LOC = AP5  | IOSTANDARD = "LVDS_25";	# MTP fiber 1, Rx on GTX0
+NET "xtrarxn[0]"		LOC = AP6  | IOSTANDARD = "LVDS_25";	#
 
 #----------------------------------------------------------------------------------------------------------
 # IO Bank Impedances, just for reference, do not lock these pins
