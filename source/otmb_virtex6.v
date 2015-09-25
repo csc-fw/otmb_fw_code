@@ -787,7 +787,7 @@
   wire  [MXCNTVME-1:0]  event_counter11;
   wire  [MXCNTVME-1:0]  event_counter12;
 
-// TMB Event Counters
+// CLCT Event Counters
   wire  [MXCNTVME-1:0]  event_counter13;
   wire  [MXCNTVME-1:0]  event_counter14;
   wire  [MXCNTVME-1:0]  event_counter15;
@@ -806,6 +806,8 @@
   wire  [MXCNTVME-1:0]  event_counter28;
   wire  [MXCNTVME-1:0]  event_counter29;
   wire  [MXCNTVME-1:0]  event_counter30;
+
+// TMB Event Counters
   wire  [MXCNTVME-1:0]  event_counter31;
   wire  [MXCNTVME-1:0]  event_counter32;
   wire  [MXCNTVME-1:0]  event_counter33;
@@ -830,12 +832,16 @@
   wire  [MXCNTVME-1:0]  event_counter52;
   wire  [MXCNTVME-1:0]  event_counter53;
   wire  [MXCNTVME-1:0]  event_counter54;
+
+// L1A Counters
   wire  [MXCNTVME-1:0]  event_counter55;
   wire  [MXCNTVME-1:0]  event_counter56;
   wire  [MXCNTVME-1:0]  event_counter57;
   wire  [MXCNTVME-1:0]  event_counter58;
   wire  [MXCNTVME-1:0]  event_counter59;
   wire  [MXCNTVME-1:0]  event_counter60;
+
+// STAT Counters
   wire  [MXCNTVME-1:0]  event_counter61;
   wire  [MXCNTVME-1:0]  event_counter62;
   wire  [MXCNTVME-1:0]  event_counter63;
@@ -849,6 +855,10 @@
   wire  [7:0]      alct_err_counter3;
   wire  [7:0]      alct_err_counter4;
   wire  [7:0]      alct_err_counter5;
+
+// CLCT pre-trigger coincidence counters
+  wire  [MXCNTVME-1:0] pretrig_l1a_counter;  // CLCT pre-trigger AND L1A coincidence counter
+  wire  [MXCNTVME-1:0] pretrig_alct_counter; // CLCT pre-trigger AND ALCT coincidence counter
 
 // CFEB injector RAM map 2D arrays into 1D for ALCT
   wire  [MXCFEB-1:0]  inj_ramout_pulse;
@@ -1123,34 +1133,34 @@
   end
 
 // Optical receiver status
-  wire  [MXCFEB-1:0]  gtx_rx_enable; // In  Enable/Unreset GTX optical input, disables copper SCSI
-  wire  [MXCFEB-1:0]  gtx_rx_reset;  // In  Reset this GTX rx & sync module
-  wire  [MXCFEB-1:0]  gtx_rx_reset_err_cnt;  // In  Resets the PRBS test error counters
-  wire  [MXCFEB-1:0]  gtx_rx_en_prbs_test;  // In  Select random input test data mode
-  wire  [MXCFEB-1:0]  gtx_rx_start;  // Out  Set when the DCFEB Start Pattern is present
-  wire  [MXCFEB-1:0]  gtx_rx_fc;     // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
-  wire  [MXCFEB-1:0]  gtx_rx_valid;  // Out  Valid data detected on link
-  wire  [MXCFEB-1:0]  gtx_rx_match;  // Out  PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
-  wire  [MXCFEB-1:0]  gtx_rx_rst_done;   // Out  These get set before rxsync cycle begins
-  wire  [MXCFEB-1:0]  gtx_rx_sync_done;  // Out  Use these to determine gtx_ready
-  wire  [MXCFEB-1:0]  gtx_rx_pol_swap;   // Out  GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
-  wire  [MXCFEB-1:0]  gtx_rx_err;    // Out  PRBS test detects an error
-  wire  [MXCFEB-1:0]  gtx_rx_sump;   // Out  Unused signals
-  wire  [15:0]    gtx_rx_err_count [MXCFEB-1:0];  // Out  Error count on this fiber channel
-  wire  [MXCFEB-1:0]  link_had_err;  // link stability monitor: error happened at least once
-  wire  [MXCFEB-1:0]  link_good;     // link stability monitor: always good, no errors since last resync
-  wire  [MXCFEB-1:0]  link_bad;      // link stability monitor: errors happened over 100 times
-  wire  [MXCFEB-1:0]  ready_phaser;    // phaser dps done and ready status
+  wire  [MXCFEB-1:0]  gtx_rx_enable;                 // In  Enable/Unreset GTX optical input, disables copper SCSI
+  wire  [MXCFEB-1:0]  gtx_rx_reset;                  // In  Reset this GTX rx & sync module
+  wire  [MXCFEB-1:0]  gtx_rx_reset_err_cnt;          // In  Resets the PRBS test error counters
+  wire  [MXCFEB-1:0]  gtx_rx_en_prbs_test;           // In  Select random input test data mode
+  wire  [MXCFEB-1:0]  gtx_rx_start;                  // Out  Set when the DCFEB Start Pattern is present
+  wire  [MXCFEB-1:0]  gtx_rx_fc;                     // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
+  wire  [MXCFEB-1:0]  gtx_rx_valid;                  // Out  Valid data detected on link
+  wire  [MXCFEB-1:0]  gtx_rx_match;                  // Out  PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
+  wire  [MXCFEB-1:0]  gtx_rx_rst_done;               // Out  These get set before rxsync cycle begins
+  wire  [MXCFEB-1:0]  gtx_rx_sync_done;              // Out  Use these to determine gtx_ready
+  wire  [MXCFEB-1:0]  gtx_rx_pol_swap;               // Out  GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
+  wire  [MXCFEB-1:0]  gtx_rx_err;                    // Out  PRBS test detects an error
+  wire  [MXCFEB-1:0]  gtx_rx_sump;                   // Out  Unused signals
+  wire  [15:0]        gtx_rx_err_count [MXCFEB-1:0]; // Out  Error count on this fiber channel
+  wire  [MXCFEB-1:0]  link_had_err;                  // link stability monitor: error happened at least once
+  wire  [MXCFEB-1:0]  link_good;                     // link stability monitor: always good, no errors since last resync
+  wire  [MXCFEB-1:0]  link_bad;                      // link stability monitor: errors happened over 100 times
+  wire  [MXCFEB-1:0]  ready_phaser;                  // phaser dps done and ready status
   wire 	ready_phaser_a, ready_phaser_b, auto_gtx_reset;
    
-   reg 	 gtx_wait = 1'b1;
-   reg [15:0] gtx_wait_count = 0;
+  reg 	     gtx_wait       = 1'b1;
+  reg [15:0] gtx_wait_count = 0;
 
-   always @(posedge clock) // things that use lhc_clk wo/Reset
-     begin
-	if ( gtx_wait & (ready_phaser_a | ready_phaser_b) ) gtx_wait_count <= gtx_wait_count + 1'b1;
-	gtx_wait <= !gtx_wait_count[14];  // goes to zero after 409 usec
-     end
+  always @(posedge clock) // things that use lhc_clk wo/Reset
+  begin
+    if ( gtx_wait & (ready_phaser_a | ready_phaser_b) ) gtx_wait_count <= gtx_wait_count + 1'b1;
+    gtx_wait <= !gtx_wait_count[14];  // goes to zero after 409 usec
+  end
 
   assign  ready_phaser[0] = !gtx_wait & ready_phaser_b;
   assign  ready_phaser[1] = !gtx_wait & ready_phaser_b;
@@ -1579,13 +1589,13 @@
   wire  [MXCFEBB-1:0]  bcb_cfeb_adr;      // CFEB ID  
 
 // Sequencer Header Counters
-  wire  [MXCNTVME-1:0]  pretrig_counter;    // Pre-trigger counter
-  wire  [MXCNTVME-1:0]  clct_counter;      // CLCT counter
-  wire  [MXCNTVME-1:0]  trig_counter;      // TMB trigger counter
-  wire  [MXCNTVME-1:0]  alct_counter;      // ALCTs received counter
-  wire  [MXL1ARX-1:0]  l1a_rx_counter;      // L1As received from ccb counter
-  wire  [MXL1ARX-1:0]  readout_counter;    // Readout counter
-  wire  [MXORBIT-1:0]  orbit_counter;      // Orbit counter
+  wire  [MXCNTVME-1:0] pretrig_counter; // Pre-trigger counter
+  wire  [MXCNTVME-1:0] clct_counter;    // CLCT counter
+  wire  [MXCNTVME-1:0] trig_counter;    // TMB trigger counter
+  wire  [MXCNTVME-1:0] alct_counter;    // ALCTs received counter
+  wire  [MXL1ARX-1:0]  l1a_rx_counter;  // L1As received from ccb counter
+  wire  [MXL1ARX-1:0]  readout_counter; // Readout counter
+  wire  [MXORBIT-1:0]  orbit_counter;   // Orbit counter
 
 // Sequencer Revcode
   wire  [14:0]      revcode;
@@ -2081,15 +2091,19 @@
   .event_counter64  (event_counter64[MXCNTVME-1:0]),  // Out
   .event_counter65  (event_counter65[MXCNTVME-1:0]),  // Out
 
+// CLCT pre-trigger coincidence counters
+  .pretrig_l1a_counter  (pretrig_l1a_counter[MXCNTVME-1:0]),   // Out
+  .pretrig_alct_counter  (pretrig_alct_counter[MXCNTVME-1:0]), // Out
+
 // Sequencer Header Counters
-  .hdr_clear_on_resync  (hdr_clear_on_resync),      // In  Clear header counters on ttc_resync
-  .pretrig_counter  (pretrig_counter[MXCNTVME-1:0]),  // Out  Pre-trigger counter
-  .clct_counter    (clct_counter[MXCNTVME-1:0]),    // Out  CLCT counter
-  .alct_counter    (alct_counter[MXCNTVME-1:0]),    // Out  ALCTs received counter
-  .trig_counter    (trig_counter[MXCNTVME-1:0]),    // Out  TMB trigger counter
-  .l1a_rx_counter    (l1a_rx_counter[MXL1ARX-1:0]),    // Out  L1As received from ccb counter
-  .readout_counter  (readout_counter[MXL1ARX-1:0]),    // Out  Readout counter
-  .orbit_counter    (orbit_counter[MXORBIT-1:0]),    // Out  Orbit counter
+  .hdr_clear_on_resync (hdr_clear_on_resync),           // In  Clear header counters on ttc_resync
+  .pretrig_counter     (pretrig_counter[MXCNTVME-1:0]), // Out  Pre-trigger counter
+  .clct_counter        (clct_counter[MXCNTVME-1:0]),    // Out  CLCT counter
+  .alct_counter        (alct_counter[MXCNTVME-1:0]),    // Out  ALCTs received counter
+  .trig_counter        (trig_counter[MXCNTVME-1:0]),    // Out  TMB trigger counter
+  .l1a_rx_counter      (l1a_rx_counter[MXL1ARX-1:0]),   // Out  L1As received from ccb counter
+  .readout_counter     (readout_counter[MXL1ARX-1:0]),  // Out  Readout counter
+  .orbit_counter       (orbit_counter[MXORBIT-1:0]),    // Out  Orbit counter
 
 // Sequencer Parity Errors
   .perr_pulse    (perr_pulse),        // In  Parity error pulse for counting
@@ -3611,14 +3625,14 @@
       .event_counter65    (event_counter65[MXCNTVME-1:0]),  // In
 
       // Header Counter Ports
-      .hdr_clear_on_resync    (hdr_clear_on_resync),        // Out  Clear header counters on ttc_resync
-      .pretrig_counter    (pretrig_counter[MXCNTVME-1:0]),  // In  Pre-trigger counter
-      .clct_counter      (clct_counter[MXCNTVME-1:0]),    // In  CLCT counter
-      .trig_counter      (trig_counter[MXCNTVME-1:0]),    // In  TMB trigger counter
-      .alct_counter      (alct_counter[MXCNTVME-1:0]),    // In  ALCTs received counter
-      .l1a_rx_counter      (l1a_rx_counter[MXL1ARX-1:0]),    // In  L1As received from ccb counter
-      .readout_counter    (readout_counter[MXL1ARX-1:0]),    // In  Readout counter
-      .orbit_counter      (orbit_counter[MXORBIT-1:0]),    // In  Orbit counter
+      .hdr_clear_on_resync (hdr_clear_on_resync),           // Out  Clear header counters on ttc_resync
+      .pretrig_counter     (pretrig_counter[MXCNTVME-1:0]), // In  Pre-trigger counter
+      .clct_counter        (clct_counter[MXCNTVME-1:0]),    // In  CLCT counter
+      .trig_counter        (trig_counter[MXCNTVME-1:0]),    // In  TMB trigger counter
+      .alct_counter        (alct_counter[MXCNTVME-1:0]),    // In  ALCTs received counter
+      .l1a_rx_counter      (l1a_rx_counter[MXL1ARX-1:0]),   // In  L1As received from ccb counter
+      .readout_counter     (readout_counter[MXL1ARX-1:0]),  // In  Readout counter
+      .orbit_counter       (orbit_counter[MXORBIT-1:0]),    // In  Orbit counter
 
       // ALCT Structure Error Counters
       .alct_err_counter0    (alct_err_counter0[7:0]),      // In  Error counter 1D remap
@@ -3627,7 +3641,11 @@
       .alct_err_counter3    (alct_err_counter3[7:0]),      // In
       .alct_err_counter4    (alct_err_counter4[7:0]),      // In
       .alct_err_counter5    (alct_err_counter5[7:0]),      // In
-
+      
+      // CLCT pre-trigger coincidence counters
+      .pretrig_l1a_counter  (pretrig_l1a_counter[MXCNTVME-1:0]),  // In
+      .pretrig_alct_counter (pretrig_alct_counter[MXCNTVME-1:0]), // In
+      
       // CSC Orientation Ports
       .csc_type      (csc_type[3:0]),          // In  Firmware compile type
       .csc_me1ab      (csc_me1ab),            // In  1=ME1A or ME1B CSC type

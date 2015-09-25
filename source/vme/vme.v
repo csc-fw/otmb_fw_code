@@ -683,7 +683,7 @@
   event_counter11,
   event_counter12,
 
-// TMB+CLCT Event Counters
+// CLCT Event Counters
   event_counter13,
   event_counter14,
   event_counter15,
@@ -702,6 +702,8 @@
   event_counter28,
   event_counter29,
   event_counter30,
+
+// TMB Event Counters
   event_counter31,
   event_counter32,
   event_counter33,
@@ -726,12 +728,16 @@
   event_counter52,
   event_counter53,
   event_counter54,
-  event_counter55,
-  event_counter56,
-  event_counter57,
-  event_counter58,
-  event_counter59,
-  event_counter60,
+  
+// L1A Counters
+  event_counter55, // L1A received
+  event_counter56, // L1A received, TMB in L1A window
+  event_counter57, // L1A received, no TMB in window
+  event_counter58, // TMB triggered, no L1A in window
+  event_counter59, // TMB readouts completed
+  event_counter60, // TMB readouts lost by 1-event-per-L1A limit
+
+// STAT Counters
   event_counter61,
   event_counter62,
   event_counter63,
@@ -755,6 +761,10 @@
   alct_err_counter3,
   alct_err_counter4,
   alct_err_counter5,
+
+// CLCT pre-trigger coincidence counters
+  pretrig_l1a_counter,  // CLCT pre-trigger AND L1A coincidence counter
+  pretrig_alct_counter, // CLCT pre-trigger AND ALCT coincidence counter
 
 // CSC Orientation Ports
   csc_type,
@@ -1141,8 +1151,8 @@
 
   parameter ADR_SCP_TRIG      = 9'hCE;  // Scope trigger source channel
 
-  parameter ADR_CNT_CTRL      = 9'hD0;  // Counter control
-  parameter ADR_CNT_RDATA      = 9'hD2;  // Counter data
+  parameter ADR_CNT_CTRL  = 9'hD0;  // Counter control
+  parameter ADR_CNT_RDATA = 9'hD2;  // Counter data
 
   parameter ADR_JTAGSM0      = 9'hD4;  // JTAG state machine
   parameter ADR_JTAGSM1      = 9'hD6;
@@ -1915,15 +1925,15 @@
   input  [3:0]      rpc1_bxn_diff;      // RPC - offset
 
 // ALCT Trigger/Readout Counter Ports
-  output          cnt_all_reset;      // Trigger/Readout counter reset
-  output          cnt_stop_on_ovf;    // Stop all counters if any overflows
-  output          cnt_non_me1ab_en;    // Allow clct pretrig counters count non me1ab
-  output          cnt_alct_debug;      // Enable ALCT debug lct error counter
-  input          cnt_any_ovf_alct;    // At least one alct counter overflowed
-  input          cnt_any_ovf_seq;    // At least one sequencer counter overflowed
+  output cnt_all_reset;    // Trigger/Readout counter reset
+  output cnt_stop_on_ovf;  // Stop all counters if any overflows
+  output cnt_non_me1ab_en; // Allow clct pretrig counters count non me1ab
+  output cnt_alct_debug;   // Enable ALCT debug lct error counter
+  input  cnt_any_ovf_alct; // At least one alct counter overflowed
+  input  cnt_any_ovf_seq;  // At least one sequencer counter overflowed
 
 // ALCT Event Counters
-  input  [MXCNTVME-1:0]  event_counter0;      // Event counter 1D remap
+  input  [MXCNTVME-1:0]  event_counter0; // Event counter 1D remap
   input  [MXCNTVME-1:0]  event_counter1;
   input  [MXCNTVME-1:0]  event_counter2;
   input  [MXCNTVME-1:0]  event_counter3;
@@ -1937,8 +1947,8 @@
   input  [MXCNTVME-1:0]  event_counter11;
   input  [MXCNTVME-1:0]  event_counter12;
 
-// TMB+CLCT Event Counters
-  input  [MXCNTVME-1:0]  event_counter13;    // Event counter 1D remap
+// CLCT Event Counters
+  input  [MXCNTVME-1:0]  event_counter13; // Event counter 1D remap
   input  [MXCNTVME-1:0]  event_counter14;
   input  [MXCNTVME-1:0]  event_counter15;
   input  [MXCNTVME-1:0]  event_counter16;
@@ -1956,6 +1966,8 @@
   input  [MXCNTVME-1:0]  event_counter28;
   input  [MXCNTVME-1:0]  event_counter29;
   input  [MXCNTVME-1:0]  event_counter30;
+
+// TMB Event Counters
   input  [MXCNTVME-1:0]  event_counter31;
   input  [MXCNTVME-1:0]  event_counter32;
   input  [MXCNTVME-1:0]  event_counter33;
@@ -1980,12 +1992,16 @@
   input  [MXCNTVME-1:0]  event_counter52;
   input  [MXCNTVME-1:0]  event_counter53;
   input  [MXCNTVME-1:0]  event_counter54;
-  input  [MXCNTVME-1:0]  event_counter55;
-  input  [MXCNTVME-1:0]  event_counter56;
-  input  [MXCNTVME-1:0]  event_counter57;
-  input  [MXCNTVME-1:0]  event_counter58;
-  input  [MXCNTVME-1:0]  event_counter59;
-  input  [MXCNTVME-1:0]  event_counter60;
+
+// L1A Counters
+  input  [MXCNTVME-1:0]  event_counter55; // L1A received
+  input  [MXCNTVME-1:0]  event_counter56; // L1A received, TMB in L1A window
+  input  [MXCNTVME-1:0]  event_counter57; // L1A received, no TMB in window
+  input  [MXCNTVME-1:0]  event_counter58; // TMB triggered, no L1A in window
+  input  [MXCNTVME-1:0]  event_counter59; // TMB readouts completed
+  input  [MXCNTVME-1:0]  event_counter60; // TMB readouts lost by 1-event-per-L1A limit
+
+// STAT Counters
   input  [MXCNTVME-1:0]  event_counter61;
   input  [MXCNTVME-1:0]  event_counter62;
   input  [MXCNTVME-1:0]  event_counter63;
@@ -1993,22 +2009,26 @@
   input  [MXCNTVME-1:0]  event_counter65;
 
 // Header Counters
-  output          hdr_clear_on_resync;  // Clear header counters on ttc_resync
-  input  [MXCNTVME-1:0]  pretrig_counter;    // Pre-trigger counter
-  input  [MXCNTVME-1:0]  clct_counter;      // CLCT counter
-  input  [MXCNTVME-1:0]  trig_counter;      // TMB trigger counter
-  input  [MXCNTVME-1:0]  alct_counter;      // ALCTs received counter
+  output                hdr_clear_on_resync; // Clear header counters on ttc_resync
+  input  [MXCNTVME-1:0] pretrig_counter;     // Pre-trigger counter
+  input  [MXCNTVME-1:0] clct_counter;        // CLCT counter
+  input  [MXCNTVME-1:0] trig_counter;        // TMB trigger counter
+  input  [MXCNTVME-1:0] alct_counter;        // ALCTs received counter
   input  [MXL1ARX-1:0]  l1a_rx_counter;      // L1As received from ccb counter
-  input  [MXL1ARX-1:0]  readout_counter;    // Readout counter
-  input  [MXORBIT-1:0]  orbit_counter;      // Orbit counter
+  input  [MXL1ARX-1:0]  readout_counter;     // Readout counter
+  input  [MXORBIT-1:0]  orbit_counter;       // Orbit counter
 
 // ALCT Structure Error Counters
-  input  [7:0]      alct_err_counter0;    // Error counter 1D remap
-  input  [7:0]      alct_err_counter1;
-  input  [7:0]      alct_err_counter2;
-  input  [7:0]      alct_err_counter3;
-  input  [7:0]      alct_err_counter4;
-  input  [7:0]      alct_err_counter5;
+  input  [7:0] alct_err_counter0; // Error counter 1D remap
+  input  [7:0] alct_err_counter1;
+  input  [7:0] alct_err_counter2;
+  input  [7:0] alct_err_counter3;
+  input  [7:0] alct_err_counter4;
+  input  [7:0] alct_err_counter5;
+
+// CLCT pre-trigger coincidence counters
+  input  [MXCNTVME-1:0]  pretrig_l1a_counter;  // CLCT pre-trigger AND L1A coincidence counter
+  input  [MXCNTVME-1:0]  pretrig_alct_counter; // CLCT pre-trigger AND ALCT coincidence counter
 
 // CSC Orientation Ports
   input  [3:0]      csc_type;        // Firmware compile type
@@ -2471,8 +2491,8 @@
   reg    [15:0]  scp_trigger_ch_wr;
   wire  [15:0]  scp_trigger_ch_rd;
 
-  reg    [15:0]  cnt_ctrl_wr;
-  wire  [15:0]  cnt_ctrl_rd;
+  reg  [15:0] cnt_ctrl_wr;
+  wire [15:0] cnt_ctrl_rd;
 
   wire  [15:0]  cnt_rdata_rd;
 
@@ -3196,8 +3216,8 @@
                  
   ADR_SCP_TRIG:      data_out  <= scp_trigger_ch_rd;
                  
-  ADR_CNT_CTRL:      data_out  <= cnt_ctrl_rd;
-  ADR_CNT_RDATA:      data_out  <= cnt_rdata_rd;
+  ADR_CNT_CTRL:  data_out  <= cnt_ctrl_rd;
+  ADR_CNT_RDATA: data_out  <= cnt_rdata_rd;
                  
   ADR_JTAGSM0:      data_out  <= jtagsm0_rd;
   ADR_JTAGSM1:      data_out  <= jtagsm1_rd;
@@ -3406,8 +3426,8 @@
   assign wr_bx0_delay    = (reg_adr==ADR_BX0_DELAY    && clk_en);
   assign wr_non_trig_ro    = (reg_adr==ADR_NON_TRIG_RO    && clk_en);
 
-  assign wr_scp_trigger_ch  = (reg_adr==ADR_SCP_TRIG    && clk_en);
-  assign wr_cnt_ctrl    = (reg_adr==ADR_CNT_CTRL    && clk_en);
+  assign wr_scp_trigger_ch = (reg_adr==ADR_SCP_TRIG && clk_en);
+  assign wr_cnt_ctrl       = (reg_adr==ADR_CNT_CTRL && clk_en);
 
   assign wr_jtagsm0    = (reg_adr==ADR_JTAGSM0      && clk_en);
   assign wr_vmesm0    = (reg_adr==ADR_VMESM0      && clk_en);
@@ -5932,53 +5952,54 @@
   assign scp_trigger_ch_rd[15:0]  = scp_trigger_ch_wr[15:0];  //    Readback
 
 //------------------------------------------------------------------------------------------------------------------
-// ADR_CNT_CTRL=D0  Trigger/Readout Counter Control Register
+// ADR_CNT_CTRL=D0  Trigger/Readout Counter Control Register                                                        
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  cnt_ctrl_wr[0]          = 0;            // RW  1=reset all counters
-  cnt_ctrl_wr[1]          = 0;            // RW  1=take snapshot of current count
-  cnt_ctrl_wr[2]          = 0;            // RW  1=Stop all counters if any overflows
-  cnt_ctrl_wr[3]          = 0;            // R  At least one alct counter overflowed
-  cnt_ctrl_wr[4]          = 0;            // R  At least one sequencer counter overflowed
-  cnt_ctrl_wr[5]          = 1;            // RW  1=Enable alct lct error alct debug counter
-  cnt_ctrl_wr[6]          = 0;            // RW  1=Clear VME    counters on ttc_resync
-  cnt_ctrl_wr[7]          = 1;            // RW  1=Clear Header counters on ttc_resync
-  cnt_ctrl_wr[8]          = 0;            // RW  0=read counter lower 16 bits, 1=upper 14 
-  cnt_ctrl_wr[14:9]        = 0;            // RW  Counter address
-  cnt_ctrl_wr[15]          = 0;            // RW  Parity error reset
+    cnt_ctrl_wr[0]    = 0; // RW  1=reset all counters
+    cnt_ctrl_wr[1]    = 0; // RW  1=take snapshot of current count
+    cnt_ctrl_wr[2]    = 0; // RW  1=Stop all counters if any overflows
+    cnt_ctrl_wr[3]    = 0; // R  At least one alct counter overflowed
+    cnt_ctrl_wr[4]    = 0; // R  At least one sequencer counter overflowed
+    cnt_ctrl_wr[5]    = 1; // RW  1=Enable alct lct error alct debug counter
+    cnt_ctrl_wr[6]    = 0; // RW  1=Clear VME    counters on ttc_resync
+    cnt_ctrl_wr[7]    = 1; // RW  1=Clear Header counters on ttc_resync
+    cnt_ctrl_wr[8]    = 0; // RW  0=read counter lower 16 bits, 1=upper 14 
+    cnt_ctrl_wr[14:9] = 0; // RW  Counter address
+    cnt_ctrl_wr[15]   = 0; // RW  Parity error reset
   end
 
-  wire [6:0]  cnt_select;
-  wire    cnt_snapshot;
-  wire    cnt_all_reset_vme;
-  wire    cnt_clear_on_resync;
+  wire [6:0] cnt_select;
+  wire       cnt_snapshot;
+  wire       cnt_all_reset_vme;
+  wire       cnt_clear_on_resync;
 
-  assign cnt_all_reset_vme    = cnt_ctrl_wr[0];      // RW  1=reset all VME counters (doesnt clear header)
-  assign cnt_snapshot        = cnt_ctrl_wr[1];      // RW  1=take snapshot of current count
-  assign cnt_stop_on_ovf      = cnt_ctrl_wr[2];      // RW  1=Stop all counters if any overflows
-  assign cnt_alct_debug      = cnt_ctrl_wr[5];      // RW  1=Enable alct lct error alct debug counter
-  assign cnt_clear_on_resync    = cnt_ctrl_wr[6];      // RW  1=Clear VME    counters on ttc_resync
-  assign hdr_clear_on_resync    = cnt_ctrl_wr[7];      // RW  1=Clear Header counters on ttc_resync
-  assign cnt_adr_lsb        = cnt_ctrl_wr[8];      // RW  0=read counter lower 16 bits, 1=upper 14 
-  assign cnt_select[6:0]      = cnt_ctrl_wr[15:9];    // RW  Counter address
+  assign cnt_all_reset_vme   = cnt_ctrl_wr[0];    // RW  1=reset all VME counters (doesnt clear header)
+  assign cnt_snapshot        = cnt_ctrl_wr[1];    // RW  1=take snapshot of current count
+  assign cnt_stop_on_ovf     = cnt_ctrl_wr[2];    // RW  1=Stop all counters if any overflows
+  assign cnt_alct_debug      = cnt_ctrl_wr[5];    // RW  1=Enable alct lct error alct debug counter
+  assign cnt_clear_on_resync = cnt_ctrl_wr[6];    // RW  1=Clear VME    counters on ttc_resync
+  assign hdr_clear_on_resync = cnt_ctrl_wr[7];    // RW  1=Clear Header counters on ttc_resync
+  assign cnt_adr_lsb         = cnt_ctrl_wr[8];    // RW  0=read counter lower 16 bits, 1=upper 14 
+  assign cnt_select[6:0]     = cnt_ctrl_wr[15:9]; // RW  Counter address
 
-  assign cnt_ctrl_rd[2:0]      = cnt_ctrl_wr[2:0];      // RW  Readback
-  assign cnt_ctrl_rd[3]      = cnt_any_ovf_alct;      // R  At least one alct counter overflowed
-  assign cnt_ctrl_rd[4]      = cnt_any_ovf_seq;      // R  At least one sequencer counter overflowed
-  assign cnt_ctrl_rd[15:5]    = cnt_ctrl_wr[15:5];    // RW  Readback
+  assign cnt_ctrl_rd[2:0]    = cnt_ctrl_wr[2:0];  // RW  Readback
+  assign cnt_ctrl_rd[3]      = cnt_any_ovf_alct;  // R  At least one alct counter overflowed
+  assign cnt_ctrl_rd[4]      = cnt_any_ovf_seq;   // R  At least one sequencer counter overflowed
+  assign cnt_ctrl_rd[15:5]   = cnt_ctrl_wr[15:5]; // RW  Readback
 
-  assign cnt_all_reset      = cnt_all_reset_vme || (ttc_resync && cnt_clear_on_resync);
-
+  assign cnt_all_reset       = cnt_all_reset_vme || (ttc_resync && cnt_clear_on_resync);
+  
+  // x_oneshot is Digital One-Shot defined in utils/x_oneshot.v
   x_oneshot usnap (.d(cnt_snapshot),.clock(clock),.q(cnt_snapshot_os));
 
 //------------------------------------------------------------------------------------------------------------------
-// ADR_CNT_RDATA=D2  Trigger/Readout Counter Data Register
+// ADR_CNT_RDATA=D2  Trigger/Readout Counter Data Register                                                          
 //------------------------------------------------------------------------------------------------------------------
-// Remap 1D counters to 2D, beco XST does not support 2D ports
-  parameter MXCNT=88;                // Number of counters, last counter id is mxcnt-1
-  reg  [MXCNTVME-1:0]  cnt_snap [MXCNT-1:0];    // Event counter snapshot 2D
-  wire [MXCNTVME-1:0]  cnt      [MXCNT-1:0];    // Event counter 2D map
+// Remap 1D counters to 2D, because XST does not support 2D ports
+  parameter MXCNT = 88;                     // Number of counters, last counter id is mxcnt-1
+  reg  [MXCNTVME-1:0] cnt_snap [MXCNT-1:0]; // Event counter snapshot 2D
+  wire [MXCNTVME-1:0] cnt      [MXCNT-1:0]; // Event counter 2D map
 
 // ALCT Event Counters
   assign cnt[0]  = event_counter0;
@@ -5995,7 +6016,7 @@
   assign cnt[11]  = event_counter11;
   assign cnt[12]  = event_counter12;
 
-// TMB+CLCT Event Counters
+// CLCT Event Counters
   assign cnt[13]  = event_counter13;
   assign cnt[14]  = event_counter14;
   assign cnt[15]  = event_counter15;
@@ -6014,6 +6035,8 @@
   assign cnt[28]  = event_counter28;
   assign cnt[29]  = event_counter29;
   assign cnt[30]  = event_counter30;
+
+// TMB Event Counters
   assign cnt[31]  = event_counter31;
   assign cnt[32]  = event_counter32;
   assign cnt[33]  = event_counter33;
@@ -6038,12 +6061,16 @@
   assign cnt[52]  = event_counter52;
   assign cnt[53]  = event_counter53;
   assign cnt[54]  = event_counter54;
-  assign cnt[55]  = event_counter55;
-  assign cnt[56]  = event_counter56;
-  assign cnt[57]  = event_counter57;
-  assign cnt[58]  = event_counter58;
-  assign cnt[59]  = event_counter59;
-  assign cnt[60]  = event_counter60;
+
+// L1A Counters
+  assign cnt[55]  = event_counter55; // L1A received
+  assign cnt[56]  = event_counter56; // L1A received, TMB in L1A window
+  assign cnt[57]  = event_counter57; // L1A received, no TMB in window
+  assign cnt[58]  = event_counter58; // TMB triggered, no L1A in window
+  assign cnt[59]  = event_counter59; // TMB readouts completed
+  assign cnt[60]  = event_counter60; // TMB readouts lost by 1-event-per-L1A limit
+
+// STAT Counters
   assign cnt[61]  = event_counter61;
   assign cnt[62]  = event_counter62;
   assign cnt[63]  = event_counter63;
@@ -6051,13 +6078,13 @@
   assign cnt[65]  = event_counter65;
 
 // Header Counters, not reset via direct VME command
-  assign cnt[66]  = pretrig_counter;    // Pre-trigger counter
-  assign cnt[67]  = clct_counter;      // CLCT counter
-  assign cnt[68]  = trig_counter;      // TMB trigger counter
-  assign cnt[69]  = alct_counter;      // ALCTs received counter
-  assign cnt[70]  = l1a_rx_counter;    // L1As received from ccb counter, only 12 bits
-  assign cnt[71]  = readout_counter;    // Readout counter, only 12 bits
-  assign cnt[72]  = orbit_counter;    // Orbit counter
+  assign cnt[66]  = pretrig_counter; // Pre-trigger counter
+  assign cnt[67]  = clct_counter;    // CLCT counter
+  assign cnt[68]  = trig_counter;    // TMB trigger counter
+  assign cnt[69]  = alct_counter;    // ALCTs received counter
+  assign cnt[70]  = l1a_rx_counter;  // L1As received from ccb counter, only 12 bits
+  assign cnt[71]  = readout_counter; // Readout counter, only 12 bits
+  assign cnt[72]  = orbit_counter;   // Orbit counter
 
 // ALCT Structure Error Counters
   assign cnt[73]  = alct_err_counter0;
@@ -6071,9 +6098,14 @@
   assign cnt[79]  = ccb_ttcrx_lost_cnt;  // Number of times lock has been lost
   assign cnt[80]  = ccb_qpll_lost_cnt;  // Number of times lock has been lost
 
+// CLCT pre-trigger coincidence counters
+// NOTE: these counters were previously used for Virtex-6 GTX Optical Receiver Error Counters
+  assign cnt[81]  = pretrig_l1a_counter;  // CLCT pre-trigger AND L1A coincidence counter
+  assign cnt[82]  = pretrig_alct_counter; // CLCT pre-trigger AND ALCT coincidence counter
+
 // Virtex-6 GTX Optical Receiver Error Counters
-  assign cnt[81]  = gtx_rx_err_count0;  // Error count on this fiber channel
-  assign cnt[82]  = gtx_rx_err_count1;
+//  assign cnt[81]  = gtx_rx_err_count0;  // Error count on this fiber channel
+//  assign cnt[82]  = gtx_rx_err_count1;
   assign cnt[83]  = gtx_rx_err_count2;
   assign cnt[84]  = gtx_rx_err_count3;
   assign cnt[85]  = gtx_rx_err_count4;
@@ -6083,19 +6115,19 @@
 // Snapshot current value of all counters at once
   genvar j;
   generate
-  for (j=0; j<MXCNT; j=j+1) begin: gensnap
-  always @(posedge clock) begin
-  if (!power_up      ) cnt_snap[j] <= {MXCNTVME{1'b1}};  // Load 1s on startup, defeats warnings for short counters
-  if (cnt_snapshot_os) cnt_snap[j] <= cnt[j];        // Snapshot of j-th counter
-  end
-  end
+    for (j=0; j<MXCNT; j=j+1) begin: gensnap
+      always @(posedge clock) begin
+        if (!power_up      ) cnt_snap[j] <= {MXCNTVME{1'b1}}; // Load 1s on startup, defeats warnings for short counters
+        if (cnt_snapshot_os) cnt_snap[j] <= cnt[j];           // Snapshot of j-th counter
+      end
+    end
   endgenerate
 
 // Latch addressed counter for readout
-  reg [29:0] cnt_rdata=0;        // Full 30-bit width register
+  reg [29:0] cnt_rdata=0; // Full 30-bit width register
 
   always @(posedge clock) begin
-  cnt_rdata <= cnt_snap[cnt_select];
+    cnt_rdata <= cnt_snap[cnt_select];
   end
 
 // Muliplex counter halves to fit in VMED16, if lsb=0 select lower 16 bits, if lsb=1 select upper 14
