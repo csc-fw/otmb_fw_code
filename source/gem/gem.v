@@ -72,10 +72,10 @@ module gem (
     output reg [13:0] gem_hit2,
     output reg [13:0] gem_hit3,
 
-    output reg    gem_vpf0,
-    output reg    gem_vpf1,
-    output reg    gem_vpf2,
-    output reg    gem_vpf3,
+    output gem_vpf0,
+    output gem_vpf1,
+    output gem_vpf2,
+    output gem_vpf3,
 
 );
 
@@ -157,69 +157,37 @@ parameter IGEM   = 0;
 // Decompose packed GEM data format
 //------------------------------------------------------------------------------------------------------------------
 
-    //---------------------------------------------
-    // 14 bit hit format encoding
-    //  hit[1:0]   = column                 3 columns
-    //  hit[4:2]   = partition              8 partitions
-    //  hit[10:5]  = pad                    32 or 64 per vfat
-    //  hit[13:11] = n additional pads hit  up to 7
-    //---------------------------------------------
-
-    always @(posedge clock) begin
-      gem_hit0 <= gtx_rx_data[13: 0];
-      gem_hit1 <= gtx_rx_data[27:14];
-      gem_hit2 <= gtx_rx_data[41:28];
-      gem_hit3 <= gtx_rx_data[55:42];
-    end
-
-    // vectorized
-    wire [13:0] gem_hit[3:0];
-    assign gem_hit[0] = gem_hit0;
-    assign gem_hit[1] = gem_hit1;
-    assign gem_hit[2] = gem_hit2;
-    assign gem_hit[3] = gem_hit3;
+    wire cluster0 = gtx_rx_data[13: 0];
+    wire cluster1 = gtx_rx_data[27:14];
+    wire cluster2 = gtx_rx_data[41:28];
+    wire cluster3 = gtx_rx_data[55:42];
 
 //----------------------------------------------------------------------------------------------------------------------
 // Decompose GEM Hits
 //----------------------------------------------------------------------------------------------------------------------
 
+  wire [11:0] adr0=cluster0[10:0];
+  wire  [2:0] cnt0=cluster0[13:11];
 
-reg    gem_pattern_check;
+  wire [11:0] adr1=cluster1[10:0];
+  wire  [2:0] cnt1=cluster1[13:11];
 
-/*  14 bit hit format encoding
-*    hit[2:0]   = partition
-*    hit[10:3]  = pad
-*    hit[13:11] = n pads hit  up to 7
-*/
+  wire [11:0] adr2=cluster2[10:0];
+  wire  [2:0] cnt2=cluster2[13:11];
 
-wire [2:0] row0=gem_hit0[2:0];
-wire [7:0] pad0=gem_hit0[10:3];
-wire [2:0] cnt0=gem_hit0[13:11];
+  wire [11:0] adr3=cluster3[10:0];
+  wire  [2:0] cnt3=cluster3[13:11];
 
-wire [2:0] row1=gem_hit1[2:0];
-wire [7:0] pad1=gem_hit1[10:3];
-wire [2:0] cnt1=gem_hit1[13:11];
-
-wire [2:0] row2=gem_hit2[2:0];
-wire [7:0] pad2=gem_hit2[10:3];
-wire [2:0] cnt2=gem_hit2[13:11];
-
-wire [2:0] row3=gem_hit3[2:0];
-wire [7:0] pad3=gem_hit3[10:3];
-wire [2:0] cnt3=gem_hit3[13:11];
+  assign gem_vpf0 = ~(adr0[10:9]=2'b11);
+  assign gem_vpf1 = ~(adr1[10:9]=2'b11);
+  assign gem_vpf2 = ~(adr2[10:9]=2'b11);
+  assign gem_vpf3 = ~(adr3[10:9]=2'b11);
 
 always @(posedge clock) begin
-
     gtx_rx_nonzero    <= (|gtx_rx_data[55:0]);
-    gem_pattern_check <=  (gtx_rx_data[55:0]==56'hfeedadeadabeef);
-
-    gem_vpf0         <= (|cnt0) && (pad0<8'd192);
-    gem_vpf1         <= (|cnt1) && (pad1<8'd192);
-    gem_vpf2         <= (|cnt2) && (pad2<8'd192);
-    gem_vpf3         <= (|cnt3) && (pad3<8'd192);
 end
 
-assign feeddeadbeef = gem_pattern_check;
+wire gem_vpf = (gem_vpf0 | gem_vpf1 | gem_vpf2 | gem_vpf3);
 
 //----------------------------------------------------------------------------------------------------------------------
 // GEM Raw Hits Dummy RAM
@@ -247,7 +215,7 @@ assign feeddeadbeef = gem_pattern_check;
 
       // gem raw hits ram SM
       case (ram_sm)
-        RAM_READY:    ram_sm <= (|gtx_rx_data[55:0])    ? RAM_WRITING : ram_sm;
+        RAM_READY:    ram_sm <= (gem_vpf)               ? RAM_WRITING : ram_sm;
         RAM_WRITING:  ram_sm <= (gem_ram_adr==10'd1023) ? RAM_READOUT : ram_sm;
         RAM_READOUT:  ram_sm <= (fifo_reset)            ? RAM_READY   : ram_sm;
       endcase
