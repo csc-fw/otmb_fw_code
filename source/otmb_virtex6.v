@@ -1312,10 +1312,10 @@
 
     wire  [13:0] gem_fifo_rdata [MXGEM-1:0];    // GEM FIFO RAM read data
 
-    wire [13:0] gem_hit0 [MXGEM-1:0];
-    wire [13:0] gem_hit1 [MXGEM-1:0];
-    wire [13:0] gem_hit2 [MXGEM-1:0];
-    wire [13:0] gem_hit3 [MXGEM-1:0];
+    wire [13:0] gem_cluster0 [MXGEM-1:0];
+    wire [13:0] gem_cluster1 [MXGEM-1:0];
+    wire [13:0] gem_cluster2 [MXGEM-1:0];
+    wire [13:0] gem_cluster3 [MXGEM-1:0];
 
     wire  [0:0]   gem_vpf0 [MXGEM-1:0];
     wire  [0:0]   gem_vpf1 [MXGEM-1:0];
@@ -1378,10 +1378,10 @@
         .fifo_reset           ( gem_fifo_reset),       // In  FIFO RAM reset
         .fifo_rdata           ( gem_fifo_rdata[igem]), // Out FIFO RAM read data
 
-        .gem_hit0             (gem_hit0[igem]),  // Out GEM Cluster
-        .gem_hit1             (gem_hit1[igem]),  // Out GEM Cluster
-        .gem_hit2             (gem_hit2[igem]),  // Out GEM Cluster
-        .gem_hit3             (gem_hit3[igem]),  // Out GEM Cluster
+        .gem_cluster0             (gem_cluster0[igem]),  // Out GEM Cluster
+        .gem_cluster1             (gem_cluster1[igem]),  // Out GEM Cluster
+        .gem_cluster2             (gem_cluster2[igem]),  // Out GEM Cluster
+        .gem_cluster3             (gem_cluster3[igem]),  // Out GEM Cluster
 
         .gem_vpf0             (gem_vpf0[igem]),  // Out GEM valid data
         .gem_vpf1             (gem_vpf1[igem]),  // Out GEM valid data

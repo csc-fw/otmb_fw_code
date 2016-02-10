@@ -67,16 +67,15 @@ module gem (
     output [3:0]    parity_err_gem,
 
     // GEM Outputs
-    output reg [13:0] gem_hit0,
-    output reg [13:0] gem_hit1,
-    output reg [13:0] gem_hit2,
-    output reg [13:0] gem_hit3,
+    output [13:0] gem_cluster0,
+    output [13:0] gem_cluster1,
+    output [13:0] gem_cluster2,
+    output [13:0] gem_cluster3,
 
     output gem_vpf0,
     output gem_vpf1,
     output gem_vpf2,
-    output gem_vpf3,
-
+    output gem_vpf3
 );
 
 // Raw hits RAM parameters
@@ -157,37 +156,40 @@ parameter IGEM   = 0;
 // Decompose packed GEM data format
 //------------------------------------------------------------------------------------------------------------------
 
-    wire cluster0 = gtx_rx_data[13: 0];
-    wire cluster1 = gtx_rx_data[27:14];
-    wire cluster2 = gtx_rx_data[41:28];
-    wire cluster3 = gtx_rx_data[55:42];
+  assign  cluster0 = gtx_rx_data[13: 0];
+  assign  cluster1 = gtx_rx_data[27:14];
+  assign  cluster2 = gtx_rx_data[41:28];
+  assign  cluster3 = gtx_rx_data[55:42];
+
+  wire [13:0] cluster [3:0]; 
+  assign cluster[0] = cluster0; 
+  assign cluster[1] = cluster1; 
+  assign cluster[2] = cluster2; 
+  assign cluster[3] = cluster3; 
 
 //----------------------------------------------------------------------------------------------------------------------
 // Decompose GEM Hits
 //----------------------------------------------------------------------------------------------------------------------
 
-  wire [11:0] adr0=cluster0[10:0];
-  wire  [2:0] cnt0=cluster0[13:11];
+    wire [11:0] adr [3:0]; 
+    wire  [2:0] cnt [3:0]; 
+    wire  [0:0] vpf [3:0]; 
 
-  wire [11:0] adr1=cluster1[10:0];
-  wire  [2:0] cnt1=cluster1[13:11];
+    genvar iclust;
+    generate
+    for (iclust=0; iclust<4; iclust=iclust+1) begin: cluster_assignment
+      assign adr[iclust] = cluster[iclust][10:0]; 
+      assign cnt[iclust] = cluster[iclust][13:11]; 
+      assign vpf[iclust] = ~(adr[iclust][10:9]==2'b11);
+    end
+    endgenerate
 
-  wire [11:0] adr2=cluster2[10:0];
-  wire  [2:0] cnt2=cluster2[13:11];
+    always @(posedge clock) begin
+        gtx_rx_nonzero    <= (|gtx_rx_data[55:0]);
+    end
 
-  wire [11:0] adr3=cluster3[10:0];
-  wire  [2:0] cnt3=cluster3[13:11];
 
-  assign gem_vpf0 = ~(adr0[10:9]=2'b11);
-  assign gem_vpf1 = ~(adr1[10:9]=2'b11);
-  assign gem_vpf2 = ~(adr2[10:9]=2'b11);
-  assign gem_vpf3 = ~(adr3[10:9]=2'b11);
-
-always @(posedge clock) begin
-    gtx_rx_nonzero    <= (|gtx_rx_data[55:0]);
-end
-
-wire gem_vpf = (gem_vpf0 | gem_vpf1 | gem_vpf2 | gem_vpf3);
+    wire gem_has_data = (vpf[0] | vpf[1] | vpf[2] | vpf[3]);
 
 //----------------------------------------------------------------------------------------------------------------------
 // GEM Raw Hits Dummy RAM
@@ -215,7 +217,7 @@ wire gem_vpf = (gem_vpf0 | gem_vpf1 | gem_vpf2 | gem_vpf3);
 
       // gem raw hits ram SM
       case (ram_sm)
-        RAM_READY:    ram_sm <= (gem_vpf)               ? RAM_WRITING : ram_sm;
+        RAM_READY:    ram_sm <= (gem_has_data)          ? RAM_WRITING : ram_sm;
         RAM_WRITING:  ram_sm <= (gem_ram_adr==10'd1023) ? RAM_READOUT : ram_sm;
         RAM_READOUT:  ram_sm <= (fifo_reset)            ? RAM_READY   : ram_sm;
       endcase
@@ -247,10 +249,10 @@ wire gem_vpf = (gem_vpf0 | gem_vpf1 | gem_vpf2 | gem_vpf3);
     wire [3:0] parity_wr;
     wire [3:0] parity_rd;
 
-    assign parity_wr[0] = ~(^gem_hit[0]);
-    assign parity_wr[1] = ~(^gem_hit[1]);
-    assign parity_wr[2] = ~(^gem_hit[2]);
-    assign parity_wr[3] = ~(^gem_hit[3]);
+    assign parity_wr[0] = ~(^cluster[0]);
+    assign parity_wr[1] = ~(^cluster[1]);
+    assign parity_wr[2] = ~(^cluster[2]);
+    assign parity_wr[3] = ~(^cluster[3]);
 
     wire [4:0] db [3:0]; // Virtex6 dob dummy, no sump needed
 
@@ -259,9 +261,8 @@ wire gem_vpf = (gem_vpf0 | gem_vpf1 | gem_vpf2 | gem_vpf3);
     wire [13:0] fifo_rdata_clst [3:0];
 
     // depth = 1024
-    genvar ihit;
     generate
-    for (ihit=0; ihit<4; ihit=ihit+1) begin: raw
+    for (iclust=0; iclust<4; iclust=iclust+1) begin: raw
     RAMB18E1 #( // Virtex6
         .RAM_MODE            ("TDP"),        // SDP or TDP
         .READ_WIDTH_A        (0),            // 0,1,2,4,9,18,36 Read/write width per port
@@ -281,8 +282,8 @@ wire gem_vpf = (gem_vpf0 | gem_vpf1 | gem_vpf2 | gem_vpf3);
         .CLKARDCLK           (clock),                     // 1-bit  A port clock/Read clock input
         .ADDRARDADDR         ({fifo_wadr[9:0], 4'b1111}), // 14-bit A port address/Read address input (10 bits used [13:4])
 
-        .DIADI               ({2'h0,gem_hit[ihit]}),   // 16-bit A port data/LSB data input
-        .DIPADIP             ({1'b0,parity_wr[ihit]}), // 2-bit  A port parity/LSB parity input
+        .DIADI               ({2'h0,cluster[iclust]}),   // 16-bit A port data/LSB data input
+        .DIPADIP             ({1'b0,parity_wr[iclust]}), // 2-bit  A port parity/LSB parity input
         .DOADO               (),                       // 16-bit A port data/LSB data output
         .DOPADOP             (),                       // 2-bit  A port parity/LSB parity output
 
@@ -295,8 +296,8 @@ wire gem_vpf = (gem_vpf0 | gem_vpf1 | gem_vpf2 | gem_vpf3);
         .ADDRBWRADDR         ({fifo_radr[9:0], 4'b1111}),             // 14-bit B port address/Write address input 10b->[13:4]
         .DIBDI               (),                                      // 16-bit B port data/MSB data input
         .DIPBDIP             (),                                      // 2-bit  B port parity/MSB parity input
-        .DOBDO               ({db[ihit][1:0],fifo_rdata_clst[ihit]}), // 16-bit B port data/MSB data output
-        .DOPBDOP             ({db[ihit][4],  parity_rd[ihit]})        // 2-bit  B port parity/MSB parity output
+        .DOBDO               ({db[iclust][1:0],fifo_rdata_clst[iclust]}), // 16-bit B port data/MSB data output
+        .DOPBDOP             ({db[iclust][4],  parity_rd[iclust]})        // 2-bit  B port parity/MSB parity output
     );
     end
     endgenerate
@@ -315,6 +316,18 @@ wire gem_vpf = (gem_vpf0 | gem_vpf1 | gem_vpf2 | gem_vpf3);
     // fifo data output multiplexer
     //-----------------------------
     assign fifo_rdata = fifo_rdata_clst[fifo_sel];
+
+// outputs 
+
+assign gem_cluster0 = cluster[0]; 
+assign gem_cluster1 = cluster[1]; 
+assign gem_cluster2 = cluster[2]; 
+assign gem_cluster3 = cluster[3]; 
+
+assign gem_vpf0 = vpf[0]; 
+assign gem_vpf1 = vpf[1]; 
+assign gem_vpf2 = vpf[2]; 
+assign gem_vpf3 = vpf[3]; 
 
 //-------------------------------------------------------------------------------------------------------------------
 endmodule
