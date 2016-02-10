@@ -2890,34 +2890,10 @@
   .D2  (set_sw[8] ? 1'b0 : (!set_sw[7] ? bpi_rd_stat : link_good[0])), // In   1-bit data input tx on negative edge
   .Q  (mez_tp[1]));    // Out  1-bit DDR output
 
+  x_flashsm #(19) uflash_blink_cfeb_led (.trigger(|cfeb_rx_nonzero ), .hold(1'b0), .clock(clock), .out(blink_cfeb_led));
+  x_flashsm #(19) uflash_blink_gem_led  (.trigger(|gem_rx_nonzero ), .hold(1'b0),  .clock(clock), .out(blink_gem_led));
 
-  reg [17:0] blink_count = 0;
-  reg [17:0] blink_cfeb_count = 0;
-  reg  blink_led = 0;
-  reg  blink_cfeb_led = 0;
-
-  always @(posedge clock) begin
-    if (|gem_rx_nonzero) blink_led <= 1'b1;  // set signal to make a blink
-    else if (&blink_count[17:16]) blink_led <= 1'b0;  // turn off signal to make a blink
-    else blink_led <= blink_led;  // keep signal to make a blink
-
-    if (|cfeb_rx_nonzero) blink_cfeb_led <= 1'b1;
-    else if (&blink_cfeb_count[17:16]) blink_cfeb_led <= 1'b0;
-    else blink_cfeb_led <= blink_cfeb_led; 
-
-  end
-  always @(posedge clock_1mhz) begin
-    if (blink_led)  blink_count <= blink_count + 1'b1;  // counter for blink duration
-    else blink_count <= 0;
-
-    if (blink_cfeb_led) blink_cfeb_count <= blink_cfeb_count + 1'b1; 
-    else blink_cfeb_count <= 0;  
-  end
-
-
-
-
-  assign mez_led[0] = ~|link_had_err ^ blink_led;    // blue OFF.  was ~alct_wait_cfg
+  assign mez_led[0] = ~|link_had_err ^ blink_gem_led;    // blue OFF.  was ~alct_wait_cfg
   assign mez_led[1] = ~l_tmbclk0_lock ^ blink_cfeb_led;   // green
   assign mez_led[2] = lock_tmb_clock0;   // yellow
   assign mez_led[3] = ~tmbmmcm_locklost; // red
