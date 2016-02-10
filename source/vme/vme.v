@@ -525,6 +525,13 @@
   dmb_wdcnt,
   dmb_busy,
 
+// GEM Ports: GEM Raw Hits Ram
+  gem_fifo_reset,
+  gem_fifo_adr,
+  gem_fifo_sel,
+  gem_fifo_igem,
+  gem_fifo_data,
+
 // Sequencer Ports: Buffer Status
   wr_buf_ready,
   wr_buf_adr,
@@ -1288,6 +1295,8 @@
 
   parameter ADR_V6_EXTEND      = 10'h17A;  // DCFEB 7-bit extensions
 
+  parameter ADR_GEM_RAW_HITS_CTRL     = 10'h194;
+  parameter ADR_GEM_RAW_HITS_DATA     = 10'h196;
   parameter ADR_ODMB      = 10'h1EE;  // ODMB mode: various addresses are handled inside odmb_device
 
 //------------------------------------------------------------------------------------------------------------------
@@ -1808,6 +1817,14 @@
   input  [MXRAMDATA-1:0]  dmb_rdata;        // Raw hits RAM VME read data
   input  [MXRAMADR-1:0]  dmb_wdcnt;        // Raw hits RAM VME word count
   input          dmb_busy;        // Raw hits RAM VME busy writing DMB data
+
+// GEM Raw Hits Ram
+  output        gem_fifo_reset;  // Raw hits RAM VME address reset
+  output [9:0]  gem_fifo_adr;    // Raw hits RAM VME read/write address
+  output [1:0]  gem_fifo_sel;    // Select which gem Cluster to read
+  output [1:0]  gem_fifo_igem;   // Select which gem chamber to read
+
+  input  [15:0] gem_fifo_data;  // Raw hits RAM VME read data
 
 // Sequencer Ports: Buffer Status
   input          wr_buf_ready;      // Write buffer is ready
@@ -2696,6 +2713,12 @@
   reg   [15:0]  virtex6_extend_wr;
   wire  [15:0]  virtex6_extend_rd;
 
+  reg  [15:0] gem_raw_hits_data_wr;
+  wire  [15:0] gem_raw_hits_data_rd;
+
+  reg  [15:0] gem_raw_hits_ctrl_wr;
+  wire [15:0] gem_raw_hits_ctrl_rd;
+
 //------------------------------------------------------------------------------------------------------------------
 // Address Write Decodes
 //------------------------------------------------------------------------------------------------------------------
@@ -2833,8 +2856,12 @@
   wire [3:0]	wr_gem_gtx_rx; //rdk
   wire      wr_virtex6_sysmon;
   wire      wr_virtex6_extend;
+
+  wire      wr_gem_raw_hits_data;
+  wire      wr_gem_raw_hits_ctrl;
+
   wire      wr_adr_cap;
-  
+
        // Virtex-6 GTX error counters
        wire    [7:0]           gtx_rx_err_count [MXCFEB-1:0];    // JRG In:    Error count on each fiber channel
          assign        gtx_rx_err_count[0][7:0] = gtx_rx_err_count0[7:0];      //      Error count on this fiber channel
@@ -3389,6 +3416,9 @@
 
   ADR_V6_EXTEND:      data_out  <= virtex6_extend_rd;
 
+  ADR_GEM_RAW_HITS_CTRL:     data_out <= gem_raw_hits_ctrl_rd;
+  ADR_GEM_RAW_HITS_DATA:     data_out <= gem_raw_hits_data_rd;
+
   ADR_ODMB:      data_out  <= odmb_data;
 
   default:      data_out  <= 16'hDEAF;
@@ -3544,6 +3574,10 @@
   assign wr_virtex6_sysmon  = (reg_adr==ADR_V6_SYSMON    && clk_en);
 
   assign wr_virtex6_extend  = (reg_adr==ADR_V6_EXTEND    && clk_en);
+
+  assign wr_gem_raw_hits_ctrl    = (reg_adr==ADR_GEM_RAW_HITS_CTRL    && clk_en);
+  assign wr_gem_raw_hits_data    = (reg_adr==ADR_GEM_RAW_HITS_DATA    && clk_en);
+
   assign wr_adr_cap    = (adr_cap);
   
   assign wr_mpc_frames_fifo_ctrl = (reg_adr==  ADR_MPC_FRAMES_FIFO_CTRL && clk_en);
@@ -7162,6 +7196,38 @@
   assign virtex6_extend_rd[15:10]    = virtex6_extend_wr[15:10];  // RW  Unused
 
   wire   virtex6_extend_sump      = |virtex6_extend_wr[9:8];  // RO
+
+//------------------------------------------------------------------------------------------------------------------
+// GEM_RAW_HITS_CTRL = 0x194  GEM Raw Hits Readout RAM Simple Controller
+//------------------------------------------------------------------------------------------------------------------
+// Power up
+  initial begin
+  gem_raw_hits_ctrl_wr[0]     =  1'b1; // RW reset
+  gem_raw_hits_ctrl_wr[2:1]   =  2'b0; // RW cluster select
+  gem_raw_hits_ctrl_wr[4:3]   =  2'b0; // RW gem select
+  gem_raw_hits_ctrl_wr[14:5]  = 10'b0; // RW address
+  gem_raw_hits_ctrl_wr[15]    =  1'b0; // unused
+  end
+
+  assign gem_fifo_reset = gem_raw_hits_ctrl_wr[0];
+  assign gem_fifo_sel   = gem_raw_hits_ctrl_wr[2:1];
+  assign gem_fifo_igem  = gem_raw_hits_ctrl_wr[4:3];
+  assign gem_fifo_adr   = gem_raw_hits_ctrl_wr[14:5];
+
+  assign gem_raw_hits_ctrl_rd = gem_raw_hits_ctrl_wr;
+
+//------------------------------------------------------------------------------------------------------------------
+// GEM_RAW_HITS_DATA = 0x196  GEM Raw Hits Data
+//------------------------------------------------------------------------------------------------------------------
+
+    reg  [15:0] gem_raw_hits_data_mux;
+    // Power up
+    initial begin
+    gem_raw_hits_data_wr[15:0] = 16'b0; // RW address
+    end
+
+    assign gem_raw_hits_data_rd = gem_fifo_data;
+
 
 //------------------------------------------------------------------------------------------------------------------
 // VME Write-Registers latch data when addressed + latch power-up defaults
