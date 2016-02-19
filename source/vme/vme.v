@@ -7356,6 +7356,8 @@
   if (wr_virtex6_gtx_rx[6])   virtex6_gtx_rx_wr[6] <=  d[15:0];  
   if (wr_virtex6_sysmon)      virtex6_sysmon_wr    <=  d[15:0];
   if (wr_virtex6_extend)      virtex6_extend_wr    <=  d[15:0];
+  if (wr_gem_raw_hits_ctrl)   gem_raw_hits_ctrl_wr    <=  d[15:0];
+  if (wr_gem_raw_hits_data)   gem_raw_hits_data_wr    <=  d[15:0];
   if (wr_mpc_frames_fifo_ctrl) mpc_frames_fifo_ctrl_wr <= d[15:0];
   end
 
