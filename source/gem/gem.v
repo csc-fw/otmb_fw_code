@@ -156,16 +156,16 @@ parameter IGEM   = 0;
 // Decompose packed GEM data format
 //------------------------------------------------------------------------------------------------------------------
 
-  assign  cluster0 = gtx_rx_data[13: 0];
-  assign  cluster1 = gtx_rx_data[27:14];
-  assign  cluster2 = gtx_rx_data[41:28];
-  assign  cluster3 = gtx_rx_data[55:42];
+  assign  gem_cluster0 = gtx_rx_data[13: 0];
+  assign  gem_cluster1 = gtx_rx_data[27:14];
+  assign  gem_cluster2 = gtx_rx_data[41:28];
+  assign  gem_cluster3 = gtx_rx_data[55:42];
 
   wire [13:0] cluster [3:0]; 
-  assign cluster[0] = cluster0; 
-  assign cluster[1] = cluster1; 
-  assign cluster[2] = cluster2; 
-  assign cluster[3] = cluster3; 
+  assign cluster[0] = gem_cluster0; 
+  assign cluster[1] = gem_cluster1; 
+  assign cluster[2] = gem_cluster2; 
+  assign cluster[3] = gem_cluster3; 
 
 //----------------------------------------------------------------------------------------------------------------------
 // Decompose GEM Hits
