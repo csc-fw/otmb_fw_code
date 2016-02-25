@@ -2890,12 +2890,15 @@
   .D2  (set_sw[8] ? 1'b0 : (!set_sw[7] ? bpi_rd_stat : link_good[0])), // In   1-bit data input tx on negative edge
   .Q  (mez_tp[1]));    // Out  1-bit DDR output
 
-  x_flashsm #(19) uflash_blink_cfeb_led (.trigger(|cfeb_rx_nonzero ), .hold(1'b0), .clock(clock), .out(blink_cfeb_led));
-  x_flashsm #(19) uflash_blink_gem_led  (.trigger(|gem_rx_nonzero ), .hold(1'b0),  .clock(clock), .out(blink_gem_led));
+  wire [3:0] gem0_vpf = {gem_vpf0[0], gem_vpf1[0], gem_vpf2[0], gem_vpf3[0]}; 
+
+  x_flashsm #(22) uflash_blink_cfeb_led (.trigger(|cfeb_rx_nonzero ),    .hold(1'b0), .clock(clock), .out(blink_cfeb_led));
+  x_flashsm #(22) uflash_blink_gem_led  (.trigger(|gem0_vpf[3:0]),       .hold(1'b0), .clock(clock), .out(blink_gem_led));
+  x_flashsm #(22) uflash_blink_gnz_led  (.trigger(|gem_rx_nonzero[3:0]), .hold(1'b0), .clock(clock), .out(blink_gem_nonzero));
 
   assign mez_led[0] = ~|link_had_err ^ blink_gem_led;    // blue OFF.  was ~alct_wait_cfg
   assign mez_led[1] = ~l_tmbclk0_lock ^ blink_cfeb_led;   // green
-  assign mez_led[2] = lock_tmb_clock0;   // yellow
+  assign mez_led[2] =  lock_tmb_clock0 ^ blink_gem_nonzero;   // yellow
   assign mez_led[3] = ~tmbmmcm_locklost; // red
   assign mez_led[4] = ~l_qpll_lock;   // green
   assign mez_led[5] = qpll_lock;      // yellow
