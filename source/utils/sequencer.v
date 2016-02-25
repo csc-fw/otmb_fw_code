@@ -420,7 +420,7 @@
 
 // Trigger modifiers
   all_cfebs_active,
-  alct_trig_width,
+  alct_preClct_width,
   wr_buf_required,
   wr_buf_autoclr_en,
   valid_clct_required,
@@ -428,12 +428,16 @@
   sync_err_stops_readout,
 
 // External Trigger Delays
-  alct_pre_trig_dly,
+  alct_preClct_dly,
   alct_pat_trig_dly,
   adb_ext_trig_dly,
   dmb_ext_trig_dly,
   clct_ext_trig_dly,
   alct_ext_trig_dly,
+
+// pre-CLCT modifiers for L1A*preCLCT overlap
+  l1a_preClct_width,
+  l1a_preClct_dly,
 
 // CLCT/RPC/RAT Pattern Injector
   inj_trig_vme,
@@ -860,8 +864,20 @@
   orbit_counter,
 
 // CLCT pre-trigger coincidence counters
-  pretrig_l1a_counter,  // CLCT pre-trigger AND L1A coincidence counter
-  pretrig_alct_counter, // CLCT pre-trigger AND ALCT coincidence counter
+  preClct_l1a_counter,  // CLCT pre-trigger AND L1A  coincidence counter
+  preClct_alct_counter, // CLCT pre-trigger AND ALCT coincidence counter
+
+// Active CFEB(s) counters
+  active_cfebs_event_counter,      // Any CFEB active flag sent to DMB
+  active_cfebs_me1a_event_counter, // ME1a CFEB active flag sent to DMB
+  active_cfebs_me1b_event_counter, // ME1b CFEB active flag sent to DMB
+  active_cfeb0_event_counter,      // CFEB0 active flag sent to DMB
+  active_cfeb1_event_counter,      // CFEB1 active flag sent to DMB
+  active_cfeb2_event_counter,      // CFEB2 active flag sent to DMB
+  active_cfeb3_event_counter,      // CFEB3 active flag sent to DMB
+  active_cfeb4_event_counter,      // CFEB4 active flag sent to DMB
+  active_cfeb5_event_counter,      // CFEB5 active flag sent to DMB
+  active_cfeb6_event_counter,      // CFEB6 active flag sent to DMB
 
 // Parity Errors
   perr_pulse,
@@ -932,7 +948,7 @@
   ,wr_en_xmpc
   ,wr_en_rmpc
 
-  ,alct_pretrig_window
+  ,alct_preClct_window
 
   ,pretrig_data
   ,postdrift_data
@@ -960,170 +976,174 @@
 //------------------------------------------------------------------------------------------------------------------
 // Constants:
 //------------------------------------------------------------------------------------------------------------------
-  parameter MXCFEB    = 7;        // Number CFEBs
-  parameter MXCFEBB    = 3;        // Number CFEB ID bits
-  parameter MXLY      = 6;        // Number Layers in CSC
-  parameter MXDS      = 8;        // Number of DiStrips per layer
-  parameter MXHS      = 32;        // Number 1/2-Strips per layer
-  parameter MXHSX      = MXCFEB*MXHS;    // Number of 1/2-Strips per layer on 7 CFEBs
-  parameter MXKEY      = MXHS;        // Number Key 1/2-strips
-  parameter MXKEYB    = 5;        // Number Key bits
-  parameter MXKEYX    = MXHSX;      // Number of key 1/2-strips on 7 CFEBs
-  parameter MXKEYBX    = 8;        // Number of 1/2-strip key bits on 7 CFEBs
+  parameter MXCFEB       = 7;           // Number CFEBs
+  parameter MXCFEBB      = 3;           // Number CFEB ID bits
+  parameter MXLY         = 6;           // Number Layers in CSC
+  parameter MXDS         = 8;           // Number of DiStrips per layer
+  parameter MXHS         = 32;          // Number 1/2-Strips per layer
+  parameter MXHSX        = MXCFEB*MXHS; // Number of 1/2-Strips per layer on 7 CFEBs
+  parameter MXKEY        = MXHS;        // Number Key 1/2-strips
+  parameter MXKEYB       = 5;           // Number Key bits
+  parameter MXKEYX       = MXHSX;       // Number of key 1/2-strips on 7 CFEBs
+  parameter MXKEYBX      = 8;           // Number of 1/2-strip key bits on 7 CFEBs
 
-  parameter MXPIDB    = 4;        // Pattern ID bits
-  parameter MXHITB    = 3;        // Hits on pattern bits
-  parameter MXPATB    = 3+4;        // Pattern bits
+  parameter MXPIDB       = 4;           // Pattern ID bits
+  parameter MXHITB       = 3;           // Hits on pattern bits
+  parameter MXPATB       = 3+4;         // Pattern bits
 
-  parameter MXBDID    = 5;        // Number TMB Board ID bits
-  parameter MXCSC      = 4;        // Number CSC Chamber ID bits
-  parameter MXRID      = 4;        // Number Run ID bits
-  parameter LCT_TYPE    = 1;        // Set to 1 for Cathode, 0 for Anode
-//  parameter LHC_CYCLE    = 3564;        // Highest LHC bxn
+  parameter MXBDID       = 5;          // Number TMB Board ID bits
+  parameter MXCSC        = 4;          // Number CSC Chamber ID bits
+  parameter MXRID        = 4;          // Number Run ID bits
+  parameter LCT_TYPE     = 1;          // Set to 1 for Cathode, 0 for Anode
+//  parameter LHC_CYCLE    = 3564;       // Highest LHC bxn
 //  parameter LHC_CYCLE    = 924;        // Highest LHC bxn for CERN beam test
-  parameter MXDMB      = 49;        // Number DMB output bits, not including hardware dmb clock
-  parameter NSTARTUP    = 6;        // Number clocks to stay in starup state
-  parameter MXDRIFT    = 2;        // Number drift delay bits
-  parameter MXBXN      = 12;        // Number BXN bits, LHC bunchs numbered 0 to 3563
-  parameter NFCBITS    = 11;        // Number bits for frame counter
-  parameter MXEXTDLY    = 4;        // Number bits CLCT external trigger delay
-  parameter MXMPCPIPE    = 16;        // Number clocks to delay mpc response
-  parameter MXMPCDLY    = 4;        // MPC delay time bits
+  parameter MXDMB        = 49;         // Number DMB output bits, not including hardware dmb clock
+  parameter NSTARTUP     = 6;          // Number clocks to stay in starup state
+  parameter MXDRIFT      = 2;          // Number drift delay bits
+  parameter MXBXN        = 12;         // Number BXN bits, LHC bunchs numbered 0 to 3563
+  parameter NFCBITS      = 11;         // Number bits for frame counter
+  parameter MXEXTDLY     = 4;          // Number bits CLCT external trigger delay
+  parameter MXMPCPIPE    = 16;         // Number clocks to delay mpc response
+  parameter MXMPCDLY     = 4;          // MPC delay time bits
 
-  parameter MXL1A      = 4;        // Number L1A counter bits
-  parameter MXL1DELAY    = 8;        // Number L1Acc delay counter bits
-  parameter MXL1WIND    = 4;        // Number L1ACC window width bits
-  parameter L1ADLYOFFSET  = 7;        // Correction to programmed n L1A delay so status window is n after pretrig
+  parameter MXL1A        = 4;          // Number L1A counter bits
+  parameter MXL1DELAY    = 8;          // Number L1Acc delay counter bits
+  parameter MXL1WIND     = 4;          // Number L1ACC window width bits
+  parameter L1ADLYOFFSET = 7;          // Correction to programmed n L1A delay so status window is n after pretrig
   
-  parameter MXBUF      = 16;        // Number of buffers
-  parameter MXBUFB    = 4;        // Buffer address width 
-  parameter MXFMODE    = 3;        // Number FIFO Mode bits
-  parameter MXTBIN    = 5;        // Number FIFO time bin bits
-  parameter MXFIFO    = 8;        // FIFO Slice data width
+  parameter MXBUF        = 16;        // Number of buffers
+  parameter MXBUFB       = 4;         // Buffer address width 
+  parameter MXFMODE      = 3;         // Number FIFO Mode bits
+  parameter MXTBIN       = 5;         // Number FIFO time bin bits
+  parameter MXFIFO       = 8;         // FIFO Slice data width
 
-  parameter MXHW      = 19;        // Number bits in a header frame
-  parameter MXHD      = 42;        // Number DMB header words, must be even, and a multiple of 4, minus 2 (for e0b and e0c)
-  parameter MNHD      = 8;        // Number DMB header words for no-buffer events
-  parameter NHBITS    = 6;        // Number bits needed for header count
+  parameter MXHW         = 19;        // Number bits in a header frame
+  parameter MXHD         = 42;        // Number DMB header words, must be even, and a multiple of 4, minus 2 (for e0b and e0c)
+  parameter MNHD         = 8;         // Number DMB header words for no-buffer events
+  parameter NHBITS       = 6;         // Number bits needed for header count
 
-  parameter MXTLR      = 5;        // Number Trailer words
-  parameter NTBITS    = 3;        // Number bits needed for trailer count
+  parameter MXTLR        = 5;         // Number Trailer words
+  parameter NTBITS       = 3;         // Number bits needed for trailer count
 
-  parameter MXFLUSH    = 4;        // Number bits needed for flush counter
-  parameter MXTHROTTLE  = 8;        // Number bits needed for throttle counter
+  parameter MXFLUSH      = 4;         // Number bits needed for flush counter
+  parameter MXTHROTTLE   = 8;         // Number bits needed for throttle counter
 
 // Raw hits RAM parameters
-  parameter RAM_DEPTH    = 2048;        // Storage bx depth
-  parameter RAM_ADRB    = 11;        // Address width=log2(ram_depth)
-  parameter RAM_WIDTH    = 8;        // Data width
+  parameter RAM_DEPTH    = 2048;      // Storage bx depth
+  parameter RAM_ADRB     = 11;        // Address width=log2(ram_depth)
+  parameter RAM_WIDTH    = 8;         // Data width
 
 // Raw hits buffer parameters
-  parameter MXBADR    = RAM_ADRB;      // Header buffer data address bits
-  parameter MXBDATA    = 32;        // Pushed data width
-  parameter MXSTAT    = 2;        // Buffer status bits
+  parameter MXBADR       = RAM_ADRB;  // Header buffer data address bits
+  parameter MXBDATA      = 32;        // Pushed data width
+  parameter MXSTAT       = 2;         // Buffer status bits
 
 // VME raw hits storage
-  parameter MXRAMADR    = 12;        // Number VME Raw Hits RAM address bits
+  parameter MXRAMADR     = 12;        // Number VME Raw Hits RAM address bits
   parameter MXRAMDATA    = 18;        // Number VME Raw Hits RAM data bits, does not include fifo wren
 
 // CLCT arrays
-  parameter MXALCT    = 16;        // Number bits per ALCT word
-  parameter MXCLCT    = 16;        // Number bits per CLCT word
-  parameter MXCLCTA    = 7;        // Number bits per CLCT auxiliary data word
-  parameter MXCLCTC    = 3;        // Number bits per CLCT common data word
-  parameter MXMPCRX    = 2;        // Number bits from MPC
-  parameter MXMPCTX    = 32;        // Number bits sent to MPC
-  parameter MPCTIME    = 3;        // Number clocks to wait for MPC response
-  parameter MXFRAME    = 16;        // Number bits per muon frame
+  parameter MXALCT       = 16;        // Number bits per ALCT word
+  parameter MXCLCT       = 16;        // Number bits per CLCT word
+  parameter MXCLCTA      = 7;         // Number bits per CLCT auxiliary data word
+  parameter MXCLCTC      = 3;         // Number bits per CLCT common data word
+  parameter MXMPCRX      = 2;         // Number bits from MPC
+  parameter MXMPCTX      = 32;        // Number bits sent to MPC
+  parameter MPCTIME      = 3;         // Number clocks to wait for MPC response
+  parameter MXFRAME      = 16;        // Number bits per muon frame
 
 // RPC Constants
-  parameter MXRPC      = 2;        // Number RPCs
-  parameter MXRPCB    = 1;        // Number RPC ID bits
+  parameter MXRPC        = 2;         // Number RPCs
+  parameter MXRPCB       = 1;         // Number RPC ID bits
 
 // Counters
-  parameter MXCNTVME    = 30;        // VME counter length
-  parameter MXL1ARX    = 12;        // Number L1As received counter bits
-  parameter MXORBIT    = 30;        // Number orbit counter bits
+  parameter MXCNTVME     = 30;        // VME counter length
+  parameter MXL1ARX      = 12;        // Number L1As received counter bits
+  parameter MXORBIT      = 30;        // Number orbit counter bits
 
 //------------------------------------------------------------------------------------------------------------------
 // I/O Ports:
 //------------------------------------------------------------------------------------------------------------------
 // CCB
-  input          clock;          // 40MHz TMB main clock
-  input          global_reset;      // 1=Reset everything
-  input          clock_lock_lost_err;  // 40MHz main clock lost lock FF
-  input          ccb_l1accept;      // Level 1 Accept
-  input          ccb_evcntres;      // Event counter (L1A) reset command
-  input          ttc_bx0;        // Bunch crossing 0 flag
-  input          ttc_resync;        // Purge l1a processing stack
-  input          ttc_bxreset;      // Reset bxn
-  input          ttc_orbit_reset;    // Reset orbit counter
-  input          fmm_trig_stop;      // Stop clct trigger sequencer
-  input          sync_err;        // Sync error OR of enabled types of error
-  output          clct_bx0_sync_err;    // TMB clock pulse count err bxn!=0+offset at ttc_bx0 arrival
+  input          clock;               // 40MHz TMB main clock
+  input          global_reset;        // 1=Reset everything
+  input          clock_lock_lost_err; // 40MHz main clock lost lock FF
+  input          ccb_l1accept;        // Level 1 Accept
+  input          ccb_evcntres;        // Event counter (L1A) reset command
+  input          ttc_bx0;             // Bunch crossing 0 flag
+  input          ttc_resync;          // Purge l1a processing stack
+  input          ttc_bxreset;         // Reset bxn
+  input          ttc_orbit_reset;     // Reset orbit counter
+  input          fmm_trig_stop;       // Stop clct trigger sequencer
+  input          sync_err;            // Sync error OR of enabled types of error
+  output         clct_bx0_sync_err;   // TMB clock pulse count err bxn!=0+offset at ttc_bx0 arrival
 
 // ALCT
-  input          alct_active_feb;    // ALCT Pattern pre-trigger (faster than alct_1st_valid)
-  input          alct0_valid;      // ALCT has valid LCT
-  input          alct1_valid;      // ALCT has valid LCT
-  output          read_sm_xdmb;      // TMB sequencer starting a readout
+  input          alct_active_feb; // ALCT Pattern pre-trigger (faster than alct_1st_valid)
+  input          alct0_valid;     // ALCT has valid LCT
+  input          alct1_valid;     // ALCT has valid LCT
+  output         read_sm_xdmb;    // TMB sequencer starting a readout
 
 // External Triggers
-  input          alct_adb_pulse_sync;  // ADB Test pulse trigger
-  input          dmb_ext_trig;      // DMB Calibration trigger
-  input          clct_ext_trig;      // CLCT External trigger from CCB
-  input          alct_ext_trig;      // ALCT External trigger from CCB
-  input          vme_ext_trig;      // External trigger from VME
-  input          ext_trig_inject;    // Changes clct_ext_trig to fire pattern injector
+  input          alct_adb_pulse_sync; // ADB Test pulse trigger
+  input          dmb_ext_trig;        // DMB Calibration trigger
+  input          clct_ext_trig;       // CLCT External trigger from CCB
+  input          alct_ext_trig;       // ALCT External trigger from CCB
+  input          vme_ext_trig;        // External trigger from VME
+  input          ext_trig_inject;     // Changes clct_ext_trig to fire pattern injector
 
 // External Trigger Enables
-  input          clct_pat_trig_en;    // Allow CLCT Pattern triggers
-  input          alct_pat_trig_en;    // Allow ALCT Pattern trigger
-  input          alct_match_trig_en;    // Allow ALCT*CLCT Pattern trigger
-  input          adb_ext_trig_en;    // Allow ADB Test pulse trigger
-  input          dmb_ext_trig_en;    // Allow DMB Calibration trigger
-  input          clct_ext_trig_en;    // Allow CLCT External trigger from CCB
-  input          alct_ext_trig_en;    // Allow ALCT External trigger from CCB
-  input          layer_trig_en;      // Allow layer-wide triggering
-  input          all_cfebs_active;    // Make all CFEBs active when triggered
-  input  [MXCFEB-1:0]  cfeb_en;        // 1=Enable this CFEB for triggering + sending active feb flag
-  input          active_feb_src;      // Active cfeb flag source, 0=pretrig, 1=tmb-matching ~8bx later
+  input              clct_pat_trig_en;    // Allow CLCT Pattern triggers
+  input              alct_pat_trig_en;    // Allow ALCT Pattern trigger
+  input              alct_match_trig_en;  // Allow ALCT*CLCT Pattern trigger
+  input              adb_ext_trig_en;     // Allow ADB Test pulse trigger
+  input              dmb_ext_trig_en;     // Allow DMB Calibration trigger
+  input              clct_ext_trig_en;    // Allow CLCT External trigger from CCB
+  input              alct_ext_trig_en;    // Allow ALCT External trigger from CCB
+  input              layer_trig_en;       // Allow layer-wide triggering
+  input              all_cfebs_active;    // Make all CFEBs active when triggered
+  input [MXCFEB-1:0] cfeb_en;             // 1=Enable this CFEB for triggering + sending active feb flag
+  input              active_feb_src;      // Active cfeb flag source, 0=pretrig, 1=tmb-matching ~8bx later
 
-  input  [3:0]      alct_trig_width;    // ALCT*CLCT overlap window size
-  input          wr_buf_required;    // Require wr_buffer to pretrigger
-  input          wr_buf_autoclr_en;    // Enable frozen buffer auto clear
-  input          valid_clct_required;  // Require valid pattern after drift to trigger
+  input [3:0]        alct_preClct_width;  // ALCT (alct_active_feb flag) window width for ALCT*preCLCT overlap
+  input              wr_buf_required;     // Require wr_buffer to pretrigger
+  input              wr_buf_autoclr_en;   // Enable frozen buffer auto clear
+  input              valid_clct_required; // Require valid pattern after drift to trigger
 
-  input          sync_err_stops_pretrig;  // Sync error stops CLCT pre-triggers
-  input          sync_err_stops_readout;  // Sync error stops L1A readouts
+  input sync_err_stops_pretrig; // Sync error stops CLCT pre-triggers
+  input sync_err_stops_readout; // Sync error stops L1A readouts
 
 // External Trigger Delays
-  input  [MXEXTDLY-1:0]  alct_pre_trig_dly;    // ALCT pre      trigger delay
-  input  [MXEXTDLY-1:0]  alct_pat_trig_dly;    // ALCT pattern  trigger delay
-  input  [MXEXTDLY-1:0]  adb_ext_trig_dly;    // ADB  external trigger delay
-  input  [MXEXTDLY-1:0]  dmb_ext_trig_dly;    // DMB  external trigger delay
-  input  [MXEXTDLY-1:0]  clct_ext_trig_dly;    // CLCT external trigger delay
-  input  [MXEXTDLY-1:0]  alct_ext_trig_dly;    // ALCT external trigger delay
+  input  [MXEXTDLY-1:0]  alct_preClct_dly;  // ALCT (alct_active_feb flag) delay for ALCT*preCLCT overlap
+  input  [MXEXTDLY-1:0]  alct_pat_trig_dly; // ALCT (alct0_valid flag) pattern trigger delay
+  input  [MXEXTDLY-1:0]  adb_ext_trig_dly;  // ADB  external trigger delay
+  input  [MXEXTDLY-1:0]  dmb_ext_trig_dly;  // DMB  external trigger delay
+  input  [MXEXTDLY-1:0]  clct_ext_trig_dly; // CLCT external trigger delay
+  input  [MXEXTDLY-1:0]  alct_ext_trig_dly; // ALCT external trigger delay
+
+// pre-CLCT modifiers for L1A*preCLCT overlap
+  input [3:0] l1a_preClct_width; // pre-CLCT window width for L1A*preCLCT overlap
+  input [7:0] l1a_preClct_dly;   // pre-CLCT delay for L1A*preCLCT overlap
 
 // CLCT/RPC/RAT Pattern Injector
-  input          inj_trig_vme;      // Start pattern injector
-  input  [MXCFEB-1:0]  injector_mask_cfeb;    // Enable CFEB(n) for injector trigger
-  input          injector_mask_rat;    // Enable RAT for injector trigger
-  input          injector_mask_rpc;    // Enable RPC for injector trigger
-  input  [3:0]      inj_delay_rat;      // CFEB/RPC Injector waits for RAT injector
-  output  [MXCFEB-1:0]  injector_go_cfeb;    // Start CFEB(n) pattern injector
-  output          injector_go_rat;    // Start RAT     pattern injector
-  output          injector_go_rpc;    // Start RPC     pattern injector
+  input               inj_trig_vme;       // Start pattern injector
+  input  [MXCFEB-1:0] injector_mask_cfeb; // Enable CFEB(n) for injector trigger
+  input               injector_mask_rat;  // Enable RAT for injector trigger
+  input               injector_mask_rpc;  // Enable RPC for injector trigger
+  input  [3:0]        inj_delay_rat;      // CFEB/RPC Injector waits for RAT injector
+  output [MXCFEB-1:0] injector_go_cfeb;   // Start CFEB(n) pattern injector
+  output              injector_go_rat;    // Start RAT     pattern injector
+  output              injector_go_rpc;    // Start RPC     pattern injector
 
 // CFEB Status Ports
-  input  [MXCFEB-1:0]  triad_skip;        // Triads skipped
-  input  [MXCFEB-1:0]  triad_tp;        // Triad test point at input to raw hits RAM
-  input  [MXCFEB-1:0]  cfeb_badbits_found;    // CFEB[n] has at least 1 bad bit
-  input          cfeb_badbits_blocked;  // A CFEB had bad bits that were blocked
+  input [MXCFEB-1:0] triad_skip;           // Triads skipped
+  input [MXCFEB-1:0] triad_tp;             // Triad test point at input to raw hits RAM
+  input [MXCFEB-1:0] cfeb_badbits_found;   // CFEB[n] has at least 1 bad bit
+  input              cfeb_badbits_blocked; // A CFEB had bad bits that were blocked
   
 // Pattern Finder PreTrigger Ports
   input  [MXCFEB-1:0]  cfeb_hit;        // This CFEB has a pattern over pre-trigger threshold
-  input  [MXCFEB-1:0]  cfeb_active;      // CFEBs marked for DMB readout
+  input  [MXCFEB-1:0]  cfeb_active;     // CFEBs marked for DMB readout
 
   input          cfeb_layer_trig;    // Layer pretrigger
   input  [MXLY-1:0]    cfeb_layer_or;      // OR of hstrips on each layer at pre-trigger
@@ -1176,51 +1196,51 @@
   input  [MXHITB-1:0]  hit_thresh_postdrift;  // Minimum pattern hits for a valid pattern
   input  [MXPIDB-1:0]  pid_thresh_postdrift;  // Minimum pattern ID   for a valid pattern
 
-  input  [MXTHROTTLE-1:0]clct_throttle;    // Pre-trigger throttle to reduce trigger rate
-  input  [MXFLUSH-1:0]  clct_flush_delay;  // Pre-trigger sequencer flush state timer
-  input          clct_wr_continuous;  // 1=allow continuous header buffer writing for invalid triggers
+  input [MXTHROTTLE-1:0] clct_throttle;      // Pre-trigger throttle to reduce trigger rate
+  input [MXFLUSH-1:0]    clct_flush_delay;   // Pre-trigger sequencer flush state timer
+  input                  clct_wr_continuous; // 1=allow continuous header buffer writing for invalid triggers
 
-  input  [3:0]      alct_delay;      // Delay ALCT for CLCT match window
-  input  [3:0]      clct_window;    // CLCT match window width
+  input  [3:0] alct_delay;  // Delay ALCT for CLCT match window
+  input  [3:0] clct_window; // CLCT match window width
 
-  input          tmb_allow_alct;    // Allow ALCT only 
-  input          tmb_allow_clct;    // Allow CLCT only
-  input          tmb_allow_match;  // Allow Match only
+  input tmb_allow_alct;  // Allow ALCT only 
+  input tmb_allow_clct;  // Allow CLCT only
+  input tmb_allow_match; // Allow Match only
 
-  input          tmb_allow_alct_ro;  // Allow ALCT only  readout, non-triggering
-  input          tmb_allow_clct_ro;  // Allow CLCT only  readout, non-triggering
-  input          tmb_allow_match_ro;  // Allow Match only readout, non-triggering
+  input tmb_allow_alct_ro;  // Allow ALCT only  readout, non-triggering
+  input tmb_allow_clct_ro;  // Allow CLCT only  readout, non-triggering
+  input tmb_allow_match_ro; // Allow Match only readout, non-triggering
 
-  input  [MXMPCDLY-1:0]  mpc_tx_delay;    // Delay LCT to MPC
-  input          mpc_sel_ttc_bx0;  // MPC gets ttc_bx0 or bx0_local
-  input          pretrig_halt;    // Pretrigger and halt until unhalt arrives
+  input  [MXMPCDLY-1:0] mpc_tx_delay;    // Delay LCT to MPC
+  input                 mpc_sel_ttc_bx0; // MPC gets ttc_bx0 or bx0_local
+  input                 pretrig_halt;    // Pretrigger and halt until unhalt arrives
 
-  output  [15:0]      uptime;        // Uptime since last hard reset
-  input  [14:0]      bd_status;      // Board status summary
+  output [15:0] uptime;    // Uptime since last hard reset
+  input  [14:0] bd_status; // Board status summary
 
-  input  [MXBDID-1:0]  board_id;      // Board ID hex switch
-  input  [MXCSC-1:0]    csc_id;        // CSC Chamber ID number
-  input  [MXRID-1:0]    run_id;        // Run ID
+  input  [MXBDID-1:0] board_id; // Board ID hex switch
+  input  [MXCSC-1:0]  csc_id;   // CSC Chamber ID number
+  input  [MXRID-1:0]  run_id;   // Run ID
 
-  input  [MXL1DELAY-1:0]  l1a_delay;      // Level1 Accept delay from pretrig status output
-  input          l1a_internal;    // Generate internal Level 1, overrides external
-  input  [MXL1WIND-1:0]  l1a_internal_dly;  // Delay internal l1a to shift position in l1a match window
-  input  [MXL1WIND-1:0]  l1a_window;      // Level1 Accept window width after delay
-  input          l1a_win_pri_en;    // Enable L1A window priority
-  input  [MXBADR-1:0]  l1a_lookback;    // Bxn to look back from l1a wr_buf_adr
-  input          l1a_preset_sr;    // Dummy VME bit to feign preset l1a sr group
+  input  [MXL1DELAY-1:0] l1a_delay;        // Level1 Accept delay from pretrig status output
+  input                  l1a_internal;     // Generate internal Level 1, overrides external
+  input  [MXL1WIND-1:0]  l1a_internal_dly; // Delay internal l1a to shift position in l1a match window
+  input  [MXL1WIND-1:0]  l1a_window;       // Level1 Accept window width after delay
+  input                  l1a_win_pri_en;   // Enable L1A window priority
+  input  [MXBADR-1:0]    l1a_lookback;     // Bxn to look back from l1a wr_buf_adr
+  input                  l1a_preset_sr;    // Dummy VME bit to feign preset l1a sr group
 
-  input          l1a_allow_match;  // Readout allows tmb trig pulse in L1A window (normal mode)
-  input          l1a_allow_notmb;  // Readout allows no tmb trig pulse in L1A window
-  input          l1a_allow_nol1a;  // Readout allows tmb trig pulse outside L1A window
-  input          l1a_allow_alct_only;// Allow alct_only events to readout at L1A
+  input                  l1a_allow_match;     // Readout allows tmb trig pulse in L1A window (normal mode)
+  input                  l1a_allow_notmb;     // Readout allows no tmb trig pulse in L1A window
+  input                  l1a_allow_nol1a;     // Readout allows tmb trig pulse outside L1A window
+  input                  l1a_allow_alct_only; // Allow alct_only events to readout at L1A
 
-  input  [MXFMODE-1:0]  fifo_mode;      // FIFO Mode 0=no dump w/header,1=full,2=local,3=no dump short header
-  input  [MXTBIN-1:0]  fifo_tbins_cfeb;  // Number CFEB FIFO time bins to read out
-  input  [MXTBIN-1:0]  fifo_pretrig_cfeb;  // Number CFEB FIFO time bins before pretrigger
+  input  [MXFMODE-1:0] fifo_mode;         // FIFO Mode 0=no dump w/header,1=full,2=local,3=no dump short header
+  input  [MXTBIN-1:0]  fifo_tbins_cfeb;   // Number CFEB FIFO time bins to read out
+  input  [MXTBIN-1:0]  fifo_pretrig_cfeb; // Number CFEB FIFO time bins before pretrigger
 
-  output          seq_trigger;    // Sequencer requests L1A from CCB
-  output  [11:0]      sequencer_state;  // Sequencer state for vme read
+  output        seq_trigger;     // Sequencer requests L1A from CCB
+  output [11:0] sequencer_state; // Sequencer state for vme read
 
   input          event_clear_vme;  // Event clear for aff,alct,clct,mpc vme diagnostic registers
   output  [MXCLCT-1:0]  clct0_vme;      // First  CLCT
@@ -1445,25 +1465,25 @@
   output  [15:0]      scp_rdata;      // Recorded channel data
 
 // Miniscope
-  input          mini_read_enable;  // Enable Miniscope readout
-  input          mini_fifo_busy;    // Readout busy sending data to sequencer, goes down 1bx early
-  input          mini_first_frame;  // First frame valid 2bx after rd_start
-  input          mini_last_frame;  // Last frame valid 1bx after busy goes down
-  input  [RAM_WIDTH*2-1:0] mini_rdata;    // FIFO dump miniscope
-  output  [RAM_WIDTH*2-1:0] fifo_wdata_mini;  // Miniscope FIFO RAM write data
-  output  [RAM_ADRB-1:0]  wr_mini_offset;    // RAM address offset for miniscope write
+  input                    mini_read_enable; // Enable Miniscope readout
+  input                    mini_fifo_busy;   // Readout busy sending data to sequencer, goes down 1bx early
+  input                    mini_first_frame; // First frame valid 2bx after rd_start
+  input                    mini_last_frame;  // Last frame valid 1bx after busy goes down
+  input  [RAM_WIDTH*2-1:0] mini_rdata;       // FIFO dump miniscope
+  output [RAM_WIDTH*2-1:0] fifo_wdata_mini;  // Miniscope FIFO RAM write data
+  output [RAM_ADRB-1:0]    wr_mini_offset;   // RAM address offset for miniscope write
 
 // Mini Sequencer Readout Control
-  output          rd_start_mini;    // Start readout sequence
-  output          rd_abort_mini;    // Cancel readout
-  output  [RAM_ADRB-1:0]  rd_mini_offset;    // RAM address rd_fifo_adr offset for miniscope read out
+  output                rd_start_mini;  // Start readout sequence
+  output                rd_abort_mini;  // Cancel readout
+  output [RAM_ADRB-1:0] rd_mini_offset; // RAM address rd_fifo_adr offset for miniscope read out
 
 // Trigger/Readout Counter Ports
-  input          cnt_all_reset;    // Trigger/Readout counter reset
-  input          cnt_stop_on_ovf;  // Stop all counters if any overflows
-  input          cnt_any_ovf_alct;  // At least one alct counter overflowed
-  input          cnt_non_me1ab_en;  // Allow clct pretrig counters count non me1ab
-  output          cnt_any_ovf_seq;  // At least one sequencer counter overflowed
+  input  cnt_all_reset;    // Trigger/Readout counter reset
+  input  cnt_stop_on_ovf;  // Stop all counters if any overflows
+  input  cnt_any_ovf_alct; // At least one alct counter overflowed
+  input  cnt_non_me1ab_en; // Allow clct pretrig counters count non me1ab
+  output cnt_any_ovf_seq;  // At least one sequencer counter overflowed
 
   output  [MXCNTVME-1:0]  event_counter13;  // Event counter 1D remap
   output  [MXCNTVME-1:0]  event_counter14;
@@ -1530,8 +1550,20 @@
   output  [MXORBIT-1:0]   orbit_counter;       // Orbit counter
 
 // CLCT pre-trigger coincidence counters
-  output  [MXCNTVME-1:0]  pretrig_l1a_counter;  // CLCT pre-trigger AND L1A coincidence counter
-  output  [MXCNTVME-1:0]  pretrig_alct_counter; // CLCT pre-trigger AND ALCT coincidence counter
+  output  [MXCNTVME-1:0]  preClct_l1a_counter;  // CLCT pre-trigger AND L1A coincidence counter
+  output  [MXCNTVME-1:0]  preClct_alct_counter; // CLCT pre-trigger AND ALCT coincidence counter
+
+// Active CFEB(s) counters
+  output  [MXCNTVME-1:0] active_cfebs_event_counter;      // Any CFEB active flag sent to DMB
+  output  [MXCNTVME-1:0] active_cfebs_me1a_event_counter; // ME1a CFEB active flag sent to DMB
+  output  [MXCNTVME-1:0] active_cfebs_me1b_event_counter; // ME1b CFEB active flag sent to DMB
+  output  [MXCNTVME-1:0] active_cfeb0_event_counter;      // CFEB0 active flag sent to DMB
+  output  [MXCNTVME-1:0] active_cfeb1_event_counter;      // CFEB1 active flag sent to DMB
+  output  [MXCNTVME-1:0] active_cfeb2_event_counter;      // CFEB2 active flag sent to DMB
+  output  [MXCNTVME-1:0] active_cfeb3_event_counter;      // CFEB3 active flag sent to DMB
+  output  [MXCNTVME-1:0] active_cfeb4_event_counter;      // CFEB4 active flag sent to DMB
+  output  [MXCNTVME-1:0] active_cfeb5_event_counter;      // CFEB5 active flag sent to DMB
+  output  [MXCNTVME-1:0] active_cfeb6_event_counter;      // CFEB6 active flag sent to DMB
 
 // Parity Errors
   input                perr_pulse;   // Parity error pulse for counting
@@ -1603,7 +1635,7 @@
   output          wr_en_xmpc;
   output          wr_en_rmpc;
 
-  output          alct_pretrig_window;
+  output          alct_preClct_window;
   output  [21-1:0]    pretrig_data;
   output  [21-1:0]    postdrift_data;
   output  [3:0]      postdrift_adr;
@@ -1630,7 +1662,7 @@
 //------------------------------------------------------------------------------------------------------------------
 // Local:
 //------------------------------------------------------------------------------------------------------------------
-  wire alct_pretrig;
+  wire alct_preClct; // ALCT*CLCT pre-trigger coincidence
 
   wire clct0_vpf;
   wire clct1_vpf;
@@ -1876,7 +1908,7 @@
 
   assign uptime[15:0]=orbit_counter[29:14];    // Uptime for vme, orbit=3564x25ns=89.1us, 1.46 seconds per tick
 
-// Pre-trigger counter, presets at evcntres or resync
+// Pre-trigger counter, resets at evcntres or resync
   reg   [MXCNTVME-1:0]  pretrig_counter = 0;
 
   wire pretrig_cnt_reset = ccb_evcntres || (ttc_resync && hdr_clear_on_resync);
@@ -1889,32 +1921,127 @@
   end
 
 // CLCT pre-trigger AND L1A coincidence counter (YP August 2015)
-  reg [MXCNTVME-1:0] pretrig_l1a_counter = 0;
-  reg [3:0]          clct_pretrig_delay = 6; // 6bx delay before l1a comes
-  wire               clct_pretrig_ff;
-  x_delay uclct_pretrig_delay (.d(clct_pretrig),.clock(clock),.delay(clct_pretrig_delay[3:0]),.q(clct_pretrig_ff));
+  reg [MXCNTVME-1:0] preClct_l1a_counter = 0;
+  // add delay to CLCT pre-trigger
+  wire preClct = (clct_sm == pretrig);
+//  wire preClct_ff;         // delayed CLCT pre-trigger
+//  x_delay_os #( .MXDLY(8) ) upreClct_delay (.d(clct_pretrig),.clock(clock),.delay(l1a_preClct_dly),.q(preClct_ff)); 
+  wire preClct_ff = preClct;         // Lets not delay CLCT pre-trigger for now
   
-  wire pretrig_l1a_cnt_reset = ccb_evcntres || (ttc_resync && hdr_clear_on_resync);
-  wire pretrig_l1a_cnt_ovf   = (pretrig_l1a_counter == {MXCNTVME{1'b1}});
-  wire pretrig_l1a_cnt_en    = clct_pretrig_ff && l1a_pulse && !pretrig_l1a_cnt_ovf;
-
+  // open CLCT pre-trigger window
+  reg  [3:0] preClct_width_cnt = 0;
+  wire       preClct_width_bsy = (preClct_width_cnt != 0); 
+  //
   always @(posedge clock) begin
-    if      (pretrig_l1a_cnt_reset) pretrig_l1a_counter = 0;
-    else if (pretrig_l1a_cnt_en   ) pretrig_l1a_counter = pretrig_l1a_counter + 1'b1;
+    if      ( ttc_resync        ) preClct_width_cnt = 0;                        // Clear on reset
+    else if ( preClct_ff        ) preClct_width_cnt = l1a_preClct_width - 1'b1; // Load persistence count
+    else if ( preClct_width_bsy ) preClct_width_cnt = preClct_width_cnt - 1'b1; // Decrement count down to 0
+  end
+  //
+  wire preClct_window = preClct_width_bsy | preClct_ff; // Assert immediately, hold until count done
+  //
+//  wire preClct_l1a_cnt_reset = ccb_evcntres || (ttc_resync && hdr_clear_on_resync);
+  wire preClct_l1a_cnt_reset = vme_cnt_reset;
+  wire preClct_l1a_cnt_ovf   = (preClct_l1a_counter == {MXCNTVME{1'b1}});
+  wire preClct_l1a_cnt_en    = preClct_window && l1a_pulse && !preClct_l1a_cnt_ovf;
+//  wire preClct_l1a_cnt_en    =                   l1a_pulse && !preClct_l1a_cnt_ovf;  // Let's count l1as only for now
+  //
+  always @(posedge clock) begin
+    if      (preClct_l1a_cnt_reset) preClct_l1a_counter = 0;
+    else if (preClct_l1a_cnt_en   ) preClct_l1a_counter = preClct_l1a_counter + 1'b1;
   end
 
 // CLCT pre-trigger AND ALCT coincidence counter (YP August 2015)
-  reg   [MXCNTVME-1:0]  pretrig_alct_counter = 0;
+  reg   [MXCNTVME-1:0]  preClct_alct_counter = 0;
 
-  wire pretrig_alct_cnt_reset = ccb_evcntres || (ttc_resync && hdr_clear_on_resync);
-  wire pretrig_alct_cnt_ovf   = (pretrig_alct_counter == {MXCNTVME{1'b1}});
-  wire pretrig_alct_cnt_en    = clct_pretrig && alct_active_feb && !pretrig_alct_cnt_ovf;
+//  wire preClct_alct_cnt_reset = ccb_evcntres || (ttc_resync && hdr_clear_on_resync);
+  wire preClct_alct_cnt_reset = vme_cnt_reset;
+  wire preClct_alct_cnt_ovf   = (preClct_alct_counter == {MXCNTVME{1'b1}});
+  wire preClct_alct_cnt_en    = alct_preClct && !preClct_alct_cnt_ovf;
+//  wire preClct_alct_cnt_en    = alct_active_feb && !preClct_alct_cnt_ovf;
 
   always @(posedge clock) begin
-    if      (pretrig_alct_cnt_reset) pretrig_alct_counter = 0;
-    else if (pretrig_alct_cnt_en   ) pretrig_alct_counter = pretrig_alct_counter + 1'b1;
+    if      (preClct_alct_cnt_reset) preClct_alct_counter = cnt_fatzero;
+    else if (preClct_alct_cnt_en   ) preClct_alct_counter = preClct_alct_counter + 1'b1;
   end
 
+// Active CFEB(s) counters (YP January 2016)
+  reg   [MXCNTVME-1:0]  active_cfebs_event_counter      = 0; // Any CFEB active flag sent to DMB
+  reg   [MXCNTVME-1:0]  active_cfebs_me1a_event_counter = 0; // ME1a CFEB active flag sent to DMB
+  reg   [MXCNTVME-1:0]  active_cfebs_me1b_event_counter = 0; // ME1a CFEB active flag sent to DMB
+  reg   [MXCNTVME-1:0]  active_cfeb0_event_counter      = 0; // CFEB0 active flag sent to DMB
+  reg   [MXCNTVME-1:0]  active_cfeb1_event_counter      = 0; // CFEB1 active flag sent to DMB
+  reg   [MXCNTVME-1:0]  active_cfeb2_event_counter      = 0; // CFEB2 active flag sent to DMB
+  reg   [MXCNTVME-1:0]  active_cfeb3_event_counter      = 0; // CFEB3 active flag sent to DMB
+  reg   [MXCNTVME-1:0]  active_cfeb4_event_counter      = 0; // CFEB4 active flag sent to DMB
+  reg   [MXCNTVME-1:0]  active_cfeb5_event_counter      = 0; // CFEB5 active flag sent to DMB
+  reg   [MXCNTVME-1:0]  active_cfeb6_event_counter      = 0; // CFEB6 active flag sent to DMB
+
+  wire active_cfebs_event_counter_reset      = vme_cnt_reset;
+  wire active_cfebs_me1a_event_counter_reset = vme_cnt_reset;
+  wire active_cfebs_me1b_event_counter_reset = vme_cnt_reset;
+  wire active_cfeb0_event_counter_reset      = vme_cnt_reset;
+  wire active_cfeb1_event_counter_reset      = vme_cnt_reset;
+  wire active_cfeb2_event_counter_reset      = vme_cnt_reset;
+  wire active_cfeb3_event_counter_reset      = vme_cnt_reset;
+  wire active_cfeb4_event_counter_reset      = vme_cnt_reset;
+  wire active_cfeb5_event_counter_reset      = vme_cnt_reset;
+  wire active_cfeb6_event_counter_reset      = vme_cnt_reset;
+  
+  wire active_cfebs_event_counter_ovf      = (active_cfebs_event_counter      == {MXCNTVME{1'b1}});
+  wire active_cfebs_me1a_event_counter_ovf = (active_cfebs_me1a_event_counter == {MXCNTVME{1'b1}});
+  wire active_cfebs_me1b_event_counter_ovf = (active_cfebs_me1b_event_counter == {MXCNTVME{1'b1}});
+  wire active_cfeb0_event_counter_ovf      = (active_cfeb0_event_counter      == {MXCNTVME{1'b1}});
+  wire active_cfeb1_event_counter_ovf      = (active_cfeb1_event_counter      == {MXCNTVME{1'b1}});
+  wire active_cfeb2_event_counter_ovf      = (active_cfeb2_event_counter      == {MXCNTVME{1'b1}});
+  wire active_cfeb3_event_counter_ovf      = (active_cfeb3_event_counter      == {MXCNTVME{1'b1}});
+  wire active_cfeb4_event_counter_ovf      = (active_cfeb4_event_counter      == {MXCNTVME{1'b1}});
+  wire active_cfeb5_event_counter_ovf      = (active_cfeb5_event_counter      == {MXCNTVME{1'b1}});
+  wire active_cfeb6_event_counter_ovf      = (active_cfeb6_event_counter      == {MXCNTVME{1'b1}});
+  
+  wire active_cfebs_event_counter_en      = (|active_feb_list) && !active_cfebs_event_counter_ovf;
+  wire active_cfebs_me1a_event_counter_en =  (|active_feb_list[6:4]) && !(|active_feb_list[3:0]) && !active_cfebs_me1a_event_counter_ovf; // Only ME1A was active
+  wire active_cfebs_me1b_event_counter_en = !(|active_feb_list[6:4]) &&  (|active_feb_list[3:0]) && !active_cfebs_me1b_event_counter_ovf; // Only ME1B was active
+  wire active_cfeb0_event_counter_en      = active_feb_list[0] && !active_cfeb0_event_counter_ovf;
+  wire active_cfeb1_event_counter_en      = active_feb_list[1] && !active_cfeb1_event_counter_ovf;
+  wire active_cfeb2_event_counter_en      = active_feb_list[2] && !active_cfeb2_event_counter_ovf;
+  wire active_cfeb3_event_counter_en      = active_feb_list[3] && !active_cfeb3_event_counter_ovf;
+  wire active_cfeb4_event_counter_en      = active_feb_list[4] && !active_cfeb4_event_counter_ovf;
+  wire active_cfeb5_event_counter_en      = active_feb_list[5] && !active_cfeb5_event_counter_ovf;
+  wire active_cfeb6_event_counter_en      = active_feb_list[6] && !active_cfeb6_event_counter_ovf;
+  
+  always @(posedge clock) begin
+    if      (active_cfebs_event_counter_reset) active_cfebs_event_counter = cnt_fatzero;
+    else if (active_cfebs_event_counter_en   ) active_cfebs_event_counter = active_cfebs_event_counter + 1'b1;
+    //
+    if      (active_cfebs_me1a_event_counter_reset) active_cfebs_me1a_event_counter = cnt_fatzero;
+    else if (active_cfebs_me1a_event_counter_en   ) active_cfebs_me1a_event_counter = active_cfebs_me1a_event_counter + 1'b1;
+    //
+    if      (active_cfebs_me1b_event_counter_reset) active_cfebs_me1b_event_counter = cnt_fatzero;
+    else if (active_cfebs_me1b_event_counter_en   ) active_cfebs_me1b_event_counter = active_cfebs_me1b_event_counter + 1'b1;
+    //
+    if      (active_cfeb0_event_counter_reset) active_cfeb0_event_counter = cnt_fatzero;
+    else if (active_cfeb0_event_counter_en   ) active_cfeb0_event_counter = active_cfeb0_event_counter + 1'b1;
+    //
+    if      (active_cfeb1_event_counter_reset) active_cfeb1_event_counter = cnt_fatzero;
+    else if (active_cfeb1_event_counter_en   ) active_cfeb1_event_counter = active_cfeb1_event_counter + 1'b1;
+    //
+    if      (active_cfeb2_event_counter_reset) active_cfeb2_event_counter = cnt_fatzero;
+    else if (active_cfeb2_event_counter_en   ) active_cfeb2_event_counter = active_cfeb2_event_counter + 1'b1;
+    //
+    if      (active_cfeb3_event_counter_reset) active_cfeb3_event_counter = cnt_fatzero;
+    else if (active_cfeb3_event_counter_en   ) active_cfeb3_event_counter = active_cfeb3_event_counter + 1'b1;
+    //
+    if      (active_cfeb4_event_counter_reset) active_cfeb4_event_counter = cnt_fatzero;
+    else if (active_cfeb4_event_counter_en   ) active_cfeb4_event_counter = active_cfeb4_event_counter + 1'b1;
+    //
+    if      (active_cfeb5_event_counter_reset) active_cfeb5_event_counter = cnt_fatzero;
+    else if (active_cfeb5_event_counter_en   ) active_cfeb5_event_counter = active_cfeb5_event_counter + 1'b1;
+    //
+    if      (active_cfeb6_event_counter_reset) active_cfeb6_event_counter = cnt_fatzero;
+    else if (active_cfeb6_event_counter_en   ) active_cfeb6_event_counter = active_cfeb6_event_counter + 1'b1;
+  end
+  
 // CLCT counter, presets at evcntres or resync
   reg   [MXCNTVME-1:0]  clct_counter = 0;
 
@@ -2036,9 +2163,9 @@
   x_delay   uninjdly  (.d(inj_trig_pulse),.clock(clock),.delay(inj_delay_rat[3:0]),.q(inj_trig_pulse_ff));
 
   always@(posedge clock) begin
-  injector_go_cfeb[MXCFEB-1:0]  <= {MXCFEB{inj_trig_pulse_ff}} & injector_mask_cfeb;  // waits for rat
-  injector_go_rpc          <=         inj_trig_pulse_ff   & injector_mask_rpc;    // waits for rat
-  injector_go_rat          <=         inj_trig_pulse      & injector_mask_rat;    // fires first
+    injector_go_cfeb[MXCFEB-1:0] <= {MXCFEB{inj_trig_pulse_ff}} & injector_mask_cfeb; // waits for rat
+    injector_go_rpc              <=         inj_trig_pulse_ff   & injector_mask_rpc;  // waits for rat
+    injector_go_rat              <=         inj_trig_pulse      & injector_mask_rat;  // fires first
   end
 
 // Raw hits & header RAM buffer status
@@ -2049,18 +2176,18 @@
   wire [MXCFEB-1:0] active_feb;
   wire any_cfeb_hit;    
 
-  assign any_cfeb_hit           = (|cfeb_hit[MXCFEB-1:0]);                // Any CFEB has a hit
+  assign any_cfeb_hit           = (|cfeb_hit[MXCFEB-1:0]);                               // Any CFEB has a hit
   assign active_feb[MXCFEB-1:0] = cfeb_active[MXCFEB-1:0] | {MXCFEB{all_cfebs_active}};  // Active list includes boundary overlaps
 
 // Delay External trigger sources
-  wire  alct_pre_trig_os;  // ALCT  pre-trigger before drift and priority encode
-  wire  alct_pat_trig_os;  // ALCT pattern trigger after drift
+  wire  alct_pre_trig_os; // ALCT  pre-trigger before drift and priority encode
+  wire  alct_pat_trig_os; // ALCT pattern trigger after drift
   wire  adb_ext_trig_os;  // ADB  test pulse trigger
   wire  dmb_ext_trig_os;  // DMB  calibration trigger
-  wire  clct_ext_trig_os;  // CLCT external trigger from ccb (scintillator)
-  wire  alct_ext_trig_os;  // ALCT external trigger from ccb
+  wire  clct_ext_trig_os; // CLCT external trigger from ccb (scintillator)
+  wire  alct_ext_trig_os; // ALCT external trigger from ccb
 
-  x_delay    #(4) udly0 (.d(alct_active_feb    ),.clock(clock),.delay(alct_pre_trig_dly),.q(alct_pre_trig_os));  
+  x_delay_os #(4) udly0 (.d(alct_active_feb    ),.clock(clock),.delay(alct_preClct_dly ),.q(alct_pre_trig_os));  
   x_delay_os #(4) udly1 (.d(alct0_valid        ),.clock(clock),.delay(alct_pat_trig_dly),.q(alct_pat_trig_os));  
   x_delay_os #(4) udly2 (.d(alct_adb_pulse_sync),.clock(clock),.delay(adb_ext_trig_dly ),.q(adb_ext_trig_os ));  
   x_delay_os #(4) udly3 (.d(dmb_ext_trig       ),.clock(clock),.delay(dmb_ext_trig_dly ),.q(dmb_ext_trig_os ));  
@@ -2069,33 +2196,33 @@
 
 // Open an ALCT pretrig coincidence window, updates if new alcts arrive, uses triad decoder fast look-ahead counter
   reg  [3:0] alct_width_cnt=0;
-  wire [3:0] alct_pretrig_win;
+  wire [3:0] alct_preClct_win;
 
   wire alct_width_bsy   = (alct_width_cnt != 0); 
-  wire alct_open_window = alct_pre_trig_os;                // ALCT match window opens on alct_active_feb
+  wire alct_open_window = alct_pre_trig_os; // ALCT match window opens on alct_active_feb
   
   always @(posedge clock) begin
-  if    (ttc_resync      )  alct_width_cnt = 0;              // Clear on reset
-  else if (alct_open_window)  alct_width_cnt = alct_trig_width-1'b1;    // Load persistence count
-  else if (alct_width_bsy  )  alct_width_cnt = alct_width_cnt-1'b1;    // Decrement count down to 0
+    if      (ttc_resync      )  alct_width_cnt = 0;                         // Clear on reset
+    else if (alct_open_window)  alct_width_cnt = alct_preClct_width - 1'b1; // Load persistence count
+    else if (alct_width_bsy  )  alct_width_cnt = alct_width_cnt  - 1'b1;    // Decrement count down to 0
   end
 
-  wire   alct_pretrig_window = alct_width_bsy | alct_open_window;              // Assert immediately, hold until count done
-  assign alct_pretrig_win    = (alct_open_window) ? 4'h0: alct_trig_width-alct_width_cnt;  // Position of alct active feb signal at pretrigger
-  wire   alct_required       = alct_match_trig_en && !clct_pat_trig_en;          // ALCT coincidence is required
+  wire   alct_preClct_window = alct_width_bsy | alct_open_window;                              // Assert immediately, hold until count done
+  assign alct_preClct_win    = (alct_open_window) ? 4'h0: alct_preClct_width - alct_width_cnt; // Position of alct active feb signal at pretrigger
+  wire   alct_required       = alct_match_trig_en && !clct_pat_trig_en;                        // ALCT coincidence is required
 
 // Pre-trigger Source Multiplexer
   wire [8:0] trig_source;
 
-  assign trig_source[0] = any_cfeb_hit    &&  clct_pat_trig_en;            // CLCT pattern pretrigger
-  assign trig_source[1] = alct_pat_trig_os  &&  alct_pat_trig_en;            // ALCT pattern trigger
-  assign trig_source[2] = any_cfeb_hit    &&   alct_match_trig_en;            // ALCT*CLCT match pattern pretrigger, success presumed
-  assign trig_source[3] = adb_ext_trig_os   &&  adb_ext_trig_en;            // ADB external trigger
-  assign trig_source[4] = dmb_ext_trig_os    &&  dmb_ext_trig_en;            // DMB external trigger
-  assign trig_source[5] = clct_ext_trig_os  &&  clct_ext_trig_en && !ext_trig_inject;  // CLCT external trigger from CCB
-  assign trig_source[6] = alct_ext_trig_os  &&  alct_ext_trig_en;            // ALCT external trigger from CCB
-  assign trig_source[7] = vme_ext_trig;                          // VME  external trigger from backplane
-  assign trig_source[8] = cfeb_layer_trig     && layer_trig_en;              // Layer-wide trigger
+  assign trig_source[0] = any_cfeb_hit     && clct_pat_trig_en;                     // CLCT pattern pretrigger
+  assign trig_source[1] = alct_pat_trig_os && alct_pat_trig_en;                     // ALCT pattern trigger
+  assign trig_source[2] = any_cfeb_hit     && alct_match_trig_en;                   // ALCT*CLCT match pattern pretrigger, success presumed
+  assign trig_source[3] = adb_ext_trig_os  && adb_ext_trig_en;                      // ADB external trigger
+  assign trig_source[4] = dmb_ext_trig_os  && dmb_ext_trig_en;                      // DMB external trigger
+  assign trig_source[5] = clct_ext_trig_os && clct_ext_trig_en && !ext_trig_inject; // CLCT external trigger from CCB
+  assign trig_source[6] = alct_ext_trig_os && alct_ext_trig_en;                     // ALCT external trigger from CCB
+  assign trig_source[7] = vme_ext_trig;                                             // VME  external trigger from backplane
+  assign trig_source[8] = cfeb_layer_trig  && layer_trig_en;                        // Layer-wide trigger
 
 // Pre-trigger
   reg  noflush    = 0;
@@ -2106,8 +2233,11 @@
   wire clct_pretrig_rqst= (| trig_source[7:0]) && !sync_err_stops_pretrig; // CLCT pretrigger requested, dont trig on [8]
 
   assign clct_pretrig = (clct_sm == pretrig);                        // CLCT pre-triggered
-  assign alct_pretrig = (clct_sm == pretrig) && alct_pretrig_window; // ALCT*CLCT pre-trigger coincidence
+  assign alct_preClct = (clct_sm == pretrig) && alct_preClct_window; // ALCT*CLCT pre-trigger coincidence
 
+// *****************************************************************************
+// YP: THIS IS WHERE CLCT DEADTIME IS
+// *****************************************************************************
   wire clct_pat_trig  = any_cfeb_hit && clct_pat_trig_en;        // Trigger source is a CLCT pattern
   wire clct_retrigger = clct_pat_trig && noflush && nothrottle;  // Immediate re-trigger
   wire clct_notbusy   = !clct_pretrig_rqst;                      // Ready for next pretrig  
@@ -2115,7 +2245,7 @@
 
 // Pre-trigger keep or discard
   wire discard_nowrbuf = clct_pretrig && !wr_buf_avail;                   // Discard pretrig because wr_buf was not ready
-  wire discard_noalct  = clct_pretrig && !alct_pretrig  && alct_required; // Discard pretrig because alct was not in window
+  wire discard_noalct  = clct_pretrig && !alct_preClct  && alct_required; // Discard pretrig because alct was not in window
   wire discard_pretrig = discard_nowrbuf || discard_noalct;               // Discard this pretrig
 
   wire clct_push_pretrig = clct_pretrig && !discard_pretrig; // Keep this pretrig, push it into pipeline
@@ -2198,24 +2328,24 @@
   wire flush_cnt_ena = (clct_sm == flush);
 
   always @(posedge clock) begin
-  if    (flush_cnt_clr) flush_cnt = clct_flush_delay-1'b1;  // sync load before entering flush state
-  else if (flush_cnt_ena) flush_cnt = flush_cnt-1'b1;      // only count during flush
+    if    (flush_cnt_clr) flush_cnt = clct_flush_delay-1'b1; // sync load before entering flush state
+    else if (flush_cnt_ena) flush_cnt = flush_cnt-1'b1;      // only count during flush
   end
 
   assign flush_done = ((flush_cnt == 0) || noflush) && clct_notbusy;
 
   always @(posedge clock) begin
-  noflush  <= (clct_flush_delay == 0);
+    noflush  <= (clct_flush_delay == 0);
   end
 
 // Delay trigger source and cfeb active feb list 1bx for clct_sm to go to pretrig state
   reg [MXCFEB-1:0] active_feb_s0  = 0;
-  reg [MXCFEB-1:0] cfeb_hit_s0  = 0;
-  reg [2:0]     nlayers_hit_s0  = 0;
-  reg [8:0]     trig_source_s0  = 0;
+  reg [MXCFEB-1:0] cfeb_hit_s0    = 0;
+  reg [2:0]        nlayers_hit_s0 = 0;
+  reg [8:0]        trig_source_s0 = 0;
 
   always @(posedge clock) begin
-    active_feb_s0  <= active_feb;    // CFEBs hit, including overlaps
+    active_feb_s0  <= active_feb;    // CFEBs active, including overlaps
     cfeb_hit_s0    <= cfeb_hit;      // CFEBs hit, not including overlaps
     nlayers_hit_s0 <= cfeb_nlayers_hit;
     trig_source_s0 <= trig_source;
@@ -2232,8 +2362,11 @@
   end
 
 // Trigger source was ME1A or ME1B
-  wire only_me1a_hit =  (|active_feb_s0[6:4]) && !(|active_feb_s0[3:0]);        // Only ME1A was hit
-  wire only_me1b_hit = !(|active_feb_s0[6:4]) &&  (|active_feb_s0[3:0]);        // Only ME1B was hit
+// YP: code below mixed up pre-triggers and active cfebs, so I modified it to have only pre-triggers
+//  wire only_me1a_hit =  (|active_feb_s0[6:4]) && !(|active_feb_s0[3:0]); // Only ME1A was hit
+//  wire only_me1b_hit = !(|active_feb_s0[6:4]) &&  (|active_feb_s0[3:0]); // Only ME1B was hit
+  wire only_me1a_hit =  (|cfeb_hit_s0[6:4]) && !(|cfeb_hit_s0[3:0]); // Only ME1A was hit
+  wire only_me1b_hit = !(|cfeb_hit_s0[6:4]) &&  (|cfeb_hit_s0[3:0]); // Only ME1B was hit
 
   wire clct_pretrig_me1a = clct_pretrig && (csc_me1ab || cnt_non_me1ab_en) && only_me1a_hit && clct_pat_trig_en;  // Pretriggered on ME1A only
   wire clct_pretrig_me1b = clct_pretrig && (csc_me1ab || cnt_non_me1ab_en) && only_me1b_hit && clct_pat_trig_en;  // Pretriggered on ME1B only
@@ -2242,7 +2375,7 @@
   wire [10:0] trig_source_s0_mod;
   
   assign trig_source_s0_mod[1:0] = trig_source_s0[1:0];      // Copy non-alct trigger source bits
-  assign trig_source_s0_mod[2]   = alct_pretrig_window && clct_pretrig && alct_match_trig_en;  // ALCT window was open at pretrig
+  assign trig_source_s0_mod[2]   = alct_preClct_window && clct_pretrig && alct_match_trig_en;  // ALCT window was open at pretrig
   assign trig_source_s0_mod[8:3] = trig_source_s0[8:3];      // Copy non-alct trigger source bits
   assign trig_source_s0_mod[9]   = clct_pretrig_me1a;        // CLCT pre-trigger was ME1A only
   assign trig_source_s0_mod[10]  = clct_pretrig_me1b;        // CLCT pre-trigger was ME1B only
@@ -2253,26 +2386,26 @@
   reg  [MXBXN-1:0] bxn_clct_vme    = 0;
 
   always @(posedge clock) begin
-  if (event_clear_vme) begin
-  nlayers_hit_vme  <= 0;
-  trig_source_vme  <= 0;
-  bxn_clct_vme  <= 0;
-  end
-  else if (clct_push_pretrig) begin
-  nlayers_hit_vme  <= nlayers_hit_s0;
-  trig_source_vme  <= trig_source_s0_mod;
-  bxn_clct_vme  <= bxn_counter;
-  end
+    if (event_clear_vme) begin
+      nlayers_hit_vme <= 0;
+      trig_source_vme <= 0;
+      bxn_clct_vme    <= 0;
+    end
+    else if (clct_push_pretrig) begin
+      nlayers_hit_vme <= nlayers_hit_s0;
+      trig_source_vme <= trig_source_s0_mod;
+      bxn_clct_vme    <= bxn_counter;
+    end
   end
   
 // On Pretrigger send Active FEB word to DMB, persist 1 cycle per event
-  wire [MXCFEB-1:0] active_feb_list_pre;  // Active FEB list to DMB at pretrig time
-  wire [MXCFEB-1:0] active_feb_list_tmb;  // Active FEB list to DMB at tmb match time
-  wire [MXCFEB-1:0] active_feb_list;    // Active FEB list selection
+  wire [MXCFEB-1:0] active_feb_list_pre; // Active FEB list to DMB at pretrig time
+  wire [MXCFEB-1:0] active_feb_list_tmb; // Active FEB list to DMB at tmb match time
+  wire [MXCFEB-1:0] active_feb_list;     // Active FEB list selection
   
-  wire              active_feb_flag_pre;  // Active FEB flag to DMB at pretrig time
-  wire              active_feb_flag_tmb;  // Active FEB flag to DMB at tmb match time
-  wire              active_feb_flag;    // Active FEB flag selection
+  wire              active_feb_flag_pre; // Active FEB flag to DMB at pretrig time
+  wire              active_feb_flag_tmb; // Active FEB flag to DMB at tmb match time
+  wire              active_feb_flag;     // Active FEB flag selection
 
   assign active_feb_flag_pre = clct_push_pretrig;
   assign active_feb_list_pre = active_feb_s0[MXCFEB-1:0] & {MXCFEB{active_feb_flag_pre}};
@@ -2287,7 +2420,7 @@
   reg [MXCFEB-1:0] tmb_aff_list_ff = 0;
   
   always @(posedge clock) begin
-  tmb_aff_list_ff <= tmb_aff_list;
+    tmb_aff_list_ff <= tmb_aff_list;
   end
 
 //------------------------------------------------------------------------------------------------------------------
@@ -2298,7 +2431,7 @@
   parameter PATTERN_FINDER_LATENCY = 2;  // Tuned 4/22/08
   parameter MXPTRID = 23;
 
-  wire [3:0] postdrift_adr;
+  wire [3:0]         postdrift_adr;
   wire [MXPTRID-1:0] pretrig_data;
   wire [MXPTRID-1:0] postdrift_data;
 
@@ -2314,12 +2447,12 @@
   srl16e_bbl #(MXPTRID) usrldrift (.clock(clock),.ce(1'b1),.adr(postdrift_adr),.d(pretrig_data),.q(postdrift_data));
 
 // Extract pre-trigger data after drift delay, compensated for pattern-finder latency + programmable drift delay
-  wire        clct_pop_xtmb    = postdrift_data[0];    // CLCT postdrift flag aka active_feb_flag
-  wire [MXBADR-1:0]  clct_wr_adr_xtmb  = postdrift_data[11:1];    // Buffer address at pre-trigger
-  wire        clct_wr_avail_xtmb   = postdrift_data[12];    // Buffer address was valid at pre-trigger
-  wire [1:0]      bxn_counter_xtmb  = postdrift_data[14:13];  // BXN at pre-trigger, only lsbs are needed for clct
-  wire        trig_source_ext_xtmb= postdrift_data[15];    // Trigger source was not CLCT pattern
-  wire [MXCFEB-1:0]  aff_list_xtmb    = postdrift_data[22:16];  // Active feb list
+  wire              clct_pop_xtmb        = postdrift_data[0];     // CLCT postdrift flag aka active_feb_flag
+  wire [MXBADR-1:0] clct_wr_adr_xtmb     = postdrift_data[11:1];  // Buffer address at pre-trigger
+  wire              clct_wr_avail_xtmb   = postdrift_data[12];    // Buffer address was valid at pre-trigger
+  wire [1:0]        bxn_counter_xtmb     = postdrift_data[14:13]; // BXN at pre-trigger, only lsbs are needed for clct
+  wire              trig_source_ext_xtmb = postdrift_data[15];    // Trigger source was not CLCT pattern
+  wire [MXCFEB-1:0] aff_list_xtmb        = postdrift_data[22:16]; // Active feb list
 
 // After drift, send CLCT words to TMB, persist 1 cycle only, blank invalid CLCTs unless override
   wire clct0_hit_valid = (hs_hit_1st >= hit_thresh_postdrift);    // CLCT is over hit thresh
@@ -2340,27 +2473,27 @@
 // Construct CLCTs for sending to TMB matching. These are node names only
   wire [MXCLCT-1:0]  clct0, clct0_xtmb;
   wire [MXCLCT-1:0]  clct1, clct1_xtmb;
-  wire [MXCLCTA-1:0]  clcta, clcta_xtmb;
-  wire [MXCLCTC-1:0]  clctc, clctc_xtmb;
+  wire [MXCLCTA-1:0] clcta, clcta_xtmb;
+  wire [MXCLCTC-1:0] clctc, clctc_xtmb;
   wire [MXCFEB-1:0]  clctf, clctf_xtmb;
 
-  assign clct0[0]    = clct0_vpf;        // Valid pattern flag
-  assign clct0[3:1]  = hs_hit_1st[2:0];      // Hits on pattern 0-6
-  assign clct0[7:4]  = hs_pid_1st[3:0];      // Pattern shape 0-A
-  assign clct0[15:8]  = hs_key_1st[7:0];      // 1/2-strip ID number
+  assign clct0[0]    = clct0_vpf;       // Valid pattern flag
+  assign clct0[3:1]  = hs_hit_1st[2:0]; // Hits on pattern 0-6
+  assign clct0[7:4]  = hs_pid_1st[3:0]; // Pattern shape 0-A
+  assign clct0[15:8] = hs_key_1st[7:0]; // 1/2-strip ID number
 
-  assign clct1[0]    = clct1_vpf;        // Valid pattern flag
-  assign clct1[3:1]  = hs_hit_2nd[2:0];      // Hits on pattern 0-6
-  assign clct1[7:4]  = hs_pid_2nd[3:0];      // Pattern shape 0-A
-  assign clct1[15:8]  = hs_key_2nd[7:0];      // 1/2-strip ID number
+  assign clct1[0]    = clct1_vpf;       // Valid pattern flag
+  assign clct1[3:1]  = hs_hit_2nd[2:0]; // Hits on pattern 0-6
+  assign clct1[7:4]  = hs_pid_2nd[3:0]; // Pattern shape 0-A
+  assign clct1[15:8] = hs_key_2nd[7:0]; // 1/2-strip ID number
 
-  assign clcta[5:0]  = hs_layer_or[5:0];      // Layer ORs at pattern finder output
-  assign clcta[6]    = hs_bsy_2nd;        // 2nd CLCT busy, logic error indicator
+  assign clcta[5:0]  = hs_layer_or[5:0]; // Layer ORs at pattern finder output
+  assign clcta[6]    = hs_bsy_2nd;       // 2nd CLCT busy, logic error indicator
 
-  assign clctc[1:0]  = bxn_counter_xtmb[1:0];  // Bunch crossing number
-  assign clctc[2]    = sync_err;          // BX0 disagrees with BXN count
+  assign clctc[1:0]  = bxn_counter_xtmb[1:0]; // Bunch crossing number
+  assign clctc[2]    = sync_err;              // BX0 disagrees with BXN count
 
-  assign clctf[6:0]  = aff_list_xtmb[6:0];    // Active feb list post drift
+  assign clctf[6:0]  = aff_list_xtmb[6:0]; // Active feb list post drift
 
 // Blank CLCTs with insufficient hits
   wire clct0_blanking = clct_blanking && !clct0_vpf;
@@ -2376,70 +2509,70 @@
 // Latch CLCTs for VME
   reg [MXCLCT-1:0]  clct0_vme=0;
   reg [MXCLCT-1:0]  clct1_vme=0;
-  reg [MXCLCTC-1:0]  clctc_vme=0;
+  reg [MXCLCTC-1:0] clctc_vme=0;
   reg [MXCFEB-1:0]  clctf_vme=0;
 
   wire clear_clct_vme = event_clear_vme | clct_pretrig;
 
   always @(posedge clock) begin
-  if (clear_clct_vme) begin    // Clear clcts in case event gets flushed
-  clct0_vme    <=  0;
-  clct1_vme    <=  0;
-  clctc_vme    <=  0;
-  clctf_vme    <=  0;
-  end
-  else if (clct0_vpf) begin
-  clct0_vme    <=  clct0_xtmb;
-  clct1_vme    <=  clct1_xtmb;
-  clctc_vme    <=  clctc_xtmb;
-  clctf_vme    <=  clctf_xtmb;
-  end
+    if (clear_clct_vme) begin    // Clear clcts in case event gets flushed
+      clct0_vme <= 0;
+      clct1_vme <= 0;
+      clctc_vme <= 0;
+      clctf_vme <= 0;
+    end
+    else if (clct0_vpf) begin
+      clct0_vme <= clct0_xtmb;
+      clct1_vme <= clct1_xtmb;
+      clctc_vme <= clctc_xtmb;
+      clctf_vme <= clctf_xtmb;
+    end
   end
 
 // Discard event if there was no valid first pattern after drift
   wire [1:0] clct_invp;
   
-  assign clct_invp[0] = !(clct0_vpf || trig_source_ext_xtmb);    // Force valid for external trigger
+  assign clct_invp[0] = !(clct0_vpf || trig_source_ext_xtmb);                     // Force valid for external trigger
   assign clct_invp[1] = !(clct1_vpf || trig_source_ext_xtmb) && (hs_hit_2nd !=0); // clct1 invalid if it has hits below thresh
 
-  wire   discard_invp    =  clct_invp[0] && clct_pop_xtmb;    // Discard event, clct0 failed hit or pid thresh
-  wire   clct_push_xtmb   = !clct_invp[0] && clct_pop_xtmb;    // Keep event, push to TMB section
+  wire discard_invp   =  clct_invp[0] && clct_pop_xtmb;    // Discard event, clct0 failed hit or pid thresh
+  wire clct_push_xtmb = !clct_invp[0] && clct_pop_xtmb;    // Keep event, push to TMB section
 
-  wire   clct_en = clct_pop_xtmb && !trig_source_ext_xtmb;    // Popped out of pipeline and was not external trig
-  wire   discard_inv_clct0= clct0_hit_valid && !clct0_pid_valid && clct_en;  // Discarded clct0 that passed hit thresh but failed pid thresh
-  wire   discard_inv_clct1= clct1_hit_valid && !clct1_pid_valid && clct_en;  // Discarded clct1 that passed hit thresh but failed pid thresh
+  wire clct_en           = clct_pop_xtmb   && !trig_source_ext_xtmb;       // Popped out of pipeline and was not external trig
+  wire discard_inv_clct0 = clct0_hit_valid && !clct0_pid_valid && clct_en; // Discarded clct0 that passed hit thresh but failed pid thresh
+  wire discard_inv_clct1 = clct1_hit_valid && !clct1_pid_valid && clct_en; // Discarded clct1 that passed hit thresh but failed pid thresh
 
 // TMB response, variable tmb latency depends on when alct arrived in clct window
-  wire discard_tmbreject  = (tmb_trig_pulse && !tmb_trig_keep);  // TMB could not match clct to alct
+  wire discard_tmbreject  = (tmb_trig_pulse && !tmb_trig_keep); // TMB could not match clct to alct
 
 //------------------------------------------------------------------------------------------------------------------
 // Event Discard Counter and TMB Response Failure Section
 //------------------------------------------------------------------------------------------------------------------
 // Event discard counters
-  wire discard_nowrbuf_cnt_en    = discard_nowrbuf;
+  wire discard_nowrbuf_cnt_en   = discard_nowrbuf;
   wire discard_noalct_cnt_en    = discard_noalct;
-  wire discard_invp_cnt_en    = discard_invp;      // Discarded event, invalid pattern, clct0 failed hit or pid thresh
-  wire discard_inv_clct0_cnt_en  = discard_inv_clct0;  // Discarded clct0 that passed hit thresh but failed pid thresh
-  wire discard_inv_clct1_cnt_en  = discard_inv_clct1;  // Discarded clct1 that passed hit thresh but failed pid thresh
-  wire discard_tmbreject_cnt_en  = discard_tmbreject;
-  wire discard_event_led      = discard_nowrbuf || discard_noalct || discard_tmbreject;
+  wire discard_invp_cnt_en      = discard_invp;      // Discarded event, invalid pattern, clct0 failed hit or pid thresh
+  wire discard_inv_clct0_cnt_en = discard_inv_clct0; // Discarded clct0 that passed hit thresh but failed pid thresh
+  wire discard_inv_clct1_cnt_en = discard_inv_clct1; // Discarded clct1 that passed hit thresh but failed pid thresh
+  wire discard_tmbreject_cnt_en = discard_tmbreject;
+  wire discard_event_led        = discard_nowrbuf || discard_noalct || discard_tmbreject;
 
 // L1A requested but not received or L1A received and no TMB in window
   wire l1a_match_cnt_en = l1a_match;  // TMB triggered, TMB in L1A window
   wire l1a_notmb_cnt_en = l1a_notmb;  // L1A received, no TMB in window
   wire tmb_nol1a_cnt_en = tmb_nol1a;  // TMB triggered, no L1A received
-  wire l1a_los_win;          // TMB readouts lost due to L1A prioritizing
+  wire l1a_los_win;                   // TMB readouts lost due to L1A prioritizing
 
 //------------------------------------------------------------------------------------------------------------------
 // Trigger/Readout VME Counter Section
 //------------------------------------------------------------------------------------------------------------------
 // Counter registers
-  parameter MNCNT        = 13;            // First sequencer counter, not number of counters beco they start at elsewhere
-  parameter MXCNT        = 65;            // Last  sequencer counter, not number of counters beco they end elsewhere
+  parameter MNCNT        = 13;            // First sequencer counter, not number of counters because they start elsewhere
+  parameter MXCNT        = 65;            // Last  sequencer counter, not number of counters becouse they end elsewhere
   parameter RESYNCCNT_ID = 63;            // TTC Resyncs received counter does not get cleared
 
   reg [MXCNTVME-1:0] cnt [MXCNT:MNCNT]; // TMB counter array, counters[6:0] are in alct.v
-  reg [MXCNT:MNCNT]  cnt_en = 0;          // Counter increment enables
+  reg [MXCNT:MNCNT]  cnt_en = 0;        // Counter increment enables
 
 // Counter enable strobes
   always @(posedge clock) begin
@@ -2527,8 +2660,8 @@
   reg cnt_any_ovf_seq = 0;
 
   always @(posedge clock) begin
-  cnt_any_ovf_seq  <= cnt_any_ovf_clct;
-  cnt_en_all    <= !((cnt_any_ovf_clct || cnt_any_ovf_alct) && cnt_stop_on_ovf);
+    cnt_any_ovf_seq <= cnt_any_ovf_clct;
+    cnt_en_all      <= !((cnt_any_ovf_clct || cnt_any_ovf_alct) && cnt_stop_on_ovf);
   end
 
 // Counting
@@ -2608,207 +2741,209 @@
 // Multi-buffer storage for event header
 //------------------------------------------------------------------------------------------------------------------
 // Pre-trigger: store pre-trigger data in RAM mapping array
-  parameter MXXPRE = 90;                    // Pre-trig data bits
-  wire [MXXPRE-1:0]  xpre_wdata;                // Mapping array
-  wire [MXXPRE-1:0]  xpre_rdata;                // Mapping array
+  parameter MXXPRE = 90; // Pre-trig data bits
 
-  assign xpre_wdata[6:0]    =  active_feb_list_pre[6:0];  // Active FEB list sent to DAQMB
-  assign xpre_wdata[17:7]    =  trig_source_s0_mod[10:0];  // Trigger source vector
-  assign xpre_wdata[29:18]  =  bxn_counter[11:0];      // Full Bunch Crossing number at pretrig
-  assign xpre_wdata[59:30]  =  orbit_counter[29:0];    // Orbit count at pre-trigger
-  assign xpre_wdata[60]    =  sync_err;          // BXN sync error
-  assign xpre_wdata[64:61]  =  alct_pretrig_win[3:0];    // ALCT active_feb_flag position in pretrig window
+  wire [MXXPRE-1:0] xpre_wdata; // Mapping array
+  wire [MXXPRE-1:0] xpre_rdata; // Mapping array
 
-  assign xpre_wdata[75:65]  =  wr_buf_adr[MXBADR-1:0];    // Address of write buffer at pretrig
-  assign xpre_wdata[86:76]  =  buf_fence_dist[10:0];    // Distance to 1st fence address at pretrigger
-  assign xpre_wdata[87]    =  wr_buf_avail;        // Write buffer is ready or bypassed
-  assign xpre_wdata[88]    =  wr_buf_ready;        // Write buffer is ready
-  assign xpre_wdata[89]    =  buf_stalled;        // All buffer memory space is in use
+  assign xpre_wdata[6:0]   =  active_feb_list_pre[6:0]; // Active FEB list sent to DAQMB
+  assign xpre_wdata[17:7]  =  trig_source_s0_mod[10:0]; // Trigger source vector
+  assign xpre_wdata[29:18] =  bxn_counter[11:0];        // Full Bunch Crossing number at pretrig
+  assign xpre_wdata[59:30] =  orbit_counter[29:0];      // Orbit count at pre-trigger
+  assign xpre_wdata[60]    =  sync_err;                 // BXN sync error
+  assign xpre_wdata[64:61] =  alct_preClct_win[3:0];    // ALCT active_feb_flag position in pretrig window
+
+  assign xpre_wdata[75:65] =  wr_buf_adr[MXBADR-1:0]; // Address of write buffer at pretrig
+  assign xpre_wdata[86:76] =  buf_fence_dist[10:0];   // Distance to 1st fence address at pretrigger
+  assign xpre_wdata[87]    =  wr_buf_avail;           // Write buffer is ready or bypassed
+  assign xpre_wdata[88]    =  wr_buf_ready;           // Write buffer is ready
+  assign xpre_wdata[89]    =  buf_stalled;            // All buffer memory space is in use
 
 // Pre-trigger+1bx: store pre-trigger counter 1bx after pretrig to give it time to count current event
-  parameter MXXPRE1 = 60;                    // Pre-trig+1bx data bits
-  wire [MXXPRE1-1:0]  xpre1_wdata;              // Mapping array
-  wire [MXXPRE1-1:0]  xpre1_rdata;              // Mapping array
+  parameter MXXPRE1 = 60; // Pre-trig+1bx data bits
 
-  assign xpre1_wdata[29:0]  =  pretrig_counter[29:0];    // Pre-trigger counter
-  assign xpre1_wdata[59:30]  =  alct_counter[29:0];      // ALCT counter at pre-trigger
+  wire [MXXPRE1-1:0] xpre1_wdata; // Mapping array
+  wire [MXXPRE1-1:0] xpre1_rdata; // Mapping array
+
+  assign xpre1_wdata[29:0]  = pretrig_counter[29:0]; // Pre-trigger counter
+  assign xpre1_wdata[59:30] = alct_counter[29:0];    // ALCT counter at pre-trigger
 
 // Post-drift: store CLCT data sent to TMB in RAM mapping array
   parameter MXXTMB = 44;                    // Post drift CLCT data
   wire [MXXTMB-1:0]  xtmb_wdata;                // Mapping array
   wire [MXXTMB-1:0]  xtmb_rdata;                // Mapping array
   
-  assign xtmb_wdata[15:0]    =  clct0_xtmb[15:0];      // CLCT0 after drift
-  assign xtmb_wdata[31:16]  =  clct1_xtmb[15:0];      // CLCT1 after drift
-  assign xtmb_wdata[34:32]  =  clctc_xtmb[2:0];      // CLCT0/1 common after drift
-  assign xtmb_wdata[41:35]  =  clcta_xtmb[6:0];      // CLCT0/1 common after drift
-  assign xtmb_wdata[42]    =  clct_invp[0];        // CLCT had invalid pattern after drift delay
-  assign xtmb_wdata[43]    =  clct_invp[1];        // CLCT had invalid pattern after drift delay
+  assign xtmb_wdata[15:0]  =  clct0_xtmb[15:0]; // CLCT0 after drift
+  assign xtmb_wdata[31:16] =  clct1_xtmb[15:0]; // CLCT1 after drift
+  assign xtmb_wdata[34:32] =  clctc_xtmb[2:0];  // CLCT0/1 common after drift
+  assign xtmb_wdata[41:35] =  clcta_xtmb[6:0];  // CLCT0/1 common after drift
+  assign xtmb_wdata[42]    =  clct_invp[0];     // CLCT had invalid pattern after drift delay
+  assign xtmb_wdata[43]    =  clct_invp[1];     // CLCT had invalid pattern after drift delay
 
 // Post-drift+1bx: store CLCT counter in RAM mapping array
-  parameter MXXTMB1 = 30;                    // Post drift CLCT counter
-  wire [MXXTMB1-1:0]  xtmb1_wdata;              // Mapping array
-  wire [MXXTMB1-1:0]  xtmb1_rdata;              // Mapping array
+  parameter MXXTMB1 = 30;         // Post drift CLCT counter
+  wire [MXXTMB1-1:0] xtmb1_wdata; // Mapping array
+  wire [MXXTMB1-1:0] xtmb1_rdata; // Mapping array
 
   assign xtmb1_wdata[29:0]  =  clct_counter[29:0];      // CLCTs sent to TMB section
 
 // TMB match: store TMB match results in RAM mapping array
-  parameter MXRTMB = 23;                    // TMB match data bits
-  wire [MXRTMB-1:0]  rtmb_wdata;                // Mapping array
-  wire [MXRTMB-1:0]  rtmb_rdata;                // Mapping array
+  parameter MXRTMB = 23;        // TMB match data bits
+  wire [MXRTMB-1:0] rtmb_wdata; // Mapping array
+  wire [MXRTMB-1:0] rtmb_rdata; // Mapping array
 
-  assign rtmb_wdata[0]    =  tmb_match;          // ALCT and CLCT matched in time
-  assign rtmb_wdata[1]    =  tmb_alct_only;        // Only ALCT triggered
-  assign rtmb_wdata[2]    =  tmb_clct_only;        // Only CLCT triggered
-  assign rtmb_wdata[6:3]    =  tmb_match_win[3:0];      // Location of alct in clct window
+  assign rtmb_wdata[0]   = tmb_match;          // ALCT and CLCT matched in time
+  assign rtmb_wdata[1]   = tmb_alct_only;      // Only ALCT triggered
+  assign rtmb_wdata[2]   = tmb_clct_only;      // Only CLCT triggered
+  assign rtmb_wdata[6:3] = tmb_match_win[3:0]; // Location of alct in clct window
 
-  assign rtmb_wdata[7]    =  tmb_no_alct;        // No ALCT
-  assign rtmb_wdata[8]    =  tmb_one_alct;        // One ALCT
-  assign rtmb_wdata[9]    =  tmb_one_clct;        // One CLCT
-  assign rtmb_wdata[10]    =  tmb_two_alct;        // Two ALCTs
-  assign rtmb_wdata[11]    =  tmb_two_clct;        // Two CLCTs
-  assign rtmb_wdata[12]    =  tmb_dupe_alct;        // ALCT0 copied into ALCT1 to make 2nd LCT
-  assign rtmb_wdata[13]    =  tmb_dupe_clct;        // CLCT0 copied into CLCT1 to make 2nd LCT
-  assign rtmb_wdata[14]    =  tmb_rank_err;        // LCT1 has higher quality than LCT0
+  assign rtmb_wdata[7]   =  tmb_no_alct;       // No ALCT
+  assign rtmb_wdata[8]   =  tmb_one_alct;      // One ALCT
+  assign rtmb_wdata[9]   =  tmb_one_clct;      // One CLCT
+  assign rtmb_wdata[10]  =  tmb_two_alct;      // Two ALCTs
+  assign rtmb_wdata[11]  =  tmb_two_clct;      // Two CLCTs
+  assign rtmb_wdata[12]  =  tmb_dupe_alct;     // ALCT0 copied into ALCT1 to make 2nd LCT
+  assign rtmb_wdata[13]  =  tmb_dupe_clct;     // CLCT0 copied into CLCT1 to make 2nd LCT
+  assign rtmb_wdata[14]  =  tmb_rank_err;      // LCT1 has higher quality than LCT0
 
-  assign rtmb_wdata[15]    =  tmb_match_ro;        // ALCT and CLCT matched in time, non-triggering readout
-  assign rtmb_wdata[16]    =  tmb_alct_only_ro;      // Only ALCT triggered, non-triggering readout
-  assign rtmb_wdata[17]    =  tmb_clct_only_ro;      // Only CLCT triggered, non-triggering readout
+  assign rtmb_wdata[15]  =  tmb_match_ro;      // ALCT and CLCT matched in time, non-triggering readout
+  assign rtmb_wdata[16]  =  tmb_alct_only_ro;  // Only ALCT triggered, non-triggering readout
+  assign rtmb_wdata[17]  =  tmb_clct_only_ro;  // Only CLCT triggered, non-triggering readout
 
-  assign rtmb_wdata[18]    =  tmb_trig_pulse;        // TMB trig pulse agreed with rtmb_push
-  assign rtmb_wdata[19]    =  tmb_trig_keep;        // TMB said keep triggering event
-  assign rtmb_wdata[20]    =  tmb_non_trig_keep;      // TMB said keep non-triggering event
-  assign rtmb_wdata[21]    =  tmb_clct0_discard;      // TMB discarded clct0 from ME1A
-  assign rtmb_wdata[22]    =  tmb_clct1_discard;      // TMB discarded clct1 from ME1A
+  assign rtmb_wdata[18]  =  tmb_trig_pulse;    // TMB trig pulse agreed with rtmb_push
+  assign rtmb_wdata[19]  =  tmb_trig_keep;     // TMB said keep triggering event
+  assign rtmb_wdata[20]  =  tmb_non_trig_keep; // TMB said keep non-triggering event
+  assign rtmb_wdata[21]  =  tmb_clct0_discard; // TMB discarded clct0 from ME1A
+  assign rtmb_wdata[22]  =  tmb_clct1_discard; // TMB discarded clct1 from ME1A
 
 // TMB match: store ALCTs sent to MPC in RAM mapping array, arrives same bx as tmb match result
-  parameter MXALCTD = 11+11+5+2;                // ALCT transmit frame data bits, 2alcts + bxn + tmb stats
-  wire [MXALCTD-1:0]  alct_wdata;                // Mapping array
-  wire [MXALCTD-1:0]  alct_rdata;                // Mapping array
+  parameter MXALCTD = 11+11+5+2; // ALCT transmit frame data bits, 2alcts + bxn + tmb stats
+  wire [MXALCTD-1:0] alct_wdata; // Mapping array
+  wire [MXALCTD-1:0] alct_rdata; // Mapping array
 
-  assign alct_wdata[10:0]    =  tmb_alct0[10:0];      // ALCT best muon latched at trigger
-  assign alct_wdata[21:11]  =  tmb_alct1[10:0];      // ALCT second best muon latched at trigger
-  assign alct_wdata[26:22]  =  tmb_alctb[4:0];        // ALCT shared bxn
-  assign alct_wdata[28:27]  =  tmb_alcte[1:0];        // ALCT ecc error syndrome latched at trigger
+  assign alct_wdata[10:0]  =  tmb_alct0[10:0]; // ALCT best muon latched at trigger
+  assign alct_wdata[21:11] =  tmb_alct1[10:0]; // ALCT second best muon latched at trigger
+  assign alct_wdata[26:22] =  tmb_alctb[4:0];  // ALCT shared bxn
+  assign alct_wdata[28:27] =  tmb_alcte[1:0];  // ALCT ecc error syndrome latched at trigger
 
 // TMB match+1bx: store TMB match results in RAM mapping array, 1bx later to give it time to count current event
-  parameter MXRTMB1 = 37;                    // Trigger counter
-  wire [MXRTMB1-1:0]  rtmb1_wdata;              // Mapping array
-  wire [MXRTMB1-1:0]  rtmb1_rdata;              // Mapping array
+  parameter MXRTMB1 = 37;         // Trigger counter
+  wire [MXRTMB1-1:0] rtmb1_wdata; // Mapping array
+  wire [MXRTMB1-1:0] rtmb1_rdata; // Mapping array
 
-  assign rtmb1_wdata[29:0]  =  trig_counter[29:0];      // TMB trigger counter
-  assign rtmb1_wdata[36:30]  =  tmb_aff_list_ff[6:0];    // Active cfeb list at TMB match, saves 1 ram if put here
+  assign rtmb1_wdata[29:0]  = trig_counter[29:0];   // TMB trigger counter
+  assign rtmb1_wdata[36:30] = tmb_aff_list_ff[6:0]; // Active cfeb list at TMB match, saves 1 ram if put here
 
 // MPC transmit: store MPC transmit frame data in RAM mapping array
-  parameter MXXMPC = 64;                    // MPC transmit frame data bits
-  wire [MXXMPC-1:0]  xmpc_wdata;                // Mapping array
-  wire [MXXMPC-1:0]  xmpc_rdata;                // Mapping array
+  parameter MXXMPC = 64;        // MPC transmit frame data bits
+  wire [MXXMPC-1:0] xmpc_wdata; // Mapping array
+  wire [MXXMPC-1:0] xmpc_rdata; // Mapping array
 
-  assign xmpc_wdata[15:0]    =  mpc0_frame0_ff[15:0];    // MPC muon 0 frame 0
-  assign xmpc_wdata[31:16]  =  mpc0_frame1_ff[15:0];    // MPC muon 0 frame 1
-  assign xmpc_wdata[47:32]  =  mpc1_frame0_ff[15:0];    // MPC muon 1 frame 0
-  assign xmpc_wdata[63:48]  =  mpc1_frame1_ff[15:0];    // MPC muon 1 frame 1
+  assign xmpc_wdata[15:0]  = mpc0_frame0_ff[15:0]; // MPC muon 0 frame 0
+  assign xmpc_wdata[31:16] = mpc0_frame1_ff[15:0]; // MPC muon 0 frame 1
+  assign xmpc_wdata[47:32] = mpc1_frame0_ff[15:0]; // MPC muon 1 frame 0
+  assign xmpc_wdata[63:48] = mpc1_frame1_ff[15:0]; // MPC muon 1 frame 1
 
 // MPC receive: store MPC response data in RAM mapping array
-  parameter MXRMPC = 4;                    // MPC receive data bits
-  wire [MXRMPC-1:0]  rmpc_wdata;                // Mapping array
-  wire [MXRMPC-1:0]  rmpc_rdata;                // Mapping array
+  parameter MXRMPC = 4;         // MPC receive data bits
+  wire [MXRMPC-1:0] rmpc_wdata; // Mapping array
+  wire [MXRMPC-1:0] rmpc_rdata; // Mapping array
 
-  assign rmpc_wdata[1:0]    =  mpc_accept_ff[1:0];      // MPC muon accept response
-  assign rmpc_wdata[3:2]    =  mpc_reserved_ff[1:0];    // MPC reserved
+  assign rmpc_wdata[1:0] = mpc_accept_ff[1:0];   // MPC muon accept response
+  assign rmpc_wdata[3:2] = mpc_reserved_ff[1:0]; // MPC reserved
 
 // L1A: store L1A results in RAM mapping array
-  parameter MXL1AD = 32;                    // L1A data bits
-  wire [MXL1AD-1:0]  l1a_wdata;                // Mapping array
-  wire [MXL1AD-1:0]  l1a_wdata_notmb;            // Mapping array
-  wire [MXL1AD-1:0]  l1a_rdata;                // Mapping array
+  parameter MXL1AD = 32;             // L1A data bits
+  wire [MXL1AD-1:0] l1a_wdata;       // Mapping array
+  wire [MXL1AD-1:0] l1a_wdata_notmb; // Mapping array
+  wire [MXL1AD-1:0] l1a_rdata;       // Mapping array
 
-  wire [MXL1WIND-1:0]  l1a_match_win;
+  wire [MXL1WIND-1:0] l1a_match_win;
   wire [MXL1ARX-1:0]  l1a_cnt_win;
-  wire [MXBXN-1:0]  l1a_bxn_win;
-  wire        l1a_push_me;
-  wire        l1a_keep;
-  wire        wr_avail_xl1a;                // Buffer available at L1A match
+  wire [MXBXN-1:0]    l1a_bxn_win;
+  wire                l1a_push_me;
+  wire                l1a_keep;
+  wire                wr_avail_xl1a; // Buffer available at L1A match
 
-  assign l1a_wdata[11:0]    =  l1a_bxn_win[11:0];        // BXN at L1A arrival
-  assign l1a_wdata[23:12]    =  l1a_cnt_win[11:0];        // L1As received at time of this event
-  assign l1a_wdata[27:24]    =  l1a_match_win[3:0];        // Position of l1a in window
-  assign l1a_wdata[28]    =  l1a_push_me;          // L1A with TMB in window, and readouts enabled
-  assign l1a_wdata[29]    =  l1a_notmb && l1a_allow_notmb;  // L1A with no TMB in window, readout anyway
-  assign l1a_wdata[30]    =  tmb_nol1a && l1a_allow_nol1a;  // TMB with no L1A arrival, readout anyway
-  assign l1a_wdata[31]    =  wr_avail_xl1a;          // Buffer available at L1A match
+  assign l1a_wdata[11:0]  = l1a_bxn_win[11:0];            // BXN at L1A arrival
+  assign l1a_wdata[23:12] = l1a_cnt_win[11:0];            // L1As received at time of this event
+  assign l1a_wdata[27:24] = l1a_match_win[3:0];           // Position of l1a in window
+  assign l1a_wdata[28]    = l1a_push_me;                  // L1A with TMB in window, and readouts enabled
+  assign l1a_wdata[29]    = l1a_notmb && l1a_allow_notmb; // L1A with no TMB in window, readout anyway
+  assign l1a_wdata[30]    = tmb_nol1a && l1a_allow_nol1a; // TMB with no L1A arrival, readout anyway
+  assign l1a_wdata[31]    = wr_avail_xl1a;                // Buffer available at L1A match
 
-  assign l1a_wdata_notmb[11:0] =  bxn_counter_l1a[11:0];      // BXN at L1A arrival, uses separate offset
-  assign l1a_wdata_notmb[23:12]=  l1a_rx_counter_plus1[11:0];    // L1As received at time of this event
-  assign l1a_wdata_notmb[27:24]=  0;                // Position of l1a in window
-  assign l1a_wdata_notmb[28]   =  l1a_push_me;          // L1A with TMB in window, and readouts enabled
-  assign l1a_wdata_notmb[29]   =  l1a_notmb && l1a_allow_notmb;  // L1A with no TMB in window, readout anyway
-  assign l1a_wdata_notmb[30]   =  tmb_nol1a && l1a_allow_nol1a;  // TMB with no L1A arrival, readout anyway
-  assign l1a_wdata_notmb[31]   =  wr_buf_avail;          // Buffer available at L1A match
+  assign l1a_wdata_notmb[11:0]  =  bxn_counter_l1a[11:0];        // BXN at L1A arrival, uses separate offset
+  assign l1a_wdata_notmb[23:12] =  l1a_rx_counter_plus1[11:0];   // L1As received at time of this event
+  assign l1a_wdata_notmb[27:24] =  0;                            // Position of l1a in window
+  assign l1a_wdata_notmb[28]    =  l1a_push_me;                  // L1A with TMB in window, and readouts enabled
+  assign l1a_wdata_notmb[29]    =  l1a_notmb && l1a_allow_notmb; // L1A with no TMB in window, readout anyway
+  assign l1a_wdata_notmb[30]    =  tmb_nol1a && l1a_allow_nol1a; // TMB with no L1A arrival, readout anyway
+  assign l1a_wdata_notmb[31]    =  wr_buf_avail;                 // Buffer available at L1A match
 
 //------------------------------------------------------------------------------------------------------------------
 // Pipeline arrays for wr_buf_adr to coincide with in data valid:
 //------------------------------------------------------------------------------------------------------------------
-  wire [MXBADR-1:0] wr_adr_xpre  = wr_buf_adr;      // Buffer write address at pre-trigger
-  reg  [MXBADR-1:0] wr_adr_xpre1  = 0;          // Buffer write address at pre-trigger+1bx
-  wire [MXBADR-1:0] wr_adr_xtmb  = clct_wr_adr_xtmb;    // Buffer write address after drift
-  reg  [MXBADR-1:0] wr_adr_xtmb1  = 0;          // Buffer write address after drift+1bx
-  wire [MXBADR-1:0] wr_adr_rtmb;              // Buffer write address at tmb reply
-  reg  [MXBADR-1:0] wr_adr_rtmb1  = 0;          // Buffer write address at tmb reply+1bx
-  wire [MXBADR-1:0] wr_adr_xmpc;              // Buffer write address at mpc transmit
-  wire [MXBADR-1:0] wr_adr_rmpc;              // Buffer write address at mpc receive
-  wire [MXBADR-1:0] wr_adr_xl1a;              // Buffer write address at l1a match
+  wire [MXBADR-1:0] wr_adr_xpre  = wr_buf_adr;       // Buffer write address at pre-trigger
+  reg  [MXBADR-1:0] wr_adr_xpre1 = 0;                // Buffer write address at pre-trigger+1bx
+  wire [MXBADR-1:0] wr_adr_xtmb  = clct_wr_adr_xtmb; // Buffer write address after drift
+  reg  [MXBADR-1:0] wr_adr_xtmb1 = 0;                // Buffer write address after drift+1bx
+  wire [MXBADR-1:0] wr_adr_rtmb;                     // Buffer write address at tmb reply
+  reg  [MXBADR-1:0] wr_adr_rtmb1 = 0;                // Buffer write address at tmb reply+1bx
+  wire [MXBADR-1:0] wr_adr_xmpc;                     // Buffer write address at mpc transmit
+  wire [MXBADR-1:0] wr_adr_rmpc;                     // Buffer write address at mpc receive
+  wire [MXBADR-1:0] wr_adr_xl1a;                     // Buffer write address at l1a match
 
-  wire wr_push_xpre    = clct_push_pretrig;      // Buffer write strobe at pre-trigger
-  reg  wr_push_xpre1    = 0;              // Buffer write strobe at pre-trigger+1bx
-  wire wr_push_xtmb    = clct_push_xtmb;        // Buffer write strobe after drift time
-  reg  wr_push_xtmb1    = 0;              // Buffer write strobe after drift time+1bx
-  wire wr_push_rtmb;                    // Buffer write strobe at TMB matching time
-  reg  wr_push_rtmb1    = 0;              // Buffer write strobe at tmb reply+1bx
-  wire wr_push_xmpc;                    // Buffer write strobe at MPC xmit to sequencer
-  wire wr_push_rmpc;                    // Buffer write strobe at MPC received
+  wire wr_push_xpre  = clct_push_pretrig; // Buffer write strobe at pre-trigger
+  reg  wr_push_xpre1 = 0;                 // Buffer write strobe at pre-trigger+1bx
+  wire wr_push_xtmb  = clct_push_xtmb;    // Buffer write strobe after drift time
+  reg  wr_push_xtmb1 = 0;                 // Buffer write strobe after drift time+1bx
+  wire wr_push_rtmb;                      // Buffer write strobe at TMB matching time
+  reg  wr_push_rtmb1 = 0;                 // Buffer write strobe at tmb reply+1bx
+  wire wr_push_xmpc;                      // Buffer write strobe at MPC xmit to sequencer
+  wire wr_push_rmpc;                      // Buffer write strobe at MPC received
 
-  wire wr_avail_xpre    = wr_buf_avail;          // Buffer available at pre-trigger
-  reg  wr_avail_xpre1    = 0;              // Buffer available at pre-trigger+1bx
-  wire wr_avail_xtmb    = clct_wr_avail_xtmb;      // Buffer available after drift time
-  reg  wr_avail_xtmb1    = 0;              // Buffer available after drift time+1bx
-  wire wr_avail_rtmb;                    // Buffer available at TMB matching time
-  reg  wr_avail_rtmb1    = 0;              // Buffer available at tmb reply+1bx
-  wire wr_avail_xmpc;                    // Buffer available at MPC xmit to sequencer
-  wire wr_avail_rmpc;                    // Buffer available at MPC received
-//  wire wr_avail_xl1a;                    // Buffer available at L1A match
+  wire wr_avail_xpre  = wr_buf_avail;       // Buffer available at pre-trigger
+  reg  wr_avail_xpre1 = 0;                  // Buffer available at pre-trigger+1bx
+  wire wr_avail_xtmb  = clct_wr_avail_xtmb; // Buffer available after drift time
+  reg  wr_avail_xtmb1 = 0;                  // Buffer available after drift time+1bx
+  wire wr_avail_rtmb;                       // Buffer available at TMB matching time
+  reg  wr_avail_rtmb1 = 0;                  // Buffer available at tmb reply+1bx
+  wire wr_avail_xmpc;                       // Buffer available at MPC xmit to sequencer
+  wire wr_avail_rmpc;                       // Buffer available at MPC received
+//  wire wr_avail_xl1a;                     // Buffer available at L1A match
 
 // Piplelines delays for locally predictable coincidences
-  always @(posedge clock) begin              // 1 bx delay FFs
-  wr_adr_xpre1    <= wr_adr_xpre;            // pretrig + 1bx
-  wr_push_xpre1    <= wr_push_xpre;          // pretrig + 1bx
-  wr_avail_xpre1    <= wr_avail_xpre;          // pretrig + 1bx
+  always @(posedge clock) begin      // 1 bx delay FFs
+    wr_adr_xpre1   <= wr_adr_xpre;   // pretrig + 1bx
+    wr_push_xpre1  <= wr_push_xpre;  // pretrig + 1bx
+    wr_avail_xpre1 <= wr_avail_xpre; // pretrig + 1bx
 
-  wr_adr_xtmb1    <= wr_adr_xtmb;            // to tmb + 1bx
-  wr_push_xtmb1    <= wr_push_xtmb;          // to tmb + 1bx
-  wr_avail_xtmb1    <= wr_avail_xtmb;          // to tmb + 1bx
+    wr_adr_xtmb1   <= wr_adr_xtmb;   // to tmb + 1bx
+    wr_push_xtmb1  <= wr_push_xtmb;  // to tmb + 1bx
+    wr_avail_xtmb1 <= wr_avail_xtmb; // to tmb + 1bx
 
-  wr_adr_rtmb1    <= wr_adr_rtmb;            // tmb reply + 1bx
-  wr_push_rtmb1    <= wr_push_rtmb;          // tmb reply + 1bx
-  wr_avail_rtmb1    <= wr_avail_rtmb;          // tmb reply + 1bx
+    wr_adr_rtmb1   <= wr_adr_rtmb;   // tmb reply + 1bx
+    wr_push_rtmb1  <= wr_push_rtmb;  // tmb reply + 1bx
+    wr_avail_rtmb1 <= wr_avail_rtmb; // tmb reply + 1bx
   end
 
 // Qualify buffer write strobes [0]=strobe,[1]=buffer available for writing
-  wire   wr_en_xpre  = (wr_push_xpre    || clct_wr_continuous) && wr_avail_xpre;
-  wire   wr_en_xpre1  = (wr_push_xpre1  || clct_wr_continuous) && wr_avail_xpre1;
-  wire   wr_en_xtmb  = (wr_push_xtmb    || clct_wr_continuous) && wr_avail_xtmb;
-  wire   wr_en_xtmb1  = (wr_push_xtmb1  || clct_wr_continuous) && wr_avail_xtmb1;
-  assign wr_en_rtmb  = (wr_push_rtmb    || clct_wr_continuous) && wr_avail_rtmb;
-  wire   wr_en_rtmb1  = (wr_push_rtmb1  || clct_wr_continuous) && wr_avail_rtmb1;
-  wire   wr_en_xmpc  = (wr_push_xmpc    || clct_wr_continuous) && wr_avail_xmpc;
-  wire   wr_en_rmpc  = (wr_push_rmpc    || clct_wr_continuous) && wr_avail_rmpc;
+  wire   wr_en_xpre  = (wr_push_xpre  || clct_wr_continuous) && wr_avail_xpre;
+  wire   wr_en_xpre1 = (wr_push_xpre1 || clct_wr_continuous) && wr_avail_xpre1;
+  wire   wr_en_xtmb  = (wr_push_xtmb  || clct_wr_continuous) && wr_avail_xtmb;
+  wire   wr_en_xtmb1 = (wr_push_xtmb1 || clct_wr_continuous) && wr_avail_xtmb1;
+  assign wr_en_rtmb  = (wr_push_rtmb  || clct_wr_continuous) && wr_avail_rtmb;
+  wire   wr_en_rtmb1 = (wr_push_rtmb1 || clct_wr_continuous) && wr_avail_rtmb1;
+  wire   wr_en_xmpc  = (wr_push_xmpc  || clct_wr_continuous) && wr_avail_xmpc;
+  wire   wr_en_rmpc  = (wr_push_rmpc  || clct_wr_continuous) && wr_avail_rmpc;
 
 //------------------------------------------------------------------------------------------------------------------
 // Header storage RAMs
 //------------------------------------------------------------------------------------------------------------------
-  wire [MXBADR-1:0] rd_buf_adr;  // Block RAM header readout address
-  wire [8:0] dang;        // Block RAM dangling output pins
-  wire rd_enb = !buf_q_empty;    // Enable port b for reading when readout in progress
+  wire [MXBADR-1:0] rd_buf_adr;            // Block RAM header readout address
+  wire [8:0]        dang;                  // Block RAM dangling output pins
+  wire              rd_enb = !buf_q_empty; // Enable port b for reading when readout in progress
 
 // Store Buffer data on pretrigger
   ramblock #(MXXPRE, MXBADR) uramblock0 (.clock(clock),.wr_wea(wr_en_xpre ),.wr_adra(wr_adr_xpre ),.wr_dataa(xpre_wdata ),.rd_enb(rd_enb),.rd_adrb(rd_buf_adr),.rd_datab(xpre_rdata ),.dang(dang[0]));
@@ -2842,26 +2977,26 @@
   reg seq_trigger=0;
 
   always @(posedge clock) begin
-  seq_trigger  <=  tmb_trig_pulse && (tmb_trig_keep || tmb_non_trig_keep) && !seq_trigger;
+    seq_trigger <= tmb_trig_pulse && (tmb_trig_keep || tmb_non_trig_keep) && !seq_trigger;
   end
 
 // Scintillator Veto for FAST sites, Assert veto on l1a request, persist until clear on VME, copy to VME
   reg  scint_veto     = 0;
   reg  scint_veto_vme = 0;
   wire scint_veto_clr_os;
-  wire scint_pretrig = clct_pretrig;
+  wire scint_pretrig  = clct_pretrig;
 
   x_oneshot uveto (.d(scint_veto_clr), .clock(clock), .q(scint_veto_clr_os));
 
   always @(posedge clock) begin
-  if (scint_veto_clr_os) begin
-  scint_veto     <= 0;
-  scint_veto_vme <= 0;
-  end
-  else begin
-  scint_veto     <= (scint_pretrig | scint_veto);
-  scint_veto_vme <= (scint_pretrig | scint_veto);
-  end
+    if (scint_veto_clr_os) begin
+      scint_veto     <= 0;
+      scint_veto_vme <= 0;
+    end
+    else begin
+      scint_veto     <= (scint_pretrig | scint_veto);
+      scint_veto_vme <= (scint_pretrig | scint_veto);
+    end
   end
 
 //------------------------------------------------------------------------------------------------------------------
@@ -2882,8 +3017,8 @@
   reg [7:0]  l1a_delay_radr=8'hFF;
 
   always @(posedge clock) begin
-  l1a_delay_wadr = l1a_delay_wadr + 1'b1;
-  l1a_delay_radr = l1a_delay_wadr - l1a_delay_adj;
+    l1a_delay_wadr = l1a_delay_wadr + 1'b1;
+    l1a_delay_radr = l1a_delay_wadr - l1a_delay_adj;
   end
 
 // On TMB trigger, store event record in L1A shifter, FF required to align data before RAM write
@@ -2904,52 +3039,53 @@
 
   initial $display("sequencer: generating Virtex6 RAMB18E1_S18_S18 ul1abs");
 
-  RAMB18E1 #(                        // Virtex6
-  .RAM_MODE      ("TDP"),              // SDP or TDP
-   .READ_WIDTH_A    (0),                // 0,1,2,4,9,18,36 Read/write width per port
-  .WRITE_WIDTH_A    (18),                // 0,1,2,4,9,18
-  .READ_WIDTH_B    (18),                // 0,1,2,4,9,18
-  .WRITE_WIDTH_B    (0),                // 0,1,2,4,9,18,36
-  .WRITE_MODE_A    ("READ_FIRST"),            // WRITE_FIRST, READ_FIRST, or NO_CHANGE
-  .WRITE_MODE_B    ("READ_FIRST"),
-  .SIM_COLLISION_CHECK("ALL")                // ALL, WARNING_ONLY, GENERATE_X_ONLY or NONE)
+  RAMB18E1 #(                          // Virtex6
+    .RAM_MODE            ("TDP"),        // SDP or TDP
+    .READ_WIDTH_A        (0),            // 0,1,2,4,9,18,36 Read/write width per port
+    .WRITE_WIDTH_A       (18),           // 0,1,2,4,9,18
+    .READ_WIDTH_B        (18),           // 0,1,2,4,9,18
+    .WRITE_WIDTH_B       (0),            // 0,1,2,4,9,18,36
+    .WRITE_MODE_A        ("READ_FIRST"), // WRITE_FIRST, READ_FIRST, or NO_CHANGE
+    .WRITE_MODE_B        ("READ_FIRST"),
+    .SIM_COLLISION_CHECK ("ALL")         // ALL, WARNING_ONLY, GENERATE_X_ONLY or NONE)
   ) ul1abs (
-  .WEA        (2'b11),              //  2-bit A port write enable input
-  .ENARDEN      (1'b1),                //  1-bit A port enable/Read enable input
-  .RSTRAMARSTRAM    (1'b0),                //  1-bit A port set/reset input
-  .RSTREGARSTREG    (1'b0),                //  1-bit A port register set/reset input
-  .REGCEAREGCE    (1'b0),                //  1-bit A port register enable/Register enable input
-  .CLKARDCLK      (clock),              //  1-bit A port clock/Read clock input
-  .ADDRARDADDR    ({2'h0,l1a_delay_wadr[7:0],4'hF}),  // 14-bit A port address/Read address input 18b->[13:4]
-  .DIADI        (l1a_dia[15:0]),          // 16-bit A port data/LSB data input
-  .DIPADIP      (),                  //  2-bit A port parity/LSB parity input
-  .DOADO        (),                  // 16-bit A port data/LSB data output
-  .DOPADOP      (),                  //  2-bit A port parity/LSB parity output
+    .WEA           (2'b11),         //  2-bit A port write enable input
+    .ENARDEN       (1'b1),          //  1-bit A port enable/Read enable input
+    .RSTRAMARSTRAM (1'b0),          //  1-bit A port set/reset input
+    .RSTREGARSTREG (1'b0),          //  1-bit A port register set/reset input
+    .REGCEAREGCE   (1'b0),          //  1-bit A port register enable/Register enable input
+    .CLKARDCLK     (clock),         //  1-bit A port clock/Read clock input
+    .ADDRARDADDR   ({2'h0,l1a_delay_wadr[7:0],4'hF}), // 14-bit A port address/Read address input 18b->[13:4]
+    .DIADI         (l1a_dia[15:0]), // 16-bit A port data/LSB data input
+    .DIPADIP       (),              //  2-bit A port parity/LSB parity input
+    .DOADO         (),              // 16-bit A port data/LSB data output
+    .DOPADOP       (),              //  2-bit A port parity/LSB parity output
 
-  .WEBWE        (),                  //  4-bit B port write enable/Write enable input
-  .ENBWREN      (1'b1),                //  1-bit B port enable/Write enable input
-  .REGCEB        (1'b0),                //  1-bit B port register enable input
-  .RSTRAMB      (1'b0),                //  1-bit B port set/reset input
-  .RSTREGB      (1'b0),                //  1-bit B port register set/reset input
-  .CLKBWRCLK      (clock),              //  1-bit B port clock/Write clock input
-  .ADDRBWRADDR    ({2'h0,l1a_delay_radr[7:0],4'hF}),  // 14-bit B port address/Write address input 18b->[13:4]
-  .DIBDI        (),                  // 16-bit B port data/MSB data input
-  .DIPBDIP      (),                  //  2-bit B port parity/MSB parity input
-  .DOBDO        (l1a_dob[15:0]),          // 16-bit B port data/MSB data output
-  .DOPBDOP      ());                //  2-bit B port parity/MSB parity output
+    .WEBWE         (),              //  4-bit B port write enable/Write enable input
+    .ENBWREN       (1'b1),          //  1-bit B port enable/Write enable input
+    .REGCEB        (1'b0),          //  1-bit B port register enable input
+    .RSTRAMB       (1'b0),          //  1-bit B port set/reset input
+    .RSTREGB       (1'b0),          //  1-bit B port register set/reset input
+    .CLKBWRCLK     (clock),         //  1-bit B port clock/Write clock input
+    .ADDRBWRADDR   ({2'h0,l1a_delay_radr[7:0],4'hF}),  // 14-bit B port address/Write address input 18b->[13:4]
+    .DIBDI         (),              // 16-bit B port data/MSB data input
+    .DIPBDIP       (),              //  2-bit B port parity/MSB parity input
+    .DOBDO         (l1a_dob[15:0]), // 16-bit B port data/MSB data output
+    .DOPBDOP       ()               //  2-bit B port parity/MSB parity output
+  );                
 
 // After ~128bx L1A delay, unpack data stored in L1A parallel shifter
-  wire     tmb_push_dly    = l1a_dob[0];
-  wire [10:0] wr_adr_rtmb_dly    = l1a_dob[11:1];
-  wire    wr_avail_rtmb_dly  = l1a_dob[12];
-  wire    tmb_alct_only_dly  = l1a_dob[13];
-  wire    l1a_dob_sump    = | l1a_dob[15:14];
+  wire        tmb_push_dly      =   l1a_dob[0];
+  wire [10:0] wr_adr_rtmb_dly   =   l1a_dob[11:1];
+  wire        wr_avail_rtmb_dly =   l1a_dob[12];
+  wire        tmb_alct_only_dly =   l1a_dob[13];
+  wire        l1a_dob_sump      = | l1a_dob[15:14];
 
 // Push TMB event token into a 16-stage FF shift register for L1A matching
   reg [15:0] l1a_vpf_sr=0;
 
   always @(posedge clock) begin
-  l1a_vpf_sr[15:0] <= {l1a_vpf_sr[14:0],tmb_push_dly};
+    l1a_vpf_sr[15:0] <= {l1a_vpf_sr[14:0],tmb_push_dly};
   end
 
 // Push event address into 16-stage SRL shifter
@@ -2967,7 +3103,7 @@
 
 // FF buffer l1a_window index for fanout, points to 1st position window is closed 
   always @(posedge clock) begin
-  winclosed <= l1a_window;
+    winclosed <= l1a_window;
   end
 
 // L1A window preset and clear ffs
@@ -2975,8 +3111,8 @@
   reg clear_sr  = 0;
 
   always @(posedge clock) begin
-  preset_sr <= l1a_preset_sr;
-  clear_sr  <= ttc_resync;
+    preset_sr <= l1a_preset_sr;
+    clear_sr  <= ttc_resync;
   end
 
 // Decode L1A window width setting to select which l1a_vpf_sr stages to include in l1a_window
@@ -2984,19 +3120,19 @@
   integer i;
 
   always @(posedge clock) begin
-  if      (preset_sr) l1a_sr_include <= 16'hFFFF;
-  else if (clear_sr ) l1a_sr_include <= 0;
+    if      (preset_sr) l1a_sr_include <= 16'hFFFF;
+    else if (clear_sr ) l1a_sr_include <= 0;
 
-  else begin
-  i=0;
-  while (i<=15) begin
-  if (l1a_window!=0)
-  l1a_sr_include[i] <= (i<=l1a_window-1);  // l1a_window=3, enables sr stages 0,1,2
-  else
-  l1a_sr_include[i] <= 0;          // l1a_window=0, disables all sr stages
-  i=i+1;
-  end  // close while
-  end  // close else
+    else begin
+      i=0;
+      while (i<=15) begin
+        if (l1a_window!=0)
+          l1a_sr_include[i] <= (i<=l1a_window-1);  // l1a_window=3, enables sr stages 0,1,2
+        else
+          l1a_sr_include[i] <= 0;          // l1a_window=0, disables all sr stages
+        i=i+1;
+      end  // close while
+    end  // close else
   end  // close clock
 
 // Calculate dynamic L1A window center and positional priorities
@@ -3004,14 +3140,14 @@
   wire [3:0] l1a_win_center = l1a_window/2;  // Gives priority to higher winbx for even widths
 
   always @(posedge clock) begin
-  i=0;
-  while (i<=15) begin
-  if    (ttc_resync)       l1a_win_priority[i] = 4'hF;
-  else if (i>=l1a_window || i==0)  l1a_win_priority[i] = 0;                  // i >  lastwin or i=0
-  else if (i<=l1a_win_center    )   l1a_win_priority[i] = l1a_window-1'd1-((l1a_win_center-i[3:0])<<1);  // i <= center
-  else               l1a_win_priority[i] = l1a_window-1'd0-((i[3:0]-l1a_win_center)<<1);  // i >  center
-  i=i+1;
-  end
+    i=0;
+    while (i<=15) begin
+      if      (ttc_resync           ) l1a_win_priority[i] = 4'hF;
+      else if (i>=l1a_window || i==0) l1a_win_priority[i] = 0;                  // i >  lastwin or i=0
+      else if (i<=l1a_win_center    ) l1a_win_priority[i] = l1a_window-1'd1-((l1a_win_center-i[3:0])<<1);  // i <= center
+      else                            l1a_win_priority[i] = l1a_window-1'd0-((i[3:0]-l1a_win_center)<<1);  // i >  center
+      i=i+1;
+    end
   end
 
 // Window position delay for internal L1A, 0bx to 16bx for simulator
@@ -3020,27 +3156,27 @@
   SRL16E usrlint (.CLK(clock),.CE(1'b1),.D(tmb_push_dly),.A0(ldly[0]),.A1(ldly[1]),.A2(ldly[2]),.A3(ldly[3]),.Q(l1a_internal_pulse));
 
 // Construct L1A from CCB or internal, internal L1A disables CCB L1A, if internal l1a, delay pulse only for status displays
-  wire   l1a_ccb     = ccb_l1accept && !l1a_internal;
-  wire   l1a_int     = l1a_internal && l1a_internal_pulse;
-  assign l1a_pulse  = l1a_ccb || l1a_int;
-  assign l1a_received  = l1a_pulse;
+  wire   l1a_ccb      = ccb_l1accept && !l1a_internal;
+  wire   l1a_int      = l1a_internal && l1a_internal_pulse;
+  assign l1a_pulse    = l1a_ccb || l1a_int;
+  assign l1a_received = l1a_pulse;
   
 // L1A window matching register declarations
-  reg [15:0]  l1a_tag_sr=0;      // Readout tag
-  reg [3:0]  l1a_win_sr  [15:0];    // L1A Window position at LCT*L1A coincidence, init=1 removes spurious warnings
-  reg [11:0]  l1a_cnt_sr  [15:0];    // L1As received counter at LCT*L1A coincidence
-  reg [11:0]  l1a_bxn_sr  [15:0];    // BXN counter at LCT*L1A coincidence
-  reg  [15:0]  l1a_see_sr=0;      // L1A seen by this event
+  reg [15:0] l1a_tag_sr = 0;    // Readout tag
+  reg [3:0]  l1a_win_sr [15:0]; // L1A Window position at LCT*L1A coincidence, init=1 removes spurious warnings
+  reg [11:0] l1a_cnt_sr [15:0]; // L1As received counter at LCT*L1A coincidence
+  reg [11:0] l1a_bxn_sr [15:0]; // BXN counter at LCT*L1A coincidence
+  reg [15:0] l1a_see_sr = 0;    // L1A seen by this event
 
 // Generate table of enabled L1A windows and their priorities
   wire [15:0] win_ena;        // Table of enabled window positions
-  wire [3:0]  win_pri [15:0];      // Table of window position priorities that are enabled
+  wire [3:0]  win_pri [15:0]; // Table of window position priorities that are enabled
 
   generate              // Table window priorities multipled by window position enables
-  for (j=0; j<=15; j=j+1) begin: genpri
-  assign win_ena[j] = (l1a_sr_include[j]==1 && l1a_vpf_sr[j]==1 && l1a_tag_sr[j]==0);
-  assign win_pri[j] = (l1a_win_priority[j]  & {4{win_ena[j]}});
-  end
+    for (j=0; j<=15; j=j+1) begin: genpri
+      assign win_ena[j] = (l1a_sr_include[j]==1 && l1a_vpf_sr[j]==1 && l1a_tag_sr[j]==0);
+      assign win_pri[j] = (l1a_win_priority[j]  & {4{win_ena[j]}});
+    end
   endgenerate
 
 // Tree encoder Finds best 4 of 16 window positions
@@ -3103,65 +3239,65 @@
   reg nl1a_win_pri_en=0;
 
   always @(posedge clock) begin
-  nl1a_win_pri_en <= !l1a_win_pri_en;
+    nl1a_win_pri_en <= !l1a_win_pri_en;
   end
 
 // L1A window lost events due to prioritizing
   always @(posedge clock) begin
-  if      (preset_sr) l1a_see_sr <= 1;
-  else if (clear_sr ) l1a_see_sr <= 0;
+    if      (preset_sr) l1a_see_sr <= 1;
+    else if (clear_sr ) l1a_see_sr <= 0;
 
-  else begin
-  i=0;
-  while (i<=14) begin
-  if (l1a_match && l1a_vpf_sr[i] && l1a_sr_include[i] && !l1a_tag_sr[i]) l1a_see_sr[i+1] <= 1;
-  else                                                                   l1a_see_sr[i+1] <= l1a_see_sr[i];
-  i=i+1;
-  end  // close while
-  end  // close else
+    else begin
+      i=0;
+      while (i<=14) begin
+        if (l1a_match && l1a_vpf_sr[i] && l1a_sr_include[i] && !l1a_tag_sr[i]) l1a_see_sr[i+1] <= 1;
+        else                                                                   l1a_see_sr[i+1] <= l1a_see_sr[i];
+        i=i+1;
+      end  // close while
+    end  // close else
   end  // close clock
 
 // L1A window matching shift registers
   always @(posedge clock) begin
 
-  if (preset_sr) begin        // Sych preset 1st stage
-  l1a_tag_sr      <= 1;      // Readout tag
-  l1a_win_sr[0][3:0]  <= 4'hF;    // L1A Window position at LCT*L1A coincidence
-  l1a_cnt_sr[0][11:0]  <= 12'hFFF;    // L1As received counter at LCT*L1A coincidence
-  l1a_bxn_sr[0][11:0]  <= 12'hFFF;    // BXN counter  at LCT*L1A coincidence
-  end
+    if (preset_sr) begin              // Sych preset 1st stage
+      l1a_tag_sr          <= 1;       // Readout tag
+      l1a_win_sr[0][3:0]  <= 4'hF;    // L1A Window position at LCT*L1A coincidence
+      l1a_cnt_sr[0][11:0] <= 12'hFFF; // L1As received counter at LCT*L1A coincidence
+      l1a_bxn_sr[0][11:0] <= 12'hFFF; // BXN counter  at LCT*L1A coincidence
+    end
 
-  else if (clear_sr) begin      // Sych reset all stages
-  i=0;                // Loop over 15 window positions 0 to 15 
-  while (i<=15) begin
-  l1a_tag_sr      <= 0;      // Readout tag
-  l1a_win_sr[i][3:0]  <= 0;      // L1A Window position at LCT*L1A coincidence
-  l1a_cnt_sr[i][11:0]  <= 0;      // L1As received counter at LCT*L1A coincidence
-  l1a_bxn_sr[i][11:0]  <= 0;      // BXN counter  at LCT*L1A coincidence
-  i=i+1;
-  end
-  end
+    else if (clear_sr) begin      // Sych reset all stages
+      i=0;                // Loop over 15 window positions 0 to 15 
+      while (i<=15) begin
+        l1a_tag_sr          <= 0; // Readout tag
+        l1a_win_sr[i][3:0]  <= 0; // L1A Window position at LCT*L1A coincidence
+        l1a_cnt_sr[i][11:0] <= 0; // L1As received counter at LCT*L1A coincidence
+        l1a_bxn_sr[i][11:0] <= 0; // BXN counter  at LCT*L1A coincidence
+        i=i+1;
+      end
+    end
 
-  else begin
-  i=0;                // Loop over 15 window positions 0 to 14 
-  while (i<=14) begin
-  if (l1a_match && l1a_vpf_sr[i] && l1a_sr_include[i] && !l1a_tag_sr[i] && ((l1a_win_best==i) || nl1a_win_pri_en)) begin
-  l1a_tag_sr[i+1]       <= 1;                // Readout tag
-  l1a_win_sr[i+1][3:0]  <= i[3:0];            // L1A Window position at LCT*L1A coincidence
-  l1a_cnt_sr[i+1][11:0] <= l1a_rx_counter_plus1[11:0];  // L1As received counter at LCT*L1A coincidence
-  l1a_bxn_sr[i+1][11:0] <= bxn_counter_l1a[11:0];      // BXN counter at LCT*L1A coincidence, has separate offset
-  end  // close if l1a_match
+    else begin
+      i=0;                // Loop over 15 window positions 0 to 14 
+      while (i<=14) begin
+        if (l1a_match && l1a_vpf_sr[i] && l1a_sr_include[i] && !l1a_tag_sr[i] && ((l1a_win_best==i) || nl1a_win_pri_en)) begin
+          l1a_tag_sr[i+1]       <= 1;                          // Readout tag
+          l1a_win_sr[i+1][3:0]  <= i[3:0];                     // L1A Window position at LCT*L1A coincidence
+          l1a_cnt_sr[i+1][11:0] <= l1a_rx_counter_plus1[11:0]; // L1As received counter at LCT*L1A coincidence
+          l1a_bxn_sr[i+1][11:0] <= bxn_counter_l1a[11:0];      // BXN counter at LCT*L1A coincidence, has separate offset
+        end  // close if l1a_match
 
-  else begin              // Otherwise parallel shift all data left
-  l1a_tag_sr[i+1]  <= l1a_tag_sr[i];
-  l1a_win_sr[i+1]  <= l1a_win_sr[i];
-  l1a_cnt_sr[i+1]  <= l1a_cnt_sr[i];
-  l1a_bxn_sr[i+1]  <= l1a_bxn_sr[i];
-  end  // close else
+        else begin // Otherwise parallel shift all data left
+          l1a_tag_sr[i+1] <= l1a_tag_sr[i];
+          l1a_win_sr[i+1] <= l1a_win_sr[i];
+          l1a_cnt_sr[i+1] <= l1a_cnt_sr[i];
+          l1a_bxn_sr[i+1] <= l1a_bxn_sr[i];
+        end  // close else
 
-  i=i+1;
-  end  // close while
-  end  // close else
+        i=i+1;
+      end  // close while
+    end  // close else
   end  // close clock
 
 // Extract pushed counters and match results from sr stage after window closed
@@ -3177,10 +3313,10 @@
   assign l1a_window_haslcts = |(l1a_vpf_sr & l1a_sr_include & ~l1a_tag_sr);
 
 // L1A Match results
-  assign l1a_match   = l1a_pulse   &&  l1a_window_haslcts;  // TMB trig_pulse matches L1A window, sent before window close
-  assign l1a_notmb   = l1a_pulse   && !l1a_window_haslcts;  // L1A arrived, but there was no TMB window open
-  assign tmb_nol1a   = tmb_push_sr && !l1a_push_me;      // No L1A arrived in window, sent after window close
-  assign l1a_los_win = l1a_see_win && !l1a_push_me;      // Event saw an L1A but was not pushed beco
+  assign l1a_match   = l1a_pulse   &&  l1a_window_haslcts; // TMB trig_pulse matches L1A window, sent before window close
+  assign l1a_notmb   = l1a_pulse   && !l1a_window_haslcts; // L1A arrived, but there was no TMB window open
+  assign tmb_nol1a   = tmb_push_sr && !l1a_push_me;        // No L1A arrived in window, sent after window close
+  assign l1a_los_win = l1a_see_win && !l1a_push_me;        // Event saw an L1A but was not pushed beco
 
 // Diagnostic L1A cases force a readout without L1A matching, if enabled. Usually not enabled
   wire l1a_forced_notmb =(l1a_notmb && l1a_allow_notmb && !no_daq);  // L1A with no TMB in window, readout anyway
@@ -3199,14 +3335,14 @@
   assign buf_push  = l1a_keep;                // Allocate write buffer space for this event
 
   always @* begin
-  if (l1a_forced_notmb) begin                // No-tmb-trigger l1a-only readout
-  buf_push_adr  <= wr_buf_adr-l1a_lookback;        // Address of write buffer to allocate is current-lookback
-  buf_push_data  <= l1a_wdata_notmb[MXL1AD-1:0];      // L1A data associated with push_adr when no tmb trigger
-  end
-  else begin                        // Normal tmb-triggered readout
-  buf_push_adr  <= wr_adr_xl1a;              // Address of write buffer to allocate
-  buf_push_data  <= l1a_wdata[MXL1AD-1:0];        // L1A data associated with push_adr
-  end
+    if (l1a_forced_notmb) begin                     // No-tmb-trigger l1a-only readout
+      buf_push_adr  <= wr_buf_adr-l1a_lookback;     // Address of write buffer to allocate is current-lookback
+      buf_push_data <= l1a_wdata_notmb[MXL1AD-1:0]; // L1A data associated with push_adr when no tmb trigger
+    end
+    else begin                                 // Normal tmb-triggered readout
+      buf_push_adr  <= wr_adr_xl1a;            // Address of write buffer to allocate
+      buf_push_data  <= l1a_wdata[MXL1AD-1:0]; // L1A data associated with push_adr
+    end
   end
 
 // Pop event off of fence queue after readout completes
@@ -3219,75 +3355,75 @@
   reg  [MXBXN-1:0] bxn_l1a_vme=0;
 
   always @(posedge clock) begin
-  if (l1a_received) bxn_l1a_vme <= bxn_counter_l1a;
+    if (l1a_received) bxn_l1a_vme <= bxn_counter_l1a;
   end
 
 // VME debug register latches
-  reg  [MXBADR-1:0]  deb_wr_buf_adr    = 0;
+  reg  [MXBADR-1:0] deb_wr_buf_adr    = 0;
   reg [MXBADR-1:0]  deb_buf_push_adr  = 0;
-  reg [MXBADR-1:0]  deb_buf_pop_adr    = 0;
-  reg [MXBDATA-1:0]  deb_buf_push_data  = 0;
-  reg [MXBDATA-1:0]  deb_buf_pop_data  = 0;
+  reg [MXBADR-1:0]  deb_buf_pop_adr   = 0;
+  reg [MXBDATA-1:0] deb_buf_push_data = 0;
+  reg [MXBDATA-1:0] deb_buf_pop_data  = 0;
 
   always @(posedge clock) begin
-  if (clct_push_pretrig)
-  deb_wr_buf_adr    <=  wr_buf_adr;            // Buffer address at last pretrig
-  end
-
-  always @(posedge clock) begin
-  if (buf_push) begin
-  deb_buf_push_adr  <=  buf_push_adr;          // Address of write buffer to allocate at last push
-  deb_buf_push_data  <=  buf_push_data;          // L1A data associated with push_adr at last push
-  end
+    if (clct_push_pretrig)
+    deb_wr_buf_adr    <=  wr_buf_adr; // Buffer address at last pretrig
   end
 
   always @(posedge clock) begin
-  if (buf_pop) begin
-  deb_buf_pop_adr    <=  buf_pop_adr;          // Buffer pop address at last xpop
-  deb_buf_pop_data  <=  l1a_rdata;            // Buffer pop data at last xpop
+    if (buf_push) begin
+      deb_buf_push_adr  <=  buf_push_adr;  // Address of write buffer to allocate at last push
+      deb_buf_push_data <=  buf_push_data; // L1A data associated with push_adr at last push
+    end
   end
+
+  always @(posedge clock) begin
+    if (buf_pop) begin
+      deb_buf_pop_adr    <=  buf_pop_adr; // Buffer pop address at last xpop
+      deb_buf_pop_data  <=  l1a_rdata;    // Buffer pop data at last xpop
+    end
   end
 
 //------------------------------------------------------------------------------------------------------------------
 // Unpack multi-buffer storage for event header
 //------------------------------------------------------------------------------------------------------------------
 // Unpack Pre-trigger data from RAM mapping array
-  wire [6:0]  r_active_feb    =  xpre_rdata[6:0];  // Active FEB list sent to DAQMB
-  wire [10:0]  r_trig_source_vec  =  xpre_rdata[17:7];  // Trigger source vector
-  wire [11:0]  r_bxn_counter    =  xpre_rdata[29:18];  // Full Bunch Crossing number at pretrig
-  wire [29:0]  r_orbit_counter    =  xpre_rdata[59:30];  // Orbit count at pre-trigger
-  wire    r_sync_err      =  xpre_rdata[60];    // BXN sync error
-  wire [3:0]  r_alct_pretrig_win  =  xpre_rdata[64:61];  // ALCT active_feb_flag position in pretrig window
+  wire [6:0]  r_active_feb       = xpre_rdata[6:0];   // Active FEB list sent to DAQMB
+  wire [10:0] r_trig_source_vec  = xpre_rdata[17:7];  // Trigger source vector
+  wire [11:0] r_bxn_counter      = xpre_rdata[29:18]; // Full Bunch Crossing number at pretrig
+  wire [29:0] r_orbit_counter    = xpre_rdata[59:30]; // Orbit count at pre-trigger
+  wire        r_sync_err         = xpre_rdata[60];    // BXN sync error
+  wire [3:0]  r_alct_preClct_win = xpre_rdata[64:61]; // ALCT active_feb_flag position in pretrig window
 
-  wire [10:0]  r_wr_buf_adr    =  xpre_rdata[75:65];  // Address of write buffer at pretrig
-  wire [10:0] r_buf_fence_dist  =  xpre_rdata[86:76];  // Distance to 1st fence address at pretrigger
-  wire    r_wr_buf_avail    =  xpre_rdata[87];    // Write buffer is ready or bypassed
-  wire    r_wr_buf_ready    =  xpre_rdata[88];    // Write buffer is ready
-  wire    r_buf_stalled    =  xpre_rdata[89];    // All buffer memory space is in use
+  wire [10:0] r_wr_buf_adr       = xpre_rdata[75:65]; // Address of write buffer at pretrig
+  wire [10:0] r_buf_fence_dist   = xpre_rdata[86:76]; // Distance to 1st fence address at pretrigger
+  wire        r_wr_buf_avail     = xpre_rdata[87];    // Write buffer is ready or bypassed
+  wire        r_wr_buf_ready     = xpre_rdata[88];    // Write buffer is ready
+  wire        r_buf_stalled      = xpre_rdata[89];    // All buffer memory space is in use
 
 // Unpack Pre-trigger +1bx data from RAM mapping array
-  wire [29:0]  r_pretrig_counter  =  xpre1_rdata[29:0];  // Pre-trigger counter
-  wire [29:0]  r_alct_counter    =  xpre1_rdata[59:30];  // ALCT counter at pre-trigger
+  wire [29:0] r_pretrig_counter  = xpre1_rdata[29:0];  // Pre-trigger counter
+  wire [29:0] r_alct_counter     = xpre1_rdata[59:30]; // ALCT counter at pre-trigger
 
 // Unpack CLCT data sent to TMB from RAM mapping array
-  wire [15:0]  r_clct0_xtmb    =  xtmb_rdata[15:0];  // CLCT0 after drift
-  wire [15:0]  r_clct1_xtmb    =  xtmb_rdata[31:16];  // CLCT1 after drift
-  wire [2:0]  r_clctc_xtmb    =  xtmb_rdata[34:32];  // CLCT common after drift
-  wire [6:0]  r_clcta_xtmb    =  xtmb_rdata[41:35];  // CLCT aux after drift
-  wire     r_clct0_invp    =  xtmb_rdata[42];    // CLCT0 had invalid pattern after drift delay
-  wire     r_clct1_invp    =  xtmb_rdata[43];    // CLCT1 had invalid pattern after drift delay
+  wire [15:0] r_clct0_xtmb = xtmb_rdata[15:0];  // CLCT0 after drift
+  wire [15:0] r_clct1_xtmb = xtmb_rdata[31:16]; // CLCT1 after drift
+  wire [2:0]  r_clctc_xtmb = xtmb_rdata[34:32]; // CLCT common after drift
+  wire [6:0]  r_clcta_xtmb = xtmb_rdata[41:35]; // CLCT aux after drift
+  wire        r_clct0_invp = xtmb_rdata[42];    // CLCT0 had invalid pattern after drift delay
+  wire        r_clct1_invp = xtmb_rdata[43];    // CLCT1 had invalid pattern after drift delay
 
-  wire [5:0]  r_layers_hit    =  r_clcta_xtmb[5:0];  // Layers hit
-  wire     r_clct1_busy    =  r_clcta_xtmb[6];  // CLCT1 busy internal check
+  wire [5:0] r_layers_hit = r_clcta_xtmb[5:0]; // Layers hit
+  wire       r_clct1_busy = r_clcta_xtmb[6];   // CLCT1 busy internal check
 
 // Unpack CLCT counter from RAM mapping array
-  wire [29:0]  r_clct_counter    =  xtmb1_rdata[29:0];  // CLCTs sent to TMB section
+  wire [29:0] r_clct_counter = xtmb1_rdata[29:0]; // CLCTs sent to TMB section
 
 // Unpack TMB match results from RAM mapping array
-  wire     r_tmb_match      =  rtmb_rdata[0];    // ALCT and CLCT matched in time
-  wire     r_tmb_alct_only    =  rtmb_rdata[1];    // Only ALCT triggered
-  wire     r_tmb_clct_only    =  rtmb_rdata[2];    // Only CLCT triggered
-  wire [3:0]  r_tmb_match_win    =  rtmb_rdata[6:3];  // Location of alct in clct window
+  wire       r_tmb_match     =  rtmb_rdata[0];   // ALCT and CLCT matched in time
+  wire       r_tmb_alct_only =  rtmb_rdata[1];   // Only ALCT triggered
+  wire       r_tmb_clct_only =  rtmb_rdata[2];   // Only CLCT triggered
+  wire [3:0] r_tmb_match_win =  rtmb_rdata[6:3]; // Location of alct in clct window
 
   wire     r_tmb_no_alct    =  rtmb_rdata[7];    // No ALCT
   wire     r_tmb_one_alct    =  rtmb_rdata[8];    // One ALCT
@@ -3752,11 +3888,11 @@
   assign  header20_[14]    =  stagger_hs_csc;        // CSC Staggering ON
   assign  header20_[18:15]  =  0;              // DDU+DMB control flags
 
-  assign  header21_[3:0]    =  triad_persist[3:0];      // CLCT Triad persistence
-  assign   header21_[6:4]    =  dmb_thresh_pretrig[2:0];  // DMB pre-trigger threshold for active-feb
-  assign  header21_[10:7]    =  alct_delay[3:0];      // Delay ALCT for CLCT match window
-  assign  header21_[14:11]  =  clct_window[3:0];      // CLCT match window width
-  assign  header21_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header21_[3:0]   =  triad_persist[3:0];      // CLCT Triad persistence
+  assign  header21_[6:4]   =  dmb_thresh_pretrig[2:0]; // DMB pre-trigger threshold for active-feb
+  assign  header21_[10:7]  =  alct_delay[3:0];         // Delay ALCT for CLCT match window
+  assign  header21_[14:11] =  clct_window[3:0];        // CLCT match window width
+  assign  header21_[18:15] =  0;                       // DDU+DMB control flags
 
 // CLCT Trigger Status
   assign  header22_[8:0]    =  r_trig_source_vec[8:0];    // Trigger source vector
@@ -3807,7 +3943,7 @@
   assign  header28_[2:1]    =  r_alct0_quality[1:0];    // ALCT0 quality
   assign  header28_[3]    =  r_alct0_amu;        // ALCT0 accelerator muon flag
   assign  header28_[10:4]    =  r_alct0_key[6:0];      // ALCT0 key wire group
-  assign  header28_[14:11]  =  r_alct_pretrig_win[3:0];  // ALCT active_feb_flag position in pretrig window
+  assign  header28_[14:11]  =  r_alct_preClct_win[3:0];  // ALCT active_feb_flag position in pretrig window
   assign  header28_[18:15]  =  0;              // DDU+DMB control flags
 
   assign  header29_[0]    =  r_alct1_valid;        // ALCT1 valid pattern flag
@@ -4010,28 +4146,28 @@
   wire [15:0] miniscope_data;
   wire [9:0]  miniscope_data_dly;
 
-  assign miniscope_data[0]    = any_cfeb_hit;          // Any CFEB over threshold
-  assign miniscope_data[3:1]    = clct_sm_vec[2:0];        // Pre-trigger state machine
-  assign miniscope_data[4]    = clct_push_xtmb && clct0_vpf;  // CLCT vpf in TMB
-  assign miniscope_data[5]    = clct_push_xtmb && clct1_vpf;  // CLCT vpf in TMB
-  assign miniscope_data[6]    = alct0_vpf_tprt;        // ALCT vpf in TMB after pipe delay, unbuffered real time
-  assign miniscope_data[7]    = alct1_vpf_tprt;        // ALCT vpf in TMB after pipe delay, unbuffered real time
-  assign miniscope_data[8]    = clct_window_tprt;        // CLCT matching window in TMB
-  assign miniscope_data[9]    = wr_push_rtmb;          // Buffer write strobe at TMB matching time
+  assign miniscope_data[0]   = any_cfeb_hit;                // Any CFEB over threshold
+  assign miniscope_data[3:1] = clct_sm_vec[2:0];            // Pre-trigger state machine
+  assign miniscope_data[4]   = clct_push_xtmb && clct0_vpf; // CLCT vpf in TMB
+  assign miniscope_data[5]   = clct_push_xtmb && clct1_vpf; // CLCT vpf in TMB
+  assign miniscope_data[6]   = alct0_vpf_tprt;              // ALCT vpf in TMB after pipe delay, unbuffered real time
+  assign miniscope_data[7]   = alct1_vpf_tprt;              // ALCT vpf in TMB after pipe delay, unbuffered real time
+  assign miniscope_data[8]   = clct_window_tprt;            // CLCT matching window in TMB
+  assign miniscope_data[9]   = wr_push_rtmb;                // Buffer write strobe at TMB matching time
 
-  assign miniscope_data[10]    = tmb_push_dly;          // Event token from tmb matching
-  assign miniscope_data[11]    = l1a_pulse;          // L1A from ccb or internal
-  assign miniscope_data[12]    = l1a_window_open;        // L1A dynamic window
-  assign miniscope_data[13]    = l1a_push_me;          // L1A match queued for readout
+  assign miniscope_data[10]  = tmb_push_dly;                // Event token from tmb matching
+  assign miniscope_data[11]  = l1a_pulse;                   // L1A from ccb or internal
+  assign miniscope_data[12]  = l1a_window_open;             // L1A dynamic window
+  assign miniscope_data[13]  = l1a_push_me;                 // L1A match queued for readout
 
-  assign miniscope_data[14]    = 0;              // No readout for this bit, taken by weak unpacker
-  assign miniscope_data[15]    = 0;              // No readout for this bit, taken by ddu special
+  assign miniscope_data[14]  = 0;                           // No readout for this bit, taken by weak unpacker
+  assign miniscope_data[15]  = 0;                           // No readout for this bit, taken by ddu special
 
 // Delay signals in pretrig region to come out at L1A time
   generate
-  for (j=0; j<=9; j=j+1) begin: srlbit
-  srl16e_bit #(8,256) usrlbit (.clock(clock),.adr(l1a_delay),.d(miniscope_data[j]),.q(miniscope_data_dly[j]));
-  end
+    for (j=0; j<=9; j=j+1) begin: srlbit
+      srl16e_bit #(8,256) usrlbit (.clock(clock),.adr(l1a_delay),.d(miniscope_data[j]),.q(miniscope_data_dly[j]));
+    end
   endgenerate
 
   assign fifo_wdata_mini[9:0]   = miniscope_data_dly[9:0];    // Delayed pretrig region 
@@ -4043,11 +4179,11 @@
   wire mini_start_from_xe05  = (read_sm == xe05);
   wire mini_start_lookahead  = (mini_start_from_xdump || mini_start_from_xe04 || mini_start_from_xe05);
 
-  assign rd_start_mini  = mini_start_lookahead && mini_read_enable;  // Start readout sequence, send fifo dump to DMB
-  assign rd_abort_mini  = 0;                    // Cancel readout
-  assign mini_fifo_done   = !mini_fifo_busy;              // Readout busy sending data to sequencer
-  assign rd_mini_offset  = 0;                    // RAM address offset for miniscope read
-  assign wr_mini_offset  = l1a_delay;                // RAM address offset for miniscope write
+  assign rd_start_mini  = mini_start_lookahead && mini_read_enable; // Start readout sequence, send fifo dump to DMB
+  assign rd_abort_mini  = 0;                                        // Cancel readout
+  assign mini_fifo_done = !mini_fifo_busy;                          // Readout busy sending data to sequencer
+  assign rd_mini_offset = 0;                                        // RAM address offset for miniscope read
+  assign wr_mini_offset = l1a_delay;                                // RAM address offset for miniscope write
 
 //------------------------------------------------------------------------------------------------------------------
 // Blocked CFEB triad bits readout
@@ -4056,19 +4192,19 @@
   reg [MXCFEBB-1:0] rd_ncfebs_bcb = 0;
 
   always @* begin
-  if (full_dump || local_dump) begin
-  rd_list_bcb   = {MXCFEB{1'b1}};    // List of CFEBs to read out
-  rd_ncfebs_bcb = MXCFEB;        // Number of CFEBs in bcb_list
-  end
-  else begin
-  rd_list_bcb   = 0;
-  rd_ncfebs_bcb = 0;
-  end
+    if (full_dump || local_dump) begin
+      rd_list_bcb   = {MXCFEB{1'b1}}; // List of CFEBs to read out
+      rd_ncfebs_bcb = MXCFEB;         // Number of CFEBs in bcb_list
+    end
+    else begin
+      rd_list_bcb   = 0;
+      rd_ncfebs_bcb = 0;
+    end
   end
 
-  assign rd_start_bcb   = (read_sm == xbcb);            // Start readout sequence, send fifo dump to DMB
-  assign rd_abort_bcb   = 0;                    // Cancel readout
-  assign bcb_fifo_done = !bcb_fifo_busy || !bcb_read_enable;    // Readout busy sending data to sequencer
+  assign rd_start_bcb  = (read_sm == xbcb);                  // Start readout sequence, send fifo dump to DMB
+  assign rd_abort_bcb  = 0;                                  // Cancel readout
+  assign bcb_fifo_done = !bcb_fifo_busy || !bcb_read_enable; // Readout busy sending data to sequencer
 
 //------------------------------------------------------------------------------------------------------------------
 // Readout Special Frames and Trailer Frames Section
@@ -4367,7 +4503,7 @@
 
 // Pre-trigger CLCT*ALCT matching
   assign scp_ch[9]  = alct_active_feb;     // ALCT active feb flag, should precede alct0_vpf
-  assign scp_ch[10] = alct_pretrig_window; // ALCT*CLCT pretrigger matching window
+  assign scp_ch[10] = alct_preClct_window; // ALCT*CLCT pretrigger matching window
 
 // Pre-trigger Processing
   assign scp_ch[13:11] = clct_sm_vec[2:0];  // Pre-trigger state machine
@@ -4485,31 +4621,31 @@
 // Scope control
 //------------------------------------------------------------------------------------------------------------------
   wire scp_read_busy;
-  wire scp_trig_discard  = discard_nowrbuf_cnt_en || discard_invp_cnt_en || discard_tmbreject_cnt_en || tmb_nol1a;
-  wire scp_clear      = (scp_trig_discard && !scp_read_busy);
+  wire scp_trig_discard = discard_nowrbuf_cnt_en || discard_invp_cnt_en || discard_tmbreject_cnt_en || tmb_nol1a;
+  wire scp_clear        = (scp_trig_discard && !scp_read_busy);
   wire scp_runstop_mux  = (scp_auto) ? !scp_clear : scp_runstop;  // Auto mode over-rides vme runstop
-  wire scp_start_read    = (read_sm == xb05);
+  wire scp_start_read   = (read_sm == xb05);
 
   scope160 uscope
   (
-  .clock      (clock),          // In  40MHz system clock
-  .ttc_resync    (ttc_resync),        // In  Reset scope
-  .ch        (scp_ch_mux[159:0]),    // In  Channel inputs
-  .trigger_ch    (scp_trigger_ch[7:0]),    // In  Trigger channel 0-159
-  .ch_trig_en    (scp_ch_trig_en),      // In  Enable channel triggers
-  .force_trig    (scp_force_trig),      // In  Force a trigger
-  .runstop    (scp_runstop_mux),      // In  1=run 0=stop
-  .auto      (scp_auto),          // In  Sequencer readout mode
-  .nowrite    (scp_nowrite),        // In  No-write mode preserves initial RAM contents
-  .ram_sel    (scp_ram_sel[3:0]),      // In  RAM bank select in VME mode
-  .tbins      (scp_tbins[2:0]),      // In  Time bins per channel code, actual tbins/ch = (tbins+1)*64
-  .radr_vme    (scp_radr[8:0]),      // In  Channel data read address
-  .start_read    (scp_start_read),      // In  Start sequencer readout
-  .waiting    (scp_waiting),        // Out  Waiting for trigger
-  .trig_done    (scp_trig_done),      // Out  Trigger done, ready for readout 
-  .rdata      (scp_rdata[15:0]),      // Out  Recorded channel data
-  .read_busy    (scp_read_busy),      // Out  Readout busy sending data to sequencer
-  .read_done    (scp_read_done)        // Out  Read done
+    .clock      (clock),               // In  40MHz system clock
+    .ttc_resync (ttc_resync),          // In  Reset scope
+    .ch         (scp_ch_mux[159:0]),   // In  Channel inputs
+    .trigger_ch (scp_trigger_ch[7:0]), // In  Trigger channel 0-159
+    .ch_trig_en (scp_ch_trig_en),      // In  Enable channel triggers
+    .force_trig (scp_force_trig),      // In  Force a trigger
+    .runstop    (scp_runstop_mux),     // In  1=run 0=stop
+    .auto       (scp_auto),            // In  Sequencer readout mode
+    .nowrite    (scp_nowrite),         // In  No-write mode preserves initial RAM contents
+    .ram_sel    (scp_ram_sel[3:0]),    // In  RAM bank select in VME mode
+    .tbins      (scp_tbins[2:0]),      // In  Time bins per channel code, actual tbins/ch = (tbins+1)*64
+    .radr_vme   (scp_radr[8:0]),       // In  Channel data read address
+    .start_read (scp_start_read),      // In  Start sequencer readout
+    .waiting    (scp_waiting),         // Out  Waiting for trigger
+    .trig_done  (scp_trig_done),       // Out  Trigger done, ready for readout 
+    .rdata      (scp_rdata[15:0]),     // Out  Recorded channel data
+    .read_busy  (scp_read_busy),       // Out  Readout busy sending data to sequencer
+    .read_done  (scp_read_done)        // Out  Read done
   );
 
 // Output calibration signals to help tune external L1A arrival time on CCB front panel
@@ -4595,24 +4731,24 @@
   reg [11:0] sequencer_state=0;
 
   always @(posedge clock) begin
-  sequencer_state[2:0]  <= clct_sm_vec[2:0];
-  sequencer_state[7:3]  <= read_sm_vec[4:0];
-  sequencer_state[8]    <= buf_q_full;    // All raw hits ram in use, ram writing must stop
-  sequencer_state[9]    <= buf_q_empty;    // No fences remain on buffer stack
-  sequencer_state[10]    <= buf_q_ovf_err;  // Tried to push when stack full
-  sequencer_state[11]    <= buf_q_adr_err;  // Tried to pop when stack empty
+    sequencer_state[2:0] <= clct_sm_vec[2:0];
+    sequencer_state[7:3] <= read_sm_vec[4:0];
+    sequencer_state[8]   <= buf_q_full;    // All raw hits ram in use, ram writing must stop
+    sequencer_state[9]   <= buf_q_empty;   // No fences remain on buffer stack
+    sequencer_state[10]  <= buf_q_ovf_err; // Tried to push when stack full
+    sequencer_state[11]  <= buf_q_adr_err; // Tried to pop when stack empty
   end
 
 // LED status displays
   always @(posedge clock) begin
-  led_hold      <=  (clct_sm == halt);                // Freeze display when halted
-  led_lct_ff      <=  tmb_trig_pulse && tmb_match;          // TMB found ALCT + CLCT match
-  led_alct_ff      <=  alct_pat_trig_os;                // ALCT active_feb
-  led_clct_ff      <=  trig_clct_flash;                // CLCT or external trigger, not ALCT
-  led_l1a_intime_ff  <=  l1a_keep;                    // L1A arrived in window or forced L1A
-  led_invpat_ff    <=  discard_event_led;                // Invalid pattern after drift
-  led_nol1a_flush_ff  <=  tmb_nol1a;                    // L1A never arrived, event flushed
-  led_nomatch_ff    <=  tmb_trig_pulse && !tmb_match;          // Trigger but no match 
+    led_hold           <=  (clct_sm == halt);            // Freeze display when halted
+    led_lct_ff         <=  tmb_trig_pulse && tmb_match;  // TMB found ALCT + CLCT match
+    led_alct_ff        <=  alct_pat_trig_os;             // ALCT active_feb
+    led_clct_ff        <=  trig_clct_flash;              // CLCT or external trigger, not ALCT
+    led_l1a_intime_ff  <=  l1a_keep;                     // L1A arrived in window or forced L1A
+    led_invpat_ff      <=  discard_event_led;            // Invalid pattern after drift
+    led_nol1a_flush_ff <=  tmb_nol1a;                    // L1A never arrived, event flushed
+    led_nomatch_ff     <=  tmb_trig_pulse && !tmb_match; // Trigger but no match 
   end
 
 // Front Panel: Normal Mode LED Digital pulse stretch for visual persistence
@@ -4623,14 +4759,14 @@
   x_flashsm #(19) uflashf4  (.trigger(led_invpat_ff),     .hold(led_hold), .clock(clock), .out(led_invpat_os)     );  // LED4  Amber  INVP
   x_flashsm #(19) uflashf5  (.trigger(led_nomatch_ff),    .hold(led_hold), .clock(clock), .out(led_nomatch_os)    );  // LED5  Amber  NMAT
   x_flashsm #(19) uflashf6  (.trigger(led_nol1a_flush_ff),.hold(led_hold), .clock(clock), .out(led_nol1a_flush_os));  // LED6  Red    NL1A
-                                            // LED7  Green  VME
-  assign led_lct      = led_lct_os;      // LED0  Blue  LCT
-  assign led_alct      = led_alct_os;      // LED1  Green  ALCT
-  assign led_clct      = led_clct_os;      // LED2  Green  CLCT
-  assign led_l1a_intime  = led_l1a_intime_os;  // LED3  Green  L1A
-  assign led_invpat    = led_invpat_os;    // LED4  Amber  INVP
-  assign led_nomatch     = led_nomatch_os;    // LED5  Amber  NMAT
-  assign led_nol1a_flush  = led_nol1a_flush_os;  // LED6  Red    NL1A
+                                               // LED7  Green VME
+  assign led_lct         = led_lct_os;         // LED0  Blue  LCT
+  assign led_alct        = led_alct_os;        // LED1  Green ALCT
+  assign led_clct        = led_clct_os;        // LED2  Green CLCT
+  assign led_l1a_intime  = led_l1a_intime_os;  // LED3  Green L1A
+  assign led_invpat      = led_invpat_os;      // LED4  Amber INVP
+  assign led_nomatch     = led_nomatch_os;     // LED5  Amber NMAT
+  assign led_nol1a_flush = led_nol1a_flush_os; // LED6  Red   NL1A
 
 // Inboard display buffer space in-use bar graph
   assign led_bd[7:0] = buf_display[7:0];
@@ -4699,46 +4835,46 @@
   
   initial $display("sequencer: generating Virtex6 RAMB18E1_S9_S9 dmb_bram");
 
-  assign seq_dopa = 0;                      // Port A dummy not needed for Virtex6
-  wire [8:0] db [1:0][1:0];                    // Port B dummy for Virtex6, does not need sump
+  assign seq_dopa = 0;      // Port A dummy not needed for Virtex6
+  wire [8:0] db [1:0][1:0]; // Port B dummy for Virtex6, does not need sump
   
   generate
   for (jdepth=0; jdepth<=1; jdepth=jdepth+1) begin: depth_2x2048
   for (iwidth=0; iwidth<=1; iwidth=iwidth+1) begin: width_2x9
 
-  RAMB18E1 #(                            // Virtex6
-  .RAM_MODE      ("TDP"),                  // SDP or TDP
-   .READ_WIDTH_A    (0),                    // 0,1,2,4,9,18,36 Read/write width per port
-  .WRITE_WIDTH_A    (9),                    // 0,1,2,4,9,18
-  .READ_WIDTH_B    (9),                    // 0,1,2,4,9,18
-  .WRITE_WIDTH_B    (9),                    // 0,1,2,4,9,18,36
-  .WRITE_MODE_A    ("READ_FIRST"),                // WRITE_FIRST, READ_FIRST, or NO_CHANGE
-  .WRITE_MODE_B    ("READ_FIRST"),
-  .SIM_COLLISION_CHECK("ALL")                    // ALL, WARNING_ONLY, GENERATE_X_ONLY or NONE)
+  RAMB18E1 #(                         // Virtex6
+    .RAM_MODE           ("TDP"),        // SDP or TDP
+    .READ_WIDTH_A       (0),            // 0,1,2,4,9,18,36 Read/write width per port
+    .WRITE_WIDTH_A      (9),            // 0,1,2,4,9,18
+    .READ_WIDTH_B       (9),            // 0,1,2,4,9,18
+    .WRITE_WIDTH_B      (9),            // 0,1,2,4,9,18,36
+    .WRITE_MODE_A       ("READ_FIRST"), // WRITE_FIRST, READ_FIRST, or NO_CHANGE
+    .WRITE_MODE_B       ("READ_FIRST"),
+    .SIM_COLLISION_CHECK("ALL")         // ALL, WARNING_ONLY, GENERATE_X_ONLY or NONE)
   ) dmb_bram (
-  .WEA        ({2{seq_wea[jdepth]}}),            //  2-bit A port write enable input
-  .ENARDEN      (seq_ena),                  //  1-bit A port enable/Read enable input
-  .RSTRAMARSTRAM    (1'b0),                    //  1-bit A port set/reset input
-  .RSTREGARSTREG    (1'b0),                    //  1-bit A port register set/reset input
-  .REGCEAREGCE    (1'b0),                    //  1-bit A port register enable/Register enable input
-  .CLKARDCLK      (clock),                  //  1-bit A port clock/Read clock input
-  .ADDRARDADDR    ({seq_wadr[10:0],3'h7}),          // 14-bit A port address/Read address input 9b->[13:3]
-  .DIADI        ({8'h00,seq_wdata[7+9*iwidth:9*iwidth]}),  // 16-bit A port data/LSB data input
-  .DIPADIP      ({1'b0,seq_wdata[8+9*iwidth]}),        //  2-bit A port parity/LSB parity input
-  .DOADO        (),                      // 16-bit A port data/LSB data output
-  .DOPADOP      (),                      //  2-bit A port parity/LSB parity output
+    .WEA           ({2{seq_wea[jdepth]}}),                   //  2-bit A port write enable input
+    .ENARDEN       (seq_ena),                                //  1-bit A port enable/Read enable input
+    .RSTRAMARSTRAM (1'b0),                                   //  1-bit A port set/reset input
+    .RSTREGARSTREG (1'b0),                                   //  1-bit A port register set/reset input
+    .REGCEAREGCE   (1'b0),                                   //  1-bit A port register enable/Register enable input
+    .CLKARDCLK     (clock),                                  //  1-bit A port clock/Read clock input
+    .ADDRARDADDR   ({seq_wadr[10:0],3'h7}),                  // 14-bit A port address/Read address input 9b->[13:3]
+    .DIADI         ({8'h00,seq_wdata[7+9*iwidth:9*iwidth]}), // 16-bit A port data/LSB data input
+    .DIPADIP       ({1'b0,seq_wdata[8+9*iwidth]}),           //  2-bit A port parity/LSB parity input
+    .DOADO         (),                                       // 16-bit A port data/LSB data output
+    .DOPADOP       (),                                       //  2-bit A port parity/LSB parity output
 
-  .WEBWE        ({4{dmb_web[jdepth]}}),            //  4-bit B port write enable/Write enable input
-  .ENBWREN      (dmb_enb),                  //  1-bit B port enable/Write enable input
-  .REGCEB        (1'b0),                    //  1-bit B port register enable input
-  .RSTRAMB      (1'b0),                    //  1-bit B port set/reset input
-  .RSTREGB      (1'b0),                    //  1-bit B port register set/reset input
-  .CLKBWRCLK      (clock),                  //  1-bit B port clock/Write clock input
-  .ADDRBWRADDR    ({dmb_adr[10:0],3'h7}),            // 14-bit B port address/Write address input 9b->[13:3]
-  .DIBDI        ({8'h00,dmb_wdata[7+9*iwidth:9*iwidth]}),  // 16-bit B port data/MSB data input
-  .DIPBDIP      ({1'b0,dmb_wdata[8+9*iwidth]}),        //  2-bit B port parity/MSB parity input
-  .DOBDO        ({db[jdepth][iwidth][7:0],dmb_rdata_mux[(jdepth*18)+(7+9*iwidth):(jdepth*18)+(9*iwidth)]}),  // 16-bit B port data/MSB data output
-  .DOPBDOP      ({db[jdepth][iwidth][8],  dmb_rdata_mux[(jdepth*18)+(8+9*iwidth)]})              //  2-bit B port parity/MSB parity output
+    .WEBWE         ({4{dmb_web[jdepth]}}),                   //  4-bit B port write enable/Write enable input
+    .ENBWREN       (dmb_enb),                                //  1-bit B port enable/Write enable input
+    .REGCEB        (1'b0),                                   //  1-bit B port register enable input
+    .RSTRAMB       (1'b0),                                   //  1-bit B port set/reset input
+    .RSTREGB       (1'b0),                                   //  1-bit B port register set/reset input
+    .CLKBWRCLK     (clock),                                  //  1-bit B port clock/Write clock input
+    .ADDRBWRADDR   ({dmb_adr[10:0],3'h7}),                   // 14-bit B port address/Write address input 9b->[13:3]
+    .DIBDI         ({8'h00,dmb_wdata[7+9*iwidth:9*iwidth]}), // 16-bit B port data/MSB data input
+    .DIPBDIP       ({1'b0,dmb_wdata[8+9*iwidth]}),           //  2-bit B port parity/MSB parity input
+    .DOBDO         ({db[jdepth][iwidth][7:0],dmb_rdata_mux[(jdepth*18)+(7+9*iwidth):(jdepth*18)+(9*iwidth)]}), // 16-bit B port data/MSB data output
+    .DOPBDOP       ({db[jdepth][iwidth][8],  dmb_rdata_mux[(jdepth*18)+(8+9*iwidth)]})                         //  2-bit B port parity/MSB parity output
   );
   end
   end
@@ -4758,15 +4894,15 @@
 //-------------------------------------------------------------------------------------------------------------------
 // State machine declarations
   reg [3:0] cb_sm;          // synthesis attribute safe_implementation of cb_sm is "yes";
-  parameter cb_startup  = 0;
+  parameter cb_startup = 0;
   parameter cb_idle    = 1;
-  parameter cb_clear    = 2;
+  parameter cb_clear   = 2;
   parameter cb_wait    = 3;
 
   reg [0:0] cb_cnt=0;
   always @(posedge clock) begin
-  if (cb_sm==cb_clear) cb_cnt <= cb_cnt+1'b1;
-  else         cb_cnt <= 0;
+    if (cb_sm==cb_clear) cb_cnt <= cb_cnt+1'b1;
+    else                 cb_cnt <= 0;
   end
 
   wire cb_full = (clct_sm==idle) && (read_sm==xckstack) && buf_stalled && wr_buf_autoclr_en;
@@ -4776,16 +4912,16 @@
 
 // Write-buffer auto-clear state machine
   always @(posedge clock or posedge sm_reset) begin
-  if (sm_reset)           cb_sm <= cb_startup;
-  else begin
-  case (cb_sm)
-  cb_startup:  if (startup_done)  cb_sm <= cb_idle;
-  cb_idle:  if (cb_full)    cb_sm <= cb_clear;
-  cb_clear:            cb_sm <= cb_wait;
-  cb_wait:  if (cb_done)    cb_sm <= cb_idle;
-  default              cb_sm <= cb_idle;
-  endcase
-  end
+    if (sm_reset) cb_sm <= cb_startup;
+    else begin
+      case (cb_sm)
+        cb_startup: if (startup_done) cb_sm <= cb_idle;
+        cb_idle:    if (cb_full)      cb_sm <= cb_clear;
+        cb_clear:                     cb_sm <= cb_wait;
+        cb_wait:    if (cb_done)      cb_sm <= cb_idle;
+        default                       cb_sm <= cb_idle;
+      endcase
+    end
   end
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -4938,7 +5074,6 @@
   7'b1011111:  rom = 6;
   7'b1100000:  rom = 2;
   7'b1100001:  rom = 3;
-  7'b1100010:  rom = 3;
   7'b1100011:  rom = 4;
   7'b1100100:  rom = 3;
   7'b1100101:  rom = 4;
@@ -4984,77 +5119,77 @@
   reg        deb_dmb_nwr = 0;
   
   always @(posedge clock or posedge startup_blank) begin
-  if (startup_blank) begin          // async preset
-  deb_dmb_tx[15:0]<= 0;          // fifo data
-  deb_dmb_nwr    <= 1;
-  end
-  else begin                // sync load
-  deb_dmb_tx[14:0]<= dmb_ffdly[14:0];    // fifo data  
-  deb_dmb_tx[15]  <= dmb_ffdly[15];    // DDU special
-  deb_dmb_nwr    <= dmb_ffdly[18];    // DMB /wr
-  end
+    if (startup_blank) begin // async preset
+      deb_dmb_tx[15:0]<= 0;  // fifo data
+      deb_dmb_nwr    <= 1;
+    end
+    else begin                // sync load
+      deb_dmb_tx[14:0] <= dmb_ffdly[14:0]; // fifo data  
+      deb_dmb_tx[15]   <= dmb_ffdly[15];   // DDU special
+      deb_dmb_nwr      <= dmb_ffdly[18];   // DMB /wr
+    end
   end
 
 // CLCT Sequencer State Declarations
   reg[63:0] clct_sm_dsp;
 
   always @* begin
-  case (clct_sm)
-  startup:  clct_sm_dsp <= "startup ";
-  idle:    clct_sm_dsp <= "idle    ";
-  pretrig:  clct_sm_dsp <= "pretrig ";
-  throttle:  clct_sm_dsp <= "throttle";
-  flush:    clct_sm_dsp <= "flush   ";
-  halt:    clct_sm_dsp <= "halt    ";
-  default    clct_sm_dsp <= "default ";
-  endcase
+    case (clct_sm)
+      startup:  clct_sm_dsp <= "startup ";
+      idle:     clct_sm_dsp <= "idle    ";
+      pretrig:  clct_sm_dsp <= "pretrig ";
+      throttle: clct_sm_dsp <= "throttle";
+      flush:    clct_sm_dsp <= "flush   ";
+      halt:     clct_sm_dsp <= "halt    ";
+      default   clct_sm_dsp <= "default ";
+    endcase
   end
 
 // Readout State Declarations
   reg[63:0] read_sm_dsp;
   always @* begin
-  case (read_sm)
-  xstartup:  read_sm_dsp  <= "xstartup";
-  xckstack:  read_sm_dsp <= "xckstack";
-  xdmb:    read_sm_dsp <= "xdmb    ";
-  xheader:  read_sm_dsp <= "xheader ";
-  xe0b:    read_sm_dsp <= "xe0b    ";
-  xdump:    read_sm_dsp <= "xdump   ";
-  xb04:    read_sm_dsp <= "xb04er  ";
-  xrpc:    read_sm_dsp <= "xrpc    ";
-  xe04:    read_sm_dsp <= "xe04    ";
-  xb05:    read_sm_dsp <= "xb05    ";
-  xscope:    read_sm_dsp <= "xscope  ";
-  xe05:    read_sm_dsp <= "xe05    ";
-  xb07:    read_sm_dsp <= "xb07    ";
-  xmini:    read_sm_dsp <= "xmini   ";
-  xe07:    read_sm_dsp <= "xe07    ";
-  xbcb:    read_sm_dsp <= "xbcb    ";
-  xblkbit:  read_sm_dsp <= "xblkbit ";
-  xecb:    read_sm_dsp <= "xecb    ";
-  xmod40:    read_sm_dsp <= "xmod40  ";
-  xmod41:    read_sm_dsp <= "xmod41  ";
-  xe0f:    read_sm_dsp <= "xe0f    ";
-  xcrc0:    read_sm_dsp <= "xcrc0   ";
-  xcrc1:    read_sm_dsp <= "xcrc1   ";
-  xlast:    read_sm_dsp <= "xlast   ";
-  xpop:    read_sm_dsp <= "xpop    ";
-  xhalt:    read_sm_dsp <= "xhalt   ";
-  default    read_sm_dsp <= "default ";
-  endcase
+    case (read_sm)
+      xstartup: read_sm_dsp  <= "xstartup";
+      xckstack: read_sm_dsp <= "xckstack";
+      xdmb:     read_sm_dsp <= "xdmb    ";
+      xheader:  read_sm_dsp <= "xheader ";
+      xe0b:     read_sm_dsp <= "xe0b    ";
+      xdump:    read_sm_dsp <= "xdump   ";
+      xb04:     read_sm_dsp <= "xb04er  ";
+      xrpc:     read_sm_dsp <= "xrpc    ";
+      xe04:     read_sm_dsp <= "xe04    ";
+      xb05:     read_sm_dsp <= "xb05    ";
+      xscope:   read_sm_dsp <= "xscope  ";
+      xe05:     read_sm_dsp <= "xe05    ";
+      xb07:     read_sm_dsp <= "xb07    ";
+      xmini:    read_sm_dsp <= "xmini   ";
+      xe07:     read_sm_dsp <= "xe07    ";
+      xbcb:     read_sm_dsp <= "xbcb    ";
+      xblkbit:  read_sm_dsp <= "xblkbit ";
+      xecb:     read_sm_dsp <= "xecb    ";
+      xmod40:   read_sm_dsp <= "xmod40  ";
+      xmod41:   read_sm_dsp <= "xmod41  ";
+      xe0f:     read_sm_dsp <= "xe0f    ";
+      xcrc0:    read_sm_dsp <= "xcrc0   ";
+      xcrc1:    read_sm_dsp <= "xcrc1   ";
+      xlast:    read_sm_dsp <= "xlast   ";
+      xpop:     read_sm_dsp <= "xpop    ";
+      xhalt:    read_sm_dsp <= "xhalt   ";
+      default   read_sm_dsp <= "default ";
+    endcase
   end
 
 // Write-buffer auto-clear state machine display
   reg[79:0] cb_sm_dsp;
 
   always @* begin
-  case (cb_sm)
-  cb_startup:  cb_sm_dsp <= "cb_startup";
-  cb_idle:  cb_sm_dsp <= "cb_idle   ";
-  cb_clear:  cb_sm_dsp <= "cb_clear  ";
-  cb_wait:  cb_sm_dsp <= "cb_wait   ";
-  default    cb_sm_dsp <= "cb_startup";
-  endcase
+    case (cb_sm)
+      cb_startup: cb_sm_dsp <= "cb_startup";
+      cb_idle:    cb_sm_dsp <= "cb_idle   ";
+      cb_clear:   cb_sm_dsp <= "cb_clear  ";
+      cb_wait:    cb_sm_dsp <= "cb_wait   ";
+      default     cb_sm_dsp <= "cb_startup";
+    endcase
   end
 `endif
 

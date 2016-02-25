@@ -4,8 +4,8 @@
 // Firmware version global definitions
   `define FIRMWARE_TYPE 04'hC    // C=Normal CLCT/TMB, D=Debug PCB loopback version
   `define VERSION       04'hE    // Version revision number, A=TMB2004 and earlier, E=TMB2005E production
-  `define MONTHDAY      16'h0915 // Version date
-  `define YEAR          16'h2015 // Version year
+  `define MONTHDAY      16'h0225 // Version date
+  `define YEAR          16'h2016 // Version year
 
   `define AUTO_VME         01'h1 // Automatically initialize VME registers from PROM data,   0=do not
   `define AUTO_JTAG        01'h1 // Automatically initialize JTAG chain from PROM data,      0=do not
@@ -16,7 +16,7 @@
 
   `define VIRTEX6      04'h6    // FPGA type is Virtex6
   `define MEZCARD      04'hD    // Mezzanine Card: D=Virtex6
-  `define ISE_VERSION  16'h1460 // ISE Compiler version
+  `define ISE_VERSION  16'h1470 // ISE Compiler version
 //  `define FPGAID     16'h6195 // FPGA Type 6195 XC6VLX195T
   `define FPGAID       16'h6240 // FPGA Type 6240 XC6VLX240T
 

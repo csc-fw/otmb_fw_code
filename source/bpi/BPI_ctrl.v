@@ -285,8 +285,8 @@ assign rbk_cnt_rst = csp_rbk_cnt_rst || local_rst;
 assign usr_cmnd     = csp_ctrl ? csp_usr_cmnd     : ((enable_cmd && !local) ? ff_usr_cmnd : 5'h00);
 assign base_address = csp_ctrl ? csp_base_address : ff_base_address;
 assign start_offset = csp_ctrl ? csp_start_offset : ff_start_offset;
-assign n_minus_1    = csp_ctrl ? (csp_ncnt[4:0]-1): ff_n_minus_1[4:0];
-assign ncnt         = csp_ctrl ? csp_ncnt         : ff_n_minus_1 + 1;
+assign n_minus_1    = csp_ctrl ? (csp_ncnt[4:0]-1'b1): ff_n_minus_1[4:0];
+assign ncnt         = csp_ctrl ? csp_ncnt         : ff_n_minus_1 + 1'b1;
 assign bpi_wrt_data = csp_fifo_src ? csp_data         : BPI_CMD_FIFO_DATA;
 assign ff_load_offset = enable_cmd && (ff_usr_cmnd == Load_Address);
 assign start_tmr      = enable_cmd && (ff_usr_cmnd == Start_Timer);
@@ -351,7 +351,7 @@ begin
     parser_inactive_tmr <= 20'h00000;
   else
     if(parser_active && parser_idle)
-      parser_inactive_tmr <= parser_inactive_tmr + 1;
+      parser_inactive_tmr <= parser_inactive_tmr + 1'b1;
     else
       parser_inactive_tmr <= parser_inactive_tmr;
 end
