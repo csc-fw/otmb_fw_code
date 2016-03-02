@@ -110,7 +110,6 @@ parameter IGEM   = 0;
 
     wire [55:0] gtx_rx_data;
 
-
     gem_gtx_optical_rx ugem_gtx_optical_rx (
         // Clocks
         .clock       (clock),          // In  40  MHz fabric clock
@@ -318,11 +317,6 @@ parameter IGEM   = 0;
     assign fifo_rdata = fifo_rdata_clst[fifo_sel];
 
 // outputs 
-
-assign gem_cluster0 = cluster[0]; 
-assign gem_cluster1 = cluster[1]; 
-assign gem_cluster2 = cluster[2]; 
-assign gem_cluster3 = cluster[3]; 
 
 assign gem_vpf0 = vpf[0]; 
 assign gem_vpf1 = vpf[1]; 
