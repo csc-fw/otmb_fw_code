@@ -2890,10 +2890,10 @@
   .D2  (set_sw[8] ? 1'b0 : (!set_sw[7] ? bpi_rd_stat : link_good[0])), // In   1-bit data input tx on negative edge
   .Q  (mez_tp[1]));    // Out  1-bit DDR output
 
-  wire [3:0] gem0_vpf = {gem_vpf0[0], gem_vpf1[0], gem_vpf2[0], gem_vpf3[0]}; 
+  wire gem_vpf = gem_vpf0[0] | gem_vpf1[0] | gem_vpf2[0] | gem_vpf3[0]; 
 
   x_flashsm #(22) uflash_blink_cfeb_led (.trigger(|cfeb_rx_nonzero ),    .hold(1'b0), .clock(clock), .out(blink_cfeb_led));
-  x_flashsm #(22) uflash_blink_gem_led  (.trigger(|gem0_vpf[3:0]),       .hold(1'b0), .clock(clock), .out(blink_gem_led));
+  x_flashsm #(22) uflash_blink_gem_led  (.trigger(gem_vpf),       .hold(1'b0), .clock(clock), .out(blink_gem_led));
   x_flashsm #(22) uflash_blink_gnz_led  (.trigger(|gem_rx_nonzero[3:0]), .hold(1'b0), .clock(clock), .out(blink_gem_nonzero));
 
   assign mez_led[0] = ~|link_had_err ^ blink_gem_led;    // blue OFF.  was ~alct_wait_cfg
@@ -3955,7 +3955,7 @@
 
    // Sump
    assign sump = ccb_sump | alct_sump |   rpc_sump   | sequencer_sump | tmb_sump     | buf_sump  |
-     vme_sump | rpc_inj_sel | mini_sump | (|cfeb_sump) | inj_ram_sump   | virtex6_sump  | cfeb_rx_sump | gem_sump | gem_rx_sump; 
+     vme_sump | rpc_inj_sel | mini_sump | (|cfeb_sump) | inj_ram_sump   | virtex6_sump  | cfeb_rx_sump | (|gem_sump) | (|gem_rx_sump);
 
 
    //-------------------------------------------------------------------------------------------
