@@ -57,14 +57,11 @@ module gem (
     output link_bad,     // link stability monitor: errors happened over 100 times
 
     // Raw Hits FIFO RAM
-    //input                   fifo_wen;        // 1=Write enable FIFO RAM
-    //input  [RAM_ADRB-1:0]   fifo_wadr;       // FIFO RAM write address
-
-    input  [9:0]    fifo_radr,       // FIFO RAM read tbin address
-    input  [1:0]    fifo_sel,        // FIFO RAM read layer clusters 0-3
-    output [13:0]   fifo_rdata,      // FIFO RAM read data
-    input           fifo_reset,      // FIFO RAM read data
-    output [3:0]    parity_err_gem,
+    input  [9:0]    debug_fifo_radr,       // FIFO RAM read tbin address
+    input  [1:0]    debug_fifo_sel,        // FIFO RAM read layer clusters 0-3
+    output [13:0]   debug_fifo_rdata,      // FIFO RAM read data
+    input           debug_fifo_reset,      // FIFO RAM read data
+    output [3:0]    debug_parity_err_gem,
 
     // GEM Outputs
     output [13:0] gem_cluster0,
@@ -196,29 +193,25 @@ parameter IGEM   = 0;
 
     // dummy ram controller
     //---------------------
-    reg  [9:0] gem_ram_adr   = 10'd0;
+    reg  [9:0] debug_ram_adr   = 10'd0;
 
-
-    reg [2:0] ram_sm = 2'd0;
+    reg [2:0] debug_ram_sm = 2'd0;
     parameter RAM_READY    =  2'd0;
     parameter RAM_WRITING  =  2'd1;
     parameter RAM_READOUT  =  2'd2;
-
-    wire ram_is_ready   = (ram_sm==RAM_READY);
-    wire ram_is_writing = (ram_sm==RAM_WRITING);
 
     always @(posedge clock) begin
 
       // global reset case
       if (reset)
-        ram_sm <= RAM_READY;
+        debug_ram_sm <= RAM_READY;
       else begin
 
       // gem raw hits ram SM
-      case (ram_sm)
-        RAM_READY:    ram_sm <= (gem_has_data)          ? RAM_WRITING : ram_sm;
-        RAM_WRITING:  ram_sm <= (gem_ram_adr==10'd1023) ? RAM_READOUT : ram_sm;
-        RAM_READOUT:  ram_sm <= (fifo_reset)            ? RAM_READY   : ram_sm;
+      case (debug_ram_sm)
+        RAM_READY:    debug_ram_sm <= (gem_has_data)            ? RAM_WRITING : debug_ram_sm;
+        RAM_WRITING:  debug_ram_sm <= (debug_ram_adr==10'd1023) ? RAM_READOUT : debug_ram_sm;
+        RAM_READOUT:  debug_ram_sm <= (debug_fifo_reset)        ? RAM_READY   : debug_ram_sm;
       endcase
 
       end // not reset
@@ -228,36 +221,36 @@ parameter IGEM   = 0;
     //----------------------------------------
     always @ (posedge clock) begin
       // gem raw hits ram SM
-      case (ram_sm)
-        RAM_READY:    gem_ram_adr <= 10'd0;
-        RAM_WRITING:  gem_ram_adr <= gem_ram_adr+1'b1;
-        RAM_READOUT:  gem_ram_adr <= 10'd1023;
+      case (debug_ram_sm)
+        RAM_READY:    debug_ram_adr <= 10'd0;
+        RAM_WRITING:  debug_ram_adr <= debug_ram_adr+1'b1;
+        RAM_READOUT:  debug_ram_adr <= 10'd1023;
       endcase
     end
 
     // rename for input to bram
     //--------------------------------------------------
-    wire                  fifo_wen;        // 1=Write enable FIFO RAM
-    wire [RAM_ADRB-1:0]   fifo_wadr;       // FIFO RAM write address
+    wire                  debug_fifo_wen;        // 1=Write enable FIFO RAM
+    wire [RAM_ADRB-1:0]   debug_fifo_wadr;       // FIFO RAM write address
 
-    assign fifo_wen  = ram_is_writing;
-    assign fifo_wadr = gem_ram_adr;
+    assign debug_fifo_wen  = debug_ram_sm==RAM_WRITING; 
+    assign debug_fifo_wadr = debug_ram_adr;
 
     // Calculate parity for raw hits RAM write data
     //---------------------------------------------
-    wire [3:0] parity_wr;
-    wire [3:0] parity_rd;
+    wire [3:0] debug_parity_wr;
+    wire [3:0] debug_parity_rd;
 
-    assign parity_wr[0] = ~(^cluster[0]);
-    assign parity_wr[1] = ~(^cluster[1]);
-    assign parity_wr[2] = ~(^cluster[2]);
-    assign parity_wr[3] = ~(^cluster[3]);
+    assign debug_parity_wr[0] = ~(^cluster[0]);
+    assign debug_parity_wr[1] = ~(^cluster[1]);
+    assign debug_parity_wr[2] = ~(^cluster[2]);
+    assign debug_parity_wr[3] = ~(^cluster[3]);
 
-    wire [4:0] db [3:0]; // Virtex6 dob dummy, no sump needed
+    wire [4:0] debug_db [3:0]; // Virtex6 dob dummy, no sump needed
 
     // Generate GEM Raw Hits Block Rams
     //---------------------------------
-    wire [13:0] fifo_rdata_clst [3:0];
+    wire [13:0] debug_fifo_rdata_clst [3:0];
 
     // depth = 1024
     generate
@@ -273,48 +266,48 @@ parameter IGEM   = 0;
         .SIM_COLLISION_CHECK ("ALL")         // ALL, WARNING_ONLY, GENERATE_X_ONLY or NONE)
     )
     rawhits_ram              (
-        .WEA                 ({2{fifo_wen}}),             // 2-bit  A port write enable input
-        .ENARDEN             (1'b1),                      // 1-bit  A port enable/Read enable input
-        .RSTRAMARSTRAM       (1'b0),                      // 1-bit  A port set/reset input
-        .RSTREGARSTREG       (1'b0),                      // 1-bit  A port register set/reset input
-        .REGCEAREGCE         (1'b0),                      // 1-bit  A port register enable/Register enable input
-        .CLKARDCLK           (clock),                     // 1-bit  A port clock/Read clock input
-        .ADDRARDADDR         ({fifo_wadr[9:0], 4'b1111}), // 14-bit A port address/Read address input (10 bits used [13:4])
+        .WEA                 ({2{debug_fifo_wen}}),             // 2-bit  A port write enable input
+        .ENARDEN             (1'b1),                            // 1-bit  A port enable/Read enable input
+        .RSTRAMARSTRAM       (1'b0),                            // 1-bit  A port set/reset input
+        .RSTREGARSTREG       (1'b0),                            // 1-bit  A port register set/reset input
+        .REGCEAREGCE         (1'b0),                            // 1-bit  A port register enable/Register enable input
+        .CLKARDCLK           (clock),                           // 1-bit  A port clock/Read clock input
+        .ADDRARDADDR         ({debug_fifo_wadr[9:0], 4'b1111}), // 14-bit A port address/Read address input (10 bits used [13:4])
 
-        .DIADI               ({2'h0,cluster[iclust]}),   // 16-bit A port data/LSB data input
-        .DIPADIP             ({1'b0,parity_wr[iclust]}), // 2-bit  A port parity/LSB parity input
-        .DOADO               (),                       // 16-bit A port data/LSB data output
-        .DOPADOP             (),                       // 2-bit  A port parity/LSB parity output
+        .DIADI               ({2'h0,cluster[iclust]}),         // 16-bit A port data/LSB data input
+        .DIPADIP             ({1'b0,debug_parity_wr[iclust]}), // 2-bit  A port parity/LSB parity input
+        .DOADO               (),                               // 16-bit A port data/LSB data output
+        .DOPADOP             (),                               // 2-bit  A port parity/LSB parity output
 
-        .WEBWE               (),                                      // 4-bit  B port write enable/Write enable input
-        .ENBWREN             (1'b1),                                  // 1-bit  B port enable/Write enable input
-        .REGCEB              (1'b0),                                  // 1-bit  B port register enable input
-        .RSTRAMB             (1'b0),                                  // 1-bit  B port set/reset input
-        .RSTREGB             (1'b0),                                  // 1-bit  B port register set/reset input
-        .CLKBWRCLK           (clock),                                 // 1-bit  B port clock/Write clock input
-        .ADDRBWRADDR         ({fifo_radr[9:0], 4'b1111}),             // 14-bit B port address/Write address input 10b->[13:4]
-        .DIBDI               (),                                      // 16-bit B port data/MSB data input
-        .DIPBDIP             (),                                      // 2-bit  B port parity/MSB parity input
-        .DOBDO               ({db[iclust][1:0],fifo_rdata_clst[iclust]}), // 16-bit B port data/MSB data output
-        .DOPBDOP             ({db[iclust][4],  parity_rd[iclust]})        // 2-bit  B port parity/MSB parity output
+        .WEBWE               (),                                                      // 4-bit  B port write enable/Write enable input
+        .ENBWREN             (1'b1),                                                  // 1-bit  B port enable/Write enable input
+        .REGCEB              (1'b0),                                                  // 1-bit  B port register enable input
+        .RSTRAMB             (1'b0),                                                  // 1-bit  B port set/reset input
+        .RSTREGB             (1'b0),                                                  // 1-bit  B port register set/reset input
+        .CLKBWRCLK           (clock),                                                 // 1-bit  B port clock/Write clock input
+        .ADDRBWRADDR         ({debug_fifo_radr[9:0], 4'b1111}),                       // 14-bit B port address/Write address input 10b->[13:4]
+        .DIBDI               (),                                                      // 16-bit B port data/MSB data input
+        .DIPBDIP             (),                                                      // 2-bit  B port parity/MSB parity input
+        .DOBDO               ({debug_db[iclust][1:0],debug_fifo_rdata_clst[iclust]}), // 16-bit B port data/MSB data output
+        .DOPBDOP             ({debug_db[iclust][4],  debug_parity_rd[iclust]})        // 2-bit  B port parity/MSB parity output
     );
     end
     endgenerate
 
     // Compare read parity to write parity
     //------------------------------------
-    wire [3:0] parity_expect;
+    wire [3:0] debug_parity_expect;
 
-    assign parity_expect[0] = ~(^fifo_rdata_clst[0]);
-    assign parity_expect[1] = ~(^fifo_rdata_clst[1]);
-    assign parity_expect[2] = ~(^fifo_rdata_clst[2]);
-    assign parity_expect[3] = ~(^fifo_rdata_clst[3]);
+    assign debug_parity_expect[0] = ~(^debug_fifo_rdata_clst[0]);
+    assign debug_parity_expect[1] = ~(^debug_fifo_rdata_clst[1]);
+    assign debug_parity_expect[2] = ~(^debug_fifo_rdata_clst[2]);
+    assign debug_parity_expect[3] = ~(^debug_fifo_rdata_clst[3]);
 
-    assign parity_err_gem[3:0] =  ~(parity_rd ~^ parity_expect);  // ~^ is bitwise equivalence operator
+    assign debug_parity_err_gem[3:0] =  ~(debug_parity_rd ~^ debug_parity_expect);  // ~^ is bitwise equivalence operator
 
     // fifo data output multiplexer
     //-----------------------------
-    assign fifo_rdata = fifo_rdata_clst[fifo_sel];
+    assign debug_fifo_rdata = debug_fifo_rdata_clst[fifo_sel];
 
 // outputs 
 

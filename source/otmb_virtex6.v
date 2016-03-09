@@ -1310,7 +1310,7 @@
     wire  [MXGEM-1:0]     gem_link_good;                 // link stability monitor: always good, no errors since last resync
     wire  [MXGEM-1:0]     gem_link_bad;                  // link stability monitor: errors happened over 100 times
 
-    wire  [13:0] gem_fifo_rdata [MXGEM-1:0];    // GEM FIFO RAM read data
+    wire  [13:0] gem_debug_fifo_rdata [MXGEM-1:0];    // GEM FIFO RAM read data
 
     wire [13:0] gem_cluster0 [MXGEM-1:0];
     wire [13:0] gem_cluster1 [MXGEM-1:0];
@@ -1322,12 +1322,12 @@
     wire  [0:0]   gem_vpf2 [MXGEM-1:0];
     wire  [0:0]   gem_vpf3 [MXGEM-1:0];
 
-    wire [9:0]   gem_fifo_adr;        // FIFO RAM read tbin address
-    wire [1:0]   gem_fifo_sel;        // FIFO RAM read layer clusters 0-3
-    wire [1:0]   gem_fifo_igem;       // FIFO RAM read chamber 0-3
-    wire         gem_fifo_reset;      // FIFO RAM read data
+    wire [9:0]   gem_debug_fifo_adr;        // FIFO RAM read tbin address
+    wire [1:0]   gem_debug_fifo_sel;        // FIFO RAM read layer clusters 0-3
+    wire [1:0]   gem_debug_fifo_igem;       // FIFO RAM read chamber 0-3
+    wire         gem_debug_fifo_reset;      // FIFO RAM read data
 
-    wire [15:0] gem_fifo_data_vme = {2'b0,gem_fifo_rdata[gem_fifo_igem]};
+    wire [15:0]  gem_debug_fifo_data_vme = {2'b0,gem_debug_fifo_rdata[gem_debug_fifo_igem]};
 
   genvar igem;
   generate
@@ -1373,10 +1373,10 @@
         .link_bad             (gem_link_bad         [igem]                  ), // Out  link stability monitor: errors happened over 100 times
         .gtx_rx_sump          (gem_rx_sump          [igem]                  ), // Out  Unused signals
 
-        .fifo_radr            ( gem_fifo_adr),         // In  FIFO RAM read tbin address
-        .fifo_sel             ( gem_fifo_sel),         // In  FIFO RAM read layer clusters 0-3
-        .fifo_reset           ( gem_fifo_reset),       // In  FIFO RAM reset
-        .fifo_rdata           ( gem_fifo_rdata[igem]), // Out FIFO RAM read data
+        .debug_fifo_radr            ( gem_debug_fifo_adr),         // In  FIFO RAM read tbin address
+        .debug_fifo_sel             ( gem_debug_fifo_sel),         // In  FIFO RAM read layer clusters 0-3
+        .debug_fifo_reset           ( gem_debug_fifo_reset),       // In  FIFO RAM reset
+        .debug_fifo_rdata           ( gem_debug_fifo_rdata[igem]), // Out FIFO RAM read data
 
         .gem_cluster0             (gem_cluster0[igem]),  // Out GEM Cluster
         .gem_cluster1             (gem_cluster1[igem]),  // Out GEM Cluster
@@ -3517,12 +3517,12 @@
       .dmb_wdcnt      (dmb_wdcnt[MXRAMADR-1:0]),      // In  Raw hits RAM VME word count
       .dmb_busy      (dmb_busy),              // In  Raw hits RAM VME busy writing DMB data
 
-    // GEM Ports: GEM Raw Hits Ram
-    .gem_fifo_reset   (gem_fifo_reset),
-    .gem_fifo_adr     (gem_fifo_adr),
-    .gem_fifo_sel     (gem_fifo_sel),
-    .gem_fifo_igem    (gem_fifo_igem),
-    .gem_fifo_data    (gem_fifo_data_vme),
+      // GEM Ports: GEM Raw Hits Ram
+      .gem_debug_fifo_reset   (gem_debug_fifo_reset),
+      .gem_debug_fifo_adr     (gem_debug_fifo_adr),
+      .gem_debug_fifo_sel     (gem_debug_fifo_sel),
+      .gem_debug_fifo_igem    (gem_debug_fifo_igem),
+      .gem_debug_fifo_data    (gem_debug_fifo_data_vme),
 
       // Sequencer Ports: Buffer Status
       .wr_buf_ready      (wr_buf_ready),            // In  Write buffer is ready

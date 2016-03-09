@@ -526,11 +526,11 @@
   dmb_busy,
 
 // GEM Ports: GEM Raw Hits Ram
-  gem_fifo_reset,
-  gem_fifo_adr,
-  gem_fifo_sel,
-  gem_fifo_igem,
-  gem_fifo_data,
+  gem_debug_fifo_reset,
+  gem_debug_fifo_adr,
+  gem_debug_fifo_sel,
+  gem_debug_fifo_igem,
+  gem_debug_fifo_data,
 
 // Sequencer Ports: Buffer Status
   wr_buf_ready,
@@ -1295,8 +1295,8 @@
 
   parameter ADR_V6_EXTEND      = 10'h17A;  // DCFEB 7-bit extensions
 
-  parameter ADR_GEM_RAW_HITS_CTRL     = 10'h194;
-  parameter ADR_GEM_RAW_HITS_DATA     = 10'h196;
+  parameter ADR_GEM_DEBUG_FIFO_CTRL     = 10'h194;
+  parameter ADR_GEM_DEBUG_FIFO_DATA     = 10'h196;
   parameter ADR_ODMB      = 10'h1EE;  // ODMB mode: various addresses are handled inside odmb_device
 
 //------------------------------------------------------------------------------------------------------------------
@@ -1819,12 +1819,12 @@
   input          dmb_busy;        // Raw hits RAM VME busy writing DMB data
 
 // GEM Raw Hits Ram
-  output        gem_fifo_reset;  // Raw hits RAM VME address reset
-  output [9:0]  gem_fifo_adr;    // Raw hits RAM VME read/write address
-  output [1:0]  gem_fifo_sel;    // Select which gem Cluster to read
-  output [1:0]  gem_fifo_igem;   // Select which gem chamber to read
+  output        gem_debug_fifo_reset;  // Raw hits RAM VME address reset
+  output [9:0]  gem_debug_fifo_adr;    // Raw hits RAM VME read/write address
+  output [1:0]  gem_debug_fifo_sel;    // Select which gem Cluster to read
+  output [1:0]  gem_debug_fifo_igem;   // Select which gem chamber to read
 
-  input  [15:0] gem_fifo_data;  // Raw hits RAM VME read data
+  input  [15:0] gem_debug_fifo_data;  // Raw hits RAM VME read data
 
 // Sequencer Ports: Buffer Status
   input          wr_buf_ready;      // Write buffer is ready
@@ -2713,11 +2713,10 @@
   reg   [15:0]  virtex6_extend_wr;
   wire  [15:0]  virtex6_extend_rd;
 
-  reg  [15:0] gem_raw_hits_data_wr;
-  wire  [15:0] gem_raw_hits_data_rd;
+  wire  [15:0] gem_debug_fifo_data_rd;
 
-  reg  [15:0] gem_raw_hits_ctrl_wr;
-  wire [15:0] gem_raw_hits_ctrl_rd;
+  reg  [15:0] gem_debug_fifo_ctrl_wr;
+  wire [15:0] gem_debug_fifo_ctrl_rd;
 
 //------------------------------------------------------------------------------------------------------------------
 // Address Write Decodes
@@ -2857,8 +2856,7 @@
   wire      wr_virtex6_sysmon;
   wire      wr_virtex6_extend;
 
-  wire      wr_gem_raw_hits_data;
-  wire      wr_gem_raw_hits_ctrl;
+  wire      wr_gem_debug_fifo_ctrl;
 
   wire      wr_adr_cap;
 
@@ -3416,8 +3414,8 @@
 
   ADR_V6_EXTEND:      data_out  <= virtex6_extend_rd;
 
-  ADR_GEM_RAW_HITS_CTRL:     data_out <= gem_raw_hits_ctrl_rd;
-  ADR_GEM_RAW_HITS_DATA:     data_out <= gem_raw_hits_data_rd;
+  ADR_GEM_DEBUG_FIFO_CTRL:     data_out <= gem_debug_fifo_ctrl_rd;
+  ADR_GEM_DEBUG_FIFO_DATA:     data_out <= gem_debug_fifo_data_rd;
 
   ADR_ODMB:      data_out  <= odmb_data;
 
@@ -3575,8 +3573,7 @@
 
   assign wr_virtex6_extend  = (reg_adr==ADR_V6_EXTEND    && clk_en);
 
-  assign wr_gem_raw_hits_ctrl    = (reg_adr==ADR_GEM_RAW_HITS_CTRL    && clk_en);
-  assign wr_gem_raw_hits_data    = (reg_adr==ADR_GEM_RAW_HITS_DATA    && clk_en);
+  assign wr_gem_debug_fifo_ctrl = (reg_adr==ADR_GEM_DEBUG_FIFO_CTRL    && clk_en);
 
   assign wr_adr_cap    = (adr_cap);
   
@@ -7198,36 +7195,29 @@
   wire   virtex6_extend_sump      = |virtex6_extend_wr[9:8];  // RO
 
 //------------------------------------------------------------------------------------------------------------------
-// GEM_RAW_HITS_CTRL = 0x194  GEM Raw Hits Readout RAM Simple Controller
+// GEM_DEBUG_FIFO_CTRL = 0x194  GEM Raw Hits Readout RAM Simple Controller
 //------------------------------------------------------------------------------------------------------------------
 // Power up
   initial begin
-  gem_raw_hits_ctrl_wr[0]     =  1'b1; // RW reset
-  gem_raw_hits_ctrl_wr[2:1]   =  2'b0; // RW cluster select
-  gem_raw_hits_ctrl_wr[4:3]   =  2'b0; // RW gem select
-  gem_raw_hits_ctrl_wr[14:5]  = 10'b0; // RW address
-  gem_raw_hits_ctrl_wr[15]    =  1'b0; // unused
+  gem_debug_fifo_ctrl_wr[0]     =  1'b1; // RW reset
+  gem_debug_fifo_ctrl_wr[2:1]   =  2'b0; // RW cluster select
+  gem_debug_fifo_ctrl_wr[4:3]   =  2'b0; // RW gem select
+  gem_debug_fifo_ctrl_wr[14:5]  = 10'b0; // RW address
+  gem_debug_fifo_ctrl_wr[15]    =  1'b0; // unused
   end
 
-  assign gem_fifo_reset = gem_raw_hits_ctrl_wr[0];
-  assign gem_fifo_sel   = gem_raw_hits_ctrl_wr[2:1];
-  assign gem_fifo_igem  = gem_raw_hits_ctrl_wr[4:3];
-  assign gem_fifo_adr   = gem_raw_hits_ctrl_wr[14:5];
+  assign gem_debug_fifo_reset = gem_debug_fifo_ctrl_wr[0];
+  assign gem_debug_fifo_sel   = gem_debug_fifo_ctrl_wr[2:1];
+  assign gem_debug_fifo_igem  = gem_debug_fifo_ctrl_wr[4:3];
+  assign gem_debug_fifo_adr   = gem_debug_fifo_ctrl_wr[14:5];
 
-  assign gem_raw_hits_ctrl_rd = gem_raw_hits_ctrl_wr;
+  assign gem_debug_fifo_ctrl_rd = gem_debug_fifo_ctrl_wr;
 
 //------------------------------------------------------------------------------------------------------------------
-// GEM_RAW_HITS_DATA = 0x196  GEM Raw Hits Data
+// GEM_DEBUG_FIFO_DATA = 0x196  GEM Raw Hits Data
 //------------------------------------------------------------------------------------------------------------------
 
-    reg  [15:0] gem_raw_hits_data_mux;
-    // Power up
-    initial begin
-    gem_raw_hits_data_wr[15:0] = 16'b0; // RW address
-    end
-
-    assign gem_raw_hits_data_rd = gem_fifo_data;
-
+  assign gem_debug_fifo_data_rd = gem_debug_fifo_data;
 
 //------------------------------------------------------------------------------------------------------------------
 // VME Write-Registers latch data when addressed + latch power-up defaults
@@ -7356,8 +7346,7 @@
   if (wr_virtex6_gtx_rx[6])   virtex6_gtx_rx_wr[6] <=  d[15:0];  
   if (wr_virtex6_sysmon)      virtex6_sysmon_wr    <=  d[15:0];
   if (wr_virtex6_extend)      virtex6_extend_wr    <=  d[15:0];
-  if (wr_gem_raw_hits_ctrl)   gem_raw_hits_ctrl_wr    <=  d[15:0];
-  if (wr_gem_raw_hits_data)   gem_raw_hits_data_wr    <=  d[15:0];
+  if (wr_gem_debug_fifo_ctrl)   gem_debug_fifo_ctrl_wr    <=  d[15:0];
   if (wr_mpc_frames_fifo_ctrl) mpc_frames_fifo_ctrl_wr <= d[15:0];
   end
 
