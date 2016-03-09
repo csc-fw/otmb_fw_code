@@ -15,8 +15,8 @@
 //-------------------------------------------------------------------------------------------------------------------
 // Ports
 //-------------------------------------------------------------------------------------------------------------------
-  input  [15:0]  enc_in;
-  output  [5:0]  parity_out;
+  input  [15:0] enc_in;
+  output [5:0]  parity_out;
 
 //-------------------------------------------------------------------------------------------------------------------
 // Encoder checkbit generator equations
@@ -28,10 +28,9 @@
   assign enc_chk[2] = enc_in[1]  ^ enc_in[2]  ^ enc_in[3]  ^ enc_in[7]  ^ enc_in[8]  ^ enc_in[9]  ^ enc_in[10] ^ enc_in[14] ^ enc_in[15];
   assign enc_chk[3] = enc_in[4]  ^ enc_in[5]  ^ enc_in[6]  ^ enc_in[7]  ^ enc_in[8]  ^ enc_in[9]  ^ enc_in[10];
   assign enc_chk[4] = enc_in[11] ^ enc_in[12] ^ enc_in[13] ^ enc_in[14] ^ enc_in[15];
-  assign enc_chk[5] =
-  enc_in[0]  ^ enc_in[1]  ^ enc_in[2]  ^ enc_in[3]  ^ enc_in[4]  ^ enc_in[5]  ^ enc_in[6]  ^ enc_in[7]  ^
-  enc_in[8]  ^ enc_in[9]  ^ enc_in[10] ^ enc_in[11] ^ enc_in[12] ^ enc_in[13] ^ enc_in[14] ^ enc_in[15] ^
-  enc_chk[4] ^ enc_chk[3] ^ enc_chk[2] ^ enc_chk[1] ^ enc_chk[0];
+  assign enc_chk[5] = enc_in[0]  ^ enc_in[1]  ^ enc_in[2]  ^ enc_in[3]  ^ enc_in[4]  ^ enc_in[5]  ^ enc_in[6]  ^ enc_in[7]  ^
+                      enc_in[8]  ^ enc_in[9]  ^ enc_in[10] ^ enc_in[11] ^ enc_in[12] ^ enc_in[13] ^ enc_in[14] ^ enc_in[15] ^
+                      enc_chk[4] ^ enc_chk[3] ^ enc_chk[2] ^ enc_chk[1] ^ enc_chk[0];
 
   assign parity_out[5:0] = enc_chk[5:0];
 

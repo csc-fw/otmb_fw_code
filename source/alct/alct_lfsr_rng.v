@@ -15,10 +15,10 @@
   parameter LFSR_LENGTH = 49;
 
 // Ports
-  input              clock;  // 40 Mhz clock
-  input              ce;    // Clock enable
-  input              reset;  // Restart series
-  output reg   [LFSR_LENGTH-1:0]  lfsr;  // Random series
+  input                        clock; // 40 Mhz clock
+  input                        ce;    // Clock enable
+  input                        reset; // Restart series
+  output reg [LFSR_LENGTH-1:0] lfsr;  // Random series
 
 // LFSR Random Pattern Generator
 //  wire [LFSR_LENGTH-1:0] lfsr_seed = 56'h123456789ABCDE;
@@ -29,8 +29,8 @@
   wire feedback = ~(lfsr[48] ^ lfsr[39]);              // 49 bit version
 
   always @(posedge clock) begin
-  if      (reset)  lfsr <=  lfsr_seed;
-  else if (ce)  lfsr <= {lfsr[LFSR_LENGTH-2:0],feedback};
+    if      (reset) lfsr <=  lfsr_seed;
+    else if (ce)    lfsr <= {lfsr[LFSR_LENGTH-2:0],feedback};
   end
   
 //----------------------------------------------------------------------------------------------------------------

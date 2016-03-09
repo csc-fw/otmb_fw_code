@@ -238,9 +238,9 @@
   .BANDWIDTH        ("OPTIMIZED"),  // Jitter programming ("HIGH","LOW","OPTIMIZED")
   .CLKFBOUT_MULT_F     (16.000),    // Multiply all CLKOUT (5.0-64.0)    1x   40MHz clock
   .CLKOUT0_DIVIDE_F    (8.000),     // Divide amount (1.000-128.000)     2x   80MHz clock
-  .CLKOUT1_DIVIDE      (64.00),     // Divide amount (1.000-128.000)    1/4x  10MHz clock
-  .CLKOUT2_DIVIDE      (4.000),     // Divide amount (1.000-128.000)     4x   160MHz clock
-  .CLKOUT3_DIVIDE      (16.000),    // Divide amount (1.000-128.000)     1x   40MHz clock
+  .CLKOUT1_DIVIDE      (64),     // Divide amount (1.000-128.000)    1/4x  10MHz clock
+  .CLKOUT2_DIVIDE      (4),     // Divide amount (1.000-128.000)     4x   160MHz clock
+  .CLKOUT3_DIVIDE      (16),    // Divide amount (1.000-128.000)     1x   40MHz clock
   .CLKOUT4_DIVIDE       (8),  // Divide amount (1.000-128.000)  1/8 8 MHz clock = 1 MHz, for BPI
   .CLKOUT5_DIVIDE       (32),     // ...not used...
   .CLKOUT6_DIVIDE       (80)  // Divide amount (1.000-128.000)  1/5 40 MHz clock = 8 MHz, feeds input to CLKOUT$

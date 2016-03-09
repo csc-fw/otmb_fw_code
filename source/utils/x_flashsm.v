@@ -33,16 +33,16 @@
   initial  $display("x_flashsm: MXCNT=%d",MXCNT);
 
 // Ports
-  input      trigger;    // Start flash
-  input      hold;      // Hold led on
-  input      clock;      // Counter clock
-  output      out;      // LED drive
+  input  trigger; // Start flash
+  input  hold;    // Hold led on
+  input  clock;   // Counter clock
+  output out;     // LED drive
 
 // State Machine declaration
   reg [2:0] flash_sm;
   parameter idle  = 0;
-  parameter flash  = 1;
-  parameter hwait  = 2;
+  parameter flash = 1;
+  parameter hwait = 2;
 
   // synthesis attribute safe_implementation of flash_sm is "yes";
   // synthesis attribute init                of flash_sm is idle;
@@ -52,23 +52,23 @@
   reg hold_ff=0;
 
   always @(posedge clock) begin
-  trig_ff <= trigger;
-  hold_ff  <= hold | trigger;
+    trig_ff <= trigger;
+    hold_ff <= hold | trigger;
   end
 
 // Buffer output
   reg out=0;
 
   always @(posedge clock) begin
-  out <= (flash_sm != idle);
+    out <= (flash_sm != idle);
   end
 
 // Flash persistence counter
   reg [MXCNT:0] cnt=0;
 
   always @(posedge clock) begin
-  if (flash_sm != flash)  cnt <= 0;
-  else          cnt <= cnt+1'b1;
+    if (flash_sm != flash) cnt <= 0;
+    else                   cnt <= cnt+1'b1;
   end
 
   wire cnt_done = cnt[MXCNT];
@@ -77,14 +77,14 @@
   wire sm_reset = !((flash_sm==idle) || (flash_sm==flash) || (flash_sm==hwait));
 
   always @(posedge clock) begin
-  if (sm_reset)      flash_sm <= idle;
-  else begin
-  case (flash_sm)
-  idle:  if (trig_ff )  flash_sm <= flash;
-  flash:  if (cnt_done)  flash_sm <= hwait;
-  hwait:  if (!hold_ff)  flash_sm <= idle;
-  endcase
-  end
+    if (sm_reset) flash_sm <= idle;
+    else begin
+      case (flash_sm)
+        idle:  if (trig_ff )  flash_sm <= flash;
+        flash: if (cnt_done)  flash_sm <= hwait;
+        hwait: if (!hold_ff)  flash_sm <= idle;
+      endcase
+    end
   end
 
 // Debug state machine display
@@ -92,12 +92,12 @@
   output reg [39:0] flash_sm_dsp;
 
   always @* begin
-  case (flash_sm)
-  idle:  flash_sm_dsp <= "idle ";
-  flash:  flash_sm_dsp <= "flash";
-  hwait:  flash_sm_dsp <= "hwait";
-  default  flash_sm_dsp <= "deflt";
-  endcase
+    case (flash_sm)
+      idle:   flash_sm_dsp <= "idle ";
+      flash:  flash_sm_dsp <= "flash";
+      hwait:  flash_sm_dsp <= "hwait";
+      default flash_sm_dsp <= "deflt";
+    endcase
   end
 `endif
 

@@ -15,31 +15,31 @@
 
   input  d;
   input  clock;
-  output  q;
+  output q;
 
 // State Machine declarations
-  reg  [2:0] sm;    // synthesis attribute safe_implementation of sm is "yes";
+  reg [2:0] sm;    // synthesis attribute safe_implementation of sm is "yes";
   parameter idle  =  0;
-  parameter pulse  =  1;
+  parameter pulse =  1;
   parameter hold  =  2;
 
 // One-shot state machine
   initial sm = idle;
 
   always @(posedge clock) begin
-   case (sm)
-  idle:   if (d)  sm <= pulse;
-  pulse:      sm <= hold;
-  hold:  if(!d)  sm <= idle;
-  default:    sm <= idle;
-  endcase
+    case (sm)
+      idle:    if (d) sm <= pulse;
+      pulse:          sm <= hold;
+      hold:    if(!d) sm <= idle;
+      default:        sm <= idle;
+    endcase
   end
 
 // Output FF
   reg  q = 0;
 
   always @(posedge clock) begin
-  q <= (sm==pulse);
+    q <= (sm==pulse);
   end
 
 // Debug state machine display
@@ -48,12 +48,12 @@
   reg    [39:0] sm_dsp;
 
   always @* begin
-  case (sm)
-  idle:  sm_dsp <= "idle ";
-  pulse:  sm_dsp <= "pulse";
-  hold:  sm_dsp <= "hold ";
-  default  sm_dsp <= "deflt";
-  endcase
+    case (sm)
+      idle:   sm_dsp <= "idle ";
+      pulse:  sm_dsp <= "pulse";
+      hold:   sm_dsp <= "hold ";
+      default sm_dsp <= "deflt";
+    endcase
   end
 `endif
 

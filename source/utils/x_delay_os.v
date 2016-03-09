@@ -12,23 +12,23 @@
   module x_delay_os (d,clock,delay,q);
   
 // Generic
-  parameter  MXDLY =  4;        // Number delay value bits
-  localparam MXSR  =  1 << MXDLY;    // Number delay stages
+  parameter  MXDLY =  4;          // Number delay value bits
+  localparam MXSR  =  1 << MXDLY; // Number delay stages
 
   initial  $display("x_delay_os: MXDLY=%d",MXDLY);
   initial  $display("x_delay_os: MXSR =%d",MXSR );
 
 // Ports
-  input        d;
-  input        clock;
-  input  [MXDLY-1:0]  delay;
-  output        q;
+  input              d;
+  input              clock;
+  input  [MXDLY-1:0] delay;
+  output             q;
 
 // Inhibit one-shot clips inputs to 1 clock width
   reg  inhibit=0;
 
   always @(posedge clock) begin
-  inhibit <= d;
+    inhibit <= d;
   end
 
   wire d_oneshot = (d & ~inhibit);
@@ -38,18 +38,18 @@
   integer i;
 
   always @(posedge clock) begin
-  sr[1] <= d_oneshot;
-  i=2;
-  while (i<MXSR) begin
-  sr[i] <= sr[i-1];
-  i=i+1;
-   end
+    sr[1] <= d_oneshot;
+    i=2;
+    while (i<MXSR) begin
+      sr[i] <= sr[i-1];
+      i=i+1;
+    end
   end
 
 // Select delayed output
   wire [MXSR-1:0] srq;
   
-  assign srq[0]     = d_oneshot;
+  assign srq[0]        = d_oneshot;
   assign srq[MXSR-1:1] = sr;
 
   assign q = srq[delay];

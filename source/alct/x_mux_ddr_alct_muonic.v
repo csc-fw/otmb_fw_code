@@ -26,16 +26,16 @@
 //-------------------------------------------------------------------------------------------------------------------
   module x_mux_ddr_alct_muonic
   (
-  clock,
-  clock_lac,
-  clock_2x,
-  clock_iob,
-  clock_en,
-  posneg,
-  clr,
-  din1st,
-  din2nd,
-  dout
+    clock,
+    clock_lac,
+    clock_2x,
+    clock_iob,
+    clock_en,
+    posneg,
+    clr,
+    din1st,
+    din2nd,
+    dout
   );
 
 // Generic
@@ -43,16 +43,16 @@
   initial  $display("x_mux_ddr_alct_muonic: WIDTH=%d",WIDTH);
 
 // Ports
-  input        clock;        // 40MHz TMB main clock
-  input        clock_lac;      // 40MHz logic accessible clock
-  input        clock_2x;      // 80MHz commutator clock
-  input        clock_iob;      // ALCT rx  40 MHz clock
-  input        clock_en;      // Clock enable
-  input        posneg;        // Select inter-stage clock 0 or 180 degrees
-  input        clr;        // Sync clear
-  input  [WIDTH-1:0]  din1st;        // Input data 1st-in-time
-  input  [WIDTH-1:0]  din2nd;        // Input data 2nd-in-time
-  output  [WIDTH-1:0]  dout;        // Output data multiplexed 2-to-1
+  input              clock;     // 40MHz TMB main clock
+  input              clock_lac; // 40MHz logic accessible clock
+  input              clock_2x;  // 80MHz commutator clock
+  input              clock_iob; // ALCT rx  40 MHz clock
+  input              clock_en;  // Clock enable
+  input              posneg;    // Select inter-stage clock 0 or 180 degrees
+  input              clr;       // Sync clear
+  input  [WIDTH-1:0] din1st;    // Input data 1st-in-time
+  input  [WIDTH-1:0] din2nd;    // Input data 2nd-in-time
+  output [WIDTH-1:0] dout;      // Output data multiplexed 2-to-1
 
 // Latch fpga fabric inputs in main clock time domain
   reg  [2*WIDTH-1:0] din_ff = 0;
@@ -61,21 +61,21 @@
   assign din = {din2nd,din1st};
 
   always @(posedge clock) begin
-  din_ff <= din;
+    din_ff <= din;
   end
 
 // Interstage clock latches on rising or falling edge of main clock using clock_2x 
   reg  isen=0;
 
   always @(posedge clock_2x)begin
-  isen <= clock_lac ^ posneg;
+    isen <= clock_lac ^ posneg;
   end
 
 // Latch fpga fabric inputs in an inter-stage time domain
   reg  [2*WIDTH-1:0] din_is_ff = 0;
 
   always @(posedge clock_2x) begin
-  if (isen) din_is_ff <= din_ff; // din_is_ff changes every 25 ns, but either rising or falling edge (posneg)
+    if (isen) din_is_ff <= din_ff; // din_is_ff changes every 25 ns, but either rising or falling edge (posneg)
   end
 
 // Pass 1st & 2nd-in-time directly to ODDR in IOB clock time domain (use same-edge feature)
@@ -88,20 +88,21 @@
 // Generate array of output IOB DDRs, xst can not infer ddr outputs, alas
   genvar i;
   generate
-  for (i=0; i<=WIDTH-1; i=i+1) begin: ddr_gen
-  ODDR #(
-  .DDR_CLK_EDGE ("SAME_EDGE"),  // "OPPOSITE_EDGE" or "SAME_EDGE" 
-  .INIT         (1'b0),    // Initial value of Q: 1'b0 or 1'b1
-  .SRTYPE       ("SYNC")    // Set/Reset type: "SYNC" or "ASYNC" 
-  ) u0 (
-  .C  (clock_iob),    // In  1-bit clock input
-  .CE  (clock_en),    // In  1-bit clock enable input
-  .S  (1'b0),      // In  1-bit set
-  .R  (clr),      // In  1-bit reset
-  .D1  (din1st_iobff[i]),  // In  1-bit data input tx on positive edge
-  .D2  (din2nd_iobff[i]),  // In  1-bit data input tx on negative edge
-  .Q  (dout[i]));    // Out  1-bit DDR output
-  end
+    for (i=0; i<=WIDTH-1; i=i+1) begin: ddr_gen
+      ODDR #(
+        .DDR_CLK_EDGE ("SAME_EDGE"), // "OPPOSITE_EDGE" or "SAME_EDGE" 
+        .INIT         (1'b0),        // Initial value of Q: 1'b0 or 1'b1
+        .SRTYPE       ("SYNC")       // Set/Reset type: "SYNC" or "ASYNC" 
+      ) u0 (
+        .C  (clock_iob),       // In  1-bit clock input
+        .CE (clock_en),        // In  1-bit clock enable input
+        .S  (1'b0),            // In  1-bit set
+        .R  (clr),             // In  1-bit reset
+        .D1 (din1st_iobff[i]), // In  1-bit data input tx on positive edge
+        .D2 (din2nd_iobff[i]), // In  1-bit data input tx on negative edge
+        .Q  (dout[i])          // Out  1-bit DDR output
+      );
+    end
   endgenerate
 
 //-------------------------------------------------------------------------------------------------------------------

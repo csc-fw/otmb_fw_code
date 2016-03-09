@@ -176,10 +176,10 @@
 //------------------------------------------------------------------------------------------------------------------
 // CCB Ports
 //------------------------------------------------------------------------------------------------------------------
-  input        clock;          // 40MHz TMB system clock
-  input        global_reset;      // 1=Reset everything
-  input  [50:0]    _ccb_rx;        // GTLP data from CCB, inverted
-  output  [26:0]    _ccb_tx;        // GTLP data to   CCB, inverted
+  input         clock;          // 40MHz TMB system clock
+  input         global_reset;      // 1=Reset everything
+  input  [50:0] _ccb_rx;        // GTLP data from CCB, inverted
+  output [26:0] _ccb_tx;        // GTLP data to   CCB, inverted
 
 // VME Control Ports
   input        ccb_ignore_rx;      // 1=Ignore CCB backplane inputs

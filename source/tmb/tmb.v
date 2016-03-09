@@ -801,12 +801,12 @@
 //------------------------------------------------------------------------------------------------------------------
 // Push CLCT data into a 1bx to 16bx pipeline delay to wait for an alct match
 //------------------------------------------------------------------------------------------------------------------
-  wire [MXCLCT-1:0]  clct0_pipe, clct0_srl;        // First  CLCT
-  wire [MXCLCT-1:0]  clct1_pipe, clct1_srl;        // Second CLCT
-  wire [MXCLCTC-1:0]  clctc_pipe, clctc_srl;        // Common to CLCT0/1 to TMB
-  wire [MXCFEB-1:0]  clctf_pipe, clctf_srl;        // Active cfeb list to TMB
-  wire [MXBADR-1:0]  wr_adr_xtmb_pipe, wr_adr_xtmb_srl;  // Buffer write address after clct pipeline delay
-  wire [3:0]      clct_srl_ptr;
+  wire [MXCLCT-1:0]  clct0_pipe, clct0_srl; // First  CLCT
+  wire [MXCLCT-1:0]  clct1_pipe, clct1_srl; // Second CLCT
+  wire [MXCLCTC-1:0] clctc_pipe, clctc_srl; // Common to CLCT0/1 to TMB
+  wire [MXCFEB-1:0]  clctf_pipe, clctf_srl; // Active cfeb list to TMB
+  wire [MXBADR-1:0]  wr_adr_xtmb_pipe, wr_adr_xtmb_srl; // Buffer write address after clct pipeline delay
+  wire [3:0]         clct_srl_ptr;
 
   wire [3:0] clct_srl_adr = clct_srl_ptr-1;        // Pointer to clct SRL data accounts for SLR 1bx latency
 
@@ -1005,9 +1005,9 @@
 
 // Event trigger disposition
   reg  [MXCFEB-1:0] tmb_aff_list  = 0;
-  reg   [3:0]        tmb_match_win = 0;
-  reg   [3:0]        tmb_match_pri = 0;
-  wire alct_only_trig;
+  reg  [3:0]        tmb_match_win = 0;
+  reg  [3:0]        tmb_match_pri = 0;
+  wire              alct_only_trig;
 
   wire clct_keep    =((clct_match && tmb_allow_match   ) || (clct_noalct &&  tmb_allow_clct    && !clct_noalct_lost));
   wire alct_keep    = (clct_match && tmb_allow_match   ) || (alct_noclct &&  tmb_allow_alct);
@@ -1071,33 +1071,33 @@
   reg  [ 1:0]  tmb_alcte    = 0;                // ALCT ecc latched at trigger
 
   always @(posedge clock) begin
-  tmb_trig_pulse    <= trig_pulse;              // ALCT or CLCT or both triggered
-  tmb_trig_keep_ff  <= trig_keep;              // ALCT or CLCT or both triggered, and trigger is allowed
-  tmb_non_trig_keep_ff<= non_trig_keep;            // Event did not trigger but is kept for readout
+    tmb_trig_pulse       <= trig_pulse;    // ALCT or CLCT or both triggered
+    tmb_trig_keep_ff     <= trig_keep;     // ALCT or CLCT or both triggered, and trigger is allowed
+    tmb_non_trig_keep_ff <= non_trig_keep; // Event did not trigger but is kept for readout
 
-  tmb_match      <= clct_match_tr  && tmb_allow_match;  // ALCT and CLCT matched in time
-  tmb_alct_only    <= alct_noclct_tr && tmb_allow_alct;  // Only ALCT triggered
-  tmb_clct_only    <= clct_noalct_tr && tmb_allow_clct;  // Only CLCT triggered
+    tmb_match            <= clct_match_tr  && tmb_allow_match; // ALCT and CLCT matched in time
+    tmb_alct_only        <= alct_noclct_tr && tmb_allow_alct;  // Only ALCT triggered
+    tmb_clct_only        <= clct_noalct_tr && tmb_allow_clct;  // Only CLCT triggered
 
-  tmb_match_ro_ff    <= clct_match_ro  && tmb_allow_match_ro;// ALCT and CLCT matched in time, nontriggering event
-  tmb_alct_only_ro_ff  <= alct_noclct_ro && tmb_allow_alct_ro;  // Only ALCT triggered, nontriggering event
-  tmb_clct_only_ro_ff  <= clct_noalct_ro && tmb_allow_clct_ro;  // Only CLCT triggered, nontriggering event
+    tmb_match_ro_ff      <= clct_match_ro  && tmb_allow_match_ro; // ALCT and CLCT matched in time, nontriggering event
+    tmb_alct_only_ro_ff  <= alct_noclct_ro && tmb_allow_alct_ro;  // Only ALCT triggered, nontriggering event
+    tmb_clct_only_ro_ff  <= clct_noalct_ro && tmb_allow_clct_ro;  // Only CLCT triggered, nontriggering event
 
-  tmb_match_win    <= match_win;              // Location of alct in clct window
-  tmb_match_pri    <= clct_pri_best;            // Priority of clct that matched
-  tmb_aff_list    <= clctf_pipe;              // Active feb pipe
+    tmb_match_win        <= match_win;     // Location of alct in clct window
+    tmb_match_pri        <= clct_pri_best; // Priority of clct that matched
+    tmb_aff_list         <= clctf_pipe;    // Active feb pipe
 
-  tmb_alct_discard  <= alct_discard;            // ALCT was not used for LCT
-  tmb_clct_discard  <= clct_discard;            // CLCT was not used for LCT
+    tmb_alct_discard     <= alct_discard;  // ALCT was not used for LCT
+    tmb_clct_discard     <= clct_discard;  // CLCT was not used for LCT
 
-  tmb_alct0      <= alct0_pipe[10:0];          // Copy of ALCT for header
-  tmb_alct1      <= alct1_pipe[10:0];
-  tmb_alctb      <= alct0_pipe[15:11];
-  tmb_alcte      <= alcte_pipe[1:0];
+    tmb_alct0            <= alct0_pipe[10:0]; // Copy of ALCT for header
+    tmb_alct1            <= alct1_pipe[10:0];
+    tmb_alctb            <= alct0_pipe[15:11];
+    tmb_alcte            <= alcte_pipe[1:0];
 
-  wr_adr_rtmb       <= wr_adr_xtmb_pipe;          // Buffer write address at TMB matching time, continuous
-  wr_push_rtmb      <= wr_push_mux;              // Buffer write strobe at TMB matching time
-  wr_avail_rtmb     <= wr_avail_xtmb_pipe;          // Buffer available at TMB matching time
+    wr_adr_rtmb          <= wr_adr_xtmb_pipe;   // Buffer write address at TMB matching time, continuous
+    wr_push_rtmb         <= wr_push_mux;        // Buffer write strobe at TMB matching time
+    wr_avail_rtmb        <= wr_avail_xtmb_pipe; // Buffer available at TMB matching time
   end
 
 // Had to wait for kill signal to go valid

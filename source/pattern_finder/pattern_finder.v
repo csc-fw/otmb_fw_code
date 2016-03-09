@@ -184,7 +184,7 @@ module pattern_finder (
   input                     clct_blanking;      // 1=Blank clct outputs if zero hits
 
   output [MXCFEB - 1: 0] cfeb_hit;         // This CFEB has a pattern over pre-trigger threshold
-  output [MXCFEB - 1: 0] cfeb_active;      // CFEBs marked for DMB readout
+  output [MXCFEB - 1: 0] cfeb_active;      // CFEBs marked active for DMB readout
   output                 cfeb_layer_trig;  // Layer pretrigger
   output [MXLY - 1: 0]   cfeb_layer_or;    // OR of hstrips on each layer
   output [MXHITB - 1: 0] cfeb_nlayers_hit; // Number of CSC layers hit

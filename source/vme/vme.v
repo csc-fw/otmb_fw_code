@@ -446,13 +446,17 @@
   clct_flush_delay,
   clct_throttle,
   clct_wr_continuous,
-  alct_trig_width,
+  alct_preClct_width,
   wr_buf_required,
   wr_buf_autoclr_en,
   valid_clct_required,
 
+// Sequencer Ports: pre-CLCT modifiers for L1A*preCLCT overlap
+  l1a_preClct_width,
+  l1a_preClct_dly,
+
 // Sequencer Ports: External Trigger Delays
-  alct_pre_trig_dly,
+  alct_preClct_dly,
   alct_pat_trig_dly,
   adb_ext_trig_dly,
   dmb_ext_trig_dly,
@@ -690,7 +694,7 @@
   event_counter11,
   event_counter12,
 
-// TMB+CLCT Event Counters
+// CLCT Event Counters
   event_counter13,
   event_counter14,
   event_counter15,
@@ -709,6 +713,8 @@
   event_counter28,
   event_counter29,
   event_counter30,
+
+// TMB Event Counters
   event_counter31,
   event_counter32,
   event_counter33,
@@ -733,12 +739,16 @@
   event_counter52,
   event_counter53,
   event_counter54,
-  event_counter55,
-  event_counter56,
-  event_counter57,
-  event_counter58,
-  event_counter59,
-  event_counter60,
+  
+// L1A Counters
+  event_counter55, // L1A received
+  event_counter56, // L1A received, TMB in L1A window
+  event_counter57, // L1A received, no TMB in window
+  event_counter58, // TMB triggered, no L1A in window
+  event_counter59, // TMB readouts completed
+  event_counter60, // TMB readouts lost by 1-event-per-L1A limit
+
+// STAT Counters
   event_counter61,
   event_counter62,
   event_counter63,
@@ -762,6 +772,22 @@
   alct_err_counter3,
   alct_err_counter4,
   alct_err_counter5,
+
+// CLCT pre-trigger coincidence counters
+  preClct_l1a_counter,  // CLCT pre-trigger AND L1A coincidence counter
+  preClct_alct_counter, // CLCT pre-trigger AND ALCT coincidence counter
+
+// Active CFEB(s) counters
+  active_cfebs_event_counter,      // Any CFEB active flag sent to DMB
+  active_cfebs_me1a_event_counter, // ME1a CFEB active flag sent to DMB
+  active_cfebs_me1b_event_counter, // ME1b CFEB active flag sent to DMB
+  active_cfeb0_event_counter,      // CFEB0 active flag sent to DMB
+  active_cfeb1_event_counter,      // CFEB1 active flag sent to DMB
+  active_cfeb2_event_counter,      // CFEB2 active flag sent to DMB
+  active_cfeb3_event_counter,      // CFEB3 active flag sent to DMB
+  active_cfeb4_event_counter,      // CFEB4 active flag sent to DMB
+  active_cfeb5_event_counter,      // CFEB5 active flag sent to DMB
+  active_cfeb6_event_counter,      // CFEB6 active flag sent to DMB
 
 // CSC Orientation Ports
   csc_type,
@@ -974,54 +1000,54 @@
 //------------------------------------------------------------------------------------------------------------------
 // Bus Parameters
 //------------------------------------------------------------------------------------------------------------------
-  parameter MXCFEB      = 7;      // Number of CFEBs on CSC
-  parameter MXLY        = 6;      // Number Layers in CSC
-  parameter MXHS        = 32;      // Number of 1/2-Strips per layer
-  parameter MXKEYB      = 5;      // Number of key bits
-  parameter MXDS        = 8;      // Number of DiStrips per layer
-  parameter MXBDID      = 5;      // Number TMB Board ID bits
-  parameter MXCSC        = 4;      // Number CSC Chamber ID bits
-  parameter MXRID        = 4;      // Number Run ID bits
-  parameter MXDRIFT      = 2;      // Number drift delay bits
-  parameter MXBXN        = 12;      // Number BXN bits, LHC bunchs numbered 0 to 3563
-  parameter MXL1DELAY      = 8;      // NUmber L1Acc delay counter bits
-  parameter MXL1WIND      = 4;      // Number L1Acc window width bits
-  parameter MXFMODE      = 3;      // Number FIFO Mode bits
-  parameter MXTBIN      = 5;      // Number FIFO time bin bits
-  parameter MXRAMADR      = 12;      // Number Raw Hits RAM address bits
-  parameter MXRAMDATA      = 18;      // Number Raw Hits RAM data bits, does not include fifo wren
-  parameter MXCLCT      = 16;      // Number bits per CLCT word
-  parameter MXCLCTC      = 3;      // Number bits per CLCT common data word
-  parameter MXFRAME      = 16;      // Number bits per muon frame
-  parameter MXEXTDLY      = 4;      // Number bits CLCT external trigger delay
-  parameter MXMPCDLY      = 4;      // Number MPC delay time bits
-  parameter MXARAMADR      = 11;      // Number ALCT Raw Hits RAM address bits
-  parameter MXARAMDATA      = 18;      // Number ALCT Raw Hits RAM data bits, does not include fifo wren
-  parameter MXBUF        = 8;      // Number of buffers
-  parameter MXBUFB      = 3;      // Buffer address width
-  parameter MXFLUSH      = 4;      // Number bits needed for flush counter
-  parameter MXTHROTTLE      = 8;      // Number bits needed for throttle counter
-  parameter MXDPS        = 9;      // Number of digital phase shifters 2 ALCT + 7 DCFEB
+  parameter MXCFEB     = 7;        // Number of CFEBs on CSC
+  parameter MXLY       = 6;        // Number Layers in CSC
+  parameter MXHS       = 32;       // Number of 1/2-Strips per layer
+  parameter MXKEYB     = 5;        // Number of key bits
+  parameter MXDS       = 8;        // Number of DiStrips per layer
+  parameter MXBDID     = 5;        // Number TMB Board ID bits
+  parameter MXCSC      = 4;        // Number CSC Chamber ID bits
+  parameter MXRID      = 4;        // Number Run ID bits
+  parameter MXDRIFT    = 2;        // Number drift delay bits
+  parameter MXBXN      = 12;       // Number BXN bits, LHC bunchs numbered 0 to 3563
+  parameter MXL1DELAY  = 8;        // NUmber L1Acc delay counter bits
+  parameter MXL1WIND   = 4;        // Number L1Acc window width bits
+  parameter MXFMODE    = 3;        // Number FIFO Mode bits
+  parameter MXTBIN     = 5;        // Number FIFO time bin bits
+  parameter MXRAMADR   = 12;       // Number Raw Hits RAM address bits
+  parameter MXRAMDATA  = 18;       // Number Raw Hits RAM data bits, does not include fifo wren
+  parameter MXCLCT     = 16;       // Number bits per CLCT word
+  parameter MXCLCTC    = 3;        // Number bits per CLCT common data word
+  parameter MXFRAME    = 16;       // Number bits per muon frame
+  parameter MXEXTDLY   = 4;        // Number bits CLCT external trigger delay
+  parameter MXMPCDLY   = 4;        // Number MPC delay time bits
+  parameter MXARAMADR  = 11;       // Number ALCT Raw Hits RAM address bits
+  parameter MXARAMDATA = 18;       // Number ALCT Raw Hits RAM data bits, does not include fifo wren
+  parameter MXBUF      = 8;        // Number of buffers
+  parameter MXBUFB     = 3;        // Buffer address width
+  parameter MXFLUSH    = 4;        // Number bits needed for flush counter
+  parameter MXTHROTTLE = 8;        // Number bits needed for throttle counter
+  parameter MXDPS      = 9;        // Number of digital phase shifters 2 ALCT + 7 DCFEB
   
-  parameter MXRPC        = 2;      // Number RPCs
-  parameter MXRPCB      = 1;      // Number RPC ID bits
-  parameter MXRPCPAD      = 16;      // Number RPC pads per link board
-  parameter MXRPCDB      = 19;      // Number RPC bits per link board
+  parameter MXRPC      = 2;        // Number RPCs
+  parameter MXRPCB     = 1;        // Number RPC ID bits
+  parameter MXRPCPAD   = 16;       // Number RPC pads per link board
+  parameter MXRPCDB    = 19;       // Number RPC bits per link board
 
-  parameter MXPIDB      = 4;      // Pattern ID bits
-  parameter MXHITB      = 3;      // Hits on pattern bits
-  parameter MXPATB      = 3+4;      // Pattern bits
+  parameter MXPIDB     = 4;        // Pattern ID bits
+  parameter MXHITB     = 3;        // Hits on pattern bits
+  parameter MXPATB     = 3+4;      // Pattern bits
 
 // Raw hits RAM parameters
-  parameter RAM_DEPTH      = 2048;      // Storage bx depth
-  parameter RAM_ADRB      = 11;      // Address width=log2(ram_depth)
-  parameter MXBADR      = RAM_ADRB;    // Header buffer data address bits
-  parameter MXBDATA      = 32;      // Pushed data width
+  parameter RAM_DEPTH  = 2048;     // Storage bx depth
+  parameter RAM_ADRB   = 11;       // Address width=log2(ram_depth)
+  parameter MXBADR     = RAM_ADRB; // Header buffer data address bits
+  parameter MXBDATA    = 32;       // Pushed data width
 
 // Counters
-  parameter MXCNTVME      = 30;      // VME counters
-  parameter MXL1ARX      = 12;      // Number L1As received counter bits
-  parameter MXORBIT      = 30;      // Number orbit counter bits
+  parameter MXCNTVME   = 30;       // VME counters
+  parameter MXL1ARX    = 12;       // Number L1As received counter bits
+  parameter MXORBIT    = 30;       // Number orbit counter bits
 
 //------------------------------------------------------------------------------------------------------------------
 // VME Addresses
@@ -1092,10 +1118,11 @@
   parameter ADR_HCM423      = 10'h64;  // CFEB4 Ly2,Ly3 Hot Channel Mask
   parameter ADR_HCM445      = 10'h66;  // CFEB4 Ly4,Ly5 Hot Channel Mask
 
-  parameter ADR_SEQ_TRIG_EN    = 10'h68;  // Sequencer Trigger Source Enables
-  parameter ADR_SEQ_TRIG_DLY0    = 10'h6A;  // Sequencer Trigger Source Delays
-  parameter ADR_SEQ_TRIG_DLY1    = 10'h6C;  // Sequencer Trigger Source Delays
-  parameter ADR_SEQ_ID      = 10'h6E;  // Sequencer ID info
+  parameter ADR_SEQ_TRIG_EN    =  10'h68;  // Sequencer Trigger Source Enables
+  parameter ADR_SEQ_TRIG_DLY0  =  10'h6A;  // Sequencer Trigger Source Delays
+  parameter ADR_SEQ_TRIG_DLY1  =  10'h6C;  // Sequencer Trigger Source Delays
+  parameter ADR_SEQ_TRIG_DLY2  =  10'h194; // Sequencer Trigger Source Delays
+  parameter ADR_SEQ_ID         =  10'h6E;  // Sequencer ID info
 
   parameter ADR_SEQ_CLCT      = 10'h70;  // Sequencer CLCT Configuration
   parameter ADR_SEQ_FIFO      = 10'h72;  // Sequencer FIFO Configuration
@@ -1172,8 +1199,8 @@
 
   parameter ADR_SCP_TRIG      = 10'hCE;  // Scope trigger source channel
 
-  parameter ADR_CNT_CTRL      = 10'hD0;  // Counter control
-  parameter ADR_CNT_RDATA      = 10'hD2;  // Counter data
+  parameter ADR_CNT_CTRL   =  10'hD0; // Counter control
+  parameter ADR_CNT_RDATA  =  10'hD2; // Counter data
 
   parameter ADR_JTAGSM0      = 10'hD4;  // JTAG state machine
   parameter ADR_JTAGSM1      = 10'hD6;
@@ -1295,8 +1322,8 @@
 
   parameter ADR_V6_EXTEND      = 10'h17A;  // DCFEB 7-bit extensions
 
-  parameter ADR_GEM_DEBUG_FIFO_CTRL     = 10'h194;
-  parameter ADR_GEM_DEBUG_FIFO_DATA     = 10'h196;
+  parameter ADR_GEM_DEBUG_FIFO_CTRL     = 10'h200;
+  parameter ADR_GEM_DEBUG_FIFO_DATA     = 10'h202;
   parameter ADR_ODMB      = 10'h1EE;  // ODMB mode: various addresses are handled inside odmb_device
 
 //------------------------------------------------------------------------------------------------------------------
@@ -1317,9 +1344,9 @@
   output [14:0]       revcode;     // Firmware revision code
 
 // ODMB device
-   output         bd_sel;  // Out Board selected
-   input         odmb_sel;  // In  ODMB mode selected
-   input [15:0]       odmb_data; // In  ODMB data
+   output       bd_sel;    // Out Board selected
+   input        odmb_sel;  // In  ODMB mode selected
+   input [15:0] odmb_data; // In  ODMB data
 
 // VME Bus Input Port Map
 `define IO (*IOB="true"*)
@@ -1523,15 +1550,15 @@
   input  [7:0]      ccb_qpll_lost_cnt;    // Number of times lock has been lost
 
 // CCB Ports: Trigger Control
-  output          clct_ext_trig_l1aen;  // 1=Request ccb l1a on clct ext_trig
-  output          alct_ext_trig_l1aen;  // 1=Request ccb l1a on alct ext_trig
-  output          seq_trig_l1aen;      // 1=Request ccb l1a on sequencer trigger
-  output          alct_ext_trig_vme;    // 1=Fire alct_ext_trig oneshot
-  output          clct_ext_trig_vme;    // 1=Fire clct_ext_trig oneshot
-  output          ext_trig_both;      // 1=clct_ext_trig fires alct and alct fires clct_trig, DC level
-  output          l1a_vme;        // 1=fire ccb_l1accept oneshot
-  output  [7:0]      l1a_delay_vme;      // Internal L1A delay
-  output          l1a_inj_ram_en;      // L1A injector RAM enable
+  output       clct_ext_trig_l1aen; // 1=Request ccb l1a on clct ext_trig
+  output       alct_ext_trig_l1aen; // 1=Request ccb l1a on alct ext_trig
+  output       seq_trig_l1aen;      // 1=Request ccb l1a on sequencer trigger
+  output       alct_ext_trig_vme;   // 1=Fire alct_ext_trig oneshot
+  output       clct_ext_trig_vme;   // 1=Fire clct_ext_trig oneshot
+  output       ext_trig_both;       // 1=clct_ext_trig fires alct and alct fires clct_trig, DC level
+  output       l1a_vme;             // 1=fire ccb_l1accept oneshot
+  output [7:0] l1a_delay_vme;       // Internal L1A delay
+  output       l1a_inj_ram_en;      // L1A injector RAM enable
 
 // ALCT Ports: Trigger Control
   output          cfg_alct_ext_trig_en;  // 1=Enable alct_ext_trig   from CCB
@@ -1720,36 +1747,40 @@
   input  [MXDS-1:0]    cfeb6_ly5_badbits;    // 1=CFEB rx bit went bad
 
 // Sequencer Ports: External Trigger Enables
-  output          clct_pat_trig_en;    // Allow CLCT Pattern pre-triggers
-  output          alct_pat_trig_en;    // Allow ALCT Pattern pre-trigger
-  output          alct_match_trig_en;    // Match ALCT*CLCT Pattern pre-triggers
-  output          adb_ext_trig_en;    // Allow ADB Test pulse pre-trigger
-  output          dmb_ext_trig_en;    // Allow DMB Calibration pre-trigger
-  output          clct_ext_trig_en;    // Allow CLCT External pre-trigger from CCB
-  output          alct_ext_trig_en;    // Allow ALCT External pre-trigger from CCB
-  output          layer_trig_en;      // Allow layer-wide pre-triggering
-  output          all_cfebs_active;    // Make all CFEBs active when pre-triggered
-  output          vme_ext_trig;      // External pre-trigger from VME
-  output  [MXCFEB-1:0]  cfeb_en;        // Enables CFEBs for triggering and active feb flag
-  output          active_feb_src;      // Active cfeb flag source, 0=pretrig, 1=tmb-matching ~8bx later
+  output              clct_pat_trig_en;   // Allow CLCT Pattern pre-triggers
+  output              alct_pat_trig_en;   // Allow ALCT Pattern pre-trigger
+  output              alct_match_trig_en; // Match ALCT*CLCT Pattern pre-triggers
+  output              adb_ext_trig_en;    // Allow ADB Test pulse pre-trigger
+  output              dmb_ext_trig_en;    // Allow DMB Calibration pre-trigger
+  output              clct_ext_trig_en;   // Allow CLCT External pre-trigger from CCB
+  output              alct_ext_trig_en;   // Allow ALCT External pre-trigger from CCB
+  output              layer_trig_en;      // Allow layer-wide pre-triggering
+  output              all_cfebs_active;   // Make all CFEBs active when pre-triggered
+  output              vme_ext_trig;       // External pre-trigger from VME
+  output [MXCFEB-1:0] cfeb_en;            // Enables CFEBs for triggering and active feb flag
+  output              active_feb_src;     // Active cfeb flag source, 0=pretrig, 1=tmb-matching ~8bx later
 
 // Sequencer Ports: Trigger Modifiers
-  output  [MXFLUSH-1:0]  clct_flush_delay;    // Trigger sequencer flush state timer
-  output  [MXTHROTTLE-1:0]clct_throttle;      // Pre-trigger throttle to reduce trigger rate
-  output          clct_wr_continuous;    // 1=allow continuous header buffer writing for invalid triggers
-  output  [3:0]      alct_trig_width;    // ALCT*CLCT overlap window size
-  output          wr_buf_required;    // Require wr_buffer to pretrigger
-  output          wr_buf_autoclr_en;    // Enable frozen buffer auto clear
-  output          valid_clct_required;  // Require valid pattern after drift to trigger
+  output [MXFLUSH-1:0]    clct_flush_delay;    // Trigger sequencer flush state timer
+  output [MXTHROTTLE-1:0] clct_throttle;       // Pre-trigger throttle to reduce trigger rate
+  output                  clct_wr_continuous;  // 1=allow continuous header buffer writing for invalid triggers
+  output [3:0]            alct_preClct_width;  // ALCT (alct_active_feb flag) window width for ALCT*preCLCT overlap
+  output                  wr_buf_required;     // Require wr_buffer to pretrigger
+  output                  wr_buf_autoclr_en;   // Enable frozen buffer auto clear
+  output                  valid_clct_required; // Require valid pattern after drift to trigger
+
+// Sequencer Ports: pre-CLCT modifiers for L1A*preCLCT overlap
+  output [3:0] l1a_preClct_width; // pre-CLCT window width for L1A*preCLCT overlap
+  output [7:0] l1a_preClct_dly;   // pre-CLCT delay for L1A*preCLCT overlap
 
 // Sequencer Ports: External Trigger Delays
-  output  [MXEXTDLY-1:0]  alct_pre_trig_dly;    // ALCT pre      trigger delay
-  output  [MXEXTDLY-1:0]  alct_pat_trig_dly;    // ALCT pattern  trigger delay
-  output  [MXEXTDLY-1:0]  adb_ext_trig_dly;    // ADB  external trigger delay
-  output  [MXEXTDLY-1:0]  dmb_ext_trig_dly;    // DMB  external trigger delay
-  output  [MXEXTDLY-1:0]  clct_ext_trig_dly;    // CLCT external trigger delay
-  output  [MXEXTDLY-1:0]  alct_ext_trig_dly;    // ALCT external trigger delay
-//  output  [MXEXTDLY-1:0]  layer_trig_dly;      // Layer OR      trigger delay
+  output  [MXEXTDLY-1:0]  alct_preClct_dly;  // ALCT (alct_active_feb flag) delay for ALCT*preCLCT overlap
+  output  [MXEXTDLY-1:0]  alct_pat_trig_dly; // ALCT pattern  trigger delay
+  output  [MXEXTDLY-1:0]  adb_ext_trig_dly;  // ADB  external trigger delay
+  output  [MXEXTDLY-1:0]  dmb_ext_trig_dly;  // DMB  external trigger delay
+  output  [MXEXTDLY-1:0]  clct_ext_trig_dly; // CLCT external trigger delay
+  output  [MXEXTDLY-1:0]  alct_ext_trig_dly; // ALCT external trigger delay
+//output  [MXEXTDLY-1:0]  layer_trig_dly;    // Layer OR      trigger delay
 
 // Sequencer Ports: CLCT/RPC/RAT Pattern Injector
   output          inj_trig_vme;      // Start pattern injector
@@ -1775,18 +1806,18 @@
   output  [MXTBIN-1:0]  fifo_pretrig_cfeb;    // Number CFEB FIFO time bins before pretrigger
   output          fifo_no_raw_hits;    // 1=do not wait to store raw hits
 
-  output  [MXL1DELAY-1:0]  l1a_delay;        // Level1 Accept delay from pretrig status output
-  output          l1a_internal;      // Generate internal Level 1, overrides external
-  output  [MXL1WIND-1:0]  l1a_internal_dly;    // Delay internal l1a to shift position in l1a match window
-  output  [MXL1WIND-1:0]  l1a_window;        // Level1 Accept window width after delay
-  output          l1a_win_pri_en;      // Enable L1A window priority
-  output  [MXBADR-1:0]  l1a_lookback;      // Bxn to look back from l1a wr_buf_adr
-  output          l1a_preset_sr;      // Dummy VME bit to feign preset l1a sr group
+  output [MXL1DELAY-1:0] l1a_delay;        // Level1 Accept delay from pretrig status output
+  output                 l1a_internal;     // Generate internal Level 1, overrides external
+  output [MXL1WIND-1:0]  l1a_internal_dly; // Delay internal l1a to shift position in l1a match window
+  output [MXL1WIND-1:0]  l1a_window;       // Level1 Accept window width after delay
+  output                 l1a_win_pri_en;   // Enable L1A window priority
+  output [MXBADR-1:0]    l1a_lookback;     // Bxn to look back from l1a wr_buf_adr
+  output                 l1a_preset_sr;    // Dummy VME bit to feign preset l1a sr group
 
-  output          l1a_allow_match;    // Readout allows tmb trig pulse in L1A window (normal mode)
-  output          l1a_allow_notmb;    // Readout allows no tmb trig pulse in L1A window
-  output          l1a_allow_nol1a;    // Readout allows tmb trig pulse outside L1A window
-  output          l1a_allow_alct_only;  // Allow alct_only events to readout at L1A
+  output l1a_allow_match;     // Readout allows tmb trig pulse in L1A window (normal mode)
+  output l1a_allow_notmb;     // Readout allows no tmb trig pulse in L1A window
+  output l1a_allow_nol1a;     // Readout allows tmb trig pulse outside L1A window
+  output l1a_allow_alct_only; // Allow alct_only events to readout at L1A
 
   output  [MXBDID-1:0]  board_id;        // Board ID = VME Slot
   output  [MXCSC-1:0]    csc_id;          // CSC Chamber ID number
@@ -1963,15 +1994,15 @@
   input  [3:0]      rpc1_bxn_diff;      // RPC - offset
 
 // ALCT Trigger/Readout Counter Ports
-  output          cnt_all_reset;      // Trigger/Readout counter reset
-  output          cnt_stop_on_ovf;    // Stop all counters if any overflows
-  output          cnt_non_me1ab_en;    // Allow clct pretrig counters count non me1ab
-  output          cnt_alct_debug;      // Enable ALCT debug lct error counter
-  input          cnt_any_ovf_alct;    // At least one alct counter overflowed
-  input          cnt_any_ovf_seq;    // At least one sequencer counter overflowed
+  output cnt_all_reset;    // Trigger/Readout counter reset
+  output cnt_stop_on_ovf;  // Stop all counters if any overflows
+  output cnt_non_me1ab_en; // Allow clct pretrig counters count non me1ab
+  output cnt_alct_debug;   // Enable ALCT debug lct error counter
+  input  cnt_any_ovf_alct; // At least one alct counter overflowed
+  input  cnt_any_ovf_seq;  // At least one sequencer counter overflowed
 
 // ALCT Event Counters
-  input  [MXCNTVME-1:0]  event_counter0;      // Event counter 1D remap
+  input  [MXCNTVME-1:0]  event_counter0; // Event counter 1D remap
   input  [MXCNTVME-1:0]  event_counter1;
   input  [MXCNTVME-1:0]  event_counter2;
   input  [MXCNTVME-1:0]  event_counter3;
@@ -1985,8 +2016,8 @@
   input  [MXCNTVME-1:0]  event_counter11;
   input  [MXCNTVME-1:0]  event_counter12;
 
-// TMB+CLCT Event Counters
-  input  [MXCNTVME-1:0]  event_counter13;    // Event counter 1D remap
+// CLCT Event Counters
+  input  [MXCNTVME-1:0]  event_counter13; // Event counter 1D remap
   input  [MXCNTVME-1:0]  event_counter14;
   input  [MXCNTVME-1:0]  event_counter15;
   input  [MXCNTVME-1:0]  event_counter16;
@@ -2004,6 +2035,8 @@
   input  [MXCNTVME-1:0]  event_counter28;
   input  [MXCNTVME-1:0]  event_counter29;
   input  [MXCNTVME-1:0]  event_counter30;
+
+// TMB Event Counters
   input  [MXCNTVME-1:0]  event_counter31;
   input  [MXCNTVME-1:0]  event_counter32;
   input  [MXCNTVME-1:0]  event_counter33;
@@ -2028,12 +2061,16 @@
   input  [MXCNTVME-1:0]  event_counter52;
   input  [MXCNTVME-1:0]  event_counter53;
   input  [MXCNTVME-1:0]  event_counter54;
-  input  [MXCNTVME-1:0]  event_counter55;
-  input  [MXCNTVME-1:0]  event_counter56;
-  input  [MXCNTVME-1:0]  event_counter57;
-  input  [MXCNTVME-1:0]  event_counter58;
-  input  [MXCNTVME-1:0]  event_counter59;
-  input  [MXCNTVME-1:0]  event_counter60;
+
+// L1A Counters
+  input  [MXCNTVME-1:0]  event_counter55; // L1A received
+  input  [MXCNTVME-1:0]  event_counter56; // L1A received, TMB in L1A window
+  input  [MXCNTVME-1:0]  event_counter57; // L1A received, no TMB in window
+  input  [MXCNTVME-1:0]  event_counter58; // TMB triggered, no L1A in window
+  input  [MXCNTVME-1:0]  event_counter59; // TMB readouts completed
+  input  [MXCNTVME-1:0]  event_counter60; // TMB readouts lost by 1-event-per-L1A limit
+
+// STAT Counters
   input  [MXCNTVME-1:0]  event_counter61;
   input  [MXCNTVME-1:0]  event_counter62;
   input  [MXCNTVME-1:0]  event_counter63;
@@ -2041,30 +2078,46 @@
   input  [MXCNTVME-1:0]  event_counter65;
 
 // Header Counters
-  output          hdr_clear_on_resync;  // Clear header counters on ttc_resync
-  input  [MXCNTVME-1:0]  pretrig_counter;    // Pre-trigger counter
-  input  [MXCNTVME-1:0]  clct_counter;      // CLCT counter
-  input  [MXCNTVME-1:0]  trig_counter;      // TMB trigger counter
-  input  [MXCNTVME-1:0]  alct_counter;      // ALCTs received counter
+  output                hdr_clear_on_resync; // Clear header counters on ttc_resync
+  input  [MXCNTVME-1:0] pretrig_counter;     // Pre-trigger counter
+  input  [MXCNTVME-1:0] clct_counter;        // CLCT counter
+  input  [MXCNTVME-1:0] trig_counter;        // TMB trigger counter
+  input  [MXCNTVME-1:0] alct_counter;        // ALCTs received counter
   input  [MXL1ARX-1:0]  l1a_rx_counter;      // L1As received from ccb counter
-  input  [MXL1ARX-1:0]  readout_counter;    // Readout counter
-  input  [MXORBIT-1:0]  orbit_counter;      // Orbit counter
+  input  [MXL1ARX-1:0]  readout_counter;     // Readout counter
+  input  [MXORBIT-1:0]  orbit_counter;       // Orbit counter
 
 // ALCT Structure Error Counters
-  input  [7:0]      alct_err_counter0;    // Error counter 1D remap
-  input  [7:0]      alct_err_counter1;
-  input  [7:0]      alct_err_counter2;
-  input  [7:0]      alct_err_counter3;
-  input  [7:0]      alct_err_counter4;
-  input  [7:0]      alct_err_counter5;
+  input  [7:0] alct_err_counter0; // Error counter 1D remap
+  input  [7:0] alct_err_counter1;
+  input  [7:0] alct_err_counter2;
+  input  [7:0] alct_err_counter3;
+  input  [7:0] alct_err_counter4;
+  input  [7:0] alct_err_counter5;
+
+// CLCT pre-trigger coincidence counters
+  input  [MXCNTVME-1:0] preClct_l1a_counter;  // CLCT pre-trigger AND L1A coincidence counter
+  input  [MXCNTVME-1:0] preClct_alct_counter; // CLCT pre-trigger AND ALCT coincidence counter
+
+// Active CFEB(s) counters
+  input  [MXCNTVME-1:0] active_cfebs_event_counter;      // Any CFEB active flag sent to DMB
+  input  [MXCNTVME-1:0] active_cfebs_me1a_event_counter; // ME1a CFEB active flag sent to DMB
+  input  [MXCNTVME-1:0] active_cfebs_me1b_event_counter; // ME1b CFEB active flag sent to DMB
+  input  [MXCNTVME-1:0] active_cfeb0_event_counter;      // CFEB0 active flag sent to DMB
+  input  [MXCNTVME-1:0] active_cfeb1_event_counter;      // CFEB1 active flag sent to DMB
+  input  [MXCNTVME-1:0] active_cfeb2_event_counter;      // CFEB2 active flag sent to DMB
+  input  [MXCNTVME-1:0] active_cfeb3_event_counter;      // CFEB3 active flag sent to DMB
+  input  [MXCNTVME-1:0] active_cfeb4_event_counter;      // CFEB4 active flag sent to DMB
+  input  [MXCNTVME-1:0] active_cfeb5_event_counter;      // CFEB5 active flag sent to DMB
+  input  [MXCNTVME-1:0] active_cfeb6_event_counter;      // CFEB6 active flag sent to DMB
 
 // CSC Orientation Ports
-  input  [3:0]      csc_type;        // Firmware compile type
-  input          csc_me1ab;        // 1=ME1A or ME1B CSC type
-  input          stagger_hs_csc;      // 1=Staggered CSC, 0=non-staggered
-  input          reverse_hs_csc;      // 1=Reverse staggered CSC, non-me1
-  input          reverse_hs_me1a;    // 1=reverse me1a hstrips prior to pattern sorting
-  input          reverse_hs_me1b;    // 1=reverse me1b hstrips prior to pattern sorting
+  input  [3:0] csc_type;        // Firmware compile type
+  input        csc_me1ab;       // 1=ME1A or ME1B CSC type
+  input        stagger_hs_csc;  // 1=Staggered CSC, 0=non-staggered
+  input        reverse_hs_csc;  // 1=Reverse staggered CSC, non-me1
+  input        reverse_hs_me1a; // 1=reverse me1a hstrips prior to pattern sorting
+  input        reverse_hs_me1b; // 1=reverse me1b hstrips prior to pattern sorting
 
 // Pattern Finder Ports
   output          clct_blanking;      // clct_blanking
@@ -2402,14 +2455,17 @@
   reg    [15:0]  hcm645_wr;
   wire  [15:0]  hcm645_rd;
 
-  reg    [15:0]  seq_trigen_wr;
+  reg   [15:0]  seq_trigen_wr;
   wire  [15:0]  seq_trigen_rd;
 
-  reg    [15:0]  seq_trigdly0_wr;
+  reg   [15:0]  seq_trigdly0_wr;
   wire  [15:0]  seq_trigdly0_rd;
 
-  reg    [15:0]  seq_trigdly1_wr;
+  reg   [15:0]  seq_trigdly1_wr;
   wire  [15:0]  seq_trigdly1_rd;
+  
+  reg   [15:0]  seq_trigdly2_wr;
+  wire  [15:0]  seq_trigdly2_rd;
 
   reg    [15:0]  seq_id_wr;
   wire  [15:0]  seq_id_rd;
@@ -2546,8 +2602,8 @@
   reg    [15:0]  scp_trigger_ch_wr;
   wire  [15:0]  scp_trigger_ch_rd;
 
-  reg    [15:0]  cnt_ctrl_wr;
-  wire  [15:0]  cnt_ctrl_rd;
+  reg  [15:0] cnt_ctrl_wr;
+  wire [15:0] cnt_ctrl_rd;
 
   wire  [15:0]  cnt_rdata_rd;
 
@@ -2775,6 +2831,7 @@
   wire      wr_seq_trigen;
   wire      wr_seq_trigdly0;
   wire      wr_seq_trigdly1;
+  wire      wr_seq_trigdly2;
   wire      wr_seq_id;
   wire      wr_seq_clct;
   wire      wr_seq_fifo;
@@ -3215,10 +3272,11 @@
   ADR_HCM423:      data_out  <= hcm423_rd;
   ADR_HCM445:      data_out  <= hcm445_rd;
                  
-  ADR_SEQ_TRIG_EN:    data_out  <= seq_trigen_rd;
-  ADR_SEQ_TRIG_DLY0:    data_out  <= seq_trigdly0_rd;
-  ADR_SEQ_TRIG_DLY1:    data_out  <= seq_trigdly1_rd;
-  ADR_SEQ_ID:      data_out  <= seq_id_rd;
+  ADR_SEQ_TRIG_EN:   data_out  <= seq_trigen_rd;
+  ADR_SEQ_TRIG_DLY0: data_out  <= seq_trigdly0_rd;
+  ADR_SEQ_TRIG_DLY1: data_out  <= seq_trigdly1_rd;
+  ADR_SEQ_TRIG_DLY2: data_out  <= seq_trigdly2_rd;
+  ADR_SEQ_ID:        data_out  <= seq_id_rd;
                  
   ADR_SEQ_CLCT:      data_out  <= seq_clct_rd;
   ADR_SEQ_FIFO:      data_out  <= seq_fifo_rd;
@@ -3248,15 +3306,14 @@
   
   ADR_MPC_FRAMES_FIFO_CTRL: data_out  <= mpc_frames_fifo_ctrl_rd;
 
-  ADR_TMB_SPECIAL_COUNT: data_out  <= tmb_special_count_rd;    // Adr 186 used to Read MMCM lock time, now just whatever we need it for!
-  ADR_TMB_POWER_UP_TIME:  data_out  <= tmb_power_up_time_rd;     // Adr 188
-  ADR_TMB_LOAD_CFG_TIME:  data_out  <= tmb_load_cfg_time_rd;     // Adr 18A
+  ADR_TMB_SPECIAL_COUNT:     data_out  <= tmb_special_count_rd;     // Adr 186 used to Read MMCM lock time, now just whatever we need it for!
+  ADR_TMB_POWER_UP_TIME:     data_out  <= tmb_power_up_time_rd;     // Adr 188
+  ADR_TMB_LOAD_CFG_TIME:     data_out  <= tmb_load_cfg_time_rd;     // Adr 18A
   ADR_ALCT_PHASER_LOCK_TIME: data_out  <= alct_phaser_lock_time_rd; // Adr 18C
-  ADR_ALCT_LOAD_CFG_TIME: data_out  <= alct_load_cfg_time_rd;    // Adr 18E -- time after alct_config_wait
-  ADR_GTX_RST_DONE_TIME:  data_out  <= gtx_rst_done_time_rd;     // Adr 190
-  ADR_GTX_SYNC_DONE_TIME: data_out  <= gtx_sync_done_time_rd;    // Adr 192
+  ADR_ALCT_LOAD_CFG_TIME:    data_out  <= alct_load_cfg_time_rd;    // Adr 18E -- time after alct_config_wait
+  ADR_GTX_RST_DONE_TIME:     data_out  <= gtx_rst_done_time_rd;     // Adr 190
+  ADR_GTX_SYNC_DONE_TIME:    data_out  <= gtx_sync_done_time_rd;    // Adr 192
 
-  
   ADR_MPC_INJ:      data_out  <= mpc_inj_rd;
   ADR_MPC_RAM_ADR:    data_out  <= mpc_ram_adr_rd;  
   ADR_MPC_RAM_WDATA:    data_out  <= mpc_ram_wdata_rd;
@@ -3294,8 +3351,8 @@
                  
   ADR_SCP_TRIG:      data_out  <= scp_trigger_ch_rd;
                  
-  ADR_CNT_CTRL:      data_out  <= cnt_ctrl_rd;
-  ADR_CNT_RDATA:      data_out  <= cnt_rdata_rd;
+  ADR_CNT_CTRL:  data_out  <= cnt_ctrl_rd;
+  ADR_CNT_RDATA: data_out  <= cnt_rdata_rd;
                  
   ADR_JTAGSM0:      data_out  <= jtagsm0_rd;
   ADR_JTAGSM1:      data_out  <= jtagsm1_rd;
@@ -3469,31 +3526,32 @@
   assign wr_hcm401    = (reg_adr==ADR_HCM401      && clk_en);
   assign wr_hcm423    = (reg_adr==ADR_HCM423      && clk_en);
   assign wr_hcm445    = (reg_adr==ADR_HCM445      && clk_en);
-  assign wr_hcm501    = (reg_adr==ADR_V6_HCM501    && clk_en);
-  assign wr_hcm523    = (reg_adr==ADR_V6_HCM523    && clk_en);
-  assign wr_hcm545    = (reg_adr==ADR_V6_HCM545    && clk_en);
-  assign wr_hcm601    = (reg_adr==ADR_V6_HCM601    && clk_en);
-  assign wr_hcm623    = (reg_adr==ADR_V6_HCM623    && clk_en);
-  assign wr_hcm645    = (reg_adr==ADR_V6_HCM645    && clk_en);
+  assign wr_hcm501    = (reg_adr==ADR_V6_HCM501   && clk_en);
+  assign wr_hcm523    = (reg_adr==ADR_V6_HCM523   && clk_en);
+  assign wr_hcm545    = (reg_adr==ADR_V6_HCM545   && clk_en);
+  assign wr_hcm601    = (reg_adr==ADR_V6_HCM601   && clk_en);
+  assign wr_hcm623    = (reg_adr==ADR_V6_HCM623   && clk_en);
+  assign wr_hcm645    = (reg_adr==ADR_V6_HCM645   && clk_en);
 
-  assign wr_seq_trigen    = (reg_adr==ADR_SEQ_TRIG_EN    && clk_en);
-  assign wr_seq_trigdly0    = (reg_adr==ADR_SEQ_TRIG_DLY0    && clk_en);
-  assign wr_seq_trigdly1    = (reg_adr==ADR_SEQ_TRIG_DLY1    && clk_en);
-  assign wr_seq_id    = (reg_adr==ADR_SEQ_ID      && clk_en);
+  assign wr_seq_trigen   = (reg_adr==ADR_SEQ_TRIG_EN   && clk_en);
+  assign wr_seq_trigdly0 = (reg_adr==ADR_SEQ_TRIG_DLY0 && clk_en);
+  assign wr_seq_trigdly1 = (reg_adr==ADR_SEQ_TRIG_DLY1 && clk_en);
+  assign wr_seq_trigdly2 = (reg_adr==ADR_SEQ_TRIG_DLY2 && clk_en);
+  assign wr_seq_id       = (reg_adr==ADR_SEQ_ID        && clk_en);
 
-  assign wr_seq_clct    = (reg_adr==ADR_SEQ_CLCT    && clk_en);
-  assign wr_seq_fifo    = (reg_adr==ADR_SEQ_FIFO    && clk_en);
-  assign wr_seq_l1a    = (reg_adr==ADR_SEQ_L1A      && clk_en);
-  assign wr_seq_offset0    = (reg_adr==ADR_SEQ_OFFSET0    && clk_en);
-  assign wr_dmb_ram_adr    = (reg_adr==ADR_DMB_RAM_ADR    && clk_en);
-  assign wr_dmb_ram_wdata    = (reg_adr==ADR_DMB_RAM_WDATA    && clk_en);
-  assign wr_tmb_trig    = (reg_adr==ADR_TMB_TRIG    && clk_en);
-  assign wr_mpc_inj    = (reg_adr==ADR_MPC_INJ      && clk_en);
-  assign wr_mpc_ram_adr    = (reg_adr==ADR_MPC_RAM_ADR    && clk_en);
-  assign wr_mpc_ram_wdata    = (reg_adr==ADR_MPC_RAM_WDATA    && clk_en);
+  assign wr_seq_clct      = (reg_adr==ADR_SEQ_CLCT      && clk_en);
+  assign wr_seq_fifo      = (reg_adr==ADR_SEQ_FIFO      && clk_en);
+  assign wr_seq_l1a       = (reg_adr==ADR_SEQ_L1A       && clk_en);
+  assign wr_seq_offset0   = (reg_adr==ADR_SEQ_OFFSET0   && clk_en);
+  assign wr_dmb_ram_adr   = (reg_adr==ADR_DMB_RAM_ADR   && clk_en);
+  assign wr_dmb_ram_wdata = (reg_adr==ADR_DMB_RAM_WDATA && clk_en);
+  assign wr_tmb_trig      = (reg_adr==ADR_TMB_TRIG      && clk_en);
+  assign wr_mpc_inj       = (reg_adr==ADR_MPC_INJ       && clk_en);
+  assign wr_mpc_ram_adr   = (reg_adr==ADR_MPC_RAM_ADR   && clk_en);
+  assign wr_mpc_ram_wdata = (reg_adr==ADR_MPC_RAM_WDATA && clk_en);
 
-  assign wr_scp_ctrl    = (reg_adr==ADR_SCP_CTRL    && clk_en);
-  assign wr_scp_rdata    = (reg_adr==ADR_SCP_RDATA    && clk_en);
+  assign wr_scp_ctrl  = (reg_adr==ADR_SCP_CTRL  && clk_en);
+  assign wr_scp_rdata = (reg_adr==ADR_SCP_RDATA && clk_en);
 
   assign wr_ccb_cmd    = (reg_adr==ADR_CCB_CMD      && clk_en);
   assign wr_alct_fifo1    = (reg_adr==ADR_ALCTFIFO1    && clk_en);
@@ -3512,8 +3570,8 @@
   assign wr_bx0_delay    = (reg_adr==ADR_BX0_DELAY    && clk_en);
   assign wr_non_trig_ro    = (reg_adr==ADR_NON_TRIG_RO    && clk_en);
 
-  assign wr_scp_trigger_ch  = (reg_adr==ADR_SCP_TRIG    && clk_en);
-  assign wr_cnt_ctrl    = (reg_adr==ADR_CNT_CTRL    && clk_en);
+  assign wr_scp_trigger_ch = (reg_adr==ADR_SCP_TRIG && clk_en);
+  assign wr_cnt_ctrl       = (reg_adr==ADR_CNT_CTRL && clk_en);
 
   assign wr_jtagsm0    = (reg_adr==ADR_JTAGSM0      && clk_en);
   assign wr_vmesm0    = (reg_adr==ADR_VMESM0      && clk_en);
@@ -4766,27 +4824,27 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-     ccb_trig_wr[0]          = 1'b0;    // 1=Request ccb l1a on alct ext_trig
-     ccb_trig_wr[1]          = 1'b0;    // 1=Request ccb l1a on clct ext_trig
-     ccb_trig_wr[2]          = 1'b1;    // 1=Request ccb l1a on sequencer trigger
-     ccb_trig_wr[3]          = 1'b0;    // 1=Fire alct_ext_trig oneshot
-     ccb_trig_wr[4]          = 1'b0;    // 1=Fire clct_ext_trig oneshot
-     ccb_trig_wr[5]          = 1'b0;    // 1=clct_ext_trig fires alct and alct fires clct_trig, DC level
-     ccb_trig_wr[6]          = 1'b0;    // 1=Allow clct_ext_trigger_ccb even if ccb_ignore_rx=1
-     ccb_trig_wr[7]          = 1'b0;    // 1=ignore ttc trig_start/stop commands
-     ccb_trig_wr[15:8]        = 8'd114;  // Internal L1A delay (not same as sequencer internal)
+     ccb_trig_wr[0]    = 1'b0;    // 1=Request ccb l1a on alct ext_trig
+     ccb_trig_wr[1]    = 1'b0;    // 1=Request ccb l1a on clct ext_trig
+     ccb_trig_wr[2]    = 1'b1;    // 1=Request ccb l1a on sequencer trigger
+     ccb_trig_wr[3]    = 1'b0;    // 1=Fire alct_ext_trig oneshot
+     ccb_trig_wr[4]    = 1'b0;    // 1=Fire clct_ext_trig oneshot
+     ccb_trig_wr[5]    = 1'b0;    // 1=clct_ext_trig fires alct and alct fires clct_trig, DC level
+     ccb_trig_wr[6]    = 1'b0;    // 1=Allow clct_ext_trigger_ccb even if ccb_ignore_rx=1
+     ccb_trig_wr[7]    = 1'b0;    // 1=ignore ttc trig_start/stop commands
+     ccb_trig_wr[15:8] = 8'd114;  // Internal L1A delay (not same as sequencer internal)
   end
 
-  assign alct_ext_trig_l1aen    = ccb_trig_wr[0];  // RW  1=Request ccb l1a on clct ext_trig
-  assign clct_ext_trig_l1aen    = ccb_trig_wr[1];  // RW  1=Request ccb l1a on alct ext_trig
-  assign seq_trig_l1aen      = ccb_trig_wr[2];  // RW  1=Request ccb l1a on alct sequencer trig
-  assign alct_ext_trig_vme    = ccb_trig_wr[3];  // RW  1=Fire alct_ext_trig oneshot
-  assign clct_ext_trig_vme    = ccb_trig_wr[4];  // RW  1=Fire clct_ext_trig oneshot
-  assign ext_trig_both      = ccb_trig_wr[5];  // RW  1=clct_ext_trig fires alct and alct fires clct_trig, DC level
-  assign ccb_allow_ext_bypass    = ccb_trig_wr[6];  // RW  1=Allow clct_ext_trigger_ccb even if ccb_ignore_rx=1
-  assign ccb_ignore_startstop    = ccb_trig_wr[7];  // RW  1=ignore ttc trig_start/stop commands
-  assign l1a_delay_vme[7:0]    = ccb_trig_wr[15:8];  // RW  Internal L1A delay
-  assign ccb_trig_rd[15:0]    = ccb_trig_wr[15:0];  //     Readback
+  assign alct_ext_trig_l1aen  = ccb_trig_wr[0];    // RW  1=Request ccb l1a on clct ext_trig
+  assign clct_ext_trig_l1aen  = ccb_trig_wr[1];    // RW  1=Request ccb l1a on alct ext_trig
+  assign seq_trig_l1aen       = ccb_trig_wr[2];    // RW  1=Request ccb l1a on alct sequencer trig
+  assign alct_ext_trig_vme    = ccb_trig_wr[3];    // RW  1=Fire alct_ext_trig oneshot
+  assign clct_ext_trig_vme    = ccb_trig_wr[4];    // RW  1=Fire clct_ext_trig oneshot
+  assign ext_trig_both        = ccb_trig_wr[5];    // RW  1=clct_ext_trig fires alct and alct fires clct_trig, DC level
+  assign ccb_allow_ext_bypass = ccb_trig_wr[6];    // RW  1=Allow clct_ext_trigger_ccb even if ccb_ignore_rx=1
+  assign ccb_ignore_startstop = ccb_trig_wr[7];    // RW  1=ignore ttc trig_start/stop commands
+  assign l1a_delay_vme[7:0]   = ccb_trig_wr[15:8]; // RW  Internal L1A delay
+  assign ccb_trig_rd[15:0]    = ccb_trig_wr[15:0]; //     Readback
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_CCB_STAT0=2E    CCB Status Register, Readonly
@@ -5251,31 +5309,40 @@
 //------------------------------------------------------------------------------------------------------------------
 // ADR_SEQ_TRIG_DLY0=6A    Sequencer Trigger Delays Register: First Group
 // ADR_SEQ_TRIG_DLY1=6C    Sequencer Trigger Delays Register: Second Group
+// ADR_SEQ_TRIG_DLY2=194   Sequencer Trigger Delays Register: Third Group
 //------------------------------------------------------------------------------------------------------------------
-// Power-up defaults First+Second Group
+// Power-up defaults First+Second+Third Group
   initial begin
-  seq_trigdly0_wr[3:0]      = 4'd3;            // ALCT*CLCT pretrigger overlap window size
-  seq_trigdly0_wr[7:4]      = 4'd0;            // ALCT pre      trigger delay
-  seq_trigdly0_wr[11:8]      = 4'd0;            // ALCT pattern  trigger delay
-  seq_trigdly0_wr[15:12]      = 4'd1;            // ADB  external trigger delay
+    seq_trigdly0_wr[3:0]   = 4'd4;   // ALCT (alct_active_feb flag) window width for ALCT*preCLCT overlap
+    seq_trigdly0_wr[7:4]   = 4'd2;   // ALCT (alct_active_feb flag) delay for ALCT*preCLCT overlap
+    seq_trigdly0_wr[11:8]  = 4'd0;   // ALCT pattern  trigger delay
+    seq_trigdly0_wr[15:12] = 4'd1;   // ADB  external trigger delay
 
-  seq_trigdly1_wr[3:0]      = 4'd1;            // DMB  external trigger delay
-  seq_trigdly1_wr[7:4]      = 4'd7;            // CLCT External trigger delay
-  seq_trigdly1_wr[11:8]      = 4'd7;            // ALCT External trigger delay
-  seq_trigdly1_wr[15:12]      = 4'd0;            // Free
+    seq_trigdly1_wr[3:0]   = 4'd1;   // DMB  external trigger delay
+    seq_trigdly1_wr[7:4]   = 4'd7;   // CLCT External trigger delay
+    seq_trigdly1_wr[11:8]  = 4'd7;   // ALCT External trigger delay
+    seq_trigdly1_wr[15:12] = 4'd0;   // Free
+    
+    seq_trigdly2_wr[3:0]   = 4'd4;   // pre-CLCT window width for L1A*preCLCT overlap
+    seq_trigdly2_wr[11:4]  = 8'd128; // pre-CLCT delay for L1A*preCLCT overlap
+    seq_trigdly2_wr[15:12] = 4'd0;   // Free
   end
 
-  assign alct_trig_width[3:0]    = seq_trigdly0_wr[3:0];    // RW  ALCT*CLCT overlap window size
-  assign alct_pre_trig_dly[3:0]  = seq_trigdly0_wr[7:4];    // RW  ALCT pre     trigger delay
+  assign alct_preClct_width[3:0] = seq_trigdly0_wr[3:0];   // RW  ALCT (alct_active_feb flag) window width for ALCT*preCLCT overlap
+  assign alct_preClct_dly[3:0]   = seq_trigdly0_wr[7:4];   // RW  ALCT (alct_active_feb flag) delay for ALCT*preCLCT overlap
   assign alct_pat_trig_dly[3:0]  = seq_trigdly0_wr[11:8];  // RW  ALCT Pattern trigger delay
-  assign adb_ext_trig_dly[3:0]  = seq_trigdly0_wr[15:12];  // RW  ADB External trigger delay
-  assign seq_trigdly0_rd[15:0]  = seq_trigdly0_wr[15:0];  //    Readback
+  assign adb_ext_trig_dly[3:0]   = seq_trigdly0_wr[15:12]; // RW  ADB External trigger delay
+  assign seq_trigdly0_rd[15:0]   = seq_trigdly0_wr[15:0];  //     Readback
 
   assign dmb_ext_trig_dly[3:0]  = seq_trigdly1_wr[3:0];    // RW  DMB External trigger delay
-  assign clct_ext_trig_dly[3:0]  = seq_trigdly1_wr[7:4];    // RW  CLCT External trigger delay
-  assign alct_ext_trig_dly[3:0]  = seq_trigdly1_wr[11:8];  // RW  ALCT External trigger delay
-//  assign layer_trig_dly[3:0]    = seq_trigdly1_wr[15:12];  // RW  Free
-  assign seq_trigdly1_rd[15:0]  = seq_trigdly1_wr[15:0];  //    Readback
+  assign clct_ext_trig_dly[3:0] = seq_trigdly1_wr[7:4];    // RW  CLCT External trigger delay
+  assign alct_ext_trig_dly[3:0] = seq_trigdly1_wr[11:8];   // RW  ALCT External trigger delay
+//assign layer_trig_dly[3:0]    = seq_trigdly1_wr[15:12];  // RW  Free
+  assign seq_trigdly1_rd[15:0]  = seq_trigdly1_wr[15:0];   //     Readback
+  
+  assign l1a_preClct_width[3:0] = seq_trigdly2_wr[3:0];    // RW  pre-CLCT window width for L1A*preCLCT overlap
+  assign l1a_preClct_dly[7:0]   = seq_trigdly2_wr[11:4];   // RW  pre-CLCT delay for L1A*preCLCT overlap
+  assign seq_trigdly2_rd[15:0]  = seq_trigdly2_wr[15:0];   //     Readback
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_SEQ_ID=6E    Sequencer ID Information Register, Board & CSC ID
@@ -5377,18 +5444,18 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  seq_l1a_wr[7:0]          = 8'd128;          // Level 1 Accept delay from pretrig status output
-  seq_l1a_wr[11:8]        = 4'd3;            // Level 1 Accept window width after delay
-  seq_l1a_wr[12]          = 1'b0;            // 1=Generate internal Level 1, overrides external
-  seq_l1a_wr[15:13]        = 3'd0;            // Delay internal l1a to shift position in l1a match window
+  seq_l1a_wr[7:0]   = 8'd128; // Level 1 Accept delay from pretrig status output
+  seq_l1a_wr[11:8]  = 4'd3;   // Level 1 Accept window width after delay
+  seq_l1a_wr[12]    = 1'b0;   // 1=Generate internal Level 1, overrides external
+  seq_l1a_wr[15:13] = 3'd0;   // Delay internal l1a to shift position in l1a match window
   end
 
-  assign l1a_delay[7:0]      = seq_l1a_wr[7:0];      // RW  Level1 Accept delay from pretrig status output
-  assign l1a_window[3:0]      = seq_l1a_wr[11:8];      // RW  Level1 Accept window width after delay
-  assign l1a_internal        = seq_l1a_wr[12];      // RW  Generate internal Level 1, overrides external
-  assign l1a_internal_dly[2:0]  = seq_l1a_wr[15:13];    // RW  Delay internal l1a to shift position in l1a match window
-  assign l1a_internal_dly[3]    = 0;            //    Ran out of bits =:-( 
-  assign seq_l1a_rd[15:0]      = seq_l1a_wr[15:0];      //    Readback
+  assign l1a_delay[7:0]        = seq_l1a_wr[7:0];   // RW  Level1 Accept delay from pretrig status output
+  assign l1a_window[3:0]       = seq_l1a_wr[11:8];  // RW  Level1 Accept window width after delay
+  assign l1a_internal          = seq_l1a_wr[12];    // RW  Generate internal Level 1, overrides external
+  assign l1a_internal_dly[2:0] = seq_l1a_wr[15:13]; // RW  Delay internal l1a to shift position in l1a match window
+  assign l1a_internal_dly[3]   = 0;                 //    Ran out of bits =:-( 
+  assign seq_l1a_rd[15:0]      = seq_l1a_wr[15:0];  //    Readback
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_SEQ_OFFSET0=76  Sequencer Counter Offsets Register  [continued in Adr 0x10A]
@@ -5734,44 +5801,44 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  seq_trigmod_wr[3:0]        = 1;            // RW  Trigger sequencer flush state timer
-  seq_trigmod_wr[4]        = 1;            // RW  1=Enable frozen buffer auto clear
-  seq_trigmod_wr[5]        = 0;            // RW  1=allow continuous header buffer writing for invalid triggers
+    seq_trigmod_wr[3:0] = 1; // RW  Trigger sequencer flush state timer
+    seq_trigmod_wr[4]   = 1; // RW  1=Enable frozen buffer auto clear
+    seq_trigmod_wr[5]   = 0; // RW  1=allow continuous header buffer writing for invalid triggers
 
-  seq_trigmod_wr[6]        = 1;            // RW  Require wr_buffer to pretrigger
-  seq_trigmod_wr[7]        = 1;            // RW  Require valid pattern after drift to trigger
+    seq_trigmod_wr[6]   = 1; // RW  Require wr_buffer to pretrigger
+    seq_trigmod_wr[7]   = 1; // RW  Require valid pattern after drift to trigger
 
-  seq_trigmod_wr[8]        = 1;            // RW  Readout allows tmb trig pulse in L1A window (normal mode)
-  seq_trigmod_wr[9]        = 0;            // RW  Readout allows no tmb trig pulse in L1A window
-  seq_trigmod_wr[10]        = 0;            // RW  Readout allows tmb trig pulse outside L1A window
-  seq_trigmod_wr[11]        = 0;            // RW  Allow alct_only events to readout at L1A  
+    seq_trigmod_wr[8]   = 1; // RW  Readout allows tmb trig pulse in L1A window (normal mode)
+    seq_trigmod_wr[9]   = 0; // RW  Readout allows no tmb trig pulse in L1A window
+    seq_trigmod_wr[10]  = 0; // RW  Readout allows tmb trig pulse outside L1A window
+    seq_trigmod_wr[11]  = 0; // RW  Allow alct_only events to readout at L1A  
 
-  seq_trigmod_wr[12]        = 0;            // RW  Clear scintillator veto ff
-  seq_trigmod_wr[13]        = 0;            // R  Scintillator veto state
-  seq_trigmod_wr[14]        = 0;            // RW  Active cfeb flag source, 0=pretrig, 1=tmb-matching ~8bx later
-  seq_trigmod_wr[15]        = 0;            // RW  Event clear for aff,clct,mpc vme diagnostic registers
+    seq_trigmod_wr[12]  = 0; // RW  Clear scintillator veto ff
+    seq_trigmod_wr[13]  = 0; // R  Scintillator veto state
+    seq_trigmod_wr[14]  = 0; // RW  Active cfeb flag source, 0=pretrig, 1=tmb-matching ~8bx later
+    seq_trigmod_wr[15]  = 0; // RW  Event clear for aff,clct,mpc vme diagnostic registers
   end
 
-  assign clct_flush_delay[3:0]   = seq_trigmod_wr[3:0];    // RW  Trigger sequencer flush state timer
-  assign wr_buf_autoclr_en    = seq_trigmod_wr[4];    // RW  Enable frozen buffer auto clear
-  assign clct_wr_continuous    = seq_trigmod_wr[5];    // RW  1=allow continuous header buffer writing for invalid triggers
+  assign clct_flush_delay[3:0] = seq_trigmod_wr[3:0];   // RW  Trigger sequencer flush state timer
+  assign wr_buf_autoclr_en     = seq_trigmod_wr[4];     // RW  Enable frozen buffer auto clear
+  assign clct_wr_continuous    = seq_trigmod_wr[5];     // RW  1=allow continuous header buffer writing for invalid triggers
 
-  assign wr_buf_required      = seq_trigmod_wr[6];    // RW  Require wr_buffer to pretrigger
-  assign valid_clct_required    = seq_trigmod_wr[7];    // RW  Require valid pattern after drift to trigger
+  assign wr_buf_required       = seq_trigmod_wr[6];     // RW  Require wr_buffer to pretrigger
+  assign valid_clct_required   = seq_trigmod_wr[7];     // RW  Require valid pattern after drift to trigger
 
-  assign l1a_allow_match      = seq_trigmod_wr[8];    // RW  Readout allows tmb trig pulse in L1A window (normal mode)
-  assign l1a_allow_notmb      = seq_trigmod_wr[9];    // RW  Readout allows no tmb trig pulse in L1A window
-  assign l1a_allow_nol1a      = seq_trigmod_wr[10];    // RW  Readout allows tmb trig pulse outside L1A window
-  assign l1a_allow_alct_only    = seq_trigmod_wr[11];    // RW  Allow alct_only events to readout at L1A
+  assign l1a_allow_match       = seq_trigmod_wr[8];     // RW  Readout allows tmb trig pulse in L1A window (normal mode)
+  assign l1a_allow_notmb       = seq_trigmod_wr[9];     // RW  Readout allows no tmb trig pulse in L1A window
+  assign l1a_allow_nol1a       = seq_trigmod_wr[10];    // RW  Readout allows tmb trig pulse outside L1A window
+  assign l1a_allow_alct_only   = seq_trigmod_wr[11];    // RW  Allow alct_only events to readout at L1A
 
-  assign scint_veto_clr      = seq_trigmod_wr[12];    // RW  Clear scintillator veto ff
+  assign scint_veto_clr        = seq_trigmod_wr[12];    // RW  Clear scintillator veto ff
   wire   scint_veto_dummy      = seq_trigmod_wr[13];    // W  Event clear for aff,clct,mpc vme diagnostic registers
-  assign active_feb_src      = seq_trigmod_wr[14];    // RW  Active cfeb flag source, 0=pretrig, 1=tmb-matching ~8bx later
-  assign event_clear_vme      = seq_trigmod_wr[15];    // RW  Event clear for aff,clct,mpc vme diagnostic registers
+  assign active_feb_src        = seq_trigmod_wr[14];    // RW  Active cfeb flag source, 0=pretrig, 1=tmb-matching ~8bx later
+  assign event_clear_vme       = seq_trigmod_wr[15];    // RW  Event clear for aff,clct,mpc vme diagnostic registers
 
-  assign seq_trigmod_rd[12:0]    = seq_trigmod_wr[12:0];    // RW  Readback
-  assign seq_trigmod_rd[13]    = scint_veto_vme;      // R  Scintillator veto state
-  assign seq_trigmod_rd[15:14]  = seq_trigmod_wr[15:14];  // RW  Readback
+  assign seq_trigmod_rd[12:0]  = seq_trigmod_wr[12:0];  // RW  Readback
+  assign seq_trigmod_rd[13]    = scint_veto_vme;        // R  Scintillator veto state
+  assign seq_trigmod_rd[15:14] = seq_trigmod_wr[15:14]; // RW  Readback
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_SEQSM    = 0xAE  Sequencer Machine State Register, Readonly
@@ -6043,53 +6110,54 @@
   assign scp_trigger_ch_rd[15:0]  = scp_trigger_ch_wr[15:0];  //    Readback
 
 //------------------------------------------------------------------------------------------------------------------
-// ADR_CNT_CTRL=D0  Trigger/Readout Counter Control Register
+// ADR_CNT_CTRL=0xD0  Trigger/Readout Counter Control Register                                                        
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  cnt_ctrl_wr[0]          = 0;            // RW  1=reset all counters
-  cnt_ctrl_wr[1]          = 0;            // RW  1=take snapshot of current count
-  cnt_ctrl_wr[2]          = 0;            // RW  1=Stop all counters if any overflows
-  cnt_ctrl_wr[3]          = 0;            // R  At least one alct counter overflowed
-  cnt_ctrl_wr[4]          = 0;            // R  At least one sequencer counter overflowed
-  cnt_ctrl_wr[5]          = 1;            // RW  1=Enable alct lct error alct debug counter
-  cnt_ctrl_wr[6]          = 0;            // RW  1=Clear VME    counters on ttc_resync
-  cnt_ctrl_wr[7]          = 1;            // RW  1=Clear Header counters on ttc_resync
-  cnt_ctrl_wr[8]          = 0;            // RW  0=read counter lower 16 bits, 1=upper 14 
-  cnt_ctrl_wr[14:9]        = 0;            // RW  Counter address
-  cnt_ctrl_wr[15]          = 0;            // RW  Parity error reset
+    cnt_ctrl_wr[0]    = 0; // RW  1=reset all counters
+    cnt_ctrl_wr[1]    = 0; // RW  1=take snapshot of current count
+    cnt_ctrl_wr[2]    = 0; // RW  1=Stop all counters if any overflows
+    cnt_ctrl_wr[3]    = 0; // R  At least one alct counter overflowed
+    cnt_ctrl_wr[4]    = 0; // R  At least one sequencer counter overflowed
+    cnt_ctrl_wr[5]    = 1; // RW  1=Enable alct lct error alct debug counter
+    cnt_ctrl_wr[6]    = 0; // RW  1=Clear VME    counters on ttc_resync
+    cnt_ctrl_wr[7]    = 1; // RW  1=Clear Header counters on ttc_resync
+    cnt_ctrl_wr[8]    = 0; // RW  0=read counter lower 16 bits, 1=upper 14 
+    cnt_ctrl_wr[14:9] = 0; // RW  Counter address
+    cnt_ctrl_wr[15]   = 0; // RW  Parity error reset
   end
 
-  wire [6:0]  cnt_select;
-  wire    cnt_snapshot;
-  wire    cnt_all_reset_vme;
-  wire    cnt_clear_on_resync;
+  wire [6:0] cnt_select;
+  wire       cnt_snapshot;
+  wire       cnt_all_reset_vme;
+  wire       cnt_clear_on_resync;
 
-  assign cnt_all_reset_vme    = cnt_ctrl_wr[0];      // RW  1=reset all VME counters (doesnt clear header)
-  assign cnt_snapshot        = cnt_ctrl_wr[1];      // RW  1=take snapshot of current count
-  assign cnt_stop_on_ovf      = cnt_ctrl_wr[2];      // RW  1=Stop all counters if any overflows
-  assign cnt_alct_debug      = cnt_ctrl_wr[5];      // RW  1=Enable alct lct error alct debug counter
-  assign cnt_clear_on_resync    = cnt_ctrl_wr[6];      // RW  1=Clear VME    counters on ttc_resync
-  assign hdr_clear_on_resync    = cnt_ctrl_wr[7];      // RW  1=Clear Header counters on ttc_resync
-  assign cnt_adr_lsb        = cnt_ctrl_wr[8];      // RW  0=read counter lower 16 bits, 1=upper 14 
-  assign cnt_select[6:0]      = cnt_ctrl_wr[15:9];    // RW  Counter address
+  assign cnt_all_reset_vme   = cnt_ctrl_wr[0];    // RW  1=reset all VME counters (doesnt clear header)
+  assign cnt_snapshot        = cnt_ctrl_wr[1];    // RW  1=take snapshot of current count
+  assign cnt_stop_on_ovf     = cnt_ctrl_wr[2];    // RW  1=Stop all counters if any overflows
+  assign cnt_alct_debug      = cnt_ctrl_wr[5];    // RW  1=Enable alct lct error alct debug counter
+  assign cnt_clear_on_resync = cnt_ctrl_wr[6];    // RW  1=Clear VME    counters on ttc_resync
+  assign hdr_clear_on_resync = cnt_ctrl_wr[7];    // RW  1=Clear Header counters on ttc_resync
+  assign cnt_adr_lsb         = cnt_ctrl_wr[8];    // RW  0=read counter lower 16 bits, 1=upper 14 
+  assign cnt_select[6:0]     = cnt_ctrl_wr[15:9]; // RW  Counter address
 
-  assign cnt_ctrl_rd[2:0]      = cnt_ctrl_wr[2:0];      // RW  Readback
-  assign cnt_ctrl_rd[3]      = cnt_any_ovf_alct;      // R  At least one alct counter overflowed
-  assign cnt_ctrl_rd[4]      = cnt_any_ovf_seq;      // R  At least one sequencer counter overflowed
-  assign cnt_ctrl_rd[15:5]    = cnt_ctrl_wr[15:5];    // RW  Readback
+  assign cnt_ctrl_rd[2:0]    = cnt_ctrl_wr[2:0];  // RW  Readback
+  assign cnt_ctrl_rd[3]      = cnt_any_ovf_alct;  // R  At least one alct counter overflowed
+  assign cnt_ctrl_rd[4]      = cnt_any_ovf_seq;   // R  At least one sequencer counter overflowed
+  assign cnt_ctrl_rd[15:5]   = cnt_ctrl_wr[15:5]; // RW  Readback
 
-  assign cnt_all_reset      = cnt_all_reset_vme || (ttc_resync && cnt_clear_on_resync);
-
+  assign cnt_all_reset       = cnt_all_reset_vme || (ttc_resync && cnt_clear_on_resync);
+  
+  // x_oneshot is Digital One-Shot defined in utils/x_oneshot.v
   x_oneshot usnap (.d(cnt_snapshot),.clock(clock),.q(cnt_snapshot_os));
 
 //------------------------------------------------------------------------------------------------------------------
-// ADR_CNT_RDATA=D2  Trigger/Readout Counter Data Register
+// ADR_CNT_RDATA=0xD2  Trigger/Readout Counter Data Register                                                          
 //------------------------------------------------------------------------------------------------------------------
-// Remap 1D counters to 2D, beco XST does not support 2D ports
-  parameter MXCNT=88;                // Number of counters, last counter id is mxcnt-1
-  reg  [MXCNTVME-1:0]  cnt_snap [MXCNT-1:0];    // Event counter snapshot 2D
-  wire [MXCNTVME-1:0]  cnt      [MXCNT-1:0];    // Event counter 2D map
+// Remap 1D counters to 2D, because XST does not support 2D ports
+  parameter MXCNT = 93;                     // Number of counters, last counter id is mxcnt-1
+  reg  [MXCNTVME-1:0] cnt_snap [MXCNT-1:0]; // Event counter snapshot 2D
+  wire [MXCNTVME-1:0] cnt      [MXCNT-1:0]; // Event counter 2D map
 
 // ALCT Event Counters
   assign cnt[0]  = event_counter0;
@@ -6102,11 +6170,11 @@
   assign cnt[7]  = event_counter7;
   assign cnt[8]  = event_counter8;
   assign cnt[9]  = event_counter9;
-  assign cnt[10]  = event_counter10;
-  assign cnt[11]  = event_counter11;
-  assign cnt[12]  = event_counter12;
+  assign cnt[10] = event_counter10;
+  assign cnt[11] = event_counter11;
+  assign cnt[12] = event_counter12;
 
-// TMB+CLCT Event Counters
+// CLCT Event Counters
   assign cnt[13]  = event_counter13;
   assign cnt[14]  = event_counter14;
   assign cnt[15]  = event_counter15;
@@ -6125,6 +6193,8 @@
   assign cnt[28]  = event_counter28;
   assign cnt[29]  = event_counter29;
   assign cnt[30]  = event_counter30;
+
+// TMB Event Counters
   assign cnt[31]  = event_counter31;
   assign cnt[32]  = event_counter32;
   assign cnt[33]  = event_counter33;
@@ -6149,12 +6219,16 @@
   assign cnt[52]  = event_counter52;
   assign cnt[53]  = event_counter53;
   assign cnt[54]  = event_counter54;
-  assign cnt[55]  = event_counter55;
-  assign cnt[56]  = event_counter56;
-  assign cnt[57]  = event_counter57;
-  assign cnt[58]  = event_counter58;
-  assign cnt[59]  = event_counter59;
-  assign cnt[60]  = event_counter60;
+
+// L1A Counters
+  assign cnt[55]  = event_counter55; // L1A received
+  assign cnt[56]  = event_counter56; // L1A received, TMB in L1A window
+  assign cnt[57]  = event_counter57; // L1A received, no TMB in window
+  assign cnt[58]  = event_counter58; // TMB triggered, no L1A in window
+  assign cnt[59]  = event_counter59; // TMB readouts completed
+  assign cnt[60]  = event_counter60; // TMB readouts lost by 1-event-per-L1A limit
+
+// STAT Counters
   assign cnt[61]  = event_counter61;
   assign cnt[62]  = event_counter62;
   assign cnt[63]  = event_counter63;
@@ -6162,13 +6236,13 @@
   assign cnt[65]  = event_counter65;
 
 // Header Counters, not reset via direct VME command
-  assign cnt[66]  = pretrig_counter;    // Pre-trigger counter
-  assign cnt[67]  = clct_counter;      // CLCT counter
-  assign cnt[68]  = trig_counter;      // TMB trigger counter
-  assign cnt[69]  = alct_counter;      // ALCTs received counter
-  assign cnt[70]  = l1a_rx_counter;    // L1As received from ccb counter, only 12 bits
-  assign cnt[71]  = readout_counter;    // Readout counter, only 12 bits
-  assign cnt[72]  = orbit_counter;    // Orbit counter
+  assign cnt[66]  = pretrig_counter; // Pre-trigger counter
+  assign cnt[67]  = clct_counter;    // CLCT counter
+  assign cnt[68]  = trig_counter;    // TMB trigger counter
+  assign cnt[69]  = alct_counter;    // ALCTs received counter
+  assign cnt[70]  = l1a_rx_counter;  // L1As received from ccb counter, only 12 bits
+  assign cnt[71]  = readout_counter; // Readout counter, only 12 bits
+  assign cnt[72]  = orbit_counter;   // Orbit counter
 
 // ALCT Structure Error Counters
   assign cnt[73]  = alct_err_counter0;
@@ -6182,31 +6256,49 @@
   assign cnt[79]  = ccb_ttcrx_lost_cnt;  // Number of times lock has been lost
   assign cnt[80]  = ccb_qpll_lost_cnt;  // Number of times lock has been lost
 
+// CLCT pre-trigger coincidence counters
+// NOTE: these counters 81-87 were previously used for Virtex-6 GTX Optical Receiver Error Counters
+  assign cnt[81]  = preClct_l1a_counter;  // CLCT pre-trigger AND L1A coincidence counter
+  assign cnt[82]  = preClct_alct_counter; // CLCT pre-trigger AND ALCT coincidence counter
+
+// Active CFEB(s) counters
+// NOTE: counters 81-87 were previously used for Virtex-6 GTX Optical Receiver Error Counters
+  assign cnt[83]  = active_cfeb0_event_counter;      // CFEB0 active flag sent to DMB
+  assign cnt[84]  = active_cfeb1_event_counter;      // CFEB1 active flag sent to DMB
+  assign cnt[85]  = active_cfeb2_event_counter;      // CFEB2 active flag sent to DMB
+  assign cnt[86]  = active_cfeb3_event_counter;      // CFEB3 active flag sent to DMB
+  assign cnt[87]  = active_cfeb4_event_counter;      // CFEB4 active flag sent to DMB
+  assign cnt[88]  = active_cfeb5_event_counter;      // CFEB5 active flag sent to DMB
+  assign cnt[89]  = active_cfeb6_event_counter;      // CFEB6 active flag sent to DMB
+  assign cnt[90]  = active_cfebs_me1a_event_counter; // ME1a CFEB active flag sent to DMB
+  assign cnt[91]  = active_cfebs_me1b_event_counter; // ME1b CFEB active flag sent to DMB
+  assign cnt[92]  = active_cfebs_event_counter;      // Any CFEB active flag sent to DMB
+  
 // Virtex-6 GTX Optical Receiver Error Counters
-  assign cnt[81]  = gtx_rx_err_count0;  // Error count on this fiber channel
-  assign cnt[82]  = gtx_rx_err_count1;
-  assign cnt[83]  = gtx_rx_err_count2;
-  assign cnt[84]  = gtx_rx_err_count3;
-  assign cnt[85]  = gtx_rx_err_count4;
-  assign cnt[86]  = gtx_rx_err_count5;
-  assign cnt[87]  = gtx_rx_err_count6;
+//  assign cnt[81]  = gtx_rx_err_count0;  // Error count on this fiber channel
+//  assign cnt[82]  = gtx_rx_err_count1;
+//  assign cnt[83]  = gtx_rx_err_count2;
+//  assign cnt[84]  = gtx_rx_err_count3;
+//  assign cnt[85]  = gtx_rx_err_count4;
+//  assign cnt[86]  = gtx_rx_err_count5;
+//  assign cnt[87]  = gtx_rx_err_count6;
 
 // Snapshot current value of all counters at once
   genvar j;
   generate
-  for (j=0; j<MXCNT; j=j+1) begin: gensnap
-  always @(posedge clock) begin
-  if (!power_up      ) cnt_snap[j] <= {MXCNTVME{1'b1}};  // Load 1s on startup, defeats warnings for short counters
-  if (cnt_snapshot_os) cnt_snap[j] <= cnt[j];        // Snapshot of j-th counter
-  end
-  end
+    for (j=0; j<MXCNT; j=j+1) begin: gensnap
+      always @(posedge clock) begin
+        if (!power_up      ) cnt_snap[j] <= {MXCNTVME{1'b1}}; // Load 1s on startup, defeats warnings for short counters
+        if (cnt_snapshot_os) cnt_snap[j] <= cnt[j];           // Snapshot of j-th counter
+      end
+    end
   endgenerate
 
 // Latch addressed counter for readout
-  reg [29:0] cnt_rdata=0;        // Full 30-bit width register
+  reg [29:0] cnt_rdata=0; // Full 30-bit width register
 
   always @(posedge clock) begin
-  cnt_rdata <= cnt_snap[cnt_select];
+    cnt_rdata <= cnt_snap[cnt_select];
   end
 
 // Muliplex counter halves to fit in VMED16, if lsb=0 select lower 16 bits, if lsb=1 select upper 14
@@ -7195,7 +7287,7 @@
   wire   virtex6_extend_sump      = |virtex6_extend_wr[9:8];  // RO
 
 //------------------------------------------------------------------------------------------------------------------
-// GEM_DEBUG_FIFO_CTRL = 0x194  GEM Raw Hits Readout RAM Simple Controller
+// GEM_DEBUG_FIFO_CTRL = 0x200  GEM Raw Hits Readout RAM Simple Controller
 //------------------------------------------------------------------------------------------------------------------
 // Power up
   initial begin
@@ -7214,7 +7306,7 @@
   assign gem_debug_fifo_ctrl_rd = gem_debug_fifo_ctrl_wr;
 
 //------------------------------------------------------------------------------------------------------------------
-// GEM_DEBUG_FIFO_DATA = 0x196  GEM Raw Hits Data
+// GEM_DEBUG_FIFO_DATA = 0x202  GEM Raw Hits Data
 //------------------------------------------------------------------------------------------------------------------
 
   assign gem_debug_fifo_data_rd = gem_debug_fifo_data;
@@ -7268,10 +7360,11 @@
   if (wr_hcm601)          hcm601_wr        <=  d[15:0];
   if (wr_hcm623)          hcm623_wr        <=  d[15:0];
   if (wr_hcm645)          hcm645_wr        <=  d[15:0];
-  if (wr_seq_trigen)        seq_trigen_wr      <=  d[15:0];
-  if (wr_seq_trigdly0)      seq_trigdly0_wr      <=  d[15:0];
-  if (wr_seq_trigdly1)      seq_trigdly1_wr      <=  d[15:0];
-//  if (wr_seq_id)          seq_id_wr        <=  d[15:0];
+  if (wr_seq_trigen)      seq_trigen_wr    <=  d[15:0];
+  if (wr_seq_trigdly0)    seq_trigdly0_wr  <=  d[15:0];
+  if (wr_seq_trigdly1)    seq_trigdly1_wr  <=  d[15:0];
+  if (wr_seq_trigdly2)    seq_trigdly2_wr  <=  d[15:0];
+//if (wr_seq_id)          seq_id_wr        <=  d[15:0];
   if (wr_seq_clct)        seq_clct_wr        <=  d[15:0];
   if (wr_seq_fifo)        seq_fifo_wr        <=  d[15:0];
   if (wr_seq_l1a)          seq_l1a_wr        <=  d[15:0];

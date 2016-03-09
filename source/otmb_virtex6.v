@@ -481,7 +481,8 @@
 // Clock DCM Instantiation
 //-------------------------------------------------------------------------------------------------------------------
 // Phaser VME control/status ports
-  parameter MXDPS=9;  // 2 ALCT + 7 DCFEB
+  //  parameter MXDPS=9;  // JRG: UCLA sets to 9, I prefer 4 to save BUFGs.  2 ALCT + 7 DCFEBs
+  parameter MXDPS=4;  // JRG: UCLA sets to 9, I prefer 4 to save BUFGs.  2 ALCT + 1 DCFEB(me1/1b)+ 1 DCFEB(me1/1a)
 
   wire [MXDPS-1:0]  dps_fire;
   wire [MXDPS-1:0]  dps_reset;
@@ -666,22 +667,22 @@
   .ccb_subaddr_strobe    (ccb_subaddr_strobe),    // Out  CCB subaddress strobe
 
 // TMB signals received from CCB
-  .ccb_clock40_enable    (ccb_clock40_enable),    // Out  Enable 40MHz clock
-  .ccb_reserved      (ccb_reserved[4:0]),    // Out  Unassigned
-  .ccb_evcntres      (ccb_evcntres),        // Out  Event counter reset
-  .ccb_bcntres      (ccb_bcntres),        // Out  Bunch crossing counter reset
-  .ccb_bx0        (ccb_bx0),          // Out  Bunch crossing zero
-  .ccb_l1accept      (ccb_l1accept),        // Out  Level 1 Accept
-  .tmb_hard_reset      (tmb_hard_reset  ),      // Out  Reload TMB  FPGA
-  .alct_hard_reset    (alct_hard_reset),      // Out  Reload ALCT FPGA
-  .tmb_reserved      (tmb_reserved[1:0]),    // Out  Unassigned
-  .alct_adb_pulse_sync  (alct_adb_pulse_sync),    // Out  ALCT synchronous  test pulse
-  .alct_adb_pulse_async  (alct_adb_pulse_async),    // Out  ALCT asynchronous test pulse
-  .clct_ext_trig      (clct_ext_trig),      // Out  CLCT external trigger
-  .alct_ext_trig      (alct_ext_trig),      // Out  ALCT external trigger
-  .dmb_ext_trig      (dmb_ext_trig),        // Out  DMB  external trigger
-  .tmb_reserved_out    (tmb_reserved_out[2:0]),  // Out  Unassigned
-  .ccb_sump        (ccb_sump),          // Out  Unused signals
+  .ccb_clock40_enable   (ccb_clock40_enable),    // Out  Enable 40MHz clock
+  .ccb_reserved         (ccb_reserved[4:0]),     // Out  Unassigned
+  .ccb_evcntres         (ccb_evcntres),          // Out  Event counter reset
+  .ccb_bcntres          (ccb_bcntres),           // Out  Bunch crossing counter reset
+  .ccb_bx0              (ccb_bx0),               // Out  Bunch crossing zero
+  .ccb_l1accept         (ccb_l1accept),          // Out  Level 1 Accept
+  .tmb_hard_reset       (tmb_hard_reset  ),      // Out  Reload TMB  FPGA
+  .alct_hard_reset      (alct_hard_reset),       // Out  Reload ALCT FPGA
+  .tmb_reserved         (tmb_reserved[1:0]),     // Out  Unassigned
+  .alct_adb_pulse_sync  (alct_adb_pulse_sync),   // Out  ALCT synchronous  test pulse
+  .alct_adb_pulse_async (alct_adb_pulse_async),  // Out  ALCT asynchronous test pulse
+  .clct_ext_trig        (clct_ext_trig),         // Out  CLCT external trigger
+  .alct_ext_trig        (alct_ext_trig),         // Out  ALCT external trigger
+  .dmb_ext_trig         (dmb_ext_trig),          // Out  DMB  external trigger
+  .tmb_reserved_out     (tmb_reserved_out[2:0]), // Out  Unassigned
+  .ccb_sump             (ccb_sump),              // Out  Unused signals
 
 // Monitored DMB Signals
   .dmb_cfeb_calibrate    (dmb_cfeb_calibrate[2:0]),  // Out  DMB calibration
@@ -703,22 +704,22 @@
   .seq_trigger      (seq_trigger),        // In  Sequencer requests L1A from CCB
 
 // Trigger Ports from VME
-  .alct_ext_trig_vme    (alct_ext_trig_vme),    // In  1=Fire alct_ext_trig oneshot
-  .clct_ext_trig_vme    (clct_ext_trig_vme),    // In  1=Fire clct_ext_trig oneshot
-  .ext_trig_both      (ext_trig_both),      // In  1=clct_ext_trig fires alct and alct fires clct_trig, DC level
-  .l1a_vme        (l1a_vme),          // In  1=fire ccb_l1accept oneshot
-  .l1a_delay_vme      (l1a_delay_vme[7:0]),    // In  Internal L1A delay
-  .l1a_inj_ram      (l1a_inj_ram),        // In  L1A injector RAM pulse
-  .l1a_inj_ram_en      (l1a_inj_ram_en),      // In  L1A injector RAM enable
-  .inj_ramout_busy    (inj_ramout_busy),      // In  Injector RAM busy
+  .alct_ext_trig_vme (alct_ext_trig_vme),  // In  1=Fire alct_ext_trig oneshot
+  .clct_ext_trig_vme (clct_ext_trig_vme),  // In  1=Fire clct_ext_trig oneshot
+  .ext_trig_both     (ext_trig_both),      // In  1=clct_ext_trig fires alct and alct fires clct_trig, DC level
+  .l1a_vme           (l1a_vme),            // In  1=fire ccb_l1accept oneshot
+  .l1a_delay_vme     (l1a_delay_vme[7:0]), // In  Internal L1A delay
+  .l1a_inj_ram       (l1a_inj_ram),        // In  L1A injector RAM pulse
+  .l1a_inj_ram_en    (l1a_inj_ram_en),     // In  L1A injector RAM enable
+  .inj_ramout_busy   (inj_ramout_busy),    // In  Injector RAM busy
 
 // TTC Decoded Commands
-  .ttc_bx0        (ttc_bx0),          // Out  Bunch crossing zero
-  .ttc_resync        (ttc_resync),        // Out  TTC resync
-  .ttc_bxreset      (ttc_bxreset),        // Out  Reset bxn
-  .ttc_mpc_inject      (ttc_mpc_inject),      // Out  Start MPC injector
-  .ttc_orbit_reset    (ttc_orbit_reset),      // Out  Reset orbit counter
-  .fmm_trig_stop      (fmm_trig_stop),      // Out  Stop clct trigger sequencer
+  .ttc_bx0         (ttc_bx0),         // Out  Bunch crossing zero
+  .ttc_resync      (ttc_resync),      // Out  TTC resync
+  .ttc_bxreset     (ttc_bxreset),     // Out  Reset bxn
+  .ttc_mpc_inject  (ttc_mpc_inject),  // Out  Start MPC injector
+  .ttc_orbit_reset (ttc_orbit_reset), // Out  Reset orbit counter
+  .fmm_trig_stop   (fmm_trig_stop),   // Out  Stop clct trigger sequencer
 
 // VME
   .vme_ccb_cmd_enable    (vme_ccb_cmd_enable),    // In  Disconnect ccb_cmd_bpl, use vme_ccb_cmd;
@@ -791,7 +792,7 @@
   wire  [MXCNTVME-1:0]  event_counter11;
   wire  [MXCNTVME-1:0]  event_counter12;
 
-// TMB Event Counters
+// CLCT Event Counters
   wire  [MXCNTVME-1:0]  event_counter13;
   wire  [MXCNTVME-1:0]  event_counter14;
   wire  [MXCNTVME-1:0]  event_counter15;
@@ -810,6 +811,8 @@
   wire  [MXCNTVME-1:0]  event_counter28;
   wire  [MXCNTVME-1:0]  event_counter29;
   wire  [MXCNTVME-1:0]  event_counter30;
+
+// TMB Event Counters
   wire  [MXCNTVME-1:0]  event_counter31;
   wire  [MXCNTVME-1:0]  event_counter32;
   wire  [MXCNTVME-1:0]  event_counter33;
@@ -834,12 +837,16 @@
   wire  [MXCNTVME-1:0]  event_counter52;
   wire  [MXCNTVME-1:0]  event_counter53;
   wire  [MXCNTVME-1:0]  event_counter54;
+
+// L1A Counters
   wire  [MXCNTVME-1:0]  event_counter55;
   wire  [MXCNTVME-1:0]  event_counter56;
   wire  [MXCNTVME-1:0]  event_counter57;
   wire  [MXCNTVME-1:0]  event_counter58;
   wire  [MXCNTVME-1:0]  event_counter59;
   wire  [MXCNTVME-1:0]  event_counter60;
+
+// STAT Counters
   wire  [MXCNTVME-1:0]  event_counter61;
   wire  [MXCNTVME-1:0]  event_counter62;
   wire  [MXCNTVME-1:0]  event_counter63;
@@ -854,12 +861,28 @@
   wire  [7:0]      alct_err_counter4;
   wire  [7:0]      alct_err_counter5;
 
+// CLCT pre-trigger coincidence counters
+  wire  [MXCNTVME-1:0] preClct_l1a_counter;  // CLCT pre-trigger AND L1A coincidence counter
+  wire  [MXCNTVME-1:0] preClct_alct_counter; // CLCT pre-trigger AND ALCT coincidence counter
+
+// Active CFEB(s) counters
+  wire  [MXCNTVME-1:0] active_cfebs_event_counter;      // Any CFEB active flag sent to DMB
+  wire  [MXCNTVME-1:0] active_cfebs_me1a_event_counter; // ME1a CFEB active flag sent to DMB
+  wire  [MXCNTVME-1:0] active_cfebs_me1b_event_counter; // ME1b CFEB active flag sent to DMB
+  wire  [MXCNTVME-1:0] active_cfeb0_event_counter;      // CFEB0 active flag sent to DMB
+  wire  [MXCNTVME-1:0] active_cfeb1_event_counter;      // CFEB1 active flag sent to DMB
+  wire  [MXCNTVME-1:0] active_cfeb2_event_counter;      // CFEB2 active flag sent to DMB
+  wire  [MXCNTVME-1:0] active_cfeb3_event_counter;      // CFEB3 active flag sent to DMB
+  wire  [MXCNTVME-1:0] active_cfeb4_event_counter;      // CFEB4 active flag sent to DMB
+  wire  [MXCNTVME-1:0] active_cfeb5_event_counter;      // CFEB5 active flag sent to DMB
+  wire  [MXCNTVME-1:0] active_cfeb6_event_counter;      // CFEB6 active flag sent to DMB
+
 // CFEB injector RAM map 2D arrays into 1D for ALCT
   wire  [MXCFEB-1:0]  inj_ramout_pulse;
   assign inj_ramout_busy=|inj_ramout_pulse;
 
-  wire  [5:0]      inj_ramout [MXCFEB-1:0];
-  wire  [41:0]      inj_ramout_mux;
+  wire  [5:0]  inj_ramout [MXCFEB-1:0];
+  wire  [41:0] inj_ramout_mux;
 
   assign inj_ramout_mux[5:0]   = inj_ramout[0][5:0];
   assign inj_ramout_mux[11:6]  = inj_ramout[1][5:0];
@@ -870,11 +893,11 @@
   assign inj_ramout_mux[41:36] = inj_ramout[6][5:0];
 
 // ALCT Injectors
-  wire  [10:0]      alct0_inj_ram = inj_ramout_mux[10:0];  // Injector RAM ALCT0
-  wire  [10:0]      alct1_inj_ram = inj_ramout_mux[21:11];  // Injector RAM ALCT1
-  wire  [4:0]      alctb_inj_ram = inj_ramout_mux[26:22];  // Injector RAM ALCT bxn
-  assign          l1a_inj_ram   = inj_ramout_mux[27];    // Injector RAM L1A
-  wire          inj_ram_sump  =|inj_ramout_mux[41:28];   // Injector RAM unused
+  wire   [10:0] alct0_inj_ram = inj_ramout_mux[10:0];  // Injector RAM ALCT0
+  wire   [10:0] alct1_inj_ram = inj_ramout_mux[21:11]; // Injector RAM ALCT1
+  wire   [4:0]  alctb_inj_ram = inj_ramout_mux[26:22]; // Injector RAM ALCT bxn
+  assign        l1a_inj_ram   = inj_ramout_mux[27];    // Injector RAM L1A
+  wire          inj_ram_sump  =|inj_ramout_mux[41:28]; // Injector RAM unused
 
   wire alct_ext_inject = alct_ext_trig;        // CCB failed to implement this signal
 
@@ -907,21 +930,21 @@
   .ccb_subaddr_strobe    (ccb_subaddr_strobe),    // In  TTC sub-addr valid
 
 // CCB Ports
-  .ccb_bx0        (ccb_bx0),          // In  TTC bx0
-  .alct_ext_inject    (alct_ext_inject),      // In  External inject
-  .alct_ext_trig      (alct_ext_trig),      // In  External trigger
-  .ccb_l1accept      (ccb_l1accept),        // In  L1A
-  .ccb_evcntres      (ccb_evcntres),        // In  Event counter reset
-  .alct_adb_pulse_sync  (alct_adb_pulse_sync),    // In  Synchronous test pulse (asyn pulse is on PCB)
-  .alct_cfg_done      (alct_cfg_done),      // Out  ALCT reports FPGA configuration done
-  .alct_state        (alct_state[5:0]),      // Out  ALCT state for CCB front panel ECL outputs
+  .ccb_bx0             (ccb_bx0),             // In  TTC bx0
+  .alct_ext_inject     (alct_ext_inject),     // In  External inject
+  .alct_ext_trig       (alct_ext_trig),       // In  External trigger
+  .ccb_l1accept        (ccb_l1accept),        // In  L1A
+  .ccb_evcntres        (ccb_evcntres),        // In  Event counter reset
+  .alct_adb_pulse_sync (alct_adb_pulse_sync), // In  Synchronous test pulse (asyn pulse is on PCB)
+  .alct_cfg_done       (alct_cfg_done),       // Out  ALCT reports FPGA configuration done
+  .alct_state          (alct_state[5:0]),     // Out  ALCT state for CCB front panel ECL outputs
 
 // Sequencer Ports
-  .alct_active_feb    (alct_active_feb),      // Out  ALCT has an active FEB
-  .alct0_valid      (alct0_valid),        // Out  ALCT has valid LCT
-  .alct1_valid      (alct1_valid),        // Out  ALCT has valid LCT
-  .alct_dmb        (alct_dmb[18:0]),      // Out  ALCT to DMB
-  .read_sm_xdmb      (read_sm_xdmb),        // In  TMB sequencer starting a readout
+  .alct_active_feb (alct_active_feb), // Out  ALCT has an active FEB
+  .alct0_valid     (alct0_valid),     // Out  ALCT has valid LCT
+  .alct1_valid     (alct1_valid),     // Out  ALCT has valid LCT
+  .alct_dmb        (alct_dmb[18:0]),  // Out  ALCT to DMB
+  .read_sm_xdmb    (read_sm_xdmb),    // In  TMB sequencer starting a readout
 
 // TMB Ports
   .alct0_tmb        (alct0_tmb[MXALCT-1:0]),  // Out  ALCT best muon
@@ -1128,35 +1151,38 @@
   end
 
 // Optical receiver status
-  wire  [MXCFEB-1:0]  gtx_rx_enable; // In  Enable/Unreset GTX optical input, disables copper SCSI
-  wire  [MXCFEB-1:0]  gtx_rx_reset;  // In  Reset this GTX rx & sync module
-  wire  [MXCFEB-1:0]  gtx_rx_reset_err_cnt;  // In  Resets the PRBS test error counters
-  wire  [MXCFEB-1:0]  gtx_rx_en_prbs_test;  // In  Select random input test data mode
-  wire  [MXCFEB-1:0]  gtx_rx_start;  // Out  Set when the DCFEB Start Pattern is present
-  wire  [MXCFEB-1:0]  gtx_rx_fc;     // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
-  wire  [MXCFEB-1:0]  cfeb_rx_nonzero; //rdk Out Flags when rx sees non-zero data
-  wire  [MXCFEB-1:0]  gtx_rx_valid;  // Out  Valid data detected on link
-  wire  [MXCFEB-1:0]  gtx_rx_match;  // Out  PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
-  wire  [MXCFEB-1:0]  gtx_rx_rst_done;   // Out  These get set before rxsync cycle begins
-  wire  [MXCFEB-1:0]  gtx_rx_sync_done;  // Out  Use these to determine gtx_ready
-  wire  [MXCFEB-1:0]  gtx_rx_pol_swap;   // Out  GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
-  wire  [MXCFEB-1:0]  gtx_rx_err;    // Out  PRBS test detects an error
-  wire  [MXCFEB-1:0]  gtx_rx_sump;   // Out  Unused signals
-  wire  [15:0]    gtx_rx_err_count [MXCFEB-1:0];  // Out  Error count on this fiber channel
-  wire  [MXCFEB-1:0]  link_had_err;  // link stability monitor: error happened at least once
-  wire  [MXCFEB-1:0]  link_good;     // link stability monitor: always good, no errors since last resync
-  wire  [MXCFEB-1:0]  link_bad;      // link stability monitor: errors happened over 100 times
-  wire  [MXCFEB-1:0]  ready_phaser;    // phaser dps done and ready status
+
+  wire  [MXCFEB-1:0]  gtx_rx_enable;                 // In  Enable/Unreset GTX optical input, disables copper SCSI
+  wire  [MXCFEB-1:0]  gtx_rx_reset;                  // In  Reset this GTX rx & sync module
+  wire  [MXCFEB-1:0]  gtx_rx_reset_err_cnt;          // In  Resets the PRBS test error counters
+  wire  [MXCFEB-1:0]  gtx_rx_en_prbs_test;           // In  Select random input test data mode
+  wire  [MXCFEB-1:0]  gtx_rx_start;                  // Out  Set when the DCFEB Start Pattern is present
+  wire  [MXCFEB-1:0]  gtx_rx_fc;                     // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
+  wire  [MXCFEB-1:0]  gtx_rx_valid;                  // Out  Valid data detected on link
+  wire  [MXCFEB-1:0]  gtx_rx_match;                  // Out  PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
+  wire  [MXCFEB-1:0]  gtx_rx_rst_done;               // Out  These get set before rxsync cycle begins
+  wire  [MXCFEB-1:0]  gtx_rx_sync_done;              // Out  Use these to determine gtx_ready
+  wire  [MXCFEB-1:0]  gtx_rx_pol_swap;               // Out  GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
+  wire  [MXCFEB-1:0]  gtx_rx_err;                    // Out  PRBS test detects an error
+  wire  [MXCFEB-1:0]  gtx_rx_sump;                   // Out  Unused signals
+  wire  [15:0]        gtx_rx_err_count [MXCFEB-1:0]; // Out  Error count on this fiber channel
+  wire  [MXCFEB-1:0]  link_had_err;                  // link stability monitor: error happened at least once
+  wire  [MXCFEB-1:0]  link_good;                     // link stability monitor: always good, no errors since last resync
+  wire  [MXCFEB-1:0]  link_bad;                      // link stability monitor: errors happened over 100 times
+  wire  [MXCFEB-1:0]  ready_phaser;                  // phaser dps done and ready status
+
+  wire  [MXCFEB-1:0]  cfeb_rx_nonzero;               // rdk Out Flags when rx sees non-zero data
+
   wire 	ready_phaser_a, ready_phaser_b, auto_gtx_reset;
+   
+  reg 	     gtx_wait       = 1'b1;
+  reg [15:0] gtx_wait_count = 0;
 
-   reg 	 gtx_wait = 1'b1;
-   reg [15:0] gtx_wait_count = 0;
-
-   always @(posedge clock) // things that use lhc_clk wo/Reset
-     begin
-	if ( gtx_wait & (ready_phaser_a | ready_phaser_b) ) gtx_wait_count <= gtx_wait_count + 1'b1;
-	gtx_wait <= !gtx_wait_count[14];  // goes to zero after 409 usec
-     end
+  always @(posedge clock) // things that use lhc_clk wo/Reset
+  begin
+    if ( gtx_wait & (ready_phaser_a | ready_phaser_b) ) gtx_wait_count <= gtx_wait_count + 1'b1;
+    gtx_wait <= !gtx_wait_count[14];  // goes to zero after 409 usec
+  end
 
   assign  ready_phaser[0] = !gtx_wait & ready_phaser_b;
   assign  ready_phaser[1] = !gtx_wait & ready_phaser_b;
@@ -1396,9 +1422,9 @@
 // Pattern Finder declarations, common to ME1A+ME1B+ME234
 //-------------------------------------------------------------------------------------------------------------------
 // Pre-Trigger Ports
-  wire  [3:0]      csc_type;            // Firmware compile type;
-  wire  [MXCFEB-1:0]  cfeb_en;            // Enables CFEBs for triggering and active feb flag
-  wire  [MXKEYB-1+1:0]  adjcfeb_dist;          // Distance from key to cfeb boundary for marking adjacent cfeb as hit
+  wire  [3:0]          csc_type;     // Firmware compile type;
+  wire  [MXCFEB-1:0]   cfeb_en;      // Enables CFEBs for triggering and active feb flag
+  wire  [MXKEYB-1+1:0] adjcfeb_dist; // Distance from key to cfeb boundary for marking adjacent cfeb as hit
 
   wire  [2:0] lyr_thresh_pretrig;
   wire  [2:0] hit_thresh_pretrig;
@@ -1406,33 +1432,33 @@
   wire  [2:0] dmb_thresh_pretrig;
 
 // 2nd CLCT separation RAM Ports
-  wire      clct_sep_src;              // CLCT separation source 1=vme, 0=ram
-  wire  [7:0]  clct_sep_vme;              // CLCT separation from vme
-  wire      clct_sep_ram_we;            // CLCT separation RAM write enable
-  wire  [3:0]  clct_sep_ram_adr;            // CLCT separation RAM rw address VME
-  wire  [15:0]  clct_sep_ram_wdata;            // CLCT separation RAM write data VME
-  wire  [15:0]  clct_sep_ram_rdata;            // CLCT separation RAM read  data VME
+  wire         clct_sep_src;       // CLCT separation source 1=vme, 0=ram
+  wire  [7:0]  clct_sep_vme;       // CLCT separation from vme
+  wire         clct_sep_ram_we;    // CLCT separation RAM write enable
+  wire  [3:0]  clct_sep_ram_adr;   // CLCT separation RAM rw address VME
+  wire  [15:0] clct_sep_ram_wdata; // CLCT separation RAM write data VME
+  wire  [15:0] clct_sep_ram_rdata; // CLCT separation RAM read  data VME
 
 //-------------------------------------------------------------------------------------------------------------------
 // Pattern Finder instantiation
 //-------------------------------------------------------------------------------------------------------------------
-  wire  [MXCFEB-1:0]  cfeb_hit;            // This CFEB has a pattern over pre-trigger threshold
-  wire  [MXCFEB-1:0]  cfeb_active;          // CFEBs marked for DMB readout
-  wire  [MXLY-1:0]    cfeb_layer_or;          // OR of hstrips on each layer
-  wire  [MXHITB-1:0]  cfeb_nlayers_hit;        // Number of CSC layers hit
+  wire  [MXCFEB-1:0]  cfeb_hit;         // This CFEB has a pattern over pre-trigger threshold
+  wire  [MXCFEB-1:0]  cfeb_active;      // CFEBs marked for DMB readout
+  wire  [MXLY-1:0]    cfeb_layer_or;    // OR of hstrips on each layer
+  wire  [MXHITB-1:0]  cfeb_nlayers_hit; // Number of CSC layers hit
 
   wire  [MXHITB-1:0]  hs_hit_1st;
   wire  [MXPIDB-1:0]  hs_pid_1st;
-  wire  [MXKEYBX-1:0]  hs_key_1st;
+  wire  [MXKEYBX-1:0] hs_key_1st;
 
   wire  [MXHITB-1:0]  hs_hit_2nd;
   wire  [MXPIDB-1:0]  hs_pid_2nd;
-  wire  [MXKEYBX-1:0]  hs_key_2nd;
-  wire          hs_bsy_2nd;
+  wire  [MXKEYBX-1:0] hs_key_2nd;
+  wire                hs_bsy_2nd;
   
-  wire          hs_layer_trig;          // Layer triggered
-  wire  [MXHITB-1:0]  hs_nlayers_hit;          // Number of layers hit
-  wire  [MXLY-1:0]    hs_layer_or;          // Layer ORs
+  wire                hs_layer_trig;  // Layer triggered
+  wire  [MXHITB-1:0]  hs_nlayers_hit; // Number of layers hit
+  wire  [MXLY-1:0]    hs_layer_or;    // Layer ORs
 
   pattern_finder upattern_finder
   (
@@ -1449,7 +1475,7 @@
   .cfeb0_ly5hs  (cfeb_ly5hs[0][MXHS-1:0]),        // In  1/2-strip pulses
 
   .cfeb1_ly0hs  (cfeb_ly0hs[1][MXHS-1:0]),        // In  1/2-strip pulses
-  .cfeb1_ly1hs  (cfeb_ly1hs[1][MXHS-1:0]),        // In   1/2-strip pulses
+  .cfeb1_ly1hs  (cfeb_ly1hs[1][MXHS-1:0]),        // In  1/2-strip pulses
   .cfeb1_ly2hs  (cfeb_ly2hs[1][MXHS-1:0]),        // In  1/2-strip pulses
   .cfeb1_ly3hs  (cfeb_ly3hs[1][MXHS-1:0]),        // In  1/2-strip pulses
   .cfeb1_ly4hs  (cfeb_ly4hs[1][MXHS-1:0]),        // In  1/2-strip pulses
@@ -1467,7 +1493,7 @@
   .cfeb3_ly2hs  (cfeb_ly2hs[3][MXHS-1:0]),        // In  1/2-strip pulses
   .cfeb3_ly3hs  (cfeb_ly3hs[3][MXHS-1:0]),        // In  1/2-strip pulses
   .cfeb3_ly4hs  (cfeb_ly4hs[3][MXHS-1:0]),        // In  1/2-strip pulses
-  .cfeb3_ly5hs  (cfeb_ly5hs[3][MXHS-1:0]),        // In   1/2-strip pulses
+  .cfeb3_ly5hs  (cfeb_ly5hs[3][MXHS-1:0]),        // In  1/2-strip pulses
 
   .cfeb4_ly0hs  (cfeb_ly0hs[4][MXHS-1:0]),        // In  1/2-strip pulses
   .cfeb4_ly1hs  (cfeb_ly1hs[4][MXHS-1:0]),        // In  1/2-strip pulses
@@ -1491,51 +1517,51 @@
   .cfeb6_ly5hs  (cfeb_ly5hs[6][MXHS-1:0]),        // In  1/2-strip pulses
 
 // CSC Orientation Ports
-  .csc_type      (csc_type[3:0]),          // Out  Firmware compile type
-  .csc_me1ab      (csc_me1ab),            // Out  1=ME1A or ME1B CSC type
-  .stagger_hs_csc    (stagger_hs_csc),          // Out  1=Staggered CSC, 0=non-staggered
-  .reverse_hs_csc    (reverse_hs_csc),          // Out  1=Reverse staggered CSC, non-me1
-  .reverse_hs_me1a  (reverse_hs_me1a),          // Out  1=reverse me1a hstrips prior to pattern sorting
-  .reverse_hs_me1b  (reverse_hs_me1b),          // Out  1=reverse me1b hstrips prior to pattern sorting
+  .csc_type        (csc_type[3:0]),   // Out  Firmware compile type
+  .csc_me1ab       (csc_me1ab),       // Out  1=ME1A or ME1B CSC type
+  .stagger_hs_csc  (stagger_hs_csc),  // Out  1=Staggered CSC, 0=non-staggered
+  .reverse_hs_csc  (reverse_hs_csc),  // Out  1=Reverse staggered CSC, non-me1
+  .reverse_hs_me1a (reverse_hs_me1a), // Out  1=reverse me1a hstrips prior to pattern sorting
+  .reverse_hs_me1b (reverse_hs_me1b), // Out  1=reverse me1b hstrips prior to pattern sorting
 
 // PreTrigger Ports
-  .layer_trig_en    (layer_trig_en),          // In  1=Enable layer trigger mode
-  .lyr_thresh_pretrig  (lyr_thresh_pretrig[MXHITB-1:0]),  // In  Layers hit pre-trigger threshold
-  .hit_thresh_pretrig  (hit_thresh_pretrig[MXHITB-1:0]),  // In  Hits on pattern template pre-trigger threshold
-  .pid_thresh_pretrig  (pid_thresh_pretrig[MXPIDB-1:0]),  // In  Pattern shape ID pre-trigger threshold
-  .dmb_thresh_pretrig  (dmb_thresh_pretrig[MXHITB-1:0]),  // In  Hits on pattern template DMB active-feb threshold
-  .cfeb_en      (cfeb_en[MXCFEB-1:0]),        // In  1=Enable cfeb for pre-triggering
-  .adjcfeb_dist    (adjcfeb_dist[MXKEYB-1+1:0]),    // In  Distance from key to cfeb boundary for marking adjacent cfeb as hit
-  .clct_blanking    (clct_blanking),          // In  clct_blanking=1 clears clcts with 0 hits
+  .layer_trig_en      (layer_trig_en),                  // In  1=Enable layer trigger mode
+  .lyr_thresh_pretrig (lyr_thresh_pretrig[MXHITB-1:0]), // In  Layers hit pre-trigger threshold
+  .hit_thresh_pretrig (hit_thresh_pretrig[MXHITB-1:0]), // In  Hits on pattern template pre-trigger threshold
+  .pid_thresh_pretrig (pid_thresh_pretrig[MXPIDB-1:0]), // In  Pattern shape ID pre-trigger threshold
+  .dmb_thresh_pretrig (dmb_thresh_pretrig[MXHITB-1:0]), // In  Hits on pattern template DMB active-feb threshold
+  .cfeb_en            (cfeb_en[MXCFEB-1:0]),            // In  1=Enable cfeb for pre-triggering
+  .adjcfeb_dist       (adjcfeb_dist[MXKEYB-1+1:0]),     // In  Distance from key to cfeb boundary for marking adjacent cfeb as hit
+  .clct_blanking      (clct_blanking),                  // In  clct_blanking=1 clears clcts with 0 hits
 
-  .cfeb_hit      (cfeb_hit[MXCFEB-1:0]),        // Out  This CFEB has a pattern over pre-trigger threshold
-  .cfeb_active    (cfeb_active[MXCFEB-1:0]),      // Out  CFEBs marked for DMB readout
+  .cfeb_hit    (cfeb_hit[MXCFEB-1:0]),    // Out  This CFEB has a pattern over pre-trigger threshold
+  .cfeb_active (cfeb_active[MXCFEB-1:0]), // Out  CFEBs marked active for DMB readout
 
-  .cfeb_layer_trig  (cfeb_layer_trig),          // Out  Layer pretrigger
+  .cfeb_layer_trig  (cfeb_layer_trig),              // Out  Layer pretrigger
   .cfeb_layer_or    (cfeb_layer_or[MXLY-1:0]),      // Out  OR of hstrips on each layer
-  .cfeb_nlayers_hit  (cfeb_nlayers_hit[MXHITB-1:0]),    // Out  Number of CSC layers hit
+  .cfeb_nlayers_hit (cfeb_nlayers_hit[MXHITB-1:0]), // Out  Number of CSC layers hit
 
 // 2nd CLCT separation RAM Ports
-  .clct_sep_src    (clct_sep_src),            // In  CLCT separation source 1=vme, 0=ram
-  .clct_sep_vme    (clct_sep_vme[7:0]),        // In  CLCT separation from vme
-  .clct_sep_ram_we  (clct_sep_ram_we),          // In  CLCT separation RAM write enable
-  .clct_sep_ram_adr  (clct_sep_ram_adr[3:0]),      // In  CLCT separation RAM rw address VME
-  .clct_sep_ram_wdata  (clct_sep_ram_wdata[15:0]),      // In  CLCT separation RAM write data VME
-  .clct_sep_ram_rdata  (clct_sep_ram_rdata[15:0]),      // Out  CLCT separation RAM read  data VME
+  .clct_sep_src       (clct_sep_src),             // In  CLCT separation source 1=vme, 0=ram
+  .clct_sep_vme       (clct_sep_vme[7:0]),        // In  CLCT separation from vme
+  .clct_sep_ram_we    (clct_sep_ram_we),          // In  CLCT separation RAM write enable
+  .clct_sep_ram_adr   (clct_sep_ram_adr[3:0]),    // In  CLCT separation RAM rw address VME
+  .clct_sep_ram_wdata (clct_sep_ram_wdata[15:0]), // In  CLCT separation RAM write data VME
+  .clct_sep_ram_rdata (clct_sep_ram_rdata[15:0]), // Out  CLCT separation RAM read  data VME
 
 // CLCT Pattern-finder results
-  .hs_hit_1st      (hs_hit_1st[MXHITB-1:0]),      // Out  1st CLCT pattern hits
-  .hs_pid_1st      (hs_pid_1st[MXPIDB-1:0]),      // Out  1st CLCT pattern ID
-  .hs_key_1st      (hs_key_1st[MXKEYBX-1:0]),      // Out  1st CLCT key 1/2-strip
+  .hs_hit_1st (hs_hit_1st[MXHITB-1:0]),  // Out  1st CLCT pattern hits
+  .hs_pid_1st (hs_pid_1st[MXPIDB-1:0]),  // Out  1st CLCT pattern ID
+  .hs_key_1st (hs_key_1st[MXKEYBX-1:0]), // Out  1st CLCT key 1/2-strip
 
-  .hs_hit_2nd      (hs_hit_2nd[MXHITB-1:0]),      // Out  2nd CLCT pattern hits
-  .hs_pid_2nd      (hs_pid_2nd[MXPIDB-1:0]),      // Out  2nd CLCT pattern ID
-  .hs_key_2nd      (hs_key_2nd[MXKEYBX-1:0]),      // Out  2nd CLCT key 1/2-strip
-  .hs_bsy_2nd      (hs_bsy_2nd),            // Out  2nd CLCT busy, logic error indicator
+  .hs_hit_2nd (hs_hit_2nd[MXHITB-1:0]),  // Out  2nd CLCT pattern hits
+  .hs_pid_2nd (hs_pid_2nd[MXPIDB-1:0]),  // Out  2nd CLCT pattern ID
+  .hs_key_2nd (hs_key_2nd[MXKEYBX-1:0]), // Out  2nd CLCT key 1/2-strip
+  .hs_bsy_2nd (hs_bsy_2nd),              // Out  2nd CLCT busy, logic error indicator
 
-  .hs_layer_trig    (hs_layer_trig),          // Out  Layer triggered
-  .hs_nlayers_hit    (hs_nlayers_hit[MXHITB-1:0]),    // Out  Number of layers hit
-  .hs_layer_or    (hs_layer_or[MXLY-1:0])        // Out  Layer ORs
+  .hs_layer_trig  (hs_layer_trig),              // Out  Layer triggered
+  .hs_nlayers_hit (hs_nlayers_hit[MXHITB-1:0]), // Out  Number of layers hit
+  .hs_layer_or    (hs_layer_or[MXLY-1:0])       // Out  Layer ORs
   );
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1572,30 +1598,33 @@
   wire  [MXCSC-1:0]    csc_id;
   wire  [MXRID-1:0]    run_id;
 
-  wire  [15:0]      uptime;          // Uptime since last hard reset
-  wire  [14:0]      bd_status;        // Board status summary
-  wire  [2:0]      dmb_tx_reserved;
+  wire  [15:0] uptime;          // Uptime since last hard reset
+  wire  [14:0] bd_status;       // Board status summary
+  wire  [2:0]  dmb_tx_reserved;
 
-  wire  [MXL1DELAY-1:0]  l1a_delay;
+  wire  [MXL1DELAY-1:0] l1a_delay;
   wire  [MXL1WIND-1:0]  l1a_window;
   wire  [MXL1WIND-1:0]  l1a_internal_dly;
-  wire  [MXBADR-1:0]  l1a_lookback;
+  wire  [MXBADR-1:0]    l1a_lookback;
   
-  wire  [7:0]      led_bd;
+  wire  [7:0]       led_bd;
   wire  [11:0]      sequencer_state;
   wire  [10:0]      trig_source_vme;
-  wire  [2:0]      nlayers_hit_vme;
-  wire  [MXBXN-1:0]    bxn_clct_vme;      // CLCT BXN at pre-trigger
-  wire  [MXBXN-1:0]    bxn_l1a_vme;      // CLCT BXN at L1A
-  wire  [3:0]      alct_trig_width;
+  wire  [2:0]       nlayers_hit_vme;
+  wire  [MXBXN-1:0] bxn_clct_vme;       // CLCT BXN at pre-trigger
+  wire  [MXBXN-1:0] bxn_l1a_vme;        // CLCT BXN at L1A
+  wire  [3:0]       alct_preClct_width;
 
-  wire  [MXEXTDLY-1:0]  alct_pre_trig_dly;
+  wire  [MXEXTDLY-1:0]  alct_preClct_dly;
   wire  [MXEXTDLY-1:0]  alct_pat_trig_dly;
   wire  [MXEXTDLY-1:0]  adb_ext_trig_dly;
   wire  [MXEXTDLY-1:0]  dmb_ext_trig_dly;
   wire  [MXEXTDLY-1:0]  clct_ext_trig_dly;
   wire  [MXEXTDLY-1:0]  alct_ext_trig_dly;
-
+  
+  wire [3:0] l1a_preClct_width;
+  wire [7:0] l1a_preClct_dly;
+  
   wire  [MXCLCT-1:0]  clct0_vme;
   wire  [MXCLCT-1:0]  clct1_vme;
   wire  [MXCLCTC-1:0]  clctc_vme;
@@ -1692,13 +1721,13 @@
   wire  [MXCFEBB-1:0]  bcb_cfeb_adr;      // CFEB ID  
 
 // Sequencer Header Counters
-  wire  [MXCNTVME-1:0]  pretrig_counter;    // Pre-trigger counter
-  wire  [MXCNTVME-1:0]  clct_counter;      // CLCT counter
-  wire  [MXCNTVME-1:0]  trig_counter;      // TMB trigger counter
-  wire  [MXCNTVME-1:0]  alct_counter;      // ALCTs received counter
-  wire  [MXL1ARX-1:0]  l1a_rx_counter;      // L1As received from ccb counter
-  wire  [MXL1ARX-1:0]  readout_counter;    // Readout counter
-  wire  [MXORBIT-1:0]  orbit_counter;      // Orbit counter
+  wire  [MXCNTVME-1:0] pretrig_counter; // Pre-trigger counter
+  wire  [MXCNTVME-1:0] clct_counter;    // CLCT counter
+  wire  [MXCNTVME-1:0] trig_counter;    // TMB trigger counter
+  wire  [MXCNTVME-1:0] alct_counter;    // ALCTs received counter
+  wire  [MXL1ARX-1:0]  l1a_rx_counter;  // L1As received from ccb counter
+  wire  [MXL1ARX-1:0]  readout_counter; // Readout counter
+  wire  [MXORBIT-1:0]  orbit_counter;   // Orbit counter
 
 // Sequencer Revcode
   wire  [14:0]      revcode;
@@ -1750,73 +1779,77 @@
   .ext_trig_inject  (ext_trig_inject),      // In  Changes clct_ext_trig to fire pattern injector
 
 // Sequencer External Trigger Enables
-  .clct_pat_trig_en  (clct_pat_trig_en),      // In  Allow CLCT Pattern pre-triggers
-  .alct_pat_trig_en  (alct_pat_trig_en),      // In  Allow ALCT Pattern pre-trigger
-  .alct_match_trig_en  (alct_match_trig_en),      // In  Allow CLCT*ALCT Pattern pre-trigger
-  .adb_ext_trig_en  (adb_ext_trig_en),      // In  Allow ADB Test pulse pre-trigger
-  .dmb_ext_trig_en  (dmb_ext_trig_en),      // In  Allow DMB Calibration pre-trigger
-  .clct_ext_trig_en  (clct_ext_trig_en),      // In  Allow CLCT External pre-trigger from CCB
-  .alct_ext_trig_en  (alct_ext_trig_en),      // In  Allow ALCT External pre-trigger from CCB
-  .layer_trig_en    (layer_trig_en),      // In  Allow layer-wide pre-triggering
-  .all_cfebs_active  (all_cfebs_active),      // In  Make all CFEBs active when triggered
-//  .cfeb_en    (cfeb_en[MXCFEB-1:0]),      // In  1=Enable this CFEB for triggering + sending active feb flag
-  .cfeb_en    (cfeb_en[MXCFEB-1:0] & ~link_bad[MXCFEB-1:0] & link_good[MXCFEB-1:0]),      // In  1=Enable this CFEB for triggering + sending active feb flag unless fiber link is bad
-  .active_feb_src    (active_feb_src),      // In  Active cfeb flag source, 0=pretrig, 1=tmb-matching ~8bx later
+  .clct_pat_trig_en   (clct_pat_trig_en),    // In  Allow CLCT Pattern pre-triggers
+  .alct_pat_trig_en   (alct_pat_trig_en),    // In  Allow ALCT Pattern pre-trigger
+  .alct_match_trig_en (alct_match_trig_en),  // In  Allow CLCT*ALCT Pattern pre-trigger
+  .adb_ext_trig_en    (adb_ext_trig_en),     // In  Allow ADB Test pulse pre-trigger
+  .dmb_ext_trig_en    (dmb_ext_trig_en),     // In  Allow DMB Calibration pre-trigger
+  .clct_ext_trig_en   (clct_ext_trig_en),    // In  Allow CLCT External pre-trigger from CCB
+  .alct_ext_trig_en   (alct_ext_trig_en),    // In  Allow ALCT External pre-trigger from CCB
+  .layer_trig_en      (layer_trig_en),       // In  Allow layer-wide pre-triggering
+  .all_cfebs_active   (all_cfebs_active),    // In  Make all CFEBs active when triggered
+//.cfeb_en            (cfeb_en[MXCFEB-1:0]), // In  1=Enable this CFEB for triggering + sending active feb flag
+  .cfeb_en            (cfeb_en[MXCFEB-1:0] & ~link_bad[MXCFEB-1:0] & link_good[MXCFEB-1:0]),      // In  1=Enable this CFEB for triggering + sending active feb flag unless fiber link is bad
+  .active_feb_src     (active_feb_src),      // In  Active cfeb flag source, 0=pretrig, 1=tmb-matching ~8bx later
 
-  .alct_trig_width  (alct_trig_width[3:0]),      // In  ALCT*CLCT overlap window size
-  .wr_buf_required  (wr_buf_required),      // In  Require wr_buffer to pretrigger
-  .wr_buf_autoclr_en  (wr_buf_autoclr_en),      // In  Enable frozen buffer auto clear
-  .valid_clct_required  (valid_clct_required),      // In  Require valid pattern after drift to trigger
+  .alct_preClct_width  (alct_preClct_width[3:0]), // In  ALCT (alct_active_feb flag) window width for ALCT*preCLCT overlap
+  .wr_buf_required     (wr_buf_required),         // In  Require wr_buffer to pretrigger
+  .wr_buf_autoclr_en   (wr_buf_autoclr_en),       // In  Enable frozen buffer auto clear
+  .valid_clct_required (valid_clct_required),     // In  Require valid pattern after drift to trigger
 
-  .sync_err_stops_pretrig  (sync_err_stops_pretrig),    // In  Sync error stops CLCT pre-triggers
-  .sync_err_stops_readout  (sync_err_stops_readout),    // In  Sync error stops L1A readouts
+  .sync_err_stops_pretrig  (sync_err_stops_pretrig), // In  Sync error stops CLCT pre-triggers
+  .sync_err_stops_readout  (sync_err_stops_readout), // In  Sync error stops L1A readouts
 
 // Sequencer External Trigger Delays
-  .alct_pre_trig_dly  (alct_pre_trig_dly[MXEXTDLY-1:0]),  // In  ALCT pre      trigger delay
-  .alct_pat_trig_dly  (alct_pat_trig_dly[MXEXTDLY-1:0]),  // In  ALCT pattern  trigger delay
+  .alct_preClct_dly  (alct_preClct_dly[MXEXTDLY-1:0]),  // In  ALCT (alct_active_feb flag) delay for ALCT*preCLCT overlap
+  .alct_pat_trig_dly (alct_pat_trig_dly[MXEXTDLY-1:0]), // In  ALCT pattern  trigger delay
   .adb_ext_trig_dly  (adb_ext_trig_dly[MXEXTDLY-1:0]),  // In  ADB  external trigger delay
   .dmb_ext_trig_dly  (dmb_ext_trig_dly[MXEXTDLY-1:0]),  // In  DMB  external trigger delay
-  .clct_ext_trig_dly  (clct_ext_trig_dly[MXEXTDLY-1:0]),  // In  CLCT external trigger delay
-  .alct_ext_trig_dly  (alct_ext_trig_dly[MXEXTDLY-1:0]),  // In  ALCT external trigger delay
+  .clct_ext_trig_dly (clct_ext_trig_dly[MXEXTDLY-1:0]), // In  CLCT external trigger delay
+  .alct_ext_trig_dly (alct_ext_trig_dly[MXEXTDLY-1:0]), // In  ALCT external trigger delay
+
+// Sequencer Ports: pre-CLCT modifiers for L1A*preCLCT overlap
+  .l1a_preClct_width (l1a_preClct_width[3:0]), // In  pre-CLCT window width for L1A*preCLCT overlap
+  .l1a_preClct_dly   (l1a_preClct_dly[7:0]),   // In  pre-CLCT delay for L1A*preCLCT overlap
 
 // Sequencer CLCT/RPC/RAT Pattern Injector
-  .inj_trig_vme    (inj_trig_vme),        // In  Start pattern injector
-  .injector_mask_cfeb  (injector_mask_cfeb[MXCFEB-1:0]),  // In  Enable CFEB(n) for injector trigger
-  .injector_mask_rat  (injector_mask_rat),      // In  Enable RAT for injector trigger
-  .injector_mask_rpc  (injector_mask_rpc),      // In  Enable RPC for injector trigger
-  .inj_delay_rat    (inj_delay_rat[3:0]),      // In  CFEB/RPC Injector waits for RAT injector
-  .injector_go_cfeb  (injector_go_cfeb[MXCFEB-1:0]),    // Out  Start CFEB(n) pattern injector
-  .injector_go_rat  (injector_go_rat),      // Out  Start RAT     pattern injector
-  .injector_go_rpc  (injector_go_rpc),      // Out  Start RPC     pattern injector
+  .inj_trig_vme       (inj_trig_vme),                   // In  Start pattern injector
+  .injector_mask_cfeb (injector_mask_cfeb[MXCFEB-1:0]), // In  Enable CFEB(n) for injector trigger
+  .injector_mask_rat  (injector_mask_rat),              // In  Enable RAT for injector trigger
+  .injector_mask_rpc  (injector_mask_rpc),              // In  Enable RPC for injector trigger
+  .inj_delay_rat      (inj_delay_rat[3:0]),             // In  CFEB/RPC Injector waits for RAT injector
+  .injector_go_cfeb   (injector_go_cfeb[MXCFEB-1:0]),   // Out  Start CFEB(n) pattern injector
+  .injector_go_rat    (injector_go_rat),                // Out  Start RAT     pattern injector
+  .injector_go_rpc    (injector_go_rpc),                // Out  Start RPC     pattern injector
 
 // Sequencer Status from CFEBs
-  .triad_skip    (triad_skip[MXCFEB-1:0]),    // In  Triads skipped
-  .triad_tp    (triad_tp[MXCFEB-1:0]),      // In  Triad test point at raw hits RAM input
-  .cfeb_badbits_found  (cfeb_badbits_found[MXCFEB-1:0] | link_had_err[MXCFEB-1:0]),  // In  CFEB[n] has at least 1 bad bit or fiber error detected
-//  .cfeb_badbits_found  (cfeb_badbits_found[MXCFEB-1:0]),  // In  CFEB[n] has at least 1 bad bit
-  .cfeb_badbits_blocked  (cfeb_badbits_blocked),      // In  A CFEB had bad bits that were blocked
+  .triad_skip           (triad_skip[MXCFEB-1:0]),         // In  Triads skipped
+  .triad_tp             (triad_tp[MXCFEB-1:0]),           // In  Triad test point at raw hits RAM input
+//.cfeb_badbits_found   (cfeb_badbits_found[MXCFEB-1:0]), // In  CFEB[n] has at least 1 bad bit
+  .cfeb_badbits_found   (cfeb_badbits_found[MXCFEB-1:0] | link_had_err[MXCFEB-1:0]),  // In  CFEB[n] has at least 1 bad bit or fiber error detected
+  .cfeb_badbits_blocked (cfeb_badbits_blocked),           // In  A CFEB had bad bits that were blocked
 
 // Sequencer Pattern Finder PreTrigger Ports
-  .cfeb_hit    (cfeb_hit[MXCFEB-1:0]),      // In  This CFEB has a pattern over pre-trigger threshold
-  .cfeb_active    (cfeb_active[MXCFEB-1:0]),    // In  CFEBs marked for DMB readout
+  .cfeb_hit    (cfeb_hit[MXCFEB-1:0]),    // In  This CFEB has a pattern over pre-trigger threshold
+  .cfeb_active (cfeb_active[MXCFEB-1:0]), // In  CFEBs marked for DMB readout
 
-  .cfeb_layer_trig  (cfeb_layer_trig),      // In  Layer pretrigger
-  .cfeb_layer_or    (cfeb_layer_or[MXLY-1:0]),    // In  OR of hstrips on each layer
-  .cfeb_nlayers_hit  (cfeb_nlayers_hit[MXHITB-1:0]),    // In  Number of CSC layers hit
+  .cfeb_layer_trig  (cfeb_layer_trig),              // In  Layer pretrigger
+  .cfeb_layer_or    (cfeb_layer_or[MXLY-1:0]),      // In  OR of hstrips on each layer
+  .cfeb_nlayers_hit (cfeb_nlayers_hit[MXHITB-1:0]), // In  Number of CSC layers hit
 
 // Sequencer Pattern Finder CLCT results
-  .hs_hit_1st    (hs_hit_1st[MXHITB-1:0]),    // In  1st CLCT pattern hits
-  .hs_pid_1st    (hs_pid_1st[MXPIDB-1:0]),    // In  1st CLCT pattern ID
-  .hs_key_1st    (hs_key_1st[MXKEYBX-1:0]),    // In  1st CLCT key 1/2-strip
+  .hs_hit_1st (hs_hit_1st[MXHITB-1:0]),  // In  1st CLCT pattern hits
+  .hs_pid_1st (hs_pid_1st[MXPIDB-1:0]),  // In  1st CLCT pattern ID
+  .hs_key_1st (hs_key_1st[MXKEYBX-1:0]), // In  1st CLCT key 1/2-strip
 
-  .hs_hit_2nd    (hs_hit_2nd[MXHITB-1:0]),    // In  2nd CLCT pattern hits
-  .hs_pid_2nd    (hs_pid_2nd[MXPIDB-1:0]),    // In  2nd CLCT pattern ID
-  .hs_key_2nd    (hs_key_2nd[MXKEYBX-1:0]),    // In  2nd CLCT key 1/2-strip
-  .hs_bsy_2nd    (hs_bsy_2nd),        // In  2nd CLCT busy, logic error indicator
+  .hs_hit_2nd (hs_hit_2nd[MXHITB-1:0]),  // In  2nd CLCT pattern hits
+  .hs_pid_2nd (hs_pid_2nd[MXPIDB-1:0]),  // In  2nd CLCT pattern ID
+  .hs_key_2nd (hs_key_2nd[MXKEYBX-1:0]), // In  2nd CLCT key 1/2-strip
+  .hs_bsy_2nd (hs_bsy_2nd),              // In  2nd CLCT busy, logic error indicator
 
-  .hs_layer_trig    (hs_layer_trig),      // In  Layer triggered
-  .hs_nlayers_hit    (hs_nlayers_hit[MXHITB-1:0]),    // In  Number of layers hit
-  .hs_layer_or    (hs_layer_or[MXLY-1:0]),    // In  Layer ORs
+  .hs_layer_trig  (hs_layer_trig),              // In  Layer triggered
+  .hs_nlayers_hit (hs_nlayers_hit[MXHITB-1:0]), // In  Number of layers hit
+  .hs_layer_or    (hs_layer_or[MXLY-1:0]),      // In  Layer ORs
 
 // Sequencer DMB Ports
   .alct_dmb        (alct_dmb[18:0]),       // In  ALCT to DMB
@@ -1826,69 +1859,69 @@
   .bpi_active      (bpi_active),           // In  BPI Active: coming from vme
 
 // Sequencer ALCT Status
-  .alct_cfg_done    (alct_cfg_done),      // In  ALCT FPGA configuration done
+  .alct_cfg_done (alct_cfg_done), // In  ALCT FPGA configuration done
 
 // Sequencer CSC Orientation Ports
-  .csc_me1ab    (csc_me1ab),        // In  1=ME1A or ME1B CSC type
-  .stagger_hs_csc    (stagger_hs_csc),      // In  1=Staggered CSC, 0=non-staggered
-  .reverse_hs_csc    (reverse_hs_csc),      // In  1=Reverse staggered CSC, non-me1
-  .reverse_hs_me1a  (reverse_hs_me1a),      // In  1=reverse me1a hstrips prior to pattern sorting
-  .reverse_hs_me1b  (reverse_hs_me1b),      // In  1=reverse me1b hstrips prior to pattern sorting
+  .csc_me1ab       (csc_me1ab),       // In  1=ME1A or ME1B CSC type
+  .stagger_hs_csc  (stagger_hs_csc),  // In  1=Staggered CSC, 0=non-staggered
+  .reverse_hs_csc  (reverse_hs_csc),  // In  1=Reverse staggered CSC, non-me1
+  .reverse_hs_me1a (reverse_hs_me1a), // In  1=reverse me1a hstrips prior to pattern sorting
+  .reverse_hs_me1b (reverse_hs_me1b), // In  1=reverse me1b hstrips prior to pattern sorting
 
 // Sequencer CLCT VME Configuration Ports
-  .clct_blanking    (clct_blanking),      // In  clct_blanking=1 clears clcts with 0 hits
-  .bxn_offset_pretrig  (bxn_offset_pretrig[MXBXN-1:0]),  // In  BXN offset at reset, for pretrig bxn
-  .bxn_offset_l1a    (bxn_offset_l1a[MXBXN-1:0]),    // In  BXN offset at reset, for L1A bxn
-  .lhc_cycle    (lhc_cycle[MXBXN-1:0]),      // In  LHC period, max BXN count+1
-  .l1a_offset    (l1a_offset[MXL1ARX-1:0]),    // In  L1A counter preset value
-  .drift_delay    (drift_delay[MXDRIFT-1:0]),    // In  CSC Drift delay clocks
-  .triad_persist    (triad_persist[3:0]),      // In  Triad 1/2-strip persistence
+  .clct_blanking      (clct_blanking),                 // In  clct_blanking=1 clears clcts with 0 hits
+  .bxn_offset_pretrig (bxn_offset_pretrig[MXBXN-1:0]), // In  BXN offset at reset, for pretrig bxn
+  .bxn_offset_l1a     (bxn_offset_l1a[MXBXN-1:0]),     // In  BXN offset at reset, for L1A bxn
+  .lhc_cycle          (lhc_cycle[MXBXN-1:0]),          // In  LHC period, max BXN count+1
+  .l1a_offset         (l1a_offset[MXL1ARX-1:0]),       // In  L1A counter preset value
+  .drift_delay        (drift_delay[MXDRIFT-1:0]),      // In  CSC Drift delay clocks
+  .triad_persist      (triad_persist[3:0]),            // In  Triad 1/2-strip persistence
 
-  .lyr_thresh_pretrig  (lyr_thresh_pretrig[MXHITB-1:0]),  // In  Layers hit pre-trigger threshold
-  .hit_thresh_pretrig  (hit_thresh_pretrig[MXHITB-1:0]),  // In  Hits on pattern template pre-trigger threshold
-  .pid_thresh_pretrig  (pid_thresh_pretrig[MXPIDB-1:0]),  // In  Pattern shape ID pre-trigger threshold
-  .dmb_thresh_pretrig  (dmb_thresh_pretrig[MXHITB-1:0]),  // In  Hits on pattern template DMB active-feb threshold
-  .hit_thresh_postdrift  (hit_thresh_postdrift[MXHITB-1:0]),  // In  Minimum pattern hits for a valid pattern
-  .pid_thresh_postdrift  (pid_thresh_postdrift[MXPIDB-1:0]),  // In  Minimum pattern ID   for a valid pattern
+  .lyr_thresh_pretrig   (lyr_thresh_pretrig[MXHITB-1:0]),   // In  Layers hit pre-trigger threshold
+  .hit_thresh_pretrig   (hit_thresh_pretrig[MXHITB-1:0]),   // In  Hits on pattern template pre-trigger threshold
+  .pid_thresh_pretrig   (pid_thresh_pretrig[MXPIDB-1:0]),   // In  Pattern shape ID pre-trigger threshold
+  .dmb_thresh_pretrig   (dmb_thresh_pretrig[MXHITB-1:0]),   // In  Hits on pattern template DMB active-feb threshold
+  .hit_thresh_postdrift (hit_thresh_postdrift[MXHITB-1:0]), // In  Minimum pattern hits for a valid pattern
+  .pid_thresh_postdrift (pid_thresh_postdrift[MXPIDB-1:0]), // In  Minimum pattern ID   for a valid pattern
 
-  .clct_flush_delay  (clct_flush_delay[MXFLUSH-1:0]),  // In  Trigger sequencer flush state timer
-  .clct_throttle    (clct_throttle[MXTHROTTLE-1:0]),  // In  Pre-trigger throttle to reduce trigger rate
-  .clct_wr_continuous  (clct_wr_continuous),      // In  1=allow continuous header buffer writing for invalid triggers
+  .clct_flush_delay   (clct_flush_delay[MXFLUSH-1:0]), // In  Trigger sequencer flush state timer
+  .clct_throttle      (clct_throttle[MXTHROTTLE-1:0]), // In  Pre-trigger throttle to reduce trigger rate
+  .clct_wr_continuous (clct_wr_continuous),            // In  1=allow continuous header buffer writing for invalid triggers
 
-  .alct_delay    (alct_delay[3:0]),      // In  Delay ALCT for CLCT match window
-  .clct_window    (clct_window[3:0]),      // In  CLCT match window width
+  .alct_delay  (alct_delay[3:0]),  // In  Delay ALCT for CLCT match window
+  .clct_window (clct_window[3:0]), // In  CLCT match window width
 
-  .tmb_allow_alct    (tmb_allow_alct),      // In  Allow ALCT only 
-  .tmb_allow_clct    (tmb_allow_clct),      // In  Allow CLCT only
-  .tmb_allow_match  (tmb_allow_match),      // In  Allow ALCT+CLCT match
+  .tmb_allow_alct  (tmb_allow_alct),  // In  Allow ALCT only 
+  .tmb_allow_clct  (tmb_allow_clct),  // In  Allow CLCT only
+  .tmb_allow_match (tmb_allow_match), // In  Allow ALCT+CLCT match
 
-  .tmb_allow_alct_ro  (tmb_allow_alct_ro),      // In  Allow ALCT only  readout, non-triggering
-  .tmb_allow_clct_ro  (tmb_allow_clct_ro),      // In  Allow CLCT only  readout, non-triggering
-  .tmb_allow_match_ro  (tmb_allow_match_ro),      // In  Allow Match only readout, non-triggering
+  .tmb_allow_alct_ro  (tmb_allow_alct_ro),  // In  Allow ALCT only  readout, non-triggering
+  .tmb_allow_clct_ro  (tmb_allow_clct_ro),  // In  Allow CLCT only  readout, non-triggering
+  .tmb_allow_match_ro (tmb_allow_match_ro), // In  Allow Match only readout, non-triggering
 
-  .mpc_tx_delay    (mpc_tx_delay[MXMPCDLY-1:0]),    // In  MPC transmit delay
-  .mpc_sel_ttc_bx0  (mpc_sel_ttc_bx0),      // In  MPC gets ttc_bx0 or bx0_local
-  .pretrig_halt    (pretrig_halt),        // In  Pretrigger and halt until unhalt arrives
+  .mpc_tx_delay    (mpc_tx_delay[MXMPCDLY-1:0]), // In  MPC transmit delay
+  .mpc_sel_ttc_bx0 (mpc_sel_ttc_bx0),            // In  MPC gets ttc_bx0 or bx0_local
+  .pretrig_halt    (pretrig_halt),               // In  Pretrigger and halt until unhalt arrives
 
-  .uptime      (uptime[15:0]),        // Out  Uptime since last hard reset
-  .bd_status    (bd_status[14:0]),      // In  Board status summary
+  .uptime    (uptime[15:0]),    // Out  Uptime since last hard reset
+  .bd_status (bd_status[14:0]), // In  Board status summary
 
-  .board_id    (board_id[MXBDID-1:0]),      // In  Board ID = VME Slot
-  .csc_id      (csc_id[MXCSC-1:0]),      // In  CSC Chamber ID number
-  .run_id      (run_id[MXRID-1:0]),      // In  Run ID
+  .board_id (board_id[MXBDID-1:0]), // In  Board ID = VME Slot
+  .csc_id   (csc_id[MXCSC-1:0]),    // In  CSC Chamber ID number
+  .run_id   (run_id[MXRID-1:0]),    // In  Run ID
 
-  .l1a_delay    (l1a_delay[MXL1DELAY-1:0]),    // In  Level1 Accept delay from pretrig status output
-  .l1a_internal    (l1a_internal),        // In  Generate internal Level 1, overrides external
-  .l1a_internal_dly  (l1a_internal_dly[MXL1WIND-1:0]),  // In   Delay internal l1a to shift position in l1a match windwow
-  .l1a_window    (l1a_window[MXL1WIND-1:0]),    // In  Level1 Accept window width after delay
-  .l1a_win_pri_en    (l1a_win_pri_en),      // In  Enable L1A window priority
-  .l1a_lookback    (l1a_lookback[MXBADR-1:0]),    // In  Bxn to look back from l1a wr_buf_adr
-  .l1a_preset_sr    (l1a_preset_sr),      // In  Dummy VME bit to feign preset l1a sr group
+  .l1a_delay        (l1a_delay[MXL1DELAY-1:0]),       // In  Level1 Accept delay from pretrig status output
+  .l1a_internal     (l1a_internal),                   // In  Generate internal Level 1, overrides external
+  .l1a_internal_dly (l1a_internal_dly[MXL1WIND-1:0]), // In   Delay internal l1a to shift position in l1a match windwow
+  .l1a_window       (l1a_window[MXL1WIND-1:0]),       // In  Level1 Accept window width after delay
+  .l1a_win_pri_en   (l1a_win_pri_en),                 // In  Enable L1A window priority
+  .l1a_lookback     (l1a_lookback[MXBADR-1:0]),       // In  Bxn to look back from l1a wr_buf_adr
+  .l1a_preset_sr    (l1a_preset_sr),                  // In  Dummy VME bit to feign preset l1a sr group
 
-  .l1a_allow_match  (l1a_allow_match),      // In  Readout allows tmb trig pulse in L1A window (normal mode)
-  .l1a_allow_notmb  (l1a_allow_notmb),      // In  Readout allows no tmb trig pulse in L1A window
-  .l1a_allow_nol1a  (l1a_allow_nol1a),      // In  Readout allows tmb trig pulse outside L1A window
-  .l1a_allow_alct_only  (l1a_allow_alct_only),      // In  Allow alct_only events to readout at L1A
+  .l1a_allow_match     (l1a_allow_match),     // In  Readout allows tmb trig pulse in L1A window (normal mode)
+  .l1a_allow_notmb     (l1a_allow_notmb),     // In  Readout allows no tmb trig pulse in L1A window
+  .l1a_allow_nol1a     (l1a_allow_nol1a),     // In  Readout allows tmb trig pulse outside L1A window
+  .l1a_allow_alct_only (l1a_allow_alct_only), // In  Allow alct_only events to readout at L1A
 
   .fifo_mode    (fifo_mode[MXFMODE-1:0]),    // In  FIFO Mode 0=no dump,1=full,2=local,3=sync
   .fifo_tbins_cfeb  (fifo_tbins_cfeb[MXTBIN-1:0]),    // In  Number CFEB FIFO time bins to read out
@@ -2196,15 +2229,31 @@
   .event_counter64  (event_counter64[MXCNTVME-1:0]),  // Out
   .event_counter65  (event_counter65[MXCNTVME-1:0]),  // Out
 
+// CLCT pre-trigger coincidence counters
+  .preClct_l1a_counter   (preClct_l1a_counter[MXCNTVME-1:0]),  // Out
+  .preClct_alct_counter  (preClct_alct_counter[MXCNTVME-1:0]), // Out
+  
+// Active CFEB(s) counters
+  .active_cfebs_event_counter      (active_cfebs_event_counter[MXCNTVME-1:0]),      // Out
+  .active_cfebs_me1a_event_counter (active_cfebs_me1a_event_counter[MXCNTVME-1:0]), // Out
+  .active_cfebs_me1b_event_counter (active_cfebs_me1b_event_counter[MXCNTVME-1:0]), // Out
+  .active_cfeb0_event_counter      (active_cfeb0_event_counter[MXCNTVME-1:0]),      // Out
+  .active_cfeb1_event_counter      (active_cfeb1_event_counter[MXCNTVME-1:0]),      // Out
+  .active_cfeb2_event_counter      (active_cfeb2_event_counter[MXCNTVME-1:0]),      // Out
+  .active_cfeb3_event_counter      (active_cfeb3_event_counter[MXCNTVME-1:0]),      // Out
+  .active_cfeb4_event_counter      (active_cfeb4_event_counter[MXCNTVME-1:0]),      // Out
+  .active_cfeb5_event_counter      (active_cfeb5_event_counter[MXCNTVME-1:0]),      // Out
+  .active_cfeb6_event_counter      (active_cfeb6_event_counter[MXCNTVME-1:0]),      // Out
+  
 // Sequencer Header Counters
-  .hdr_clear_on_resync  (hdr_clear_on_resync),      // In  Clear header counters on ttc_resync
-  .pretrig_counter  (pretrig_counter[MXCNTVME-1:0]),  // Out  Pre-trigger counter
-  .clct_counter    (clct_counter[MXCNTVME-1:0]),    // Out  CLCT counter
-  .alct_counter    (alct_counter[MXCNTVME-1:0]),    // Out  ALCTs received counter
-  .trig_counter    (trig_counter[MXCNTVME-1:0]),    // Out  TMB trigger counter
-  .l1a_rx_counter    (l1a_rx_counter[MXL1ARX-1:0]),    // Out  L1As received from ccb counter
-  .readout_counter  (readout_counter[MXL1ARX-1:0]),    // Out  Readout counter
-  .orbit_counter    (orbit_counter[MXORBIT-1:0]),    // Out  Orbit counter
+  .hdr_clear_on_resync (hdr_clear_on_resync),           // In  Clear header counters on ttc_resync
+  .pretrig_counter     (pretrig_counter[MXCNTVME-1:0]), // Out  Pre-trigger counter
+  .clct_counter        (clct_counter[MXCNTVME-1:0]),    // Out  CLCT counter
+  .alct_counter        (alct_counter[MXCNTVME-1:0]),    // Out  ALCTs received counter
+  .trig_counter        (trig_counter[MXCNTVME-1:0]),    // Out  TMB trigger counter
+  .l1a_rx_counter      (l1a_rx_counter[MXL1ARX-1:0]),   // Out  L1As received from ccb counter
+  .readout_counter     (readout_counter[MXL1ARX-1:0]),  // Out  Readout counter
+  .orbit_counter       (orbit_counter[MXORBIT-1:0]),    // Out  Orbit counter
 
 // Sequencer Parity Errors
   .perr_pulse    (perr_pulse),        // In  Parity error pulse for counting
@@ -3216,59 +3265,59 @@
       .fmm_state      (fmm_state[2:0]),        // In  FMM machine state
 
       //  CCB TTC lock status
-      .ccb_ttcrx_lock_never    (ccb_ttcrx_lock_never),      // In  Lock never achieved
-      .ccb_ttcrx_lost_ever    (ccb_ttcrx_lost_ever),      // In  Lock was lost at least once
-      .ccb_ttcrx_lost_cnt    (ccb_ttcrx_lost_cnt[7:0]),    // In  Number of times lock has been lost
+      .ccb_ttcrx_lock_never (ccb_ttcrx_lock_never),    // In  Lock never achieved
+      .ccb_ttcrx_lost_ever  (ccb_ttcrx_lost_ever),     // In  Lock was lost at least once
+      .ccb_ttcrx_lost_cnt   (ccb_ttcrx_lost_cnt[7:0]), // In  Number of times lock has been lost
 
-      .ccb_qpll_lock_never    (ccb_qpll_lock_never),      // In  Lock never achieved
-      .ccb_qpll_lost_ever    (ccb_qpll_lost_ever),      // In  Lock was lost at least once
-      .ccb_qpll_lost_cnt    (ccb_qpll_lost_cnt[7:0]),    // In  Number of times lock has been lost
+      .ccb_qpll_lock_never    (ccb_qpll_lock_never),  // In  Lock never achieved
+      .ccb_qpll_lost_ever    (ccb_qpll_lost_ever),    // In  Lock was lost at least once
+      .ccb_qpll_lost_cnt    (ccb_qpll_lost_cnt[7:0]), // In  Number of times lock has been lost
 
       // CCB Ports: Trigger Control
-      .clct_ext_trig_l1aen    (clct_ext_trig_l1aen),      // Out  1=Request ccb l1a on clct ext_trig
-      .alct_ext_trig_l1aen    (alct_ext_trig_l1aen),      // Out  1=Request ccb l1a on alct ext_trig
-      .seq_trig_l1aen      (seq_trig_l1aen),        // Out  1=Request ccb l1a on sequencer trigger
-      .alct_ext_trig_vme    (alct_ext_trig_vme),      // Out  1=Fire alct_ext_trig oneshot
-      .clct_ext_trig_vme    (clct_ext_trig_vme),      // Out  1=Fire clct_ext_trig oneshot
-      .ext_trig_both      (ext_trig_both),        // Out  1=clct_ext_trig fires alct and alct fires clct_trig, DC level
-      .l1a_vme      (l1a_vme),            // Out  1=fire ccb_l1accept oneshot
-      .l1a_delay_vme      (l1a_delay_vme[7:0]),      // Out  Internal L1A delay
-      .l1a_inj_ram_en      (l1a_inj_ram_en),        // Out  L1A injector RAM enable
+      .clct_ext_trig_l1aen (clct_ext_trig_l1aen), // Out  1=Request ccb l1a on clct ext_trig
+      .alct_ext_trig_l1aen (alct_ext_trig_l1aen), // Out  1=Request ccb l1a on alct ext_trig
+      .seq_trig_l1aen      (seq_trig_l1aen),      // Out  1=Request ccb l1a on sequencer trigger
+      .alct_ext_trig_vme   (alct_ext_trig_vme),   // Out  1=Fire alct_ext_trig oneshot
+      .clct_ext_trig_vme   (clct_ext_trig_vme),   // Out  1=Fire clct_ext_trig oneshot
+      .ext_trig_both       (ext_trig_both),       // Out  1=clct_ext_trig fires alct and alct fires clct_trig, DC level
+      .l1a_vme             (l1a_vme),             // Out  1=fire ccb_l1accept oneshot
+      .l1a_delay_vme       (l1a_delay_vme[7:0]),  // Out  Internal L1A delay
+      .l1a_inj_ram_en      (l1a_inj_ram_en),      // Out  L1A injector RAM enable
 
       // ALCT Ports: Trigger Control
-      .cfg_alct_ext_trig_en    (cfg_alct_ext_trig_en),      // Out  1=Enable alct_ext_trig   from CCB
-      .cfg_alct_ext_inject_en    (cfg_alct_ext_inject_en),    // Out  1=Enable alct_ext_inject from CCB
-      .cfg_alct_ext_trig    (cfg_alct_ext_trig),      // Out  1=Assert alct_ext_trig
-      .cfg_alct_ext_inject    (cfg_alct_ext_inject),      // Out  1=Assert alct_ext_inject
-      .alct_clear      (alct_clear),          // Out  1=Blank alct_rx inputs
-      .alct_inject      (alct_inject),          // Out  1=Start ALCT injector
-      .alct_inj_ram_en    (alct_inj_ram_en),        // Out  1=Link  ALCT injector to CFEB injector RAM
-      .alct_inj_delay      (alct_inj_delay[4:0]),      // Out  ALCT Injector delay  
-      .alct0_inj      (alct0_inj[15:0]),        // Out  ALCT0 to inject        
-      .alct1_inj      (alct1_inj[15:0]),        // Out  ALCT1 to inject
+      .cfg_alct_ext_trig_en   (cfg_alct_ext_trig_en),   // Out  1=Enable alct_ext_trig   from CCB
+      .cfg_alct_ext_inject_en (cfg_alct_ext_inject_en), // Out  1=Enable alct_ext_inject from CCB
+      .cfg_alct_ext_trig      (cfg_alct_ext_trig),      // Out  1=Assert alct_ext_trig
+      .cfg_alct_ext_inject    (cfg_alct_ext_inject),    // Out  1=Assert alct_ext_inject
+      .alct_clear             (alct_clear),             // Out  1=Blank alct_rx inputs
+      .alct_inject            (alct_inject),            // Out  1=Start ALCT injector
+      .alct_inj_ram_en        (alct_inj_ram_en),        // Out  1=Link  ALCT injector to CFEB injector RAM
+      .alct_inj_delay         (alct_inj_delay[4:0]),    // Out  ALCT Injector delay  
+      .alct0_inj              (alct0_inj[15:0]),        // Out  ALCT0 to inject        
+      .alct1_inj              (alct1_inj[15:0]),        // Out  ALCT1 to inject
 
       // ALCT Ports: Sequencer Control/Status
-      .alct0_vme      (alct0_vme[15:0]),        // In  ALCT latched at last valid pattern
-      .alct1_vme      (alct1_vme[15:0]),        // In  ALCT latched at last valid pattern
-      .alct_ecc_en      (alct_ecc_en),          // Out  Enable ALCT ECC decoder, else do no ECC correction
-      .alct_ecc_err_blank    (alct_ecc_err_blank),      // Out  Blank alcts with uncorrected ecc errors
-      .alct_txd_int_delay    (alct_txd_int_delay[3:0]),    // Out  ALCT data transmit delay, integer bx
-      .alct_clock_en_vme    (alct_clock_en_vme),      // Out  Enable ALCT 40MHz clock
-      .alct_seq_cmd      (alct_seq_cmd[3:0]),      // Out  ALCT Sequencer command
+      .alct0_vme          (alct0_vme[15:0]),         // In  ALCT latched at last valid pattern
+      .alct1_vme          (alct1_vme[15:0]),         // In  ALCT latched at last valid pattern
+      .alct_ecc_en        (alct_ecc_en),             // Out  Enable ALCT ECC decoder, else do no ECC correction
+      .alct_ecc_err_blank (alct_ecc_err_blank),      // Out  Blank alcts with uncorrected ecc errors
+      .alct_txd_int_delay (alct_txd_int_delay[3:0]), // Out  ALCT data transmit delay, integer bx
+      .alct_clock_en_vme  (alct_clock_en_vme),       // Out  Enable ALCT 40MHz clock
+      .alct_seq_cmd       (alct_seq_cmd[3:0]),       // Out  ALCT Sequencer command
 
       // VME ALCT sync mode ports
-      .alct_sync_txdata_1st    (alct_sync_txdata_1st[9:0]),  // Out  ALCT sync mode data to send for loopback
-      .alct_sync_txdata_2nd    (alct_sync_txdata_2nd[9:0]),  // Out  ALCT sync mode data to send for loopback
-      .alct_sync_rxdata_dly    (alct_sync_rxdata_dly[3:0]),  // Out  ALCT sync mode lfsr delay pointer to valid data
-      .alct_sync_rxdata_pre    (alct_sync_rxdata_pre[3:0]),  // Out  ALCT sync mode delay pointer to valid data, fixed pre-delay
-      .alct_sync_tx_random    (alct_sync_tx_random),      // Out  ALCT sync mode tmb transmits random data to alct
-      .alct_sync_clr_err    (alct_sync_clr_err),      // Out  ALCT sync mode clear rng error FFs
+      .alct_sync_txdata_1st (alct_sync_txdata_1st[9:0]), // Out  ALCT sync mode data to send for loopback
+      .alct_sync_txdata_2nd (alct_sync_txdata_2nd[9:0]), // Out  ALCT sync mode data to send for loopback
+      .alct_sync_rxdata_dly (alct_sync_rxdata_dly[3:0]), // Out  ALCT sync mode lfsr delay pointer to valid data
+      .alct_sync_rxdata_pre (alct_sync_rxdata_pre[3:0]), // Out  ALCT sync mode delay pointer to valid data, fixed pre-delay
+      .alct_sync_tx_random  (alct_sync_tx_random),       // Out  ALCT sync mode tmb transmits random data to alct
+      .alct_sync_clr_err    (alct_sync_clr_err),         // Out  ALCT sync mode clear rng error FFs
 
       .alct_sync_1st_err    (alct_sync_1st_err),      // In  ALCT sync mode 1st-intime match ok, alct-to-tmb
       .alct_sync_2nd_err    (alct_sync_2nd_err),      // In  ALCT sync mode 2nd-intime match ok, alct-to-tmb
-      .alct_sync_1st_err_ff    (alct_sync_1st_err_ff),      // In  ALCT sync mode 1st-intime match ok, alct-to-tmb, latched
-      .alct_sync_2nd_err_ff    (alct_sync_2nd_err_ff),      // In  ALCT sync mode 2nd-intime match ok, alct-to-tmb, latched
-      .alct_sync_ecc_err    (alct_sync_ecc_err[1:0]),    // In  ALCT sync mode ecc error syndrome
+      .alct_sync_1st_err_ff (alct_sync_1st_err_ff),   // In  ALCT sync mode 1st-intime match ok, alct-to-tmb, latched
+      .alct_sync_2nd_err_ff (alct_sync_2nd_err_ff),   // In  ALCT sync mode 2nd-intime match ok, alct-to-tmb, latched
+      .alct_sync_ecc_err    (alct_sync_ecc_err[1:0]), // In  ALCT sync mode ecc error syndrome
 
       .alct_sync_rxdata_1st    (alct_sync_rxdata_1st[28:1]),  // In  Demux data for demux timing-in
       .alct_sync_rxdata_2nd    (alct_sync_rxdata_2nd[28:1]),  // In  Demux data for demux timing-in
@@ -3435,65 +3484,69 @@
       .active_feb_src      (active_feb_src),          // Out  Active cfeb flag source, 0=pretrig, 1=tmb-matching ~8bx later
 
       // Sequencer Ports: Trigger Modifiers
-      .clct_flush_delay    (clct_flush_delay[MXFLUSH-1:0]),  // Out  Trigger sequencer flush state timer
-      .clct_throttle      (clct_throttle[MXTHROTTLE-1:0]),  // Out  Pre-trigger throttle to reduce trigger rate
-      .clct_wr_continuous    (clct_wr_continuous),        // Out  1=allow continuous header buffer writing for invalid triggers
-      .alct_trig_width    (alct_trig_width[3:0]),        // Out  ALCT*CLCT overlap window size
-      .wr_buf_required    (wr_buf_required),          // Out  Require wr_buffer to pretrigger
-      .wr_buf_autoclr_en    (wr_buf_autoclr_en),        // Out  Enable frozen buffer auto clear
-      .valid_clct_required    (valid_clct_required),        // Out  Require valid pattern after drift to trigger
+      .clct_flush_delay    (clct_flush_delay[MXFLUSH-1:0]), // Out  Trigger sequencer flush state timer
+      .clct_throttle       (clct_throttle[MXTHROTTLE-1:0]), // Out  Pre-trigger throttle to reduce trigger rate
+      .clct_wr_continuous  (clct_wr_continuous),            // Out  1=allow continuous header buffer writing for invalid triggers
+      .alct_preClct_width  (alct_preClct_width[3:0]),       // Out  ALCT (alct_active_feb flag) window width for ALCT*preCLCT overlap
+      .wr_buf_required     (wr_buf_required),               // Out  Require wr_buffer to pretrigger
+      .wr_buf_autoclr_en   (wr_buf_autoclr_en),             // Out  Enable frozen buffer auto clear
+      .valid_clct_required (valid_clct_required),           // Out  Require valid pattern after drift to trigger
 
       // Sequencer Ports: External Trigger Delays
-      .alct_pre_trig_dly    (alct_pre_trig_dly[MXEXTDLY-1:0]),  // Out  ALCT pre      trigger delay
-      .alct_pat_trig_dly    (alct_pat_trig_dly[MXEXTDLY-1:0]),  // Out  ALCT pattern  trigger delay
-      .adb_ext_trig_dly    (adb_ext_trig_dly[MXEXTDLY-1:0]),  // Out  ADB  external trigger delay
-      .dmb_ext_trig_dly    (dmb_ext_trig_dly[MXEXTDLY-1:0]),  // Out  DMB  external trigger delay
-      .clct_ext_trig_dly    (clct_ext_trig_dly[MXEXTDLY-1:0]),  // Out  CLCT external trigger delay
-      .alct_ext_trig_dly    (alct_ext_trig_dly[MXEXTDLY-1:0]),  // Out  ALCT external trigger delay
+      .alct_preClct_dly  (alct_preClct_dly[MXEXTDLY-1:0]),  // Out  ALCT (alct_active_feb flag) delay for ALCT*preCLCT overlap
+      .alct_pat_trig_dly (alct_pat_trig_dly[MXEXTDLY-1:0]), // Out  ALCT pattern  trigger delay
+      .adb_ext_trig_dly  (adb_ext_trig_dly[MXEXTDLY-1:0]),  // Out  ADB  external trigger delay
+      .dmb_ext_trig_dly  (dmb_ext_trig_dly[MXEXTDLY-1:0]),  // Out  DMB  external trigger delay
+      .clct_ext_trig_dly (clct_ext_trig_dly[MXEXTDLY-1:0]), // Out  CLCT external trigger delay
+      .alct_ext_trig_dly (alct_ext_trig_dly[MXEXTDLY-1:0]), // Out  ALCT external trigger delay
+
+      // Sequencer Ports: pre-CLCT modifiers for L1A*preCLCT overlap
+      .l1a_preClct_width (l1a_preClct_width[3:0]), // Out  pre-CLCT window width for L1A*preCLCT overlap
+      .l1a_preClct_dly   (l1a_preClct_dly[7:0]),   // Out  pre-CLCT delay for L1A*preCLCT overlap
 
       // Sequencer Ports: CLCT/RPC/RAT Pattern Injector
-      .inj_trig_vme      (inj_trig_vme),            // Out  Start pattern injector
-      .injector_mask_cfeb    (injector_mask_cfeb[MXCFEB-1:0]),  // Out  Enable CFEB(n) for injector trigger
-      .ext_trig_inject    (ext_trig_inject),          // Out  Changes clct_ext_trig to fire pattern injector
-      .injector_mask_rat    (injector_mask_rat),        // Out  Enable RAT for injector trigger
-      .injector_mask_rpc    (injector_mask_rpc),        // Out  Enable RPC for injector trigger
-      .inj_delay_rat      (inj_delay_rat[3:0]),        // Out  CFEB/RPC Injector waits for RAT injector
-      .rpc_tbins_test      (rpc_tbins_test),          // Out  Set write_data=address
+      .inj_trig_vme       (inj_trig_vme),                   // Out  Start pattern injector
+      .injector_mask_cfeb (injector_mask_cfeb[MXCFEB-1:0]), // Out  Enable CFEB(n) for injector trigger
+      .ext_trig_inject    (ext_trig_inject),                // Out  Changes clct_ext_trig to fire pattern injector
+      .injector_mask_rat  (injector_mask_rat),              // Out  Enable RAT for injector trigger
+      .injector_mask_rpc  (injector_mask_rpc),              // Out  Enable RPC for injector trigger
+      .inj_delay_rat      (inj_delay_rat[3:0]),             // Out  CFEB/RPC Injector waits for RAT injector
+      .rpc_tbins_test     (rpc_tbins_test),                 // Out  Set write_data=address
 
       // Sequencer Ports: CLCT Processing
-      .sequencer_state    (sequencer_state[11:0]),      // In  Sequencer state for vme
-      .scint_veto_vme      (scint_veto_vme),          // In  Scintillator veto for FAST Sites
-      .drift_delay      (drift_delay[MXDRIFT-1:0]),      // Out  CSC Drift delay clocks
-      .hit_thresh_postdrift    (hit_thresh_postdrift[MXHITB-1:0]),  // Out  Minimum pattern hits for a valid pattern
-      .pid_thresh_postdrift    (pid_thresh_postdrift[MXPIDB-1:0]),  // Out  Minimum pattern ID   for a valid pattern
-      .pretrig_halt      (pretrig_halt),            // Out  Pretrigger and halt until unhalt arrives
-      .scint_veto_clr      (scint_veto_clr),          // Out  Clear scintillator veto ff
+      .sequencer_state      (sequencer_state[11:0]),            // In  Sequencer state for vme
+      .scint_veto_vme       (scint_veto_vme),                   // In  Scintillator veto for FAST Sites
+      .drift_delay          (drift_delay[MXDRIFT-1:0]),         // Out  CSC Drift delay clocks
+      .hit_thresh_postdrift (hit_thresh_postdrift[MXHITB-1:0]), // Out  Minimum pattern hits for a valid pattern
+      .pid_thresh_postdrift (pid_thresh_postdrift[MXPIDB-1:0]), // Out  Minimum pattern ID   for a valid pattern
+      .pretrig_halt         (pretrig_halt),                     // Out  Pretrigger and halt until unhalt arrives
+      .scint_veto_clr       (scint_veto_clr),                   // Out  Clear scintillator veto ff
 
-      .fifo_mode      (fifo_mode[MXFMODE-1:0]),      // Out  FIFO Mode 0=no dump,1=full,2=local,3=sync
-      .fifo_tbins_cfeb    (fifo_tbins_cfeb[MXTBIN-1:0]),    // Out  Number CFEB FIFO time bins to read out
-      .fifo_pretrig_cfeb    (fifo_pretrig_cfeb[MXTBIN-1:0]),  // Out  Number CFEB FIFO time bins before pretrigger
-      .fifo_no_raw_hits    (fifo_no_raw_hits),          // Out  1=do not wait to store raw hits
+      .fifo_mode         (fifo_mode[MXFMODE-1:0]),        // Out  FIFO Mode 0=no dump,1=full,2=local,3=sync
+      .fifo_tbins_cfeb   (fifo_tbins_cfeb[MXTBIN-1:0]),   // Out  Number CFEB FIFO time bins to read out
+      .fifo_pretrig_cfeb (fifo_pretrig_cfeb[MXTBIN-1:0]), // Out  Number CFEB FIFO time bins before pretrigger
+      .fifo_no_raw_hits  (fifo_no_raw_hits),              // Out  1=do not wait to store raw hits
 
-      .l1a_delay      (l1a_delay[MXL1DELAY-1:0]),      // Out  Level1 Accept delay from pretrig status output
-      .l1a_internal      (l1a_internal),            // Out  Generate internal Level 1, overrides external
-      .l1a_internal_dly    (l1a_internal_dly[MXL1WIND-1:0]),  // Out   Delay internal l1a to shift position in l1a match window
-      .l1a_window      (l1a_window[MXL1WIND-1:0]),      // Out  Level1 Accept window width after delay
-      .l1a_win_pri_en      (l1a_win_pri_en),          // Out  Enable L1A window priority
-      .l1a_lookback      (l1a_lookback[MXBADR-1:0]),      // Out  Bxn to look back from l1a wr_buf_adr
-      .l1a_preset_sr      (l1a_preset_sr),          // Out  Dummy VME bit to feign preset l1a sr group
+      .l1a_delay        (l1a_delay[MXL1DELAY-1:0]),       // Out  Level1 Accept delay from pretrig status output
+      .l1a_internal     (l1a_internal),                   // Out  Generate internal Level 1, overrides external
+      .l1a_internal_dly (l1a_internal_dly[MXL1WIND-1:0]), // Out   Delay internal l1a to shift position in l1a match window
+      .l1a_window       (l1a_window[MXL1WIND-1:0]),       // Out  Level1 Accept window width after delay
+      .l1a_win_pri_en   (l1a_win_pri_en),                 // Out  Enable L1A window priority
+      .l1a_lookback     (l1a_lookback[MXBADR-1:0]),       // Out  Bxn to look back from l1a wr_buf_adr
+      .l1a_preset_sr    (l1a_preset_sr),                  // Out  Dummy VME bit to feign preset l1a sr group
 
-      .l1a_allow_match    (l1a_allow_match),          // Out  Readout allows tmb trig pulse in L1A window (normal mode)
-      .l1a_allow_notmb    (l1a_allow_notmb),          // Out  Readout allows no tmb trig pulse in L1A window
-      .l1a_allow_nol1a    (l1a_allow_nol1a),          // Out  Readout allows tmb trig pulse outside L1A window
-      .l1a_allow_alct_only    (l1a_allow_alct_only),        // Out  Allow alct_only events to readout at L1A
+      .l1a_allow_match     (l1a_allow_match),     // Out  Readout allows tmb trig pulse in L1A window (normal mode)
+      .l1a_allow_notmb     (l1a_allow_notmb),     // Out  Readout allows no tmb trig pulse in L1A window
+      .l1a_allow_nol1a     (l1a_allow_nol1a),     // Out  Readout allows tmb trig pulse outside L1A window
+      .l1a_allow_alct_only (l1a_allow_alct_only), // Out  Allow alct_only events to readout at L1A
 
-      .board_id      (board_id[MXBDID-1:0]),        // Out  Board ID = VME Slot
-      .csc_id        (csc_id[MXCSC-1:0]),        // Out  CSC Chamber ID number
-      .run_id        (run_id[MXRID-1:0]),        // Out  Run ID
-      .bxn_offset_pretrig    (bxn_offset_pretrig[MXBXN-1:0]),  // Out  BXN offset at reset, for pretrig bxn
-      .bxn_offset_l1a      (bxn_offset_l1a[MXBXN-1:0]),    // Out  BXN offset at reset, for l1a bxn
-      .lhc_cycle      (lhc_cycle[MXBXN-1:0]),        // Out  LHC period, max BXN count+1
-      .l1a_offset      (l1a_offset[MXL1ARX-1:0]),      // Out  L1A counter preset value
+      .board_id           (board_id[MXBDID-1:0]),          // Out  Board ID = VME Slot
+      .csc_id             (csc_id[MXCSC-1:0]),             // Out  CSC Chamber ID number
+      .run_id             (run_id[MXRID-1:0]),             // Out  Run ID
+      .bxn_offset_pretrig (bxn_offset_pretrig[MXBXN-1:0]), // Out  BXN offset at reset, for pretrig bxn
+      .bxn_offset_l1a     (bxn_offset_l1a[MXBXN-1:0]),     // Out  BXN offset at reset, for l1a bxn
+      .lhc_cycle          (lhc_cycle[MXBXN-1:0]),          // Out  LHC period, max BXN count+1
+      .l1a_offset          (l1a_offset[MXL1ARX-1:0]),      // Out  L1A counter preset value
 
       // Sequencer Ports: Latched CLCTs + Status
       .event_clear_vme    (event_clear_vme),          // Out  Event clear for vme diagnostic registers
@@ -3737,14 +3790,14 @@
       .event_counter65    (event_counter65[MXCNTVME-1:0]),  // In
 
       // Header Counter Ports
-      .hdr_clear_on_resync    (hdr_clear_on_resync),        // Out  Clear header counters on ttc_resync
-      .pretrig_counter    (pretrig_counter[MXCNTVME-1:0]),  // In  Pre-trigger counter
-      .clct_counter      (clct_counter[MXCNTVME-1:0]),    // In  CLCT counter
-      .trig_counter      (trig_counter[MXCNTVME-1:0]),    // In  TMB trigger counter
-      .alct_counter      (alct_counter[MXCNTVME-1:0]),    // In  ALCTs received counter
-      .l1a_rx_counter      (l1a_rx_counter[MXL1ARX-1:0]),    // In  L1As received from ccb counter
-      .readout_counter    (readout_counter[MXL1ARX-1:0]),    // In  Readout counter
-      .orbit_counter      (orbit_counter[MXORBIT-1:0]),    // In  Orbit counter
+      .hdr_clear_on_resync (hdr_clear_on_resync),           // Out  Clear header counters on ttc_resync
+      .pretrig_counter     (pretrig_counter[MXCNTVME-1:0]), // In  Pre-trigger counter
+      .clct_counter        (clct_counter[MXCNTVME-1:0]),    // In  CLCT counter
+      .trig_counter        (trig_counter[MXCNTVME-1:0]),    // In  TMB trigger counter
+      .alct_counter        (alct_counter[MXCNTVME-1:0]),    // In  ALCTs received counter
+      .l1a_rx_counter      (l1a_rx_counter[MXL1ARX-1:0]),   // In  L1As received from ccb counter
+      .readout_counter     (readout_counter[MXL1ARX-1:0]),  // In  Readout counter
+      .orbit_counter       (orbit_counter[MXORBIT-1:0]),    // In  Orbit counter
 
       // ALCT Structure Error Counters
       .alct_err_counter0    (alct_err_counter0[7:0]),      // In  Error counter 1D remap
@@ -3753,14 +3806,30 @@
       .alct_err_counter3    (alct_err_counter3[7:0]),      // In
       .alct_err_counter4    (alct_err_counter4[7:0]),      // In
       .alct_err_counter5    (alct_err_counter5[7:0]),      // In
-
+      
+      // CLCT pre-trigger coincidence counters
+      .preClct_l1a_counter  (preClct_l1a_counter[MXCNTVME-1:0]),  // In
+      .preClct_alct_counter (preClct_alct_counter[MXCNTVME-1:0]), // In
+      
+      // Active CFEB(s) counters
+      .active_cfebs_event_counter      (active_cfebs_event_counter[MXCNTVME-1:0]),      // In
+      .active_cfebs_me1a_event_counter (active_cfebs_me1a_event_counter[MXCNTVME-1:0]), // In
+      .active_cfebs_me1b_event_counter (active_cfebs_me1b_event_counter[MXCNTVME-1:0]), // In
+      .active_cfeb0_event_counter      (active_cfeb0_event_counter[MXCNTVME-1:0]),      // In
+      .active_cfeb1_event_counter      (active_cfeb1_event_counter[MXCNTVME-1:0]),      // In
+      .active_cfeb2_event_counter      (active_cfeb2_event_counter[MXCNTVME-1:0]),      // In
+      .active_cfeb3_event_counter      (active_cfeb3_event_counter[MXCNTVME-1:0]),      // In
+      .active_cfeb4_event_counter      (active_cfeb4_event_counter[MXCNTVME-1:0]),      // In
+      .active_cfeb5_event_counter      (active_cfeb5_event_counter[MXCNTVME-1:0]),      // In
+      .active_cfeb6_event_counter      (active_cfeb6_event_counter[MXCNTVME-1:0]),      // In
+      
       // CSC Orientation Ports
-      .csc_type      (csc_type[3:0]),          // In  Firmware compile type
-      .csc_me1ab      (csc_me1ab),            // In  1=ME1A or ME1B CSC type
-      .stagger_hs_csc      (stagger_hs_csc),          // In  1=Staggered CSC, 0=non-staggered
-      .reverse_hs_csc      (reverse_hs_csc),          // In  1=Reverse staggered CSC, non-me1
-      .reverse_hs_me1a    (reverse_hs_me1a),          // In  1=reverse me1a hstrips prior to pattern sorting
-      .reverse_hs_me1b    (reverse_hs_me1b),          // In  1=reverse me1b hstrips prior to pattern sorting
+      .csc_type        (csc_type[3:0]),   // In  Firmware compile type
+      .csc_me1ab       (csc_me1ab),       // In  1=ME1A or ME1B CSC type
+      .stagger_hs_csc  (stagger_hs_csc),  // In  1=Staggered CSC, 0=non-staggered
+      .reverse_hs_csc  (reverse_hs_csc),  // In  1=Reverse staggered CSC, non-me1
+      .reverse_hs_me1a (reverse_hs_me1a), // In  1=reverse me1a hstrips prior to pattern sorting
+      .reverse_hs_me1b (reverse_hs_me1b), // In  1=reverse me1b hstrips prior to pattern sorting
 
       // Pattern Finder Ports
       .clct_blanking      (clct_blanking),          // Out  clct_blanking clears clcts with 0 hits
