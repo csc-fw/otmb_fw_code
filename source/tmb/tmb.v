@@ -1437,15 +1437,14 @@
 
 // Push MPC frames into header RAM after mpc_tx_delay
   reg  mpc_frame_ff=0;
-
   always @(posedge clock) begin
-  wr_adr_xmpc   <= wr_adr_rtmb_dly;
-  wr_push_xmpc  <= wr_push_rtmb_dly;
-  wr_avail_xmpc <= wr_avail_rtmb_dly;
-  mpc_frame_ff  <= trig_mpc_rtmb_dly;            // Pipeline strobes
+    wr_adr_xmpc   <= wr_adr_rtmb_dly;
+    wr_push_xmpc  <= wr_push_rtmb_dly;
+    wr_avail_xmpc <= wr_avail_rtmb_dly;
+    mpc_frame_ff  <= trig_mpc_rtmb_dly;                // Pipeline strobes
 
-  {mpc1_frame0_ff,mpc0_frame0_ff} <= mpc_frame0_dly; // Pulsed copy of LCTs for header
-  {mpc1_frame1_ff,mpc0_frame1_ff} <= mpc_frame1_dly;
+    {mpc1_frame0_ff,mpc0_frame0_ff} <= mpc_frame0_dly; // Pulsed copy of LCTs for header
+    {mpc1_frame1_ff,mpc0_frame1_ff} <= mpc_frame1_dly;
   end
 
 // Latch MPC output words for VME
