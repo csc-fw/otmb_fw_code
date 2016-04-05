@@ -25,7 +25,14 @@
   parity_err_cfeb4,
   parity_err_cfeb5,
   parity_err_cfeb6,
+
   parity_err_rpc,
+
+  parity_err_gem0,
+  parity_err_gem1,
+  parity_err_gem2,
+  parity_err_gem3,
+
   parity_err_mini,
 
 // Raw hits RAM control
@@ -34,6 +41,7 @@
 // Parity summary to sequencer and VME
   perr_cfeb,
   perr_rpc,
+  perr_gem,
   perr_mini,
   perr_en,
   perr,
@@ -41,6 +49,7 @@
 
   perr_cfeb_ff,
   perr_rpc_ff,
+  perr_gem_ff,
   perr_mini_ff,
   perr_ff,
   perr_ram_ff
@@ -52,52 +61,67 @@
   ,reset
 `endif
   );
+
 //------------------------------------------------------------------------------------------------------------------
 // Bus widths
 //------------------------------------------------------------------------------------------------------------------
-  parameter MXCFEB  = 7;            // Number of CFEBs on CSC
-  parameter MXLY    = 6;            // Number Layers in CSC
-  parameter RAM_ADRB  = 11;            // Address width=log2(ram_depth)
+
+  parameter MXCFEB    =  7;  // Number of CFEBs on CSC
+  parameter MXGEM     =  4;  // Number of GEM Fibers
+  parameter MXLY      =  6;  // Number Layers in CSC
+  parameter MXCLST    =  4;  // Number Clusters per GEM Fiber
+  parameter RAM_ADRB  =  11; // Address width=log2(ram_depth)
+  parameter MXRAMS    =  65; // Mapped bad parity RAMs, 42 cfebs + 5 rpcs + 2 mini + 16 GEM
 
 //------------------------------------------------------------------------------------------------------------------
 // Ports
 //------------------------------------------------------------------------------------------------------------------
+
 // Clock
   input          clock;          // 40MHz TMB main clock
   input          global_reset;      // Global reset
   input          perr_reset;        // Parity error reset
 
 // Parity inputs
-  input  [MXLY-1:0]    parity_err_cfeb0;    // CFEB raw hits RAM parity errors
-  input  [MXLY-1:0]    parity_err_cfeb1;    // CFEB raw hits RAM parity errors
-  input  [MXLY-1:0]    parity_err_cfeb2;    // CFEB raw hits RAM parity errors
-  input  [MXLY-1:0]    parity_err_cfeb3;    // CFEB raw hits RAM parity errors
-  input  [MXLY-1:0]    parity_err_cfeb4;    // CFEB raw hits RAM parity errors
-  input  [MXLY-1:0]    parity_err_cfeb5;    // CFEB raw hits RAM parity errors
-  input  [MXLY-1:0]    parity_err_cfeb6;    // CFEB raw hits RAM parity errors
-  input  [4:0]      parity_err_rpc;      // RPC  raw hits RAM parity errors
-  input  [1:0]      parity_err_mini;    // Miniscope     RAM parity errors
+  input  [MXLY-1:0]    parity_err_cfeb0; // CFEB raw hits RAM parity errors
+  input  [MXLY-1:0]    parity_err_cfeb1; // CFEB raw hits RAM parity errors
+  input  [MXLY-1:0]    parity_err_cfeb2; // CFEB raw hits RAM parity errors
+  input  [MXLY-1:0]    parity_err_cfeb3; // CFEB raw hits RAM parity errors
+  input  [MXLY-1:0]    parity_err_cfeb4; // CFEB raw hits RAM parity errors
+  input  [MXLY-1:0]    parity_err_cfeb5; // CFEB raw hits RAM parity errors
+  input  [MXLY-1:0]    parity_err_cfeb6; // CFEB raw hits RAM parity errors
+
+  input  [4:0]         parity_err_rpc;   // RPC  raw hits RAM parity errors
+
+  input  [3:0]         parity_err_gem0;  // GEM  raw hits RAM parity errors
+  input  [3:0]         parity_err_gem1;  // GEM  raw hits RAM parity errors
+  input  [3:0]         parity_err_gem2;  // GEM  raw hits RAM parity errors
+  input  [3:0]         parity_err_gem3;  // GEM  raw hits RAM parity errors
+
+  input  [1:0]         parity_err_mini;  // Miniscope     RAM parity errors
 
 // Raw hits RAM control
   input          fifo_wen;        // 1=Write enable FIFO RAM
 
 // Parity summary to sequencer and VME
-  output  [MXCFEB-1:0]  perr_cfeb;        // CFEB RAM parity error
-  output          perr_rpc;        // RPC  RAM parity error
-  output          perr_mini;        // Mini RAM parity error
-  output          perr_en;        // Parity error latch enabled
-  output          perr;          // Parity error summary        
-  output          perr_pulse;        // Parity error pulse for counting
-  
-  output  [MXCFEB-1:0]  perr_cfeb_ff;      // CFEB RAM parity error, latched
-  output          perr_rpc_ff;      // RPC  RAM parity error, latched
-  output          perr_mini_ff;      // Mini RAM parity error, latches
-  output          perr_ff;        // Parity error summary,  latched
-  output  [48:0]      perr_ram_ff;      // Mapped bad parity RAMs, 42 cfebs + 5 rpcs + 2 mini
+  output  [MXCFEB-1:0]  perr_cfeb;  // CFEB RAM parity error
+  output                perr_rpc;   // RPC  RAM parity error
+  output  [MXGEM-1:0]   perr_gem;   // RPC  RAM parity error
+  output                perr_mini;  // Mini RAM parity error
+  output                perr_en;    // Parity error latch enabled
+  output                perr;       // Parity error summary
+  output                perr_pulse; // Parity error pulse for counting
+
+  output  [MXCFEB-1:0]  perr_cfeb_ff; // CFEB RAM parity error, latched
+  output                perr_rpc_ff;  // RPC  RAM parity error, latched
+  output  [MXGEM-1:0]   perr_gem_ff;  // RPC  RAM parity error, latched
+  output                perr_mini_ff; // Mini RAM parity error, latches
+  output                perr_ff;      // Parity error summary,  latched
+  output  [MXRAMS-1:0]  perr_ram_ff;  // Mapped bad parity RAMs, 42 cfebs + 5 rpcs + 2 mini + 16 GEM
 
 // Debug
 `ifdef DEBUG_PARITY
-  output  [15:0]      parity_rd;
+  output  [15:0]  parity_rd;
   output          fifo_wadr_cnt_en;
   output          fifo_wadr_done;
   output          reset;
@@ -113,50 +137,59 @@
   assign perr_cfeb[4]  = | parity_err_cfeb4[MXLY-1:0];
   assign perr_cfeb[5]  = | parity_err_cfeb5[MXLY-1:0];
   assign perr_cfeb[6]  = | parity_err_cfeb6[MXLY-1:0];
-  assign perr_rpc    = | parity_err_rpc[4:0];
-  assign perr_mini  = | parity_err_mini[1:0];
 
-  assign perr      = (|perr_cfeb) || perr_rpc || perr_mini;
+  assign perr_gem[0]   = | parity_err_gem0 [MXCLST-1:0];
+  assign perr_gem[1]   = | parity_err_gem1 [MXCLST-1:0];
+  assign perr_gem[2]   = | parity_err_gem2 [MXCLST-1:0];
+  assign perr_gem[3]   = | parity_err_gem3 [MXCLST-1:0];
+
+  assign perr_rpc      = | parity_err_rpc[4:0];
+  assign perr_mini     = | parity_err_mini[1:0];
+
+  assign perr      = (|perr_cfeb) || (|perr_gem) || perr_rpc || perr_mini;
 
 // Wait for raw hits RAM address to wrap around, indicating parity bit was written to all addresses
   `ifndef DEBUG_PARITY parameter FIFO_LAST_ADR = 4096; `endif  // Make sure fifo wrote all addresses before checking parity
-  `ifdef  DEBUG_PARITY parameter FIFO_LAST_ADR = 8;   `endif  // Shorten for simulator
+  `ifdef  DEBUG_PARITY parameter FIFO_LAST_ADR = 8;    `endif  // Shorten for simulator
 
   reg [12:0] fifo_wadr_cnt = 0;
   reg perr_en = 0;
-  
+
   wire fifo_wadr_cnt_en = fifo_wen && !perr_en;
   wire fifo_wadr_done   = fifo_wadr_cnt > FIFO_LAST_ADR;
   wire reset            = perr_reset || global_reset;
 
   always @(posedge clock) begin
   if (fifo_wadr_cnt_en) fifo_wadr_cnt <= fifo_wadr_cnt+1'b1;
-  else          fifo_wadr_cnt <= 0;
+  else                  fifo_wadr_cnt <= 0;
   end
 
   always @(posedge clock) begin
-  if     (reset)       perr_en <= 0;
+  if      (reset)          perr_en <= 0;
   else if (fifo_wadr_done) perr_en <= 1;
   end
 
-// Latch errors 
-  reg  [MXCFEB-1:0] perr_cfeb_ff  = 0;
-  reg         perr_rpc_ff  = 0;
-  reg         perr_mini_ff  = 0;
-  reg         perr_ff    = 0;
+// Latch errors
+  reg  [MXCFEB-1:0] perr_cfeb_ff  =  0;
+  reg  [MXGEM -1:0] perr_gem_ff   =  0;
+  reg               perr_rpc_ff   =  0;
+  reg               perr_mini_ff  =  0;
+  reg               perr_ff       =  0;
 
   always @(posedge clock) begin
   if (reset) begin
-  perr_cfeb_ff <= 0;
-  perr_rpc_ff  <= 0;
-  perr_mini_ff <= 0;
-  perr_ff     <= 0;
+    perr_cfeb_ff <= 0;
+    perr_gem_ff  <= 0;
+    perr_rpc_ff  <= 0;
+    perr_mini_ff <= 0;
+    perr_ff      <= 0;
   end
   else if (perr_en) begin
-  perr_cfeb_ff <= perr_cfeb_ff | perr_cfeb;
-  perr_rpc_ff  <= perr_rpc_ff  | perr_rpc;
-  perr_mini_ff <= perr_mini_ff | perr_mini;
-  perr_ff     <= perr_ff      | perr;
+    perr_cfeb_ff <= perr_cfeb_ff | perr_cfeb;
+    perr_gem_ff  <= perr_gem_ff  | perr_gem;
+    perr_rpc_ff  <= perr_rpc_ff  | perr_rpc;
+    perr_mini_ff <= perr_mini_ff | perr_mini;
+    perr_ff      <= perr_ff      | perr;
   end
   end
 
@@ -167,8 +200,8 @@
   perr_pulse <= perr & perr_en;
   end
 
-// Map bad parity RAMs, 6x7=42 cfebs and 5 rpcs and 2 miniscope
-  reg [48:0] perr_ram_ff=0;
+// Map bad parity RAMs, 6x7=42 cfebs and 5 rpcs and 2 miniscope and 16 GEMs
+  reg [MXRAMS-1:0] perr_ram_ff=0;
 
   wire reset_perr_ram = reset || !perr_en;
 
@@ -182,8 +215,12 @@
   perr_ram_ff[29:24]  <= perr_ram_ff[29:24] | parity_err_cfeb4[5:0];  // cfeb4 rams
   perr_ram_ff[35:30]  <= perr_ram_ff[35:30] | parity_err_cfeb5[5:0];  // cfeb5 rams
   perr_ram_ff[41:36]  <= perr_ram_ff[41:36] | parity_err_cfeb6[5:0];  // cfeb6 rams
-  perr_ram_ff[46:42]  <= perr_ram_ff[46:42] | parity_err_rpc[4:0];  // rpc   rams
-  perr_ram_ff[48:47]  <= perr_ram_ff[48:47] | parity_err_mini[1:0];  // mini  rams
+  perr_ram_ff[46:42]  <= perr_ram_ff[46:42] | parity_err_rpc[4:0];    // rpc   rams
+  perr_ram_ff[48:47]  <= perr_ram_ff[48:47] | parity_err_mini[1:0];   // mini  rams
+  perr_ram_ff[52:49]  <= perr_ram_ff[52:49] | parity_err_gem0[3:0];   // gem   rams
+  perr_ram_ff[56:53]  <= perr_ram_ff[56:53] | parity_err_gem1[3:0];   // gem   rams
+  perr_ram_ff[60:57]  <= perr_ram_ff[60:57] | parity_err_gem2[3:0];   // gem   rams
+  perr_ram_ff[64:61]  <= perr_ram_ff[64:61] | parity_err_gem2[3:0];   // gem   rams
   end
   end
 
@@ -191,14 +228,14 @@
 // Debug
 //------------------------------------------------------------------------------------------------------------------
 `ifdef DEBUG_PARITY
-  assign parity_rd[4:0]  = perr_cfeb[4:0];
-  assign parity_rd[5]    = perr_rpc;
-  assign parity_rd[6]    = perr_mini;
-  assign parity_rd[7]    = perr_en;
-  assign parity_rd[8]    = perr;
-  assign parity_rd[13:9]  = perr_cfeb_ff[4:0];
-  assign parity_rd[14]  = perr_rpc_ff;
-  assign parity_rd[15]  = perr_ff;
+  assign parity_rd[4:0]   =  perr_cfeb[4:0];
+  assign parity_rd[5]     =  perr_rpc;
+  assign parity_rd[6]     =  perr_mini;
+  assign parity_rd[7]     =  perr_en;
+  assign parity_rd[8]     =  perr;
+  assign parity_rd[13:9]  =  perr_cfeb_ff[4:0];
+  assign parity_rd[14]    =  perr_rpc_ff;
+  assign parity_rd[15]    =  perr_ff;
 `endif
 
 //------------------------------------------------------------------------------------------------------------------
