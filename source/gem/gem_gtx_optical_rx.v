@@ -73,7 +73,7 @@
   input      clocks_rdy;      // QPLL & MMCM locked
   input      rxp;             // SNAP12+ fiber input for GTX
   input      rxn;             // SNAP12- fiber input for GTX
-  input      gtx_rx_pol_swap; // Inputs 5,6 [ie dcfeb 4,5] have swapped rx board routes
+  output     gtx_rx_pol_swap; // Inputs 5,6 [ie dcfeb 4,5] have swapped rx board routes
 
 // Optical receiver status
   input           gtx_rx_reset;         // Reset GTX
