@@ -9,6 +9,7 @@
 //  04/30/2009  Add miniscope ram parity
 //  08/17/2010  Port to ISE 12
 //  02/21/2013  Expand to 7 CFEBs
+//  04/05/2016  Addition of GEM Parity check
 //------------------------------------------------------------------------------------------------------------------
   module parity
   (
