@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------------------------------------------
 //  buffer_read_ctrl
 //
-//  Controls CFEB and RPC Raw Hits, and Miniscope RAM Readout to Sequencer
+//  Controls CFEB and RPC/GEM Raw Hits, and Miniscope RAM Readout to Sequencer
 //------------------------------------------------------------------------------------------------------------------
 //   02/22/2002  Initial
 //  02/25/2002  Invert fifo_wen
@@ -68,6 +68,7 @@
 //  12/01/2010  Remove prefixes from blocked bits slices
 //  05/27/2011  Shorten cfeb_slice_cnt_bcb[2:0] to [1:0], as it never counts past 3
 //  02/21/2013  Expand to 7 cfebs
+//  04/11/2016  Addition of GEM Readout
 //------------------------------------------------------------------------------------------------------------------
   module  buffer_read_ctrl
   (
@@ -78,6 +79,10 @@
 // CFEB Raw Hits FIFO RAM Ports
   fifo_radr_cfeb,
   fifo_sel_cfeb,
+
+// GEM Raw Hits FIFO RAM Ports
+  fifo_radr_gem,
+  fifo_sel_gem,
 
 // RPC Raw Hits FIFO RAM Ports
   fifo_radr_rpc,
@@ -104,6 +109,12 @@
   cfeb5_blockedbits,
   cfeb6_blockedbits,
 
+// GEM Raw hits Data Ports
+  fifo0_rdata_gem, // gem0, fiber0
+  fifo1_rdata_gem, // gem0, fiber1
+  fifo2_rdata_gem, // gem0, fiber0
+  fifo3_rdata_gem, // gem0, fiber1
+
 // RPC Raw hits Data Ports
   fifo0_rdata_rpc,
   fifo1_rdata_rpc,
@@ -118,6 +129,11 @@
 // RPC VME Configuration Ports
   fifo_tbins_rpc,
   fifo_pretrig_rpc,
+
+// GEM VME Configuration Ports
+  fifo_tbins_gem,
+  fifo_pretrig_gem,
+  gem_zero_suppress,
 
 // Minisocpe VME Configuration Ports
   mini_tbins_word,
@@ -143,6 +159,13 @@
   rd_list_rpc,
   rd_nrpcs,
   rd_rpc_offset,
+
+// GEM Sequencer Readout Control
+  rd_start_gem,
+  rd_abort_gem,
+  rd_list_gem,
+  rd_ngems,
+  rd_gem_offset,
 
 // Mini Sequencer Readout Control
   rd_start_mini,
@@ -172,6 +195,14 @@
   rpc_rawhits,
   rpc_fifo_busy,
 
+// GEM Sequencer Frame Output
+  gem_first_frame,
+  gem_last_frame,
+  gem_adr,
+  gem_rawhits,
+  gem_id,
+  gem_fifo_busy,
+
 // Mini Sequencer Frame Output
   mini_first_frame,
   mini_last_frame,
@@ -183,6 +214,7 @@
   ,fifo_wen
   ,read_csm_dsp
   ,read_bcb_dsp
+  ,read_gsm_dsp
   ,read_rsm_dsp
   ,read_msm_dsp
 
@@ -191,6 +223,9 @@
 
   ,rpc_ram_rdata
   ,rpc_ram_rdata_ff
+
+  ,gem_ram_rdata
+  ,gem_ram_rdata_ff
 
   ,cfeb_done
   ,cfeb_tbin_done
@@ -241,35 +276,45 @@
 // Constants
 //------------------------------------------------------------------------------------------------------------------
   parameter MXCFEB        = 7;      // Number CFEBs
-  parameter MXCFEBB        = 3;      // Number CFEB ID bits
+  parameter MXCFEBB       = 3;      // Number CFEB ID bits
   parameter MXTBIN        = 5;      // Time bin address width
   parameter MXLY          = 6;      // Number Layers in CSC
   parameter MXDS          = 8;      // Number of DiStrips per layer
-  parameter MXRPC          = 2;      // Number RPCs
+  parameter MXGEM         = 4;      // Number GEM Fibers
+  parameter MXGEMB        = 2;      // Number GEM ID bits to identify fiber
+  parameter MXCLST        = 4;      // Number GEM Clusters per Fiber
+  parameter MXRPC         = 2;      // Number RPCs
   parameter MXRPCB        = 1;      // Number RPC ID bits
-  parameter READ_ADR_OFFSET    = 11'd6;    // Number clocks from first address to pretrigger adr latch, trial 04/22/08
-  parameter READ_ADR_OFFSET_RPC  = 11'd0;    // Number clocks from first address to pretrigger
-  parameter READ_ADR_OFFSET_MINI  = 11'd0;    // Number clocks from first address to pretrigger
+
+  parameter READ_ADR_OFFSET      = 11'd6; // Number clocks from first address to pretrigger adr latch, trial 04/22/08
+  parameter READ_ADR_OFFSET_RPC  = 11'd0; // Number clocks from first address to pretrigger
+  parameter READ_ADR_OFFSET_GEM  = 11'd0; // Number clocks from first address to pretrigger
+  parameter READ_ADR_OFFSET_MINI = 11'd0; // Number clocks from first address to pretrigger
 
 // Raw hits RAM parameters
-  parameter RAM_DEPTH        = 2048;      // Storage bx depth
-  parameter RAM_ADRB        = 11;      // Address width=log2(ram_depth)
-  parameter RAM_WIDTH        = 8;      // Data width
+  parameter RAM_DEPTH     = 2048; // Storage bx depth
+  parameter RAM_ADRB      = 11;   // Address width      = log2(ram_depth)
+  parameter RAM_WIDTH     = 8;    // Data width
+  parameter RAM_WIDTH_GEM = 14;   // Data width for GEM FIFOs
 
 //------------------------------------------------------------------------------------------------------------------
 // Ports
 //------------------------------------------------------------------------------------------------------------------
 // CCB
-  input            clock;        // 40MHz TMB main clock
-  input            ttc_resync;      // Resync TMB
+  input            clock;      // 40MHz TMB main clock
+  input            ttc_resync; // Resync TMB
 
 // CFEB Raw Hits FIFO RAM
-  output  [RAM_ADRB-1:0]    fifo_radr_cfeb;    // FIFO RAM read tbin address
-  output  [2:0]        fifo_sel_cfeb;    // FIFO RAM read layer address 0-5
+  output  [RAM_ADRB-1:0]    fifo_radr_cfeb; // FIFO RAM read tbin address
+  output  [2:0]             fifo_sel_cfeb;  // FIFO RAM read layer address 0-5
+
+// GEM Raw Hits FIFO RAM
+  output  [RAM_ADRB-1:0]    fifo_radr_gem; // FIFO RAM read tbin address
+  output  [1:0]             fifo_sel_gem;  // FIFO RAM read cluster address 0-3
 
 // RPC Raw Hits FIFO RAM
-  output  [RAM_ADRB-1:0]    fifo_radr_rpc;    // FIFO RAM read tbin address
-  output  [0:0]        fifo_sel_rpc;    // FIFO RAM read slice address 0-1
+  output  [RAM_ADRB-1:0]    fifo_radr_rpc; // FIFO RAM read tbin address
+  output  [0:0]             fifo_sel_rpc;  // FIFO RAM read slice address 0-1
 
 // Miniscpe FIFO RAM
   output  [RAM_ADRB-1:0]    fifo_radr_mini;    // Mini RAM read address
@@ -283,6 +328,7 @@
   input  [RAM_WIDTH-1:0]    fifo5_rdata_cfeb;  // FIFO RAM read data
   input  [RAM_WIDTH-1:0]    fifo6_rdata_cfeb;  // FIFO RAM read data
 
+
 // CFEB Blockedbits Data
   input  [MXDS*MXLY-1:0]    cfeb0_blockedbits;  // 1=CFEB rx bit blocked by hcm or went bad, packed
   input  [MXDS*MXLY-1:0]    cfeb1_blockedbits;  // 1=CFEB rx bit blocked by hcm or went bad, packed
@@ -292,6 +338,12 @@
   input  [MXDS*MXLY-1:0]    cfeb5_blockedbits;  // 1=CFEB rx bit blocked by hcm or went bad, packed
   input  [MXDS*MXLY-1:0]    cfeb6_blockedbits;  // 1=CFEB rx bit blocked by hcm or went bad, packed
 
+  // GEM Raw Hits Data
+  input  [RAM_WIDTH_GEM-1:0]    fifo0_rdata_gem;  // FIFO RAM read data
+  input  [RAM_WIDTH_GEM-1:0]    fifo1_rdata_gem;  // FIFO RAM read data
+  input  [RAM_WIDTH_GEM-1:0]    fifo2_rdata_gem;  // FIFO RAM read data
+  input  [RAM_WIDTH_GEM-1:0]    fifo3_rdata_gem;  // FIFO RAM read data
+
 // RPC Raw hits Data
   input  [RAM_WIDTH-1+4:0]  fifo0_rdata_rpc;  // FIFO RAM read data, rpc
   input  [RAM_WIDTH-1+4:0]  fifo1_rdata_rpc;  // FIFO RAM read data, rpc
@@ -300,102 +352,125 @@
   input  [RAM_WIDTH*2-1:0]  fifo_rdata_mini;  // FIFO RAM read data, miniscope
 
 // CFEB VME Configuration
-  input  [MXTBIN-1:0]    fifo_tbins_cfeb;  // Number CFEB FIFO time bins to read out
-  input  [MXTBIN-1:0]    fifo_pretrig_cfeb;  // Number CFEB FIFO time bins before pretrigger
+  input  [MXTBIN-1:0]    fifo_tbins_cfeb;   // Number CFEB FIFO time bins to read out
+  input  [MXTBIN-1:0]    fifo_pretrig_cfeb; // Number CFEB FIFO time bins before pretrigger
 
 // RPC VME Configuration
-  input  [MXTBIN-1:0]    fifo_tbins_rpc;    // Number RPC FIFO time bins to read out
-  input  [MXTBIN-1:0]    fifo_pretrig_rpc;  // Number RPC FIFO time bins before pretrigger
+  input  [MXTBIN-1:0]    fifo_tbins_rpc;   // Number RPC FIFO time bins to read out
+  input  [MXTBIN-1:0]    fifo_pretrig_rpc; // Number RPC FIFO time bins before pretrigger
 
-// Minisocpe VME Configuration
-  input            mini_tbins_word;  // Insert tbins and pretrig tbins in 1st word
-  input  [MXTBIN-1:0]    fifo_tbins_mini;  // Number Mini FIFO time bins to read out
-  input  [MXTBIN-1:0]    fifo_pretrig_mini;  // Number Mini FIFO time bins before pretrigger
+// GEM VME Configuration
+  input  [MXTBIN-1:0]    fifo_tbins_gem;    // Number GEM FIFO time bins to read out
+  input  [MXTBIN-1:0]    fifo_pretrig_gem;  // Number GEM FIFO time bins before pretrigger
+  input                  gem_zero_suppress; // GEM Zero Suppression Enable
+
+// Miniscope VME Configuration
+  input                  mini_tbins_word;   // Insert tbins and pretrig tbins in 1st word
+  input  [MXTBIN-1:0]    fifo_tbins_mini;   // Number Mini FIFO time bins to read out
+  input  [MXTBIN-1:0]    fifo_pretrig_mini; // Number Mini FIFO time bins before pretrigger
 
 // CFEB Sequencer Readout Control
-  input            rd_start_cfeb;    // Initiates a FIFO readout
-  input            rd_abort_cfeb;    // Abort FIFO dump
-  input  [MXCFEB-1:0]     rd_list_cfeb;    // List of CFEBs to read out
-  input  [MXCFEBB-1:0]    rd_ncfebs;      // Number of CFEBs in feb_list (4 or 7 depending on CSC type)
-  input  [RAM_ADRB-1:0]    rd_fifo_adr;    // RAM address at pre-trig, must be valid 1bx before rd_start
+  input                   rd_start_cfeb; // Initiates a FIFO readout
+  input                   rd_abort_cfeb; // Abort FIFO dump
+  input  [MXCFEB-1:0]     rd_list_cfeb;  // List of CFEBs to read out
+  input  [MXCFEBB-1:0]    rd_ncfebs;     // Number of CFEBs in feb_list (4 or 7 depending on CSC type)
+  input  [RAM_ADRB-1:0]   rd_fifo_adr;   // RAM address at pre-trig, must be valid 1bx before rd_start
 
 // CFEB Blockedbits Readout Control
-  input            rd_start_bcb;    // Start readout sequence
-  input            rd_abort_bcb;    // Cancel readout
-  input  [MXCFEB-1:0]     rd_list_bcb;    // List of CFEBs to read out
-  input  [MXCFEBB-1:0]    rd_ncfebs_bcb;    // Number of CFEBs in bcb_list (0 to 7)
+  input                   rd_start_bcb;  // Start readout sequence
+  input                   rd_abort_bcb;  // Cancel readout
+  input  [MXCFEB-1:0]     rd_list_bcb;   // List of CFEBs to read out
+  input  [MXCFEBB-1:0]    rd_ncfebs_bcb; // Number of CFEBs in bcb_list (0 to 7)
+
+// GEM Sequencer Readout Control
+  input                    rd_start_gem;  // Start readout sequence
+  input                    rd_abort_gem;  // Cancel readout
+  input  [MXGEM-1:0]       rd_list_gem;   // List of GEMs to read out
+  input  [MXGEMB-1+1:0]    rd_ngems;      // Number of GEMs in gem_list (4)
+  input  [RAM_ADRB-1:0]    rd_gem_offset; // RAM address rd_fifo_adr offset for gem read out
 
 // RPC Sequencer Readout Control
-  input            rd_start_rpc;    // Start readout sequence
-  input            rd_abort_rpc;    // Cancel readout
-  input  [MXRPC-1:0]     rd_list_rpc;    // List of RPCs to read out
-  input  [MXRPCB-1+1:0]    rd_nrpcs;      // Number of RPCs in rpc_list (0 or 1-to-2 depending on CSC type)
-  input  [RAM_ADRB-1:0]    rd_rpc_offset;    // RAM address rd_fifo_adr offset for rpc read out
+  input                  rd_start_rpc;  // Start readout sequence
+  input                  rd_abort_rpc;  // Cancel readout
+  input  [MXRPC-1:0]     rd_list_rpc;   // List of RPCs to read out
+  input  [MXRPCB-1+1:0]  rd_nrpcs;      // Number of RPCs in rpc_list (0 or 1-to-2 depending on CSC type)
+  input  [RAM_ADRB-1:0]  rd_rpc_offset; // RAM address rd_fifo_adr offset for rpc read out
 
 // Mini Sequencer Readout Control
-  input            rd_start_mini;    // Start readout sequence
-  input            rd_abort_mini;    // Cancel readout
-  input  [RAM_ADRB-1:0]    rd_mini_offset;    // RAM address rd_fifo_adr offset for miniscope read out
+  input                    rd_start_mini;  // Start readout sequence
+  input                    rd_abort_mini;  // Cancel readout
+  input  [RAM_ADRB-1:0]    rd_mini_offset; // RAM address rd_fifo_adr offset for miniscope read out
 
 // CFEB Sequencer Frame Output
-  output            cfeb_first_frame;  // First frame valid 2bx after rd_start
-  output            cfeb_last_frame;  // Last frame valid 1bx after busy goes down
-  output  [MXCFEBB-1:0]    cfeb_adr;      // FIFO dump CFEB ID
-  output  [MXTBIN-1:0]    cfeb_tbin;      // FIFO dump Time Bin #
-  output  [7:0]        cfeb_rawhits;    // Layer data from FIFO
-  output            cfeb_fifo_busy;    // Readout busy sending data to sequencer, goes down 1bx early
+  output                 cfeb_first_frame; // First frame valid 2bx after rd_start
+  output                 cfeb_last_frame;  // Last frame valid 1bx after busy goes down
+  output  [MXCFEBB-1:0]  cfeb_adr;         // FIFO dump CFEB ID
+  output  [MXTBIN-1:0]   cfeb_tbin;        // FIFO dump Time Bin #
+  output  [7:0]          cfeb_rawhits;     // Layer data from FIFO
+  output                 cfeb_fifo_busy;   // Readout busy sending data to sequencer, goes down 1bx early
 
 // CFEB Blockedbits Frame Output
-  output            bcb_first_frame;  // First frame valid 2bx after rd_start
-  output            bcb_last_frame;    // Last frame valid 1bx after busy goes down
-  output  [11:0]        bcb_blkbits;    // CFEB blocked bits frame data
-  output  [MXCFEBB-1:0]    bcb_cfeb_adr;    // CFEB ID  
-  output            bcb_fifo_busy;    // Readout busy sending data to sequencer, goes down 1bx early
+  output                 bcb_first_frame; // First frame valid 2bx after rd_start
+  output                 bcb_last_frame;  // Last frame valid 1bx after busy goes down
+  output  [11:0]         bcb_blkbits;     // CFEB blocked bits frame data
+  output  [MXCFEBB-1:0]  bcb_cfeb_adr;    // CFEB ID
+  output                 bcb_fifo_busy;   // Readout busy sending data to sequencer, goes down 1bx early
+
+// GEM Sequencer Frame Output
+  output               gem_first_frame; // First frame valid 2bx after rd_start
+  output               gem_last_frame;  // Last frame valid 1bx after busy goes down
+  output  [MXGEMB-1:0] gem_adr;         // FIFO dump GEM ID
+  output  [13:0]       gem_rawhits;     // FIFO dump GEM pad hits
+  output  [0:0]        gem_id;          // FIFO dump GEM gemID
+  output               gem_fifo_busy;   // Readout busy sending data to sequencer, goes down 1bx early
 
 // RPC Sequencer Frame Output
-  output            rpc_first_frame;  // First frame valid 2bx after rd_start
-  output            rpc_last_frame;    // Last frame valid 1bx after busy goes down
-  output  [MXRPCB-1:0]    rpc_adr;      // FIFO dump RPC ID
-  output  [MXTBIN-1:0]    rpc_tbinbxn;    // FIFO dump RPC tbin or bxn for DMB
-  output  [7:0]        rpc_rawhits;    // FIFO dump RPC pad hits, 8 of 16 per cycle
-  output            rpc_fifo_busy;    // Readout busy sending data to sequencer, goes down 1bx early
+  output               rpc_first_frame; // First frame valid 2bx after rd_start
+  output               rpc_last_frame;  // Last frame valid 1bx after busy goes down
+  output  [MXRPCB-1:0] rpc_adr;         // FIFO dump RPC ID
+  output  [MXTBIN-1:0] rpc_tbinbxn;     // FIFO dump RPC tbin or bxn for DMB
+  output  [7:0]        rpc_rawhits;     // FIFO dump RPC pad hits, 8 of 16 per cycle
+  output               rpc_fifo_busy;   // Readout busy sending data to sequencer, goes down 1bx early
 
 // Mini Sequencer Frame Output
-  output            mini_first_frame;  // First frame valid 2bx after rd_start
-  output            mini_last_frame;  // Last frame valid 1bx after busy goes down
-  output  [RAM_WIDTH*2-1:0]  mini_rdata;      // FIFO dump miniscope
-  output            mini_fifo_busy;    // Readout busy sending data to sequencer, goes down 1bx early
+  output                     mini_first_frame; // First frame valid 2bx after rd_start
+  output                     mini_last_frame;  // Last frame valid 1bx after busy goes down
+  output  [RAM_WIDTH*2-1:0]  mini_rdata;       // FIFO dump miniscope
+  output                     mini_fifo_busy;   // Readout busy sending data to sequencer, goes down 1bx early
 
 // Debug
 `ifdef DEBUG_BUFFER_READ_CTRL
   input          fifo_wen;
-  output  [63:0]      read_csm_dsp;
-  output  [63:0]      read_bcb_dsp;
-  output  [63:0]       read_rsm_dsp;
-  output  [63:0]       read_msm_dsp;
+  output  [63:0] read_csm_dsp;
+  output  [63:0] read_bcb_dsp;
+  output  [63:0] read_rsm_dsp;
+  output  [63:0] read_msm_dsp;
 
-  output  [7:0]      cfeb_ram_rdata;
-  output  [7:0]      cfeb_ram_rdata_ff;
+  output  [7:0]  cfeb_ram_rdata;
+  output  [7:0]  cfeb_ram_rdata_ff;
 
-  output  [7:0]      rpc_ram_rdata;
-  output  [7:0]      rpc_ram_rdata_ff;
-  
-  output          cfeb_done;
-  output          cfeb_tbin_done;
-  output          cfeb_layer_done;
+  output  [7:0]  rpc_ram_rdata;
+  output  [7:0]  rpc_ram_rdata_ff;
+
+  output  [14:0]  gem_ram_rdata;
+  output  [14:0]  gem_ram_rdata_ff;
+
+  output         cfeb_done;
+  output         cfeb_tbin_done;
+  output         cfeb_layer_done;
 
   output  [MXCFEBB-1:0]  cfeb_cnt;
-  output  [MXTBIN-1:0]  cfeb_tbin_cnt;
-  output  [2:0]       cfeb_layer_cnt;
+  output  [MXTBIN-1:0]   cfeb_tbin_cnt;
+  output  [2:0]          cfeb_layer_cnt;
 
   output          cfeb_cnt_clr;
   output          cfeb_tbin_cnt_clr;
   output          cfeb_layer_cnt_clr;
 
-  output  [MXCFEBB-1:0]  cfeb_cnt_bcb;
+  output  [MXCFEBB-1:0]    cfeb_cnt_bcb;
   output  [MXDS*MXLY-1:0]  cfeb_blockedbits;
-  output  [1:0]      cfeb_slice_cnt_bcb;
-  output  [MXCFEBB-1:0]  cfeb_sel_bcb;
+  output  [1:0]            cfeb_slice_cnt_bcb;
+  output  [MXCFEBB-1:0]    cfeb_sel_bcb;
 
   output          bcb_done;
   output          bcb_slice_done;
@@ -411,7 +486,7 @@
 
   output  [MXRPCB-1:0]  rpc_cnt;
   output  [MXTBIN-1:0]  rpc_tbin_cnt;
-  output  [0:0]       rpc_slice_cnt;
+  output  [0:0]         rpc_slice_cnt;
 
   output          rpc_cnt_clr;
   output          rpc_tbin_cnt_clr;
@@ -419,28 +494,28 @@
 
   output [MXTBIN-1:0]    bxn0_mux;
   output [MXTBIN-1:0]    bxn1_mux;
-  output  [0:0]      rpc_slice_cnt_dly;
+  output  [0:0]          rpc_slice_cnt_dly;
 `endif
 
-//------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
 // CFEB FIFO Read Section:
-//------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
 // Counter done flags
   wire cfeb_done;
   wire cfeb_tbin_done;
   wire cfeb_layer_done;
 
 // CFEB FIFO Read State Machine
-  reg  [1:0] read_csm;      // synthesis attribute safe_implementation of read_csm is "yes";
-  parameter csm_idle  =  0;  // Waiting for start_read
-  parameter csm_read  =  1;  // Raw hits readout in progress
+  reg  [1:0] read_csm;    // synthesis attribute safe_implementation of read_csm is "yes";
+  parameter csm_idle = 0; // Waiting for start_read
+  parameter csm_read = 1; // Raw hits readout in progress
 
   initial read_csm = csm_idle;
-  
+
   wire csm_reset = (ttc_resync || rd_abort_cfeb);
 
   always @(posedge clock) begin
-  if (csm_reset) 
+  if (csm_reset)
     read_csm = csm_idle;
   else begin
   case (read_csm)
@@ -462,12 +537,12 @@
   wire cfeb_cnt_clr = cfeb_done || (read_csm != csm_read);
 
   always @(posedge clock) begin
-  if    (cfeb_cnt_clr  ) cfeb_cnt =0;
+  if      (cfeb_cnt_clr  ) cfeb_cnt =0;
   else if (cfeb_tbin_done) cfeb_cnt=cfeb_cnt+1'b1;
   end
 
   assign cfeb_done = ((cfeb_cnt == (rd_ncfebs-1)) || (rd_ncfebs == 0)) && cfeb_tbin_done;
-  
+
 // Time bin read-address counter
   reg  [MXTBIN-1:0] cfeb_tbin_cnt=0;
   wire [MXTBIN-1:0] cfeb_tbin_last;
@@ -475,7 +550,7 @@
   wire cfeb_tbin_cnt_clr = cfeb_tbin_done || (read_csm != csm_read) && !rd_start_cfeb; // accelerate startup with rd_start
 
   always @(posedge clock) begin
-  if    (cfeb_tbin_cnt_clr) cfeb_tbin_cnt = 0;
+  if       (cfeb_tbin_cnt_clr) cfeb_tbin_cnt = 0;
   else if  (cfeb_layer_done  ) cfeb_tbin_cnt = cfeb_tbin_cnt+1'b1;
   end
 
@@ -489,12 +564,12 @@
 
   always @(posedge clock) begin
   if (cfeb_layer_cnt_clr)  cfeb_layer_cnt = 0;
-  else          cfeb_layer_cnt = cfeb_layer_cnt+1'b1;
+  else                     cfeb_layer_cnt = cfeb_layer_cnt+1'b1;
   end
 
   assign cfeb_layer_done = (cfeb_layer_cnt == 5);
 
-// Readout sequence map selects CFEB order according to FEB hit list, ie 11111 reads out 0,1,2,3,4 and 00001 reads 0 
+// Readout sequence map selects CFEB order according to FEB hit list, ie 11111 reads out 0,1,2,3,4 and 00001 reads 0
   reg [2:0] cfebptr [MXCFEB-1:0];
   integer i;
   integer n;
@@ -516,7 +591,7 @@
 
 // Delay cfeb_sel to compensate for RAM access
   reg [MXCFEBB-1:0] cfeb_sel_ff [1:0];
-  
+
   always @(posedge clock) begin
   cfeb_sel_ff[0] <= cfeb_sel;
   cfeb_sel_ff[1] <= cfeb_sel_ff[0];
@@ -524,7 +599,7 @@
 
   wire [MXCFEBB-1:0] cfeb_sel_dly = cfeb_sel_ff[1];
 
-// Calculate first RAM read address, arithmetic is pipelined, but values are really static 
+// Calculate first RAM read address, arithmetic is pipelined, but values are really static
   reg  [RAM_ADRB-1:0] first_read_adr_cfeb=0;
 
   always @(posedge clock) begin
@@ -532,14 +607,14 @@
   end
 
 // Construct outgoing RAM read-address and layer mux select, RAM access takes 1bx
-  reg [RAM_ADRB-1:0]  fifo_radr_cfeb   = 0;
-  reg [2:0]      fifo_sel_cfeb_s0 = 0;
-  reg [2:0]      fifo_sel_cfeb    = 0;
+  reg [RAM_ADRB-1:0] fifo_radr_cfeb   = 0;
+  reg [2:0]          fifo_sel_cfeb_s0 = 0;
+  reg [2:0]          fifo_sel_cfeb    = 0;
 
   always @(posedge clock) begin
-  fifo_radr_cfeb    <= cfeb_tbin_cnt + first_read_adr_cfeb;  // FF buffer the add operation beco it has wide fanout
+  fifo_radr_cfeb    <= cfeb_tbin_cnt + first_read_adr_cfeb; // FF buffer the add operation beco it has wide fanout
   fifo_sel_cfeb_s0  <= cfeb_layer_cnt;
-  fifo_sel_cfeb    <= fifo_sel_cfeb_s0;          // Delay CFEB layer mux select 1bx for RAM access time
+  fifo_sel_cfeb     <= fifo_sel_cfeb_s0;                    // Delay CFEB layer mux select 1bx for RAM access time
   end
 
 // Multiplex incoming RAM data from 7 CFEBs, delays 1bx
@@ -547,13 +622,13 @@
 
   always @* begin
   case (cfeb_sel_dly)
-  3'h0:  cfeb_rawhits <= fifo0_rdata_cfeb;
-  3'h1:  cfeb_rawhits <= fifo1_rdata_cfeb;
-  3'h2:  cfeb_rawhits <= fifo2_rdata_cfeb;
-  3'h3:  cfeb_rawhits <= fifo3_rdata_cfeb;
-  3'h4:  cfeb_rawhits <= fifo4_rdata_cfeb;
-  3'h5:  cfeb_rawhits <= fifo5_rdata_cfeb;
-  3'h6:  cfeb_rawhits <= fifo6_rdata_cfeb;
+  3'h0:    cfeb_rawhits <= fifo0_rdata_cfeb;
+  3'h1:    cfeb_rawhits <= fifo1_rdata_cfeb;
+  3'h2:    cfeb_rawhits <= fifo2_rdata_cfeb;
+  3'h3:    cfeb_rawhits <= fifo3_rdata_cfeb;
+  3'h4:    cfeb_rawhits <= fifo4_rdata_cfeb;
+  3'h5:    cfeb_rawhits <= fifo5_rdata_cfeb;
+  3'h6:    cfeb_rawhits <= fifo6_rdata_cfeb;
   default  cfeb_rawhits <= fifo0_rdata_cfeb;
   endcase
   end
@@ -580,9 +655,9 @@
   srl16e_bbl #(1) usrlc4 (.clock(clock),.ce(1'b1),.adr(dly1),.d(cfeb_done    ),.q(cfeb_last_frame ));
 
 // Assert data markers, alignment FFs, signals valid 2bx after rd_start arrives
-  assign cfeb_adr      = cfeb_adr_dly;
-  assign cfeb_tbin    = cfeb_tbin_dly;
-  assign cfeb_fifo_busy = cfeb_busy_fast; 
+  assign cfeb_adr       = cfeb_adr_dly;
+  assign cfeb_tbin      = cfeb_tbin_dly;
+  assign cfeb_fifo_busy = cfeb_busy_fast;
 
 //------------------------------------------------------------------------------------------------------------------
 // CFEB Blockebits Read Section:
@@ -593,15 +668,15 @@
 
 // CFEB Blockedbits Read State Machine
   reg  [1:0] read_bcb;      // synthesis attribute safe_implementation of read_bcb is "yes";
-  parameter bcb_idle  =  0;  // Waiting for start_read
-  parameter bcb_read  =  1;  // Raw hits readout in progress
+  parameter bcb_idle  =  0; // Waiting for start_read
+  parameter bcb_read  =  1; // Raw hits readout in progress
 
   initial read_bcb = bcb_idle;
-  
+
   wire bcb_reset = (ttc_resync || rd_abort_bcb);
 
   always @(posedge clock) begin
-  if (bcb_reset) 
+  if (bcb_reset)
     read_bcb <= bcb_idle;
   else begin
   case (read_bcb)
@@ -628,7 +703,7 @@
   end
 
   assign bcb_done = ((cfeb_cnt_bcb == (rd_ncfebs_bcb-1)) || (rd_ncfebs_bcb == 0)) && bcb_slice_done;
-  
+
 // Readout slice counter points to slices 0-3 for packed blockedbits data
   parameter cfeb_slice_last_bcb = 4-1;
   reg [1:0] cfeb_slice_cnt_bcb  = 0;
@@ -642,7 +717,7 @@
 
   assign bcb_slice_done = (cfeb_slice_cnt_bcb == cfeb_slice_last_bcb);
 
-// Readout sequence map selects CFEB order according to CFEB enabled list, ie 11111 reads out CFEB0,1,2,3,4 and 00001 reads CFEB0 
+// Readout sequence map selects CFEB order according to CFEB enabled list, ie 11111 reads out CFEB0,1,2,3,4 and 00001 reads CFEB0
   reg  [MXCFEBB-1:0] cfebptr_bcb [MXCFEB-1:0];
   wire [MXCFEBB-1:0] cfeb_sel_bcb;
 
@@ -673,16 +748,16 @@
   always @* begin
   if (bcb_data_valid) begin
   case (cfeb_sel_bcb)
-  3'h0:  cfeb_blockedbits <= cfeb0_blockedbits;
-  3'h1:  cfeb_blockedbits <= cfeb1_blockedbits;
-  3'h2:  cfeb_blockedbits <= cfeb2_blockedbits;
-  3'h3:  cfeb_blockedbits <= cfeb3_blockedbits;
-  3'h4:  cfeb_blockedbits <= cfeb4_blockedbits;
-  3'h5:  cfeb_blockedbits <= cfeb5_blockedbits;
-  3'h6:  cfeb_blockedbits <= cfeb6_blockedbits;
+  3'h0:  cfeb_blockedbits   <= cfeb0_blockedbits;
+  3'h1:  cfeb_blockedbits   <= cfeb1_blockedbits;
+  3'h2:  cfeb_blockedbits   <= cfeb2_blockedbits;
+  3'h3:  cfeb_blockedbits   <= cfeb3_blockedbits;
+  3'h4:  cfeb_blockedbits   <= cfeb4_blockedbits;
+  3'h5:  cfeb_blockedbits   <= cfeb5_blockedbits;
+  3'h6:  cfeb_blockedbits   <= cfeb6_blockedbits;
   default  cfeb_blockedbits <= cfeb0_blockedbits;
   endcase
-  end 
+  end
   else  cfeb_blockedbits <= 12'hBEF;
   end
 
@@ -720,6 +795,161 @@
   srl16e_bbl #(1) usrlbcb1 (.clock(clock),.ce(1'b1),.adr(dly0),.d(bcb_done    ),.q(bcb_last_frame ));
 
 //------------------------------------------------------------------------------------------------------------------
+// GEM FIFO Read Section:
+//------------------------------------------------------------------------------------------------------------------
+
+// we read the GEM according to the following (psuedocode) loop:
+// for (itbin=0; itbin<ntbins; itbin++)
+//    for (igem=0; igem<ngems; igem++)
+//        for (iclust=0; iclust<nclusts; iclust++)
+//            tx = data (itbin,igem,iclust)
+
+// Counter done flags
+  wire gem_fiber_done;
+  wire gem_tbin_done;
+  wire gem_clust_done;
+
+// GEM FIFO Read State Machine
+//----------------------------------------------------------------------------------------------------------------------
+
+  reg  [1:0] read_gsm;    // synthesis attribute safe_implementation of read_gsm is "yes";
+  parameter gsm_idle = 0; // Waiting for start_read
+  parameter gsm_read = 1; // Raw hits readout in progress
+
+  initial read_gsm = gsm_idle;
+
+  wire gsm_reset = (ttc_resync || rd_abort_gem);
+
+  always @(posedge clock) begin
+    if (gsm_reset)
+      read_gsm = gsm_idle;
+    else begin
+      case (read_gsm)
+        gsm_idle: if (rd_start_gem)  read_gsm = gsm_read;
+        gsm_read: if (gem_tbin_done) read_gsm = gsm_idle;
+        default                      read_gsm = gsm_idle;
+      endcase
+    end
+  end
+
+// Time bin counter
+//----------------------------------------------------------------------------------------------------------------------
+
+  reg  [MXTBIN-1:0] gem_tbin_cnt=0;
+  wire [MXTBIN-1:0] gem_tbin_last;
+
+  wire gem_tbin_cnt_clr = gem_tbin_done || (read_gsm != gsm_read);
+
+  always @(posedge clock) begin
+    if       (gem_tbin_cnt_clr) gem_tbin_cnt = 0;
+    else if  (gem_fiber_done  ) gem_tbin_cnt = gem_tbin_cnt+1'b1; // advance to the next time bin when we finish reading the last fiber
+  end
+
+  assign gem_tbin_last = fifo_tbins_gem - 1'b1;  // Calculate separately from tbin_done else fails for 0
+  assign gem_tbin_done = (gem_tbin_cnt == gem_tbin_last) && gem_fiber_done;
+
+// GEM fiber counter
+//----------------------------------------------------------------------------------------------------------------------
+
+  reg  [MXGEMB-1:0] gem_fiber_cnt=0;
+  wire [MXGEMB-1:0] gem_readout_count;
+
+  // logical && has higher precedence than logical OR...
+  wire gem_fiber_cnt_clr = gem_fiber_done || ((read_gsm != gsm_read) && !rd_start_gem); // accelerate startup with rd_start
+  // rd_start_gem goes high 2bx before CFEB finishes reading. Gives us 2bx to pre-access RAM
+
+  always @(posedge clock) begin
+    if      (gem_fiber_cnt_clr   ) gem_fiber_cnt = 0;
+    else if (gem_clust_done) gem_fiber_cnt = gem_fiber_cnt+1'b1; // advance to the next fiber when we finish reading the last cluster
+  end
+
+  assign gem_fiber_done = ((gem_fiber_cnt == (rd_ngems-1)) || (rd_ngems == 0)) && gem_clust_done;
+
+// Cluster counter
+//----------------------------------------------------------------------------------------------------------------------
+
+  reg [1:0] gem_clust_cnt=0; // count from clusters 0-3 on this fiber
+
+  wire gem_clust_cnt_clr = gem_clust_done || (read_gsm != gsm_read) && !rd_start_gem; // accelerate startup with rd_start
+
+  always @(posedge clock) begin
+    if   (gem_clust_cnt_clr)  gem_clust_cnt = 0;
+    else                      gem_clust_cnt = gem_clust_cnt+1'b1;
+  end
+
+  parameter [1:0] MAX_CLUSTER_COUNT = 2'd3;
+
+  wire [1:0] gem_valid_cluster_count = MAX_CLUSTER_COUNT; // TODO: this needs to be a muxed value of the cluster count on THIS GEM for THIS time bin this means we have to store the cluster counts (at pretrig time..) look them up now, and adjust this based on those values.
+
+  wire [1:0] gem_readout_cnt = (gem_zero_suppress) ? gem_valid_cluster_count : MAX_CLUSTER_COUNT;
+
+  assign gem_clust_done = (gem_clust_cnt==gem_readout_cnt);
+
+// Calculate first RAM read address: arithmetic is pipelined, but values are really static
+//----------------------------------------------------------------------------------------------------------------------
+  reg  [RAM_ADRB-1:0] first_read_adr_gem=0;
+
+  always @(posedge clock) begin
+    first_read_adr_gem  <=  rd_fifo_adr-fifo_pretrig_gem-rd_gem_offset-READ_ADR_OFFSET_GEM;
+    /* fifo_pretrig_gem comes from VME config */
+    /* rd_gem_offset should get hard-coded in the sequecer */
+    /* READ_ADR_OFFSET_GEM should come from this module, hardcoded. */
+  end
+
+// Construct outgoing RAM read-address and slice mux select, RAM access takes 1bx
+  reg [RAM_ADRB-1:0]  fifo_radr_gem   = 0;  // 1bx delayed copy of address
+  reg [1:0]           fifo_sel_gem_s0 = 0;  // 1bx delayed copy of cluster #
+  reg [1:0]           fifo_sel_gem    = 0;  // 2bx delayed copy of cluster #
+
+  always @(posedge clock) begin
+    fifo_radr_gem   <= gem_tbin_cnt + first_read_adr_gem;  // FF buffer the add operation beco it has wide fanout
+    fifo_sel_gem_s0 <= gem_clust_cnt;
+    fifo_sel_gem    <= fifo_sel_gem_s0;  // Delay GEM cluster mux select 1bx for RAM access time
+  end
+
+// Delay gem_fiber_cnt to align with dmb readout multiplexer
+//----------------------------------------------------------------------------------------------------------------------
+
+  // srl+ff to delay by 2bx to account for RAM access time
+  wire [MXGEMB-1:0] gem_fiber_cnt_dly_s0;
+  reg  [MXGEMB-1:0] gem_fiber_cnt_dly;
+
+  srl16e_bbl #(MXGEMB) usrlg0 (.clock(clock),.ce(1'b1),.adr(dly0),.d(gem_fiber_cnt),.q(gem_fiber_cnt_dly_s0));
+  always @(posedge clock)
+    gem_fiber_cnt_dly <= gem_fiber_cnt_dly_s0;
+
+// Multiplex incoming RAM data from 4 GEM fibers, delays 1bx
+//----------------------------------------------------------------------------------------------------------------------
+
+  reg  [RAM_WIDTH_GEM-1:0] gem_rawhits; // 14 bits multiplexed data
+  reg  [0:0] gem_id;                    // gem chamber ID, 0 or 1
+
+  always @* begin
+  case (gem_fiber_cnt_dly) // 2 bx delayed copy of fiber #
+    2'h0:  {gem_id,gem_rawhits} <= {gem_fiber_cnt_dly[1], fifo0_rdata_gem[RAM_WIDTH_GEM-1:0]}; // from GEM0, fiber0
+    2'h1:  {gem_id,gem_rawhits} <= {gem_fiber_cnt_dly[1], fifo1_rdata_gem[RAM_WIDTH_GEM-1:0]}; // from GEM0, fiber1
+    2'h2:  {gem_id,gem_rawhits} <= {gem_fiber_cnt_dly[1], fifo2_rdata_gem[RAM_WIDTH_GEM-1:0]}; // from GEM1, fiber0
+    2'h3:  {gem_id,gem_rawhits} <= {gem_fiber_cnt_dly[1], fifo3_rdata_gem[RAM_WIDTH_GEM-1:0]}; // from GEM1, fiber1
+  endcase
+  end
+
+// Accelerate busy out to go high when rd_start arrives, then go low 1bx before end of readout
+  wire rd_gem_busy   = (read_gsm == gsm_read);
+  wire gem_busy_fast = rd_start_gem || rd_gem_busy || gem_busy_dly; // gem_busy_fast used to accelerate startup of next data frame
+
+// Delay busy marker by 1bx
+  wire gem_busy_dly;
+  srl16e_bbl #(1) usrlg2 (.clock(clock),.ce(1'b1),.adr(dly0),.d(rd_gem_busy ),.q(gem_busy_dly));
+
+// First frame valid 1bx after rd_start, last frame 1bx after busy goes down
+  srl16e_bbl #(1) usrlg3 (.clock(clock),.ce(1'b1),.adr(dly1),.d(rd_start_gem),  .q(gem_first_frame));
+  srl16e_bbl #(1) usrlg4 (.clock(clock),.ce(1'b1),.adr(dly1),.d(gem_fiber_done),.q(gem_last_frame ));
+
+// Assert data markers, alignment FFs, signals valid 2bx after rd_start arrives
+  assign gem_adr       = gem_fiber_cnt_dly;
+  assign gem_fifo_busy = gem_busy_fast;
+
+//------------------------------------------------------------------------------------------------------------------
 // RPC FIFO Read Section:
 //------------------------------------------------------------------------------------------------------------------
 // Counter done flags
@@ -728,28 +958,23 @@
   wire rpc_slice_done;
 
 // RPC FIFO Read State Machine
-  reg  [1:0] read_rsm;      // synthesis attribute safe_implementation of read_rsm is "yes";
-  parameter rsm_idle  =  0;  // Waiting for start_read
-  parameter rsm_read  =  1;  // Raw hits readout in progress
+  reg  [1:0] read_rsm;    // synthesis attribute safe_implementation of read_rsm is "yes";
+  parameter rsm_idle = 0; // Waiting for start_read
+  parameter rsm_read = 1; // Raw hits readout in progress
 
   initial read_rsm = rsm_idle;
 
   wire rsm_reset = (ttc_resync || rd_abort_rpc);
 
   always @(posedge clock) begin
-  if (rsm_reset) 
+  if (rsm_reset)
     read_rsm = rsm_idle;
   else begin
-  case (read_rsm)
-  rsm_idle:
-    if (rd_start_rpc)
-    read_rsm = rsm_read;
-  rsm_read:
-    if (rpc_done)
-    read_rsm = rsm_idle;
-  default
-    read_rsm = rsm_idle;
-  endcase
+    case (read_rsm)
+      rsm_idle: if (rd_start_rpc) read_rsm = rsm_read;
+      rsm_read: if (rpc_done)     read_rsm = rsm_idle;
+      default                     read_rsm = rsm_idle;
+    endcase
   end
   end
 
@@ -772,7 +997,7 @@
   wire rpc_tbin_cnt_clr = rpc_tbin_done || (read_rsm != rsm_read)&& !rd_start_rpc; // accelerate startup with rd_start
 
   always @(posedge clock) begin
-  if    (rpc_tbin_cnt_clr) rpc_tbin_cnt = 0;
+  if       (rpc_tbin_cnt_clr) rpc_tbin_cnt = 0;
   else if  (rpc_slice_done  ) rpc_tbin_cnt = rpc_tbin_cnt+1'b1;
   end
 
@@ -785,18 +1010,18 @@
   wire rpc_slice_cnt_clr = rpc_slice_done || (read_rsm != rsm_read) && !rd_start_rpc; // accelerate startup with rd_start
 
   always @(posedge clock) begin
-  if (rpc_slice_cnt_clr)  rpc_slice_cnt = 0;
-  else          rpc_slice_cnt = rpc_slice_cnt+1'b1;
+  if   (rpc_slice_cnt_clr)  rpc_slice_cnt = 0;
+  else                      rpc_slice_cnt = rpc_slice_cnt+1'b1;
   end
 
   assign rpc_slice_done = (rpc_slice_cnt == 1);
 
-// Readout sequence map selects RPC order according to RPC hit list, ie 11 reads out RPCs 0,1 and 01 reads 0 
+// Readout sequence map selects RPC order according to RPC hit list, ie 11 reads out RPCs 0,1 and 01 reads 0
   reg [MXRPCB-1:0] rpcptr [MXRPC-1:0];
-  
+
   integer i_test;
   integer n_test;
-  
+
   integer j;
 	initial j=0;
   always @* begin
@@ -814,8 +1039,8 @@
       i_test=i_test+1;
     end
   end
-  
-  
+
+
 //  integer j;
 //	initial j=0;
 //  always @* begin
@@ -838,7 +1063,7 @@
 
 // Delay rpc_sel to compensate for RAM access
   reg [MXRPCB-1:0] rpc_sel_ff [1:0];
-  
+
   always @(posedge clock) begin
   rpc_sel_ff[0] <= rpc_sel;
   rpc_sel_ff[1] <= rpc_sel_ff[0];
@@ -846,7 +1071,7 @@
 
   wire [MXRPCB-1:0] rpc_sel_dly = rpc_sel_ff[1];
 
-// Calculate first RAM read address, arithmetic is pipelined, but values are really static 
+// Calculate first RAM read address, arithmetic is pipelined, but values are really static
   reg  [RAM_ADRB-1:0] first_read_adr_rpc=0;
 
   always @(posedge clock) begin
@@ -855,13 +1080,13 @@
 
 // Construct outgoing RAM read-address and slice mux select, RAM access takes 1bx
   reg [RAM_ADRB-1:0]  fifo_radr_rpc   = 0;
-  reg [0:0]      fifo_sel_rpc_s0 = 0;
-  reg [0:0]      fifo_sel_rpc    = 0;
+  reg [0:0]           fifo_sel_rpc_s0 = 0;
+  reg [0:0]           fifo_sel_rpc    = 0;
 
   always @(posedge clock) begin
-  fifo_radr_rpc  <= rpc_tbin_cnt + first_read_adr_rpc;  // FF buffer the add operation beco it has wide fanout
+  fifo_radr_rpc    <= rpc_tbin_cnt + first_read_adr_rpc; // FF buffer the add operation beco it has wide fanout
   fifo_sel_rpc_s0  <= rpc_slice_cnt;
-  fifo_sel_rpc  <= fifo_sel_rpc_s0;            // Delay RPC slice mux select 1bx for RAM access time
+  fifo_sel_rpc     <= fifo_sel_rpc_s0;                   // Delay RPC slice mux select 1bx for RAM access time
   end
 
 // Delay slice counter 2bx to compensate for RAM access and RPC slice mux
@@ -872,14 +1097,14 @@
   wire [MXTBIN-1:0]  rpc_tbin_dly;
   wire [MXTBIN-1-4:0] pad0s = 0;
 
-  wire [2:0] rpc0_bxn  = fifo0_rdata_rpc[10:8];
-  wire [2:0] rpc1_bxn  = fifo1_rdata_rpc[10:8];
+  wire [2:0] rpc0_bxn = fifo0_rdata_rpc[10:8];
+  wire [2:0] rpc1_bxn = fifo1_rdata_rpc[10:8];
 
   wire       rpc0_flag = fifo0_rdata_rpc[11];
   wire       rpc1_flag = fifo1_rdata_rpc[11];
 
-  wire [MXTBIN-1:0] bxn0_mux  = (rpc_slice_cnt_dly) ? {pad0s,rpc0_flag,rpc0_bxn} : rpc_tbin_dly;
-  wire [MXTBIN-1:0] bxn1_mux  = (rpc_slice_cnt_dly) ? {pad0s,rpc1_flag,rpc1_bxn} : rpc_tbin_dly;
+  wire [MXTBIN-1:0] bxn0_mux = (rpc_slice_cnt_dly) ? {pad0s,rpc0_flag,rpc0_bxn} : rpc_tbin_dly;
+  wire [MXTBIN-1:0] bxn1_mux = (rpc_slice_cnt_dly) ? {pad0s,rpc1_flag,rpc1_bxn} : rpc_tbin_dly;
 
 // Multiplex incoming RAM data from 2 RPCs, delays 1bx
   reg  [RAM_WIDTH-1:0] rpc_rawhits;
@@ -921,16 +1146,16 @@
   wire mini_tbin_done;
 
 // Miniscope FIFO Read State Machine
-  reg  [1:0] read_msm;      // synthesis attribute safe_implementation of read_msm is "yes";
-  parameter msm_idle  =  0;  // Waiting for start_read
-  parameter msm_read  =  1;  // Readout in progress
+  reg  [1:0] read_msm;    // synthesis attribute safe_implementation of read_msm is "yes";
+  parameter msm_idle = 0; // Waiting for start_read
+  parameter msm_read = 1; // Readout in progress
 
   initial read_msm = msm_idle;
 
   wire msm_reset = (ttc_resync || rd_abort_mini);
 
   always @(posedge clock) begin
-  if (msm_reset) 
+  if (msm_reset)
     read_msm = msm_idle;
   else begin
   case (read_msm)
@@ -949,7 +1174,7 @@
 // Time bin read-address counter
   reg  [MXTBIN-1:0] mini_tbin_cnt=0;
   wire [MXTBIN-1:0] mini_tbin_last;
-  
+
   wire mini_tbin_cnt_clr = mini_tbin_done || (read_msm != msm_read) && !rd_start_mini; // accelerate startup with rd_start
 
   always @(posedge clock) begin
@@ -961,7 +1186,7 @@
   assign mini_tbin_done = (mini_tbin_cnt == mini_tbin_last);
   assign mini_done      = mini_tbin_done;      // miniscope has no ram mux
 
-// Calculate first RAM read address, arithmetic is pipelined, but values are really static 
+// Calculate first RAM read address, arithmetic is pipelined, but values are really static
   reg  [RAM_ADRB-1:0] first_read_adr_mini=0;
 
   always @(posedge clock) begin
@@ -1026,6 +1251,17 @@
   endcase
   end
 
+// GEM FIFO Read State Machine
+  reg[63:0] read_gsm_dsp;
+
+  always @* begin
+  case (read_gsm)
+  gsm_idle:  read_gsm_dsp <= "gsm_idle";
+  gsm_read:  read_gsm_dsp <= "gsm_read";
+  default    read_gsm_dsp <= "gsm_idle";
+  endcase
+  end
+
 // RPC FIFO Read State Machine
   reg[63:0] read_rsm_dsp;
 
@@ -1057,35 +1293,35 @@
   generate
   for (ily=0; ily<=5; ily=ily+1) begin: ram
   RAMB16_S9_S9 #(
-  .WRITE_MODE_A     ("WRITE_FIRST"),  // WRITE_FIRST, READ_FIRST or NO_CHANGE
-  .WRITE_MODE_B     ("WRITE_FIRST"),  // WRITE_FIRST, READ_FIRST or NO_CHANGE
-  .SIM_COLLISION_CHECK ("WARNING_ONLY")  // "NONE", "WARNING_ONLY", "GENERATE_X_ONLY", "ALL"
+  .WRITE_MODE_A        ("WRITE_FIRST"), // WRITE_FIRST, READ_FIRST or NO_CHANGE
+  .WRITE_MODE_B        ("WRITE_FIRST"), // WRITE_FIRST, READ_FIRST or NO_CHANGE
+  .SIM_COLLISION_CHECK ("WARNING_ONLY") // "NONE", "WARNING_ONLY", "GENERATE_X_ONLY", "ALL"
   ) cfeb (
-  .WEA  (fifo_wen),            // Port A Write Enable Input
-  .ENA  (1'b0),              // Port A RAM Enable Input
-  .SSRA  (1'b0),              // Port A Synchronous Set/Reset Input
-  .CLKA  (clock),            // Port A Clock
-  .ADDRA  (11'h7FF),            // Port A 11-bit Address Input
-  .DIA  (8'hAB),            // Port A 8-bit Data Input
-  .DIPA  (1'b0),              // Port A 1-bit parity Input
-  .DOA  (),                // Port A 8-bit Data Output
-  .DOPA  (),                // Port A 1-bit Parity Output
+    .WEA   (fifo_wen),                     // Port A Write Enable Input
+    .ENA   (1'b0),                         // Port A RAM Enable Input
+    .SSRA  (1'b0),                         // Port A Synchronous Set/Reset Input
+    .CLKA  (clock),                        // Port A Clock
+    .ADDRA (11'h7FF),                      // Port A 11-bit Address Input
+    .DIA   (8'hAB),                        // Port A 8-bit Data Input
+    .DIPA  (1'b0),                         // Port A 1-bit parity Input
+    .DOA   (),                             // Port A 8-bit Data Output
+    .DOPA  (),                             // Port A 1-bit Parity Output
 
-  .WEB  (1'b0),              // Port B Write Enable Input
-  .ENB  (1'b1),              // Port B RAM Enable Input
-  .SSRB  (1'b0),              // Port B Synchronous Set/Reset Input
-  .CLKB  (clock),            // Port B Clock
-  .ADDRB  (fifo_radr_cfeb[RAM_ADRB-1:0]),  // Port B 11-bit Address Input
-  .DIB  ({8{1'b0}}),          // Port B 8-bit Data Input
-  .DIPB  (1'b0),              // Port B 1-bit parity Input
-  .DOB  (cfeb_ramout[ily][7:0]),    // Port B 8-bit Data Output
-  .DOPB  ());              // Port B 1-bit Parity Output
+    .WEB   (1'b0),                         // Port B Write Enable Input
+    .ENB   (1'b1),                         // Port B RAM Enable Input
+    .SSRB  (1'b0),                         // Port B Synchronous Set/Reset Input
+    .CLKB  (clock),                        // Port B Clock
+    .ADDRB (fifo_radr_cfeb[RAM_ADRB-1:0]), // Port B 11-bit Address Input
+    .DIB   ({8{1'b0}}),                    // Port B 8-bit Data Input
+    .DIPB  (1'b0),                         // Port B 1-bit parity Input
+    .DOB   (cfeb_ramout[ily][7:0]),        // Port B 8-bit Data Output
+    .DOPB  ());                            // Port B 1-bit Parity Output
   end
   endgenerate
 
 // Initialize Injector RAMs, INIT values contain preset test pattern, 2 layers x 16 tbins per line
 // Key layer 2: 6 hits on key 5 + 5 hits on key 26
-// Tbin                                FFFFEEEEDDDDCCCCBBBBAAAA9999888877776666555544443333222211110000;
+// Tbin                              FFFFEEEEDDDDCCCCBBBBAAAA9999888877776666555544443333222211110000;
   defparam ram[0].cfeb.INIT_00 =256'h00000000000000000000000000000000000F0E0D0C0B0A090807060504030201;
   defparam ram[1].cfeb.INIT_00 =256'h00000000000000000000000000000000001F1E1D1C1B1A191817161514131211;
   defparam ram[2].cfeb.INIT_00 =256'h00000000000000000000000000000000002F2E2D2C2B2A292827262524232221;
@@ -1098,12 +1334,12 @@
 
   always @(cfeb_ramout[0]or fifo_sel_cfeb) begin
   case (fifo_sel_cfeb[2:0])
-  3'h0:  cfeb_ram_rdata <= cfeb_ramout[0];
-  3'h1:  cfeb_ram_rdata <= cfeb_ramout[1];
-  3'h2:  cfeb_ram_rdata <= cfeb_ramout[2];
-  3'h3:  cfeb_ram_rdata <= cfeb_ramout[3];
-  3'h4:  cfeb_ram_rdata <= cfeb_ramout[4];
-  3'h5:  cfeb_ram_rdata <= cfeb_ramout[5];
+  3'h0:    cfeb_ram_rdata <= cfeb_ramout[0];
+  3'h1:    cfeb_ram_rdata <= cfeb_ramout[1];
+  3'h2:    cfeb_ram_rdata <= cfeb_ramout[2];
+  3'h3:    cfeb_ram_rdata <= cfeb_ramout[3];
+  3'h4:    cfeb_ram_rdata <= cfeb_ramout[4];
+  3'h5:    cfeb_ram_rdata <= cfeb_ramout[5];
   default  cfeb_ram_rdata <= cfeb_ramout[0];
   endcase
   end
@@ -1123,34 +1359,34 @@
   generate
   for (ily=0; ily<=1; ily=ily+1) begin: ramr
   RAMB16_S9_S9 #(
-  .WRITE_MODE_A     ("WRITE_FIRST"),  // WRITE_FIRST, READ_FIRST or NO_CHANGE
-  .WRITE_MODE_B     ("WRITE_FIRST"),  // WRITE_FIRST, READ_FIRST or NO_CHANGE
-  .SIM_COLLISION_CHECK ("WARNING_ONLY")  // "NONE", "WARNING_ONLY", "GENERATE_X_ONLY", "ALL"
+  .WRITE_MODE_A        ("WRITE_FIRST"), // WRITE_FIRST, READ_FIRST or NO_CHANGE
+  .WRITE_MODE_B        ("WRITE_FIRST"), // WRITE_FIRST, READ_FIRST or NO_CHANGE
+  .SIM_COLLISION_CHECK ("WARNING_ONLY") // "NONE", "WARNING_ONLY", "GENERATE_X_ONLY", "ALL"
   ) rpc (
-  .WEA  (fifo_wen),            // Port A Write Enable Input
-  .ENA  (1'b0),              // Port A RAM Enable Input
-  .SSRA  (1'b0),              // Port A Synchronous Set/Reset Input
-  .CLKA  (clock),            // Port A Clock
-  .ADDRA  (11'h7FF),            // Port A 11-bit Address Input
-  .DIA  (8'hAB),            // Port A 8-bit Data Input
-  .DIPA  (1'b0),              // Port A 1-bit parity Input
-  .DOA  (),                // Port A 8-bit Data Output
-  .DOPA  (),                // Port A 1-bit Parity Output
+    .WEA   (fifo_wen),                    // Port A Write Enable Input
+    .ENA   (1'b0),                        // Port A RAM Enable Input
+    .SSRA  (1'b0),                        // Port A Synchronous Set/Reset Input
+    .CLKA  (clock),                       // Port A Clock
+    .ADDRA (11'h7FF),                     // Port A 11-bit Address Input
+    .DIA   (8'hAB),                       // Port A 8-bit Data Input
+    .DIPA  (1'b0),                        // Port A 1-bit parity Input
+    .DOA   (),                            // Port A 8-bit Data Output
+    .DOPA  (),                            // Port A 1-bit Parity Output
 
-  .WEB  (1'b0),              // Port B Write Enable Input
-  .ENB  (1'b1),              // Port B RAM Enable Input
-  .SSRB  (1'b0),              // Port B Synchronous Set/Reset Input
-  .CLKB  (clock),            // Port B Clock
-  .ADDRB  (fifo_radr_rpc[RAM_ADRB-1:0]),  // Port B 11-bit Address Input
-  .DIB  ({8{1'b0}}),          // Port B 8-bit Data Input
-  .DIPB  (1'b0),              // Port B 1-bit parity Input
-  .DOB  (rpc_ramout[ily][7:0]),      // Port B 8-bit Data Output
-  .DOPB  ());              // Port B 1-bit Parity Output
+    .WEB   (1'b0),                        // Port B Write Enable Input
+    .ENB   (1'b1),                        // Port B RAM Enable Input
+    .SSRB  (1'b0),                        // Port B Synchronous Set/Reset Input
+    .CLKB  (clock),                       // Port B Clock
+    .ADDRB (fifo_radr_rpc[RAM_ADRB-1:0]), // Port B 11-bit Address Input
+    .DIB   ({8{1'b0}}),                   // Port B 8-bit Data Input
+    .DIPB  (1'b0),                        // Port B 1-bit parity Input
+    .DOB   (rpc_ramout[ily][7:0]),        // Port B 8-bit Data Output
+    .DOPB  ());                           // Port B 1-bit Parity Output
   end
   endgenerate
 
 // Initialize Injector RAMs, slice 0 rpc0 bxn[2:0],pads[7:0],  slice 1 rpc0 bxn[2:0],pads[15:8]
-// Tbin                                FFFFEEEEDDDDCCCCBBBBAAAA9999888877776666555544443333222211110000;
+// Tbin                              FFFFEEEEDDDDCCCCBBBBAAAA9999888877776666555544443333222211110000;
   defparam ramr[0].rpc.INIT_00 =256'h00000000000000000000000000000000000F0E0D0C0B0A090807060504030201;
   defparam ramr[1].rpc.INIT_00 =256'h00000000000000000000000000000000001F1E1D1C1B1A191817161514131211;
 
@@ -1170,10 +1406,72 @@
   always @(posedge clock) begin
   rpc_ram_rdata_ff <= rpc_ram_rdata;
   end
+
+//-------------------------------------------------------------------------------------------------------------------
+// Temporary GEM RAM to check readout timing
+//-------------------------------------------------------------------------------------------------------------------
+
+  wire [13:0] gem_ramout [4-1:0];  // 14 bits by 4 clusters on one GEM fiber
+
+  generate
+  for (ily=0; ily<=1; ily=ily+1) begin: ramg
+  RAMB16_S9_S9 #(
+  .WRITE_MODE_A        ("WRITE_FIRST"), // WRITE_FIRST, READ_FIRST or NO_CHANGE
+  .WRITE_MODE_B        ("WRITE_FIRST"), // WRITE_FIRST, READ_FIRST or NO_CHANGE
+  .SIM_COLLISION_CHECK ("WARNING_ONLY") // "NONE", "WARNING_ONLY", "GENERATE_X_ONLY", "ALL"
+  ) gem (
+    .WEA   (fifo_wen),                    // Port A Write Enable Input
+    .ENA   (1'b0),                        // Port A RAM Enable Input
+    .SSRA  (1'b0),                        // Port A Synchronous Set/Reset Input
+    .CLKA  (clock),                       // Port A Clock
+    .ADDRA (11'h7FF),                     // Port A 11-bit Address Input
+    .DIA   (8'hAB),                       // Port A 8-bit Data Input
+    .DIPA  (1'b0),                        // Port A 1-bit parity Input
+    .DOA   (),                            // Port A 8-bit Data Output
+    .DOPA  (),                            // Port A 1-bit Parity Output
+
+    .WEB   (1'b0),                        // Port B Write Enable Input
+    .ENB   (1'b1),                        // Port B RAM Enable Input
+    .SSRB  (1'b0),                        // Port B Synchronous Set/Reset Input
+    .CLKB  (clock),                       // Port B Clock
+    .ADDRB (fifo_radr_gem[RAM_ADRB-1:0]), // Port B 11-bit Address Input
+    .DIB   ({8{1'b0}}),                   // Port B 8-bit Data Input
+    .DIPB  (1'b0),                        // Port B 1-bit parity Input
+    .DOB   (gem_ramout[ily][7:0]),        // Port B 8-bit Data Output
+    .DOPB  ());                           // Port B 1-bit Parity Output
+  end
+  endgenerate
+
+// Initialize Injector RAMs
+// Tbin                              FFFFEEEEDDDDCCCCBBBBAAAA9999888877776666555544443333222211110000;
+  defparam ramg[0].gem.INIT_00 =256'h00000000000000000000000000000000000F0E0D0C0B0A090807060504030201;
+  defparam ramg[1].gem.INIT_00 =256'h00000000000000000000000000000000001F1E1D1C1B1A191817161514131211;
+  defparam ramg[2].gem.INIT_00 =256'h00000000000000000000000000000000002F2E2D2C2B2A292827262524232221;
+  defparam ramg[3].gem.INIT_00 =256'h00000000000000000000000000000000003F3E3D3C3B3A393837363534333231;
+
+// Multiplex Injector RAM output data, tri-state output if GEM is not selected
+  reg [7:0] gem_ram_rdata;
+
+  always @(gem_ramout[0] or fifo_sel_gem) begin
+  case (fifo_sel_gem[1:0])
+  3'h0:  gem_ram_rdata <= gem_ramout[0];
+  3'h1:  gem_ram_rdata <= gem_ramout[1];
+  3'h2:  gem_ram_rdata <= gem_ramout[2];
+  3'h3:  gem_ram_rdata <= gem_ramout[3];
+  endcase
+  end
+
+// Align ramout with tbin and gem markers
+  reg [7:0] gem_ram_rdata_ff;
+
+  always @(posedge clock) begin
+  gem_ram_rdata_ff <= gem_ram_rdata;
+  end
+
 `endif
 
   initial $display($time, " buffer_read_ctrl end");
 
 //------------------------------------------------------------------------------------------------------------------
-  endmodule
+endmodule
 //------------------------------------------------------------------------------------------------------------------
