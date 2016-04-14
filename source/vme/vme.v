@@ -775,6 +775,8 @@
 
 // Active CFEB(s) counters
   active_cfebs_event_counter,      // Any CFEB active flag sent to DMB
+  active_cfebs_me1a_event_counter, // ME1a CFEB active flag sent to DMB
+  active_cfebs_me1b_event_counter, // ME1b CFEB active flag sent to DMB
   active_cfeb0_event_counter,      // CFEB0 active flag sent to DMB
   active_cfeb1_event_counter,      // CFEB1 active flag sent to DMB
   active_cfeb2_event_counter,      // CFEB2 active flag sent to DMB
@@ -782,8 +784,6 @@
   active_cfeb4_event_counter,      // CFEB4 active flag sent to DMB
   active_cfeb5_event_counter,      // CFEB5 active flag sent to DMB
   active_cfeb6_event_counter,      // CFEB6 active flag sent to DMB
-  active_cfebs_me1a_event_counter, // ME1a CFEB active flag sent to DMB
-  active_cfebs_me1b_event_counter, // ME1b CFEB active flag sent to DMB
 
 // CSC Orientation Ports
   csc_type,
@@ -2061,6 +2061,8 @@
 
 // Active CFEB(s) counters
   input  [MXCNTVME-1:0] active_cfebs_event_counter;      // Any CFEB active flag sent to DMB
+  input  [MXCNTVME-1:0] active_cfebs_me1a_event_counter; // ME1a CFEB active flag sent to DMB
+  input  [MXCNTVME-1:0] active_cfebs_me1b_event_counter; // ME1b CFEB active flag sent to DMB
   input  [MXCNTVME-1:0] active_cfeb0_event_counter;      // CFEB0 active flag sent to DMB
   input  [MXCNTVME-1:0] active_cfeb1_event_counter;      // CFEB1 active flag sent to DMB
   input  [MXCNTVME-1:0] active_cfeb2_event_counter;      // CFEB2 active flag sent to DMB
@@ -2068,8 +2070,6 @@
   input  [MXCNTVME-1:0] active_cfeb4_event_counter;      // CFEB4 active flag sent to DMB
   input  [MXCNTVME-1:0] active_cfeb5_event_counter;      // CFEB5 active flag sent to DMB
   input  [MXCNTVME-1:0] active_cfeb6_event_counter;      // CFEB6 active flag sent to DMB
-  input  [MXCNTVME-1:0] active_cfebs_me1a_event_counter; // ME1a CFEB active flag sent to DMB
-  input  [MXCNTVME-1:0] active_cfebs_me1b_event_counter; // ME1b CFEB active flag sent to DMB
 
 // CSC Orientation Ports
   input  [3:0] csc_type;        // Firmware compile type
@@ -6056,7 +6056,7 @@
 // ADR_CNT_RDATA=0xD2  Trigger/Readout Counter Data Register                                                          
 //------------------------------------------------------------------------------------------------------------------
 // Remap 1D counters to 2D, because XST does not support 2D ports
-  parameter MXCNT = 93; // Number of counters, last counter id is mxcnt-1. ME1/1 chambers have 93 counters. Non-ME1/1 chambers have 89 counters
+  parameter MXCNT = 93;                     // Number of counters, last counter id is mxcnt-1
   reg  [MXCNTVME-1:0] cnt_snap [MXCNT-1:0]; // Event counter snapshot 2D
   wire [MXCNTVME-1:0] cnt      [MXCNT-1:0]; // Event counter 2D map
 
@@ -6164,16 +6164,16 @@
 
 // Active CFEB(s) counters
 // NOTE: counters 81-87 were previously used for Virtex-6 GTX Optical Receiver Error Counters
-  assign cnt[83]  = active_cfebs_event_counter;      // Any CFEB active flag sent to DMB
-  assign cnt[84]  = active_cfeb0_event_counter;      // CFEB0 active flag sent to DMB
-  assign cnt[85]  = active_cfeb1_event_counter;      // CFEB1 active flag sent to DMB
-  assign cnt[86]  = active_cfeb2_event_counter;      // CFEB2 active flag sent to DMB
-  assign cnt[87]  = active_cfeb3_event_counter;      // CFEB3 active flag sent to DMB
-  assign cnt[88]  = active_cfeb4_event_counter;      // CFEB4 active flag sent to DMB
-  assign cnt[89]  = active_cfeb5_event_counter;      // CFEB5 active flag sent to DMB
-  assign cnt[90]  = active_cfeb6_event_counter;      // CFEB6 active flag sent to DMB
-  assign cnt[91]  = active_cfebs_me1a_event_counter; // ME1a CFEB active flag sent to DMB
-  assign cnt[92]  = active_cfebs_me1b_event_counter; // ME1b CFEB active flag sent to DMB
+  assign cnt[83]  = active_cfeb0_event_counter;      // CFEB0 active flag sent to DMB
+  assign cnt[84]  = active_cfeb1_event_counter;      // CFEB1 active flag sent to DMB
+  assign cnt[85]  = active_cfeb2_event_counter;      // CFEB2 active flag sent to DMB
+  assign cnt[86]  = active_cfeb3_event_counter;      // CFEB3 active flag sent to DMB
+  assign cnt[87]  = active_cfeb4_event_counter;      // CFEB4 active flag sent to DMB
+  assign cnt[88]  = active_cfeb5_event_counter;      // CFEB5 active flag sent to DMB
+  assign cnt[89]  = active_cfeb6_event_counter;      // CFEB6 active flag sent to DMB
+  assign cnt[90]  = active_cfebs_me1a_event_counter; // ME1a CFEB active flag sent to DMB
+  assign cnt[91]  = active_cfebs_me1b_event_counter; // ME1b CFEB active flag sent to DMB
+  assign cnt[92]  = active_cfebs_event_counter;      // Any CFEB active flag sent to DMB
   
 // Virtex-6 GTX Optical Receiver Error Counters
 //  assign cnt[81]  = gtx_rx_err_count0;  // Error count on this fiber channel
