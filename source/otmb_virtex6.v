@@ -1489,6 +1489,8 @@
   end
   endgenerate // end GEM
 
+	// GEM Fiber Synchronization Monitoring 
+	//--------------------------------------------------------------------------------------------------------------------
 
   gem_sync_mon u_gem_sync_mon (
 
@@ -1510,9 +1512,72 @@
     // latched copies that gems have lost sync in past 
     .gem0_lostsync(gem0_lostsync),  
     .gem1_lostsync(gem1_lostsync), 
-    .gems_lostsync(gems_lostsync),
+    .gems_lostsync(gems_lostsync)
   ); 
 
+	// GEM Co-pad Matching
+	//--------------------------------------------------------------------------------------------------------------------
+
+	wire        gem_match_neighbors = 1'b1; 
+	wire [7:0]  gem_match; 
+	wire [7:0]  gem_match_left; 
+	wire [7:0]  gem_match_right; 
+	wire        gem_any_match; 
+	wire [23:0] gem_active_feb_list; 
+	wire [13:0] gem_copad  [7:0]; 
+
+	copad u_copad (
+
+		.clock(clock), 
+	
+		// gem chamber 0 clusters
+		.gem0_cluster0(gem_cluster0[0]), 
+		.gem0_cluster1(gem_cluster1[0]), 
+		.gem0_cluster2(gem_cluster2[0]), 
+		.gem0_cluster3(gem_cluster3[0]), 
+
+		.gem0_cluster4(gem_cluster0[1]), 
+		.gem0_cluster5(gem_cluster1[1]), 
+		.gem0_cluster6(gem_cluster2[1]), 
+		.gem0_cluster7(gem_cluster3[1]), 
+
+		// gem chamber 1 clusters
+		.gem1_cluster0(gem_cluster0[2]), 
+		.gem1_cluster1(gem_cluster1[2]), 
+		.gem1_cluster2(gem_cluster2[2]), 
+		.gem1_cluster3(gem_cluster3[2]), 
+
+		.gem1_cluster4(gem_cluster0[3]), 
+		.gem1_cluster5(gem_cluster1[3]), 
+		.gem1_cluster6(gem_cluster2[3]), 
+		.gem1_cluster7(gem_cluster3[3]), 
+
+		// control whether to match on neighboring (+-1) clusters
+		.match_neighbors(gem_match_neighbors), 
+
+	  // cluster output addresses (unsorted)
+		.cluster0 (gem_copad[0]), 
+		.cluster1 (gem_copad[1]), 
+		.cluster2 (gem_copad[2]), 
+		.cluster3 (gem_copad[3]), 
+		.cluster4 (gem_copad[4]), 
+		.cluster5 (gem_copad[5]), 
+		.cluster6 (gem_copad[6]), 
+		.cluster7 (gem_copad[7]), 
+
+		// match flag
+		.match(gem_match), 
+
+	  // 24 bit active feb list
+		.active_feb_list(gem_active_feb_list), 
+
+	  // 8 bit cluster match was found on right/left side of respective cluster
+		.match_right (gem_match_right), 
+		.match_left  (gem_match_left), 
+
+		// 1 bit any match found
+		.any_match(gem_any_match)
+	);
 
 //-------------------------------------------------------------------------------------------------------------------
 // Pattern Finder declarations, common to ME1A+ME1B+ME234

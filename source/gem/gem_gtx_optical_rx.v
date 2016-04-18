@@ -50,6 +50,8 @@
   link_good,
   link_bad,
 
+  k_char, 
+
 // Sump
   gtx_rx_sump
   );
@@ -91,6 +93,9 @@
   output          link_had_err;
   output          link_good;
   output          link_bad;
+
+  output  [7:0]   k_char; 
+
 // Sump
   output          gtx_rx_sump;    // Unused signals
 
@@ -135,6 +140,7 @@
     .RX_RST_DONE      ( rx_rst_done),              // Out  set when gtx_reset is complete, then the rxsync cycle can begin
     .RX_SYNC_DONE     ( rx_sync_done),             // Out  set when gtx_rxsync is complete                                 ( after gtx_reset)
     .errcount         ( link_errcount[7:0]),
+    .k_char           ( k_char[7:0]), 
     .link_had_err     ( link_had_err),
     .link_good        ( link_good),
     .link_bad         ( link_bad),

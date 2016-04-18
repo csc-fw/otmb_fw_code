@@ -17,9 +17,7 @@ module gem_sync_mon (
   // latched copies that gems have lost sync in past 
   output reg gem0_lostsync,  
   output reg gem1_lostsync, 
-  output reg gems_lostsync,
-
-
+  output reg gems_lostsync
 ); 
 
 //----------------------------------------------------------------------------------------------------------------------
