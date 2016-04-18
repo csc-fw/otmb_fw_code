@@ -207,7 +207,7 @@
          reg             posneg_ff = 0;
    
   always @(posedge clock) begin
-     if (clear_sync) begin  // JRG:  OR gtx_rx_reset??
+     if (clear_sync) begin  // JRG:  OR gtx_rx_reset??
         gtx_rx_data_raw[47:0] <= 0;
         gtx_rx_start  <= 0;
         gtx_rx_fc    <= 0;
@@ -282,7 +282,8 @@
   sump_comp_fiber  &
   (|nonzero_word[3:1]) |
   (|cew[3:1])          |
-  muonic_sump
+  muonic_sump | 
+  gtx_rx_reset_err_cnt
   ;
 
 //------------------------------------------------------------------------------------------------------------------
