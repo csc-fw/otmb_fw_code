@@ -73,7 +73,7 @@
   input      clocks_rdy;      // QPLL & MMCM locked
   input      rxp;             // SNAP12+ fiber input for GTX
   input      rxn;             // SNAP12- fiber input for GTX
-  output     gtx_rx_pol_swap; // Inputs 5,6 [ie dcfeb 4,5] have swapped rx board routes
+  input      gtx_rx_pol_swap; // Inputs 5,6 [ie dcfeb 4,5] have swapped rx board routes
 
 // Optical receiver status
   input           gtx_rx_reset;         // Reset GTX
@@ -285,7 +285,8 @@
     muonic_sump |
     (|gtx_rx_data_raw) |
     (|dly) |
-    dly_is_0
+    dly_is_0 | 
+    gtx_rx_reset_err_cnt
     ;
 
 //------------------------------------------------------------------------------------------------------------------

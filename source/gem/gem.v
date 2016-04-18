@@ -51,6 +51,8 @@ module gem (
     output  [15:0] gtx_rx_err_count,     // Error count on this fiber channel
     output         gtx_rx_sump,          // Unused signals
 
+    output  [7:0]  k_char, // latched copy of the last k-char received
+
     output link_had_err, // link stability monitor: error happened at least once
     output link_good,    // link stability monitor: always good, no errors since last resync
     output link_bad,     // link stability monitor: errors happened over 100 times
@@ -151,6 +153,9 @@ parameter CLSTBITS = 14;
         .link_had_err         (link_had_err),
         .link_good            (link_good),
         .link_bad             (link_bad),
+
+        .k_char               (k_char),  // latched copy of the last k-char received
+
         .gtx_rx_sump          (gtx_rx_sump)             // Unused signals
     );
 
