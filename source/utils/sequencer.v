@@ -572,6 +572,13 @@
   fifo_tbins_rpc,
   fifo_pretrig_rpc,
 
+// GEM VME Configuration
+  gem_exists,
+  gem_read_enable,
+  gem_zero_suppress,
+  fifo_tbins_gem,
+  fifo_pretrig_gem,
+
 // CCB Status Signals
   clct_status,
 
@@ -635,6 +642,13 @@
   rd_list_bcb,
   rd_ncfebs_bcb,
 
+// GEM Sequencer Readout Control
+  rd_start_gem,
+  rd_abort_gem,
+  rd_list_gem,
+  rd_ngems,
+  rd_gem_offset,
+
 // RPC Sequencer Readout Control
   rd_start_rpc,
   rd_abort_rpc,
@@ -658,6 +672,14 @@
   bcb_blkbits,
   bcb_cfeb_adr,
   bcb_fifo_busy,
+
+// GEM Sequencer Frame
+  gem_first_frame,
+  gem_last_frame,
+  gem_adr,
+  gem_id,
+  gem_rawhits,
+  gem_fifo_busy,
 
 // RPC Sequencer Frame
   rpc_first_frame,
@@ -757,6 +779,7 @@
   revcode,
 
 // RPC/ALCT Scope
+  // TODO: rpc scope data should be muxed with GEM
   scp_rpc0_bxn,
   scp_rpc1_bxn,
   scp_rpc0_nhits,
@@ -883,6 +906,7 @@
   perr_pulse,
   perr_cfeb_ff,
   perr_rpc_ff,
+  perr_gem_ff,
   perr_mini_ff,
   perr_ff,
 
@@ -1056,6 +1080,10 @@
   parameter MXRPC        = 2;         // Number RPCs
   parameter MXRPCB       = 1;         // Number RPC ID bits
 
+// GEM Constants
+  parameter MXGEM        = 4;         // Number of GEM fibers
+  parameter MXGEMB       = 2;         // Number GEM ID bits
+
 // Counters
   parameter MXCNTVME     = 30;        // VME counter length
   parameter MXL1ARX      = 12;        // Number L1As received counter bits
@@ -1174,20 +1202,20 @@
   input          alct_cfg_done;      // ALCT FPGA configuration done
 
 // CSC Orientation Ports
-  input          csc_me1ab;        // 1=ME1A or ME1B CSC type
-  input          stagger_hs_csc;      // 1=Staggered CSC non-me1, 0=non-staggered me1
-  input          reverse_hs_csc;      // 1=Reverse staggered CSC, non-me1
-  input          reverse_hs_me1a;    // 1=reverse me1a hstrips prior to pattern sorting
-  input          reverse_hs_me1b;    // 1=reverse me1b hstrips prior to pattern sorting
+  input          csc_me1ab;       // 1=ME1A or ME1B CSC type
+  input          stagger_hs_csc;  // 1=Staggered CSC non-me1, 0=non-staggered me1
+  input          reverse_hs_csc;  // 1=Reverse staggered CSC, non-me1
+  input          reverse_hs_me1a; // 1=reverse me1a hstrips prior to pattern sorting
+  input          reverse_hs_me1b; // 1=reverse me1b hstrips prior to pattern sorting
 
 // CLCT VME Configuration Ports
-  input          clct_blanking;      // Clct_blanking=1 clears clcts with 0 hits
-  input  [MXBXN-1:0]    bxn_offset_pretrig;    // BXN offset at reset for pretrig
-  input  [MXBXN-1:0]    bxn_offset_l1a;      // BXN offset at reset for L1A
-  input  [MXBXN-1:0]    lhc_cycle;        // LHC period, max BXN count+1
-  input  [MXL1ARX-1:0]  l1a_offset;        // L1A counter preset value
-  input  [MXDRIFT-1:0]  drift_delay;      // CSC Drift delay clocks
-  input  [3:0]      triad_persist;      // Triad 1/2-strip persistence
+  input                 clct_blanking;      // Clct_blanking=1 clears clcts with 0 hits
+  input  [MXBXN-1:0]    bxn_offset_pretrig; // BXN offset at reset for pretrig
+  input  [MXBXN-1:0]    bxn_offset_l1a;     // BXN offset at reset for L1A
+  input  [MXBXN-1:0]    lhc_cycle;          // LHC period, max BXN count+1
+  input  [MXL1ARX-1:0]  l1a_offset;         // L1A counter preset value
+  input  [MXDRIFT-1:0]  drift_delay;        // CSC Drift delay clocks
+  input  [3:0]          triad_persist;      // Triad 1/2-strip persistence
 
   input  [MXHITB-1:0]  lyr_thresh_pretrig;    // Layers hit pre-trigger threshold
   input  [MXHITB-1:0]  hit_thresh_pretrig;    // Hits on pattern template pre-trigger threshold
@@ -1252,11 +1280,18 @@
   output  [MXBXN-1:0]    bxn_clct_vme;    // CLCT BXN at pre-trigger
   output  [MXBXN-1:0]    bxn_l1a_vme;    // CLCT BXN at L1A
 
-// RPC VME Configuration Ports
-  input  [MXRPC-1:0]    rpc_exists;      // RPC Readout list
-  input          rpc_read_enable;  // 1 Enable RPC Readout
-  input  [MXTBIN-1:0]  fifo_tbins_rpc;    // Number RPC FIFO time bins to read out
-  input  [MXTBIN-1:0]  fifo_pretrig_rpc;  // Number RPC FIFO time bins before pretrigger
+// RPC VME Configuration Ports 
+  input  [MXRPC-1:0]   rpc_exists;       // RPC Readout list
+  input                rpc_read_enable;  // 1 Enable RPC Readout
+  input  [MXTBIN-1:0]  fifo_tbins_rpc;   // Number RPC FIFO time bins to read out
+  input  [MXTBIN-1:0]  fifo_pretrig_rpc; // Number RPC FIFO time bins before pretrigger
+
+// GEM VME Configuration Ports
+  input  [MXGEM-1:0]   gem_exists;        // GEM Readout list
+  input                gem_read_enable;   // 1 Enable GEM Readout
+  input                gem_zero_suppress; // 1 Enable GEM Readout Zero-suppression
+  input  [MXTBIN-1:0]  fifo_tbins_gem;    // Number GEM FIFO time bins to read out
+  input  [MXTBIN-1:0]  fifo_pretrig_gem;  // Number GEM FIFO time bins before pretrigger
 
 // Status signals to CCB front panel
   output  [8:0]      clct_status;    // Array of stat_ signals for CCB
@@ -1321,6 +1356,13 @@
   output  [MXCFEB-1:0]   rd_list_bcb;    // List of CFEBs to read out
   output  [MXCFEBB-1:0]  rd_ncfebs_bcb;    // Number of CFEBs in bcb_list (0 to 5)
 
+// GEM Sequencer Readout Control
+  output                rd_start_gem;  // Start readout sequence
+  output                rd_abort_gem;  // Cancel readout
+  output [MXGEM-1:0]    rd_list_gem;   // List of GEM fibers to read out
+  output [MXGEMB-1+1:0] rd_ngems;      // Number of GEMs fibers in gem_list
+  output [RAM_ADRB-1:0] rd_gem_offset; // RAM address rd_fifo_adr offset for gem read out
+
 // RPC Sequencer Readout Control
   output                rd_start_rpc;  // Start readout sequence
   output                rd_abort_rpc;  // Cancel readout
@@ -1345,13 +1387,21 @@
   input  [MXCFEBB-1:0]  bcb_cfeb_adr;    // CFEB ID  
   input          bcb_fifo_busy;    // Readout busy sending data to sequencer, goes down 1bx early
 
+// GEM Sequencer Frame
+  input                gem_first_frame; // First frame valid 2bx after rd_start
+  input                gem_last_frame;  // Last frame valid 1bx after busy goes down
+  input  [MXGEMB-1:0]  gem_adr;         // FIFO dump GEM Fiber ID (0,1,2,3)
+  input  [0:0]         gem_id;          // FIFO dump GEM Chamber ID (0,1)
+  input  [13:0]        gem_rawhits;     // FIFO dump GEM pad hits
+  input                gem_fifo_busy;   // Readout busy sending data to sequencer, goes down 1bx early
+
 // RPC Sequencer Frame
-  input          rpc_first_frame;  // First frame valid 2bx after rd_start
-  input          rpc_last_frame;    // Last frame valid 1bx after busy goes down
-  input  [MXRPCB-1:0]  rpc_adr;      // FIFO dump RPC ID
-  input  [MXTBIN-1:0]  rpc_tbinbxn;    // FIFO dump RPC tbin or bxn for DMB
-  input  [7:0]      rpc_rawhits;    // FIFO dump RPC pad hits, 8 of 16 per cycle
-  input          rpc_fifo_busy;    // Readout busy sending data to sequencer, goes down 1bx early
+  input                rpc_first_frame; // First frame valid 2bx after rd_start
+  input                rpc_last_frame;  // Last frame valid 1bx after busy goes down
+  input  [MXRPCB-1:0]  rpc_adr;         // FIFO dump RPC ID
+  input  [MXTBIN-1:0]  rpc_tbinbxn;     // FIFO dump RPC tbin or bxn for DMB
+  input  [7:0]         rpc_rawhits;     // FIFO dump RPC pad hits, 8 of 16 per cycle
+  input                rpc_fifo_busy;   // Readout busy sending data to sequencer, goes down 1bx early
 
 // CLCT Raw Hits RAM
   input          dmb_wr;        // Raw hits RAM VME write enable
@@ -1569,6 +1619,7 @@
   input                perr_pulse;   // Parity error pulse for counting
   input  [MXCFEB-1:0]  perr_cfeb_ff; // CFEB RAM parity error, latched
   input                perr_rpc_ff;  // RPC  RAM parity error, latched
+  input  [MXGEM-1:0]   perr_gem_ff;  // GEM  RAM parity error, latched
   input                perr_mini_ff; // Mini RAM parity error, latched
   input                perr_ff;      // Parity error summary,  latched
 
@@ -1741,8 +1792,12 @@
   wire          bcb_fifo_done;
   
 // RPC related
-  wire          rpc_fifo_done;
-  reg            rpcs_all_empty=0;
+  wire   rpc_fifo_done;
+  reg    rpcs_all_empty=0;
+
+// GEM related
+  wire   gem_fifo_done;
+  reg    gems_all_empty=0;
 
 // DMB Related
   reg    [MXHW-1:0]    dmb_ff=0;
@@ -1760,52 +1815,54 @@
   reg [5:0] clct_sm;      // synthesis attribute safe_implementation of clct_sm is "yes";
   reg [2:0] clct_sm_vec;
 
-  parameter startup  =  0;  // Startup waiting for initial debris to clear
-  parameter idle    =  1;  // Idling, waiting for pretrig
-  parameter pretrig  =  2;  // Pretriggered, pushed event into pretrigger pipeline
-  parameter throttle  =  3;  // Reduce trigger rate
-  parameter flush    =  4;  // Flushing event, throttling trigger rate
-  parameter halt    =  5;  // Halted, waiting for un-halt from VME
+  parameter startup  = 0; // Startup waiting for initial debris to clear
+  parameter idle     = 1; // Idling, waiting for pretrig
+  parameter pretrig  = 2; // Pretriggered, pushed event into pretrigger pipeline
+  parameter throttle = 3; // Reduce trigger rate
+  parameter flush    = 4; // Flushing event, throttling trigger rate
+  parameter halt     = 5; // Halted, waiting for un-halt from VME
 
 // Readout State Declarations
   reg  [23:0] read_sm;      // synthesis attribute safe_implementation of read_sm is "yes";
   reg [4:0]  read_sm_vec;
 
-  parameter xstartup  =  0;  // Startup wait for buffer status to update after a reset
-  parameter xckstack  =  1;  // Idling, waiting for stack data
-  parameter xdmb    =  2;  // Begin send to dmb
+  parameter xstartup = 0;  // Startup wait for buffer status to update after a reset
+  parameter xckstack = 1;  // Idling, waiting for stack data
+  parameter xdmb     = 2;  // Begin send to dmb
 
-  parameter xheader  =  3;  // Send header to DMB
-  parameter xe0b    =  4;  // Send EOB marker
-  parameter xdump    =  5;  // Send fifo dump to DMB
+  parameter xheader  = 3;  // Send header to DMB
+  parameter xe0b     = 4;  // Send EOB marker
+  parameter xdump    = 5;  // Send fifo dump to DMB
 
-  parameter xb04    =  6;  // Send B04 Begin RPC marker
-  parameter xrpc    =  7;  // Send RPC Pad data
-  parameter xe04    =  8;  // Send E04 End of RPC marker
+  parameter xb04     = 6;  // Send B04 Begin RPC marker
+  parameter xrpc     = 7;  // Send RPC Pad data
+  parameter xgem     = 27; // Send GEM Pad data
+  parameter xe04     = 8;  // Send E04 End of RPC marker
 
-  parameter xb05    =  9;  // Send B05 frame to begin scope
-  parameter xscope  =  10;  // Send scope frames
-  parameter xe05    =  11;  // Send E05 frame to end scope
+  parameter xb05     = 9;  // Send B05 frame to begin scope
+  parameter xscope   = 10; // Send scope frames
+  parameter xe05     = 11; // Send E05 frame to end scope
 
-  parameter xb07    =  12;  // Send B07 frame to begin mini scope
-  parameter xmini    =  13;  // Send mini scope frames
-  parameter xe07    =  14;  // Send E07 frame to end scope
+  parameter xb07     = 12; // Send B07 frame to begin mini scope
+  parameter xmini    = 13; // Send mini scope frames
+  parameter xe07     = 14; // Send E07 frame to end scope
 
-  parameter xbcb    =  15;  // Send BCB frame to begin cfeb blocked bits
-  parameter xblkbit  =  16;  // Send cfeb blocked bits frames
-  parameter xecb    =  17;  // Send ECB frame to end cfeb blocked bits
-  
-  parameter xe0c    =  18;  // Send E0C marker to DMB
-  parameter xmod40  =  19;  // Send 2 words to make word count multiple of 4
-  parameter xmod41  =  20;  // Send 2 words to make word count multiple of 4
+  parameter xbcb     = 15; // Send BCB frame to begin cfeb blocked bits
+  parameter xblkbit  = 16; // Send cfeb blocked bits frames
+  parameter xecb     = 17; // Send ECB frame to end cfeb blocked bits
 
-  parameter xe0f    =  21;  // Send E0F frame
-  parameter xcrc0    =  22;  // Send crc frames
-  parameter xcrc1    =  23;  // Send crc frames
-  parameter xlast    =  24;  // Send last frame with word count
+  parameter xe0c     = 18; // Send E0C marker to DMB
+  parameter xmod40   = 19; // Send 2 words to make word count multiple of 4
+  parameter xmod41   = 20; // Send 2 words to make word count multiple of 4
 
-  parameter xpop    =  25;  // Pop data off stack, go back to idle
-  parameter xhalt    =  26;  // Halted, wait for resume
+  parameter xe0f     = 21; // Send E0F frame
+  parameter xcrc0    = 22; // Send crc frames
+  parameter xcrc1    = 23; // Send crc frames
+  parameter xlast    = 24; // Send last frame with word count
+
+  parameter xpop     = 25; // Pop data off stack, go back to idle
+  parameter xhalt    = 26; // Halted, wait for resume
+
 
 //-----------------------------------------------------------------------------------------------------------------
 // State machine power-up reset + global reset
@@ -3544,13 +3601,16 @@
 // Substitute short-header for non buffer events
   wire [NHBITS-1:0]  r_nheaders;
   wire [MXTBIN-1:0]  r_fifo_tbins_cfeb;
-  wire [MXCFEBB-1:0]  r_ncfebs;
-  wire        r_fifo_dump;
+  wire [MXCFEBB-1:0] r_ncfebs;
+  wire               r_fifo_dump;
   wire [MXCFEB-1:0]  r_cfebs_read;
-  wire [3:0]      eef;
+  wire [3:0]         eef;
 
   reg  [MXRPCB-1+1:0]  rd_nrpcs=0;
   wire [MXRPCB-1+1:0]  r_nrpcs_read;
+
+  reg  [MXGEMB-1+1:0]  rd_ngems=0;
+  wire [MXGEMB-1+1:0]  r_ngems_read;
 
   wire include_rawhits  = r_has_buf && (full_dump || local_dump);
   wire include_cfebs    = include_rawhits && (ncfebs!=0);
@@ -3666,7 +3726,9 @@
 // CFEBs
   xdump:                // Send fifo dump to DMB
     if (fifo_read_done)  begin    // Wait for clct fifo done
-     if (rpc_read_enable)
+     if (gem_read_enable)   // Read GEMs if enabled
+     read_sm = xb04; 
+     else if (rpc_read_enable)
      read_sm = xb04;        // Read RPCs if enabled
      else if (scp_auto)
      read_sm = xb05;        // Skip to scope, if enabled
@@ -3678,43 +3740,49 @@
      read_sm = xe0c;        // Otherwise go to eoc
     end
 
-// RPCs
-  xb04:                // Send b04 fram to begin RPC
-    if (rpcs_all_empty)        // Don't read rpc fifo if all RPCs empty
-    read_sm = xe04;
-    else
-    read_sm = xrpc;
+// RPCs & GEM shared header TODO: consider using different headers for GEM vs. RPC ? 
+  xb04:                        // Send b04 frame to begin RPC/GEM
+    if ((gem_read_enable && gems_all_empty) || (!gem_read_enable && rpcs_all_empty)) // Don't read rpc fifo if all RPCs empty
+      read_sm = xe04;
+    else begin
+      if  (gem_read_enable) read_sm = xgem;
+      else                  read_sm = xrpc;
+    end
 
   xrpc:                // Send RPC frames
     if (rpc_fifo_done)
     read_sm = xe04;
 
-  xe04:                // Send e04 frame to end RPC
+  xgem:                // Send GEM frames
+    if (gem_fifo_done)
+    read_sm = xe04;
+
+  xe04:                        // Send e04 frame to end RPC / GEM
     if (scp_auto)
-    read_sm = xb05;          // Skip to scope, if enabled
+    read_sm = xb05;            // Skip to scope, if enabled
     else if (mini_read_enable)
-    read_sm = xb07;          // Skip to miniscope, if enabled
+    read_sm = xb07;            // Skip to miniscope, if enabled
     else if (bcb_read_enable)
-    read_sm = xbcb;          // Skip blocked cfeb bits, if enabled
+    read_sm = xbcb;            // Skip blocked cfeb bits, if enabled
     else
     read_sm = xe0c;
 
 // Scope
   xb05:                // Send B05 frame to begin scope
-    if (scp_read_done)        // Scope had no data or did not trigger
+    if (scp_read_done) // Scope had no data or did not trigger
     read_sm = xe05;
     else
-    read_sm = xscope;        // Scope has data
+    read_sm = xscope;  // Scope has data
 
-  xscope:                // Send scope frames
+  xscope:              // Send scope frames
     if (scp_read_done)
     read_sm = xe05;
 
-  xe05:                // Send e05 frame to end scope
+  xe05:                       // Send e05 frame to end scope
     if (mini_read_enable)
-    read_sm = xb07;          // Skip to miniscope, if enabled
+    read_sm = xb07;           // Skip to miniscope, if enabled
     else if (bcb_read_enable)
-    read_sm = xbcb;          // Skip blocked cfeb bits, if enabled
+    read_sm = xbcb;           // Skip blocked cfeb bits, if enabled
     else
     read_sm = xe0c;
 
@@ -3744,8 +3812,8 @@
     read_sm = xe0c;
 
 // Filler
-  xe0c:                // Send E0C marker to force even word count
-    if (mod4)            // Word count is already a multiple of 4
+  xe0c:               // Send E0C marker to force even word count
+    if (mod4)         // Word count is already a multiple of 4
     read_sm = xe0f;
     else              // Word count is only even, need to add 2 frames
     read_sm = xmod40;
@@ -3767,18 +3835,18 @@
     read_sm = xlast;  
 
 // Trailer
-  xlast:                // Send last word to DMB
-    if (pretrig_halt)        // Pretrig_halt mode
+  xlast:              // Send last word to DMB
+    if (pretrig_halt) // Pretrig_halt mode
     read_sm = xhalt;
     else              // Pop data off stack
-    read_sm = xpop;          
+    read_sm = xpop;
 
   xpop:                // Pop data off stack, go back to idle
     if (xpop_done)
     read_sm = xckstack;
 
-  xhalt:                // Halted, wait for resume
-    if (!pretrig_halt)        // Resume arrived by toggling pretrig_halt dipswitch
+  xhalt:               // Halted, wait for resume
+    if (!pretrig_halt) // Resume arrived by toggling pretrig_halt dipswitch
     read_sm = xpop;
 
   default
@@ -3795,252 +3863,268 @@
   wire [2:0] ddu_code = 3'b101;                // DDU code for TMB/ALCT
 
 // First 4 header words must conform to DDU specification
-  assign  header00_[11:0]    =  12'hB0C;          // Beginning of Cathode record marker
-  assign  header00_[14:12]  =  ddu_code[2:0];        // DDU code for TMB/ALCT
-  assign  header00_[15]    =  1;              // DDU special
-  assign  header00_[16]    =  0;              // DMB last
-  assign  header00_[17]    =  1;              // DMB dav, dmbs copy is generated earlier at l1a
-  assign  header00_[18]    =  0;              // DMB /wr
+  assign  header00_[11:0]   =  12'hB0C;       // Beginning of Cathode record marker
+  assign  header00_[14:12]  =  ddu_code[2:0]; // DDU code for TMB/ALCT
+  assign  header00_[15]     =  1;             // DDU special
+  assign  header00_[16]     =  0;             // DMB last
+  assign  header00_[17]     =  1;             // DMB dav, dmbs copy is generated earlier at l1a
+  assign  header00_[18]     =  0;             // DMB /wr
 
-  assign  header01_[11:0]    =  r_l1a_bxn_win[11:0];     // BXN pushed on L1A stack at L1A arrival
-  assign  header01_[14:12]  =  ddu_code[2:0];        // DDU code for TMB/ALCT
-  assign  header01_[15]    =  1;              // DDU special
-  assign  header01_[18:16]  =  0;              // DMB control flags
+  assign  header01_[11:0]   =  r_l1a_bxn_win[11:0]; // BXN pushed on L1A stack at L1A arrival
+  assign  header01_[14:12]  =  ddu_code[2:0];       // DDU code for TMB/ALCT
+  assign  header01_[15]     =  1;                   // DDU special
+  assign  header01_[18:16]  =  0;                   // DMB control flags
 
-  assign  header02_[11:0]    =  r_l1a_cnt_win[11:0];    // L1As received and pushed on L1A stack
-  assign  header02_[14:12]  =  ddu_code[2:0];        // DDU code for TMB/ALCT
-  assign  header02_[15]    =  1;              // DDU special
-  assign  header02_[18:16]  =  0;              // DMB control flags
+  assign  header02_[11:0]   =  r_l1a_cnt_win[11:0]; // L1As received and pushed on L1A stack
+  assign  header02_[14:12]  =  ddu_code[2:0];       // DDU code for TMB/ALCT
+  assign  header02_[15]     =  1;                   // DDU special
+  assign  header02_[18:16]  =  0;                   // DMB control flags
 
-  assign  header03_[11:0]    =  readout_counter[11:0];    // Readout counter
-  assign  header03_[14:12]  =  ddu_code[2:0];        // DDU code for TMB/ALCT
-  assign  header03_[15]    =  1;              // DDU special
-  assign  header03_[18:16]  =  0;              // DMB control flags
+  assign  header03_[11:0]   =  readout_counter[11:0]; // Readout counter
+  assign  header03_[14:12]  =  ddu_code[2:0];         // DDU code for TMB/ALCT
+  assign  header03_[15]     =  1;                     // DDU special
+  assign  header03_[18:16]  =  0;                     // DMB control flags
 
 // Next 4 words for short header mode
-  assign  header04_[4:0]    =  board_id[4:0];        // TMB module ID number = VME slot
-  assign  header04_[8:5]    =  csc_id[3:0];        // Chamber ID number
-  assign  header04_[12:9]    =  run_id[3:0];        // Run info
-  assign  header04_[13]    =  buf_q_ovf_err;        // Fence queue overflow error
-  assign  header04_[14]    =  sync_err_hdr;        // BXN sync error
-  assign  header04_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header04_[4:0]    =  board_id[4:0]; // TMB module ID number = VME slot
+  assign  header04_[8:5]    =  csc_id[3:0];   // Chamber ID number
+  assign  header04_[12:9]   =  run_id[3:0];   // Run info
+  assign  header04_[13]     =  buf_q_ovf_err; // Fence queue overflow error
+  assign  header04_[14]     =  sync_err_hdr;  // BXN sync error
+  assign  header04_[18:15]  =  0;             // DDU+DMB control flags
 
-  assign  header05_[5:0]    =  r_nheaders[5:0];      // Number of header words
-  assign  header05_[8:6]    =  fifo_mode[2:0];        // Trigger type and fifo mode
-  assign  header05_[10:9]    =  readout_type[1:0];      // Readout type: dump,nodump, full header, short header
-  assign  header05_[12:11]  =  l1a_type[1:0];        // L1A Pop type code: buffers, no buffers, clct/alct_only
-  assign  header05_[13]    =  r_has_buf;          // Event has clct and rpc buffer data
-  assign  header05_[14]    =  buf_stalled_hdr;      // Raw hits buffer was full at pretrigger
-  assign  header05_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header05_[5:0]    =  r_nheaders[5:0];   // Number of header words
+  assign  header05_[8:6]    =  fifo_mode[2:0];    // Trigger type and fifo mode
+  assign  header05_[10:9]   =  readout_type[1:0]; // Readout type: dump,nodump, full header, short header
+  assign  header05_[12:11]  =  l1a_type[1:0];     // L1A Pop type code: buffers, no buffers, clct/alct_only
+  assign  header05_[13]     =  r_has_buf;         // Event has clct and rpc buffer data
+  assign  header05_[14]     =  buf_stalled_hdr;   // Raw hits buffer was full at pretrigger
+  assign  header05_[18:15]  =  0;                 // DDU+DMB control flags
 
-  assign  header06_[14:0]    =  bd_status[14:0];      // Board status summary
-  assign  header06_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header06_[14:0]   =  bd_status[14:0]; // Board status summary
+  assign  header06_[18:15]  =  0;               // DDU+DMB control flags
 
-  assign  header07_[14:0]    =  revcode[14:0];        // Firmware version date code
-  assign  header07_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header07_[14:0]   =  revcode[14:0]; // Firmware version date code
+  assign  header07_[18:15]  =  0;             // DDU+DMB control flags
 
 // Full Header-mode words 8-to-EOB: Event Counters
-  assign  header08_[11:0]    =  r_bxn_counter[11:0];    // CLCT Bunch Crossing number at pre-trig, 0-3563
-  assign  header08_[12]    =  r_tmb_clct0_discard;    // TMB discarded clct0 from ME1A
-  assign  header08_[13]    =  r_tmb_clct1_discard;    // TMB discarded clct1 from ME1A
-  assign  header08_[14]    =  clock_lock_lost_err;    // Main DLL lost lock
-  assign  header08_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header08_[11:0]   =  r_bxn_counter[11:0]; // CLCT Bunch Crossing number at pre-trig, 0-3563
+  assign  header08_[12]     =  r_tmb_clct0_discard; // TMB discarded clct0 from ME1A
+  assign  header08_[13]     =  r_tmb_clct1_discard; // TMB discarded clct1 from ME1A
+  assign  header08_[14]     =  clock_lock_lost_err; // Main DLL lost lock
+  assign  header08_[18:15]  =  0;                   // DDU+DMB control flags
 
-  assign  header09_[14:0]    =  r_pretrig_counter[14:0];  // CLCT pre-trigger counter, stop on ovf
-  assign  header09_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header09_[14:0]   =  r_pretrig_counter[14:0]; // CLCT pre-trigger counter, stop on ovf
+  assign  header09_[18:15]  =  0;                       // DDU+DMB control flags
 
-  assign  header10_[14:0]    =  r_pretrig_counter[29:15];  // CLCT pre-trigger counter
-  assign  header10_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header10_[14:0]   =  r_pretrig_counter[29:15]; // CLCT pre-trigger counter
+  assign  header10_[18:15]  =  0;                        // DDU+DMB control flags
 
-  assign  header11_[14:0]    =  r_clct_counter[14:0];    // CLCT post-drift counter, stop on ovf
-  assign  header11_[18:15]  =  0;              // DDU+DMB control flags
-  assign  header12_[14:0]    =  r_clct_counter[29:15];    // CLCT post-drift counter
+  assign  header11_[14:0]   =  r_clct_counter[14:0];  // CLCT post-drift counter, stop on ovf
+  assign  header11_[18:15]  =  0;                     // DDU+DMB control flags
+  assign  header12_[14:0]   =  r_clct_counter[29:15]; // CLCT post-drift counter
   assign  header12_[18:15]  =  0;
 
-  assign  header13_[14:0]    =  r_trig_counter[14:0];    // TMB trigger counter, stop on ovf
-  assign  header13_[18:15]  =  0;              // DDU+DMB control flags
-  assign  header14_[14:0]    =  r_trig_counter[29:15];    // TMB trigger counter
-  assign  header14_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header13_[14:0]   =  r_trig_counter[14:0];  // TMB trigger counter, stop on ovf
+  assign  header13_[18:15]  =  0;                     // DDU+DMB control flags
+  assign  header14_[14:0]   =  r_trig_counter[29:15]; // TMB trigger counter
+  assign  header14_[18:15]  =  0;                     // DDU+DMB control flags
 
-  assign  header15_[14:0]    =  r_alct_counter[14:0];    // Counts ALCTs received from ALCT board, stop on ovf
-  assign  header15_[18:15]  =  0;              // DDU+DMB control flags
-  assign  header16_[14:0]    =  r_alct_counter[29:15];
-  assign  header16_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header15_[14:0]   =  r_alct_counter[14:0];  // Counts ALCTs received from ALCT board, stop on ovf
+  assign  header15_[18:15]  =  0;                     // DDU+DMB control flags
+  assign  header16_[14:0]   =  r_alct_counter[29:15]; // Counts ALCTs received from ALCT board, stop on ovf
+  assign  header16_[18:15]  =  0;                     // DDU+DMB control flags
 
-  assign  header17_[14:0]    =  r_orbit_counter[14:0];    // BX0s since last hard reset, stop on ovf
-  assign  header17_[18:15]  =  0;              // DDU+DMB control flags
-  assign  header18_[14:0]    =  r_orbit_counter[29:15];    // BX0s since last hard reset
-  assign  header18_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header17_[14:0]   =  r_orbit_counter[14:0];  // BX0s since last hard reset, stop on ovf
+  assign  header17_[18:15]  =  0;                      // DDU+DMB control flags
+  assign  header18_[14:0]   =  r_orbit_counter[29:15]; // BX0s since last hard reset
+  assign  header18_[18:15]  =  0;                      // DDU+DMB control flags
   
 // CLCT Raw Hits Size
-  assign  header19_[2:0]    =  r_ncfebs[2:0];        // Number of CFEBs read out
-  assign  header19_[7:3]    =  r_fifo_tbins_cfeb[4:0];    // Number of time bins per CFEB in dump
-  assign  header19_[12:8]    =  fifo_pretrig_cfeb[4:0];    // # Time bins before pretrigger;
-  assign  header19_[13]    =  scp_auto;          // Readout includes logic analyzer scope data
-  assign  header19_[14]    =  mini_read_enable;      // Readout includes minicope data
-  assign  header19_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header19_[2:0]    =  r_ncfebs[2:0];          // Number of CFEBs read out
+  assign  header19_[7:3]    =  r_fifo_tbins_cfeb[4:0]; // Number of time bins per CFEB in dump
+  assign  header19_[12:8]   =  fifo_pretrig_cfeb[4:0]; // # Time bins before pretrigger;
+  assign  header19_[13]     =  scp_auto;               // Readout includes logic analyzer scope data
+  assign  header19_[14]     =  mini_read_enable;       // Readout includes minicope data
+  assign  header19_[18:15]  =  0;                      // DDU+DMB control flags
 
 // CLCT Configuration
-  assign  header20_[2:0]    =  hit_thresh_pretrig[2:0];  // Hits on pattern template pre-trigger threshold
-  assign  header20_[6:3]    =  pid_thresh_pretrig[3:0];  // Pattern shape ID pre-trigger threshold
-  assign  header20_[9:7]    =  hit_thresh_postdrift[2:0];  // Hits on pattern  post-drift  threshold
-  assign  header20_[13:10]  =  pid_thresh_postdrift[3:0];  // Pattern shape ID post-drift  threshold
-  assign  header20_[14]    =  stagger_hs_csc;        // CSC Staggering ON
-  assign  header20_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header20_[2:0]    =  hit_thresh_pretrig[2:0];   // Hits on pattern template pre-trigger threshold
+  assign  header20_[6:3]    =  pid_thresh_pretrig[3:0];   // Pattern shape ID pre-trigger threshold
+  assign  header20_[9:7]    =  hit_thresh_postdrift[2:0]; // Hits on pattern  post-drift  threshold
+  assign  header20_[13:10]  =  pid_thresh_postdrift[3:0]; // Pattern shape ID post-drift  threshold
+  assign  header20_[14]     =  stagger_hs_csc;            // CSC Staggering ON
+  assign  header20_[18:15]  =  0;                         // DDU+DMB control flags
 
-  assign  header21_[3:0]   =  triad_persist[3:0];      // CLCT Triad persistence
-  assign  header21_[6:4]   =  dmb_thresh_pretrig[2:0]; // DMB pre-trigger threshold for active-feb
-  assign  header21_[10:7]  =  alct_delay[3:0];         // Delay ALCT for CLCT match window
-  assign  header21_[14:11] =  clct_window[3:0];        // CLCT match window width
-  assign  header21_[18:15] =  0;                       // DDU+DMB control flags
+  assign  header21_[3:0]    =  triad_persist[3:0];      // CLCT Triad persistence
+  assign  header21_[6:4]    =  dmb_thresh_pretrig[2:0]; // DMB pre-trigger threshold for active-feb
+  assign  header21_[10:7]   =  alct_delay[3:0];         // Delay ALCT for CLCT match window
+  assign  header21_[14:11]  =  clct_window[3:0];        // CLCT match window width
+  assign  header21_[18:15]  =  0;                       // DDU+DMB control flags
 
 // CLCT Trigger Status
-  assign  header22_[8:0]    =  r_trig_source_vec[8:0];    // Trigger source vector
-  assign  header22_[14:9]    =  r_layers_hit[5:0];      // CSC layers hit on layer trigger after drift
-  assign  header22_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header22_[8:0]    =  r_trig_source_vec[8:0]; // Trigger source vector
+  assign  header22_[14:9]   =  r_layers_hit[5:0];      // CSC layers hit on layer trigger after drift
+  assign  header22_[18:15]  =  0;                      // DDU+DMB control flags
 
-  assign  header23_[4:0]    =  active_feb_mux[4:0];    // Active CFEB list sent to DMB
-  assign  header23_[9:5]    =  r_cfebs_read[4:0];      // CFEBs read out for this event
-  assign  header23_[13:10]  =  r_l1a_match_win[3:0];    // Position of l1a in window
-  assign  header23_[14]    =  active_feb_src;        // Active CFEB list source, 0=pretrig, 1=tmb match
-  assign  header23_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header23_[4:0]    =  active_feb_mux[4:0];  // Active CFEB list sent to DMB
+  assign  header23_[9:5]    =  r_cfebs_read[4:0];    // CFEBs read out for this event
+  assign  header23_[13:10]  =  r_l1a_match_win[3:0]; // Position of l1a in window
+  assign  header23_[14]     =  active_feb_src;       // Active CFEB list source, 0=pretrig, 1=tmb match
+  assign  header23_[18:15]  =  0;                    // DDU+DMB control flags
 
 // CLCT+ALCT Match Status
-  assign  header24_[0]    =  r_tmb_match;        // ALCT and CLCT matched in time, pushed on L1A stack
-  assign  header24_[1]    =  r_tmb_alct_only;      // Only ALCT triggered, pushed on L1a stack
-  assign  header24_[2]    =  r_tmb_clct_only;      // Only CLCT triggered, pushed on L1A stack
-  assign  header24_[6:3]    =  r_tmb_match_win[3:0];    // Location of alct in clct window, pushed on L1A stack
-  assign  header24_[7]    =  r_tmb_no_alct;        // No ALCT
-  assign  header24_[8]    =  r_tmb_one_alct;        // One ALCT
-  assign  header24_[9]    =  r_tmb_one_clct;        // One CLCT
-  assign  header24_[10]    =  r_tmb_two_alct;        // Two ALCTs
-  assign  header24_[11]    =  r_tmb_two_clct;        // Two CLCTs
-  assign  header24_[12]    =  r_tmb_dupe_alct;      // ALCT0 copied into ALCT1 to make 2nd LCT
-  assign  header24_[13]    =  r_tmb_dupe_clct;      // CLCT0 copied into CLCT1 to make 2nd LCT
-  assign  header24_[14]    =  r_tmb_rank_err;        // LCT1 has higher quality than LCT0
-  assign  header24_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header24_[0]      =  r_tmb_match;          // ALCT and CLCT matched in time, pushed on L1A stack
+  assign  header24_[1]      =  r_tmb_alct_only;      // Only ALCT triggered, pushed on L1a stack
+  assign  header24_[2]      =  r_tmb_clct_only;      // Only CLCT triggered, pushed on L1A stack
+  assign  header24_[6:3]    =  r_tmb_match_win[3:0]; // Location of alct in clct window, pushed on L1A stack
+  assign  header24_[7]      =  r_tmb_no_alct;        // No ALCT
+  assign  header24_[8]      =  r_tmb_one_alct;       // One ALCT
+  assign  header24_[9]      =  r_tmb_one_clct;       // One CLCT
+  assign  header24_[10]     =  r_tmb_two_alct;       // Two ALCTs
+  assign  header24_[11]     =  r_tmb_two_clct;       // Two CLCTs
+  assign  header24_[12]     =  r_tmb_dupe_alct;      // ALCT0 copied into ALCT1 to make 2nd LCT
+  assign  header24_[13]     =  r_tmb_dupe_clct;      // CLCT0 copied into CLCT1 to make 2nd LCT
+  assign  header24_[14]     =  r_tmb_rank_err;       // LCT1 has higher quality than LCT0
+  assign  header24_[18:15]  =  0;                    // DDU+DMB control flags
 
 // CLCT Trigger Data
-  assign  header25_[14:0]    =  r_clct0_xtmb[14:0];      // CLCT0 after drift lsbs
-  assign  header25_[18:15]  =  0;              // DDU+DMB control flags
 
-  assign  header26_[14:0]    =  r_clct1_xtmb[14:0];      // CLCT1 after drift lsbs
-  assign  header26_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header25_[14:0]   =  r_clct0_xtmb[14:0]; // CLCT0 after drift lsbs
+  assign  header25_[18:15]  =  0;                  // DDU+DMB control flags
 
-  assign  header27_[0]    =  r_clct0_xtmb[15];      // CLCT0 after drift msbs
-  assign  header27_[1]    =  r_clct1_xtmb[15];      // CLCT1 after drift msbs
-  assign  header27_[4:2]    =  r_clctc_xtmb[2:0];      // CLCT0/1 common after drift msbs
-  assign  header27_[5]    =  r_clct0_invp;        // CLCT0 had invalid pattern after drift delay
-  assign  header27_[6]    =  r_clct1_invp;        // CLCT1 had invalid pattern after drift delay
-  assign  header27_[7]    =  r_clct1_busy;        // 2nd CLCT busy, logic error indicator
-  assign  header27_[12:8]    =  perr_cfeb_ff[4:0];      // CFEB RAM parity error, latched
-  assign  header27_[13]    =  perr_rpc_ff | perr_mini_ff;  // RPC  or Minicope RAM parity error, latched
-  assign  header27_[14]    =  perr_ff;          // Parity error summary,  latched
-  assign  header27_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header26_[14:0]   =  r_clct1_xtmb[14:0]; // CLCT1 after drift lsbs
+  assign  header26_[18:15]  =  0;                  // DDU+DMB control flags
+
+  assign  header27_[0]      =  r_clct0_xtmb[15];                            // CLCT0 after drift msbs
+  assign  header27_[1]      =  r_clct1_xtmb[15];                            // CLCT1 after drift msbs
+  assign  header27_[4:2]    =  r_clctc_xtmb[2:0];                           // CLCT0/1 common after drift msbs
+  assign  header27_[5]      =  r_clct0_invp;                                // CLCT0 had invalid pattern after drift delay
+  assign  header27_[6]      =  r_clct1_invp;                                // CLCT1 had invalid pattern after drift delay
+  assign  header27_[7]      =  r_clct1_busy;                                // 2nd CLCT busy, logic error indicator
+  assign  header27_[12:8]   =  perr_cfeb_ff[4:0];                           // CFEB RAM parity error, latched
+  assign  header27_[13]     =  (|perr_gem_ff) | perr_rpc_ff | perr_mini_ff; // GEM or RPC or Minicope RAM parity error, latched
+  assign  header27_[14]     =  perr_ff;                                     // Parity error summary,  latched
+  assign  header27_[18:15]  =  0;                                           // DDU+DMB control flags
 
 // ALCT Trigger Data
-  assign  header28_[0]    =  r_alct0_valid;        // ALCT0 valid pattern flag
+
+  assign  header28_[0]      =  r_alct0_valid;           // ALCT0 valid pattern flag
   assign  header28_[2:1]    =  r_alct0_quality[1:0];    // ALCT0 quality
-  assign  header28_[3]    =  r_alct0_amu;        // ALCT0 accelerator muon flag
-  assign  header28_[10:4]    =  r_alct0_key[6:0];      // ALCT0 key wire group
-  assign  header28_[14:11]  =  r_alct_preClct_win[3:0];  // ALCT active_feb_flag position in pretrig window
-  assign  header28_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header28_[3]      =  r_alct0_amu;             // ALCT0 accelerator muon flag
+  assign  header28_[10:4]   =  r_alct0_key[6:0];        // ALCT0 key wire group
+  assign  header28_[14:11]  =  r_alct_preClct_win[3:0]; // ALCT active_feb_flag position in pretrig window
+  assign  header28_[18:15]  =  0;                       // DDU+DMB control flags
 
-  assign  header29_[0]    =  r_alct1_valid;        // ALCT1 valid pattern flag
-  assign  header29_[2:1]    =  r_alct1_quality[1:0];    // ALCT1 quality
-  assign  header29_[3]    =  r_alct1_amu;        // ALCT1 accelerator muon flag
-  assign  header29_[10:4]    =  r_alct1_key[6:0];      // ALCT1 key wire group
-  assign  header29_[12:11]  =  drift_delay[1:0];      // CLCT drift delay
-  assign  header29_[13]    =  bcb_read_enable;      // Enable blocked bits in readout
-  assign  header29_[14]    =  hs_layer_trig;        // Layer-mode trigger
-  assign  header29_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header29_[0]      =  r_alct1_valid;        // ALCT1 valid pattern flag
+  assign  header29_[2:1]    =  r_alct1_quality[1:0]; // ALCT1 quality
+  assign  header29_[3]      =  r_alct1_amu;          // ALCT1 accelerator muon flag
+  assign  header29_[10:4]   =  r_alct1_key[6:0];     // ALCT1 key wire group
+  assign  header29_[12:11]  =  drift_delay[1:0];     // CLCT drift delay
+  assign  header29_[13]     =  bcb_read_enable;      // Enable blocked bits in readout
+  assign  header29_[14]     =  hs_layer_trig;        // Layer-mode trigger
+  assign  header29_[18:15]  =  0;                    // DDU+DMB control flags
 
-  assign  header30_[4:0]    =  r_alct_bxn[4:0];      // ALCT0/1 bxn
-  assign  header30_[6:5]    =  r_alct_ecc_err[1:0];    // ALCT trigger path ECC error code
-  assign  header30_[11:7]    =  cfeb_badbits_found[4:0];  // CFEB[n] has at least 1 bad bit
-  assign  header30_[12]    =  cfeb_badbits_blocked;    // A CFEB had bad bits that were blocked
-  assign  header30_[13]    =  alct_cfg_done;        // ALCT FPGA configuration done
-  assign  header30_[14]    =  bx0_match;          // ALCT bx0 and CLCT bx0 match
-  assign  header30_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header30_[4:0]    =  r_alct_bxn[4:0];         // ALCT0/1 bxn
+  assign  header30_[6:5]    =  r_alct_ecc_err[1:0];     // ALCT trigger path ECC error code
+  assign  header30_[11:7]   =  cfeb_badbits_found[4:0]; // CFEB[n] has at least 1 bad bit
+  assign  header30_[12]     =  cfeb_badbits_blocked;    // A CFEB had bad bits that were blocked
+  assign  header30_[13]     =  alct_cfg_done;           // ALCT FPGA configuration done
+  assign  header30_[14]     =  bx0_match;               // ALCT bx0 and CLCT bx0 match
+  assign  header30_[18:15]  =  0;                       // DDU+DMB control flags
 
 // MPC Frames
-  assign  header31_[14:0]    =  r_mpc0_frame0_ff[14:0];    // MPC muon 0 frame 0 LSBs
-  assign  header31_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header31_[14:0]   =  r_mpc0_frame0_ff[14:0]; // MPC muon 0 frame 0 LSBs
+  assign  header31_[18:15]  =  0;                      // DDU+DMB control flags
 
-  assign  header32_[14:0]    =  r_mpc0_frame1_ff[14:0];    // MPC muon 0 frame 1 LSBs
-  assign  header32_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header32_[14:0]   =  r_mpc0_frame1_ff[14:0]; // MPC muon 0 frame 1 LSBs
+  assign  header32_[18:15]  =  0;                      // DDU+DMB control flags
 
-  assign  header33_[14:0]    =  r_mpc1_frame0_ff[14:0];    // MPC muon 1 frame 0 LSBs
-  assign  header33_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header33_[14:0]   =  r_mpc1_frame0_ff[14:0]; // MPC muon 1 frame 0 LSBs
+  assign  header33_[18:15]  =  0;                      // DDU+DMB control flags
 
-  assign  header34_[14:0]    =  r_mpc1_frame1_ff[14:0];    // MPC muon 1 frame 1 LSBs
-  assign  header34_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header34_[14:0]   =  r_mpc1_frame1_ff[14:0]; // MPC muon 1 frame 1 LSBs
+  assign  header34_[18:15]  =  0;                      // DDU+DMB control flags
 
-  assign  header35_[0]    =  r_mpc0_frame0_ff[15];    // MPC muon 0 frame 0 MSB
-  assign  header35_[1]    =  r_mpc0_frame1_ff[15];    // MPC muon 0 frame 1 MSB
-  assign  header35_[2]    =  r_mpc1_frame0_ff[15];    // MPC muon 1 frame 0 MSB
-  assign  header35_[3]    =  r_mpc1_frame1_ff[15];    // MPC muon 1 frame 1 MSB
-  assign  header35_[7:4]    =  mpc_tx_delay[3:0];      // MPC transmit delay
-  assign  header35_[9:8]    =  r_mpc_accept[1:0];      // MPC muon accept response
-  assign  header35_[14:10]  =  cfeb_en[4:0];        // CFEBs enabled for triggering
-  assign  header35_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header35_[0]      =  r_mpc0_frame0_ff[15]; // MPC muon 0 frame 0 MSB
+  assign  header35_[1]      =  r_mpc0_frame1_ff[15]; // MPC muon 0 frame 1 MSB
+  assign  header35_[2]      =  r_mpc1_frame0_ff[15]; // MPC muon 1 frame 0 MSB
+  assign  header35_[3]      =  r_mpc1_frame1_ff[15]; // MPC muon 1 frame 1 MSB
+  assign  header35_[7:4]    =  mpc_tx_delay[3:0];    // MPC transmit delay
+  assign  header35_[9:8]    =  r_mpc_accept[1:0];    // MPC muon accept response
+  assign  header35_[14:10]  =  cfeb_en[4:0];         // CFEBs enabled for triggering
+  assign  header35_[18:15]  =  0;                    // DDU+DMB control flags
 
-// RPC Configuration
-  assign  header36_[1:0]    =  rd_list_rpc[1:0];      // RPCs included in read out
-  assign  header36_[3:2]    =  r_nrpcs_read[1:0];      // Number of RPCs in readout, 0,1,2, 0 if head-only event
-  assign  header36_[4]    =  rpc_read_enable;      // RPC readout enabled
-  assign  header36_[9:5]    =  fifo_tbins_rpc[4:0];    // Number RPC FIFO time bins to read out
-  assign  header36_[14:10]  =  fifo_pretrig_rpc[4:0];    // Number RPC FIFO time bins before pretrigger
-  assign  header36_[18:15]  =  0;              // DDU+DMB control flags
+// RPC/GEM Configuration
+
+  wire [18:0] header36_rpc_;  
+  wire [18:0] header36_gem_;  
+
+  assign  header36_rpc_[1:0]   = rd_list_rpc[1:0];      // RPCs included in read out
+  assign  header36_rpc_[3:2]   = r_nrpcs_read[1:0];     // Number of RPCs in readout, 0,1,2, 0 if head-only event
+  assign  header36_rpc_[4]     = rpc_read_enable;       // RPC readout enabled
+  assign  header36_rpc_[9:5]   = fifo_tbins_rpc[4:0];   // Number RPC FIFO time bins to read out
+  assign  header36_rpc_[14:10] = fifo_pretrig_rpc[4:0]; // Number RPC FIFO time bins before pretrigger
+  assign  header36_rpc_[18:15] = 0;                     // DDU+DMB control flags
+
+  assign  header36_gem_[0]     = gem_zero_suppress;     // GEM zero-suppression enabled
+  assign  header36_gem_[3:1]   = 0;                     // unused.. so far...
+  assign  header36_gem_[4]     = gem_read_enable;       // GEM readout enabled
+  assign  header36_gem_[9:5]   = fifo_tbins_gem[4:0];   // Number GEM FIFO time bins to read out
+  assign  header36_gem_[14:10] = fifo_pretrig_gem[4:0]; // Number GEM FIFO time bins before pretrigger
+  assign  header36_gem_[18:15] = 0;                     // DDU+DMB control flags
+
+  assign  header36_ [18:0]     = (gem_read_enable) ? header36_gem_ : header36_rpc_; 
 
 // Buffer Status
-  assign  header37_[10:0]    =  r_wr_buf_adr[10:0];      // Buffer RAM write address at pretrigger
-  assign  header37_[11]    =  r_wr_buf_ready;        // Write buffer was ready at pretrig
-  assign  header37_[12]    =  wr_buf_ready;        // Write buffer ready now
-  assign  header37_[13]    =  buf_q_full;          // All raw hits ram in use, ram writing must stop
-  assign  header37_[14]    =  buf_q_empty;        // No fences remain on buffer stack
-  assign  header37_[18:15]  =  0;              // DDU+DMB control flags
 
-  assign  header38_[10:0]    =  r_buf_fence_dist[10:0];    // Distance to 1st fence address at pretrigger
-  assign  header38_[11]    =  buf_q_ovf_err;        // Tried to push when stack full
-  assign  header38_[12]    =  buf_q_udf_err;        // Tried to pop when stack empty
-  assign  header38_[13]    =  buf_q_adr_err;        // Fence adr popped from stack doesnt match rls adr
-  assign  header38_[14]    =  buf_stalled_once;      // Buffer write pointer hit a fence and stalled
-  assign  header38_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header37_[10:0]   =  r_wr_buf_adr[10:0]; // Buffer RAM write address at pretrigger
+  assign  header37_[11]     =  r_wr_buf_ready;     // Write buffer was ready at pretrig
+  assign  header37_[12]     =  wr_buf_ready;       // Write buffer ready now
+  assign  header37_[13]     =  buf_q_full;         // All raw hits ram in use, ram writing must stop
+  assign  header37_[14]     =  buf_q_empty;        // No fences remain on buffer stack
+  assign  header37_[18:15]  =  0;                  // DDU+DMB control flags
+
+  assign  header38_[10:0]   =  r_buf_fence_dist[10:0]; // Distance to 1st fence address at pretrigger
+  assign  header38_[11]     =  buf_q_ovf_err;          // Tried to push when stack full
+  assign  header38_[12]     =  buf_q_udf_err;          // Tried to pop when stack empty
+  assign  header38_[13]     =  buf_q_adr_err;          // Fence adr popped from stack doesnt match rls adr
+  assign  header38_[14]     =  buf_stalled_once;       // Buffer write pointer hit a fence and stalled
+  assign  header38_[18:15]  =  0;                      // DDU+DMB control flags
 
 // Spare Frames
-  assign  header39_[11:0]    =  buf_fence_cnt[11:0];    // Number of fences in fence RAM currently
-  assign  header39_[12]    =  reverse_hs_csc;        // 1=Reverse staggered CSC, non-me1
-  assign  header39_[13]    =  reverse_hs_me1a;      // 1=ME1A hstrip order reversed
-  assign  header39_[14]    =  reverse_hs_me1b;      // 1=ME1B hstrip order reversed
-  assign  header39_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header39_[11:0]   =  buf_fence_cnt[11:0]; // Number of fences in fence RAM currently
+  assign  header39_[12]     =  reverse_hs_csc;      // 1=Reverse staggered CSC, non-me1
+  assign  header39_[13]     =  reverse_hs_me1a;     // 1=ME1A hstrip order reversed
+  assign  header39_[14]     =  reverse_hs_me1b;     // 1=ME1B hstrip order reversed
+  assign  header39_[18:15]  =  0;                   // DDU+DMB control flags
 
-  assign  header40_[1:0]    =  active_feb_mux[6:5];    // Hdr23 Active CFEB list sent to DMB
-  assign  header40_[3:2]    =  r_cfebs_read[6:5];      // Hdr23 CFEBs read out for this event
-  assign  header40_[5:4]    =  perr_cfeb_ff[6:5];      // Hdr27 CFEB RAM parity error, latched
-  assign  header40_[7:6]    =  cfeb_badbits_found[6:5];  // Hdr30 CFEB[n] has at least 1 bad bit
-  assign  header40_[9:8]    =  cfeb_en[6:5];        // Hdr35 CFEBs enabled for triggering
-  assign  header40_[10]    =  buf_fence_cnt_is_peak;    // Current fence is peak number of fences in RAM
-  assign  header40_[11]    =  (MXCFEB==7);        // TMB has 7 DCFEBs so hdr40_[10:1] are active
-  assign  header40_[12]    =  r_trig_source_vec[9];    // Pre-trigger was ME1A only
-  assign  header40_[13]    =  r_trig_source_vec[10];    // Pre-trigger was ME1B only
-  assign  header40_[14]    =  r_tmb_trig_pulse;      // TMB trig pulse coincident with rtmb_push
-  assign  header40_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header40_[1:0]    =  active_feb_mux[6:5];     // Hdr23 Active CFEB list sent to DMB
+  assign  header40_[3:2]    =  r_cfebs_read[6:5];       // Hdr23 CFEBs read out for this event
+  assign  header40_[5:4]    =  perr_cfeb_ff[6:5];       // Hdr27 CFEB RAM parity error, latched
+  assign  header40_[7:6]    =  cfeb_badbits_found[6:5]; // Hdr30 CFEB[n] has at least 1 bad bit
+  assign  header40_[9:8]    =  cfeb_en[6:5];            // Hdr35 CFEBs enabled for triggering
+  assign  header40_[10]     =  buf_fence_cnt_is_peak;   // Current fence is peak number of fences in RAM
+  assign  header40_[11]     =  (MXCFEB==7);             // TMB has 7 DCFEBs so hdr40_[10:1] are active
+  assign  header40_[12]     =  r_trig_source_vec[9];    // Pre-trigger was ME1A only
+  assign  header40_[13]     =  r_trig_source_vec[10];   // Pre-trigger was ME1B only
+  assign  header40_[14]     =  r_tmb_trig_pulse;        // TMB trig pulse coincident with rtmb_push
+  assign  header40_[18:15]  =  0;                       // DDU+DMB control flags
 
-  assign  header41_[0]    =  tmb_allow_alct;        // Allow ALCT-only  tmb-matching trigger
-  assign  header41_[1]    =  tmb_allow_clct;        // Allow CLCT-only  tmb-matching trigger
-  assign  header41_[2]    =  tmb_allow_match;      // Allow Match-only tmb-matching trigger
-  assign  header41_[3]    =  tmb_allow_alct_ro;      // Allow ALCT-only  tmb-matching readout only
-  assign  header41_[4]    =  tmb_allow_clct_ro;      // Allow CLCT-only  tmb-matching readout only
-  assign  header41_[5]    =  tmb_allow_match_ro;      // Allow Match-only tmb-matching readout only
-  assign  header41_[6]    =  r_tmb_alct_only_ro;      // Only ALCT triggered, non-triggering readout
-  assign  header41_[7]    =  r_tmb_clct_only_ro;      // Only CLCT triggered, non-triggering readout
-  assign  header41_[8]    =  r_tmb_match_ro;        // ALCT and CLCT matched in time, non-triggering readout
-  assign  header41_[9]    =  r_tmb_trig_keep;      // Triggering readout event
-  assign  header41_[10]    =  r_tmb_non_trig_keep;    // Non-triggering readout event
-  assign  header41_[13:11]  =  lyr_thresh_pretrig[2:0];  // Layer pre-trigger threshold
-  assign  header41_[14]    =  layer_trig_en;        // Layer trigger mode enabled
-  assign  header41_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header41_[0]      =  tmb_allow_alct;          // Allow ALCT-only  tmb-matching trigger
+  assign  header41_[1]      =  tmb_allow_clct;          // Allow CLCT-only  tmb-matching trigger
+  assign  header41_[2]      =  tmb_allow_match;         // Allow Match-only tmb-matching trigger
+  assign  header41_[3]      =  tmb_allow_alct_ro;       // Allow ALCT-only  tmb-matching readout only
+  assign  header41_[4]      =  tmb_allow_clct_ro;       // Allow CLCT-only  tmb-matching readout only
+  assign  header41_[5]      =  tmb_allow_match_ro;      // Allow Match-only tmb-matching readout only
+  assign  header41_[6]      =  r_tmb_alct_only_ro;      // Only ALCT triggered, non-triggering readout
+  assign  header41_[7]      =  r_tmb_clct_only_ro;      // Only CLCT triggered, non-triggering readout
+  assign  header41_[8]      =  r_tmb_match_ro;          // ALCT and CLCT matched in time, non-triggering readout
+  assign  header41_[9]      =  r_tmb_trig_keep;         // Triggering readout event
+  assign  header41_[10]     =  r_tmb_non_trig_keep;     // Non-triggering readout event
+  assign  header41_[13:11]  =  lyr_thresh_pretrig[2:0]; // Layer pre-trigger threshold
+  assign  header41_[14]     =  layer_trig_en;           // Layer trigger mode enabled
+  assign  header41_[18:15]  =  0;                       // DDU+DMB control flags
 
 // Store header in parallel shifter
   reg  [MXHW-1:0] header_bbl [MXHD-1:0];
@@ -4055,16 +4139,16 @@
   end
   else
   if (read_sm == xdmb) begin            
-  header_bbl[0]  <=  header00_;
-  header_bbl[1]  <=  header01_;
-  header_bbl[2]  <=  header02_;
-  header_bbl[3]  <=  header03_;
-  header_bbl[4]  <=  header04_;
-  header_bbl[5]  <=  header05_;
-  header_bbl[6]  <=  header06_;
-  header_bbl[7]  <=  header07_;
-  header_bbl[8]  <=  header08_;
-  header_bbl[9]  <=  header09_;
+  header_bbl[0]   <=  header00_;
+  header_bbl[1]   <=  header01_;
+  header_bbl[2]   <=  header02_;
+  header_bbl[3]   <=  header03_;
+  header_bbl[4]   <=  header04_;
+  header_bbl[5]   <=  header05_;
+  header_bbl[6]   <=  header06_;
+  header_bbl[7]   <=  header07_;
+  header_bbl[8]   <=  header08_;
+  header_bbl[9]   <=  header09_;
   header_bbl[10]  <=  header10_;
   header_bbl[11]  <=  header11_;
   header_bbl[12]  <=  header12_;
@@ -4114,29 +4198,52 @@
 //------------------------------------------------------------------------------------------------------------------
 // Readout CLCT Raw Hits FIFO Controller Section
 //------------------------------------------------------------------------------------------------------------------
+
 // Send read start commands to FIFO controller
-  assign rd_start_cfeb  = (read_sm == xheader) && header_done && r_fifo_dump && !no_daq;
-  assign rd_abort_cfeb  = 0;
-  assign rd_list_cfeb    = cfebs_read;
-  assign rd_ncfebs    = ncfebs;
-  assign rd_fifo_adr    = r_wr_buf_adr;
+  assign rd_start_cfeb  =  (read_sm == xheader) && header_done && r_fifo_dump && !no_daq;
+  assign rd_abort_cfeb  =  0;
+  assign rd_list_cfeb   =  cfebs_read;
+  assign rd_ncfebs      =  ncfebs;
+  assign rd_fifo_adr    =  r_wr_buf_adr;
 
   assign fifo_read_done  = !cfeb_fifo_busy;    // CLCT FIFO signals completion
 
 //------------------------------------------------------------------------------------------------------------------
-// Readout RPC Raw Hits FIFO Controller Section
+// Readout GEM Raw Hits FIFO Controller Section
 //------------------------------------------------------------------------------------------------------------------
-  reg [MXRPC-1:0]  rd_list_rpc=0;
 
-  assign rd_start_rpc  = (read_sm == xdump) && fifo_read_done && rpc_read_enable && !no_daq;// Start readout sequence, send fifo dump to DMB
-  assign rd_abort_rpc  = 0;                                // Cancel readout
-  assign rpc_fifo_done   = !rpc_fifo_busy;                        // Readout busy sending data to sequencer
-  assign rd_rpc_offset = 0;                                // RAM address rd_fifo_adr offset for rpc read out
+  reg [MXGEM-1:0]  rd_list_gem= {MXGEM{1'b1}}; // init to 1 to make ise happy
+
+  // start gem read when we are accessing the last bx of CFEB data.  fifo_read_done goes high with !cfeb_busy_fast, so
+  // this takes place 2bx before the CFEB is finished reading to the DMB, which gives the GEM time for RAM access
+
+  assign rd_start_gem  = (read_sm == xdump) && fifo_read_done && gem_read_enable && !no_daq; // Start readout sequence, send fifo dump to DMB
+  assign rd_abort_gem  = 0;                                                                  // Cancel readout
+  assign gem_fifo_done = !gem_fifo_busy;                                                     // Readout busy sending data to sequencer
+  assign rd_gem_offset = 0;                                                                  // RAM address rd_fifo_adr offset for gem read out
 
   always @(posedge clock) begin
-  rd_list_rpc[MXRPC-1:0]  <= rpc_exists;                          // List of RPCs to read out
-  rd_nrpcs[MXRPCB-1+1:0]  <= rpc_exists[0]+rpc_exists[1];                  // Number of RPCs in rpc_list (0 or 1-to-2 depending on CSC type)
-  rpcs_all_empty      <= !(|rpc_exists);                        // At least 1 RPC to read
+    rd_list_gem[MXGEM-1:0]  <= gem_exists;                                              // List of GEMs to read out
+    rd_ngems[MXGEMB-1+1:0]  <= gem_exists[0]+gem_exists[1]+gem_exists[2]+gem_exists[3]; // Number of GEMs in gem_list (should be 4)
+    gems_all_empty          <= !(|gem_exists);                                          // At least 1 GEM to read
+  end
+
+//------------------------------------------------------------------------------------------------------------------
+// Readout RPC Raw Hits FIFO Controller Section
+//------------------------------------------------------------------------------------------------------------------
+
+  reg [MXRPC-1:0]  rd_list_rpc=0;
+
+  // Start readout sequence, send fifo dump to DMB
+  assign rd_start_rpc  = (read_sm == xdump) && fifo_read_done && rpc_read_enable && !gem_read_enable && !no_daq; // don't start rpc if gem exists
+  assign rd_abort_rpc  = 0;              // Cancel readout
+  assign rpc_fifo_done = !rpc_fifo_busy; // Readout busy sending data to sequencer
+  assign rd_rpc_offset = 0;              // RAM address rd_fifo_adr offset for rpc read out
+
+  always @(posedge clock) begin
+    rd_list_rpc[MXRPC-1:0]  <= rpc_exists;                  // List of RPCs to read out
+    rd_nrpcs[MXRPCB-1+1:0]  <= rpc_exists[0]+rpc_exists[1]; // Number of RPCs in rpc_list (0 or 1-to-2 depending on CSC type)
+    rpcs_all_empty          <= !(|rpc_exists);              // At least 1 RPC to read
   end
 
 //------------------------------------------------------------------------------------------------------------------
@@ -4170,8 +4277,8 @@
     end
   endgenerate
 
-  assign fifo_wdata_mini[9:0]   = miniscope_data_dly[9:0];    // Delayed pretrig region 
-  assign fifo_wdata_mini[15:10] = miniscope_data[15:10];      // Prompt  L1A region
+  assign fifo_wdata_mini[9:0]   = miniscope_data_dly[9:0]; // Delayed pretrig region
+  assign fifo_wdata_mini[15:10] = miniscope_data[15:10];   // Prompt  L1A region
 
 // Miniscope Readout
   wire mini_start_from_xdump = (read_sm == xdump) && fifo_read_done && !rpc_read_enable && !scp_auto;
@@ -4215,6 +4322,7 @@
 
   wire  [MXHW-1:0]    b04_frame;
   wire  [MXHW-1:0]    rpc_frame;
+  wire  [MXHW-1:0]    gem_frame;
   wire  [MXHW-1:0]    e04_frame;
 
   wire  [MXHW-1:0]    b05_frame;
@@ -4242,115 +4350,121 @@
 //------------------------------------------------------------------------------------------------------------------
 // Construct Special DMB frames
 //------------------------------------------------------------------------------------------------------------------
+
 // Header
-  assign e0b_frame[11:0]    =  12'hE0B;      // End of header block
-  assign e0b_frame[14:12]    =  3'b110;        // Marker  
-  assign e0b_frame[18:15]    =  0;          // DDU special + DMB control flags
+  assign e0b_frame[11:0]   =  12'hE0B;              // End of header block
+  assign e0b_frame[14:12]  =  3'b110;               // Marker
+  assign e0b_frame[18:15]  =  0;                    // DDU special + DMB control flags
 
 // CFEB Raw hits
-  assign fifo_frame[ 7: 0]  =  cfeb_rawhits[7:0];  // FIFO raw hits data
-  assign fifo_frame[11: 8]  =  cfeb_tbin[3:0];    // Time bin LSBs
-  assign fifo_frame[14:12]  =  cfeb_adr;      // CFEB ID
-  assign fifo_frame[18:15]  =  0;          // DDU special + DMB control flags
+  assign fifo_frame[ 7: 0]  =  cfeb_rawhits[7:0];   // FIFO raw hits data
+  assign fifo_frame[11: 8]  =  cfeb_tbin[3:0];      // Time bin LSBs
+  assign fifo_frame[14:12]  =  cfeb_adr;            // CFEB ID
+  assign fifo_frame[18:15]  =  0;                   // DDU special + DMB control flags
 
-// RPC Raw hits
-  assign b04_frame[11:0]    =  12'hB04;      // Beginning of RPC block
-  assign b04_frame[14:12]    =  3'b110;        // Marker  
-  assign b04_frame[18:15]    =  0;          // DDU special + DMB control flag
+// RPC+GEM Raw hits
+  assign b04_frame[11:0]   =  12'hB04;              // Beginning of RPC block
+  assign b04_frame[14:12]  =  3'b110;               // Marker
+  assign b04_frame[18:15]  =  0;                    // DDU special + DMB control flag
 
-  assign rpc_frame[7:0]    =  rpc_rawhits[7:0];  // RPC pad hits for DMB, 8 of 16 per cycle
-  assign rpc_frame[11:8]    =  rpc_tbinbxn[3:0];  // RPC tbin or flag,bxn for DMB
-  assign rpc_frame[13:12]    =  {1'b0,rpc_adr[0]};  // RPC ID tag for DMB
-  assign rpc_frame[18:14]    =  0;          // DDU special + DMB control flags
+  assign rpc_frame[7:0]    =  rpc_rawhits[7:0];     // RPC pad hits for DMB, 8 of 16 per cycle
+  assign rpc_frame[11:8]   =  rpc_tbinbxn[3:0];     // RPC tbin or flag,bxn for DMB
+  assign rpc_frame[13:12]  =  {1'b0,rpc_adr[0]};    // RPC ID tag for DMB
+  assign rpc_frame[18:14]  =  0;                    // DDU special + DMB control flags
 
-  assign e04_frame[11:0]    =  12'hE04;      // End of RPC block
-  assign e04_frame[14:12]    =  3'b110;        // Marker  
-  assign e04_frame[18:15]    =  0;          // DDU special + DMB control flags
+  assign gem_frame[13:0]   =  gem_rawhits[13:0];    // GEM raw hits data
+  assign gem_frame[14]     =  gem_id[0:0];          // GEM Chamber ID (0,1)
+  assign gem_frame[18:15]  =  0;                    // DDU special + DMB control flags
+
+  assign e04_frame[11:0]   =  12'hE04;              // End of RPC block
+  assign e04_frame[14:12]  =  3'b110;               // Marker
+  assign e04_frame[18:15]  =  0;                    // DDU special + DMB control flags
 
 // Scope
-  assign b05_frame[11:0]    =  12'hB05;      // Beginning of Scope block
-  assign b05_frame[14:12]    =  3'b110;        // Marker  
-  assign b05_frame[18:15]    =  0;          // DDU special + DMB control flags
+  assign b05_frame[11:0]   =  12'hB05;              // Beginning of Scope block
+  assign b05_frame[14:12]  =  3'b110;               // Marker
+  assign b05_frame[18:15]  =  0;                    // DDU special + DMB control flags
 
-  assign scp_frame[14:0]    =  scp_rdata[14:0];  // Scope data
-  assign scp_frame[18:15]    =  0;          // DDU special + DMB control flags
+  assign scp_frame[14:0]   =  scp_rdata[14:0];      // Scope data
+  assign scp_frame[18:15]  =  0;                    // DDU special + DMB control flags
 
-  assign e05_frame[11:0]    =  12'hE05;      // End of Scope block
-  assign e05_frame[14:12]    =  3'b110;        // Marker  
-  assign e05_frame[18:15]    =  0;          // DDU special + DMB control flags
+  assign e05_frame[11:0]   =  12'hE05;              // End of Scope block
+  assign e05_frame[14:12]  =  3'b110;               // Marker
+  assign e05_frame[18:15]  =  0;                    // DDU special + DMB control flags
 
 // Miniscope
-  assign b07_frame[11:0]    =  12'hB07;      // Beginning of minicope block
-  assign b07_frame[14:12]    =  3'b110;        // Marker  
-  assign b07_frame[18:15]    =  0;          // DDU special + DMB control flags
+  assign b07_frame[11:0]   =  12'hB07;              // Beginning of minicope block
+  assign b07_frame[14:12]  =  3'b110;               // Marker
+  assign b07_frame[18:15]  =  0;                    // DDU special + DMB control flags
 
-  assign mini_frame[14:0]    =  mini_rdata[14:0];  // Miniscope data
-  assign mini_frame[18:15]  =  0;          // DDU special + DMB control flags
+  assign mini_frame[14:0]   =  mini_rdata[14:0];    // Miniscope data
+  assign mini_frame[18:15]  =  0;                   // DDU special + DMB control flags
 
-  assign e07_frame[11:0]    =  12'hE07;      // End of miniscope block
-  assign e07_frame[14:12]    =  3'b110;        // Marker  
-  assign e07_frame[18:15]    =  0;          // DDU special + DMB control flags
+  assign e07_frame[11:0]   =  12'hE07;              // End of miniscope block
+  assign e07_frame[14:12]  =  3'b110;               // Marker
+  assign e07_frame[18:15]  =  0;                    // DDU special + DMB control flags
 
 // CFEB Blocked triad bits
-  assign bcb_frame[11:0]    =  12'hBCB;      // Beginning of CFEB blocked bits list
-  assign bcb_frame[14:12]    =  3'b110;        // Marker  
-  assign bcb_frame[18:15]    =  0;          // DDU special + DMB control flag
+  assign bcb_frame[11:0]   =  12'hBCB;              // Beginning of CFEB blocked bits list
+  assign bcb_frame[14:12]  =  3'b110;               // Marker
+  assign bcb_frame[18:15]  =  0;                    // DDU special + DMB control flag
 
-  assign blkbit_frame[11:0]  =  bcb_blkbits[11:0];  // CFEB blocked bits list
-  assign blkbit_frame[14:12]  =  bcb_cfeb_adr[2:0];  // CFEB ID  
-  assign blkbit_frame[18:15]  =  0;          // DDU special + DMB control flag
+  assign blkbit_frame[11:0]   =  bcb_blkbits[11:0]; // CFEB blocked bits list
+  assign blkbit_frame[14:12]  =  bcb_cfeb_adr[2:0]; // CFEB ID
+  assign blkbit_frame[18:15]  =  0;                 // DDU special + DMB control flag
 
-  assign ecb_frame[11:0]    =  12'hECB;      // End of CFEB blccked bits list
-  assign ecb_frame[14:12]    =  3'b110;        // Marker  
-  assign ecb_frame[18:15]    =  0;          // DDU special + DMB control flags
+  assign ecb_frame[11:0]   =  12'hECB;              // End of CFEB blccked bits list
+  assign ecb_frame[14:12]  =  3'b110;               // Marker
+  assign ecb_frame[18:15]  =  0;                    // DDU special + DMB control flags
 
 // Fillers
-  assign e0c_frame[11:0]    =  12'hE0C;      // End of Cathode
-  assign e0c_frame[14:12]    =  3'b110;        // Marker
-  assign e0c_frame[18:15]    =  0;          // DDU special + DMB control flags
 
-  assign mod40_frame[14:0]  =  'h2AAA;        // Filler word
-  assign mod40_frame[18:15]  =  0;          // DDU special + DMB control flags
+  assign e0c_frame[11:0]   =  12'hE0C;              // End of Cathode
+  assign e0c_frame[14:12]  =  3'b110;               // Marker
+  assign e0c_frame[18:15]  =  0;                    // DDU special + DMB control flags
 
-  assign mod41_frame[14:0]  =  'h5555;        // Filler word
-  assign mod41_frame[18:15]  =  0;          // DDU special + DMB control flags
+  assign mod40_frame[14:0]   =  'h2AAA;             // Filler word
+  assign mod40_frame[18:15]  =  0;                  // DDU special + DMB control flags
+
+  assign mod41_frame[14:0]   =  'h5555;             // Filler word
+  assign mod41_frame[18:15]  =  0;                  // DDU special + DMB control flags
 
 // CRC
-  assign crc0_frame[10:0]    =  11'h51A;      // Superfluous CRC mux code replaced in dly mux
-  assign crc0_frame[11]    =  LCT_TYPE;      // 1=TMB, 0=ALCT
-  assign crc0_frame[14:12]  =  3'b101;        // DDU code
-  assign crc0_frame[15]    =  1;          // DDU special
-  assign crc0_frame[16]    =  0;          // DMB last
-  assign crc0_frame[17]    =  0;          // DMB first
-  assign crc0_frame[18]    =  0;          // DMB /wr
+  assign crc0_frame[10:0]   =  11'h51A;             // Superfluous CRC mux code replaced in dly mux
+  assign crc0_frame[11]     =  LCT_TYPE;            // 1=TMB, 0=ALCT
+  assign crc0_frame[14:12]  =  3'b101;              // DDU code
+  assign crc0_frame[15]     =  1;                   // DDU special
+  assign crc0_frame[16]     =  0;                   // DMB last
+  assign crc0_frame[17]     =  0;                   // DMB first
+  assign crc0_frame[18]     =  0;                   // DMB /wr
 
-  assign crc1_frame[10:0]    =  11'h52A;      // Superfluous CRC mux code replaced in dly mux
-  assign crc1_frame[11]    =  LCT_TYPE;      // 1=TMB, 0=ALCT
-  assign crc1_frame[14:12]  =  3'b101;        // DDU code
-  assign crc1_frame[15]    =  1;          // DDU special
-  assign crc1_frame[16]    =  0;          // DMB last
-  assign crc1_frame[17]    =  0;          // DMB first
-  assign crc1_frame[18]    =  0;          // DMB /wr
+  assign crc1_frame[10:0]   =  11'h52A;             // Superfluous CRC mux code replaced in dly mux
+  assign crc1_frame[11]     =  LCT_TYPE;            // 1=TMB, 0=ALCT
+  assign crc1_frame[14:12]  =  3'b101;              // DDU code
+  assign crc1_frame[15]     =  1;                   // DDU special
+  assign crc1_frame[16]     =  0;                   // DMB last
+  assign crc1_frame[17]     =  0;                   // DMB first
+  assign crc1_frame[18]     =  0;                   // DMB /wr
 
 // Trailer Frames
-  assign e0f_frame[11:0]    =  {4'hE,eef,4'hF};  // End of event, E0F if have buffers, EEF if no buffers
-  assign e0f_frame[14:12]    =  3'b101;        // DDU code
-  assign e0f_frame[15]    =  1;          // DDU special
-  assign e0f_frame[16]    =  0;          // DMB last
-  assign e0f_frame[17]    =  0;          // DMB first
-  assign e0f_frame[18]    =  0;          // DMB /wr
+  assign e0f_frame[11:0]   =  {4'hE,eef,4'hF};      // End of event, E0F if have buffers, EEF if no buffers
+  assign e0f_frame[14:12]  =  3'b101;               // DDU code
+  assign e0f_frame[15]     =  1;                    // DDU special
+  assign e0f_frame[16]     =  0;                    // DMB last
+  assign e0f_frame[17]     =  0;                    // DMB first
+  assign e0f_frame[18]     =  0;                    // DMB /wr
 
-  assign last_frame[10:0]    =  frame_cnt[10:0];  // Total frame count
-  assign last_frame[11]    =  LCT_TYPE;      // 1=TMB, 0=ALCT
-  assign last_frame[14:12]  =  3'b101;        // DDU code
-  assign last_frame[15]    =  1;          // DDU special
-  assign last_frame[16]    =  1;          // DMB last
-  assign last_frame[17]    =  0;          // DMB first
-  assign last_frame[18]    =  0;          // DMB /wr
+  assign last_frame[10:0]   =  frame_cnt[10:0];     // Total frame count
+  assign last_frame[11]     =  LCT_TYPE;            // 1=TMB, 0=ALCT
+  assign last_frame[14:12]  =  3'b101;              // DDU code
+  assign last_frame[15]     =  1;                   // DDU special
+  assign last_frame[16]     =  1;                   // DMB last
+  assign last_frame[17]     =  0;                   // DMB first
+  assign last_frame[18]     =  0;                   // DMB /wr
 
 // Empty Frames
-  assign nowrite_frame[17:0]  =  0;          // Empty frames
-  assign nowrite_frame[18]  =  1;          // The famous /wr_dmbfifo bit 1=don't write dmb fifo
+  assign nowrite_frame[17:0]  =  0;                 // Empty frames
+  assign nowrite_frame[18]    =  1;                 // The famous /wr_dmbfifo bit 1=don't write dmb fifo
 
 //------------------------------------------------------------------------------------------------------------------
 // Readout Output Multiplexer Section
@@ -4358,10 +4472,11 @@
 // DMB output frame mutiplexer
   wire wr_hdr    = (read_sm == xheader);
   wire wr_e0b    = (read_sm == xe0b   );
-  wire wr_dmp    = (read_sm == xdump   );
+  wire wr_dmp    = (read_sm == xdump  );
 
   wire wr_b04    = (read_sm == xb04   );
   wire wr_rpc    = (read_sm == xrpc   );
+  wire wr_gem    = (read_sm == xgem   );
   wire wr_e04    = (read_sm == xe04   );
 
   wire wr_b05    = (read_sm == xb05   );
@@ -4369,50 +4484,53 @@
   wire wr_e05    = (read_sm == xe05   );
 
   wire wr_b07    = (read_sm == xb07   );
-  wire wr_mini  = (read_sm == xmini  );
+  wire wr_mini   = (read_sm == xmini  );
   wire wr_e07    = (read_sm == xe07   );
 
   wire wr_bcb    = (read_sm == xbcb   );
-  wire wr_blkbit  = (read_sm == xblkbit);
+  wire wr_blkbit = (read_sm == xblkbit);
   wire wr_ecb    = (read_sm == xecb   );
 
   wire wr_e0c    = (read_sm == xe0c   );
   wire wr_m40    = (read_sm == xmod40 );
   wire wr_m41    = (read_sm == xmod41 );
   wire wr_e0f    = (read_sm == xe0f   );
-  wire wr_crc0  = (read_sm == xcrc0   );
-  wire wr_crc1  = (read_sm == xcrc1   );
-  wire wr_last  = (read_sm == xlast   );
+  wire wr_crc0   = (read_sm == xcrc0  );
+  wire wr_crc1   = (read_sm == xcrc1  );
+  wire wr_last   = (read_sm == xlast  );
 
   always @(posedge clock) begin
-  if    (wr_hdr  )  dmb_ff  =  header_frame;  // header frames  
-  else if (wr_e0b  )  dmb_ff  =  e0b_frame;    // e0b    frame
-  else if (wr_dmp  )  dmb_ff  =  fifo_frame;    // fifo   frames
 
-  else if (wr_b04  )  dmb_ff  =  b04_frame;    // b04    frame
-  else if (wr_rpc )  dmb_ff  =  rpc_frame;    // rpc    frames
-  else if (wr_e04 )  dmb_ff  =  e04_frame;    // e04    frame
+  if      (wr_hdr   ) dmb_ff = header_frame;   // header frames
+  else if (wr_e0b   ) dmb_ff = e0b_frame;      // e0b    frame
+  else if (wr_dmp   ) dmb_ff = fifo_frame;     // fifo   frames
 
-  else if (wr_b05  )  dmb_ff  =  b05_frame;    // b05    frame
-  else if (wr_scp )  dmb_ff  =  scp_frame;    // scope  frames
-  else if (wr_e05 )  dmb_ff  =  e05_frame;    // e05    frame
+  else if (wr_b04   ) dmb_ff = b04_frame;      // b04    frame
+  else if (wr_rpc   ) dmb_ff = rpc_frame;      // rpc    frames
+  else if (wr_gem   ) dmb_ff = gem_frame;      // gem    frames
+  else if (wr_e04   ) dmb_ff = e04_frame;      // e04    frame
 
-  else if (wr_b07  )  dmb_ff  =  b07_frame;    // b07    frame
-  else if (wr_mini)  dmb_ff  =  mini_frame;    // mini   frames
-  else if (wr_e07 )  dmb_ff  =  e07_frame;    // e07    frame
+  else if (wr_b05   ) dmb_ff = b05_frame;      // b05    frame
+  else if (wr_scp   ) dmb_ff = scp_frame;      // scope  frames
+  else if (wr_e05   ) dmb_ff = e05_frame;      // e05    frame
 
-  else if (wr_bcb  )  dmb_ff  =  bcb_frame;    // bcb    frame
-  else if (wr_blkbit)  dmb_ff  =  blkbit_frame;  // blkbit frames
-  else if (wr_ecb )  dmb_ff  =  ecb_frame;    // ecb    frame
+  else if (wr_b07   ) dmb_ff = b07_frame;      // b07    frame
+  else if (wr_mini  ) dmb_ff = mini_frame;     // mini   frames
+  else if (wr_e07   ) dmb_ff = e07_frame;      // e07    frame
 
-  else if (wr_e0c  )  dmb_ff  =  e0c_frame;    // e0c    frame
-  else if (wr_m40  )  dmb_ff  =  mod40_frame;  // mod40  frame
-  else if (wr_m41  )  dmb_ff  =  mod41_frame;  // mod41  frame
-  else if (wr_e0f  )  dmb_ff  =  e0f_frame;    // e0f    frame
-  else if (wr_crc0)  dmb_ff  =  crc0_frame;    // crc0   frame
-  else if (wr_crc1)  dmb_ff  =  crc1_frame;    // crc1   frame
-  else if (wr_last)  dmb_ff  =  last_frame;    // last   frame
-  else        dmb_ff  =  nowrite_frame;  // nowrite_frame
+  else if (wr_bcb   ) dmb_ff = bcb_frame;      // bcb    frame
+  else if (wr_blkbit) dmb_ff = blkbit_frame;   // blkbit frames
+  else if (wr_ecb   ) dmb_ff = ecb_frame;      // ecb    frame
+
+  else if (wr_e0c   ) dmb_ff = e0c_frame;      // e0c    frame
+  else if (wr_m40   ) dmb_ff = mod40_frame;    // mod40  frame
+  else if (wr_m41   ) dmb_ff = mod41_frame;    // mod41  frame
+  else if (wr_e0f   ) dmb_ff = e0f_frame;      // e0f    frame
+  else if (wr_crc0  ) dmb_ff = crc0_frame;     // crc0   frame
+  else if (wr_crc1  ) dmb_ff = crc1_frame;     // crc1   frame
+  else if (wr_last  ) dmb_ff = last_frame;     // last   frame
+  else                dmb_ff = nowrite_frame;  // nowrite_frame
+
   end
 
 // DMB FF delays DMB out 1 clock, inserts CRC
@@ -4426,30 +4544,30 @@
   end
 
   always @(posedge clock) begin
-  if     (xcrc0dly)  dmb_ffdly  = {crc0_frame[18:11],crc_ff[10:0]};    // 1st crc frame
-  else if  (xcrc1dly)  dmb_ffdly  = {crc1_frame[18:11],crc_ff[21:11]};  // 2nd crc frame
-  else        dmb_ffdly  = dmb_ff;
+  if       (xcrc0dly)  dmb_ffdly  = {crc0_frame[18:11],crc_ff[10:0]};  // 1st crc frame
+  else if  (xcrc1dly)  dmb_ffdly  = {crc1_frame[18:11],crc_ff[21:11]}; // 2nd crc frame
+  else                 dmb_ffdly  = dmb_ff;
   end
 
 // Output to DMB via IOB FFs, async load outputs nowrite mode until startup done, do not specify initial state else xst chokes
   reg [MXDMB-1:0] dmb_tx={8'h00,1'b1,6'h00,1'b1,33'h000000000}; // synthesis attribute IOB of dmb_tx is "true";
 
   always @(posedge clock or posedge startup_blank) begin
-    if (startup_blank) begin     // async preset
-      dmb_tx[14: 0] <= 0;        // CLCT data
-      dmb_tx[29:15] <= 0;        // ALCT data
-      dmb_tx[30]    <= 0;        // DDU special
-      dmb_tx[31]    <= 0;        // DMB last
-      dmb_tx[32]    <= 0;        // DMB first
-      dmb_tx[33]    <= 1;        // DMB /wr
-      dmb_tx[34]    <= 0;        // DMB active cfeb flag
-      dmb_tx[39:35] <= 0;        // DMB active cfeb list
-      dmb_tx[40]    <= 1;        // ALCT _wr_fifo
-      dmb_tx[41]    <= 0;        // ALCT ddu_special
-      dmb_tx[42]    <= 0;        // ALCT last frame
-      dmb_tx[43]    <= 0;        // ALCT first frame
-      dmb_tx[45:44] <= 0;        // DMB active cfeb list
-      dmb_tx[48:46] <= 0;        // Unassigned
+    if (startup_blank) begin // async preset
+      dmb_tx[14: 0] <= 0;    // CLCT data
+      dmb_tx[29:15] <= 0;    // ALCT data
+      dmb_tx[30]    <= 0;    // DDU special
+      dmb_tx[31]    <= 0;    // DMB last
+      dmb_tx[32]    <= 0;    // DMB first
+      dmb_tx[33]    <= 1;    // DMB /wr
+      dmb_tx[34]    <= 0;    // DMB active cfeb flag
+      dmb_tx[39:35] <= 0;    // DMB active cfeb list
+      dmb_tx[40]    <= 1;    // ALCT _wr_fifo
+      dmb_tx[41]    <= 0;    // ALCT ddu_special
+      dmb_tx[42]    <= 0;    // ALCT last frame
+      dmb_tx[43]    <= 0;    // ALCT first frame
+      dmb_tx[45:44] <= 0;    // DMB active cfeb list
+      dmb_tx[48:46] <= 0;    // Unassigned
     end
     else begin          // if "BPI Active" then to "BPI Flash PROM Address connector", else to "DMB backplane connector"
       dmb_tx[1:0]   <= (bpi_active) ? bpi_ad_out[19:18] : dmb_ffdly[1:0];       // fifo data   ** 1,0
@@ -4704,6 +4822,7 @@
       xdump:    read_sm_vec <= 5;
       xb04:     read_sm_vec <= 6;
       xrpc:     read_sm_vec <= 7;
+      xgem:     read_sm_vec <= 27;
       xe04:     read_sm_vec <= 8;
       xb05:     read_sm_vec <= 9;
       xscope:   read_sm_vec <= 10;
@@ -4723,7 +4842,7 @@
       xlast:    read_sm_vec <= 24;
       xpop:     read_sm_vec <= 25;
       xhalt:    read_sm_vec <= 26;
-      default   read_sm_vec <= 27;
+      default   read_sm_vec <= 28;
     endcase
   end
 
@@ -4785,26 +4904,26 @@
   assign read_sm_xdmb = (read_sm == xdmb);
 
   always @(posedge clock) begin
-  if    (wadr_reset) wadr = 0;
+  if      (wadr_reset) wadr = 0;
   else if (wadr_cnten) wadr = wadr + 1'b1;
   end
 
 // Buffer DMB write address counter and data
   reg [MXRAMADR-1:0]  dmb_wdcnt = 0;
-   reg  [MXRAMADR-1:0]  seq_wadr  = 0;
-  reg          seq_wr    = 0;
+  reg [MXRAMADR-1:0]  seq_wadr  = 0;
+  reg                 seq_wr    = 0;
 
   always @(posedge clock or posedge sm_reset) begin
   if (sm_reset) begin
   seq_wdata  <= 0;
-  seq_wr    <= 0;
-  seq_wadr  <= 0;
+  seq_wr     <= 0;
+  seq_wadr   <= 0;
   dmb_wdcnt  <= 0;
   end
   else begin
-  seq_wdata  <= dmb_ffdly[17:0];
-  seq_wr    <= ~dmb_ffdly[18];
-  seq_wadr  <= wadr;
+  seq_wdata  <=  dmb_ffdly[17:0];
+  seq_wr     <= ~dmb_ffdly[18];
+  seq_wadr   <= wadr;
   dmb_wdcnt  <= wadr;
   end
   end
@@ -4930,6 +5049,7 @@
   wire clct_sump = 
   cfeb_first_frame | cfeb_last_frame |
   rpc_first_frame  | rpc_last_frame  | 
+  gem_first_frame  | gem_last_frame  | 
   mini_first_frame | mini_last_frame |
   bcb_first_frame  | bcb_last_frame;
 
@@ -4937,6 +5057,7 @@
   (|r_mpc_reserved)  |
   r_wr_buf_avail    |
   rpc_tbinbxn[4]    |
+  (|header36_rpc_) | 
   mini_rdata[15];
 
   wire scope_sump =
@@ -4972,7 +5093,7 @@
 //  03/22/2013  Replace with ROM version for Virtex-6
 //------------------------------------------------------------------------------------------------------------------------
   function [2:0] count1sof7;
-  input   [6:0] bits;
+  input    [6:0] bits;
   reg      [2:0] rom;
   begin
   case(bits[6:0])    // 128x3 ROM
@@ -5157,6 +5278,7 @@
       xdump:    read_sm_dsp <= "xdump   ";
       xb04:     read_sm_dsp <= "xb04er  ";
       xrpc:     read_sm_dsp <= "xrpc    ";
+      xgem:     read_sm_dsp <= "xgem    ";
       xe04:     read_sm_dsp <= "xe04    ";
       xb05:     read_sm_dsp <= "xb05    ";
       xscope:   read_sm_dsp <= "xscope  ";
