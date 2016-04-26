@@ -1352,12 +1352,13 @@
   parameter ADR_GEM_GTX_RX3           = 10'h306;
 
   // TODO: need to move these into the 300 address space. 
-  parameter ADR_GEM_DEBUG_FIFO_CTRL   = 10'h200;
-  parameter ADR_GEM_DEBUG_FIFO_DATA   = 10'h202;
-  parameter ADR_GEM_TBINS             = 10'h204;
-  parameter ADR_GEM_CFG               = 10'h206;
-  parameter ADR_V6_PHASER9            = 10'h208; // Phaser 9  GEM0 Phaser
-  parameter ADR_V6_PHASER10           = 10'h20A; // Phaser 10 GEM1 Phaser
+  parameter ADR_V6_PHASER9            = 10'h308; // Phaser 9  GEM0 Phaser
+  parameter ADR_V6_PHASER10           = 10'h30a; // Phaser 10 GEM1 Phaser
+
+  parameter ADR_GEM_DEBUG_FIFO_CTRL   = 10'h30c;
+  parameter ADR_GEM_DEBUG_FIFO_DATA   = 10'h30e;
+  parameter ADR_GEM_TBINS             = 10'h310;
+  parameter ADR_GEM_CFG               = 10'h312;
 
   parameter ADR_ODMB                  = 10'h1EE;  // ODMB mode: various addresses are handled inside odmb_device
 
@@ -1637,12 +1638,12 @@
   input  [28:1]      alct_sync_expect_2nd;  // Expected demux data for demux timing-in
 
 // ALCT Raw hits RAM Ports
-  output          alct_raw_reset;      // Reset raw hits write address and done flag
-  output  [MXARAMADR-1:0]  alct_raw_radr;      // Raw hits RAM VME read address
-  input  [MXARAMDATA-1:0]alct_raw_rdata;      // Raw hits RAM VME read data
-  input          alct_raw_busy;      // Raw hits RAM VME busy writing ALCT data
-  input          alct_raw_done;      // Raw hits ready for VME readout
-  input  [MXARAMADR-1:0]  alct_raw_wdcnt;      // ALCT word count stored in FIFO
+  output                  alct_raw_reset; // Reset raw hits write address and done flag
+  output [MXARAMADR-1:0]  alct_raw_radr;   // Raw hits RAM VME read address
+  input  [MXARAMDATA-1:0] alct_raw_rdata;  // Raw hits RAM VME read data
+  input                   alct_raw_busy;   // Raw hits RAM VME busy writing ALCT data
+  input                   alct_raw_done;   // Raw hits ready for VME readout
+  input  [MXARAMADR-1:0]  alct_raw_wdcnt;  // ALCT word count stored in FIFO
 
 // DMB Ports: Monitored Backplane Signals
   input  [2:0]      dmb_cfeb_calibrate;    // DMB calibration
@@ -1653,15 +1654,15 @@
   output  [2:0]      dmb_tx_reserved;    // DMB backplane reserved
 
 // CFEB Ports: Injector Control
-  output  [MXCFEB-1:0]  mask_all;        // 1=Enable, 0=Turn off all CFEB inputs  
-  output  [11:0]      inj_last_tbin;      // Last tbin, may wrap past 1024 ram adr
-  output  [MXCFEB-1:0]  inj_febsel;        // 1=Select CFEBn for RAM read/write
-  output  [2:0]      inj_wen;        // 1=Write enable injector RAM
-  output  [9:0]      inj_rwadr;        // Injector RAM read/write address
-  output  [17:0]      inj_wdata;        // Injector RAM write data
-  output  [2:0]      inj_ren;        // 1=Read enable Injector RAM
-  input  [17:0]      inj_rdata;        // Injector RAM read data
-  input          inj_ramout_busy;    // Injector busy
+  output  [MXCFEB-1:0]  mask_all;        // 1=Enable, 0=Turn off all CFEB inputs
+  output  [11:0]        inj_last_tbin;   // Last tbin, may wrap past 1024 ram adr
+  output  [MXCFEB-1:0]  inj_febsel;      // 1=Select CFEBn for RAM read/write
+  output  [2:0]         inj_wen;         // 1=Write enable injector RAM
+  output  [9:0]         inj_rwadr;       // Injector RAM read/write address
+  output  [17:0]        inj_wdata;       // Injector RAM write data
+  output  [2:0]         inj_ren;         // 1=Read enable Injector RAM
+  input   [17:0]        inj_rdata;       // Injector RAM read data
+  input                 inj_ramout_busy; // Injector busy
 
 // CFEB Triad Decoder Ports
   output  [3:0]      triad_persist;      // Triad 1/2-strip persistence
@@ -7472,7 +7473,7 @@
   wire   virtex6_extend_sump = |virtex6_extend_wr[9:8]; // RO
 
 //------------------------------------------------------------------------------------------------------------------
-// GEM_DEBUG_FIFO_CTRL = 0x200  GEM Raw Hits Readout RAM Simple Controller
+// GEM_DEBUG_FIFO_CTRL = 0x30C  GEM Raw Hits Readout RAM Simple Controller
 //------------------------------------------------------------------------------------------------------------------
 // Power up
   initial begin
@@ -7491,20 +7492,20 @@
   assign gem_debug_fifo_ctrl_rd = gem_debug_fifo_ctrl_wr;
 
 //------------------------------------------------------------------------------------------------------------------
-// GEM_DEBUG_FIFO_DATA = 0x202  GEM Raw Hits Data
+// GEM_DEBUG_FIFO_DATA = 0x30E  GEM Raw Hits Data
 //------------------------------------------------------------------------------------------------------------------
 
   assign gem_debug_fifo_data_rd = gem_debug_fifo_data;
 
 //------------------------------------------------------------------------------------------------------------------
-// ADR_GEM_TBINS=0x204    GEM Time bins
+// ADR_GEM_TBINS=0x310    GEM Time bins
 //------------------------------------------------------------------------------------------------------------------
 
   initial begin
   gem_tbins_wr[4:0]   = 5'd7; // RW Number GEM FIFO time bins to read out
   gem_tbins_wr[9:5]   = 5'd2; // RW Number GEM FIFO time bins before pretrigger
   gem_tbins_wr[10]    = 1'd0; // RW 1=Independent GEM and CFEB tbins, 0=copy cfeb tbins
-  gem_tbins_wr[11:11] = 1'd0; // RW 1=GEM DAQ readout enabled
+  gem_tbins_wr[11:11] = 1'd1; // RW 1=GEM DAQ readout enabled
   gem_tbins_wr[12:12] = 1'd0; // RW 1=GEM Zero-supression enabled
   gem_tbins_wr[15:13] = 0;    // Unused
   end
@@ -7531,7 +7532,7 @@
   end
 
 //------------------------------------------------------------------------------------------------------------------
-// ADR_GEM_CFG=0x206    GEM Configuration
+// ADR_GEM_CFG=0x312    GEM Configuration
 //------------------------------------------------------------------------------------------------------------------
 
   initial begin
