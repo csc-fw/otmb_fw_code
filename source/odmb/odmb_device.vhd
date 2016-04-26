@@ -6,6 +6,7 @@ library unisim;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use unisim.vcomponents.all;
+use ieee.std_logic_misc.all;
 
 entity odmb_device is
   port (
@@ -20,11 +21,13 @@ entity odmb_device is
     is_read     : in std_logic;
     bd_sel      : in std_logic;
 
-    dmb_rx : in std_logic_vector(5 downto 0);
+    dmb_rx      : in std_logic_vector(5 downto 0);
 
     dmb_tx_odmb : out std_logic_vector(48 downto 0);
     odmb_sel    : out std_logic;
-    odmb_data   : out std_logic_vector(15 downto 0)
+    odmb_data   : out std_logic_vector(15 downto 0);
+
+    sump        : out std_logic
     );
   attribute IOB                : string;
   attribute IOB of dmb_tx_odmb : signal is "True";
@@ -134,6 +137,7 @@ begin
 
   -- Data generation
   PULSE_DATARQST : PULSE_EDGE port map(pulse_data_rqst, open, clock, global_reset, 1, w_data_rqst);
+
   l1a          <= dmb_rx(3) or pulse_data_rqst;
   l1a_match(8) <= dmb_rx(4) or pulse_data_rqst;
   l1a_match(9) <= dmb_rx(5) or pulse_data_rqst;
@@ -149,7 +153,7 @@ begin
   GEN_DMB_TX : for I in 48 downto 0 generate
     FDDMBTX : FD port map(dmb_tx_odmb(I), clock, dmb_tx_odmb_inner(I));
   end generate GEN_DMB_TX;
-  
+
   eof_otmb_data_valid_b <= not eof_otmb_data_valid;
   eof_alct_data_valid_b <= not eof_alct_data_valid;
 
@@ -193,5 +197,5 @@ begin
       data_out => eof_otmb_data
       );
 
-
+  sump <= OR_REDUCE(vme_address(23 downto 16));
 end odmb_device_arch;
