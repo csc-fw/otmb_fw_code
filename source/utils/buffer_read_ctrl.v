@@ -911,12 +911,30 @@
 //----------------------------------------------------------------------------------------------------------------------
 
   // srl+ff to delay by 2bx to account for RAM access time
+
+  // fiber count
   wire [MXGEMB-1:0] gem_fiber_cnt_dly_s0;
   reg  [MXGEMB-1:0] gem_fiber_cnt_dly;
 
-  srl16e_bbl #(MXGEMB) usrlg0 (.clock(clock),.ce(1'b1),.adr(dly0),.d(gem_fiber_cnt),.q(gem_fiber_cnt_dly_s0));
+  srl16e_bbl #(MXGEMB) usrlg0_fiber (.clock(clock),.ce(1'b1),.adr(dly0),.d(gem_fiber_cnt),.q(gem_fiber_cnt_dly_s0));
   always @(posedge clock)
     gem_fiber_cnt_dly <= gem_fiber_cnt_dly_s0;
+
+  // time bin
+  wire [MXTBIN-1:0] gem_tbin_cnt_dly_s0;
+  reg  [MXTBIN-1:0] gem_tbin_cnt_dly;
+
+  srl16e_bbl #(MXTBIN) usrlg0_tbin (.clock(clock),.ce(1'b1),.adr(dly0),.d(gem_tbin_cnt),.q(gem_tbin_cnt_dly_s0));
+  always @(posedge clock)
+    gem_tbin_cnt_dly <= gem_tbin_cnt_dly_s0;
+
+  // gem select
+  wire [MXGEMB-1:0] gem_sel_dly_s0;
+  reg  [MXGEMB-1:0] gem_sel_dly;
+
+  srl16e_bbl #(MXGEMB) usrlg0_clust (.clock(clock),.ce(1'b1),.adr(dly0),.d(gem_clust_cnt),.q(gem_sel_dly_s0));
+  always @(posedge clock)
+    gem_sel_dly <= gem_sel_dly_s0;
 
 // Multiplex incoming RAM data from 4 GEM fibers, delays 1bx
 //----------------------------------------------------------------------------------------------------------------------
@@ -924,26 +942,36 @@
   reg  [RAM_WIDTH_GEM-1:0] gem_rawhits; // 14 bits multiplexed data
   reg  [0:0] gem_id;                    // gem chamber ID, 0 or 1
 
+  // `define DEBUG_GEM_READ_CTRL 1
+
   always @* begin
   case (gem_fiber_cnt_dly) // 2 bx delayed copy of fiber #
-    2'h0:  {gem_id,gem_rawhits} <= {gem_fiber_cnt_dly[1], fifo0_rdata_gem[RAM_WIDTH_GEM-1:0]}; // from GEM0, fiber0
-    2'h1:  {gem_id,gem_rawhits} <= {gem_fiber_cnt_dly[1], fifo1_rdata_gem[RAM_WIDTH_GEM-1:0]}; // from GEM0, fiber1
-    2'h2:  {gem_id,gem_rawhits} <= {gem_fiber_cnt_dly[1], fifo2_rdata_gem[RAM_WIDTH_GEM-1:0]}; // from GEM1, fiber0
-    2'h3:  {gem_id,gem_rawhits} <= {gem_fiber_cnt_dly[1], fifo3_rdata_gem[RAM_WIDTH_GEM-1:0]}; // from GEM1, fiber1
+   `ifdef DEBUG_GEM_READ_CTRL
+    2'h0:  {gem_id,gem_rawhits} <= {2'b0, 1'b0, gem_tbin_cnt_dly[3:0], 2'd0, gem_fiber_cnt_dly[1:0], 2'd0, gem_sel_dly[1:0]}; // from GEM0, fiber0
+    2'h1:  {gem_id,gem_rawhits} <= {2'b0, 1'b0, gem_tbin_cnt_dly[3:0], 2'd0, gem_fiber_cnt_dly[1:0], 2'd0, gem_sel_dly[1:0]}; // from GEM0, fiber1
+    2'h2:  {gem_id,gem_rawhits} <= {2'b0, 1'b1, gem_tbin_cnt_dly[3:0], 2'd0, gem_fiber_cnt_dly[1:0], 2'd0, gem_sel_dly[1:0]}; // from GEM1, fiber0
+    2'h3:  {gem_id,gem_rawhits} <= {2'b0, 1'b1, gem_tbin_cnt_dly[3:0], 2'd0, gem_fiber_cnt_dly[1:0], 2'd0, gem_sel_dly[1:0]}; // from GEM1, fiber1
+   `else
+    2'h0:  {gem_id,gem_rawhits} <= {1'b0, fifo0_rdata_gem[RAM_WIDTH_GEM-1:0]}; // from GEM0, fiber0
+    2'h1:  {gem_id,gem_rawhits} <= {1'b0, fifo1_rdata_gem[RAM_WIDTH_GEM-1:0]}; // from GEM0, fiber1
+    2'h2:  {gem_id,gem_rawhits} <= {1'b1, fifo2_rdata_gem[RAM_WIDTH_GEM-1:0]}; // from GEM1, fiber0
+    2'h3:  {gem_id,gem_rawhits} <= {1'b1, fifo3_rdata_gem[RAM_WIDTH_GEM-1:0]}; // from GEM1, fiber1
+   `endif
   endcase
   end
 
-// Accelerate busy out to go high when rd_start arrives, then go low 1bx before end of readout
   wire rd_gem_busy   = (read_gsm == gsm_read);
-  wire gem_busy_fast = rd_start_gem || rd_gem_busy || gem_busy_dly; // gem_busy_fast used to accelerate startup of next data frame
 
 // Delay busy marker by 1bx
   wire gem_busy_dly;
   srl16e_bbl #(1) usrlg2 (.clock(clock),.ce(1'b1),.adr(dly0),.d(rd_gem_busy ),.q(gem_busy_dly));
 
+// Accelerate busy out to go high when rd_start arrives, then go low 1bx before end of readout
+  wire gem_busy_fast = rd_start_gem || rd_gem_busy || gem_busy_dly; // gem_busy_fast used to accelerate startup of next data frame
+
 // First frame valid 1bx after rd_start, last frame 1bx after busy goes down
-  srl16e_bbl #(1) usrlg3 (.clock(clock),.ce(1'b1),.adr(dly1),.d(rd_start_gem),  .q(gem_first_frame));
-  srl16e_bbl #(1) usrlg4 (.clock(clock),.ce(1'b1),.adr(dly1),.d(gem_fiber_done),.q(gem_last_frame ));
+  srl16e_bbl #(1) usrlg3 (.clock(clock),.ce(1'b1),.adr(dly1),.d(rd_start_gem), .q(gem_first_frame));
+  srl16e_bbl #(1) usrlg4 (.clock(clock),.ce(1'b1),.adr(dly1),.d(gem_tbin_done),.q(gem_last_frame ));
 
 // Assert data markers, alignment FFs, signals valid 2bx after rd_start arrives
   assign gem_adr       = gem_fiber_cnt_dly;
@@ -1135,7 +1163,7 @@
   srl16e_bbl #(1) usrlr4 (.clock(clock),.ce(1'b1),.adr(dly1),.d(rpc_done    ),.q(rpc_last_frame ));
 
 // Assert data markers, alignment FFs, signals valid 2bx after rd_start arrives
-  assign rpc_adr     = rpc_adr_dly;
+  assign rpc_adr       = rpc_adr_dly;
   assign rpc_fifo_busy = rpc_busy_fast;
 
 //------------------------------------------------------------------------------------------------------------------
