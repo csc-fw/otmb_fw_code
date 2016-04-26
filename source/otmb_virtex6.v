@@ -434,7 +434,7 @@
   input      t12_rst;
 
 // SNAP12 receiver serial interface
-  output      r12_sclk;    // Serial interface clock, drive high
+  output     r12_sclk;    // Serial interface clock, drive high
   input      r12_sdat;    // Serial interface data
   input      r12_fok;    // Serial interface status
 
@@ -1180,6 +1180,9 @@
   endcase
   end
 
+// CFEB data received on optical link = OR of all 48 bits for a given CFEB
+  wire  [MXCFEB-1:0]  gtx_rx_data_bits_or; // CFEB data received on optical link
+
 // Optical receiver status
 
   wire  [MXCFEB-1:0]  gtx_rx_enable;                 // In  Enable/Unreset GTX optical input, disables copper SCSI
@@ -1300,6 +1303,9 @@
   .ly3hs (cfeb_ly3hs[icfeb][MXHS-1:0]),  // Out  Decoded 1/2-strip pulses
   .ly4hs (cfeb_ly4hs[icfeb][MXHS-1:0]),  // Out  Decoded 1/2-strip pulses
   .ly5hs (cfeb_ly5hs[icfeb][MXHS-1:0]),  // Out  Decoded 1/2-strip pulses
+
+// CFEB data received on optical link
+  .gtx_rx_data_bits_or (gtx_rx_data_bits_or[icfeb]), // Out  CFEB data received on optical link = OR of all 48 bits for a given CFEB
 
 // Status
   .demux_tp_1st    (demux_tp_1st[icfeb]),               // Out  Demultiplexer test point first-in-time
@@ -3921,7 +3927,10 @@
       .mpc_accept_rdata (mpc_accept_rdata[3:0]), // In  MPC response stored in RAM
       .mpc_inj_alct_bx0 (mpc_inj_alct_bx0),      // Out  ALCT bx0 injector
       .mpc_inj_clct_bx0 (mpc_inj_clct_bx0),      // Out  CLCT bx0 injector
-
+      
+      // CFEB data received on optical link
+      .gtx_rx_data_bits_or(|gtx_rx_data_bits_or), // In  CFEB data received on optical link = OR of all bits for ALL CFEBs
+      
       // RPC VME Configuration Ports
       .rpc_done         (rpc_done),                     // In  rpc_done
       .rpc_exists       (rpc_exists[MXRPC-1:0]),        // Out  RPC Readout list

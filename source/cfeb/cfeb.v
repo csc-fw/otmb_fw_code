@@ -171,6 +171,9 @@
   ly4hs,
   ly5hs,
 
+// CFEB data received on optical link = OR of all bits for ALL CFEBs
+  gtx_rx_data_bits_or,
+
 // Status
   demux_tp_1st,
   demux_tp_2nd,
@@ -299,15 +302,18 @@
   output  [MXDS-1:0]    ly5_badbits;      // 1=CFEB rx bit went bad
 
 // Triad Decoder
-  input  [3:0]      triad_persist;      // Triad 1/2-strip persistence
-  input          triad_clr;        // Triad one-shot clear
-  output          triad_skip;        // Triads skipped
-  output  [MXHS-1:0]    ly0hs;
-  output  [MXHS-1:0]    ly1hs;
-  output  [MXHS-1:0]    ly2hs;
-  output  [MXHS-1:0]    ly3hs;
-  output  [MXHS-1:0]    ly4hs;
-  output  [MXHS-1:0]    ly5hs;
+  input  [3:0]      triad_persist; // Triad 1/2-strip persistence
+  input             triad_clr;     // Triad one-shot clear
+  output            triad_skip;    // Triads skipped
+  output [MXHS-1:0] ly0hs;
+  output [MXHS-1:0] ly1hs;
+  output [MXHS-1:0] ly2hs;
+  output [MXHS-1:0] ly3hs;
+  output [MXHS-1:0] ly4hs;
+  output [MXHS-1:0] ly5hs;
+
+// CFEB data received on optical link = OR of all 48 bits for a given CFEB
+  output gtx_rx_data_bits_or;
 
 // Status
   output          demux_tp_1st;      // Demultiplexer test point first-in-time
@@ -391,7 +397,8 @@
 // Stage bx0: Read optical serial CFEB data stream into comparator triads.
 //-------------------------------------------------------------------------------------------------------------------
 // Virtex6 DCFEB optical receivers
-  wire [47:0]     gtx_rx_data;
+  wire [47:0] gtx_rx_data;
+  wire        gtx_rx_data_bits_or = (|gtx_rx_data); // CFEB data received on optical link
   wire gtx_rx_pol_swap = (ICFEB==4 || ICFEB==5);
 
   gtx_optical_rx ugtx_optical_rx
@@ -404,45 +411,45 @@
   .ttc_resync  (ttc_resync),      // use this to clear the link status monitor
 
 // Muonic
-  .clear_sync  (~gtx_rx_enable),  // In  Clear sync stages, use this to put GTX_RX in Reset state
-  .posneg      (cfeb_rxd_posneg), // In  Select inter-stage clock 0 or 180 degrees
-  .delay_is    (cfeb_rxd_int_delay[3:0]),  // In  Interstage delay
+  .clear_sync  (~gtx_rx_enable),          // In  Clear sync stages, use this to put GTX_RX in Reset state
+  .posneg      (cfeb_rxd_posneg),         // In  Select inter-stage clock 0 or 180 degrees
+  .delay_is    (cfeb_rxd_int_delay[3:0]), // In  Interstage delay
   
 // SNAP12 optical receiver
 //  .clocks_rdy (qpll_lock), // In  QPLL & MMCM were locked after power-up... AND is done at top level in l_qpll_lock logic; was AND of real-time lock signals
   .clocks_rdy (qpll_lock & clk_lock), // In  QPLL & MMCM are locked
-  .rxp          (rxp),            // In  SNAP12+ fiber input for GTX
-  .rxn          (rxn),            // In  SNAP12- fiber input for GTX
+  .rxp          (rxp),                // In  SNAP12+ fiber input for GTX
+  .rxn          (rxn),                // In  SNAP12- fiber input for GTX
   .gtx_rx_pol_swap (gtx_rx_pol_swap), // In  Inputs 5,6 [ie icfeb 4,5] have swapped rx board routes
 
 // Optical receiver status
-  .gtx_rx_reset      (gtx_rx_reset), // In  Reset GTX rx & sync module... 
-  .gtx_rx_reset_err_cnt (gtx_rx_reset_err_cnt), // In  Resets the PRBS test error counters
-  .gtx_rx_en_prbs_test  (gtx_rx_en_prbs_test),  // In  Select random input test data mode
-  .gtx_rx_start      (gtx_rx_start), // Out  Set when the DCFEB Start Pattern is present
-  .gtx_rx_fc         (gtx_rx_fc),    // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
-  .gtx_rx_valid      (gtx_rx_valid), // Out  Valid data detected on link
-  .gtx_rx_match      (gtx_rx_match), // Out  PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
-  .gtx_rx_rst_done   (gtx_rx_rst_done),         // Out  These get set before rxsync
-  .gtx_rx_sync_done  (gtx_rx_sync_done),        // Out  Use these to determine gtx_ready
-  .gtx_rx_err        (gtx_rx_err),   // Out  PRBS test detects an error
-  .gtx_rx_err_count  (gtx_rx_err_count[15:0]),  // Out  Error count on this fiber channel
-  .gtx_rx_data       (gtx_rx_data[47:0]),       // Out  DCFEB comparator data
-  .link_had_err (link_had_err),
-  .link_good    (link_good),
-  .link_bad     (link_bad),
-  .gtx_rx_sump  (gtx_rx_sump)        // Unused signals
+  .gtx_rx_reset         (gtx_rx_reset),           // In  Reset GTX rx & sync module... 
+  .gtx_rx_reset_err_cnt (gtx_rx_reset_err_cnt),   // In  Resets the PRBS test error counters
+  .gtx_rx_en_prbs_test  (gtx_rx_en_prbs_test),    // In  Select random input test data mode
+  .gtx_rx_start         (gtx_rx_start),           // Out  Set when the DCFEB Start Pattern is present
+  .gtx_rx_fc            (gtx_rx_fc),              // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
+  .gtx_rx_valid         (gtx_rx_valid),           // Out  Valid data detected on link
+  .gtx_rx_match         (gtx_rx_match),           // Out  PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
+  .gtx_rx_rst_done      (gtx_rx_rst_done),        // Out  These get set before rxsync
+  .gtx_rx_sync_done     (gtx_rx_sync_done),       // Out  Use these to determine gtx_ready
+  .gtx_rx_err           (gtx_rx_err),             // Out  PRBS test detects an error
+  .gtx_rx_err_count     (gtx_rx_err_count[15:0]), // Out  Error count on this fiber channel
+  .gtx_rx_data          (gtx_rx_data[47:0]),      // Out  DCFEB comparator data
+  .link_had_err         (link_had_err),
+  .link_good            (link_good),
+  .link_bad             (link_bad),
+  .gtx_rx_sump          (gtx_rx_sump)        // Unused signals
   );
 
 // Map DCFEB Signal names into Triad names per BB email:{L2,L4,L6,L5,L1,L3} --> {L1,L3,L5,L4,L0,L2}in TMB convention
   wire [MXDS-1:0]  triad_s0 [MXLY-1:0];
 
-  assign triad_s0[2][7:0]  = gtx_rx_data[7:0];    // Layer 2
+  assign triad_s0[2][7:0]  = gtx_rx_data[7:0];   // Layer 2
   assign triad_s0[0][7:0]  = gtx_rx_data[15:8];  // Layer 0
-  assign triad_s0[4][7:0]  = gtx_rx_data[23:16];  // Layer 4
-  assign triad_s0[5][7:0]  = gtx_rx_data[31:24];  // Layer 5
-  assign triad_s0[3][7:0]  = gtx_rx_data[39:32];  // Layer 3
-  assign triad_s0[1][7:0]  = gtx_rx_data[47:40];  // Layer 1
+  assign triad_s0[4][7:0]  = gtx_rx_data[23:16]; // Layer 4
+  assign triad_s0[5][7:0]  = gtx_rx_data[31:24]; // Layer 5
+  assign triad_s0[3][7:0]  = gtx_rx_data[39:32]; // Layer 3
+  assign triad_s0[1][7:0]  = gtx_rx_data[47:40]; // Layer 1
 
 // De-multiplexer test points: rx0 pins 1+2- Ly0Tr0  Ly3Tr0
   reg demux_tp_1st = 0;

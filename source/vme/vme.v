@@ -626,6 +626,9 @@
   mpc_inj_alct_bx0,
   mpc_inj_clct_bx0,
 
+// CFEB data received on optical link = OR of all bits for ALL CFEBs
+  gtx_rx_data_bits_or,
+
 // GEM VME Configuration Ports
   gem_read_enable, 
   gem_zero_suppress,
@@ -1186,6 +1189,8 @@
   parameter ADR_ALCT_LOAD_CFG_TIME    = 10'h18E; // Read alct configure time
   parameter ADR_GTX_RST_DONE_TIME     = 10'h190; // Read gtx rx reset done time
   parameter ADR_GTX_SYNC_DONE_TIME    = 10'h192; // Read gtx rx sync done time
+
+  parameter ADR_TMB_LATENCY_SR        = 10'h196; // Shift register for "CFEB data received on optical link" latched with MPC frame latch strobe for VME
 
   parameter ADR_MPC_INJ               = 10'h90;  // MPC Injector Control
   parameter ADR_MPC_RAM_ADR           = 10'h92;  // MPC Injector RAM address
@@ -1975,13 +1980,16 @@
   output          ttc_mpc_inj_en;      // Enable ttc_mpc_inject
   output  [7:0]      mpc_nframes;      // Number frames to inject
   output  [3:0]      mpc_wen;        // Select RAM to write
-  output  [3:0]      mpc_ren;        // Select RAM to read 
+  output  [3:0]      mpc_ren;        // Select RAM to read
   output  [7:0]      mpc_adr;        // Injector RAM read/write address
   output  [15:0]      mpc_wdata;        // Injector RAM write data
   input  [15:0]      mpc_rdata;        // Injector RAM read  data
   input  [3:0]      mpc_accept_rdata;    // MPC response stored in RAM
   output          mpc_inj_alct_bx0;    // ALCT bx0 injector
   output          mpc_inj_clct_bx0;    // CLCT bx0 injector
+
+// CFEB data received on optical link = OR of all bits for ALL CFEBs
+  input gtx_rx_data_bits_or;
 
 // RPC VME Configuration Ports
   input                 rpc_done;          // RPC FPGA configuration done
@@ -2566,15 +2574,25 @@
   wire [15:0] mpc_frames_fifo_ctrl_rd;
 
   // counters to monitor startup timing...
-  // Read bits 20:5 or 19:4 or 17:2 to VME... 800 or 400 or 100 ns resolution, counts to 52.4 or 26.2 or 6.5 ms
-  wire [15:0] tmb_special_count_rd     = tck_mez_cnt[15:0];           // was used for {11'b00000000000,fast_sum[4:0]};                    // Adr 186 -- test: count bits in phaser_lock + alct_load_cfg
-  wire [15:0] tmb_power_up_time_rd     = tmb_power_up_time[17:2];     // Adr 188
-  wire [15:0] tmb_load_cfg_time_rd     = tmb_load_cfg_time[17:2];     // Adr 18A
-  wire [15:0] alct_phaser_lock_time_rd = alct_phaser_lock_time[17:2]; // Adr 18C
-  wire [15:0] alct_load_cfg_time_rd    = alct_load_cfg_time[17:2];    // Adr 18E -- time after alct_config_wait
-  wire [15:0] gtx_rst_done_time_rd     = comp_phaser_lock_time[17:2]; // Adr 190  JRG, changed for 04062015 version... change name later!
-//wire [15:0] gtx_rst_done_time_rd     = gtx_rst_done_time[17:2];     // old Adr 190 -- does not wait for cfeb phaser lock?
-  wire [15:0] gtx_sync_done_time_rd    = gtx_sync_done_time[17:2];    // Adr 192 -- does not wait for cfeb phaser lock?
+  //   Read bits 20:5 or 19:4 or 17:2 to VME... 800 or 400 or 100 ns resolution, counts to 52.4 or 26.2 or 6.5 ms
+  wire  [15:0] tmb_special_count_rd     = tck_mez_cnt[15:0];           // was used for {11'b00000000000,fast_sum[4:0]};                    // Adr 186 -- test: count bits in phaser_lock + alct_load_cfg
+  wire  [15:0] tmb_power_up_time_rd     = tmb_power_up_time[17:2];     // Adr 188
+  wire  [15:0] tmb_load_cfg_time_rd     = tmb_load_cfg_time[17:2];     // Adr 18A
+  wire  [15:0] alct_phaser_lock_time_rd = alct_phaser_lock_time[17:2]; // Adr 18C
+  wire  [15:0] alct_load_cfg_time_rd    = alct_load_cfg_time[17:2];    // Adr 18E -- time after alct_config_wait
+  wire  [15:0] gtx_rst_done_time_rd     = comp_phaser_lock_time[17:2]; // Adr 190  JRG, changed for 04062015 version... change name later!
+//  wire  [15:0] gtx_rst_done_time_rd   = gtx_rst_done_time[17:2];     // old Adr 190 -- does not wait for cfeb phaser lock?
+  wire  [15:0] gtx_sync_done_time_rd    = gtx_sync_done_time[17:2];    // Adr 192 -- does not wait for cfeb phaser lock?
+
+  wire [15:0]  mpc0_frame0_fifo_rd;
+  wire [15:0]  mpc0_frame1_fifo_rd;
+  wire [15:0]  mpc1_frame0_fifo_rd;
+  wire [15:0]  mpc1_frame1_fifo_rd;
+  
+  wire [15:0] tmb_latency_sr_rd;
+  
+  reg  [15:0]  mpc_inj_wr;
+  wire [15:0]  mpc_inj_rd;
 
   wire lock_time_sump = 
   (|tmb_power_up_time[23:18]) |
@@ -3398,6 +3416,8 @@
   ADR_GTX_RST_DONE_TIME:     data_out <= gtx_rst_done_time_rd;     // Adr 190
   ADR_GTX_SYNC_DONE_TIME:    data_out <= gtx_sync_done_time_rd;    // Adr 192
 
+  ADR_TMB_LATENCY_SR:        data_out <= tmb_latency_sr_rd; // Adr 196
+
   ADR_MPC_INJ:               data_out <= mpc_inj_rd;
   ADR_MPC_RAM_ADR:           data_out <= mpc_ram_adr_rd;
   ADR_MPC_RAM_WDATA:         data_out <= mpc_ram_wdata_rd;
@@ -3566,6 +3586,7 @@
   ADR_ODMB:                  data_out <= odmb_data;
 
   default:                   data_out <= 16'hDEAF;
+
   endcase
   end
 
@@ -7471,6 +7492,31 @@
   assign virtex6_extend_rd[15:10] = virtex6_extend_wr[15:10]; // RW  Unused
 
   wire   virtex6_extend_sump = |virtex6_extend_wr[9:8]; // RO
+
+//------------------------------------------------------------------------------------------------------------------
+// ADR_TMB_LATENCY_SR = 0x196 TMB Latency Shift Register
+//------------------------------------------------------------------------------------------------------------------
+  reg [31:0] tmb_latency_sr = 0;
+  reg [15:0] tmb_latency_sr_latched = 0;
+  assign tmb_latency_sr_rd = tmb_latency_sr_latched;
+
+// Power up
+  initial begin
+    tmb_latency_sr         = 0;
+    tmb_latency_sr_latched = 0;
+  end
+  
+// Shift register
+  always @(posedge clock or posedge global_reset) begin
+    if(global_reset) tmb_latency_sr <= 0;
+    else             tmb_latency_sr <= { tmb_latency_sr[30:0], gtx_rx_data_bits_or };
+  end
+
+// Latch on trigger
+  always @(posedge clock or posedge global_reset) begin
+    if (global_reset)       tmb_latency_sr_latched <= 0;
+    else if (mpc_frame_vme) tmb_latency_sr_latched <= tmb_latency_sr[20:5];
+  end
 
 //------------------------------------------------------------------------------------------------------------------
 // GEM_DEBUG_FIFO_CTRL = 0x30C  GEM Raw Hits Readout RAM Simple Controller
