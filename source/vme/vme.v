@@ -768,6 +768,12 @@
   event_counter64,
   event_counter65,
 
+// GEM Counters
+  event_counter100,
+  event_counter101,
+  event_counter102,
+  event_counter103,
+
 // Header Counters
   hdr_clear_on_resync,
   pretrig_counter,
@@ -2117,6 +2123,12 @@
   input  [MXCNTVME-1:0]  event_counter63;
   input  [MXCNTVME-1:0]  event_counter64;
   input  [MXCNTVME-1:0]  event_counter65;
+
+// GEM Counters
+  input  [MXCNTVME-1:0]  event_counter100;
+  input  [MXCNTVME-1:0]  event_counter101;
+  input  [MXCNTVME-1:0]  event_counter102;
+  input  [MXCNTVME-1:0]  event_counter103;
 
 // Header Counters
   output                hdr_clear_on_resync; // Clear header counters on ttc_resync
@@ -6242,7 +6254,7 @@
 // ADR_CNT_RDATA=0xD2  Trigger/Readout Counter Data Register                                                          
 //------------------------------------------------------------------------------------------------------------------
 // Remap 1D counters to 2D, because XST does not support 2D ports
-  parameter MXCNT = 93;                     // Number of counters, last counter id is mxcnt-1
+  parameter MXCNT = 127;                    // Number of counters, last counter id is mxcnt-1
   reg  [MXCNTVME-1:0] cnt_snap [MXCNT-1:0]; // Event counter snapshot 2D
   wire [MXCNTVME-1:0] cnt      [MXCNT-1:0]; // Event counter 2D map
 
@@ -6360,6 +6372,13 @@
   assign cnt[90]  = active_cfebs_me1a_event_counter; // ME1a CFEB active flag sent to DMB
   assign cnt[91]  = active_cfebs_me1b_event_counter; // ME1b CFEB active flag sent to DMB
   assign cnt[92]  = active_cfebs_event_counter;      // Any CFEB active flag sent to DMB
+
+
+// GEM Counters  
+  assign cnt[100]  = event_counter100; 
+  assign cnt[101]  = event_counter101; 
+  assign cnt[102]  = event_counter102; 
+  assign cnt[103]  = event_counter103; 
   
 // Virtex-6 GTX Optical Receiver Error Counters
 //  assign cnt[81]  = gtx_rx_err_count0;  // Error count on this fiber channel

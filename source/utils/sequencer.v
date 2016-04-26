@@ -318,32 +318,32 @@
 //  3    No    Short
 //
 //  Full and Local Dump Format:
-//  1  DB0C   header   Beginning Of Cathode Data
-//  e   event   header    Event info
-//  e   clct   header    Cathode LCTs
-//  e   tmb     header    TMB match result
-//  e   mpc   header    MPC frames
-//  e   buf   header    Buffer status
-//  e   rpc   header    RPC status
-//  e  6E0B   header    End of header block 
-//  n   hits        FEB0 raw hits 
-//  n   hits        FEB1 raw hits 
-//  n   hits        FEB2 raw hits 
-//  n   hits        FEB3 raw hits 
-//  n   hits        FEB4 raw hits
-//  1  6B04    (option)  Start of RPC data
-//  n   RPC pads (option)  RPC data
-//  1  6E04    (option)  End of RPC data
-//  1  6B05    (option)  Start of scope data
-//  n  scope data(option)  Scope data
-//  1  6E05    (option)  End of scope data
-//  1  6E0C        End of Cathode data
-//  1  2AAA        Optional to make word count x4
-//  1  5555        Optional to make word count x4
-//  1   E0F        End of Frame
-//  1   crc0        CRC22
-//  1   crc1        CRC22
-//  1   frame wordcount  Total words in transmission
+//  1  DB0C     header      Beginning Of Cathode Data
+//  e   event   header      Event info
+//  e   clct    header      Cathode LCTs
+//  e   tmb     header      TMB match result
+//  e   mpc     header      MPC frames
+//  e   buf     header      Buffer status
+//  e   rpc     header      RPC status
+//  e  6E0B     header      End of header block 
+//  n   hits                FEB0 raw hits 
+//  n   hits                FEB1 raw hits 
+//  n   hits                FEB2 raw hits 
+//  n   hits                FEB3 raw hits 
+//  n   hits                FEB4 raw hits
+//  1  6B04       (option)  Start of RPC data
+//  n   RPC pads  (option)  RPC data
+//  1  6E04       (option)  End of RPC data
+//  1  6B05       (option)  Start of scope data
+//  n  scope data (option)  Scope data
+//  1  6E05       (option)  End of scope data
+//  1  6E0C                 End of Cathode data
+//  1  2AAA       (Option)  to make word count x4
+//  1  5555       (Option)  to make word count x4
+//  1  E0F                  End of Frame
+//  1  crc0                 CRC22
+//  1  crc1                 CRC22
+//  1  frame wordcount  Total words in transmission
 //  ---
 //  x frames = nheaders+E0B+ncfebs*(4*ntbins)+EOC+2(2AAA 5555)+EOF+2crc+wdcnt
 //
@@ -397,6 +397,12 @@
   alct0_valid,
   alct1_valid,
   read_sm_xdmb,
+
+// GEM 
+  gem_copad_matched, 
+  gem0_sync_err, 
+  gem1_sync_err,
+  gems_sync_err, 
   
 // External Triggers
   alct_adb_pulse_sync,
@@ -876,6 +882,11 @@
   event_counter64,
   event_counter65,
 
+  event_counter100,
+  event_counter101,
+  event_counter102,
+  event_counter103,
+
 // Event Counter Ports
   hdr_clear_on_resync,
   pretrig_counter,
@@ -1111,6 +1122,12 @@
   input          alct0_valid;     // ALCT has valid LCT
   input          alct1_valid;     // ALCT has valid LCT
   output         read_sm_xdmb;    // TMB sequencer starting a readout
+
+// GEM 
+  input          gem_copad_matched; // GEM co-pad match was found
+  input          gem0_sync_err;     // GEM0 has sync error
+  input          gem1_sync_err;     // GEM1 has sync error
+  input          gems_sync_err;     // GEM Super Chamber has sync error
 
 // External Triggers
   input          alct_adb_pulse_sync; // ADB Test pulse trigger
@@ -1404,37 +1421,38 @@
   input                rpc_fifo_busy;   // Readout busy sending data to sequencer, goes down 1bx early
 
 // CLCT Raw Hits RAM
-  input          dmb_wr;        // Raw hits RAM VME write enable
-  input          dmb_reset;      // Raw hits RAM VME address reset
-  input  [MXRAMADR-1:0]  dmb_adr;      // Raw hits RAM VME read/write address
-  input  [MXRAMDATA-1:0]  dmb_wdata;      // Raw hits RAM VME write data
-  output  [MXRAMDATA-1:0]  dmb_rdata;      // Raw hits RAM VME read data
-  output  [MXRAMADR-1:0]  dmb_wdcnt;      // Raw hits RAM VME word count
-  output          dmb_busy;      // Raw hits RAM VME busy writing DMB data
+  input                    dmb_wr;    // Raw hits RAM VME write enable
+  input                    dmb_reset; // Raw hits RAM VME address reset
+  input   [MXRAMADR-1:0]   dmb_adr;   // Raw hits RAM VME read/write address
+  input   [MXRAMDATA-1:0]  dmb_wdata; // Raw hits RAM VME write data
+  output  [MXRAMDATA-1:0]  dmb_rdata; // Raw hits RAM VME read data
+  output  [MXRAMADR-1:0]   dmb_wdcnt; // Raw hits RAM VME word count
+  output                   dmb_busy;  // Raw hits RAM VME busy writing DMB data
 
 // TMB-Sequencer Pipelines
-  output  [MXBADR-1:0]  wr_adr_xtmb;    // Buffer write address after drift time
-  input  [MXBADR-1:0]  wr_adr_rtmb;    // Buffer write address at TMB matching time
-  input  [MXBADR-1:0]  wr_adr_xmpc;    // Buffer write address at MPC xmit to sequencer
-  input  [MXBADR-1:0]  wr_adr_rmpc;    // Buffer write address at MPC received
+  output [MXBADR-1:0]  wr_adr_xtmb; // Buffer write address after drift time
+  input  [MXBADR-1:0]  wr_adr_rtmb; // Buffer write address at TMB matching time
+  input  [MXBADR-1:0]  wr_adr_xmpc; // Buffer write address at MPC xmit to sequencer
+  input  [MXBADR-1:0]  wr_adr_rmpc; // Buffer write address at MPC received
 
-  output          wr_push_xtmb;    // Buffer write strobe after drift time
-  input          wr_push_rtmb;    // Buffer write strobe at TMB matching time
-  input          wr_push_xmpc;    // Buffer write strobe at MPC xmit to sequencer
-  input          wr_push_rmpc;    // Buffer write strobe at MPC received
+  output         wr_push_xtmb; // Buffer write strobe after drift time
+  input          wr_push_rtmb; // Buffer write strobe at TMB matching time
+  input          wr_push_xmpc; // Buffer write strobe at MPC xmit to sequencer
+  input          wr_push_rmpc; // Buffer write strobe at MPC received
 
-  output          wr_avail_xtmb;    // Buffer available after drift time
-  input          wr_avail_rtmb;    // Buffer available at TMB matching time
-  input          wr_avail_xmpc;    // Buffer available at MPC xmit to sequencer
-  input          wr_avail_rmpc;    // Buffer available at MPC received
+  output         wr_avail_xtmb; // Buffer available after drift time
+  input          wr_avail_rtmb; // Buffer available at TMB matching time
+  input          wr_avail_xmpc; // Buffer available at MPC xmit to sequencer
+  input          wr_avail_rmpc; // Buffer available at MPC received
 
 // TMB LCT Match
-  output  [MXCLCT-1:0]  clct0_xtmb;      // 1st CLCT to TMB
-  output  [MXCLCT-1:0]  clct1_xtmb;      // 2nd CLCT to TMB
-  output  [MXCLCTC-1:0]  clctc_xtmb;      // Common to CLCT0/1 to TMB
-  output  [MXCFEB-1:0]  clctf_xtmb;      // Active cfeb list to TMB
-  output          bx0_xmpc;      // bx0 to mpc
-  input          bx0_match;      // ALCT bx0 and CLCT bx0 match in time
+  output  [MXCLCT-1:0]   clct0_xtmb; // 1st CLCT to TMB
+  output  [MXCLCT-1:0]   clct1_xtmb; // 2nd CLCT to TMB
+  output  [MXCLCTC-1:0]  clctc_xtmb; // Common to CLCT0/1 to TMB
+  output  [MXCFEB-1:0]   clctf_xtmb; // Active cfeb list to TMB
+
+  output   bx0_xmpc;  // bx0 to mpc
+  input    bx0_match; // ALCT bx0 and CLCT bx0 match in time
 
   input          tmb_trig_pulse;    // TMB Triggered on ALCT or CLCT or both
   input          tmb_trig_keep;    // ALCT or CLCT or both triggered, and trigger is allowed
@@ -1588,6 +1606,11 @@
   output  [MXCNTVME-1:0]  event_counter63;
   output  [MXCNTVME-1:0]  event_counter64;
   output  [MXCNTVME-1:0]  event_counter65;
+
+  output  [MXCNTVME-1:0]  event_counter100;
+  output  [MXCNTVME-1:0]  event_counter101;
+  output  [MXCNTVME-1:0]  event_counter102;
+  output  [MXCNTVME-1:0]  event_counter103;
 
 // Event Counter Ports
   input                   hdr_clear_on_resync; // Clear header counters on ttc_resync
@@ -2411,12 +2434,21 @@
   wire trig_source_ext = (|trig_source_s0[7:3]) | trig_source_s0[1];          // Trigger source was not CLCT pattern
   wire trig_clct_flash = clct_pretrig & (trig_source_s0[0] || trig_source_s0[7:2]);  // Trigger source flashes CLCT light
 
+
 // Record which CFEBs were hit at pretrigger
   reg [MXCFEB-1:0] cfeb_hit_at_pretrig = 0;
 
   always @(posedge clock) begin
     cfeb_hit_at_pretrig <= cfeb_hit_s0 & {MXCFEB{clct_pretrig}};
   end
+
+// Record which  GEMs were hit at CFEB pretrigger
+  //reg [1:0] gem_hit_at_pretrig = 0;
+
+  //always @(posedge clock) begin
+  //  gem_hit_at_pretrig <= cfeb_hit_s0 & {MXCFEB{clct_pretrig}};
+  //end
+
 
 // Trigger source was ME1A or ME1B
 // YP: code below mixed up pre-triggers and active cfebs, so I modified it to have only pre-triggers
@@ -2624,9 +2656,9 @@
 // Trigger/Readout VME Counter Section
 //------------------------------------------------------------------------------------------------------------------
 // Counter registers
-  parameter MNCNT        = 13;            // First sequencer counter, not number of counters because they start elsewhere
-  parameter MXCNT        = 65;            // Last  sequencer counter, not number of counters becouse they end elsewhere
-  parameter RESYNCCNT_ID = 63;            // TTC Resyncs received counter does not get cleared
+  parameter MNCNT        = 13;  // First sequencer counter, not number of counters because they start elsewhere
+  parameter MXCNT        = 110; // Last  sequencer counter, not number of counters becouse they end elsewhere
+  parameter RESYNCCNT_ID = 63;  // TTC Resyncs received counter does not get cleared
 
   reg [MXCNTVME-1:0] cnt [MXCNT:MNCNT]; // TMB counter array, counters[6:0] are in alct.v
   reg [MXCNT:MNCNT]  cnt_en = 0;        // Counter increment enables
@@ -2698,6 +2730,15 @@
     cnt_en[63]  <= ttc_resync;                // STAT  TTC Resyncs received
     cnt_en[64]  <= sync_err_cnt_en;           // STAT  TTC sync errors
     cnt_en[65]  <= perr_pulse;                // STAT Raw hits RAM parity errors
+
+    cnt_en[100] <= gem_copad_matched; // STAT Raw hits RAM parity errors
+    cnt_en[101] <= gem0_sync_err; 
+    cnt_en[102] <= gem1_sync_err; 
+    cnt_en[103] <= gems_sync_err; 
+    
+    //cnt_en[104] <= gem_hit_at_clct_pretrig[0]; 
+    //cnt_en[105] <= gem_hit_at_clct_pretrig[1]; 
+
   end
 
 // Counter overflow disable
@@ -2793,6 +2834,52 @@
   assign event_counter63  = cnt[63];
   assign event_counter64  = cnt[64];
   assign event_counter65  = cnt[65];
+  assign event_counter66  = cnt[66];
+  assign event_counter67  = cnt[67];
+  assign event_counter68  = cnt[68];
+  assign event_counter69  = cnt[69];
+  assign event_counter70  = cnt[70];
+  assign event_counter71  = cnt[71];
+  assign event_counter72  = cnt[72];
+  assign event_counter73  = cnt[73];
+  assign event_counter74  = cnt[74];
+  assign event_counter75  = cnt[75];
+  assign event_counter76  = cnt[76];
+  assign event_counter77  = cnt[77];
+  assign event_counter78  = cnt[78];
+  assign event_counter79  = cnt[79];
+  assign event_counter80  = cnt[80];
+  assign event_counter81  = cnt[81];
+  assign event_counter82  = cnt[82];
+  assign event_counter83  = cnt[83];
+  assign event_counter84  = cnt[84];
+  assign event_counter85  = cnt[85];
+  assign event_counter86  = cnt[86];
+  assign event_counter87  = cnt[87];
+  assign event_counter88  = cnt[88];
+  assign event_counter89  = cnt[89];
+  assign event_counter90  = cnt[90];
+  assign event_counter91  = cnt[91];
+  assign event_counter92  = cnt[92];
+  assign event_counter93  = cnt[93];
+  assign event_counter94  = cnt[94];
+  assign event_counter95  = cnt[95];
+  assign event_counter96  = cnt[96];
+  assign event_counter97  = cnt[97];
+  assign event_counter98  = cnt[98];
+  assign event_counter99  = cnt[99];
+
+  assign event_counter100 = cnt[100];
+  assign event_counter101 = cnt[101];
+  assign event_counter102 = cnt[102];
+  assign event_counter103 = cnt[103];
+  assign event_counter104 = cnt[104];
+  assign event_counter105 = cnt[105];
+  assign event_counter106 = cnt[106];
+  assign event_counter107 = cnt[107];
+  assign event_counter108 = cnt[108];
+  assign event_counter109 = cnt[109];
+  assign event_counter110 = cnt[110];
 
 //------------------------------------------------------------------------------------------------------------------
 // Multi-buffer storage for event header
