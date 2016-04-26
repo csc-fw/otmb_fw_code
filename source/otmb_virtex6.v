@@ -1417,7 +1417,8 @@
   genvar igem;
   generate
   for (igem=0; igem<MXGEM; igem=igem+1) begin: gengem
-  assign gem_exists[igem] = 1;                // Existence flag
+
+  assign gem_exists[igem] = 1'b1;                // Existence flag
 
   gem #(.IGEM(igem)) ugem (
 
@@ -1499,20 +1500,20 @@
     .global_reset (global_reset  ), // In  Global reset
     .ttc_resync   (ttc_resync    ), // In  TTC resync
 
-    .gem0_kchar(gem_kchar[0]), // Copy of GEM0 k-char
-    .gem1_kchar(gem_kchar[1]), // Copy of GEM1 k-char
-    .gem2_kchar(gem_kchar[2]), // Copy of GEM2 k-char
-    .gem3_kchar(gem_kchar[3]), // Copy of GEM3 k-char
+    .gem0_kchar(gem_kchar[0]), // In  Copy of GEM0 k-char
+    .gem1_kchar(gem_kchar[1]), // In  Copy of GEM1 k-char
+    .gem2_kchar(gem_kchar[2]), // In  Copy of GEM2 k-char
+    .gem3_kchar(gem_kchar[3]), // In  Copy of GEM3 k-char
 
-    .gem0_synced(gem0_synced),  // fibers from same OH are desynced 
-    .gem1_synced(gem1_synced),  // fibers from same OH are desynced
+    .gem0_synced(gem0_synced),  // Out fibers from same OH are synced 
+    .gem1_synced(gem1_synced),  // Out fibers from same OH are synced
 
-    .gems_synced(gems_synced),  // fibers from both GEM chambers are synched
+    .gems_synced(gems_synced),  // Out fibers from both GEM chambers are synched
 
     // latched copies that gems have lost sync in past 
-    .gem0_lostsync(gem0_lostsync),  
-    .gem1_lostsync(gem1_lostsync), 
-    .gems_lostsync(gems_lostsync)
+    .gem0_lostsync(gem0_lostsync), // Out  
+    .gem1_lostsync(gem1_lostsync), // Out 
+    .gems_lostsync(gems_lostsync)  // Out
   ); 
 
 	// GEM Co-pad Matching
@@ -1944,6 +1945,13 @@
   .alct_active_feb (alct_active_feb), // In  ALCT Pattern trigger
   .alct0_valid     (alct0_valid),     // In  ALCT has valid LCT
   .alct1_valid     (alct1_valid),     // In  ALCT has valid LCT
+
+  
+// Sequencer GEM Ports 
+  .gem_copad_matched (gem_any_match), // GEM co-pad match was found
+  .gem0_sync_err     (~gem0_synced),  // GEM0 has sync error
+  .gem1_sync_err     (~gem1_synced),  // GEM1 has sync error
+  .gems_sync_err     (~gems_synced),  // GEM Super Chamber has sync error
 
 // Sequencer External Triggers
   .alct_adb_pulse_sync (alct_adb_pulse_sync), // In  ADB Test pulse trigger
@@ -2720,10 +2728,10 @@
   .cfeb6_blockedbits (cfeb_blockedbits[6]), // In  1=CFEB rx bit blocked by hcm or went bad, packed
 
 // GEM Raw Hits Data Ports
-  .fifo0_rdata_gem (fifo_rdata_gem[0][RAM_WIDTH_GEM-1:0]), // In  FIFO RAM read data
-  .fifo1_rdata_gem (fifo_rdata_gem[1][RAM_WIDTH_GEM-1:0]), // In  FIFO RAM read data
-  .fifo2_rdata_gem (fifo_rdata_gem[2][RAM_WIDTH_GEM-1:0]), // In  FIFO RAM read data
-  .fifo3_rdata_gem (fifo_rdata_gem[3][RAM_WIDTH_GEM-1:0]), // In  FIFO RAM read data
+  .fifo0_rdata_gem (fifo_rdata_gem[0][RAM_WIDTH_GEM-1:0]), // In  GEM Fiber0 FIFO RAM read data 
+  .fifo1_rdata_gem (fifo_rdata_gem[1][RAM_WIDTH_GEM-1:0]), // In  GEM Fiber1 FIFO RAM read data
+  .fifo2_rdata_gem (fifo_rdata_gem[2][RAM_WIDTH_GEM-1:0]), // In  GEM Fiber2 FIFO RAM read data
+  .fifo3_rdata_gem (fifo_rdata_gem[3][RAM_WIDTH_GEM-1:0]), // In  GEM Fiber3 FIFO RAM read data
 
 // RPC Raw hits Data Ports
   .fifo0_rdata_rpc (fifo0_rdata_rpc[RAM_WIDTH-1+4:0]), // In  FIFO RAM read data, rpc
@@ -3819,11 +3827,11 @@
       .dmb_busy  (dmb_busy),                 // In  Raw hits RAM VME busy writing DMB data
 
       // GEM Ports: GEM Raw Hits Ram
-      .gem_debug_fifo_reset (gem_debug_fifo_reset),
-      .gem_debug_fifo_adr   (gem_debug_fifo_adr),
-      .gem_debug_fifo_sel   (gem_debug_fifo_sel),
-      .gem_debug_fifo_igem  (gem_debug_fifo_igem),
-      .gem_debug_fifo_data  (gem_debug_fifo_data_vme),
+      .gem_debug_fifo_reset (gem_debug_fifo_reset),     // Out Re-arm GEM debug FIFO for triggering
+      .gem_debug_fifo_adr   (gem_debug_fifo_adr),       // Out Select GEM Debug FIFO Address
+      .gem_debug_fifo_sel   (gem_debug_fifo_sel),       // Out Select GEM Fiber Cluster 0-3
+      .gem_debug_fifo_igem  (gem_debug_fifo_igem[1:0]), // Out Select GEM Fiber 0-3
+      .gem_debug_fifo_data  (gem_debug_fifo_data_vme),  // In  Multiplexed GEM Debug RAM Data
 
       // Sequencer Ports: Buffer Status
       .wr_buf_ready     (wr_buf_ready),                      // In  Write buffer is ready
