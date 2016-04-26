@@ -3609,20 +3609,22 @@
   reg  [MXRPCB-1+1:0]  rd_nrpcs=0;
   wire [MXRPCB-1+1:0]  r_nrpcs_read;
 
-  reg  [MXGEMB-1+1:0]  rd_ngems=0;
+  reg  [MXGEMB-1+1:0]  rd_ngems=3'h4; 
   wire [MXGEMB-1+1:0]  r_ngems_read;
 
-  wire include_rawhits  = r_has_buf && (full_dump || local_dump);
-  wire include_cfebs    = include_rawhits && (ncfebs!=0);
+  wire include_rawhits = r_has_buf && (full_dump || local_dump);
+  wire include_cfebs   = include_rawhits && (ncfebs!=0);
   wire include_rpcs    = include_rawhits && rpc_read_enable;
+  wire include_gems    = include_rawhits && gem_read_enable;
 
-  assign r_nheaders    = (short_header ) ? MNHD[NHBITS-1:0]: MXHD[NHBITS-1:0];  // Number of header words
-  assign eef        = (short_header ) ? 4'hE      : 4'h0;        // E0F if have buffers, EEF if no buffer
+  assign r_nheaders = (short_header ) ? MNHD[NHBITS-1:0] : MXHD[NHBITS-1:0]; // Number of header words
+  assign eef        = (short_header ) ? 4'hE             : 4'h0;             // E0F if have buffers, EEF if no buffer
 
-  assign r_fifo_tbins_cfeb= (include_cfebs) ? fifo_tbins_cfeb : 1'd0;  // Number of time bins in CLCT fifo dump
-  assign r_ncfebs      = (include_cfebs) ? ncfebs        : 1'd0;  // Number of CFEBs read
-  assign r_cfebs_read    = (include_cfebs) ? cfebs_read     : 1'd0;  // CFEBs in readout list
-  assign r_nrpcs_read    = (include_rpcs ) ? rd_nrpcs    : 1'd0;  // RPCs  in readout list
+  assign r_fifo_tbins_cfeb = (include_cfebs) ? fifo_tbins_cfeb : 1'd0; // Number of time bins in CLCT fifo dump
+  assign r_ncfebs          = (include_cfebs) ? ncfebs          : 1'd0; // Number of CFEBs read
+  assign r_cfebs_read      = (include_cfebs) ? cfebs_read      : 1'd0; // CFEBs in readout list
+  assign r_nrpcs_read      = (include_rpcs ) ? rd_nrpcs        : 1'd0; // RPCs  in readout list
+  assign r_ngems_read      = (include_gems ) ? rd_ngems        : 1'd0; // GEMs  in readout list
 
   assign r_fifo_dump    = fifo_dump && (r_ncfebs!=0);        // No CFEB raw hits if no cfebs hit
 
@@ -3726,10 +3728,8 @@
 // CFEBs
   xdump:                // Send fifo dump to DMB
     if (fifo_read_done)  begin    // Wait for clct fifo done
-     if (gem_read_enable)   // Read GEMs if enabled
-     read_sm = xb04; 
-     else if (rpc_read_enable)
-     read_sm = xb04;        // Read RPCs if enabled
+     if (gem_read_enable || rpc_read_enable)   // Read RPCs/GEMs if enabled
+     read_sm = xb04;        
      else if (scp_auto)
      read_sm = xb05;        // Skip to scope, if enabled
      else if (mini_read_enable)
@@ -3740,13 +3740,15 @@
      read_sm = xe0c;        // Otherwise go to eoc
     end
 
-// RPCs & GEM shared header TODO: consider using different headers for GEM vs. RPC ? 
+// RPCs & GEM shared header 
+  //TODO: consider using different headers for GEM vs. RPC ? 
   xb04:                        // Send b04 frame to begin RPC/GEM
-    if ((gem_read_enable && gems_all_empty) || (!gem_read_enable && rpcs_all_empty)) // Don't read rpc fifo if all RPCs empty
+    // Don't read fifo if it is empty
+    if ((gem_read_enable && gems_all_empty) || (!(|gem_exists) && rpc_read_enable && rpcs_all_empty)) 
       read_sm = xe04;
     else begin
-      if  (gem_read_enable) read_sm = xgem;
-      else                  read_sm = xrpc;
+      if   (|gem_exists) read_sm = xgem;
+      else               read_sm = xrpc;
     end
 
   xrpc:                // Send RPC frames
@@ -4074,7 +4076,7 @@
   assign  header36_gem_[14:10] = fifo_pretrig_gem[4:0]; // Number GEM FIFO time bins before pretrigger
   assign  header36_gem_[18:15] = 0;                     // DDU+DMB control flags
 
-  assign  header36_ [18:0]     = (gem_read_enable) ? header36_gem_ : header36_rpc_; 
+  assign  header36_ [18:0]     = (|gem_exists) ? header36_gem_ : header36_rpc_; 
 
 // Buffer Status
 
@@ -4223,9 +4225,9 @@
   assign rd_gem_offset = 0;                                                                  // RAM address rd_fifo_adr offset for gem read out
 
   always @(posedge clock) begin
-    rd_list_gem[MXGEM-1:0]  <= gem_exists;                                              // List of GEMs to read out
-    rd_ngems[MXGEMB-1+1:0]  <= gem_exists[0]+gem_exists[1]+gem_exists[2]+gem_exists[3]; // Number of GEMs in gem_list (should be 4)
-    gems_all_empty          <= !(|gem_exists);                                          // At least 1 GEM to read
+    rd_list_gem [MXGEM-1:0] <= gem_exists[3:0]; // List of GEMs to read out
+    rd_ngems    [MXGEMB :0] <= 3'd4;            // Number of GEMs in gem_list (should be 4)
+    gems_all_empty          <= !(|gem_exists);  // At least 1 GEM to read
   end
 
 //------------------------------------------------------------------------------------------------------------------
@@ -4235,7 +4237,7 @@
   reg [MXRPC-1:0]  rd_list_rpc=0;
 
   // Start readout sequence, send fifo dump to DMB
-  assign rd_start_rpc  = (read_sm == xdump) && fifo_read_done && rpc_read_enable && !gem_read_enable && !no_daq; // don't start rpc if gem exists
+  assign rd_start_rpc  = (read_sm == xdump) && fifo_read_done && rpc_read_enable && !(|gem_exists) && !no_daq; // don't start rpc if gem exists
   assign rd_abort_rpc  = 0;              // Cancel readout
   assign rpc_fifo_done = !rpc_fifo_busy; // Readout busy sending data to sequencer
   assign rd_rpc_offset = 0;              // RAM address rd_fifo_adr offset for rpc read out
@@ -4352,9 +4354,9 @@
 //------------------------------------------------------------------------------------------------------------------
 
 // Header
-  assign e0b_frame[11:0]   =  12'hE0B;              // End of header block
-  assign e0b_frame[14:12]  =  3'b110;               // Marker
-  assign e0b_frame[18:15]  =  0;                    // DDU special + DMB control flags
+  assign e0b_frame[11:0]    =  12'hE0B;             // End of header block
+  assign e0b_frame[14:12]   =  3'b110;              // Marker
+  assign e0b_frame[18:15]   =  0;                   // DDU special + DMB control flags
 
 // CFEB Raw hits
   assign fifo_frame[ 7: 0]  =  cfeb_rawhits[7:0];   // FIFO raw hits data
@@ -4388,26 +4390,26 @@
   assign scp_frame[14:0]   =  scp_rdata[14:0];      // Scope data
   assign scp_frame[18:15]  =  0;                    // DDU special + DMB control flags
 
-  assign e05_frame[11:0]   =  12'hE05;              // End of Scope block
-  assign e05_frame[14:12]  =  3'b110;               // Marker
-  assign e05_frame[18:15]  =  0;                    // DDU special + DMB control flags
+  assign e05_frame[11:0]   = 12'hE05;              // End of Scope block
+  assign e05_frame[14:12]  = 3'b110;               // Marker
+  assign e05_frame[18:15]  = 0;                    // DDU special + DMB control flags
 
 // Miniscope
-  assign b07_frame[11:0]   =  12'hB07;              // Beginning of minicope block
-  assign b07_frame[14:12]  =  3'b110;               // Marker
-  assign b07_frame[18:15]  =  0;                    // DDU special + DMB control flags
+  assign b07_frame[11:0]   = 12'hB07;              // Beginning of minicope block
+  assign b07_frame[14:12]  = 3'b110;               // Marker
+  assign b07_frame[18:15]  = 0;                    // DDU special + DMB control flags
 
-  assign mini_frame[14:0]   =  mini_rdata[14:0];    // Miniscope data
-  assign mini_frame[18:15]  =  0;                   // DDU special + DMB control flags
+  assign mini_frame[14:0]  = mini_rdata[14:0];    // Miniscope data
+  assign mini_frame[18:15] = 0;                   // DDU special + DMB control flags
 
-  assign e07_frame[11:0]   =  12'hE07;              // End of miniscope block
-  assign e07_frame[14:12]  =  3'b110;               // Marker
-  assign e07_frame[18:15]  =  0;                    // DDU special + DMB control flags
+  assign e07_frame[11:0]   = 12'hE07;              // End of miniscope block
+  assign e07_frame[14:12]  = 3'b110;               // Marker
+  assign e07_frame[18:15]  = 0;                    // DDU special + DMB control flags
 
 // CFEB Blocked triad bits
-  assign bcb_frame[11:0]   =  12'hBCB;              // Beginning of CFEB blocked bits list
-  assign bcb_frame[14:12]  =  3'b110;               // Marker
-  assign bcb_frame[18:15]  =  0;                    // DDU special + DMB control flag
+  assign bcb_frame[11:0]   = 12'hBCB;              // Beginning of CFEB blocked bits list
+  assign bcb_frame[14:12]  = 3'b110;               // Marker
+  assign bcb_frame[18:15]  = 0;                    // DDU special + DMB control flag
 
   assign blkbit_frame[11:0]   =  bcb_blkbits[11:0]; // CFEB blocked bits list
   assign blkbit_frame[14:12]  =  bcb_cfeb_adr[2:0]; // CFEB ID
@@ -4506,8 +4508,8 @@
   else if (wr_dmp   ) dmb_ff = fifo_frame;     // fifo   frames
 
   else if (wr_b04   ) dmb_ff = b04_frame;      // b04    frame
-  else if (wr_rpc   ) dmb_ff = rpc_frame;      // rpc    frames
   else if (wr_gem   ) dmb_ff = gem_frame;      // gem    frames
+  else if (wr_rpc   ) dmb_ff = rpc_frame;      // rpc    frames
   else if (wr_e04   ) dmb_ff = e04_frame;      // e04    frame
 
   else if (wr_b05   ) dmb_ff = b05_frame;      // b05    frame
@@ -5083,6 +5085,7 @@
   scope_sump    |
   header_sump    |
   alct1_valid    |
+  (|rd_list_gem) | 
   clct_vpf_tprt;
 
 //------------------------------------------------------------------------------------------------------------------------
