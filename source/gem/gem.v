@@ -346,7 +346,7 @@ parameter CLSTBITS = 14;
   wire [CLSTBITS-1:0] fifo_rdata_clst [MXCLST-1:0];
 
   initial $display("gem: generating Virtex6 RAMB18E1_S9_S9 raw.rawhits_ram");
-  wire [3:0] db [MXCLST-1:0];                // Virtex6 dob dummy, no sump needed
+  wire [16-7:0] db [MXCLST-1:0];                // Virtex6 dob dummy, no sump needed
 
   // Compare read parity to write parity
   wire [MXCLST-1:0] parity_expect_lower;
@@ -380,7 +380,7 @@ parameter CLSTBITS = 14;
         .REGCEAREGCE   (1'b0),                          // 1-bit  A port register enable/Register enable input
         .CLKARDCLK     (clock),                         // 1-bit  A port clock/Read clock input
         .ADDRARDADDR   ({fifo_wadr[10:0],3'h7}),        // 14-bit A port address/Read address input 9b->[13:3]
-        .DIADI         ({2'h00,cluster[iclst][6:0]}),   // 16-bit A port data/LSB data input
+        .DIADI         ({9'h0,cluster[iclst][6:0]}),    // 16-bit A port data/LSB data input
         .DIPADIP       ({1'b0,parity_wr_lower[iclst]}), // 2-bit  A port parity/LSB parity input
         .DOADO         (),                              // 16-bit A port data/LSB data output
         .DOPADOP       (),                              // 2-bit  A port parity/LSB parity output
@@ -394,8 +394,8 @@ parameter CLSTBITS = 14;
         .ADDRBWRADDR   ({fifo_radr[10:0],3'hF}),                       // 14-bit B port address/Write address input 18b->[13:4]
         .DIBDI         (),                                             // 16-bit B port data/MSB data input
         .DIPBDIP       (),                                             // 2-bit B port parity/MSB parity input
-        .DOBDO         ({db[iclst][1:0],fifo_rdata_clst[iclst][6:0]}), // 16-bit B port data/MSB data output
-        .DOPBDOP       ({db[iclst][2],  parity_rd_lower[iclst]})       // 2-bit B port parity/MSB parity output
+        .DOBDO         ({db[iclst][8:0],fifo_rdata_clst[iclst][6:0]}), // 16-bit B port data/MSB data output
+        .DOPBDOP       ({db[iclst][9],  parity_rd_lower[iclst]})       // 2-bit B port parity/MSB parity output
       );
 
     // ram for the upper 7 bits.
@@ -418,7 +418,7 @@ parameter CLSTBITS = 14;
         .REGCEAREGCE   (1'b0),                          // 1-bit  A port register enable/Register enable input
         .CLKARDCLK     (clock),                         // 1-bit  A port clock/Read clock input
         .ADDRARDADDR   ({fifo_wadr[10:0],3'h7}),        // 14-bit A port address/Read address input 9b->[13:3]
-        .DIADI         ({2'h00,cluster[iclst][13:7]}),  // 16-bit A port data/LSB data input
+        .DIADI         ({9'h0,cluster[iclst][13:7]}),   // 16-bit A port data/LSB data input
         .DIPADIP       ({1'b0,parity_wr_upper[iclst]}), // 2-bit  A port parity/LSB parity input
         .DOADO         (),                              // 16-bit A port data/LSB data output
         .DOPADOP       (),                              // 2-bit  A port parity/LSB parity output
@@ -432,8 +432,8 @@ parameter CLSTBITS = 14;
         .ADDRBWRADDR   ({fifo_radr[10:0],3'hF}),                        // 14-bit B port address/Write address input 18b->[13:4]
         .DIBDI         (),                                              // 16-bit B port data/MSB data input
         .DIPBDIP       (),                                              // 2-bit B port parity/MSB parity input
-        .DOBDO         ({db[iclst][1:0],fifo_rdata_clst[iclst][13:7]}), // 16-bit B port data/MSB data output
-        .DOPBDOP       ({db[iclst][2],  parity_rd_upper[iclst]})        // 2-bit B port parity/MSB parity output
+        .DOBDO         ({db[iclst][8:0],fifo_rdata_clst[iclst][13:7]}), // 16-bit B port data/MSB data output
+        .DOPBDOP       ({db[iclst][9],  parity_rd_upper[iclst]})        // 2-bit B port parity/MSB parity output
       );
 
     assign parity_expect_lower[iclst] = ~(^ fifo_rdata_clst[iclst][6:0]);
