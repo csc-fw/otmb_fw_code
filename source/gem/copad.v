@@ -155,7 +155,7 @@ parameter MXCLSTB    = 14;
   assign {cnt[1][6], adr[1][6]} = gem_cluster[1][6] & ~14'd7;
   assign {cnt[1][7], adr[1][7]} = gem_cluster[1][7] & ~14'd7;
 
-  // make a copy of the span of address 
+  // make a copy of the span of address + 8
   assign adr0_p [0] = adr[0][0] + 8;
   assign adr0_p [1] = adr[0][1] + 8;
   assign adr0_p [2] = adr[0][2] + 8;
@@ -165,7 +165,7 @@ parameter MXCLSTB    = 14;
   assign adr0_p [6] = adr[0][6] + 8;
   assign adr0_p [7] = adr[0][7] + 8;
 
-  // make a copy of the span of address 
+  // make a copy of the span of address - 8
   assign adr0_m [0] = adr[0][0] - 8;
   assign adr0_m [1] = adr[0][1] - 8;
   assign adr0_m [2] = adr[0][2] - 8;
