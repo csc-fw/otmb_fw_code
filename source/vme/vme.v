@@ -2602,14 +2602,6 @@
   (|comp_phaser_lock_time[23:18]) | 
   (|gtx_sync_done_time[23:18]); 
 
-  wire [15:0] mpc0_frame0_fifo_rd;
-  wire [15:0] mpc0_frame1_fifo_rd;
-  wire [15:0] mpc1_frame0_fifo_rd;
-  wire [15:0] mpc1_frame1_fifo_rd;
-
-  reg  [15:0] mpc_inj_wr;
-  wire [15:0] mpc_inj_rd;
-
   reg  [15:0] mpc_ram_adr_wr;
   wire [15:0] mpc_ram_adr_rd;
 
