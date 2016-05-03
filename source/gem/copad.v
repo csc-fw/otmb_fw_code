@@ -156,24 +156,24 @@ parameter MXCLSTB    = 14;
   assign {cnt[1][7], adr[1][7]} = gem_cluster[1][7] & ~14'd7;
 
   // make a copy of the span of address + 8
-  assign adr0_p [0] = adr[0][0] + 8;
-  assign adr0_p [1] = adr[0][1] + 8;
-  assign adr0_p [2] = adr[0][2] + 8;
-  assign adr0_p [3] = adr[0][3] + 8;
-  assign adr0_p [4] = adr[0][4] + 8;
-  assign adr0_p [5] = adr[0][5] + 8;
-  assign adr0_p [6] = adr[0][6] + 8;
-  assign adr0_p [7] = adr[0][7] + 8;
-
+  assign adr0_p [0] = adr[0][0] + 4'd8;
+  assign adr0_p [1] = adr[0][1] + 4'd8;
+  assign adr0_p [2] = adr[0][2] + 4'd8;
+  assign adr0_p [3] = adr[0][3] + 4'd8;
+  assign adr0_p [4] = adr[0][4] + 4'd8;
+  assign adr0_p [5] = adr[0][5] + 4'd8;
+  assign adr0_p [6] = adr[0][6] + 4'd8;
+  assign adr0_p [7] = adr[0][7] + 4'd8;
+                                   
   // make a copy of the span of address - 8
-  assign adr0_m [0] = adr[0][0] - 8;
-  assign adr0_m [1] = adr[0][1] - 8;
-  assign adr0_m [2] = adr[0][2] - 8;
-  assign adr0_m [3] = adr[0][3] - 8;
-  assign adr0_m [4] = adr[0][4] - 8;
-  assign adr0_m [5] = adr[0][5] - 8;
-  assign adr0_m [6] = adr[0][6] - 8;
-  assign adr0_m [7] = adr[0][7] - 8;
+  assign adr0_m [0] = adr[0][0] - 4'd8;
+  assign adr0_m [1] = adr[0][1] - 4'd8;
+  assign adr0_m [2] = adr[0][2] - 4'd8;
+  assign adr0_m [3] = adr[0][3] - 4'd8;
+  assign adr0_m [4] = adr[0][4] - 4'd8;
+  assign adr0_m [5] = adr[0][5] - 4'd8;
+  assign adr0_m [6] = adr[0][6] - 4'd8;
+  assign adr0_m [7] = adr[0][7] - 4'd8;
 
   // extract valid cluster flags
   genvar i;
