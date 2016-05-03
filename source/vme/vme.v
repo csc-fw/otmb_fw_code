@@ -530,7 +530,7 @@
   dmb_wdcnt,
   dmb_busy,
 
-// GEM Ports: GEM Raw Hits Ram
+// GEM Debug Ram: triggered RAM for sampling GEM raw hits
   gem_debug_fifo_reset,
   gem_debug_fifo_adr,
   gem_debug_fifo_sel,
@@ -772,10 +772,10 @@
   event_counter65,
 
 // GEM Counters
-  event_counter100,
-  event_counter101,
-  event_counter102,
-  event_counter103,
+  //gem_event_counter0,
+  //gem_event_counter1,
+  //gem_event_counter2,
+  //gem_event_counter3,
 
 // Header Counters
   hdr_clear_on_resync,
@@ -933,7 +933,7 @@
   r12_sdat,
   r12_fok,
 
-// Virtex-6 GTX receiver
+// Virtex-6 CFEB GTX receiver
   gtx_rx_enable,
   gtx_rx_reset,
   gtx_rx_reset_err_cnt,
@@ -947,7 +947,7 @@
   gtx_rx_pol_swap,
   gtx_rx_err,
 
-//rdk
+// Virtex-6 GEM GTX receiver
   gem_rx_enable,
   gem_rx_reset,
   gem_rx_reset_err_cnt,
@@ -962,7 +962,7 @@
   gem_rx_err,
 
 // Virtex-6 GTX error counters
-  gem_rx_err_count0, //rdk
+  gem_rx_err_count0,
   gem_rx_err_count1,
   gem_rx_err_count2,
   gem_rx_err_count3,
@@ -975,13 +975,13 @@
   gtx_rx_err_count5,
   gtx_rx_err_count6,
 
-  gtx_link_had_err,  // link stability monitor: error happened at least once
-  gtx_link_good,     // link stability monitor: always good, no errors since last resync
-  gtx_link_bad,      // link stability monitor: errors happened over 100 times
+  gtx_link_had_err,  // cfeb link stability monitor: error happened at least once
+  gtx_link_good,     // cfeb link stability monitor: always good, no errors since last resync
+  gtx_link_bad,      // cfeb link stability monitor: errors happened over 100 times
 
-  gem_link_had_err,  //rdk	link stability monitor: error happened at least once
-  gem_link_good,     //rdk 	link stability monitor: always good, no errors since last resync
-  gem_link_bad,      //rdk 	link stability monitor: errors happened over 100 times
+  gem_link_had_err,  // gem  link stability monitor: error happened at least once
+  gem_link_good,     // gem  link stability monitor: always good, no errors since last resync
+  gem_link_bad,      // gem  link stability monitor: errors happened over 100 times
 
 
   comp_phaser_a_ready,
@@ -995,18 +995,18 @@
 //------------------------------------------------------------------------------------------------------------------
 // Generic
 //------------------------------------------------------------------------------------------------------------------
-  parameter FIRMWARE_TYPE    =  4'h0;      // C=Normal TMB, D=Debug PCB loopback version
-  parameter VERSION      =  4'h0;      // Version revision number
-  parameter MONTHDAY      = 16'h0000;      // Version date
-  parameter YEAR        = 16'h0000;      // Version date
-  parameter FPGAID      = 16'h0000;      // FPGA Type XCVnnnn
-  parameter ISE_VERSION    = 16'h1234;      // ISE Compiler version
-  parameter AUTO_VME      =  1'b1;      // Auto init vme registers
-  parameter AUTO_JTAG      =  1'b1;      // Auto init jtag chain
-  parameter AUTO_PHASER    =  1'b1;      // Auto init digital phase shifters
-  parameter ALCT_MUONIC    =  1'b1;      // Floats ALCT board  in clock-space with independent time-of-flight delay
-  parameter CFEB_MUONIC    =  1'b1;      // Floats CFEB boards in clock-space with independent time-of-flight delay
-  parameter CCB_BX0_EMULATOR  =  1'b0;      // Turns on bx0 emulator at power up, must be 0 for all CERN versions
+  parameter FIRMWARE_TYPE    = 4'h0;     // C=Normal TMB, D=Debug PCB loopback version
+  parameter VERSION          = 4'h0;     // Version revision number
+  parameter MONTHDAY         = 16'h0000; // Version date
+  parameter YEAR             = 16'h0000; // Version date
+  parameter FPGAID           = 16'h0000; // FPGA Type XCVnnnn
+  parameter ISE_VERSION      = 16'h1234; // ISE Compiler version
+  parameter AUTO_VME         = 1'b1;     // Auto init vme registers
+  parameter AUTO_JTAG        = 1'b1;     // Auto init jtag chain
+  parameter AUTO_PHASER      = 1'b1;     // Auto init digital phase shifters
+  parameter ALCT_MUONIC      = 1'b1;     // Floats ALCT board  in clock-space with independent time-of-flight delay
+  parameter CFEB_MUONIC      = 1'b1;     // Floats CFEB boards in clock-space with independent time-of-flight delay
+  parameter CCB_BX0_EMULATOR = 1'b0;     // Turns on bx0 emulator at power up, must be 0 for all CERN versions
 
   `include "../otmb_virtex6_fw_version.v"
 
@@ -2134,10 +2134,10 @@
   input  [MXCNTVME-1:0]  event_counter65;
 
 // GEM Counters
-  input  [MXCNTVME-1:0]  event_counter100;
-  input  [MXCNTVME-1:0]  event_counter101;
-  input  [MXCNTVME-1:0]  event_counter102;
-  input  [MXCNTVME-1:0]  event_counter103;
+//  input  [MXCNTVME-1:0]  gem_event_counter0;
+//  input  [MXCNTVME-1:0]  gem_event_counter1;
+//  input  [MXCNTVME-1:0]  gem_event_counter2;
+//  input  [MXCNTVME-1:0]  gem_event_counter3;
 
 // Header Counters
   output                hdr_clear_on_resync; // Clear header counters on ttc_resync
@@ -6212,9 +6212,9 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  scp_trigger_ch_wr[7:0]      = 0;            // Scope trigger channel, ch0= pretrig
-  scp_trigger_ch_wr[14:8]      = 0;            // Free
-  scp_trigger_ch_wr[15]      = 0;            // Channel source overlay
+  scp_trigger_ch_wr[7:0]  = 0; // Scope trigger channel, ch0= pretrig
+  scp_trigger_ch_wr[14:8] = 0; // Free
+  scp_trigger_ch_wr[15]   = 0; // Channel source overlay
   end
 
   assign scp_trigger_ch[7:0]    = scp_trigger_ch_wr[7:0];  // RW  Scope trigger channel
@@ -6268,7 +6268,7 @@
 // ADR_CNT_RDATA=0xD2  Trigger/Readout Counter Data Register                                                          
 //------------------------------------------------------------------------------------------------------------------
 // Remap 1D counters to 2D, because XST does not support 2D ports
-  parameter MXCNT = 127;                    // Number of counters, last counter id is mxcnt-1
+  parameter MXCNT = 93;                     // Number of counters, last counter id is mxcnt-1
   reg  [MXCNTVME-1:0] cnt_snap [MXCNT-1:0]; // Event counter snapshot 2D
   wire [MXCNTVME-1:0] cnt      [MXCNT-1:0]; // Event counter 2D map
 
@@ -6387,12 +6387,6 @@
   assign cnt[91]  = active_cfebs_me1b_event_counter; // ME1b CFEB active flag sent to DMB
   assign cnt[92]  = active_cfebs_event_counter;      // Any CFEB active flag sent to DMB
 
-
-// GEM Counters  
-  assign cnt[100]  = event_counter100; 
-  assign cnt[101]  = event_counter101; 
-  assign cnt[102]  = event_counter102; 
-  assign cnt[103]  = event_counter103; 
   
 // Virtex-6 GTX Optical Receiver Error Counters
 //  assign cnt[81]  = gtx_rx_err_count0;  // Error count on this fiber channel
@@ -6423,6 +6417,16 @@
 
 // Muliplex counter halves to fit in VMED16, if lsb=0 select lower 16 bits, if lsb=1 select upper 14
   assign cnt_rdata_rd = (cnt_adr_lsb) ? cnt_rdata[29:16] : cnt_rdata[15:0];
+
+//------------------------------------------------------------------------------------------------------------------
+// 
+//------------------------------------------------------------------------------------------------------------------
+
+// GEM Counters  
+//   assign cnt[100]  = gem_event_counter0; 
+//   assign cnt[101]  = gem_event_counter1; 
+//   assign cnt[102]  = gem_event_counter2; 
+//   assign cnt[103]  = gem_event_counter3; 
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_UPTIME=E8  Uptime Counter Register, Readonly
@@ -6949,7 +6953,7 @@
 
   assign dps_fire_vme[7]   =  phaser7_wr[0];    // RW  Set new phase, software sets then unsets
   assign dps_reset[7]      =  phaser7_wr[1];    // RW  Reset current phase to 32
-  assign cfeb5_rxd_posneg  =  phaser7_wr[7];    // RW  Posneg  /* JGhere: apply this value for all A-side cfebs */
+  assign cfeb5_rxd_posneg  =  phaser7_wr[7];    // RW  Posneg  (apply this value for all A-side cfebs)
   assign dps7_phase[7:0]   =  phaser7_wr[15:8]; // RW  Phase to set, 0-255
 
   // JGhere: for OTMB, ME1/1a uses dps2 (with values from phaser 7) and  ME1/1b uses dps3 (with values from phaser 8) 
@@ -7382,7 +7386,10 @@
   end
   endgenerate
 
-//rdk
+  //--------------------------------------------------------------------------------------------------------------------
+  // GEM GTX Receiver
+  //--------------------------------------------------------------------------------------------------------------------
+
   wire [3:0] gem_gtx_rx_sump;	
   genvar igem;
   generate
@@ -7411,7 +7418,6 @@
   assign gem_rx_reset_err_cnt[igem] = gtx_rx_reset_err_cnt_all; // RW   JRG: just the ALL case will Reset PRBS test error counters
 
   assign gem_gtx_rx_sump[igem]     = |gem_gtx_rx_wr[igem][15:3]; // R  Unused write bits. JRG: used to be [10:4]
-
 
   end
   endgenerate
@@ -7443,23 +7449,23 @@
   wire    adc_valid;
 
   gtx_sysmon usysmon
-  (
-  .clock    (clock),          // In   40 MHz main
-  .reset    (adc_reset),      // In   Active-high reset
-  .adc_adr  (adc_adr[4:0]),   // In   ADC channel
+             (
+  .clock     (clock),         // In   40 MHz main
+  .reset     (adc_reset),     // In   Active-high reset
+  .adc_adr   (adc_adr[4:0]),  // In   ADC channel
   .adc_data  (adc_data[9:0]), // Out  ADC data
-  .adc_valid  (adc_valid),    // Out  ADC data valid
+  .adc_valid (adc_valid),     // Out  ADC data valid
   .adc_sump  (adc_sump)       // Out  ADC RAM sump
   );
 
 // Register map
-  assign adc_adr[4:0]          = virtex6_sysmon_wr[4:0];      // RW  ADC channel
-  assign adc_reset          = virtex6_sysmon_wr[5];        // RW  Active-high reset
-  wire   virtex6_sysmon_sump      = |virtex6_sysmon_wr[15:6];      // RW  Unused write bits
+  assign adc_adr[4:0]        = virtex6_sysmon_wr[4:0];   // RW  ADC channel
+  assign adc_reset           = virtex6_sysmon_wr[5];     // RW  Active-high reset
+  wire   virtex6_sysmon_sump = |virtex6_sysmon_wr[15:6]; // RW  Unused write bits
 
-  assign virtex6_sysmon_rd[4:0]    = adc_adr[4:0];            // RW  ADC channel
-  assign virtex6_sysmon_rd[5]      = adc_valid;            // R  ADC data valid
-  assign virtex6_sysmon_rd[15:6]    = adc_data[9:0];          // R  ADC data
+  assign virtex6_sysmon_rd[4:0]  = adc_adr[4:0];  // RW  ADC channel
+  assign virtex6_sysmon_rd[5]    = adc_valid;     // R  ADC data valid
+  assign virtex6_sysmon_rd[15:6] = adc_data[9:0]; // R  ADC data
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_V6_EXTEND = 0x17A  DCFEB 7-bit extensions for Adr 0x42 and 0x68

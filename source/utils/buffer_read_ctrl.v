@@ -5,7 +5,7 @@
 //
 //  Controls CFEB and RPC/GEM Raw Hits, and Miniscope RAM Readout to Sequencer
 //------------------------------------------------------------------------------------------------------------------
-//   02/22/2002  Initial
+//  02/22/2002  Initial
 //  02/25/2002  Invert fifo_wen
 //  02/26/2002  Pipeline delays for RAM readout
 //  02/26/2002  Fixed pretrig read address

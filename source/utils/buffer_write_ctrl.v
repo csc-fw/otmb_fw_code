@@ -226,7 +226,10 @@
   wire [RAM_ADRB-1:0] prestore_setback;
   reg  [RAM_ADRB-1:0] buf_setback=0;
 
+  // calculate the maximum setback of either GEM or RPC
   wire  [MXTBIN-1:0]  fifo_pretrig_gem_rpc = (fifo_pretrig_gem >= fifo_pretrig_rpc) ? fifo_pretrig_gem : fifo_pretrig_rpc;
+
+  // use the highest setback of either CFEB or GEM or RPC
   assign pretrig_setback  = (fifo_pretrig_cfeb >= fifo_pretrig_gem_rpc) ? fifo_pretrig_cfeb : fifo_pretrig_gem_rpc;
   assign prestore_setback =  READ_ADR_OFFSET+1+PRESTORE_SAFETY;
 

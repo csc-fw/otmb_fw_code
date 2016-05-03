@@ -456,16 +456,16 @@
   wire   [3:0] flash_ctrl;
   assign bpi_cs = flash_ctrl[3];
   
-  wire   [22:0] bpi_ad_out;  // "BPI Flash PROM Address": coming from vme, going to sequencer then sequencer connects it to dmb_tx if bpi_active
-  wire          bpi_active;  // "BPI Active set to 1 when data lines are for BPI communications": coming from vme, going to sequencer and to outside trough mez_tp[3]
-  wire          bpi_dev;     // "BPI Device Selected: going to outside through mez_tp[4]
-  wire          bpi_rst;     // "BPI Reset: going to outside through mez_tp[5]
-  wire          bpi_dsbl;    // "BPI Disable: going to outside through mez_tp[6]
-  wire          bpi_enbl;    // "BPI Enable: going to outside through mez_tp[7]
-  wire          bpi_we;      // "BPI Write Enable: going to outside through mez_tp[8]
-  wire          bpi_dtack;   // "BPI Data Acknowledge: coming from vme, going to outside through mez_tp[9]
-  wire          bpi_rd_stat; // "BPI Read interface status register command received": going to outside through mez_tp[1]
-  wire          bpi_re;      // "BPI Read-back FIFO read enable": currently not connected (connect to mez_tp[2]?)
+  wire   [22:0] bpi_ad_out;  // BPI Flash PROM Address: coming from vme, going to sequencer then sequencer connects it to dmb_tx if bpi_active
+  wire          bpi_active;  // BPI Active set to 1 when data lines are for BPI communications: coming from vme, going to sequencer and to outside trough mez_tp[3]
+  wire          bpi_dev;     // BPI Device Selected: going to outside through mez_tp[4]
+  wire          bpi_rst;     // BPI Reset: going to outside through mez_tp[5]
+  wire          bpi_dsbl;    // BPI Disable: going to outside through mez_tp[6]
+  wire          bpi_enbl;    // BPI Enable: going to outside through mez_tp[7]
+  wire          bpi_we;      // BPI Write Enable: going to outside through mez_tp[8]
+  wire          bpi_dtack;   // BPI Data Acknowledge: coming from vme, going to outside through mez_tp[9]
+  wire          bpi_rd_stat; // BPI Read interface status register command received: going to outside through mez_tp[1]
+  wire          bpi_re;      // BPI Read-back FIFO read enable: currently not connected (connect to mez_tp[2]?)
 
 //-------------------------------------------------------------------------------------------------------------------
 // Display definitions in synth log
@@ -496,6 +496,7 @@
 // Phaser VME control/status ports
   //  parameter MXDPS=9;  // JRG: UCLA sets to 9, I prefer 4 to save BUFGs.  2 ALCT + 7 DCFEBs
   parameter MXDPS=11;  // JRG: UCLA set to 9, I prefer 4 to save BUFGs.  2 ALCT + 1 DCFEB(me1/1b)+ 1 DCFEB(me1/1a)  + 2GEM
+                       // nota bene that this is not necessarily the actual number of DPSs (which is fewer and set inside clock ctrl)
 
   wire [MXDPS-1:0]  dps_fire;
   wire [MXDPS-1:0]  dps_reset;
@@ -563,6 +564,7 @@
 
   .clock_gem0_rxd (clock_gem_rxd[0]),  // Out 40MHz GEM receive  data clock 1x
   .clock_gem1_rxd (clock_gem_rxd[1]),  // Out 40MHz GEM receive  data clock 1x
+                                       // these clocks are ganged together inside of the clock control module
 
 // Global reset
   .mmcm_reset          (1'b0),                 // In  PLL reset input for simulation
@@ -1204,7 +1206,7 @@
   wire  [MXCFEB-1:0]  link_bad;                      // link stability monitor: errors happened over 100 times
   wire  [MXCFEB-1:0]  ready_phaser;                  // phaser dps done and ready status
 
-  wire  [MXCFEB-1:0]  cfeb_rx_nonzero;               // rdk Out Flags when rx sees non-zero data
+  wire  [MXCFEB-1:0]  cfeb_rx_nonzero;               // Out Flags when rx sees non-zero data
 
   wire  ready_phaser_a, ready_phaser_b, auto_gtx_reset;
    
@@ -1328,20 +1330,20 @@
 //.gtx_rx_reset         (gtx_rx_reset[icfeb]),                         // In  Reset this GTX rx & sync module
   .gtx_rx_reset_err_cnt (gtx_rx_reset_err_cnt[icfeb]),                 // In  Resets the PRBS test error counters
   .gtx_rx_en_prbs_test  (gtx_rx_en_prbs_test[icfeb]),                  // In  Select random input test data mode
-  .gtx_rx_start         (gtx_rx_start[icfeb]),                         // Out  Set when the DCFEB Start Pattern is present
-  .gtx_rx_fc            (gtx_rx_fc[icfeb]),                            // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
-  .gtx_rx_nonzero       (cfeb_rx_nonzero[icfeb]),                      // rdk Out Flags when any non-zero data passes through CFEB link
-  .gtx_rx_valid         (gtx_rx_valid[icfeb]),                         // Out  Valid data detected on link
-  .gtx_rx_match         (gtx_rx_match[icfeb]),                         // Out  PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
-  .gtx_rx_rst_done      (gtx_rx_rst_done[icfeb]),                      // Out  These get set before rxsync cycle begins
-  .gtx_rx_sync_done     (gtx_rx_sync_done[icfeb]),                     // Out  Use these to determine gtx_ready
-  .gtx_rx_pol_swap      (gtx_rx_pol_swap[icfeb]),                      // Out  GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
-  .gtx_rx_err           (gtx_rx_err[icfeb]),                           // Out  PRBS test detects an error
-  .gtx_rx_err_count     (gtx_rx_err_count[icfeb][15:0]),               // Out  Error count on this fiber channel
-  .link_had_err         (link_had_err[icfeb]),                         // link stability monitor: error happened at least once
-  .link_good            (link_good[icfeb]),                            // link stability monitor: always good, no errors since last resync
-  .link_bad             (link_bad[icfeb]),                             // link stability monitor: errors happened over 100 times
-  .gtx_rx_sump          (gtx_rx_sump[icfeb])                           // Out  Unused signals
+  .gtx_rx_start         (gtx_rx_start[icfeb]),                         // Out Set when the DCFEB Start Pattern is present
+  .gtx_rx_fc            (gtx_rx_fc[icfeb]),                            // Out Flags when Rx sees "FC" code (sent by Tx) for latency measurement
+  .gtx_rx_nonzero       (cfeb_rx_nonzero[icfeb]),                      // Out Flags when any non-zero data passes through CFEB link
+  .gtx_rx_valid         (gtx_rx_valid[icfeb]),                         // Out Valid data detected on link
+  .gtx_rx_match         (gtx_rx_match[icfeb]),                         // Out PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
+  .gtx_rx_rst_done      (gtx_rx_rst_done[icfeb]),                      // Out These get set before rxsync cycle begins
+  .gtx_rx_sync_done     (gtx_rx_sync_done[icfeb]),                     // Out Use these to determine gtx_ready
+  .gtx_rx_pol_swap      (gtx_rx_pol_swap[icfeb]),                      // Out GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
+  .gtx_rx_err           (gtx_rx_err[icfeb]),                           // Out PRBS test detects an error
+  .gtx_rx_err_count     (gtx_rx_err_count[icfeb][15:0]),               // Out Error count on this fiber channel
+  .link_had_err         (link_had_err[icfeb]),                         // Out Link stability monitor: error happened at least once
+  .link_good            (link_good[icfeb]),                            // Out Link stability monitor: always good, no errors since last resync
+  .link_bad             (link_bad[icfeb]),                             // Out Link stability monitor: errors happened over 100 times
+  .gtx_rx_sump          (gtx_rx_sump[icfeb])                           // Out Unused signals
 
 // Debug Ports
   );
@@ -1365,7 +1367,6 @@
   wire  [MXGEM-1:0]     gem_rx_pol_swap;               // Out  GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
   wire  [MXGEM-1:0]     gem_rx_err;                    // Out  PRBS test detects an error
   wire  [MXGEM-1:0]     gem_sump;
-  wire  [MXGEM-1:0]     gem_rx_sump;                   // Out  Unused signals
   wire  [15:0]          gem_rx_err_count [MXGEM-1:0];  // Out  Error count on this fiber channel
   wire  [MXGEM-1:0]     gem_link_had_err;              // link stability monitor: error happened at least once
   wire  [MXGEM-1:0]     gem_link_good;                 // link stability monitor: always good, no errors since last resync
@@ -1439,6 +1440,7 @@
   // Resets
   .global_reset (global_reset  ), // In  Global reset
   .ttc_resync   (ttc_resync    ), // In  TTC resync
+
   .gem_sump     (gem_sump[igem]), // Out  Unused signals wot must be connected
 
   // SNAP12 optical receiver
@@ -1462,7 +1464,6 @@
   .link_had_err         (gem_link_had_err     [igem]                  ), // Out  link stability monitor: error happened at least once
   .link_good            (gem_link_good        [igem]                  ), // Out  link stability monitor: always good, no errors since last resync
   .link_bad             (gem_link_bad         [igem]                  ), // Out  link stability monitor: errors happened over 100 times
-  .gtx_rx_sump          (gem_rx_sump          [igem]                  ), // Out  Unused signals
 
   .k_char               (gem_kchar            [igem]                  ), // Out latched copy of last Received K-Char
 
@@ -1496,8 +1497,8 @@
   end
   endgenerate // end GEM
 
-	// GEM Fiber Synchronization Monitoring 
-	//--------------------------------------------------------------------------------------------------------------------
+  // GEM Fiber Synchronization Monitoring 
+  //--------------------------------------------------------------------------------------------------------------------
 
   gem_sync_mon u_gem_sync_mon (
 
@@ -1522,69 +1523,69 @@
     .gems_lostsync(gems_lostsync)  // Out
   ); 
 
-	// GEM Co-pad Matching
-	//--------------------------------------------------------------------------------------------------------------------
+  // GEM Co-pad Matching
+  //--------------------------------------------------------------------------------------------------------------------
 
-	wire        gem_match_neighbors = 1'b1; 
-	wire [7:0]  gem_match; 
-	wire [7:0]  gem_match_left; 
-	wire [7:0]  gem_match_right; 
-	wire        gem_any_match; 
-	wire [23:0] gem_active_feb_list; 
-	wire [13:0] gem_copad  [7:0]; 
+  wire        gem_match_neighbors = 1'b1; 
+  wire [7:0]  gem_match; 
+  wire [7:0]  gem_match_left; 
+  wire [7:0]  gem_match_right; 
+  wire        gem_any_match; 
+  wire [23:0] gem_active_feb_list; 
+  wire [13:0] gem_copad  [7:0]; 
 
-	copad u_copad (
+  copad u_copad (
 
-		.clock(clock), 
-	
-		// gem chamber 0 clusters
-		.gem0_cluster0(gem_cluster0[0]), 
-		.gem0_cluster1(gem_cluster1[0]), 
-		.gem0_cluster2(gem_cluster2[0]), 
-		.gem0_cluster3(gem_cluster3[0]), 
+    .clock(clock), 
+  
+    // gem chamber 0 clusters
+    .gem0_cluster0(gem_cluster0[0]), 
+    .gem0_cluster1(gem_cluster1[0]), 
+    .gem0_cluster2(gem_cluster2[0]), 
+    .gem0_cluster3(gem_cluster3[0]), 
 
-		.gem0_cluster4(gem_cluster0[1]), 
-		.gem0_cluster5(gem_cluster1[1]), 
-		.gem0_cluster6(gem_cluster2[1]), 
-		.gem0_cluster7(gem_cluster3[1]), 
+    .gem0_cluster4(gem_cluster0[1]), 
+    .gem0_cluster5(gem_cluster1[1]), 
+    .gem0_cluster6(gem_cluster2[1]), 
+    .gem0_cluster7(gem_cluster3[1]), 
 
-		// gem chamber 1 clusters
-		.gem1_cluster0(gem_cluster0[2]), 
-		.gem1_cluster1(gem_cluster1[2]), 
-		.gem1_cluster2(gem_cluster2[2]), 
-		.gem1_cluster3(gem_cluster3[2]), 
+    // gem chamber 1 clusters
+    .gem1_cluster0(gem_cluster0[2]), 
+    .gem1_cluster1(gem_cluster1[2]), 
+    .gem1_cluster2(gem_cluster2[2]), 
+    .gem1_cluster3(gem_cluster3[2]), 
 
-		.gem1_cluster4(gem_cluster0[3]), 
-		.gem1_cluster5(gem_cluster1[3]), 
-		.gem1_cluster6(gem_cluster2[3]), 
-		.gem1_cluster7(gem_cluster3[3]), 
+    .gem1_cluster4(gem_cluster0[3]), 
+    .gem1_cluster5(gem_cluster1[3]), 
+    .gem1_cluster6(gem_cluster2[3]), 
+    .gem1_cluster7(gem_cluster3[3]), 
 
-		// control whether to match on neighboring (+-1) clusters
-		.match_neighbors(gem_match_neighbors), 
+    // control whether to match on neighboring (+-1) clusters
+    .match_neighbors(gem_match_neighbors), 
 
-	  // cluster output addresses (unsorted)
-		.cluster0 (gem_copad[0]), 
-		.cluster1 (gem_copad[1]), 
-		.cluster2 (gem_copad[2]), 
-		.cluster3 (gem_copad[3]), 
-		.cluster4 (gem_copad[4]), 
-		.cluster5 (gem_copad[5]), 
-		.cluster6 (gem_copad[6]), 
-		.cluster7 (gem_copad[7]), 
+    // cluster output addresses (unsorted)
+    .cluster0 (gem_copad[0]), 
+    .cluster1 (gem_copad[1]), 
+    .cluster2 (gem_copad[2]), 
+    .cluster3 (gem_copad[3]), 
+    .cluster4 (gem_copad[4]), 
+    .cluster5 (gem_copad[5]), 
+    .cluster6 (gem_copad[6]), 
+    .cluster7 (gem_copad[7]), 
 
-		// match flag
-		.match(gem_match), 
+    // match flag
+    .match(gem_match), 
 
-	  // 24 bit active feb list
-		.active_feb_list(gem_active_feb_list), 
+    // 24 bit active feb list
+    .active_feb_list(gem_active_feb_list), 
 
-	  // 8 bit cluster match was found on right/left side of respective cluster
-		.match_right (gem_match_right), 
-		.match_left  (gem_match_left), 
+    // 8 bit cluster match was found on right/left side of respective cluster
+    .match_right (gem_match_right), 
+    .match_left  (gem_match_left), 
 
-		// 1 bit any match found
-		.any_match(gem_any_match)
-	);
+    // 1 bit any match found
+    .any_match(gem_any_match)
+  );
 
 //-------------------------------------------------------------------------------------------------------------------
 // Pattern Finder declarations, common to ME1A+ME1B+ME234
@@ -1916,7 +1917,7 @@
    wire [MXCFEB-1:0]      perr_cfeb_ff;
    wire [MXGEM-1:0]       perr_gem;
    wire [MXGEM-1:0]       perr_gem_ff;
-   wire [64:0]            perr_ram_ff; // Mapped bad parity RAMs, 6x7=42 cfebs + 5 rpcs + 2 miniscope
+   wire [64:0]            perr_ram_ff; // Mapped bad parity RAMs, 6x7=42 cfebs + 5 rpcs + 2 miniscope + 4*4 GEMs
 
 // Sequencer VME debug register latches
    wire [MXBADR-1:0]      deb_wr_buf_adr;    // Buffer write address at last pretrig
@@ -1955,8 +1956,8 @@
   
 // Sequencer GEM Ports 
   .gem_copad_matched (gem_any_match), // GEM co-pad match was found
-  .gem0_sync_err     (~gem0_synced),  // GEM0 has sync error
-  .gem1_sync_err     (~gem1_synced),  // GEM1 has sync error
+  .gem0_sync_err     (~gem0_synced),  // GEM0 has intra-chamber sync error
+  .gem1_sync_err     (~gem1_synced),  // GEM1 has intra-chamber sync error
   .gems_sync_err     (~gems_synced),  // GEM Super Chamber has sync error
 
 // Sequencer External Triggers
@@ -2871,7 +2872,7 @@
   .perr         (perr),                     // Out  Parity error summary
   .perr_pulse   (perr_pulse),               // Out  Parity error pulse for counting
   .perr_cfeb_ff (perr_cfeb_ff[MXCFEB-1:0]), // Out  CFEB RAM parity error, latched
-  .perr_gem_ff  (perr_gem_ff[MXGEM-1:0]),   // Out  GEM RAM parity error, latched
+  .perr_gem_ff  (perr_gem_ff[MXGEM-1:0]),   // Out  GEM RAM parity error,  latched
   .perr_rpc_ff  (perr_rpc_ff),              // Out  RPC  RAM parity error, latched
   .perr_mini_ff (perr_mini_ff),             // Out  Mini RAM parity error, latched
   .perr_ff      (perr_ff),                  // Out  Parity error summary,  latched
@@ -4123,7 +4124,7 @@
       .perr_en      (perr_en),                  // In  Parity error latch enabled
       .perr         (perr),                     // In  Parity error summary
       .perr_cfeb_ff (perr_cfeb_ff[MXCFEB-1:0]), // In  CFEB RAM parity error, latched
-      .perr_gem_ff  (perr_gem_ff[MXGEM-1:0]),   // In  GEM RAM parity error, latched
+      .perr_gem_ff  (perr_gem_ff[MXGEM-1:0]),   // In  GEM RAM parity error,  latched
       .perr_rpc_ff  (perr_rpc_ff),              // In  RPC  RAM parity error, latched
       .perr_mini_ff (perr_mini_ff),             // In  Mini RAM parity error, latched
       .perr_ff      (perr_ff),                  // In  Parity error summary,  latched
@@ -4325,8 +4326,8 @@
    | virtex6_sump  
    | cfeb_rx_sump 
    | odmb_device_sump 
-   | (|gem_sump)
-   | (|gem_rx_sump);
+   | (|gem_sump); 
+
 
 
    //-------------------------------------------------------------------------------------------

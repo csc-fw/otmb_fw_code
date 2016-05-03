@@ -49,7 +49,6 @@ module gem (
     output         gtx_rx_pol_swap,      // GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
     output         gtx_rx_err,           // PRBS test detects an error
     output  [15:0] gtx_rx_err_count,     // Error count on this fiber channel
-    output         gtx_rx_sump,          // Unused signals
 
     output  [7:0]  k_char, // latched copy of the last k-char received
 
@@ -159,7 +158,7 @@ parameter CLSTBITS = 14;
         .gtx_rx_sump          (gtx_rx_sump)             // Unused signals
     );
 
-    assign gtx_sump = gtx_rx_start | gtx_rx_fc | gtx_rx_match | gtx_rx_match | gtx_rx_sump;
+    wire gtx_sump = gtx_rx_start | gtx_rx_fc | gtx_rx_match | gtx_rx_match | gtx_rx_sump;
 
 //------------------------------------------------------------------------------------------------------------------
 // Decompose packed GEM data format
