@@ -3852,34 +3852,34 @@
   vmesm uvmesm
   (
 // Control
-   .clock      (clock),    // In  40 MHz clock
-   .global_reset  (global_reset),      // In  Global reset
-   .power_up    (power_up),    // In  DLL clock lock, we wait for it
-   .vme_ready    (vme_ready),    // In  TMB VME registers finished setting defaults.  JG: really just power_up
-   .start      (vsm_start),    // In  Cycle start command
-   .autostart    (AUTO_VME),    // In  Enable automatic power-up
-   .throttle    (vsm_throttle[3:0]),  // In  PROM read-speed control, 0=fastest
+   .clock        (clock),               // In  40 MHz clock
+   .global_reset (global_reset),        // In  Global reset
+   .power_up     (power_up),            // In  DLL clock lock, we wait for it
+   .vme_ready    (vme_ready),           // In  TMB VME registers finished setting defaults.  JG: really just power_up
+   .start        (vsm_start),           // In  Cycle start command
+   .autostart    (AUTO_VME),            // In  Enable automatic power-up
+   .throttle     (vsm_throttle[3:0]),   // In  PROM read-speed control, 0=fastest
 // PROM
-   .prom_data    (vsm_prom_data[7:0]),  // In  prom_data[7:0]
-   .prom_clk    (vsm_prom_clk),    // Out  prom_ctrl[0]
-   .prom_oe    (vsm_prom_oe),    // Out  prom_ctrl[1]
-   .prom_nce    (vsm_prom_nce),    // Out  prom_ctrl[2]
-   .vmesm_oe    (vsm_oe),    // Out  Enable vme mux
-   .adr      (vsm_adr[23:0]),  // Out  VME register address
-   .data      (vsm_data[15:0]),  // Out  VME data from PROM
-   .ds0      (vsm_ds0),    // Out  VME stobe
+   .prom_data    (vsm_prom_data[7:0]),  // In   prom_data[7:0]
+   .prom_clk     (vsm_prom_clk),        // Out  prom_ctrl[0]
+   .prom_oe      (vsm_prom_oe),         // Out  prom_ctrl[1]
+   .prom_nce     (vsm_prom_nce),        // Out  prom_ctrl[2]
+   .vmesm_oe     (vsm_oe),              // Out  Enable vme mux
+   .adr          (vsm_adr[23:0]),       // Out  VME register address
+   .data         (vsm_data[15:0]),      // Out  VME data from PROM
+   .ds0          (vsm_ds0),             // Out  VME stobe
 // Status
-   .sreset      (vsm_sreset),    // In  Status signal reset
-   .busy      (vsm_busy),    // Out  State machine busy
-   .busy_extend  (vsm_busy_extend),    // Out  State machine busy extended to hold off jtagsm
-   .aborted    (vsm_aborted),    // Out  State machine aborted reading PROM
-   .cksum_ok    (vsm_cksum_ok),    // Out  Check-sum  matches PROM contents
-   .wdcnt_ok    (vsm_wdcnt_ok),    // Out  Word count matches PROM contents
-   .vmesm_ok    (vsm_ok),    // Out  Machine ran without errors
-   .wdcnt      (vsm_wdcnt[15:0]),  // Out  Word count
-   .cksum      (vsm_cksum[7:0]),  // Out  Check sum
-   .fmt_err    (vsm_fmt_err[4:0]),  // Out  PROM data structure error
-   .nvme_writes  (vsm_nvme_writes[7:0])          // Out  Number of vme addresses written
+   .sreset       (vsm_sreset),          // In   Status signal reset
+   .busy         (vsm_busy),            // Out  State machine busy
+   .busy_extend  (vsm_busy_extend),     // Out  State machine busy extended to hold off jtagsm
+   .aborted      (vsm_aborted),         // Out  State machine aborted reading PROM
+   .cksum_ok     (vsm_cksum_ok),        // Out  Check-sum  matches PROM contents
+   .wdcnt_ok     (vsm_wdcnt_ok),        // Out  Word count matches PROM contents
+   .vmesm_ok     (vsm_ok),              // Out  Machine ran without errors
+   .wdcnt        (vsm_wdcnt[15:0]),     // Out  Word count
+   .cksum        (vsm_cksum[7:0]),      // Out  Check sum
+   .fmt_err      (vsm_fmt_err[4:0]),    // Out  PROM data structure error
+   .nvme_writes  (vsm_nvme_writes[7:0]) // Out  Number of vme addresses written
   );
 //------------------------------------------------------------------------------------------------------------------
 // ADR_IDREG0=00  ID Register 0, Readonly

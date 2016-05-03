@@ -2936,7 +2936,7 @@
   wire [MXRTMB-1:0] rtmb_wdata; // Mapping array
   wire [MXRTMB-1:0] rtmb_rdata; // Mapping array
 
-  assign rtmb_wdata[0]   = tmb_match;          // ALCT and CLCT matched in time
+  assign rtmb_wdata[0]   =  tmb_match;          // ALCT and CLCT matched in time
   assign rtmb_wdata[1]   = tmb_alct_only;      // Only ALCT triggered
   assign rtmb_wdata[2]   = tmb_clct_only;      // Only CLCT triggered
   assign rtmb_wdata[6:3] = tmb_match_win[3:0]; // Location of alct in clct window
@@ -3463,18 +3463,18 @@
   assign l1a_los_win = l1a_see_win && !l1a_push_me;        // Event saw an L1A but was not pushed beco
 
 // Diagnostic L1A cases force a readout without L1A matching, if enabled. Usually not enabled
-  wire l1a_forced_notmb =(l1a_notmb && l1a_allow_notmb && !no_daq);  // L1A with no TMB in window, readout anyway
-  wire l1a_forced_nol1a =(tmb_nol1a && l1a_allow_nol1a && !no_daq);  // TMB with no L1A arrival, readout anyway
+  wire l1a_forced_notmb =(l1a_notmb && l1a_allow_notmb && !no_daq); // L1A with no TMB in window, readout anyway
+  wire l1a_forced_nol1a =(tmb_nol1a && l1a_allow_nol1a && !no_daq); // TMB with no L1A arrival, readout anyway
 
   assign l1a_forced = l1a_forced_notmb || l1a_forced_nol1a;
 
 // DAV signal to DMB is asserted as soon as L1A arrives, forced cases with no match are sent on window close
-  assign l1a_keep = (tmb_push_sr && l1a_push_me && l1a_allow_match) || l1a_forced;// At window close
-  assign dmb_dav  = (l1a_match && l1a_allow_match                 ) || l1a_forced;// At L1A match before window close
+  assign l1a_keep = (tmb_push_sr && l1a_push_me && l1a_allow_match) || l1a_forced; // At window close
+  assign dmb_dav  = (l1a_match && l1a_allow_match                 ) || l1a_forced; // At L1A match before window close
 
 // Push event address into fence queue to protect raw hits and queue for readout to DMB
-  reg [MXBADR-1:0]  buf_push_adr  = 0;          // Address of write buffer to allocate  
-  reg [MXBDATA-1:0]  buf_push_data = 0;          // Data associated with push_adr
+  reg [MXBADR-1:0]   buf_push_adr  = 0; // Address of write buffer to allocate
+  reg [MXBDATA-1:0]  buf_push_data = 0; // Data associated with push_adr
 
   assign buf_push  = l1a_keep;                // Allocate write buffer space for this event
 
@@ -3490,10 +3490,10 @@
   end
 
 // Pop event off of fence queue after readout completes
-  assign buf_pop     = (read_sm == xpop) && !xpop_done;  // Specified buffer is to be released
-  assign buf_pop_adr = buf_queue_adr;            // Address of read buffer to release
-  assign rd_buf_adr  = buf_queue_adr;            // Current multi-buffer storage address for readout
-  assign l1a_rdata   = buf_queue_data;          // L1A data associated with push_adr
+  assign buf_pop     = (read_sm == xpop) && !xpop_done; // Specified buffer is to be released
+  assign buf_pop_adr = buf_queue_adr;                   // Address of read buffer to release
+  assign rd_buf_adr  = buf_queue_adr;                   // Current multi-buffer storage address for readout
+  assign l1a_rdata   = buf_queue_data;                  // L1A data associated with push_adr
 
 // Save bxn at L1A regardless of match
   reg  [MXBXN-1:0] bxn_l1a_vme=0;
@@ -3539,11 +3539,11 @@
   wire        r_sync_err         = xpre_rdata[60];    // BXN sync error
   wire [3:0]  r_alct_preClct_win = xpre_rdata[64:61]; // ALCT active_feb_flag position in pretrig window
 
-  wire [10:0] r_wr_buf_adr       = xpre_rdata[75:65]; // Address of write buffer at pretrig
-  wire [10:0] r_buf_fence_dist   = xpre_rdata[86:76]; // Distance to 1st fence address at pretrigger
-  wire        r_wr_buf_avail     = xpre_rdata[87];    // Write buffer is ready or bypassed
-  wire        r_wr_buf_ready     = xpre_rdata[88];    // Write buffer is ready
-  wire        r_buf_stalled      = xpre_rdata[89];    // All buffer memory space is in use
+  wire [10:0] r_wr_buf_adr     = xpre_rdata[75:65]; // Address of write buffer at pretrig
+  wire [10:0] r_buf_fence_dist = xpre_rdata[86:76]; // Distance to 1st fence address at pretrigger
+  wire        r_wr_buf_avail   = xpre_rdata[87];    // Write buffer is ready or bypassed
+  wire        r_wr_buf_ready   = xpre_rdata[88];    // Write buffer is ready
+  wire        r_buf_stalled    = xpre_rdata[89];    // All buffer memory space is in use
 
 // Unpack Pre-trigger +1bx data from RAM mapping array
   wire [29:0] r_pretrig_counter  = xpre1_rdata[29:0];  // Pre-trigger counter
@@ -3564,83 +3564,83 @@
   wire [29:0] r_clct_counter = xtmb1_rdata[29:0]; // CLCTs sent to TMB section
 
 // Unpack TMB match results from RAM mapping array
-  wire       r_tmb_match     =  rtmb_rdata[0];   // ALCT and CLCT matched in time
-  wire       r_tmb_alct_only =  rtmb_rdata[1];   // Only ALCT triggered
-  wire       r_tmb_clct_only =  rtmb_rdata[2];   // Only CLCT triggered
-  wire [3:0] r_tmb_match_win =  rtmb_rdata[6:3]; // Location of alct in clct window
+  wire       r_tmb_match     = rtmb_rdata[0];   // ALCT and CLCT matched in time
+  wire       r_tmb_alct_only = rtmb_rdata[1];   // Only ALCT triggered
+  wire       r_tmb_clct_only = rtmb_rdata[2];   // Only CLCT triggered
+  wire [3:0] r_tmb_match_win = rtmb_rdata[6:3]; // Location of alct in clct window
 
-  wire     r_tmb_no_alct    =  rtmb_rdata[7];    // No ALCT
-  wire     r_tmb_one_alct    =  rtmb_rdata[8];    // One ALCT
-  wire     r_tmb_one_clct    =  rtmb_rdata[9];    // One CLCT
-  wire     r_tmb_two_alct    =  rtmb_rdata[10];    // Two ALCTs
-  wire     r_tmb_two_clct    =  rtmb_rdata[11];    // Two CLCTs
-  wire     r_tmb_dupe_alct    =  rtmb_rdata[12];    // ALCT0 copied into ALCT1 to make 2nd LCT
-  wire     r_tmb_dupe_clct    =  rtmb_rdata[13];    // CLCT0 copied into CLCT1 to make 2nd LCT
-  wire     r_tmb_rank_err    =  rtmb_rdata[14];    // LCT1 has higher quality than LCT0
+  wire     r_tmb_no_alct   = rtmb_rdata[7];  // No ALCT
+  wire     r_tmb_one_alct  = rtmb_rdata[8];  // One ALCT
+  wire     r_tmb_one_clct  = rtmb_rdata[9];  // One CLCT
+  wire     r_tmb_two_alct  = rtmb_rdata[10]; // Two ALCTs
+  wire     r_tmb_two_clct  = rtmb_rdata[11]; // Two CLCTs
+  wire     r_tmb_dupe_alct = rtmb_rdata[12]; // ALCT0 copied into ALCT1 to make 2nd LCT
+  wire     r_tmb_dupe_clct = rtmb_rdata[13]; // CLCT0 copied into CLCT1 to make 2nd LCT
+  wire     r_tmb_rank_err  = rtmb_rdata[14]; // LCT1 has higher quality than LCT0
 
-  wire    r_tmb_match_ro    =  rtmb_rdata[15];    // ALCT and CLCT matched in time, non-triggering readout
-  wire    r_tmb_alct_only_ro  =  rtmb_rdata[16];    // Only ALCT triggered, non-triggering readout
-  wire    r_tmb_clct_only_ro  =  rtmb_rdata[17];    // Only CLCT triggered, non-triggering readout
+  wire    r_tmb_match_ro     = rtmb_rdata[15]; // ALCT and CLCT matched in time, non-triggering readout
+  wire    r_tmb_alct_only_ro = rtmb_rdata[16]; // Only ALCT triggered, non-triggering readout
+  wire    r_tmb_clct_only_ro = rtmb_rdata[17]; // Only CLCT triggered, non-triggering readout
 
-  wire    r_tmb_trig_pulse  =  rtmb_rdata[18];    // TMB trig pulse agreed with rtmb_push
-  wire    r_tmb_trig_keep    =  rtmb_rdata[19];    // TMB said keep triggering event
-  wire    r_tmb_non_trig_keep  =  rtmb_rdata[20];    // TMB said keep non-triggering event
+  wire    r_tmb_trig_pulse    = rtmb_rdata[18]; // TMB trig pulse agreed with rtmb_push
+  wire    r_tmb_trig_keep     = rtmb_rdata[19]; // TMB said keep triggering event
+  wire    r_tmb_non_trig_keep = rtmb_rdata[20]; // TMB said keep non-triggering event
 
-  wire    r_tmb_clct0_discard  =  rtmb_rdata[21];    // TMB discarded clct0 from ME1A
-  wire    r_tmb_clct1_discard  =  rtmb_rdata[22];    // TMB discarded clct1 from ME1A
+  wire    r_tmb_clct0_discard = rtmb_rdata[21]; // TMB discarded clct0 from ME1A
+  wire    r_tmb_clct1_discard = rtmb_rdata[22]; // TMB discarded clct1 from ME1A
 
 // Unpack ALCT + extra TMB trigger data from RAM mapping array
-  wire [10:0]  r_tmb_alct0      =  alct_rdata[10:0];  // ALCT0
-  wire [10:0]  r_tmb_alct1      =  alct_rdata[21:11];  // ALCT1
-  wire [4:0]  r_tmb_alctb      =  alct_rdata[26:22];  // ALCT bxn
-  wire [1:0]  r_tmb_alcte      =  alct_rdata[28:27];  // ALCT ecc error syndrome latched at trigger
+  wire [10:0] r_tmb_alct0 = alct_rdata[10:0];  // ALCT0
+  wire [10:0] r_tmb_alct1 = alct_rdata[21:11]; // ALCT1
+  wire [4:0]  r_tmb_alctb = alct_rdata[26:22]; // ALCT bxn
+  wire [1:0]  r_tmb_alcte = alct_rdata[28:27]; // ALCT ecc error syndrome latched at trigger
 
-  wire      r_alct0_valid  =  r_tmb_alct0[0];    // Valid pattern flag
-  wire  [1:0]  r_alct0_quality  =  r_tmb_alct0[2:1];  // Pattern quality
-  wire      r_alct0_amu    =  r_tmb_alct0[3];    // Accelerator muon
-  wire  [6:0]  r_alct0_key    =  r_tmb_alct0[10:4];  // Key Wire Group
+  wire        r_alct0_valid   = r_tmb_alct0[0];    // Valid pattern flag
+  wire  [1:0] r_alct0_quality = r_tmb_alct0[2:1];  // Pattern quality
+  wire        r_alct0_amu     = r_tmb_alct0[3];    // Accelerator muon
+  wire  [6:0] r_alct0_key     = r_tmb_alct0[10:4]; // Key Wire Group
 
-  wire      r_alct1_valid  =  r_tmb_alct1[0];    // Valid pattern flag
-  wire  [1:0]  r_alct1_quality  =  r_tmb_alct1[2:1];  // Pattern quality
-  wire      r_alct1_amu    =  r_tmb_alct1[3];    // Accelerator muon
-  wire  [6:0]  r_alct1_key    =  r_tmb_alct1[10:4];  // Key Wire Group
+  wire        r_alct1_valid   = r_tmb_alct1[0];    // Valid pattern flag
+  wire  [1:0] r_alct1_quality = r_tmb_alct1[2:1];  // Pattern quality
+  wire        r_alct1_amu     = r_tmb_alct1[3];    // Accelerator muon
+  wire  [6:0] r_alct1_key     = r_tmb_alct1[10:4]; // Key Wire Group
 
-  wire  [4:0]  r_alct_bxn    =  r_tmb_alctb[4:0];  // ALCT bunch crossing number
-  wire  [1:0]  r_alct_ecc_err  =  r_tmb_alcte[1:0];  // ALCT ecc error syndrome code
+  wire  [4:0]  r_alct_bxn     = r_tmb_alctb[4:0]; // ALCT bunch crossing number
+  wire  [1:0]  r_alct_ecc_err = r_tmb_alcte[1:0]; // ALCT ecc error syndrome code
 
 // Unpack TMB match results from RAM mapping array that was delayed 1bx
-  wire [29:0]  r_trig_counter    =  rtmb1_rdata[29:0];  // TMB trigger counter
-  wire [6:0]  r_tmb_aff_list    =  rtmb1_rdata[36:30];  // Active cfeb list at TMB match, saves 1 ram
+  wire [29:0]  r_trig_counter = rtmb1_rdata[29:0];  // TMB trigger counter
+  wire [6:0]  r_tmb_aff_list  = rtmb1_rdata[36:30]; // Active cfeb list at TMB match, saves 1 ram
 
 // Unpack MPC transmit frame data from RAM mapping array
-  wire [15:0]  r_mpc0_frame0_ff  =  xmpc_rdata[15: 0];  // MPC muon 0 frame 0
-  wire [15:0]  r_mpc0_frame1_ff  =  xmpc_rdata[31:16];  // MPC muon 0 frame 1
-  wire [15:0]  r_mpc1_frame0_ff  =  xmpc_rdata[47:32];  // MPC muon 1 frame 0
-  wire [15:0]  r_mpc1_frame1_ff  =  xmpc_rdata[63:48];  // MPC muon 1 frame 1
+  wire [15:0]  r_mpc0_frame0_ff = xmpc_rdata[15: 0]; // MPC muon 0 frame 0
+  wire [15:0]  r_mpc0_frame1_ff = xmpc_rdata[31:16]; // MPC muon 0 frame 1
+  wire [15:0]  r_mpc1_frame0_ff = xmpc_rdata[47:32]; // MPC muon 1 frame 0
+  wire [15:0]  r_mpc1_frame1_ff = xmpc_rdata[63:48]; // MPC muon 1 frame 1
 
 // Unpack MPC response data from RAM mapping array
-  wire [1:0]  r_mpc_accept    =  rmpc_rdata[1:0];  // MPC muon accept response
-  wire [1:0]  r_mpc_reserved    =  rmpc_rdata[3:2];  // MPC reserved
+  wire [1:0]  r_mpc_accept   = rmpc_rdata[1:0]; // MPC muon accept response
+  wire [1:0]  r_mpc_reserved = rmpc_rdata[3:2]; // MPC reserved
 
 // Unpack L1A mach data from RAM mapping array
-  wire [11:0]  r_l1a_bxn_win    =  l1a_rdata[11:0];  // BXN at L1A arrival
-  wire [11:0]  r_l1a_cnt_win    =  l1a_rdata[23:12];  // L1As received at time of this event
-  wire [3:0]  r_l1a_match_win    =  l1a_rdata[27:24];  // Position of l1a in window
-  wire    r_l1a_push_me    =  l1a_rdata[28];    // L1A with TMB in window, and readouts enabled
-  wire    r_l1a_notmb      =  l1a_rdata[29];    // L1A with no TMB in window, readout anyway
-  wire    r_tmb_nol1a      =  l1a_rdata[30];    // TMB with no L1A arrival, readout anyway
-  wire    r_l1a_match      =  r_l1a_push_me;    // Alias
-  wire    r_wr_avail_xl1a    =  l1a_rdata[31];    // Buffer available at L1A match
+  wire [11:0] r_l1a_bxn_win   = l1a_rdata[11:0];  // BXN at L1A arrival
+  wire [11:0] r_l1a_cnt_win   = l1a_rdata[23:12]; // L1As received at time of this event
+  wire [3:0]  r_l1a_match_win = l1a_rdata[27:24]; // Position of l1a in window
+  wire        r_l1a_push_me   = l1a_rdata[28];    // L1A with TMB in window, and readouts enabled
+  wire        r_l1a_notmb     = l1a_rdata[29];    // L1A with no TMB in window, readout anyway
+  wire        r_tmb_nol1a     = l1a_rdata[30];    // TMB with no L1A arrival, readout anyway
+  wire        r_l1a_match     = r_l1a_push_me;    // Alias
+  wire        r_wr_avail_xl1a = l1a_rdata[31];    // Buffer available at L1A match
 
 // L1A pop type code indicates buffer data available for this L1A
   reg [1:0] l1a_type = 1;
 
   always @(posedge clock) begin
-  if    (r_l1a_match)    l1a_type = 0;  // CLCT trig with buffers and L1A window match
-  else if  (r_tmb_alct_only)  l1a_type = 1;  // ALCT-only trig, clct data is undefined
-  else if (r_l1a_notmb)    l1a_type = 2;  // L1A-only, TMB did not trigger
-  else if (r_tmb_nol1a)    l1a_type = 3;  // TMB trigger no L1A with buffers
-  else            l1a_type = 1;  // Error
+  if      (r_l1a_match)     l1a_type = 0; // CLCT trig with buffers and L1A window match
+  else if (r_tmb_alct_only) l1a_type = 1; // ALCT-only trig, clct data is undefined
+  else if (r_l1a_notmb)     l1a_type = 2; // L1A-only, TMB did not trigger
+  else if (r_tmb_nol1a)     l1a_type = 3; // TMB trigger no L1A with buffers
+  else                      l1a_type = 1; // Error
   end
 
 // Readout type code depends on selected FIFO mode and whether event buffer data exists
@@ -3649,22 +3649,22 @@
   wire  r_has_buf    = r_wr_avail_xl1a;
   wire  r_has_hdr    = r_wr_avail_xl1a && (!r_l1a_notmb || clct_wr_continuous);
 
-  wire  header_only    = (fifo_mode == 0) &&  r_has_buf;  // fifo_mode 0: dump: No  header: Full
-  wire  full_dump    = (fifo_mode == 1) &&  r_has_buf;  // fifo_mode 1: dump: Full  header: Full
-  wire  local_dump    = (fifo_mode == 2) &&  r_has_buf;  // fifo_mode 2: dump: Local  header: Full
-  wire  short_header  = (fifo_mode == 3) || !r_has_buf;  // fifo_mode 3: dump: No  header: Short
-  assign  no_daq      = (fifo_mode == 4);          // fifo_mode 4: dump: No  header: No
+  wire  header_only  = (fifo_mode == 0) &&  r_has_buf; // fifo_mode 0: dump: No  header: Full
+  wire  full_dump    = (fifo_mode == 1) &&  r_has_buf; // fifo_mode 1: dump: Full  header: Full
+  wire  local_dump   = (fifo_mode == 2) &&  r_has_buf; // fifo_mode 2: dump: Local  header: Full
+  wire  short_header = (fifo_mode == 3) || !r_has_buf; // fifo_mode 3: dump: No  header: Short
+  assign  no_daq     = (fifo_mode == 4);               // fifo_mode 4: dump: No  header: No
   wire  fifo_dump    = full_dump || local_dump;
 
   wire  sync_err_hdr  = (r_has_hdr) ? r_sync_err    : sync_err;
   wire  buf_stalled_hdr  = (r_has_hdr) ? r_buf_stalled : buf_stalled;
   
   always @(posedge clock) begin
-  if    (!full_dump && !local_dump &&  header_only ) readout_type = 0;  // dump: No  header: Full
-  else if  ( full_dump && !local_dump && !header_only ) readout_type = 1;  // dump: Full  header: Full
-  else if (!full_dump &&  local_dump && !header_only ) readout_type = 2;  // dump: Local  header: Full
-  else if (!full_dump && !local_dump &&  short_header) readout_type = 3;  // dump: No  header: Short
-  else                         readout_type = 0;  // no daq
+  if      (!full_dump && !local_dump &&  header_only ) readout_type = 0; // dump: No  header: Full
+  else if ( full_dump && !local_dump && !header_only ) readout_type = 1; // dump: Full  header: Full
+  else if (!full_dump &&  local_dump && !header_only ) readout_type = 2; // dump: Local  header: Full
+  else if (!full_dump && !local_dump &&  short_header) readout_type = 3; // dump: No  header: Short
+  else                                                 readout_type = 0; // no daq
   end
 
 // Determine active_feb list source, pretrig or at TMB match
@@ -3713,18 +3713,18 @@
   assign r_nrpcs_read      = (include_rpcs ) ? rd_nrpcs        : 1'd0; // RPCs  in readout list
   assign r_ngems_read      = (include_gems ) ? rd_ngems        : 1'd0; // GEMs  in readout list
 
-  assign r_fifo_dump    = fifo_dump && (r_ncfebs!=0);        // No CFEB raw hits if no cfebs hit
+  assign r_fifo_dump = fifo_dump && (r_ncfebs!=0); // No CFEB raw hits if no cfebs hit
 
 //------------------------------------------------------------------------------------------------------------------
 // Readout Sequencing Section
 //------------------------------------------------------------------------------------------------------------------
 // Header word counter
-  wire [NHBITS-1:0]  last_header;
-  wire        header_done;
+  wire [NHBITS-1:0] last_header;
+  wire              header_done;
 
   always @(posedge clock) begin
-  if    (read_sm != xheader) header_cnt = 0;          // sync clear
-  else if (read_sm == xheader) header_cnt = header_cnt + 1'b1;  // sync count
+  if      (read_sm != xheader) header_cnt = 0;                 // sync clear
+  else if (read_sm == xheader) header_cnt = header_cnt + 1'b1; // sync count
   end
 
   assign last_header = r_nheaders-1'b1;              // avoid underflow error if r_nheaders=0
@@ -3736,8 +3736,8 @@
   wire frame_cnt_ena = (read_sm != xckstack) && (read_sm !=xpop) && (read_sm != xhalt) ;
 
   always @(posedge clock) begin
-  if    (read_sm == xdmb) frame_cnt = 1;            // sync load
-  else if  (frame_cnt_ena  ) frame_cnt = frame_cnt + 1'b1;      // sync count
+  if       (read_sm == xdmb) frame_cnt = 1;                // sync load
+  else if  (frame_cnt_ena  ) frame_cnt = frame_cnt + 1'b1; // sync count
   end
 
 // Add 6-word or 4-word trailer to make word count a multiple of 4
@@ -3745,21 +3745,21 @@
 
 // DMB transmission CRC calculation
   wire  [21:0]  crc;
-  reg    [21:0]  crc_ff=0;
+  reg   [21:0]  crc_ff=0;
   wire  [15:0]  crc_data;
-  wire      crc_reset;
-  wire      crc_latch;
+  wire          crc_reset;
+  wire          crc_latch;
 
-  assign crc_data[15:0]  = dmb_ff[15:0];          // TMB output frame
-  assign crc_reset    = dmb_ff[18];          // _wr_fifo
-  assign crc_latch    = (read_sm == xcrc0);      // Latch crc on 2nd frame before 1st crc word
+  assign crc_data[15:0] = dmb_ff[15:0];       // TMB output frame
+  assign crc_reset      = dmb_ff[18];         // _wr_fifo
+  assign crc_latch      = (read_sm == xcrc0); // Latch crc on 2nd frame before 1st crc word
 
   crc22a ucrc22a
-  (
-  .clock  (clock),
+         (
+  .clock (clock),
   .data  (crc_data[15:0]),
-  .reset  (crc_reset),
-  .crc  (crc[21:0])
+  .reset (crc_reset),
+  .crc   (crc[21:0])
   );
 
   always @(posedge clock) begin
