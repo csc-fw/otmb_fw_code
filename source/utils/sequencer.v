@@ -882,10 +882,10 @@
   event_counter64,
   event_counter65,
 
-  event_counter100,
-  event_counter101,
-  event_counter102,
-  event_counter103,
+  //event_counter100,
+  //event_counter101,
+  //event_counter102,
+  //event_counter103,
 
 // Event Counter Ports
   hdr_clear_on_resync,
@@ -1607,10 +1607,10 @@
   output  [MXCNTVME-1:0]  event_counter64;
   output  [MXCNTVME-1:0]  event_counter65;
 
-  output  [MXCNTVME-1:0]  event_counter100;
-  output  [MXCNTVME-1:0]  event_counter101;
-  output  [MXCNTVME-1:0]  event_counter102;
-  output  [MXCNTVME-1:0]  event_counter103;
+  // output  [MXCNTVME-1:0]  event_counter100;
+  // output  [MXCNTVME-1:0]  event_counter101;
+  // output  [MXCNTVME-1:0]  event_counter102;
+  // output  [MXCNTVME-1:0]  event_counter103;
 
 // Event Counter Ports
   input                   hdr_clear_on_resync; // Clear header counters on ttc_resync
@@ -2657,7 +2657,7 @@
 //------------------------------------------------------------------------------------------------------------------
 // Counter registers
   parameter MNCNT        = 13;  // First sequencer counter, not number of counters because they start elsewhere
-  parameter MXCNT        = 110; // Last  sequencer counter, not number of counters becouse they end elsewhere
+  parameter MXCNT        = 65;  // Last  sequencer counter, not number of counters becouse they end elsewhere
   parameter RESYNCCNT_ID = 63;  // TTC Resyncs received counter does not get cleared
 
   reg [MXCNTVME-1:0] cnt [MXCNT:MNCNT]; // TMB counter array, counters[6:0] are in alct.v
@@ -2731,13 +2731,13 @@
     cnt_en[64]  <= sync_err_cnt_en;           // STAT  TTC sync errors
     cnt_en[65]  <= perr_pulse;                // STAT Raw hits RAM parity errors
 
-    cnt_en[100] <= gem_copad_matched; // STAT Raw hits RAM parity errors
-    cnt_en[101] <= gem0_sync_err; 
-    cnt_en[102] <= gem1_sync_err; 
-    cnt_en[103] <= gems_sync_err; 
+    // cnt_en[100] <= gem_copad_matched; // STAT Raw hits RAM parity errors
+    // cnt_en[101] <= gem0_sync_err; 
+    // cnt_en[102] <= gem1_sync_err; 
+    // cnt_en[103] <= gems_sync_err; 
     
-    //cnt_en[104] <= gem_hit_at_clct_pretrig[0]; 
-    //cnt_en[105] <= gem_hit_at_clct_pretrig[1]; 
+    // cnt_en[104] <= gem_hit_at_clct_pretrig[0]; 
+    // cnt_en[105] <= gem_hit_at_clct_pretrig[1]; 
 
   end
 
@@ -2834,52 +2834,11 @@
   assign event_counter63  = cnt[63];
   assign event_counter64  = cnt[64];
   assign event_counter65  = cnt[65];
-  assign event_counter66  = cnt[66];
-  assign event_counter67  = cnt[67];
-  assign event_counter68  = cnt[68];
-  assign event_counter69  = cnt[69];
-  assign event_counter70  = cnt[70];
-  assign event_counter71  = cnt[71];
-  assign event_counter72  = cnt[72];
-  assign event_counter73  = cnt[73];
-  assign event_counter74  = cnt[74];
-  assign event_counter75  = cnt[75];
-  assign event_counter76  = cnt[76];
-  assign event_counter77  = cnt[77];
-  assign event_counter78  = cnt[78];
-  assign event_counter79  = cnt[79];
-  assign event_counter80  = cnt[80];
-  assign event_counter81  = cnt[81];
-  assign event_counter82  = cnt[82];
-  assign event_counter83  = cnt[83];
-  assign event_counter84  = cnt[84];
-  assign event_counter85  = cnt[85];
-  assign event_counter86  = cnt[86];
-  assign event_counter87  = cnt[87];
-  assign event_counter88  = cnt[88];
-  assign event_counter89  = cnt[89];
-  assign event_counter90  = cnt[90];
-  assign event_counter91  = cnt[91];
-  assign event_counter92  = cnt[92];
-  assign event_counter93  = cnt[93];
-  assign event_counter94  = cnt[94];
-  assign event_counter95  = cnt[95];
-  assign event_counter96  = cnt[96];
-  assign event_counter97  = cnt[97];
-  assign event_counter98  = cnt[98];
-  assign event_counter99  = cnt[99];
 
-  assign event_counter100 = cnt[100];
-  assign event_counter101 = cnt[101];
-  assign event_counter102 = cnt[102];
-  assign event_counter103 = cnt[103];
-  assign event_counter104 = cnt[104];
-  assign event_counter105 = cnt[105];
-  assign event_counter106 = cnt[106];
-  assign event_counter107 = cnt[107];
-  assign event_counter108 = cnt[108];
-  assign event_counter109 = cnt[109];
-  assign event_counter110 = cnt[110];
+  //assign event_counter100 = cnt[100];
+  //assign event_counter101 = cnt[101];
+  //assign event_counter102 = cnt[102];
+  //assign event_counter103 = cnt[103];
 
 //------------------------------------------------------------------------------------------------------------------
 // Multi-buffer storage for event header
