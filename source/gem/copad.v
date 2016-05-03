@@ -1,27 +1,27 @@
 `define debug_copad
 //----------------------------------------------------------------------------------------------------------------------
 // copad.v
-// 
+//
 // simple co-pad finder---matches exact addresses and sets a flag when there is a successful match. Probably only useful
-// for vfat2 slice test. 
-// 
+// for vfat2 slice test.
+//
 // A more sophisticated matching scheme can and should be used for vfat3 matching, where cluster sizes are not fixed and
 // resolution is smaller
-// 
-// set match_neighbors high to enable matching with +/1 one pad. Otherwise requires exact match. 
-// 
-// n.b. PLEASE realize that this module WILL NOT WORK with VFAT-3 data. This is designed completely around expecting 
+//
+// set match_neighbors high to enable matching with +/1 one pad. Otherwise requires exact match.
+//
+// n.b. PLEASE realize that this module WILL NOT WORK with VFAT-3 data. This is designed completely around expecting
 // that every cluster has size=7, and clusters will only occur in partitions 0, 8, 16
-// 
+//
 //----------------------------------------------------------------------------------------------------------------------
 
 module copad (
 
     input clock, // 40MHz fabric clock
 
-    input match_neighbors, // set high for the copad finder to match on neighboring (+/- one) pads 
+    input match_neighbors, // set high for the copad finder to match on neighboring (+/- one) pads
 
-    // 8 clusters from gem0 
+    // 8 clusters from gem0
     input [13:0] gem0_cluster0,
     input [13:0] gem0_cluster1,
     input [13:0] gem0_cluster2,
@@ -31,7 +31,7 @@ module copad (
     input [13:0] gem0_cluster6,
     input [13:0] gem0_cluster7,
 
-    // 8 clusters from gem1 
+    // 8 clusters from gem1
     input [13:0] gem1_cluster0,
     input [13:0] gem1_cluster1,
     input [13:0] gem1_cluster2,
@@ -52,8 +52,8 @@ module copad (
     output reg [MXCLSTB-1:0] cluster6,
     output reg [MXCLSTB-1:0] cluster7,
 
-    // 8 bit ff'd register of matches found, with respect to the address in gem0 
-    output reg [MXCLUSTERS-1:0] match, 
+    // 8 bit ff'd register of matches found, with respect to the address in gem0
+    output reg [MXCLUSTERS-1:0] match,
 
     output reg [MXCLUSTERS-1:0] match_right, // 8 bit flag that the match was found on the rhs of gem0 adr
     output reg [MXCLUSTERS-1:0] match_left,  // 8 bit flag that the match was found on the lhs of gem0 adr
@@ -76,49 +76,49 @@ parameter MXCLSTB    = 14;
 // unpack and vectorize the inputs
 //----------------------------------------------------------------------------------------------------------------------
 
- // insert ff for correct simulation standalone synthesis 
- `ifdef debug_copad 
-    reg [MXCLSTB-1:0] gem_cluster [1:0][7:0]; 
+ // insert ff for correct simulation standalone synthesis
+ `ifdef debug_copad
+    reg [MXCLSTB-1:0] gem_cluster [1:0][7:0];
 
     always @(posedge clock) begin
-      gem_cluster[0][0] <= gem0_cluster0; 
-      gem_cluster[0][1] <= gem0_cluster1; 
-      gem_cluster[0][2] <= gem0_cluster2; 
-      gem_cluster[0][3] <= gem0_cluster3; 
-      gem_cluster[0][4] <= gem0_cluster4; 
-      gem_cluster[0][5] <= gem0_cluster5; 
-      gem_cluster[0][6] <= gem0_cluster6; 
-      gem_cluster[0][7] <= gem0_cluster7; 
+      gem_cluster[0][0] <= gem0_cluster0;
+      gem_cluster[0][1] <= gem0_cluster1;
+      gem_cluster[0][2] <= gem0_cluster2;
+      gem_cluster[0][3] <= gem0_cluster3;
+      gem_cluster[0][4] <= gem0_cluster4;
+      gem_cluster[0][5] <= gem0_cluster5;
+      gem_cluster[0][6] <= gem0_cluster6;
+      gem_cluster[0][7] <= gem0_cluster7;
 
-      gem_cluster[1][0] <= gem1_cluster0; 
-      gem_cluster[1][1] <= gem1_cluster1; 
-      gem_cluster[1][2] <= gem1_cluster2; 
-      gem_cluster[1][3] <= gem1_cluster3; 
-      gem_cluster[1][4] <= gem1_cluster4; 
-      gem_cluster[1][5] <= gem1_cluster5; 
-      gem_cluster[1][6] <= gem1_cluster6; 
-      gem_cluster[1][7] <= gem1_cluster7; 
+      gem_cluster[1][0] <= gem1_cluster0;
+      gem_cluster[1][1] <= gem1_cluster1;
+      gem_cluster[1][2] <= gem1_cluster2;
+      gem_cluster[1][3] <= gem1_cluster3;
+      gem_cluster[1][4] <= gem1_cluster4;
+      gem_cluster[1][5] <= gem1_cluster5;
+      gem_cluster[1][6] <= gem1_cluster6;
+      gem_cluster[1][7] <= gem1_cluster7;
     end
- `else 
-    wire [MXCLSTB-1:0] gem_cluster [1:0][7:0]; 
+ `else
+    wire [MXCLSTB-1:0] gem_cluster [1:0][7:0];
 
-    wire gem_cluster[0][0] = gem0_cluster0; 
-    wire gem_cluster[0][1] = gem0_cluster1; 
-    wire gem_cluster[0][2] = gem0_cluster2; 
-    wire gem_cluster[0][3] = gem0_cluster3; 
-    wire gem_cluster[0][4] = gem0_cluster4; 
-    wire gem_cluster[0][5] = gem0_cluster5; 
-    wire gem_cluster[0][6] = gem0_cluster6; 
-    wire gem_cluster[0][7] = gem0_cluster7; 
+    wire gem_cluster[0][0] = gem0_cluster0;
+    wire gem_cluster[0][1] = gem0_cluster1;
+    wire gem_cluster[0][2] = gem0_cluster2;
+    wire gem_cluster[0][3] = gem0_cluster3;
+    wire gem_cluster[0][4] = gem0_cluster4;
+    wire gem_cluster[0][5] = gem0_cluster5;
+    wire gem_cluster[0][6] = gem0_cluster6;
+    wire gem_cluster[0][7] = gem0_cluster7;
 
-    wire gem_cluster[1][0] = gem1_cluster0; 
-    wire gem_cluster[1][1] = gem1_cluster1; 
-    wire gem_cluster[1][2] = gem1_cluster2; 
-    wire gem_cluster[1][3] = gem1_cluster3; 
-    wire gem_cluster[1][4] = gem1_cluster4; 
-    wire gem_cluster[1][5] = gem1_cluster5; 
-    wire gem_cluster[1][6] = gem1_cluster6; 
-    wire gem_cluster[1][7] = gem1_cluster7; 
+    wire gem_cluster[1][0] = gem1_cluster0;
+    wire gem_cluster[1][1] = gem1_cluster1;
+    wire gem_cluster[1][2] = gem1_cluster2;
+    wire gem_cluster[1][3] = gem1_cluster3;
+    wire gem_cluster[1][4] = gem1_cluster4;
+    wire gem_cluster[1][5] = gem1_cluster5;
+    wire gem_cluster[1][6] = gem1_cluster6;
+    wire gem_cluster[1][7] = gem1_cluster7;
 
  `endif
 
@@ -175,7 +175,7 @@ parameter MXCLSTB    = 14;
   assign adr0_m [6] = adr[0][6] - 8;
   assign adr0_m [7] = adr[0][7] - 8;
 
-  // extract valid cluster flags 
+  // extract valid cluster flags
   genvar i;
   genvar j;
   generate
@@ -204,22 +204,22 @@ for (iclst=0; iclst<MXCLUSTERS; iclst=iclst+1) begin: clust_match_loop
 
   // we don't want to form left matches at the left edge of the chamber
   assign adr_at_left_edge [iclst] = (adr[0][iclst] == 0    )|
-                                    (adr[0][iclst] == 192  )| 
-                                    (adr[0][iclst] == 384  )| 
-                                    (adr[0][iclst] == 576  )| 
-                                    (adr[0][iclst] == 768  )| 
-                                    (adr[0][iclst] == 960  )| 
-                                    (adr[0][iclst] == 1152 )| 
-                                    (adr[0][iclst] == 1344 ); 
+                                    (adr[0][iclst] == 192  )|
+                                    (adr[0][iclst] == 384  )|
+                                    (adr[0][iclst] == 576  )|
+                                    (adr[0][iclst] == 768  )|
+                                    (adr[0][iclst] == 960  )|
+                                    (adr[0][iclst] == 1152 )|
+                                    (adr[0][iclst] == 1344 );
 
   // we don't want to form right matches at the right edge of the chamber
-  assign adr_at_right_edge [iclst] = (adr[0][iclst] == 191  - 7) | 
-                                     (adr[0][iclst] == 383  - 7) | 
-                                     (adr[0][iclst] == 575  - 7) | 
-                                     (adr[0][iclst] == 767  - 7) | 
-                                     (adr[0][iclst] == 959  - 7) | 
-                                     (adr[0][iclst] == 1151 - 7) | 
-                                     (adr[0][iclst] == 1535 - 7); 
+  assign adr_at_right_edge [iclst] = (adr[0][iclst] == 191  - 7) |
+                                     (adr[0][iclst] == 383  - 7) |
+                                     (adr[0][iclst] == 575  - 7) |
+                                     (adr[0][iclst] == 767  - 7) |
+                                     (adr[0][iclst] == 959  - 7) |
+                                     (adr[0][iclst] == 1151 - 7) |
+                                     (adr[0][iclst] == 1535 - 7);
 
   // match is in the center of gem0 cluster (full match)
   assign match_c  [iclst] =  vpf[0][iclst] &            // gem0 cluster is valid
@@ -246,7 +246,7 @@ for (iclst=0; iclst<MXCLUSTERS; iclst=iclst+1) begin: clust_match_loop
                           | adr0_m[iclst]==adr[1][7]  // left side match to gem1 cluster7
                           );                          // gem1 cluster automatically valid if there is a match
 
-  // match is on the right side of gem0 cluster 
+  // match is on the right side of gem0 cluster
   assign match_r [iclst] = !adr_at_right_edge[iclst] & // don't form matches at right edge
                             vpf[0][iclst] &            // gem0 cluster is valid
                           ( adr0_p[iclst]==adr[1][0]   // right side match to gem1 cluster0
@@ -261,17 +261,17 @@ for (iclst=0; iclst<MXCLUSTERS; iclst=iclst+1) begin: clust_match_loop
 end
 endgenerate
 
-wire [7:0] match_fast  =   match_c   // full cluster match 
+wire [7:0] match_fast  =   match_c   // full cluster match
                           | ({8{match_neighbors}} & match_r )
                           | ({8{match_neighbors}} & match_l );
 
-wire any_match_fast = (|match_fast); 
+wire any_match_fast = (|match_fast);
 
 always @ (posedge clock) begin
-  any_match           <= any_match_fast; 
-  match         [7:0] <= match_fast; 
-  match_left    [7:0] <= match_l; 
-  match_right   [7:0] <= match_r; 
+  any_match           <= any_match_fast;
+  match         [7:0] <= match_fast;
+  match_left    [7:0] <= match_l;
+  match_right   [7:0] <= match_r;
 
   // ff copy the clusters from gem0 to delay 1bx to lineup with output
   cluster0 <= gem_cluster[0][0];
@@ -284,33 +284,88 @@ always @ (posedge clock) begin
   cluster7 <= gem_cluster[0][7];
 end
 
+
+
 // form a list of 8 Active FEBs with clusters in GEM0
-wire [4:0] cluster_feb [MXCLUSTERS-1:0]; 
+//wire [4:0] cluster_feb [MXCLUSTERS-1:0];
+reg [4:0] cluster_feb [MXCLUSTERS-1:0];
 generate
 for (iclst=0; iclst<MXCLUSTERS; iclst=iclst+1) begin: feb_assign_loop
-  assign cluster_feb[iclst] = adr[0][iclst] >> 6;  // shr6 is a floored div64, which gives us the 5 bit VFAT-ID of the cluster
+  // assign cluster_feb[iclst] = adr[0][iclst] >> 6;  // shr6 is a floored div64, which gives us the 5 bit VFAT-ID of the cluster
+
+  // chamber looks like this  (for dumbass reasons that can't be helped)
+  //  0  8  16
+  //  1  9  17
+  //  2  10 18
+  //  3  11 19
+  //  4  12 20
+  //  5  13 21
+  //  6  14 22
+  //  7  15 23
+  // 
+  // the upper 5 bits of the address need to be mapped to VFAT-IDs.. 
+  // but naturally the upper 5-bits produce a map like
+  //  0   1    2
+  //  3   4    5
+  //  6   7    8
+  //  9   10   11
+  //  12  13   14
+  //  15  16   17
+  //  18  19   20
+  //  21  22   23
+
+  always @(*) begin
+  case (adr[0][iclst][10:5])
+    5'd0:    cluster_feb[iclst] = 5'd0;
+    5'd1:    cluster_feb[iclst] = 5'd8;
+    5'd2:    cluster_feb[iclst] = 5'd16;
+    5'd3:    cluster_feb[iclst] = 5'd1;
+    5'd4:    cluster_feb[iclst] = 5'd9;
+    5'd5:    cluster_feb[iclst] = 5'd17;
+    5'd6:    cluster_feb[iclst] = 5'd2;
+    5'd7:    cluster_feb[iclst] = 5'd10;
+    5'd8:    cluster_feb[iclst] = 5'd18;
+    5'd9:    cluster_feb[iclst] = 5'd3;
+    5'd10:   cluster_feb[iclst] = 5'd11;
+    5'd11:   cluster_feb[iclst] = 5'd19;
+    5'd12:   cluster_feb[iclst] = 5'd4;
+    5'd13:   cluster_feb[iclst] = 5'd12;
+    5'd14:   cluster_feb[iclst] = 5'd20;
+    5'd15:   cluster_feb[iclst] = 5'd5;
+    5'd16:   cluster_feb[iclst] = 5'd13;
+    5'd17:   cluster_feb[iclst] = 5'd21;
+    5'd18:   cluster_feb[iclst] = 5'd6;
+    5'd19:   cluster_feb[iclst] = 5'd14;
+    5'd20:   cluster_feb[iclst] = 5'd22;
+    5'd21:   cluster_feb[iclst] = 5'd7;
+    5'd22:   cluster_feb[iclst] = 5'd15;
+    5'd23:   cluster_feb[iclst] = 5'd23;
+    default: cluster_feb[iclst] = 5'd24; 
+  endcase
+  end
+
 end
 endgenerate
 
 // form a 24 bit list of active febs, based on presence of cluster in gem0
-genvar ifeb; 
+genvar ifeb;
 generate
 for (ifeb=0; ifeb<MXFEB; ifeb=ifeb+1)     begin:   feb_match_loop
   always @(posedge clock) begin
-  active_feb_list [ifeb] <= (cluster_feb[0]==ifeb && match_fast[0]) | 
-                            (cluster_feb[1]==ifeb && match_fast[1]) | 
-                            (cluster_feb[2]==ifeb && match_fast[2]) | 
-                            (cluster_feb[3]==ifeb && match_fast[3]) | 
-                            (cluster_feb[4]==ifeb && match_fast[4]) | 
-                            (cluster_feb[5]==ifeb && match_fast[5]) | 
-                            (cluster_feb[6]==ifeb && match_fast[6]) | 
-                            (cluster_feb[7]==ifeb && match_fast[7]); 
-  end 
+  active_feb_list [ifeb] <= (cluster_feb[0]==ifeb && match_fast[0]) |
+                            (cluster_feb[1]==ifeb && match_fast[1]) |
+                            (cluster_feb[2]==ifeb && match_fast[2]) |
+                            (cluster_feb[3]==ifeb && match_fast[3]) |
+                            (cluster_feb[4]==ifeb && match_fast[4]) |
+                            (cluster_feb[5]==ifeb && match_fast[5]) |
+                            (cluster_feb[6]==ifeb && match_fast[6]) |
+                            (cluster_feb[7]==ifeb && match_fast[7]);
+  end
 end
 endgenerate
 
-assign sump = 
-              (|cnt[0][0]) 
+assign sump =
+              (|cnt[0][0])
             | (|cnt[0][1])
             | (|cnt[0][2])
             | (|cnt[0][3])
@@ -325,7 +380,7 @@ assign sump =
             | (|cnt[1][4])
             | (|cnt[1][5])
             | (|cnt[1][6])
-            | (|cnt[1][7]); 
+            | (|cnt[1][7]);
 
 //----------------------------------------------------------------------------------------------------------------------
 endmodule
