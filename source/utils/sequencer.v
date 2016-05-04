@@ -5102,36 +5102,35 @@
   bcb_first_frame  | bcb_last_frame;
 
   wire header_sump=  
-  (|r_mpc_reserved)  |
+  (|r_mpc_reserved) |
   r_wr_buf_avail    |
   rpc_tbinbxn[4]    |
-  (|header36_rpc_) | 
+  (|header36_rpc_)  | 
   mini_rdata[15];
 
   wire scope_sump =
-  (|scp_rpc0_bxn[2:0])  |  // RPC0 bunch crossing number
-  (|scp_rpc1_bxn[2:0])  |  // RPC1 bunch crossing number
-  (|scp_rpc0_nhits[3:0])  |  // RPC0 number of pads hit
-  (|scp_rpc1_nhits[3:0]);    // RPC1 number of pads hit
+  (|scp_rpc0_bxn[2:0])    | // RPC0 bunch crossing number
+  (|scp_rpc1_bxn[2:0])    | // RPC1 bunch crossing number
+  (|scp_rpc0_nhits[3:0])  | // RPC0 number of pads hit
+  (|scp_rpc1_nhits[3:0]);   // RPC1 number of pads hit
 
   assign sequencer_sump = 
-  (|tmb_match_pri[3:0])  |  // Priority of clct in clct window
-  (|l1a_pri_best[3:0])  |
-  (|dang)      |
-  l1a_dob_sump  |
-  mpc_frame_ff  |      // MPC frame latch strobe
-  clct_sump    |
-  cfeb_tbin[4]  |
-  tmb_alct_only_dly  |    // Not sure how to implement this 4/28/08
-  l1a_allow_alct_only  |    // Not sure how to implement this
-  (|seq_dopa[3:0])  |    // Occupy block ram parity to avert dangling outputs warning
-  (|triad_tp[6:0])  |    // Used sometimes for scope
-  (|cfeb_layer_or[5:0])  |  // we dont use this here, its now in pattern finder section, maybe put in header
-  (|hs_nlayers_hit[2:0])  |  // was for header, but is already included in pattern info
-  scope_sump    |
-  header_sump    |
-  alct1_valid    |
-  (|rd_list_gem) | 
+  (|tmb_match_pri[3:0])   | // Priority of clct in clct window
+  (|l1a_pri_best[3:0])    |
+  (|dang)                 |
+  l1a_dob_sump            |
+  mpc_frame_ff            | // MPC frame latch strobe
+  clct_sump               |
+  cfeb_tbin[4]            |
+  tmb_alct_only_dly       | // Not sure how to implement this 4/28/08
+  l1a_allow_alct_only     | // Not sure how to implement this
+  (|seq_dopa[3:0])        | // Occupy block ram parity to avert dangling outputs warning
+  (|triad_tp[6:0])        | // Used sometimes for scope
+  (|cfeb_layer_or[5:0])   | // we dont use this here, its now in pattern finder section, maybe put in header
+  (|hs_nlayers_hit[2:0])  | // was for header, but is already included in pattern info
+  scope_sump              |
+  header_sump             |
+  alct1_valid             |
   clct_vpf_tprt;
 
 //------------------------------------------------------------------------------------------------------------------------
