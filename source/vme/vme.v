@@ -3300,7 +3300,7 @@
   wire        vsm_oe;
 
 //  wire [8:0]  reg_adr = (vsm_oe) ? vsm_adr[8:0] : {a_vme[8:1],1'b0};  // Pad A0, multplex vme backplane with vmesm prom data
-  wire [9:0]  reg_adr = (vsm_oe) ? {1'b0,vsm_adr[8:0]} : {a_vme[9:1],1'b0};  // Pad A0, multplex vme backplane with vmesm prom data
+  wire [9:0]  reg_adr = (vsm_oe) ? vsm_adr[9:0] : {a_vme[9:1],1'b0};  // Pad A0, multplex vme backplane with vmesm prom data
 
   always @* begin
   case (reg_adr)
@@ -4736,14 +4736,14 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-     adc_wr[5:0]      = 0;      // Readonly
-     adc_wr[6]      = 1'b0;      // VADC serial clock
-     adc_wr[7]      = 1'b0;      // VADC serial data
-     adc_wr[8]      = 1'b1;      // VADC /chip select
-     adc_wr[9]      = 1'b0;      // TADC serial clock
-     adc_wr[10]      = 1'b1;      // TADC serial data
-     adc_wr[11]      = 1'b0;      // TADC serial data from RAT
-     adc_wr[15:12]    = 0;
+     adc_wr[5:0]   = 0;    // Readonly
+     adc_wr[6]     = 1'b0; // VADC serial clock
+     adc_wr[7]     = 1'b0; // VADC serial data
+     adc_wr[8]     = 1'b1; // VADC /chip select
+     adc_wr[9]     = 1'b0; // TADC serial clock
+     adc_wr[10]    = 1'b1; // TADC serial data
+     adc_wr[11]    = 1'b0; // TADC serial data from RAT
+     adc_wr[15:12] = 0;
   end
 
   wire smb_data_in;
