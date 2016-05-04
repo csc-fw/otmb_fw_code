@@ -111,7 +111,7 @@
   ddd_adr_latch,
   ddd_serial_in,
   ddd_serial_out,
-  
+
 // Clock Single Step Port Map
   step_alct,
   step_dmb,
@@ -283,7 +283,7 @@
   alct_sync_rxdata_2nd,
   alct_sync_expect_1st,
   alct_sync_expect_2nd,
-  
+
 // ALCT Raw hits RAM Ports
   alct_raw_reset,
   alct_raw_radr,
@@ -379,21 +379,21 @@
   cfeb_badbits_found,
   cfeb_badbits_blocked,
   cfeb_badbits_nbx,
-  
+
   cfeb0_ly0_badbits,
   cfeb0_ly1_badbits,
   cfeb0_ly2_badbits,
   cfeb0_ly3_badbits,
   cfeb0_ly4_badbits,
   cfeb0_ly5_badbits,
-  
+
   cfeb1_ly0_badbits,
   cfeb1_ly1_badbits,
   cfeb1_ly2_badbits,
   cfeb1_ly3_badbits,
   cfeb1_ly4_badbits,
   cfeb1_ly5_badbits,
-  
+
   cfeb2_ly0_badbits,
   cfeb2_ly1_badbits,
   cfeb2_ly2_badbits,
@@ -630,16 +630,16 @@
   gtx_rx_data_bits_or,
 
 // GEM VME Configuration Ports
-  gem_read_enable, 
+  gem_read_enable,
   gem_zero_suppress,
-  fifo_tbins_gem,  
+  fifo_tbins_gem,
   fifo_pretrig_gem,
 
 // GEM Configuration Ports
-  gem0_rxd_posneg, 
-  gem1_rxd_posneg, 
-  gem0_rxd_int_delay, 
-  gem1_rxd_int_delay, 
+  gem0_rxd_posneg,
+  gem1_rxd_posneg,
+  gem0_rxd_int_delay,
+  gem1_rxd_int_delay,
 
 // RPC VME Configuration Ports
   rpc_done,
@@ -755,7 +755,7 @@
   event_counter52,
   event_counter53,
   event_counter54,
-  
+
 // L1A Counters
   event_counter55, // L1A received
   event_counter56, // L1A received, TMB in L1A window
@@ -1058,8 +1058,8 @@
   parameter MXFLUSH    = 4;        // Number bits needed for flush counter
   parameter MXTHROTTLE = 8;        // Number bits needed for throttle counter
   parameter MXDPS      = 11;       // Number of digital phase shifters 2 ALCT + 2 DCFEB + 2 GEM
-                                   // n.b. this is not the number of actual phase-shifters, but the number of "virtual" phase shifter address spaces. 
-  
+                                   // n.b. this is not the number of actual phase-shifters, but the number of "virtual" phase shifter address spaces.
+
   parameter MXRPC      = 2;        // Number RPCs
   parameter MXRPCB     = 1;        // Number RPC ID bits
   parameter MXRPCPAD   = 16;       // Number RPC pads per link board
@@ -1356,7 +1356,7 @@
   parameter ADR_GEM_GTX_RX2           = 10'h304;
   parameter ADR_GEM_GTX_RX3           = 10'h306;
 
-  // TODO: need to move these into the 300 address space. 
+  // TODO: need to move these into the 300 address space.
   parameter ADR_V6_PHASER9            = 10'h308; // Phaser 9  GEM0 Phaser
   parameter ADR_V6_PHASER10           = 10'h30a; // Phaser 10 GEM1 Phaser
 
@@ -1448,7 +1448,7 @@
   output    prom1_oe;  // 1=Output enable, 0= Reset address
   output    _prom1_ce;  // 0=Chip enable
   output    jsm_busy;  // State machine busy writing
-  input    tck_fpga;  // TCK from FPGA JTAG chain 
+  input    tck_fpga;  // TCK from FPGA JTAG chain
 
 // BPI flash ports
   output  [3:0] flash_ctrl;         // JRG, goes up for I/O match to UCF with FCS,FOE,FWE,FLATCH = fcs,_ccb_tx14,_ccb_tx26,_ccb_tx3
@@ -1744,28 +1744,28 @@
   input  [MXDS-1:0]    cfeb0_ly3_badbits;    // 1=CFEB rx bit went bad
   input  [MXDS-1:0]    cfeb0_ly4_badbits;    // 1=CFEB rx bit went bad
   input  [MXDS-1:0]    cfeb0_ly5_badbits;    // 1=CFEB rx bit went bad
-  
+
   input  [MXDS-1:0]    cfeb1_ly0_badbits;    // 1=CFEB rx bit went bad
   input  [MXDS-1:0]    cfeb1_ly1_badbits;    // 1=CFEB rx bit went bad
   input  [MXDS-1:0]    cfeb1_ly2_badbits;    // 1=CFEB rx bit went bad
   input  [MXDS-1:0]    cfeb1_ly3_badbits;    // 1=CFEB rx bit went bad
   input  [MXDS-1:0]    cfeb1_ly4_badbits;    // 1=CFEB rx bit went bad
   input  [MXDS-1:0]    cfeb1_ly5_badbits;    // 1=CFEB rx bit went bad
-  
+
   input  [MXDS-1:0]    cfeb2_ly0_badbits;    // 1=CFEB rx bit went bad
   input  [MXDS-1:0]    cfeb2_ly1_badbits;    // 1=CFEB rx bit went bad
   input  [MXDS-1:0]    cfeb2_ly2_badbits;    // 1=CFEB rx bit went bad
   input  [MXDS-1:0]    cfeb2_ly3_badbits;    // 1=CFEB rx bit went bad
   input  [MXDS-1:0]    cfeb2_ly4_badbits;    // 1=CFEB rx bit went bad
   input  [MXDS-1:0]    cfeb2_ly5_badbits;    // 1=CFEB rx bit went bad
-  
+
   input  [MXDS-1:0]    cfeb3_ly0_badbits;    // 1=CFEB rx bit went bad
   input  [MXDS-1:0]    cfeb3_ly1_badbits;    // 1=CFEB rx bit went bad
   input  [MXDS-1:0]    cfeb3_ly2_badbits;    // 1=CFEB rx bit went bad
   input  [MXDS-1:0]    cfeb3_ly3_badbits;    // 1=CFEB rx bit went bad
   input  [MXDS-1:0]    cfeb3_ly4_badbits;    // 1=CFEB rx bit went bad
   input  [MXDS-1:0]    cfeb3_ly5_badbits;    // 1=CFEB rx bit went bad
-  
+
   input  [MXDS-1:0]    cfeb4_ly0_badbits;    // 1=CFEB rx bit went bad
   input  [MXDS-1:0]    cfeb4_ly1_badbits;    // 1=CFEB rx bit went bad
   input  [MXDS-1:0]    cfeb4_ly2_badbits;    // 1=CFEB rx bit went bad
@@ -1930,7 +1930,7 @@
   output          scp_nowrite;      // Preserves initial RAM contents for testing
 
   input          scp_waiting;      // Waiting for trigger
-  input          scp_trig_done;      // Trigger done, ready for readout 
+  input          scp_trig_done;      // Trigger done, ready for readout
   input  [15:0]      scp_rdata;        // Recorded channel data
 
 //  Sequencer Ports: Miniscope
@@ -1945,7 +1945,7 @@
   output  [3:0]      clct_window;      //  CLCT match window width
   output  [1:0]      tmb_sync_err_en;    // Allow sync_err to MPC for either muon
 
-  output          tmb_allow_alct;      // Allow ALCT only 
+  output          tmb_allow_alct;      // Allow ALCT only
   output          tmb_allow_clct;      // Allow CLCT only
   output          tmb_allow_match;    // Allow ALCT+CLCT match
 
@@ -2310,7 +2310,7 @@
   output [MXGEM-1:0] gem_rx_reset;
   output [MXGEM-1:0] gem_rx_reset_err_cnt;
   output [MXGEM-1:0] gem_rx_en_prbs_test;
- 
+
 // gem_rx_start,
 // gem_rx_fc,
   input [MXGEM-1:0] gem_rx_valid;
@@ -2345,10 +2345,10 @@
   input [15:0] gem_rx_err_count2;
   input [15:0] gem_rx_err_count3;
 
-  input  [MXGEM-1:0]  gem_link_had_err; 
+  input  [MXGEM-1:0]  gem_link_had_err;
   input  [MXGEM-1:0]  gem_link_good;
   input  [MXGEM-1:0]  gem_link_bad;
-  
+
   input  [MXCFEB-1:0]  gtx_link_had_err;   // link stability monitor: error happened at least once
   input  [MXCFEB-1:0]  gtx_link_good;      // link stability monitor: always good, no errors since last resync
   input  [MXCFEB-1:0]  gtx_link_bad;       // link stability monitor: errors happened over 100 times
@@ -2588,19 +2588,19 @@
   wire [15:0]  mpc0_frame1_fifo_rd;
   wire [15:0]  mpc1_frame0_fifo_rd;
   wire [15:0]  mpc1_frame1_fifo_rd;
-  
+
   wire [15:0] tmb_latency_sr_rd;
-  
+
   reg  [15:0]  mpc_inj_wr;
   wire [15:0]  mpc_inj_rd;
 
-  wire lock_time_sump = 
+  wire lock_time_sump =
   (|tmb_power_up_time[23:18]) |
   (|tmb_load_cfg_time[23:18]) |
   (|alct_phaser_lock_time[23:18]) |
   (|alct_load_cfg_time[23:18]) |
-  (|comp_phaser_lock_time[23:18]) | 
-  (|gtx_sync_done_time[23:18]); 
+  (|comp_phaser_lock_time[23:18]) |
+  (|gtx_sync_done_time[23:18]);
 
   reg  [15:0] mpc_ram_adr_wr;
   wire [15:0] mpc_ram_adr_rd;
@@ -2844,7 +2844,7 @@
   wire [15:0] virtex6_gtx_rx_rd [MXCFEB-1:0];
 
   reg  [15:0] gem_gtx_rx_wr      [MXGEM-1:0];
-  wire [15:0] gem_gtx_rx_rd      [MXGEM-1:0]; 
+  wire [15:0] gem_gtx_rx_rd      [MXGEM-1:0];
 
   reg  [15:0] virtex6_sysmon_wr;
   wire [15:0] virtex6_sysmon_rd;
@@ -3007,8 +3007,8 @@
   wire      wr_virtex6_extend;
 
   wire      wr_gem_debug_fifo_ctrl;
-  wire      wr_gem_tbins; 
-  wire      wr_gem_cfg; 
+  wire      wr_gem_tbins;
+  wire      wr_gem_cfg;
 
   wire      wr_adr_cap;
 
@@ -3034,7 +3034,7 @@
   assign gem_rx_err_count[3][7:0] = gem_rx_err_count3[7:0]; // Error count on this fiber channel
 
   wire wr_mpc_frames_fifo_ctrl;
-  
+
 //---------------------------------------------------------------------------------------------------------------------
 //  Power-up Section
 //---------------------------------------------------------------------------------------------------------------------
@@ -3111,7 +3111,7 @@
     if (!alct_phaser_done_r) alct_phaser_done_r <= alct_phaser_done;
     if (!comp_phaser2_done_r) comp_phaser2_done_r <= comp_phaser2_done;
     if (!comp_phaser3_done_r) comp_phaser3_done_r <= comp_phaser3_done;
-     
+
     if (!alct_phaser_done_r && (alct_phaser_lock_time[17:10] != 8'hFF)) alct_phaser_lock_time <= alct_phaser_lock_time + 1'b1; // time until TMB clocks for alct are ready and locked
     if ( (!comp_phaser2_done_r | !comp_phaser3_done_r) && (comp_phaser_lock_time[17:10] != 8'hFF)) comp_phaser_lock_time <= comp_phaser_lock_time + 1'b1; // time until TMB clocks for comp are ready and locked
     gtx_sync_too_long  <=  (~|gtx_sync_done_time[15:10]) & (|gtx_sync_done_time[17:16]); // gtx s.b. done before 800us, so reset at 1638us and release at 1664us... repeats cycle 2 more times if needed at 3276 and 4915us
@@ -3146,24 +3146,24 @@
   wire [2:0] sd = fast6count(alct_load_cfg_time[13:8]);
   wire [3:0] absum = sa + sb;
   wire [3:0] cdsum = sc + sd;
-   
+
   function [2:0] fast6count;
      input [5:0] s;
      begin
 	fast6count[0] = ^s[5:0];   // an odd number of bits are set
 	fast6count[1] = s==6'b111111 |  // all 6 set, or exactly 3, or exactly 2
     // set 3 out of 6, 20 ways :
-    ( s==6'b000111 | s==6'b111000 | 
-	    s==6'b001011 | s==6'b001101 | s==6'b001110  |  s==6'b010011 | s==6'b010101 | s==6'b010110  |  s==6'b100011 | s==6'b100101 | s==6'b100110 | 
+    ( s==6'b000111 | s==6'b111000 |
+	    s==6'b001011 | s==6'b001101 | s==6'b001110  |  s==6'b010011 | s==6'b010101 | s==6'b010110  |  s==6'b100011 | s==6'b100101 | s==6'b100110 |
 	    s==6'b011001 | s==6'b011010 | s==6'b011100  |  s==6'b101001 | s==6'b101010 | s==6'b101100  |  s==6'b110001 | s==6'b110010 | s==6'b110100 ) |
     // set 2 out of 6, 15 ways :
-    ( s==6'b000011 | s==6'b000101 | s==6'b000110  |  s==6'b001001 | s==6'b001010 | s==6'b001100  | 
-	    s==6'b010001 | s==6'b010010 | s==6'b010100 | s==6'b011000 | 
+    ( s==6'b000011 | s==6'b000101 | s==6'b000110  |  s==6'b001001 | s==6'b001010 | s==6'b001100  |
+	    s==6'b010001 | s==6'b010010 | s==6'b010100 | s==6'b011000 |
 	    s==6'b100001 | s==6'b100010 | s==6'b100100 | s==6'b101000 | s==6'b110000 );
 	fast6count[2] = s==6'b111111 |  // all 6 set, or exactly 4, or exactly 5
     // set 4 out of 6, 15 ways :
-    ( s==6'b111100 | s==6'b111010 | s==6'b111001  |  s==6'b110110 | s==6'b110101 | s==6'b110011  | 
-	    s==6'b101110 | s==6'b101101 | s==6'b101011 | s==6'b100111 | 
+    ( s==6'b111100 | s==6'b111010 | s==6'b111001  |  s==6'b110110 | s==6'b110101 | s==6'b110011  |
+	    s==6'b101110 | s==6'b101101 | s==6'b101011 | s==6'b100111 |
 	    s==6'b011110 | s==6'b011101 | s==6'b011011 | s==6'b010111 | s==6'b001111 ) |
     // set 4 out of 6, 15 ways :
     ( s==6'b111110 | s==6'b111101 | s==6'b111011  |  s==6'b110111 | s==6'b101111 | s==6'b011111 );
@@ -3219,7 +3219,7 @@
     am_vme    <=   am;
     nga       <=  _ga;
     ngap      <=  _gap;
-    niack     <=  _iack;  
+    niack     <=  _iack;
     nlword    <=  _lword;
     nds0      <=  _ds0;
     nds1      <=  _ds1;
@@ -3235,7 +3235,7 @@
 // Uninvert VME negative logic backplane signals at IOB exit
   wire [4:0] ga       = ~nga;
   wire       gap      = ~ngap;
-  wire       iack     = ~niack;  
+  wire       iack     = ~niack;
   wire       lword    = ~nlword;
   wire       ds0      = ~nds0;
   wire       ds1      = ~nds1;
@@ -3253,7 +3253,7 @@
   wire brcst_match  = (a_vme[23:19] == ADR_BROADCAST);  // A[] matches broadcast address
   wire boot_match   = (a_vme[18:16] == 3'b111);         // A[] matches hardware bootstrap address
   wire am_match     = (am_vme=='h39 || am_vme=='h3D) && iack==0;                               // 39=A24 non-priv mode, 3D=A24 supervisor mode
-  wire bd_accessed  = (global_match || slot_match || brcst_match) && am_match;                 // Board accessed, for LED display only 
+  wire bd_accessed  = (global_match || slot_match || brcst_match) && am_match;                 // Board accessed, for LED display only
   wire bd_match     = (global_match || slot_match || brcst_match) && am_match && !boot_match;  // Board is selected
 
 // Board Select FF, U102A on TMB
@@ -3724,10 +3724,10 @@
   assign wr_virtex6_snap12_qpll   =  (reg_adr==ADR_V6_SNAP12_QPLL         && clk_en);
   assign wr_virtex6_gtx_rx_all    =  (reg_adr==ADR_V6_GTX_RX_ALL          && clk_en);
 
-  assign wr_gem_gtx_rx[0]         =  (reg_adr==ADR_GEM_GTX_RX0            && clk_en); 
-  assign wr_gem_gtx_rx[1]         =  (reg_adr==ADR_GEM_GTX_RX1            && clk_en); 
-  assign wr_gem_gtx_rx[2]         =  (reg_adr==ADR_GEM_GTX_RX2            && clk_en); 
-  assign wr_gem_gtx_rx[3]         =  (reg_adr==ADR_GEM_GTX_RX3            && clk_en); 
+  assign wr_gem_gtx_rx[0]         =  (reg_adr==ADR_GEM_GTX_RX0            && clk_en);
+  assign wr_gem_gtx_rx[1]         =  (reg_adr==ADR_GEM_GTX_RX1            && clk_en);
+  assign wr_gem_gtx_rx[2]         =  (reg_adr==ADR_GEM_GTX_RX2            && clk_en);
+  assign wr_gem_gtx_rx[3]         =  (reg_adr==ADR_GEM_GTX_RX3            && clk_en);
 
   assign wr_virtex6_gtx_rx[0]     =  (reg_adr==ADR_V6_GTX_RX0             && clk_en);
   assign wr_virtex6_gtx_rx[1]     =  (reg_adr==ADR_V6_GTX_RX1             && clk_en);
@@ -3747,21 +3747,21 @@
   assign wr_adr_cap               =  (adr_cap);
 
   assign wr_mpc_frames_fifo_ctrl  =  (reg_adr==  ADR_MPC_FRAMES_FIFO_CTRL && clk_en);
-  
+
 //------------------------------------------------------------------------------------------------------------------
 // VME Bidirectional Data Bus
 //------------------------------------------------------------------------------------------------------------------
   wire [15:0] vsm_data, data_send;
   wire [15:0] d;
-  
+
   assign d_vme     = (fpga_oe) ? data_send         : {16{1'bz}};     // transmit to backplane, else float
   assign data_send = (bpi_dev) ? bpi_outdata[15:0] : data_out[15:0]; // JGhere, select bpi data or vme_reg data to send
   assign d[15:0]   = (vsm_oe)  ? vsm_data[15:0]    : d_vme[15:0];    // insert backplane or prom data to write
-  
+
   initial begin
   	$monitor($time, "  VME Monitor: address = 0x%h data = 0x%h", a, d_vme);
   end
-  
+
 //------------------------------------------------------------------------------------------------------------------
 // ADR_VMESM0=DA  VME State Machine Control Register
 // ADR_VMESM1=DC  VME State Machine Word count
@@ -3835,7 +3835,7 @@
   assign vsm_throttle[3:0] = vmesm0_wr[15:12]; // RW PROM-read speed control, 0=fastest
 
   assign vmesm1_rd[15:0] = vsm_wdcnt[15:0]; // R  Word count
-  
+
   assign vmesm2_rd[7:0]   = vsm_cksum[7:0];       // R  Check sum
   assign vmesm2_rd[12:8]  = vsm_fmt_err[4:0];     // R  PROM data structure error
   assign vmesm2_rd[14:13] = jsm_jtag_sm_vec[1:0]; // R  JSM JTAG format  State Machine status vector
@@ -4053,7 +4053,7 @@
 // Circumvent xst inability to reg an inout signal
   wire jtag_tristate= (jsm_busy && vsm_jtag_auto && jsm_jtag_oe) || jen;
 
-  assign tdi_usr      = (jtag_tristate) ? tdi_usr_mux : 1'bz;  
+  assign tdi_usr      = (jtag_tristate) ? tdi_usr_mux : 1'bz;
   assign tms_usr      = (jtag_tristate) ? tms_usr_mux : 1'bz;
   assign tck_usr      = (jtag_tristate) ? tck_usr_mux : 1'bz;
   assign sel_usr[3:0]    = (jtag_tristate) ? sel_usr_mux : 4'bzzzz;
@@ -4078,7 +4078,7 @@
 // Power-up defaults
   initial begin
      prom_wr[7:0]  = 8'hCD;    // PROM data shared with on-board LEDs
-     prom_wr[8]    = 1'b0;      // PROM0 clock  
+     prom_wr[8]    = 1'b0;      // PROM0 clock
      prom_wr[9]    = 1'b0;      // PROM0 output enable
      prom_wr[10]    = 1'b1;      // PROM0 /chip_enable
      prom_wr[11]    = 1'b0;      // PROM1 clock
@@ -4199,7 +4199,7 @@
   assign jtagsm1_rd[15:0]  = jsm_wdcnt[15:0];  // R  jtag word-count bits [15:0]
 
   assign jtagsm2_rd[7:0]  = jsm_cksum[7:0];  // R  jtag checksum
-  assign jtagsm2_rd[11:8]  = tck_fpga_cnt[3:0];// R  fpga jtag tck counter  
+  assign jtagsm2_rd[11:8]  = tck_fpga_cnt[3:0];// R  fpga jtag tck counter
   assign jtagsm2_rd[12]  = jsm_tckcnt_ok;  // R  jsm_tckcnt_ok
   assign jtagsm2_rd[13]  = jsm_end_ok;    // R  prom end flag detected
   assign jtagsm2_rd[14]  = jsm_header_ok;  // R  Header marker found where expected
@@ -4233,9 +4233,9 @@
 //------------------------------------------------------------------------------------------------------------------
   wire jsm_start_new    = jsm_start     && jsm_sel;
   wire jsm_autostart_new  = vsm_jtag_auto && jsm_sel;
-  
+
   jtagsm_new ujtagsm_new
-  (  
+  (
 // Control
      .clock      (clock),            // In  40MHz clock
      .global_reset  (global_reset),          // In  Global reset
@@ -4257,7 +4257,7 @@
      .sel      (jsm_usr_jtag_new[6:3]),    // Out  sel_usr[3:0]
 // Status
      .sreset      (jsm_sreset),          // In  Status signal reset
-     .tck_fpga    (tck_fpga_gated),          // In  TCK from FPGA JTAG chain 
+     .tck_fpga    (tck_fpga_gated),          // In  TCK from FPGA JTAG chain
      .busy      (jsm_busy_new),          // Out  State machine busy writing
      .aborted    (jsm_aborted_new),        // Out  State machine abend signal
      .header_ok    (jsm_header_ok_new),      // Out  Header marker found where expected
@@ -4283,7 +4283,7 @@
   wire jsm_autostart_old  = vsm_jtag_auto && !jsm_sel;
 
   jtagsm_old ujtagsm_old
-  (  
+  (
 // Control
      .clock      (clock),            // In  40MHz clock
      .global_reset  (global_reset),          // In  Global reset
@@ -4305,7 +4305,7 @@
      .sel      (jsm_usr_jtag_old[6:3]),    // Out  sel_usr[3:0]
 // Status
      .sreset      (jsm_sreset),          // In  Status signal reset
-     .tck_fpga    (tck_fpga_gated),        // In  TCK from FPGA JTAG chain 
+     .tck_fpga    (tck_fpga_gated),        // In  TCK from FPGA JTAG chain
      .busy      (jsm_busy_old),          // Out  State machine busy writing
      .aborted    (jsm_aborted_old),        // Out  State machine abend signal
      .header_ok    (jsm_header_ok_old),      // Out  Header marker found where expected
@@ -4365,10 +4365,10 @@
   end
 
   wire   ddd_clock_sm;
-  wire   ddd_adr_latch_sm; 
+  wire   ddd_adr_latch_sm;
   wire   ddd_serial_in_sm;
   wire   ddd_busy;
-  wire   ddd_verify_ok;  
+  wire   ddd_verify_ok;
 
   wire   ddd_start_vme  = dddsm_wr[0];      // Start  ddd state machine
   wire   ddd_clock_vme  = dddsm_wr[1];      // Manual ddd_clock
@@ -4377,8 +4377,8 @@
   wire   ddd_autostart  = dddsm_wr[5];      // Auto start
 
   assign dddsm_rd[0]    = ddd_start_vme;    // Start  ddd state machine
-  assign dddsm_rd[1]    = ddd_clock;      // Clock to 3d3444 
-  assign dddsm_rd[2]    = ddd_adr_latch;    // Adr_latch to 3d3444 
+  assign dddsm_rd[1]    = ddd_clock;      // Clock to 3d3444
+  assign dddsm_rd[2]    = ddd_adr_latch;    // Adr_latch to 3d3444
   assign dddsm_rd[3]    = ddd_serial_in;    // Serial data in to 3d3444
   assign dddsm_rd[4]    = ddd_serial_out;    // Serial data out from 3d3444
   assign dddsm_rd[5]    = ddd_autostart;    // Auto start state
@@ -4432,7 +4432,7 @@
 
 // TMB DDD 3D3444 delay chip bank automatic power-up initialization
   ddd_tmb uddd_tmb
-  (  
+  (
      .clock      (clock),      // In  Delay chip data clock
      .global_reset  (global_reset),    // In  Global reset
      .power_up    (power_up),      // In  DCM clock lock, we wait for it
@@ -4507,7 +4507,7 @@
 // RAT DDD 3D3444 State Machine Control
   wire dddr_linktmb;
   wire dddr_clock;
-  wire dddr_adr_latch; 
+  wire dddr_adr_latch;
   wire dddr_serial_in;
   wire dddr_busy;
   wire dddr_verify_ok;
@@ -4527,8 +4527,8 @@
   assign dddr_verify_dly[1:0]=dddrsm_wr[15:14];  // Delay before latching verify data
 
   assign dddrsm_rd[0]    = dddr_start_vme;    // RW  Start  ddd state machine
-  assign dddrsm_rd[1]    = dddr_clock;      // RW  Clock to 3d3444 
-  assign dddrsm_rd[2]    = dddr_adr_latch;    // RW  Adr_latch to 3d3444 
+  assign dddrsm_rd[1]    = dddr_clock;      // RW  Clock to 3d3444
+  assign dddrsm_rd[2]    = dddr_adr_latch;    // RW  Adr_latch to 3d3444
   assign dddrsm_rd[3]    = dddr_serial_in;    // RW  Serial data in goes to 3d3444
   assign dddrsm_rd[4]    = dddr_serial_out;    // R  Serial data out comes from 3d3444
   assign dddrsm_rd[5]    = dddr_autostart;    // RW  Auto start state
@@ -4543,25 +4543,25 @@
   initial $display ("vme: instantiating Virtex6 IDDR");
 
   IDDR #(
-  .DDR_CLK_EDGE  ("SAME_EDGE_PIPELINED"),// "OPPOSITE_EDGE", "SAME_EDGE" or "SAME_EDGE_PIPELINED" 
+  .DDR_CLK_EDGE  ("SAME_EDGE_PIPELINED"),// "OPPOSITE_EDGE", "SAME_EDGE" or "SAME_EDGE_PIPELINED"
   .INIT_Q1    (1'b0),          // Initial value of Q1: 1'b0 or 1'b1
   .INIT_Q2    (1'b0),          // Initial value of Q2: 1'b0 or 1'b1
-  .SRTYPE      ("SYNC")        // Set/Reset type: "SYNC" or "ASYNC" 
+  .SRTYPE      ("SYNC")        // Set/Reset type: "SYNC" or "ASYNC"
   ) dddrin (
   .C  (clock),              // 1-bit clock input
   .CE  (1'b1),                // 1-bit clock enable input
   .R  (1'b0),                // 1-bit reset
   .S  (1'b0),                // 1-bit set
   .D  (rpc_dsn),              // 1-bit DDR data input
-  .Q1  (dddr_sdo0),            // 1-bit output for positive edge of clock 
+  .Q1  (dddr_sdo0),            // 1-bit output for positive edge of clock
   .Q2  (dddr_sdo1));            // 1-bit output for negative edge of clock
 
   reg dddr_sdo0_ff = 0;
   reg dddr_sdo1_ff = 0;
-  
+
   always @(posedge clock) begin  // Sync to local clock
      dddr_sdo0_ff <= dddr_sdo0;
-     dddr_sdo1_ff <= dddr_sdo1;  
+     dddr_sdo1_ff <= dddr_sdo1;
   end
 
   assign dddr_serial_out  = (dddr_rxphase) ? dddr_sdo1_ff : dddr_sdo0_ff;
@@ -4569,7 +4569,7 @@
 
 // RAT DDD 3D3444 multiplexer: OR state machine signals with manual VME control
   wire dddr_clock_sm;
-  wire dddr_adr_latch_sm; 
+  wire dddr_adr_latch_sm;
   wire dddr_serial_in_sm;
   wire dddr_start;
 
@@ -4635,7 +4635,7 @@
      step_wr[15:13]  = 0;
   end
 
-  assign step_alct           = step_wr[0]; 
+  assign step_alct           = step_wr[0];
   assign step_dmb             = step_wr[1];
   assign step_rpc             = step_wr[2];
   assign step_cfeb           = step_wr[3];
@@ -4748,7 +4748,7 @@
 
   wire smb_data_in;
   wire smb_data_out;
-  
+
   assign adc_sclock  = adc_wr[6];
   assign adc_din    = adc_wr[7];
   assign _adc_cs    = adc_wr[8];
@@ -4915,7 +4915,7 @@
   wire   vme_bcntres_vme      = ccb_cfg_wr[13];  // W  Bunch crossing counter reset, from VME
   wire   vme_bx0_vme      = ccb_cfg_wr[14];  // W  Bunch crossing zero, from VME
   wire   vme_bx0_emu_en      = ccb_cfg_wr[15];  // W  BX0 emulator enable, must be 0 for CERN versions
-  
+
   assign ccb_cfg_rd[6:0]      = ccb_cfg_wr[6:0];    //    Readback
   assign ccb_cfg_rd[8:7]      = tmb_reserved[1:0];    // R  Unassigned
   assign ccb_cfg_rd[11:9]      = tmb_reserved_out[2:0];  // R  Unassigned
@@ -5106,7 +5106,7 @@
   assign alct_raw_radr[10:0]    = alct_fifo1_wr[11:1];      // RW  Raw hits RAM VME read address
   assign alct_demux_mode      = alct_fifo1_wr[13];      // RW  0=fifo2 reads RAM, 1=fifo2 reads 80mhz demux
   assign alct_fifo1_rd[15:0]    = alct_fifo1_wr[15:0];      //    Readback
-  
+
 // ALCT Register: Raw Hits FIFO RAM read data LSBs (MSBs in alct_fifo0_rd) or 80MHz demux data
   reg [15:0] alct_fifo2_mux=0;
 
@@ -5433,7 +5433,7 @@
     seq_trigdly1_wr[7:4]   = 4'd7;   // CLCT External trigger delay
     seq_trigdly1_wr[11:8]  = 4'd7;   // ALCT External trigger delay
     seq_trigdly1_wr[15:12] = 4'd0;   // Free
-    
+
     seq_trigdly2_wr[3:0]   = 4'd4;   // pre-CLCT window width for L1A*preCLCT overlap
     seq_trigdly2_wr[11:4]  = 8'd128; // pre-CLCT delay for L1A*preCLCT overlap
     seq_trigdly2_wr[15:12] = 4'd0;   // Free
@@ -5450,7 +5450,7 @@
   assign alct_ext_trig_dly[3:0] = seq_trigdly1_wr[11:8];   // RW  ALCT External trigger delay
 //assign layer_trig_dly[3:0]    = seq_trigdly1_wr[15:12];  // RW  Free
   assign seq_trigdly1_rd[15:0]  = seq_trigdly1_wr[15:0];   //     Readback
-  
+
   assign l1a_preClct_width[3:0] = seq_trigdly2_wr[3:0];    // RW  pre-CLCT window width for L1A*preCLCT overlap
   assign l1a_preClct_dly[7:0]   = seq_trigdly2_wr[11:4];   // RW  pre-CLCT delay for L1A*preCLCT overlap
   assign seq_trigdly2_rd[15:0]  = seq_trigdly2_wr[15:0];   //     Readback
@@ -5518,7 +5518,7 @@
   reg triad_clr       = 0;
 
   wire triad_cnt_busy = (triad_cnt != 0);
-  
+
   always @(posedge clock) begin
   if    (global_reset  ) triad_cnt <= 0;
   else if  (wr_seq_clct   ) triad_cnt <= triad_clr_width;
@@ -5551,7 +5551,7 @@
   assign seq_fifo_rd[15:0]    = seq_fifo_wr[15:0];    //    Readback
 
 //------------------------------------------------------------------------------------------------------------------
-// ADR_SEQ_L1A=74    Sequencer Level 1 Accept Configuration Register  
+// ADR_SEQ_L1A=74    Sequencer Level 1 Accept Configuration Register
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
@@ -5565,7 +5565,7 @@
   assign l1a_window[3:0]       = seq_l1a_wr[11:8];  // RW  Level1 Accept window width after delay
   assign l1a_internal          = seq_l1a_wr[12];    // RW  Generate internal Level 1, overrides external
   assign l1a_internal_dly[2:0] = seq_l1a_wr[15:13]; // RW  Delay internal l1a to shift position in l1a match window
-  assign l1a_internal_dly[3]   = 0;                 //    Ran out of bits =:-( 
+  assign l1a_internal_dly[3]   = 0;                 //    Ran out of bits =:-(
   assign seq_l1a_rd[15:0]      = seq_l1a_wr[15:0];  //    Readback
 
 //------------------------------------------------------------------------------------------------------------------
@@ -5634,7 +5634,7 @@
 
 // Sequencer RegisterADR_DMB_RAM_RDATA Raw Hits Ram Read Data LSBs
   assign dmb_ram_rdata_rd[15: 0]  = dmb_rdata[15: 0];      // R  Raw hits RAM VME read data LSBs
-  
+
 //------------------------------------------------------------------------------------------------------------------
 // ADR_TMB_TRIG=86    TMB Trigger Configuration Register
 //------------------------------------------------------------------------------------------------------------------
@@ -5715,9 +5715,9 @@
       mpc_frames_fifo_ctrl_rd_en<=1'b0;
     end
   end
-  
+
   wire [63:0]  mpc_frames_fifo_rd;
-  
+
   wire mpc_frames_fifo_ctrl_full;
   wire mpc_frames_fifo_ctrl_wr_ack;
   wire mpc_frames_fifo_ctrl_overflow;
@@ -5725,7 +5725,7 @@
   wire mpc_frames_fifo_ctrl_prog_full;
   wire mpc_frames_fifo_ctrl_sbiterr;
   wire mpc_frames_fifo_ctrl_dbiterr;
-  
+
   fifo_MPCFrames ufifo_MPCFrames (
   .clk       ( clock                          ),
   .rst       ( global_reset                   ),
@@ -5741,12 +5741,12 @@
   .sbiterr   ( mpc_frames_fifo_ctrl_sbiterr   ),
   .dbiterr   ( mpc_frames_fifo_ctrl_dbiterr   )
   );
-  
+
   assign mpc0_frame0_fifo_rd[15:0] = mpc_frames_fifo_rd[15:0];
   assign mpc0_frame1_fifo_rd[15:0] = mpc_frames_fifo_rd[31:16];
   assign mpc1_frame0_fifo_rd[15:0] = mpc_frames_fifo_rd[47:32];
   assign mpc1_frame1_fifo_rd[15:0] = mpc_frames_fifo_rd[63:48];
-  
+
   assign mpc_frames_fifo_ctrl_rd[0]    = mpc_frames_fifo_ctrl_wr[0];
   assign mpc_frames_fifo_ctrl_rd[1]    = mpc_frames_fifo_ctrl_wr[1];
   assign mpc_frames_fifo_ctrl_rd[2]    = mpc_frames_fifo_ctrl_full;
@@ -5758,8 +5758,8 @@
   assign mpc_frames_fifo_ctrl_rd[8]    = mpc_frames_fifo_ctrl_dbiterr;
   assign mpc_frames_fifo_ctrl_rd[15:9] = 0;
 
-  wire mpc_frames_fifo_ctrl_sump = |(mpc_frames_fifo_ctrl_wr[15:2]); 
-        
+  wire mpc_frames_fifo_ctrl_sump = |(mpc_frames_fifo_ctrl_wr[15:2]);
+
 //------------------------------------------------------------------------------------------------------------------
 // ADR_MPC_INJ=90    MPC Injector Control Register
 //------------------------------------------------------------------------------------------------------------------
@@ -5924,7 +5924,7 @@
     seq_trigmod_wr[8]   = 1; // RW  Readout allows tmb trig pulse in L1A window (normal mode)
     seq_trigmod_wr[9]   = 0; // RW  Readout allows no tmb trig pulse in L1A window
     seq_trigmod_wr[10]  = 0; // RW  Readout allows tmb trig pulse outside L1A window
-    seq_trigmod_wr[11]  = 0; // RW  Allow alct_only events to readout at L1A  
+    seq_trigmod_wr[11]  = 0; // RW  Allow alct_only events to readout at L1A
 
     seq_trigmod_wr[12]  = 0; // RW  Clear scintillator veto ff
     seq_trigmod_wr[13]  = 0; // R  Scintillator veto state
@@ -6037,7 +6037,7 @@
 
   assign rpc0_delay[3:0] = rpc_raw_delay_wr[3:0]; // RW  RPC raw hits data delay value
   assign rpc1_delay[3:0] = rpc_raw_delay_wr[7:4]; // RW  RPC raw hits data delay value
-  
+
   assign rpc_raw_delay_rd[3:0]   = rpc0_delay[3:0];    // RW  Readback
   assign rpc_raw_delay_rd[7:4]   = rpc1_delay[3:0];    // RW  Readback
   assign rpc_raw_delay_rd[11:8]  = rpc0_bxn_diff[3:0]; // R  RPC-offset
@@ -6131,7 +6131,7 @@
   reg [4:0] fifo_pretrig_rpc = 5'd2;
 
   always @(posedge clock) begin
-  fifo_tbins_rpc[4:0]   <= (rpc_decouple) ? fifo_tbins_rpc_wr[4:0]   : fifo_tbins_cfeb[4:0];  
+  fifo_tbins_rpc[4:0]   <= (rpc_decouple) ? fifo_tbins_rpc_wr[4:0]   : fifo_tbins_cfeb[4:0];
   fifo_pretrig_rpc[4:0] <= (rpc_decouple) ? fifo_pretrig_rpc_wr[4:0] : fifo_pretrig_cfeb[4:0];
   end
 
@@ -6223,7 +6223,7 @@
   assign scp_trigger_ch_rd[15:0]  = scp_trigger_ch_wr[15:0];  //    Readback
 
 //------------------------------------------------------------------------------------------------------------------
-// ADR_CNT_CTRL=0xD0  Trigger/Readout Counter Control Register                                                        
+// ADR_CNT_CTRL=0xD0  Trigger/Readout Counter Control Register
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
@@ -6235,7 +6235,7 @@
     cnt_ctrl_wr[5]    = 1; // RW  1=Enable alct lct error alct debug counter
     cnt_ctrl_wr[6]    = 0; // RW  1=Clear VME    counters on ttc_resync
     cnt_ctrl_wr[7]    = 1; // RW  1=Clear Header counters on ttc_resync
-    cnt_ctrl_wr[8]    = 0; // RW  0=read counter lower 16 bits, 1=upper 14 
+    cnt_ctrl_wr[8]    = 0; // RW  0=read counter lower 16 bits, 1=upper 14
     cnt_ctrl_wr[14:9] = 0; // RW  Counter address
     cnt_ctrl_wr[15]   = 0; // RW  Parity error reset
   end
@@ -6251,7 +6251,7 @@
   assign cnt_alct_debug      = cnt_ctrl_wr[5];    // RW  1=Enable alct lct error alct debug counter
   assign cnt_clear_on_resync = cnt_ctrl_wr[6];    // RW  1=Clear VME    counters on ttc_resync
   assign hdr_clear_on_resync = cnt_ctrl_wr[7];    // RW  1=Clear Header counters on ttc_resync
-  assign cnt_adr_lsb         = cnt_ctrl_wr[8];    // RW  0=read counter lower 16 bits, 1=upper 14 
+  assign cnt_adr_lsb         = cnt_ctrl_wr[8];    // RW  0=read counter lower 16 bits, 1=upper 14
   assign cnt_select[6:0]     = cnt_ctrl_wr[15:9]; // RW  Counter address
 
   assign cnt_ctrl_rd[2:0]    = cnt_ctrl_wr[2:0];  // RW  Readback
@@ -6260,12 +6260,12 @@
   assign cnt_ctrl_rd[15:5]   = cnt_ctrl_wr[15:5]; // RW  Readback
 
   assign cnt_all_reset       = cnt_all_reset_vme || (ttc_resync && cnt_clear_on_resync);
-  
+
   // x_oneshot is Digital One-Shot defined in utils/x_oneshot.v
   x_oneshot usnap (.d(cnt_snapshot),.clock(clock),.q(cnt_snapshot_os));
 
 //------------------------------------------------------------------------------------------------------------------
-// ADR_CNT_RDATA=0xD2  Trigger/Readout Counter Data Register                                                          
+// ADR_CNT_RDATA=0xD2  Trigger/Readout Counter Data Register
 //------------------------------------------------------------------------------------------------------------------
 // Remap 1D counters to 2D, because XST does not support 2D ports
   parameter MXCNT = 93;                     // Number of counters, last counter id is mxcnt-1
@@ -6387,7 +6387,7 @@
   assign cnt[91]  = active_cfebs_me1b_event_counter; // ME1b CFEB active flag sent to DMB
   assign cnt[92]  = active_cfebs_event_counter;      // Any CFEB active flag sent to DMB
 
-  
+
 // Virtex-6 GTX Optical Receiver Error Counters
 //  assign cnt[81]  = gtx_rx_err_count0;  // Error count on this fiber channel
 //  assign cnt[82]  = gtx_rx_err_count1;
@@ -6419,14 +6419,14 @@
   assign cnt_rdata_rd = (cnt_adr_lsb) ? cnt_rdata[29:16] : cnt_rdata[15:0];
 
 //------------------------------------------------------------------------------------------------------------------
-// 
+//
 //------------------------------------------------------------------------------------------------------------------
 
-// GEM Counters  
-//   assign cnt[100]  = gem_event_counter0; 
-//   assign cnt[101]  = gem_event_counter1; 
-//   assign cnt[102]  = gem_event_counter2; 
-//   assign cnt[103]  = gem_event_counter3; 
+// GEM Counters
+//   assign cnt[100]  = gem_event_counter0;
+//   assign cnt[101]  = gem_event_counter1;
+//   assign cnt[102]  = gem_event_counter2;
+//   assign cnt[103]  = gem_event_counter3;
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_UPTIME=E8  Uptime Counter Register, Readonly
@@ -6733,7 +6733,7 @@
   miniscope_wr[12:8]  = 4;  // Number Mini FIFO time bins before pretrigger
   miniscope_wr[15:13] = 0;  // Free
   end
-  
+
   assign mini_read_enable       = miniscope_wr[0];           // RW  Enable Miniscope readout
   assign mini_tbins_test        = miniscope_wr[1];           // RW  Miniscope data=address for testing
   assign mini_tbins_word        = miniscope_wr[2];           // RW  Insert tbins and pretrig tbins in 1st word
@@ -6806,7 +6806,7 @@
   assign phaser1_rd[15:7] = phaser1_wr[15:7]; // RW  Readback
 
 //----------------------------------------------------------------------------------------------------------------------
-// JGhere: for OTMB, ME1/1a uses dps2 (with values from phaser 7) and  ME1/1b uses dps3 (with values from phaser 8) 
+// JGhere: for OTMB, ME1/1a uses dps2 (with values from phaser 7) and  ME1/1b uses dps3 (with values from phaser 8)
 //----------------------------------------------------------------------------------------------------------------------
 
   // Phaser 2: CFEB0 rxd
@@ -6828,7 +6828,7 @@
   assign cfeb0_rxd_posneg     = phaser7_wr[7];    // RW  Posneg
   assign dps2_phase[7:0]      = phaser7_wr[15:8]; // RW  Phase to set, 0-255
 
-  // JRG: readbacks from phaser 2-6 are meaningless; for 2 & 3 you should look at phaser 7 & 8 
+  // JRG: readbacks from phaser 2-6 are meaningless; for 2 & 3 you should look at phaser 7 & 8
   assign phaser2_rd[1:0]      = phaser2_wr[1:0];  // RW  Readback
   assign phaser2_rd[2]        = dps_busy[2];      // R  Phase shifter busy
   assign phaser2_rd[3]        = dps_lock[2];      // R  DCM lock status
@@ -6854,7 +6854,7 @@
   assign cfeb1_rxd_posneg = phaser8_wr[7];    // RW  Posneg
   assign dps3_phase[7:0]  = phaser8_wr[15:8]; // RW  Phase to set, 0-255
 
-  // JRG: readbacks from phaser 2-6 are meaningless; for 2 & 3 you should look at phaser 7 & 8 
+  // JRG: readbacks from phaser 2-6 are meaningless; for 2 & 3 you should look at phaser 7 & 8
   assign phaser3_rd[1:0]  = phaser3_wr[1:0];  // RW  Readback
   assign phaser3_rd[2]    = dps_busy[3];      // R  Phase shifter busy
   assign phaser3_rd[3]    = dps_lock[3];      // R  DCM lock status
@@ -6956,7 +6956,7 @@
   assign cfeb5_rxd_posneg  =  phaser7_wr[7];    // RW  Posneg  (apply this value for all A-side cfebs)
   assign dps7_phase[7:0]   =  phaser7_wr[15:8]; // RW  Phase to set, 0-255
 
-  // JGhere: for OTMB, ME1/1a uses dps2 (with values from phaser 7) and  ME1/1b uses dps3 (with values from phaser 8) 
+  // JGhere: for OTMB, ME1/1a uses dps2 (with values from phaser 7) and  ME1/1b uses dps3 (with values from phaser 8)
   //   JRG, so phaser7 read values come from dps2 instead of dps7 (which no longer exists)
   assign phaser7_rd[1:0]      = phaser7_wr[1:0];      // RW  Readback
   assign phaser7_rd[2]        = dps_busy[2];          // R  Phase shifter busy
@@ -6987,7 +6987,7 @@
   assign phaser8_rd[6:4]  = dps3_sm_vec[2:0];     // R  Phase shifter machine state
   assign phaser8_rd[15:7] = phaser8_wr[15:7];     // RW  Readback
 
-  // Phaser 9: gem0 rxd  Virtex-6 only 
+  // Phaser 9: gem0 rxd  Virtex-6 only
   //--------------------------------------------------------------------------------------------------------------------
   initial begin
   phaser9_wr[0]    = 0;  // RW  Set new phase, software sets then unsets
@@ -7010,7 +7010,7 @@
   assign phaser9_rd[6:4]  = dps9_sm_vec[2:0]; // R  Phase shifter machine state
   assign phaser9_rd[15:7] = phaser9_wr[15:7]; // RW  Readback
 
-  // Phaser 10: gem1 rxd  Virtex-6 only 
+  // Phaser 10: gem1 rxd  Virtex-6 only
   //--------------------------------------------------------------------------------------------------------------------
   initial begin
   phaser10_wr[0]     =  0;  // RW  Set new phase, software sets then unsets
@@ -7040,7 +7040,7 @@
 
   assign dps_fire[MXDPS-1:0]  = {MXDPS{fire_phaser_auto}} | dps_fire_vme[MXDPS-1:0];
 
-  wire dps_sump = (|dps_busy[8:7]) | (dps_busy[10]) | (|dps7_sm_vec) | (|dps8_sm_vec) | (|dps10_sm_vec); 
+  wire dps_sump = (|dps_busy[8:7]) | (dps_busy[10]) | (|dps7_sm_vec) | (|dps8_sm_vec) | (|dps10_sm_vec);
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_DELAY0_INT=11C DDR Interstage delays
@@ -7048,10 +7048,10 @@
 //------------------------------------------------------------------------------------------------------------------
 // Delay0_is
   initial begin
-  delay0_int_wr[3:0]        = 0;              // RW  CFEB0 Interstage delay  
-  delay0_int_wr[7:4]        = 0;              // RW  CFEB1 Interstage delay  
-  delay0_int_wr[11:8]       = 0;              // RW  CFEB2 Interstage delay  
-  delay0_int_wr[15:12]      = 0;              // RW  CFEB3 Interstage delay  
+  delay0_int_wr[3:0]        = 0;              // RW  CFEB0 Interstage delay
+  delay0_int_wr[7:4]        = 0;              // RW  CFEB1 Interstage delay
+  delay0_int_wr[11:8]       = 0;              // RW  CFEB2 Interstage delay
+  delay0_int_wr[15:12]      = 0;              // RW  CFEB3 Interstage delay
   end
 /*
   assign cfeb0_rxd_int_delay[3:0]  = delay0_int_wr[3:0];      // RW  CFEB0 Interstage delay
@@ -7069,9 +7069,9 @@
 
 // Delay1_is
   initial begin
-  delay1_int_wr[3:0]        = 0;              // RW  CFEB4 Interstage delay  
-  delay1_int_wr[7:4]        = 0;              // RW  CFEB5 Interstage delay    
-  delay1_int_wr[11:8]       = 0;              // RW  CFEB6 Interstage delay  
+  delay1_int_wr[3:0]        = 0;              // RW  CFEB4 Interstage delay
+  delay1_int_wr[7:4]        = 0;              // RW  CFEB5 Interstage delay
+  delay1_int_wr[11:8]       = 0;              // RW  CFEB6 Interstage delay
   delay1_int_wr[15:12]      = 0;              // RW  Free
   end
 
@@ -7336,10 +7336,10 @@
   assign virtex6_gtx_rx_all_rd[15:8] = (gtx_rx_err_count_all[11:8]==4'h0) ? gtx_rx_err_count_all[7:0] : 8'hFE; // R JRG: a sum of all GTX error counts, full scale set at hex FE
 //assign virtex6_gtx_rx_all_rd[15:11] = virtex6_gtx_rx_all_wr[15:11]; // RW       JRG: was Unused
 
-  wire virtex6_gtx_rx_err_count_sump = (|gtx_rx_err_count0[15:8]) | (|gtx_rx_err_count1[15:8]) | (|gtx_rx_err_count2[15:8]) | (|gtx_rx_err_count3[15:8]) | (|gtx_rx_err_count4[15:8]) | (|gtx_rx_err_count5[15:8]) | (|gtx_rx_err_count6[15:8]); 
+  wire virtex6_gtx_rx_err_count_sump = (|gtx_rx_err_count0[15:8]) | (|gtx_rx_err_count1[15:8]) | (|gtx_rx_err_count2[15:8]) | (|gtx_rx_err_count3[15:8]) | (|gtx_rx_err_count4[15:8]) | (|gtx_rx_err_count5[15:8]) | (|gtx_rx_err_count6[15:8]);
   wire virtex6_gtx_rx_all_sump    = (|virtex6_gtx_rx_all_wr[15:11]) | (|virtex6_gtx_rx_all_wr[10:3]); // R    Unused write bits. JRG: used to be [10:4]
 
-  wire dcfeb_rx_sump = virtex6_gtx_rx_err_count_sump | virtex6_gtx_rx_all_sump | (|gtx_rx_fc) | (|gtx_rx_valid) | (|gtx_rx_match) | (|gtx_rx_rst_done) | (|gtx_rx_err) | (|gtx_rx_start); 
+  wire dcfeb_rx_sump = virtex6_gtx_rx_err_count_sump | virtex6_gtx_rx_all_sump | (|gtx_rx_fc) | (|gtx_rx_valid) | (|gtx_rx_match) | (|gtx_rx_rst_done) | (|gtx_rx_err) | (|gtx_rx_start);
 
   assign gtx_rx_err_count_all[11:0] = gtx_rx_err_count0[7:0]+gtx_rx_err_count1[7:0]+gtx_rx_err_count2[7:0]+gtx_rx_err_count3[7:0]+gtx_rx_err_count4[7:0]+gtx_rx_err_count5[7:0]+gtx_rx_err_count6[7:0];
 
@@ -7390,7 +7390,7 @@
   // GEM GTX Receiver
   //--------------------------------------------------------------------------------------------------------------------
 
-  wire [3:0] gem_gtx_rx_sump;	
+  wire [3:0] gem_gtx_rx_sump;
   genvar igem;
   generate
   for (igem=0; igem<MXGEM; igem=igem+1) begin: gen_gem_rx
@@ -7422,15 +7422,15 @@
   end
   endgenerate
 
-  
-  wire gem_sump = 
-    ( gem_gtx_rx_sump) 
+
+  wire gem_sump =
+    ( gem_gtx_rx_sump)
   | (|gem_rx_err)
   | (|gem_rx_valid)
   | (|gem_rx_err_count0[15:8])
-  | (|gem_rx_err_count1[15:8]) 
+  | (|gem_rx_err_count1[15:8])
   | (|gem_rx_err_count2[15:8])
-  | (|gem_rx_err_count3[15:8]); 
+  | (|gem_rx_err_count3[15:8]);
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_V6_SYSMON = 0x15A
@@ -7484,7 +7484,7 @@
   assign inj_febsel[6:5]         = virtex6_extend_wr[3:2]; // RW  Extend 0x42[9:5]   = inj_febsel[4:0]         1=Select CFEBn for RAM read/write
   assign injector_mask_cfeb[6:5] = virtex6_extend_wr[5:4]; // RW  Extend 0x42[14:10] = injector_mask_cfeb[4:0] 1=Enable CFEB(n) for injector trigger
   assign cfeb_en_vme[6:5]        = virtex6_extend_wr[7:6]; // RW  Extend 0x68[14:10] = cfeb_en_vme[4:0]        1=Enable CFEBs for triggering and active feb flag
-  
+
   assign virtex6_extend_rd[7:0]   = virtex6_extend_wr[7:0];   // RW  Readback
   assign virtex6_extend_rd[9:8]   = cfeb_en[6:5];             // RO  Extend 0x68 cfeb_en[4:0] Readback actual cfeb_en state, altered by mask_all
   assign virtex6_extend_rd[15:10] = virtex6_extend_wr[15:10]; // RW  Unused
@@ -7503,7 +7503,7 @@
     tmb_latency_sr         = 0;
     tmb_latency_sr_latched = 0;
   end
-  
+
 // Shift register
   always @(posedge clock or posedge global_reset) begin
     if(global_reset) tmb_latency_sr <= 0;
@@ -7515,6 +7515,8 @@
     if (global_reset)       tmb_latency_sr_latched <= 0;
     else if (mpc_frame_vme) tmb_latency_sr_latched <= tmb_latency_sr[20:5];
   end
+
+wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 
 //------------------------------------------------------------------------------------------------------------------
 // GEM_DEBUG_FIFO_CTRL = 0x30C  GEM Raw Hits Readout RAM Simple Controller
@@ -7571,7 +7573,7 @@
   reg [4:0] fifo_pretrig_gem = 5'd2;
 
   always @(posedge clock) begin
-  fifo_tbins_gem  [4:0] <= (gem_decouple) ? fifo_tbins_gem_wr  [4:0] : fifo_tbins_cfeb[4:0];  
+  fifo_tbins_gem  [4:0] <= (gem_decouple) ? fifo_tbins_gem_wr  [4:0] : fifo_tbins_cfeb[4:0];
   fifo_pretrig_gem[4:0] <= (gem_decouple) ? fifo_pretrig_gem_wr[4:0] : fifo_pretrig_cfeb[4:0];
   end
 
@@ -7586,10 +7588,10 @@
   gem_cfg_wr[15:9] = 0;    // Unassigned
   end
 
-  wire [3:0] gem0_rxd_int_delay_wr = gem_cfg_wr[3:0]; 
-  wire [3:0] gem1_rxd_int_delay_wr = gem_cfg_wr[7:4]; 
+  wire [3:0] gem0_rxd_int_delay_wr = gem_cfg_wr[3:0];
+  wire [3:0] gem1_rxd_int_delay_wr = gem_cfg_wr[7:4];
 
-  wire gem_rxd_int_delay_decouple = gem_cfg_wr[8]; 
+  wire gem_rxd_int_delay_decouple = gem_cfg_wr[8];
 
   assign gem_cfg_rd [15:0] = gem_cfg_wr [15:0];  // Readback
 
@@ -7597,8 +7599,8 @@
   reg [3:0] gem0_rxd_int_delay = 0;
   reg [3:0] gem1_rxd_int_delay = 0;
   always @(posedge clock) begin
-    gem0_rxd_int_delay <= (gem_rxd_int_delay_decouple) ? (gem0_rxd_int_delay_wr[3:0]) : (gem0_rxd_int_delay_wr[3:0]); 
-    gem1_rxd_int_delay <= (gem_rxd_int_delay_decouple) ? (gem1_rxd_int_delay_wr[3:0]) : (gem0_rxd_int_delay_wr[3:0]); 
+    gem0_rxd_int_delay <= (gem_rxd_int_delay_decouple) ? (gem0_rxd_int_delay_wr[3:0]) : (gem0_rxd_int_delay_wr[3:0]);
+    gem1_rxd_int_delay <= (gem_rxd_int_delay_decouple) ? (gem1_rxd_int_delay_wr[3:0]) : (gem0_rxd_int_delay_wr[3:0]);
   end
 
 //------------------------------------------------------------------------------------------------------------------
@@ -7724,9 +7726,9 @@ always @(posedge clock_vme) begin
   if    (wr_virtex6_snap12_qpll)   virtex6_snap12_qpll_wr  <= d[15:0];
   if    (wr_virtex6_gtx_rx_all)    virtex6_gtx_rx_all_wr   <= d[15:0];
   if    (wr_gem_gtx_rx[0])         gem_gtx_rx_wr[0]        <= d[15:0];
-  if    (wr_gem_gtx_rx[1])         gem_gtx_rx_wr[1]        <= d[15:0]; 
-  if    (wr_gem_gtx_rx[2])         gem_gtx_rx_wr[2]        <= d[15:0]; 
-  if    (wr_gem_gtx_rx[3])         gem_gtx_rx_wr[3]        <= d[15:0]; 
+  if    (wr_gem_gtx_rx[1])         gem_gtx_rx_wr[1]        <= d[15:0];
+  if    (wr_gem_gtx_rx[2])         gem_gtx_rx_wr[2]        <= d[15:0];
+  if    (wr_gem_gtx_rx[3])         gem_gtx_rx_wr[3]        <= d[15:0];
   if    (wr_virtex6_gtx_rx[0])     virtex6_gtx_rx_wr[0]    <= d[15:0];
   if    (wr_virtex6_gtx_rx[1])     virtex6_gtx_rx_wr[1]    <= d[15:0];
   if    (wr_virtex6_gtx_rx[2])     virtex6_gtx_rx_wr[2]    <= d[15:0];
@@ -7791,26 +7793,27 @@ end
   (|layer_trig_wr[6:4])      |
   (|alct_sync_ctrl_wr[9:6])  |
   (|virtex6_gtx_rx_sump)     |
-  virtex6_snap12_qpll_sump   |                                    
-  dcfeb_rx_sump              | 
+  virtex6_snap12_qpll_sump   |
+  dcfeb_rx_sump              |
   virtex6_sysmon_sump        |
   adc_sump                   |
   cfeb_v6_badbits_ctrl_sump  |
   virtex6_extend_sump        |
-  mpc_frames_fifo_ctrl_sump  | 
-  powerup_sump               | 
-  lock_time_sump             | 
-  dps_sump                   | 
-  odmb_sel                   | 
+  mpc_frames_fifo_ctrl_sump  |
+  powerup_sump               |
+  lock_time_sump             |
+  dps_sump                   |
+  odmb_sel                   |
+  latency_sr_sump            |
   gem_sump
-  ; 
+  ;
 
   reg ds0_r=0;
   always @(posedge clock or posedge global_reset) begin
     if (global_reset) ds0_r <= 0; // consider if ds0 should be registered or use the raw input... rise on time & fall early?
     else   ds0_r <= ds0;
   end
-  
+
   wire        bpi_dev = (bd_sel & (a_vme[17:15] == 3'h5)); // a_vme is [23:1], for bpi_dev address we use 3 bits: [17:15] <-- this correctly works in real hardware
 //wire        bpi_dev = (bd_sel & (a_vme[18:16] == 3'h5)); // a_vme is [23:1], for bpi_dev address we use 3 bits: [18:16] <-- this correctly works in simulation
   wire [9:0]  bpi_cmd = (a_vme[11:2]);                     // a_vme is [23:1], for bpi_command we use 10 bits: [11:2] <-- this correctly works in real hardware
@@ -7828,7 +7831,7 @@ end
   wire        bpi_dsbl;
   wire        bpi_enbl;
   wire        bpi_rd_stat;
-  
+
   wire        bpi_busy;      // JRG, all done
   wire        bpi_load_data; // JRG, all done
   wire        bpi_execute;   // JRG, all done
@@ -7860,14 +7863,14 @@ end
     .BPI_RD_STATUS     (bpi_rd_stat),       // out Read BPI interface status register command received
     .BPI_RBK_FIFO_DATA (bpi_fifo_dout),     // in [15:0] Data on output of the Read-back FIFO
     .BPI_RBK_WRD_CNT   (bpi_fifo_cnt),      // in [10:0] Word count of the Read-back FIFO (number of available reads)
-    .BPI_STATUS        (bpi_stat),          // in [15:0] FIFO status bits and latest value of the PROM status register. 
+    .BPI_STATUS        (bpi_stat),          // in [15:0] FIFO status bits and latest value of the PROM status register.
     .BPI_TIMER         (bpi_time)           // in [31:0] General timer
   );
 
   BPI_ctrl  #( .USE_CHIPSCOPE (0) ) bpi_engine (  // also has two FIFOs
     .CLK     (clock),      // in 40 MHz clock
     .CLK1MHZ (clock_1mhz), // in  1 MHz clock for timers
-    .RST     (bpi_rst),    // in 
+    .RST     (bpi_rst),    // in
      // Interface Signals to/from VME interface
     .BPI_CMD_FIFO_DATA (bpi_cmd_fifo_data), // in [15:0] Data for command FIFO
     .BPI_WE            (bpi_we),            // in Command FIFO write enable  (pulse one clock cycle for one write)
@@ -7876,17 +7879,17 @@ end
     .BPI_ENBL          (bpi_enbl),          // in Enable  parsing of BPI commands in the command FIFO
     .BPI_RBK_FIFO_DATA (bpi_fifo_dout),     // out [15:0] Data on output of the Read back FIFO
     .BPI_RBK_WRD_CNT   (bpi_fifo_cnt),      // out [10:0] Word count of the Read back FIFO (number of available reads)
-    .BPI_STATUS        (bpi_stat),          // out [15:0] FIFO status bits and latest value of the PROM status register. 
+    .BPI_STATUS        (bpi_stat),          // out [15:0] FIFO status bits and latest value of the PROM status register.
     .BPI_TIMER         (bpi_time),          // out [31:0] General timer
      // Signals to/from low level BPI interface
-    .BPI_BUSY      (bpi_busy),            // in 
-    .BPI_DATA_FROM (bpi_data_from[15:0]), // in [15:0] 
-    .BPI_LOAD_DATA (bpi_load_data),       // in 
+    .BPI_BUSY      (bpi_busy),            // in
+    .BPI_DATA_FROM (bpi_data_from[15:0]), // in [15:0]
+    .BPI_LOAD_DATA (bpi_load_data),       // in
     .BPI_ACTIVE    (bpi_active),          // Out "BPI Active set to 1 when data lines are for BPI communications": going to BPI_CTRL and to otmb_virtex6_top then to sequencer and to outside trough mez_tp[3]
-    .BPI_OP        (bpi_op[1:0]),         // out [1:0] 
-    .BPI_ADDR      (bpi_addr[22:0]),      // out [22:0] 
-    .BPI_DATA_TO   (bpi_data_to[15:0]),   // out [15:0] 
-    .BPI_EXECUTE   (bpi_execute)          // out 
+    .BPI_OP        (bpi_op[1:0]),         // out [1:0]
+    .BPI_ADDR      (bpi_addr[22:0]),      // out [22:0]
+    .BPI_DATA_TO   (bpi_data_to[15:0]),   // out [15:0]
+    .BPI_EXECUTE   (bpi_execute)          // out
   );
 
   bpi_interface bpi_busctrl (
@@ -7926,7 +7929,7 @@ BPI use cases we've got to handle for OTMB
 
 
   External Prom_Data bus:   [16 bits, this is currently low-speed for TMB LEDs... ok to have I/O control for this in BPI modules, but how?]
-    -driven by TMB logic [FP_LED control for TMB] 
+    -driven by TMB logic [FP_LED control for TMB]
        -->  Should I pass TMB LED bits into the BPI "Dual_Data" port?
     -also driven by BPI_ctrl via bpi_interface?
     -and also an input for BPI_ctrl from the Prom via bpi_interface?  (needs a direction switch... does it exist already?)
