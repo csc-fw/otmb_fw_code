@@ -42,9 +42,9 @@ module gem_sync_mon (
 wire [1:0] gem_sync; 
 wire       gems_sync; 
 
-assign gem_sync [0] = (gem0_kchar==gem1_kchar);
-assign gem_sync [1] = (gem2_kchar==gem3_kchar);
-assign gems_sync    = (gem0_kchar==gem2_kchar) && (&gem_sync[1:0]);
+assign gem_sync [0] = (gem0_kchar==gem1_kchar);  // two fibers from gem chamber 1 are synced to eachother
+assign gem_sync [1] = (gem2_kchar==gem3_kchar);  // two fibers from gem chamber 2 are synced to eachother
+assign gems_sync    = (gem0_kchar==gem2_kchar) && (&gem_sync[1:0]); // gem super chamber is synced
 
 
 initial gem0_synced = 1'b1;
@@ -69,7 +69,7 @@ always @(posedge clock) begin
   else begin
     gem0_synced <= gem_sync [0];
     gem1_synced <= gem_sync [1];
-    gems_synced <= gems_synced;
+    gems_synced <= gems_sync;
 
     gem0_lostsync <= gem0_lostsync | ~gem_sync[0]; 
     gem1_lostsync <= gem1_lostsync | ~gem_sync[1]; 
