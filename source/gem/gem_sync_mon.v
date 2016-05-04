@@ -1,24 +1,24 @@
 module gem_sync_mon (
 
-  input clock, 
+  input clock,
 
-  input global_reset, 
-  input ttc_resync, 
+  input global_reset,
+  input ttc_resync,
 
-  input [7:0] gem0_kchar, 
-  input [7:0] gem1_kchar, 
-  input [7:0] gem2_kchar, 
-  input [7:0] gem3_kchar, 
+  input [7:0] gem0_kchar,
+  input [7:0] gem1_kchar,
+  input [7:0] gem2_kchar,
+  input [7:0] gem3_kchar,
 
-  output reg gem0_synced,  // fibers from same OH are desynced 
+  output reg gem0_synced,  // fibers from same OH are desynced
   output reg gem1_synced,  // fibers from same OH are desynced
   output reg gems_synced,  // fibers from both GEM chambers are synched
 
-  // latched copies that gems have lost sync in past 
-  output reg gem0_lostsync,  
-  output reg gem1_lostsync, 
+  // latched copies that gems have lost sync in past
+  output reg gem0_lostsync,
+  output reg gem1_lostsync,
   output reg gems_lostsync
-); 
+);
 
 //----------------------------------------------------------------------------------------------------------------------
 // state machine power-up reset + global reset
@@ -36,11 +36,11 @@ module gem_sync_mon (
   wire reset  = !ready;  // reset
 
 //----------------------------------------------------------------------------------------------------------------------
-// 
+//
 //----------------------------------------------------------------------------------------------------------------------
 
-wire [1:0] gem_sync; 
-wire       gems_sync; 
+wire [1:0] gem_sync;
+wire       gems_sync;
 
 assign gem_sync [0] = (gem0_kchar==gem1_kchar);  // two fibers from gem chamber 1 are synced to eachother
 assign gem_sync [1] = (gem2_kchar==gem3_kchar);  // two fibers from gem chamber 2 are synced to eachother
@@ -71,9 +71,9 @@ always @(posedge clock) begin
     gem1_synced <= gem_sync [1];
     gems_synced <= gems_sync;
 
-    gem0_lostsync <= gem0_lostsync | ~gem_sync[0]; 
-    gem1_lostsync <= gem1_lostsync | ~gem_sync[1]; 
-    gems_lostsync <= gems_lostsync | ~gems_synced; 
+    gem0_lostsync <= gem0_lostsync | ~gem_sync[0];
+    gem1_lostsync <= gem1_lostsync | ~gem_sync[1];
+    gems_lostsync <= gems_lostsync | ~gems_synced;
 
   end
 end

@@ -13,29 +13,29 @@
 //  02/25/2013  Add 2 event counters for dcfeb[6:5]
 //  04/12/2013  Produce the first stable, functional version for use at Cern (but Muonic timing disabled)
 //  04/05/2016  Initial addition of GEM DAQ Readout Path and accompanying VME Registers
-//  
+//
 //-------------------------------------------------------------------------------------------------------------------
 //  A note about clocks for the production OTMB:     (JRG, 12/2014)
-//    from the PCB, signal "clock05p" = io_197 --> CCLK and pin B31, while "tmb_clock0" = io_600 --> QPLL gives LHC_CLK on A10/B10. 
+//    from the PCB, signal "clock05p" = io_197 --> CCLK and pin B31, while "tmb_clock0" = io_600 --> QPLL gives LHC_CLK on A10/B10.
 //    in the code, tmb_clock0 is really "tmb_clock05p" from pin B31, a stoppable clock from the CCB.
 //    in the code, tmb_clock0 is the main clock that drives the mmcm's & the TMB "clock" used everywhere in the TMB logic
 //    in the code, clk40 is the differential "LHC_CLK" from QPLL based on "tmb_clock0" but Not Used for any logic!
 //    in the code, clk_160 is the 4x differential clock from QPLL based on "tmb_clock0" used for GTX references.
 //    enabling the RPC clock on the baseboard DDD chip causes ALCT communication problems, so we keep it disabled.
-//    in the code, we do not use these DDD clocks: 
+//    in the code, we do not use these DDD clocks:
 //      tmb_clock0d    // In  40MHz clock bypasses 3D3444, NOT CONNECTED, but functionally covered by clk40 from the QPLL
 //      tmb_clock1     // In  40MHz clock with 3D3444 delay, UNUSED but available on pin K24
 //      alct_rxclock   // In  40MHz clock with 3D3444 delay, UNUSED but available on pin L23 as alct_rxclk aka rx-clk
 //      alct_rxclockd  // In  40MHz clock with 3D3444 delay, UNUSED but available on pin V23 as alct_rxclk1p aka rxclockd
 //      mpc_clock      // In  40MHz clock with 3D3444 delay, UNUSED but available on pin K12 as mpc_clk
 //      dcc_clock      // In  40MHz clock with 3D3444 delay, UNUSED but available on pin H28 as dcc-clk
-//  
+//
 //-------------------------------------------------------------------------------------------------------------------
 //  Port Declarations
 //-------------------------------------------------------------------------------------------------------------------
   module otmb_virtex6
   (
-// CFEB 
+// CFEB
   cfeb0_rx,
   cfeb1_rx,
   cfeb2_rx,
@@ -173,8 +173,8 @@
   rxn,
   //xtrarxp,
   //xtrarxn,
-  gemrxp, 
-  gemrxn, 
+  gemrxp,
+  gemrxn,
 
 // Finisar
   f_sclk,
@@ -299,7 +299,7 @@
   output         alct_loop;
 
 // DMB
-  input  [5:0]   dmb_rx;  
+  input  [5:0]   dmb_rx;
   output [48:0]  dmb_tx;
   output         dmb_loop;
   output        _dmb_oe;
@@ -310,7 +310,7 @@
 // RPC
   input  [37:0]  rpc_rx;
   input          rpc_smbrx;  // was rpc_rxalt[0]
-  input          rpc_dsn;  // was rpc_rxalt[1]  
+  input          rpc_dsn;  // was rpc_rxalt[1]
   output         rpc_loop;
   output [3:0]   rpc_tx;
 
@@ -411,7 +411,7 @@
   inout  [7:0]  led_fp;
   wire  [7:0]  led_fp_tmb;
   wire  [7:0]  mez_led;
-   
+
 // CERN QPLL
   input      clk40p;      // 40 MHz from QPLL
   input      clk40n;      // 40 MHz from QPLL
@@ -419,7 +419,7 @@
   input      clk160p;    // 160 MHz from QPLL for GTX reference clock
   input      clk160n;    // 160 MHz from QPLL for GTX reference clock
 
-  input      qpll_lock;    // QPLL locked 
+  input      qpll_lock;    // QPLL locked
   input      qpll_err;    // QPLL error, replaces _gtl_oe
   output      qpll_nrst;    // QPLL reset, low=reset, drive high
 
@@ -443,9 +443,9 @@
   input  [6:0]  rxn;          // SNAP12- fiber comparator inputs for GTX
   input  [MXGEM-1:0]  gemrxp; // SNAP12+ fiber comparator inputs for GEM GTX
   input  [MXGEM-1:0]  gemrxn; // SNAP12- fiber comparator inputs for GEM GTX
-//input  [0:0]  xtrarxp;      // SNAP12+ fiber comparator inputs for 
-//input  [0:0]  xtrarxn;      // SNAP12- fiber comparator inputs for 
-  
+//input  [0:0]  xtrarxp;      // SNAP12+ fiber comparator inputs for
+//input  [0:0]  xtrarxn;      // SNAP12- fiber comparator inputs for
+
 // Finisar
   input      f_sclk;
   input      f_sdat;
@@ -455,7 +455,7 @@
   output       bpi_cs;
   wire   [3:0] flash_ctrl;
   assign bpi_cs = flash_ctrl[3];
-  
+
   wire   [22:0] bpi_ad_out;  // BPI Flash PROM Address: coming from vme, going to sequencer then sequencer connects it to dmb_tx if bpi_active
   wire          bpi_active;  // BPI Active set to 1 when data lines are for BPI communications: coming from vme, going to sequencer and to outside trough mez_tp[3]
   wire          bpi_dev;     // BPI Device Selected: going to outside through mez_tp[4]
@@ -487,8 +487,8 @@
   `ifdef ALCT_MUONIC    initial $display ("ALCT_MUONIC   %H", `ALCT_MUONIC  );  `endif
   `ifdef CFEB_MUONIC    initial $display ("CFEB_MUONIC   %H", `CFEB_MUONIC  );  `endif
 
-  `ifdef CSC_TYPE_C     initial $display ("CSC_TYPE_C    %H", `CSC_TYPE_C   );  `endif      
-  `ifdef CSC_TYPE_D     initial $display ("CSC_TYPE_D    %H", `CSC_TYPE_D   );  `endif      
+  `ifdef CSC_TYPE_C     initial $display ("CSC_TYPE_C    %H", `CSC_TYPE_C   );  `endif
+  `ifdef CSC_TYPE_D     initial $display ("CSC_TYPE_D    %H", `CSC_TYPE_D   );  `endif
 
 //-------------------------------------------------------------------------------------------------------------------
 // Clock DCM Instantiation
@@ -616,8 +616,8 @@
   );
 
   // tie off the unused dps outputs to squelch ISE
-  assign dps_busy[MXDPS-1:5] = 0; 
-  assign dps_lock[MXDPS-1:5] = 0; 
+  assign dps_busy[MXDPS-1:5] = 0;
+  assign dps_lock[MXDPS-1:5] = 0;
 
 //-------------------------------------------------------------------------------------------------------------------
 // Optical receivers
@@ -791,7 +791,7 @@
   wire  [55:0]        scp_alct_rx;
   wire  [3:0]         alct_txd_int_delay;
   wire  [4:0]         alct_inj_delay;
-  wire  [15:0]        alct0_inj;      
+  wire  [15:0]        alct0_inj;
   wire  [15:0]        alct1_inj;
 
 // VME ALCT sync mode ports
@@ -1209,7 +1209,7 @@
   wire  [MXCFEB-1:0]  cfeb_rx_nonzero;               // Out Flags when rx sees non-zero data
 
   wire  ready_phaser_a, ready_phaser_b, auto_gtx_reset;
-   
+
   reg        gtx_wait       = 1'b1;
   reg [15:0] gtx_wait_count = 0;
 
@@ -1372,13 +1372,13 @@
   wire  [MXGEM-1:0]     gem_link_good;                 // link stability monitor: always good, no errors since last resync
   wire  [MXGEM-1:0]     gem_link_bad;                  // link stability monitor: errors happened over 100 times
 
-  wire gem0_rxd_posneg; 
-  wire gem1_rxd_posneg; 
+  wire gem0_rxd_posneg;
+  wire gem1_rxd_posneg;
 
-  wire [3:0] gem0_rxd_int_delay; 
-  wire [3:0] gem1_rxd_int_delay; 
+  wire [3:0] gem0_rxd_int_delay;
+  wire [3:0] gem1_rxd_int_delay;
 
-  // both fibers on gem0, and both fibers on gem1 share posnegs and int_delays 
+  // both fibers on gem0, and both fibers on gem1 share posnegs and int_delays
   wire  [MXGEM-1:0]     gem_rxd_posneg;
   wire  [MXGEM-1:0]     gem_rxd_int_delay [3:0];
 
@@ -1387,10 +1387,10 @@
   assign gem_rxd_posneg[2] = gem1_rxd_posneg;
   assign gem_rxd_posneg[3] = gem1_rxd_posneg;
 
-  assign gem_rxd_int_delay[0] = gem0_rxd_int_delay; 
-  assign gem_rxd_int_delay[1] = gem0_rxd_int_delay; 
-  assign gem_rxd_int_delay[2] = gem1_rxd_int_delay; 
-  assign gem_rxd_int_delay[3] = gem1_rxd_int_delay; 
+  assign gem_rxd_int_delay[0] = gem0_rxd_int_delay;
+  assign gem_rxd_int_delay[1] = gem0_rxd_int_delay;
+  assign gem_rxd_int_delay[2] = gem1_rxd_int_delay;
+  assign gem_rxd_int_delay[3] = gem1_rxd_int_delay;
 
   wire  [13:0] gem_debug_fifo_rdata [MXGEM-1:0];    // GEM FIFO RAM read data
 
@@ -1418,7 +1418,7 @@
 
   wire  [3:0] parity_err_gem [MXGEM-1:0];          // Raw hits RAM parity error detected
 
-  wire  [7:0] gem_kchar [MXGEM-1:0]; 
+  wire  [7:0] gem_kchar [MXGEM-1:0];
 
 // Main GEM Generate Loop
   genvar igem;
@@ -1432,8 +1432,8 @@
   // Clock
   .clock             (clock),                        // In  40MHz TMB system clock from MMCM
   .clk_lock          (lock_tmb_clock0),              // In  40MHz TMB system clock MMCM locked
-  .clock_4x          (clock_4x),                     // In  4*40MHz TMB system clock from MMCM                       
-  .clock_gem_rxd     (clock_gem_rxd[0]),             // In  GEM cfeb-to-tmb inter-stage clock select 0 or 180 degrees 
+  .clock_4x          (clock_4x),                     // In  4*40MHz TMB system clock from MMCM
+  .clock_gem_rxd     (clock_gem_rxd[0]),             // In  GEM cfeb-to-tmb inter-stage clock select 0 or 180 degrees
   .gem_rxd_posneg    (gem_rxd_posneg[igem]),         // In  GEM cfeb-to-tmb inter-stage clock select 0 or 180 degrees
   .gem_rxd_int_delay (gem_rxd_int_delay[igem][3:0]), // In  Interstage delay, integer bx
 
@@ -1497,7 +1497,7 @@
   end
   endgenerate // end GEM
 
-  // GEM Fiber Synchronization Monitoring 
+  // GEM Fiber Synchronization Monitoring
   //--------------------------------------------------------------------------------------------------------------------
 
   gem_sync_mon u_gem_sync_mon (
@@ -1512,87 +1512,87 @@
     .gem2_kchar(gem_kchar[2]), // In  Copy of GEM2 k-char
     .gem3_kchar(gem_kchar[3]), // In  Copy of GEM3 k-char
 
-    .gem0_synced(gem0_synced),  // Out fibers from same OH are synced 
+    .gem0_synced(gem0_synced),  // Out fibers from same OH are synced
     .gem1_synced(gem1_synced),  // Out fibers from same OH are synced
 
     .gems_synced(gems_synced),  // Out fibers from both GEM chambers are synched
 
-    // latched copies that gems have lost sync in past 
-    .gem0_lostsync(gem0_lostsync), // Out  
-    .gem1_lostsync(gem1_lostsync), // Out 
+    // latched copies that gems have lost sync in past
+    .gem0_lostsync(gem0_lostsync), // Out
+    .gem1_lostsync(gem1_lostsync), // Out
     .gems_lostsync(gems_lostsync)  // Out
-  ); 
+  );
 
-  wire gem_sync_mon_sump = 
+  wire gem_sync_mon_sump =
       gem0_synced
     | gem1_synced
     | gems_synced
     | gem0_lostsync
     | gem1_lostsync
-    | gems_lostsync; 
+    | gems_lostsync;
 
   // GEM Co-pad Matching
   //--------------------------------------------------------------------------------------------------------------------
 
-  wire        gem_match_neighbors = 1'b1; 
-  wire [7:0]  gem_match; 
+  wire        gem_match_neighbors = 1'b1;
+  wire [7:0]  gem_match;
   wire [7:0]  gem_match_left;
   wire [7:0]  gem_match_right;
   wire        gem_any_match;
-  wire [23:0] gem_active_feb_list; 
-  wire [13:0] gem_copad  [7:0]; 
+  wire [23:0] gem_active_feb_list;
+  wire [13:0] gem_copad  [7:0];
 
   copad u_copad (
 
-    .clock(clock), 
-  
-    // gem chamber 0 clusters
-    .gem0_cluster0(gem_cluster0[0]), 
-    .gem0_cluster1(gem_cluster1[0]), 
-    .gem0_cluster2(gem_cluster2[0]), 
-    .gem0_cluster3(gem_cluster3[0]), 
+    .clock(clock),
 
-    .gem0_cluster4(gem_cluster0[1]), 
-    .gem0_cluster5(gem_cluster1[1]), 
-    .gem0_cluster6(gem_cluster2[1]), 
-    .gem0_cluster7(gem_cluster3[1]), 
+    // gem chamber 0 clusters
+    .gem0_cluster0(gem_cluster0[0]),
+    .gem0_cluster1(gem_cluster1[0]),
+    .gem0_cluster2(gem_cluster2[0]),
+    .gem0_cluster3(gem_cluster3[0]),
+
+    .gem0_cluster4(gem_cluster0[1]),
+    .gem0_cluster5(gem_cluster1[1]),
+    .gem0_cluster6(gem_cluster2[1]),
+    .gem0_cluster7(gem_cluster3[1]),
 
     // gem chamber 1 clusters
-    .gem1_cluster0(gem_cluster0[2]), 
-    .gem1_cluster1(gem_cluster1[2]), 
-    .gem1_cluster2(gem_cluster2[2]), 
-    .gem1_cluster3(gem_cluster3[2]), 
+    .gem1_cluster0(gem_cluster0[2]),
+    .gem1_cluster1(gem_cluster1[2]),
+    .gem1_cluster2(gem_cluster2[2]),
+    .gem1_cluster3(gem_cluster3[2]),
 
-    .gem1_cluster4(gem_cluster0[3]), 
-    .gem1_cluster5(gem_cluster1[3]), 
-    .gem1_cluster6(gem_cluster2[3]), 
-    .gem1_cluster7(gem_cluster3[3]), 
+    .gem1_cluster4(gem_cluster0[3]),
+    .gem1_cluster5(gem_cluster1[3]),
+    .gem1_cluster6(gem_cluster2[3]),
+    .gem1_cluster7(gem_cluster3[3]),
 
     // control whether to match on neighboring (+-1) clusters
-    .match_neighbors(gem_match_neighbors), 
+    .match_neighbors(gem_match_neighbors),
 
     // cluster output addresses (unsorted)
-    .cluster0 (gem_copad[0]), 
-    .cluster1 (gem_copad[1]), 
-    .cluster2 (gem_copad[2]), 
-    .cluster3 (gem_copad[3]), 
-    .cluster4 (gem_copad[4]), 
-    .cluster5 (gem_copad[5]), 
-    .cluster6 (gem_copad[6]), 
-    .cluster7 (gem_copad[7]), 
+    .cluster0 (gem_copad[0]),
+    .cluster1 (gem_copad[1]),
+    .cluster2 (gem_copad[2]),
+    .cluster3 (gem_copad[3]),
+    .cluster4 (gem_copad[4]),
+    .cluster5 (gem_copad[5]),
+    .cluster6 (gem_copad[6]),
+    .cluster7 (gem_copad[7]),
 
     // 8 bit match flags
-    .match(gem_match[7:0]), 
+    .match(gem_match[7:0]),
 
     // 24 bit active feb list
-    .active_feb_list(gem_active_feb_list[23:0]), 
+    .active_feb_list(gem_active_feb_list[23:0]),
 
     // 8 bit cluster match was found on right/left side of respective cluster
-    .match_right (gem_match_right[7:0]), 
-    .match_left  (gem_match_left[7:0]), 
+    .match_right (gem_match_right[7:0]),
+    .match_left  (gem_match_left[7:0]),
 
     // 1 bit any match found
-    .any_match(gem_any_match), 
+    .any_match(gem_any_match),
 
     .sump(copad_module_sump)
   );
@@ -1649,7 +1649,7 @@
   wire  [MXPIDB-1:0]  hs_pid_2nd;
   wire  [MXKEYBX-1:0] hs_key_2nd;
   wire                hs_bsy_2nd;
-  
+
   wire                hs_layer_trig;  // Layer triggered
   wire  [MXHITB-1:0]  hs_nlayers_hit; // Number of layers hit
   wire  [MXLY-1:0]    hs_layer_or;    // Layer ORs
@@ -1800,7 +1800,7 @@
    wire [MXL1WIND-1:0]    l1a_window;
    wire [MXL1WIND-1:0]    l1a_internal_dly;
    wire [MXBADR-1:0]      l1a_lookback;
-  
+
    wire [7:0]             led_bd;
    wire [11:0]            sequencer_state;
    wire [10:0]            trig_source_vme;
@@ -1815,10 +1815,10 @@
    wire [MXEXTDLY-1:0]    dmb_ext_trig_dly;
    wire [MXEXTDLY-1:0]    clct_ext_trig_dly;
    wire [MXEXTDLY-1:0]    alct_ext_trig_dly;
-  
+
    wire [3:0]             l1a_preClct_width;
    wire [7:0]             l1a_preClct_dly;
-  
+
    wire [MXCLCT-1:0]      clct0_vme;
    wire [MXCLCT-1:0]      clct1_vme;
    wire [MXCLCTC-1:0]     clctc_vme;
@@ -1978,8 +1978,8 @@
   .alct0_valid     (alct0_valid),     // In  ALCT has valid LCT
   .alct1_valid     (alct1_valid),     // In  ALCT has valid LCT
 
-  
-// Sequencer GEM Ports 
+
+// Sequencer GEM Ports
   .gem_copad_matched (gem_any_match), // GEM co-pad match was found
   .gem0_sync_err     (~gem0_synced),  // GEM0 has intra-chamber sync error
   .gem1_sync_err     (~gem1_synced),  // GEM1 has intra-chamber sync error
@@ -2106,7 +2106,7 @@
   .alct_delay  (alct_delay[3:0]),  // In  Delay ALCT for CLCT match window
   .clct_window (clct_window[3:0]), // In  CLCT match window width
 
-  .tmb_allow_alct  (tmb_allow_alct),  // In  Allow ALCT only 
+  .tmb_allow_alct  (tmb_allow_alct),  // In  Allow ALCT only
   .tmb_allow_clct  (tmb_allow_clct),  // In  Allow CLCT only
   .tmb_allow_match (tmb_allow_match), // In  Allow ALCT+CLCT match
 
@@ -2351,7 +2351,7 @@
   .mpc0_frame1_ff (mpc0_frame1_ff[MXFRAME-1:0]), // In  MPC best buon 2nd frame
   .mpc1_frame0_ff (mpc1_frame0_ff[MXFRAME-1:0]), // In  MPC second best muon 1st frame
   .mpc1_frame1_ff (mpc1_frame1_ff[MXFRAME-1:0]), // In  MPC second best buon 2nd frame
-  
+
   .mpc_xmit_lct0 (mpc_xmit_lct0), // In  MPC LCT0 sent
   .mpc_xmit_lct1 (mpc_xmit_lct1), // In  MPC LCT1 sent
 
@@ -2469,7 +2469,7 @@
 // CLCT pre-trigger coincidence counters
   .preClct_l1a_counter   (preClct_l1a_counter[MXCNTVME-1:0]),  // Out
   .preClct_alct_counter  (preClct_alct_counter[MXCNTVME-1:0]), // Out
-  
+
 // Active CFEB(s) counters
   .active_cfebs_event_counter      (active_cfebs_event_counter[MXCNTVME-1:0]),      // Out
   .active_cfebs_me1a_event_counter (active_cfebs_me1a_event_counter[MXCNTVME-1:0]), // Out
@@ -2481,7 +2481,7 @@
   .active_cfeb4_event_counter      (active_cfeb4_event_counter[MXCNTVME-1:0]),      // Out
   .active_cfeb5_event_counter      (active_cfeb5_event_counter[MXCNTVME-1:0]),      // Out
   .active_cfeb6_event_counter      (active_cfeb6_event_counter[MXCNTVME-1:0]),      // Out
-  
+
 // Sequencer Header Counters
   .hdr_clear_on_resync (hdr_clear_on_resync),           // In  Clear header counters on ttc_resync
   .pretrig_counter     (pretrig_counter[MXCNTVME-1:0]), // Out  Pre-trigger counter
@@ -2760,7 +2760,7 @@
   .cfeb6_blockedbits (cfeb_blockedbits[6]), // In  1=CFEB rx bit blocked by hcm or went bad, packed
 
 // GEM Raw Hits Data Ports
-  .fifo0_rdata_gem (fifo_rdata_gem[0][RAM_WIDTH_GEM-1:0]), // In  GEM Fiber0 FIFO RAM read data 
+  .fifo0_rdata_gem (fifo_rdata_gem[0][RAM_WIDTH_GEM-1:0]), // In  GEM Fiber0 FIFO RAM read data
   .fifo1_rdata_gem (fifo_rdata_gem[1][RAM_WIDTH_GEM-1:0]), // In  GEM Fiber1 FIFO RAM read data
   .fifo2_rdata_gem (fifo_rdata_gem[2][RAM_WIDTH_GEM-1:0]), // In  GEM Fiber2 FIFO RAM read data
   .fifo3_rdata_gem (fifo_rdata_gem[3][RAM_WIDTH_GEM-1:0]), // In  GEM Fiber3 FIFO RAM read data
@@ -3131,7 +3131,7 @@
    reg  [7:0] tmbmmcm_locklost_cnt = 8'h00;
    reg        qpll_locklost = 0;
    reg  [7:0] qpll_locklost_cnt = 8'h00;
-   
+
    always @(posedge clock or posedge ttc_resync) // things that use lhc_clk w/Reset
      begin
   if (ttc_resync || cnt_all_reset) begin // added OR with counter reset
@@ -3172,8 +3172,8 @@
 //    assign mez_tp[2] = link_good[1] || ((set_sw == 2'b01) && clock_alct_rxd);
 //    assign mez_tp[1] = link_good[0] || ((set_sw == 2'b01) && clock);
 //    assign mez_tp[3:1] = testled_r[3:1];
-  
-  
+
+
   ODDR #(
     .DDR_CLK_EDGE ("OPPOSITE_EDGE"), // "OPPOSITE_EDGE" or "SAME_EDGE"
     .INIT         (1'b0),            // Initial value of Q: 1'b0 or 1'b1
@@ -3218,7 +3218,7 @@
   .D2           (set_sw[8] ? 1'b0 : (!set_sw[7] ? bpi_rd_stat : link_good[0])), // In   1-bit data input tx on negative edge
   .Q            (mez_tp[1]));                                                   // Out  1-bit DDR output
 
-  wire gem_vpf = gem_vpf0[0] | gem_vpf1[0] | gem_vpf2[0] | gem_vpf3[0]; 
+  wire gem_vpf = gem_vpf0[0] | gem_vpf1[0] | gem_vpf2[0] | gem_vpf3[0];
 
   x_flashsm #(22) uflash_blink_cfeb_led (.trigger(|cfeb_rx_nonzero ),    .hold(1'b0), .clock(clock), .out(blink_cfeb_led));
   x_flashsm #(22) uflash_blink_gem_led  (.trigger(gem_vpf),              .hold(1'b0), .clock(clock), .out(blink_gem_led));
@@ -3233,7 +3233,7 @@
   assign mez_led[6] = ~qpll_locklost;                       // red
   assign mez_led[7] = ~|link_good;                          // green DIM.  --NAND this later?  was sump
 
-//  assign meztp20 = alct_startup_msec;  
+//  assign meztp20 = alct_startup_msec;
 //  assign meztp21 = alct_wait_dll;
 //  assign meztp22 = alct_startup_done;
 //  assign meztp23 = alct_wait_vme;
@@ -3291,8 +3291,8 @@
 
    wire odmb_sel, bd_sel;
    wire [15:0] odmb_data;
-   wire [48:0] dmb_tx_odmb; 
-  
+   wire [48:0] dmb_tx_odmb;
+
    odmb_device odmb_device_pm (
       .clock        (clock),        // In  TMB 40MHz clock
       .clock_vme    (clock_vme),    // In  VME 10MHz clock
@@ -3305,17 +3305,17 @@
       .vme_data    (vme_d),       // In  VME data
       .is_read     (_vme_cmd[2]), // In  1 if read, 0 if write
       .bd_sel      (bd_sel),      // In  Board selected
-      
+
       .odmb_sel  (odmb_sel),  // Out ODMB mode selected
       .odmb_data (odmb_data), // Out ODMB data
-      
-      .dmb_tx_odmb (dmb_tx_odmb), 
-      
+
+      .dmb_tx_odmb (dmb_tx_odmb),
+
       .sump (odmb_sump)
       );
-   
-  wire odmb_device_sump = odmb_sump  | (|dmb_tx_odmb); 
-   
+
+  wire odmb_device_sump = odmb_sump  | (|dmb_tx_odmb);
+
 //------------------------------------------------------------------------------------------------------------
 //  VME Interface Instantiation
 //------------------------------------------------------------------------------------------------------------
@@ -3334,7 +3334,7 @@
    defparam uvme.CCB_BX0_EMULATOR = `CCB_BX0_EMULATOR; // Turns on bx0 emulator at power up, must be 0 for all CERN versions
 
    wire        raw_mez_busy;
-   
+
    vme uvme
      (
       // Clock
@@ -3419,8 +3419,8 @@
       // VME BPI Flash PROM
       .flash_ctrl         (flash_ctrl[3:0]), // out [3:0] JRG, goes up for I/O match to UCF with FCS,FOE,FWE,FLATCH = bpi_cs,_ccb_tx14,_ccb_tx26,_ccb_tx3
       .flash_ctrl_dualuse ({ alct_status[5], // in  [2:0] JRG, goes down to bpi_interface for MUX with FOE,FWE,FLATCH
-                             tmb_reserved_in[4], 
-                             clct_status[3]}),   
+                             tmb_reserved_in[4],
+                             clct_status[3]}),
       .bpi_ad_out  (bpi_ad_out),  // Out [22:0] BPI Flash PROM Address: going to sequencer
       .bpi_active  (bpi_active),  // Out BPI Active: going to sequencer and to outside through mez_tp[3]
       .bpi_dev     (bpi_dev),     // Out BPI Device Selected: going to outside through mez_tp[4]
@@ -3707,35 +3707,35 @@
       .cfeb_badbits_found   (cfeb_badbits_found[MXCFEB-1:0]), // In  CFEB[n] has at least 1 bad bit
       .cfeb_badbits_blocked (cfeb_badbits_blocked),           // Out  A CFEB had bad bits that were blocked
       .cfeb_badbits_nbx     (cfeb_badbits_nbx[15:0]),         // Out  Cycles a bad bit must be continuously high
-      
+
       .cfeb0_ly0_badbits    (cfeb_ly0_badbits[0][MXDS-1:0]),  // In  1=CFEB rx bit went bad
       .cfeb0_ly1_badbits    (cfeb_ly1_badbits[0][MXDS-1:0]),  // In  1=CFEB rx bit went bad
       .cfeb0_ly2_badbits    (cfeb_ly2_badbits[0][MXDS-1:0]),  // In  1=CFEB rx bit went bad
       .cfeb0_ly3_badbits    (cfeb_ly3_badbits[0][MXDS-1:0]),  // In  1=CFEB rx bit went bad
       .cfeb0_ly4_badbits    (cfeb_ly4_badbits[0][MXDS-1:0]),  // In  1=CFEB rx bit went bad
       .cfeb0_ly5_badbits    (cfeb_ly5_badbits[0][MXDS-1:0]),  // In  1=CFEB rx bit went bad
-      
+
       .cfeb1_ly0_badbits    (cfeb_ly0_badbits[1][MXDS-1:0]),  // In  1=CFEB rx bit went bad
       .cfeb1_ly1_badbits    (cfeb_ly1_badbits[1][MXDS-1:0]),  // In  1=CFEB rx bit went bad
       .cfeb1_ly2_badbits    (cfeb_ly2_badbits[1][MXDS-1:0]),  // In  1=CFEB rx bit went bad
       .cfeb1_ly3_badbits    (cfeb_ly3_badbits[1][MXDS-1:0]),  // In  1=CFEB rx bit went bad
       .cfeb1_ly4_badbits    (cfeb_ly4_badbits[1][MXDS-1:0]),  // In  1=CFEB rx bit went bad
       .cfeb1_ly5_badbits    (cfeb_ly5_badbits[1][MXDS-1:0]),  // In  1=CFEB rx bit went bad
-      
+
       .cfeb2_ly0_badbits    (cfeb_ly0_badbits[2][MXDS-1:0]),  // In  1=CFEB rx bit went bad
       .cfeb2_ly1_badbits    (cfeb_ly1_badbits[2][MXDS-1:0]),  // In  1=CFEB rx bit went bad
       .cfeb2_ly2_badbits    (cfeb_ly2_badbits[2][MXDS-1:0]),  // In  1=CFEB rx bit went bad
       .cfeb2_ly3_badbits    (cfeb_ly3_badbits[2][MXDS-1:0]),  // In  1=CFEB rx bit went bad
       .cfeb2_ly4_badbits    (cfeb_ly4_badbits[2][MXDS-1:0]),  // In  1=CFEB rx bit went bad
       .cfeb2_ly5_badbits    (cfeb_ly5_badbits[2][MXDS-1:0]),  // In  1=CFEB rx bit went bad
-      
+
       .cfeb3_ly0_badbits    (cfeb_ly0_badbits[3][MXDS-1:0]),  // In  1=CFEB rx bit went bad
       .cfeb3_ly1_badbits    (cfeb_ly1_badbits[3][MXDS-1:0]),  // In  1=CFEB rx bit went bad
       .cfeb3_ly2_badbits    (cfeb_ly2_badbits[3][MXDS-1:0]),  // In  1=CFEB rx bit went bad
       .cfeb3_ly3_badbits    (cfeb_ly3_badbits[3][MXDS-1:0]),  // In  1=CFEB rx bit went bad
       .cfeb3_ly4_badbits    (cfeb_ly4_badbits[3][MXDS-1:0]),  // In  1=CFEB rx bit went bad
       .cfeb3_ly5_badbits    (cfeb_ly5_badbits[3][MXDS-1:0]),  // In  1=CFEB rx bit went bad
-      
+
       .cfeb4_ly0_badbits    (cfeb_ly0_badbits[4][MXDS-1:0]),  // In  1=CFEB rx bit went bad
       .cfeb4_ly1_badbits    (cfeb_ly1_badbits[4][MXDS-1:0]),  // In  1=CFEB rx bit went bad
       .cfeb4_ly2_badbits    (cfeb_ly2_badbits[4][MXDS-1:0]),  // In  1=CFEB rx bit went bad
@@ -3953,10 +3953,10 @@
       .mpc_accept_rdata (mpc_accept_rdata[3:0]), // In  MPC response stored in RAM
       .mpc_inj_alct_bx0 (mpc_inj_alct_bx0),      // Out  ALCT bx0 injector
       .mpc_inj_clct_bx0 (mpc_inj_clct_bx0),      // Out  CLCT bx0 injector
-      
+
       // CFEB data received on optical link
       .gtx_rx_data_bits_or(|gtx_rx_data_bits_or), // In  CFEB data received on optical link = OR of all bits for ALL CFEBs
-      
+
       // RPC VME Configuration Ports
       .rpc_done         (rpc_done),                     // In  rpc_done
       .rpc_exists       (rpc_exists[MXRPC-1:0]),        // Out  RPC Readout list
@@ -4104,11 +4104,11 @@
       .alct_err_counter3    (alct_err_counter3[7:0]),      // In
       .alct_err_counter4    (alct_err_counter4[7:0]),      // In
       .alct_err_counter5    (alct_err_counter5[7:0]),      // In
-      
+
       // CLCT pre-trigger coincidence counters
       .preClct_l1a_counter  (preClct_l1a_counter[MXCNTVME-1:0]),  // In
       .preClct_alct_counter (preClct_alct_counter[MXCNTVME-1:0]), // In
-      
+
       // Active CFEB(s) counters
       .active_cfebs_event_counter      (active_cfebs_event_counter[MXCNTVME-1:0]),      // In
       .active_cfebs_me1a_event_counter (active_cfebs_me1a_event_counter[MXCNTVME-1:0]), // In
@@ -4120,7 +4120,7 @@
       .active_cfeb4_event_counter      (active_cfeb4_event_counter[MXCNTVME-1:0]),      // In
       .active_cfeb5_event_counter      (active_cfeb5_event_counter[MXCNTVME-1:0]),      // In
       .active_cfeb6_event_counter      (active_cfeb6_event_counter[MXCNTVME-1:0]),      // In
-      
+
       // CSC Orientation Ports
       .csc_type        (csc_type[3:0]),   // In  Firmware compile type
       .csc_me1ab       (csc_me1ab),       // In  1=ME1A or ME1B CSC type
@@ -4264,7 +4264,7 @@
       .gtx_link_had_err     (link_had_err[MXCFEB-1:0]),         // link stability monitor: error happened at least once
       .gtx_link_good        (link_good[MXCFEB-1:0]),            // link stability monitor: always good, no errors since last resync
       .gtx_link_bad         (link_bad[MXCFEB-1:0]),             // link stability monitor: errors happened over 100 times
-      
+
       // Virtex-6 GTX error counters
       .gtx_rx_err_count0 (gtx_rx_err_count[0][15:0]), // In  Error count on this fiber channel
       .gtx_rx_err_count1 (gtx_rx_err_count[1][15:0]), // In  Error count on this fiber channel
@@ -4298,7 +4298,7 @@
       .gem_rx_err_count2 (gem_rx_err_count[2][15:0]), // In  Error count on this GEM fiber channel
       .gem_rx_err_count3 (gem_rx_err_count[3][15:0]), // In  Error count on this GEM fiber channel
 
-      // Sump  
+      // Sump
       .vme_sump      (vme_sump)              // Out  Unused signals
       );
 
@@ -4313,45 +4313,45 @@
          (|cfeb4_rx[23:0]);
 
   // sump more unused cfeb signals
-  wire cfeb_signal_sump = (cfeb0_rxd_posneg) | (cfeb1_rxd_posneg) | (cfeb2_rxd_posneg) | (cfeb3_rxd_posneg) | (cfeb4_rxd_posneg) | (|gtx_rx_reset_err_cnt); 
+  wire cfeb_signal_sump = (cfeb0_rxd_posneg) | (cfeb1_rxd_posneg) | (cfeb2_rxd_posneg) | (cfeb3_rxd_posneg) | (cfeb4_rxd_posneg) | (|gtx_rx_reset_err_cnt);
 
    wire  virtex6_sump      =
-            |        alct_startup_msec 
-            |        alct_wait_dll     
-            |        alct_startup_done 
-            |        alct_wait_vme     
-            |      (|gtx_rx_sump) // | (|set_sw) | (|mez_tp)           
-            |        reset             
-            |        clk125            
-            |        t12_sdat          
-            |        t12_nfault        
-            |        t12_rst           
-            |        f_sclk            
-            |        f_sdat            
-            |        f_fok             
-            |       _gtl_oe  
+            |        alct_startup_msec
+            |        alct_wait_dll
+            |        alct_startup_done
+            |        alct_wait_vme
+            |      (|gtx_rx_sump) // | (|set_sw) | (|mez_tp)
+            |        reset
+            |        clk125
+            |        t12_sdat
+            |        t12_nfault
+            |        t12_rst
+            |        f_sclk
+            |        f_sdat
+            |        f_fok
+            |       _gtl_oe
             |       bpi_re
     ;
 
    // Sump
-   assign sump = 
-     ccb_sump 
-   | alct_sump 
-   | rpc_sump   
+   assign sump =
+     ccb_sump
+   | alct_sump
+   | rpc_sump
    | sequencer_sump
-   | tmb_sump     
-   | buf_sump  
-   | clock_ctrl_sump 
-   | vme_sump 
-   | rpc_inj_sel 
-   | mini_sump 
-   | (|cfeb_sump) 
+   | tmb_sump
+   | buf_sump
+   | clock_ctrl_sump
+   | vme_sump
+   | rpc_inj_sel
+   | mini_sump
+   | (|cfeb_sump)
    | cfeb_signal_sump
-   | inj_ram_sump   
-   | virtex6_sump  
-   | cfeb_rx_sump 
-   | odmb_device_sump 
-   | (|gem_sump); 
+   | inj_ram_sump
+   | virtex6_sump
+   | cfeb_rx_sump
+   | odmb_device_sump
+   | (|gem_sump);
 
 
 

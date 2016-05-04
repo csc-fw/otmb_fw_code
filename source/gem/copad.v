@@ -76,7 +76,7 @@ parameter MXCLSTB    = 14;
 // unpack and vectorize the inputs
 //----------------------------------------------------------------------------------------------------------------------
 
- // insert ff for correct simulation standalone synthesis timing 
+ // insert ff for correct simulation standalone synthesis timing
  `ifdef debug_copad
     reg [MXCLSTB-1:0] gem_cluster [1:0][7:0];
 
@@ -164,7 +164,7 @@ parameter MXCLSTB    = 14;
   assign adr0_p [5] = adr[0][5] + 4'd8;
   assign adr0_p [6] = adr[0][6] + 4'd8;
   assign adr0_p [7] = adr[0][7] + 4'd8;
-                                   
+
   // make a copy of the span of address - 8
   assign adr0_m [0] = adr[0][0] - 4'd8;
   assign adr0_m [1] = adr[0][1] - 4'd8;
@@ -302,8 +302,8 @@ for (iclst=0; iclst<MXCLUSTERS; iclst=iclst+1) begin: feb_assign_loop
   //  5  13 21
   //  6  14 22
   //  7  15 23
-  // 
-  // the upper 5 bits of the address need to be mapped to VFAT-IDs.. 
+  //
+  // the upper 5 bits of the address need to be mapped to VFAT-IDs..
   // but naturally the upper 5-bits produce a map like
   //  0   1    2
   //  3   4    5
@@ -340,7 +340,7 @@ for (iclst=0; iclst<MXCLUSTERS; iclst=iclst+1) begin: feb_assign_loop
     5'd21:   cluster_feb[iclst] = 5'd7;
     5'd22:   cluster_feb[iclst] = 5'd15;
     5'd23:   cluster_feb[iclst] = 5'd23;
-    default: cluster_feb[iclst] = 5'd24; 
+    default: cluster_feb[iclst] = 5'd24;
   endcase
   end
 
