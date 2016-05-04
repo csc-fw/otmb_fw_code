@@ -1,4 +1,4 @@
-`define debug_copad
+// `define debug_copad
 //----------------------------------------------------------------------------------------------------------------------
 // copad.v
 //
@@ -76,7 +76,7 @@ parameter MXCLSTB    = 14;
 // unpack and vectorize the inputs
 //----------------------------------------------------------------------------------------------------------------------
 
- // insert ff for correct simulation standalone synthesis
+ // insert ff for correct simulation standalone synthesis timing 
  `ifdef debug_copad
     reg [MXCLSTB-1:0] gem_cluster [1:0][7:0];
 
@@ -102,23 +102,23 @@ parameter MXCLSTB    = 14;
  `else
     wire [MXCLSTB-1:0] gem_cluster [1:0][7:0];
 
-    wire gem_cluster[0][0] = gem0_cluster0;
-    wire gem_cluster[0][1] = gem0_cluster1;
-    wire gem_cluster[0][2] = gem0_cluster2;
-    wire gem_cluster[0][3] = gem0_cluster3;
-    wire gem_cluster[0][4] = gem0_cluster4;
-    wire gem_cluster[0][5] = gem0_cluster5;
-    wire gem_cluster[0][6] = gem0_cluster6;
-    wire gem_cluster[0][7] = gem0_cluster7;
+    assign gem_cluster[0][0] = gem0_cluster0;
+    assign gem_cluster[0][1] = gem0_cluster1;
+    assign gem_cluster[0][2] = gem0_cluster2;
+    assign gem_cluster[0][3] = gem0_cluster3;
+    assign gem_cluster[0][4] = gem0_cluster4;
+    assign gem_cluster[0][5] = gem0_cluster5;
+    assign gem_cluster[0][6] = gem0_cluster6;
+    assign gem_cluster[0][7] = gem0_cluster7;
 
-    wire gem_cluster[1][0] = gem1_cluster0;
-    wire gem_cluster[1][1] = gem1_cluster1;
-    wire gem_cluster[1][2] = gem1_cluster2;
-    wire gem_cluster[1][3] = gem1_cluster3;
-    wire gem_cluster[1][4] = gem1_cluster4;
-    wire gem_cluster[1][5] = gem1_cluster5;
-    wire gem_cluster[1][6] = gem1_cluster6;
-    wire gem_cluster[1][7] = gem1_cluster7;
+    assign gem_cluster[1][0] = gem1_cluster0;
+    assign gem_cluster[1][1] = gem1_cluster1;
+    assign gem_cluster[1][2] = gem1_cluster2;
+    assign gem_cluster[1][3] = gem1_cluster3;
+    assign gem_cluster[1][4] = gem1_cluster4;
+    assign gem_cluster[1][5] = gem1_cluster5;
+    assign gem_cluster[1][6] = gem1_cluster6;
+    assign gem_cluster[1][7] = gem1_cluster7;
 
  `endif
 
@@ -137,23 +137,23 @@ parameter MXCLSTB    = 14;
 
   // unpack the cnts and adrs here; cnts are used, but save them for later (probably useful with vfat3)
 
-  assign {cnt[0][0], adr[0][0]} = gem_cluster[0][0] & ~14'd7;
-  assign {cnt[0][1], adr[0][1]} = gem_cluster[0][1] & ~14'd7;
-  assign {cnt[0][2], adr[0][2]} = gem_cluster[0][2] & ~14'd7;
-  assign {cnt[0][3], adr[0][3]} = gem_cluster[0][3] & ~14'd7;
-  assign {cnt[0][4], adr[0][4]} = gem_cluster[0][4] & ~14'd7;
-  assign {cnt[0][5], adr[0][5]} = gem_cluster[0][5] & ~14'd7;
-  assign {cnt[0][6], adr[0][6]} = gem_cluster[0][6] & ~14'd7;
-  assign {cnt[0][7], adr[0][7]} = gem_cluster[0][7] & ~14'd7;
+  assign {cnt[0][0], adr[0][0]} = gem_cluster[0][0];
+  assign {cnt[0][1], adr[0][1]} = gem_cluster[0][1];
+  assign {cnt[0][2], adr[0][2]} = gem_cluster[0][2];
+  assign {cnt[0][3], adr[0][3]} = gem_cluster[0][3];
+  assign {cnt[0][4], adr[0][4]} = gem_cluster[0][4];
+  assign {cnt[0][5], adr[0][5]} = gem_cluster[0][5];
+  assign {cnt[0][6], adr[0][6]} = gem_cluster[0][6];
+  assign {cnt[0][7], adr[0][7]} = gem_cluster[0][7];
 
-  assign {cnt[1][0], adr[1][0]} = gem_cluster[1][0] & ~14'd7;
-  assign {cnt[1][1], adr[1][1]} = gem_cluster[1][1] & ~14'd7;
-  assign {cnt[1][2], adr[1][2]} = gem_cluster[1][2] & ~14'd7;
-  assign {cnt[1][3], adr[1][3]} = gem_cluster[1][3] & ~14'd7;
-  assign {cnt[1][4], adr[1][4]} = gem_cluster[1][4] & ~14'd7;
-  assign {cnt[1][5], adr[1][5]} = gem_cluster[1][5] & ~14'd7;
-  assign {cnt[1][6], adr[1][6]} = gem_cluster[1][6] & ~14'd7;
-  assign {cnt[1][7], adr[1][7]} = gem_cluster[1][7] & ~14'd7;
+  assign {cnt[1][0], adr[1][0]} = gem_cluster[1][0];
+  assign {cnt[1][1], adr[1][1]} = gem_cluster[1][1];
+  assign {cnt[1][2], adr[1][2]} = gem_cluster[1][2];
+  assign {cnt[1][3], adr[1][3]} = gem_cluster[1][3];
+  assign {cnt[1][4], adr[1][4]} = gem_cluster[1][4];
+  assign {cnt[1][5], adr[1][5]} = gem_cluster[1][5];
+  assign {cnt[1][6], adr[1][6]} = gem_cluster[1][6];
+  assign {cnt[1][7], adr[1][7]} = gem_cluster[1][7];
 
   // make a copy of the span of address + 8
   assign adr0_p [0] = adr[0][0] + 4'd8;
