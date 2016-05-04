@@ -1523,14 +1523,22 @@
     .gems_lostsync(gems_lostsync)  // Out
   ); 
 
+  wire gem_sync_mon_sump = 
+      gem0_synced
+    | gem1_synced
+    | gems_synced
+    | gem0_lostsync
+    | gem1_lostsync
+    | gems_lostsync; 
+
   // GEM Co-pad Matching
   //--------------------------------------------------------------------------------------------------------------------
 
   wire        gem_match_neighbors = 1'b1; 
   wire [7:0]  gem_match; 
-  wire [7:0]  gem_match_left; 
-  wire [7:0]  gem_match_right; 
-  wire        gem_any_match; 
+  wire [7:0]  gem_match_left;
+  wire [7:0]  gem_match_right;
+  wire        gem_any_match;
   wire [23:0] gem_active_feb_list; 
   wire [13:0] gem_copad  [7:0]; 
 
@@ -1573,19 +1581,36 @@
     .cluster6 (gem_copad[6]), 
     .cluster7 (gem_copad[7]), 
 
-    // match flag
-    .match(gem_match), 
+    // 8 bit match flags
+    .match(gem_match[7:0]), 
 
     // 24 bit active feb list
-    .active_feb_list(gem_active_feb_list), 
+    .active_feb_list(gem_active_feb_list[23:0]), 
 
     // 8 bit cluster match was found on right/left side of respective cluster
-    .match_right (gem_match_right), 
-    .match_left  (gem_match_left), 
+    .match_right (gem_match_right[7:0]), 
+    .match_left  (gem_match_left[7:0]), 
 
     // 1 bit any match found
-    .any_match(gem_any_match)
+    .any_match(gem_any_match), 
+
+    .sump(copad_module_sump)
   );
+
+  wire copad_sump =
+      copad_module_sump
+  | (|gem_copad[0])
+  | (|gem_copad[1])
+  | (|gem_copad[2])
+  | (|gem_copad[3])
+  | (|gem_copad[4])
+  | (|gem_copad[5])
+  | (|gem_copad[6])
+  | (|gem_copad[7])
+  | (|gem_match)
+  | (|gem_active_feb_list)
+  | (|gem_match_right)
+  | (gem_any_match);
 
 //-------------------------------------------------------------------------------------------------------------------
 // Pattern Finder declarations, common to ME1A+ME1B+ME234
