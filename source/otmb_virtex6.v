@@ -1425,7 +1425,7 @@
   generate
   for (igem=0; igem<MXGEM; igem=igem+1) begin: gengem
 
-  assign gem_exists[igem] = 1'b1;                // Existence flag
+  // gem_exists gets assigned by VME!!
 
   gem #(.IGEM(igem)) ugem (
 
@@ -3969,7 +3969,7 @@
       .gem_zero_suppress (gem_zero_suppress),            // Out  1 Enable GEM Readout Zero-suppression
       .fifo_tbins_gem    (fifo_tbins_gem[MXTBIN-1:0]),   // Out  Number GEM FIFO time bins to read out
       .fifo_pretrig_gem  (fifo_pretrig_gem[MXTBIN-1:0]), // Out  Number GEM FIFO time bins before pretrigger
-      // gem_exists gets hardcoded! not from VME. TODO: change later?
+      .gem_exists        (gem_exists[MXGEM-1:0]),        // Out  GEM Readout list
 
       // RPC Ports: RAT Control
       .rpc_sync     (rpc_sync),     // Out  Sync mode

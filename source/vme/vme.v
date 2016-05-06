@@ -631,6 +631,7 @@
 
 // GEM VME Configuration Ports
   gem_read_enable,
+  gem_exists,
   gem_zero_suppress,
   fifo_tbins_gem,
   fifo_pretrig_gem,
@@ -2000,6 +2001,7 @@
 
 // GEM VME Configuration Ports
   output              gem_read_enable;   // Out  1 Enable GEM Readout
+  output [3:0]        gem_exists;        // Out  1 GEM Exists
   output              gem_zero_suppress; // Out  1 Enable GEM Readout Zero-suppression
   output [MXTBIN-1:0] fifo_tbins_gem;    // Out  Number GEM FIFO time bins to read out
   output [MXTBIN-1:0] fifo_pretrig_gem;  // Out  Number GEM FIFO time bins before pretrigger
@@ -3101,6 +3103,7 @@
   always @(posedge tmb_clock0_ibufg) begin
     if (lock_tmb_clock0) mmcm_firstlock <= 1'b1;      // so it will only time the first mmcm lock cycle
 //  if (!lock_tmb_clock0 && !mmcm_firstlock && (tmb_mmcm_lock_time[17:10] != 8'hFF)) tmb_mmcm_lock_time <= tmb_mmcm_lock_time + 1'b1;
+
     if (!power_up && (tmb_power_up_time[17:10] != 8'hFF)) tmb_power_up_time <= tmb_power_up_time + 1'b1;
     if (!vsm_ready && (tmb_load_cfg_time[17:10] != 8'hFF)) tmb_load_cfg_time <= tmb_load_cfg_time + 1'b1; // time until TMB is ready
 
@@ -3108,6 +3111,7 @@
     if (phaser1_rd[2]) ldps_busy[1] <= 1'b1;
     if (phaser7_rd[2]) ldps_busy[2] <= 1'b1; // phaser 7 and 8 are for comparator fiber links from DCFEBs (dps 2,3)
     if (phaser8_rd[2]) ldps_busy[3] <= 1'b1;
+
     if (!alct_phaser_done_r) alct_phaser_done_r <= alct_phaser_done;
     if (!comp_phaser2_done_r) comp_phaser2_done_r <= comp_phaser2_done;
     if (!comp_phaser3_done_r) comp_phaser3_done_r <= comp_phaser3_done;
@@ -3116,7 +3120,7 @@
     if ( (!comp_phaser2_done_r | !comp_phaser3_done_r) && (comp_phaser_lock_time[17:10] != 8'hFF)) comp_phaser_lock_time <= comp_phaser_lock_time + 1'b1; // time until TMB clocks for comp are ready and locked
     gtx_sync_too_long  <=  (~|gtx_sync_done_time[15:10]) & (|gtx_sync_done_time[17:16]); // gtx s.b. done before 800us, so reset at 1638us and release at 1664us... repeats cycle 2 more times if needed at 3276 and 4915us
 
-// JRG, note that alct_startup_done means alct is ready to receive jtag cfg data.  use  jsm_ok  to indicate cfg is done!
+    // JRG, note that alct_startup_done means alct is ready to receive jtag cfg data.  use  jsm_ok  to indicate cfg is done!
     if (jsm_ok) jsm_cfg_done <= 1'b1;
     if (!jsm_cfg_done && alct_startup_done && (alct_load_cfg_time[17:10] != 8'hFF)) alct_load_cfg_time <= alct_load_cfg_time + 1'b1; // time to send alct config data after alct fpga is ready for it; for total delay add alct_startup_delay and the longer of power_up_time or tmb_load_cfg_time
 
@@ -3268,12 +3272,12 @@
   reg dtack_int = 0;  // Fabric copy
 
   always @(posedge clock_vme) begin
-//    dtack      <= bd_sel & ds0 & (!bpi_dev | !bpi_dtack);  // IOB   flip flop has no feedback path, now include BPI
-//    dtack_int  <= bd_sel & ds0 & (!bpi_dev | !bpi_dtack);  // Fabric flip flop has feedback to logic, now include BPI
+//   dtack      <= bd_sel & ds0 & (!bpi_dev | !bpi_dtack); // IOB   flip flop has no feedback path, now include BPI
+//   dtack_int  <= bd_sel & ds0 & (!bpi_dev | !bpi_dtack); // Fabric flip flop has feedback to logic, now include BPI
      dtack      <= bd_sel & ds0 & (!bpi_dev | bpi_dtack);  // IOB   flip flop has no feedback path, now include BPI
      dtack_int  <= bd_sel & ds0 & (!bpi_dev | bpi_dtack);  // Fabric flip flop has feedback to logic, now include BPI
-//    dtack      <= bd_sel & ds0;    // IOB    flip flop has no feedback path
-//    dtack_int  <= bd_sel & ds0;    // Fabric flip flop has feedback to logic
+//   dtack      <= bd_sel & ds0;                           // IOB    flip flop has no feedback path
+//   dtack_int  <= bd_sel & ds0;                           // Fabric flip flop has feedback to logic
   end
 
 // Construct read and write strobes
@@ -3942,7 +3946,7 @@
   wire [13:0]  vme_adr1_cap;
 
   assign vme_adr0_cap[0]    = lword;
-  assign vme_adr0_cap[15:1]  = a_vme[15:1];
+  assign vme_adr0_cap[15:1] = a_vme[15:1];
 
   assign vme_adr1_cap[ 7: 0]  = a_vme[23:16];
   assign vme_adr1_cap[13: 8]  = am_vme[5:0];
@@ -7575,6 +7579,7 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   always @(posedge clock) begin
   fifo_tbins_gem  [4:0] <= (gem_decouple) ? fifo_tbins_gem_wr  [4:0] : fifo_tbins_cfeb[4:0];
   fifo_pretrig_gem[4:0] <= (gem_decouple) ? fifo_pretrig_gem_wr[4:0] : fifo_pretrig_cfeb[4:0];
+
   end
 
 //------------------------------------------------------------------------------------------------------------------
@@ -7582,18 +7587,17 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 //------------------------------------------------------------------------------------------------------------------
 
   initial begin
-  gem_cfg_wr[3:0]  = 4'd0; // RW GEM0 Rxd Integer BX Delay
-  gem_cfg_wr[7:4]  = 4'd0; // RW GEM1 Rxd Integer BX Delay
-  gem_cfg_wr[8]    = 1'b0; // 1=Independent GEM RXD Integer BX delays
-  gem_cfg_wr[15:9] = 0;    // Unassigned
+  gem_cfg_wr[3:0]   = 4'd0;    // RW GEM0 Rxd Integer BX Delay
+  gem_cfg_wr[7:4]   = 4'd0;    // RW GEM1 Rxd Integer BX Delay
+  gem_cfg_wr[8]     = 1'b0;    // 1=Independent GEM RXD Integer BX delays
+  gem_cfg_wr[12:9]  = 4'b1111; // GEM exists [3:0]
+  gem_cfg_wr[15:13] = 2'b00;   // Unassigned
   end
 
   wire [3:0] gem0_rxd_int_delay_wr = gem_cfg_wr[3:0];
   wire [3:0] gem1_rxd_int_delay_wr = gem_cfg_wr[7:4];
 
   wire gem_rxd_int_delay_decouple = gem_cfg_wr[8];
-
-  assign gem_cfg_rd [15:0] = gem_cfg_wr [15:0];  // Readback
 
   // FF Buffer gem rxd integer delay
   reg [3:0] gem0_rxd_int_delay = 0;
@@ -7602,6 +7606,10 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
     gem0_rxd_int_delay <= (gem_rxd_int_delay_decouple) ? (gem0_rxd_int_delay_wr[3:0]) : (gem0_rxd_int_delay_wr[3:0]);
     gem1_rxd_int_delay <= (gem_rxd_int_delay_decouple) ? (gem1_rxd_int_delay_wr[3:0]) : (gem0_rxd_int_delay_wr[3:0]);
   end
+
+  assign gem_exists = gem_cfg_wr[12:9];
+
+  assign gem_cfg_rd [15:0] = gem_cfg_wr [15:0];  // Readback
 
 //------------------------------------------------------------------------------------------------------------------
 // VME Write-Registers latch data when addressed + latch power-up defaults
