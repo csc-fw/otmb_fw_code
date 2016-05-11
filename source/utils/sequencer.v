@@ -5,13 +5,13 @@
 //------------------------------------------------------------------------------------------------------------------
 //
 //  Pretriggers on either pattern finder or external trigger.
-//     Sequences event processing.
+//    Sequences event processing.
 //    Controls Raw Hits RAMs
 //    Outputs CLCTs to TMB
 //    Records TMB match result
 //    Outputs Raw Hits to DMB
 //
-//   02/07/2002  Ported from LCT99 AHDL
+//  02/07/2002  Ported from LCT99 AHDL
 //  02/13/2002  Added ext_inject
 //  02/14/2002  Added TTC counters
 //  02/15/2002  Trigger path pipeline delay tuning
@@ -305,6 +305,7 @@
 //  05/27/2011  Shorten cb_cnt{1:0] to [0:0], replace cb_sm with blocking operators
 //  02/21/2013  Expand to 7 cfebs
 //  03/07/2013  Restore normal scope channels
+//  05/11/2016  Addition of GEM data to sequencer readout
 //
 //------------------------------------------------------------------------------------------------------------------
 //  Readout Format:
@@ -4411,7 +4412,12 @@
   assign fifo_frame[18:15]  =  0;                   // DDU special + DMB control flags
 
 // RPC+GEM Raw hits
-  assign b04_frame[11:0]   =  12'hB04;              // Beginning of RPC block
+
+  // use a different header if GEMs are enabled, to distinguish from RPC data
+  wire [11:0] b04_frame_mux = (|gem_exists) ? 12'hC04 : 12'hB04; 
+  wire [11:0] e04_frame_mux = (|gem_exists) ? 12'hD04 : 12'hE04; 
+
+  assign b04_frame[11:0]   =  b04_frame_mux;        // Beginning of GEM/RPC block
   assign b04_frame[14:12]  =  3'b110;               // Marker
   assign b04_frame[18:15]  =  0;                    // DDU special + DMB control flag
 
@@ -4424,7 +4430,7 @@
   assign gem_frame[14]     =  gem_id[0:0];          // GEM Chamber ID (0,1)
   assign gem_frame[18:15]  =  0;                    // DDU special + DMB control flags
 
-  assign e04_frame[11:0]   =  12'hE04;              // End of RPC block
+  assign e04_frame[11:0]   =  e04_frame_mux;        // End of GEM/RPC block
   assign e04_frame[14:12]  =  3'b110;               // Marker
   assign e04_frame[18:15]  =  0;                    // DDU special + DMB control flags
 
