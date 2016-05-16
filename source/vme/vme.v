@@ -812,6 +812,135 @@
   active_cfeb5_event_counter,      // CFEB5 active flag sent to DMB
   active_cfeb6_event_counter,      // CFEB6 active flag sent to DMB
 
+  gem_counter0,
+  gem_counter1,
+  gem_counter2,
+  gem_counter3,
+  gem_counter4,
+  gem_counter5,
+  gem_counter6,
+  gem_counter7,
+  gem_counter8,
+  gem_counter9,
+  gem_counter10,
+  gem_counter11,
+  gem_counter12,
+  gem_counter13,
+  gem_counter14,
+  gem_counter15,
+  gem_counter16,
+  gem_counter17,
+  gem_counter18,
+  gem_counter19,
+  gem_counter20,
+  gem_counter21,
+  gem_counter22,
+  gem_counter23,
+  gem_counter24,
+  gem_counter25,
+  gem_counter26,
+  gem_counter27,
+  gem_counter28,
+  gem_counter29,
+  gem_counter30,
+  gem_counter31,
+  gem_counter32,
+  gem_counter33,
+  gem_counter34,
+  gem_counter35,
+  gem_counter36,
+  gem_counter37,
+  gem_counter38,
+  gem_counter39,
+  gem_counter40,
+  gem_counter41,
+  gem_counter42,
+  gem_counter43,
+  gem_counter44,
+  gem_counter45,
+  gem_counter46,
+  gem_counter47,
+  gem_counter48,
+  gem_counter49,
+  gem_counter50,
+  gem_counter51,
+  gem_counter52,
+  gem_counter53,
+  gem_counter54,
+  gem_counter55,
+  gem_counter56,
+  gem_counter57,
+  gem_counter58,
+  gem_counter59,
+  gem_counter60,
+  gem_counter61,
+  gem_counter62,
+  gem_counter63,
+  gem_counter64,
+  gem_counter65,
+  gem_counter66,
+  gem_counter67,
+  gem_counter68,
+  gem_counter69,
+  gem_counter70,
+  gem_counter71,
+  gem_counter72,
+  gem_counter73,
+  gem_counter74,
+  gem_counter75,
+  gem_counter76,
+  gem_counter77,
+  gem_counter78,
+  gem_counter79,
+  gem_counter80,
+  gem_counter81,
+  gem_counter82,
+  gem_counter83,
+  gem_counter84,
+  gem_counter85,
+  gem_counter86,
+  gem_counter87,
+  gem_counter88,
+  gem_counter89,
+  gem_counter90,
+  gem_counter91,
+  gem_counter92,
+  gem_counter93,
+  gem_counter94,
+  gem_counter95,
+  gem_counter96,
+  gem_counter97,
+  gem_counter98,
+  gem_counter99,
+  gem_counter100,
+  gem_counter101,
+  gem_counter102,
+  gem_counter103,
+  gem_counter104,
+  gem_counter105,
+  gem_counter106,
+  gem_counter107,
+  gem_counter108,
+  gem_counter109,
+  gem_counter110,
+  gem_counter111,
+  gem_counter112,
+  gem_counter113,
+  gem_counter114,
+  gem_counter115,
+  gem_counter116,
+  gem_counter117,
+  gem_counter118,
+  gem_counter119,
+  gem_counter120,
+  gem_counter121,
+  gem_counter122,
+  gem_counter123,
+  gem_counter124,
+  gem_counter125,
+  gem_counter126,
+  gem_counter127,
+
 // CSC Orientation Ports
   csc_type,
   csc_me1ab,
@@ -1357,7 +1486,6 @@
   parameter ADR_GEM_GTX_RX2           = 10'h304;
   parameter ADR_GEM_GTX_RX3           = 10'h306;
 
-  // TODO: need to move these into the 300 address space.
   parameter ADR_V6_PHASER9            = 10'h308; // Phaser 9  GEM0 Phaser
   parameter ADR_V6_PHASER10           = 10'h30a; // Phaser 10 GEM1 Phaser
 
@@ -1365,6 +1493,8 @@
   parameter ADR_GEM_DEBUG_FIFO_DATA   = 10'h30e;
   parameter ADR_GEM_TBINS             = 10'h310;
   parameter ADR_GEM_CFG               = 10'h312;
+  parameter ADR_GEM_CNT_CTRL          = 10'h314;
+  parameter ADR_GEM_CNT_RDATA         = 10'h316;
 
   parameter ADR_ODMB                  = 10'h1EE;  // ODMB mode: various addresses are handled inside odmb_device
 
@@ -2136,10 +2266,134 @@
   input  [MXCNTVME-1:0]  event_counter65;
 
 // GEM Counters
-//  input  [MXCNTVME-1:0]  gem_event_counter0;
-//  input  [MXCNTVME-1:0]  gem_event_counter1;
-//  input  [MXCNTVME-1:0]  gem_event_counter2;
-//  input  [MXCNTVME-1:0]  gem_event_counter3;
+  input  [MXCNTVME-1:0]  gem_counter0;
+  input  [MXCNTVME-1:0]  gem_counter1;
+  input  [MXCNTVME-1:0]  gem_counter2;
+  input  [MXCNTVME-1:0]  gem_counter3;
+  input  [MXCNTVME-1:0]  gem_counter4;
+  input  [MXCNTVME-1:0]  gem_counter5;
+  input  [MXCNTVME-1:0]  gem_counter6;
+  input  [MXCNTVME-1:0]  gem_counter7;
+  input  [MXCNTVME-1:0]  gem_counter8;
+  input  [MXCNTVME-1:0]  gem_counter9;
+  input  [MXCNTVME-1:0]  gem_counter10;
+  input  [MXCNTVME-1:0]  gem_counter11;
+  input  [MXCNTVME-1:0]  gem_counter12;
+  input  [MXCNTVME-1:0]  gem_counter13;
+  input  [MXCNTVME-1:0]  gem_counter14;
+  input  [MXCNTVME-1:0]  gem_counter15;
+  input  [MXCNTVME-1:0]  gem_counter16;
+  input  [MXCNTVME-1:0]  gem_counter17;
+  input  [MXCNTVME-1:0]  gem_counter18;
+  input  [MXCNTVME-1:0]  gem_counter19;
+  input  [MXCNTVME-1:0]  gem_counter20;
+  input  [MXCNTVME-1:0]  gem_counter21;
+  input  [MXCNTVME-1:0]  gem_counter22;
+  input  [MXCNTVME-1:0]  gem_counter23;
+  input  [MXCNTVME-1:0]  gem_counter24;
+  input  [MXCNTVME-1:0]  gem_counter25;
+  input  [MXCNTVME-1:0]  gem_counter26;
+  input  [MXCNTVME-1:0]  gem_counter27;
+  input  [MXCNTVME-1:0]  gem_counter28;
+  input  [MXCNTVME-1:0]  gem_counter29;
+  input  [MXCNTVME-1:0]  gem_counter30;
+  input  [MXCNTVME-1:0]  gem_counter31;
+  input  [MXCNTVME-1:0]  gem_counter32;
+  input  [MXCNTVME-1:0]  gem_counter33;
+  input  [MXCNTVME-1:0]  gem_counter34;
+  input  [MXCNTVME-1:0]  gem_counter35;
+  input  [MXCNTVME-1:0]  gem_counter36;
+  input  [MXCNTVME-1:0]  gem_counter37;
+  input  [MXCNTVME-1:0]  gem_counter38;
+  input  [MXCNTVME-1:0]  gem_counter39;
+  input  [MXCNTVME-1:0]  gem_counter40;
+  input  [MXCNTVME-1:0]  gem_counter41;
+  input  [MXCNTVME-1:0]  gem_counter42;
+  input  [MXCNTVME-1:0]  gem_counter43;
+  input  [MXCNTVME-1:0]  gem_counter44;
+  input  [MXCNTVME-1:0]  gem_counter45;
+  input  [MXCNTVME-1:0]  gem_counter46;
+  input  [MXCNTVME-1:0]  gem_counter47;
+  input  [MXCNTVME-1:0]  gem_counter48;
+  input  [MXCNTVME-1:0]  gem_counter49;
+  input  [MXCNTVME-1:0]  gem_counter50;
+  input  [MXCNTVME-1:0]  gem_counter51;
+  input  [MXCNTVME-1:0]  gem_counter52;
+  input  [MXCNTVME-1:0]  gem_counter53;
+  input  [MXCNTVME-1:0]  gem_counter54;
+  input  [MXCNTVME-1:0]  gem_counter55;
+  input  [MXCNTVME-1:0]  gem_counter56;
+  input  [MXCNTVME-1:0]  gem_counter57;
+  input  [MXCNTVME-1:0]  gem_counter58;
+  input  [MXCNTVME-1:0]  gem_counter59;
+  input  [MXCNTVME-1:0]  gem_counter60;
+  input  [MXCNTVME-1:0]  gem_counter61;
+  input  [MXCNTVME-1:0]  gem_counter62;
+  input  [MXCNTVME-1:0]  gem_counter63;
+  input  [MXCNTVME-1:0]  gem_counter64;
+  input  [MXCNTVME-1:0]  gem_counter65;
+  input  [MXCNTVME-1:0]  gem_counter66;
+  input  [MXCNTVME-1:0]  gem_counter67;
+  input  [MXCNTVME-1:0]  gem_counter68;
+  input  [MXCNTVME-1:0]  gem_counter69;
+  input  [MXCNTVME-1:0]  gem_counter70;
+  input  [MXCNTVME-1:0]  gem_counter71;
+  input  [MXCNTVME-1:0]  gem_counter72;
+  input  [MXCNTVME-1:0]  gem_counter73;
+  input  [MXCNTVME-1:0]  gem_counter74;
+  input  [MXCNTVME-1:0]  gem_counter75;
+  input  [MXCNTVME-1:0]  gem_counter76;
+  input  [MXCNTVME-1:0]  gem_counter77;
+  input  [MXCNTVME-1:0]  gem_counter78;
+  input  [MXCNTVME-1:0]  gem_counter79;
+  input  [MXCNTVME-1:0]  gem_counter80;
+  input  [MXCNTVME-1:0]  gem_counter81;
+  input  [MXCNTVME-1:0]  gem_counter82;
+  input  [MXCNTVME-1:0]  gem_counter83;
+  input  [MXCNTVME-1:0]  gem_counter84;
+  input  [MXCNTVME-1:0]  gem_counter85;
+  input  [MXCNTVME-1:0]  gem_counter86;
+  input  [MXCNTVME-1:0]  gem_counter87;
+  input  [MXCNTVME-1:0]  gem_counter88;
+  input  [MXCNTVME-1:0]  gem_counter89;
+  input  [MXCNTVME-1:0]  gem_counter90;
+  input  [MXCNTVME-1:0]  gem_counter91;
+  input  [MXCNTVME-1:0]  gem_counter92;
+  input  [MXCNTVME-1:0]  gem_counter93;
+  input  [MXCNTVME-1:0]  gem_counter94;
+  input  [MXCNTVME-1:0]  gem_counter95;
+  input  [MXCNTVME-1:0]  gem_counter96;
+  input  [MXCNTVME-1:0]  gem_counter97;
+  input  [MXCNTVME-1:0]  gem_counter98;
+  input  [MXCNTVME-1:0]  gem_counter99;
+  input  [MXCNTVME-1:0]  gem_counter100;
+  input  [MXCNTVME-1:0]  gem_counter101;
+  input  [MXCNTVME-1:0]  gem_counter102;
+  input  [MXCNTVME-1:0]  gem_counter103;
+  input  [MXCNTVME-1:0]  gem_counter104;
+  input  [MXCNTVME-1:0]  gem_counter105;
+  input  [MXCNTVME-1:0]  gem_counter106;
+  input  [MXCNTVME-1:0]  gem_counter107;
+  input  [MXCNTVME-1:0]  gem_counter108;
+  input  [MXCNTVME-1:0]  gem_counter109;
+  input  [MXCNTVME-1:0]  gem_counter110;
+  input  [MXCNTVME-1:0]  gem_counter111;
+  input  [MXCNTVME-1:0]  gem_counter112;
+  input  [MXCNTVME-1:0]  gem_counter113;
+  input  [MXCNTVME-1:0]  gem_counter114;
+  input  [MXCNTVME-1:0]  gem_counter115;
+  input  [MXCNTVME-1:0]  gem_counter116;
+  input  [MXCNTVME-1:0]  gem_counter117;
+  input  [MXCNTVME-1:0]  gem_counter118;
+  input  [MXCNTVME-1:0]  gem_counter119;
+  input  [MXCNTVME-1:0]  gem_counter120;
+  input  [MXCNTVME-1:0]  gem_counter121;
+  input  [MXCNTVME-1:0]  gem_counter122;
+  input  [MXCNTVME-1:0]  gem_counter123;
+  input  [MXCNTVME-1:0]  gem_counter124;
+  input  [MXCNTVME-1:0]  gem_counter125;
+  input  [MXCNTVME-1:0]  gem_counter126;
+  input  [MXCNTVME-1:0]  gem_counter127;
 
 // Header Counters
   output                hdr_clear_on_resync; // Clear header counters on ttc_resync
@@ -2685,6 +2939,11 @@
   wire [15:0] cnt_ctrl_rd;
 
   wire [15:0] cnt_rdata_rd;
+
+  reg  [15:0] gem_cnt_ctrl_wr;
+  wire [15:0] gem_cnt_ctrl_rd;
+
+  wire [15:0] gem_cnt_rdata_rd;
 
   reg  [15:0] jtagsm0_wr;
   wire [15:0] jtagsm0_rd;
@@ -6421,6 +6680,206 @@
 
 // Muliplex counter halves to fit in VMED16, if lsb=0 select lower 16 bits, if lsb=1 select upper 14
   assign cnt_rdata_rd = (cnt_adr_lsb) ? cnt_rdata[29:16] : cnt_rdata[15:0];
+
+//------------------------------------------------------------------------------------------------------------------
+// ADR_GEM_CNT_CTRL=0x314  GEM Counter Control Register
+//------------------------------------------------------------------------------------------------------------------
+// Power-up defaults
+  initial begin
+    gem_cnt_ctrl_wr[0]    = 0; // RW  1=reset all counters
+    gem_cnt_ctrl_wr[1]    = 0; // RW  1=take snapshot of current count
+    gem_cnt_ctrl_wr[2]    = 0; // RW  1=Stop all counters if any overflows
+    gem_cnt_ctrl_wr[3]    = 0; // R   At least one alct counter overflowed
+    gem_cnt_ctrl_wr[4]    = 0; // R   At least one sequencer counter overflowed
+    gem_cnt_ctrl_wr[5]    = 1; // RW  1=Enable alct lct error alct debug counter
+    gem_cnt_ctrl_wr[6]    = 0; // RW  1=Clear VME    counters on ttc_resync
+    gem_cnt_ctrl_wr[7]    = 1; // RW  1=Clear Header counters on ttc_resync
+    gem_cnt_ctrl_wr[8]    = 0; // RW  0=read counter lower 16 bits, 1=upper 14
+    gem_cnt_ctrl_wr[14:9] = 0; // RW  Counter address
+    gem_cnt_ctrl_wr[15]   = 0; // RW  Parity error reset
+  end
+
+  wire [6:0] gem_cnt_select;
+  wire       gem_cnt_snapshot;
+  wire       gem_cnt_all_reset_vme;
+  wire       gem_cnt_clear_on_resync;
+
+  assign gem_cnt_all_reset_vme   = gem_cnt_ctrl_wr[0];    // RW  1=reset all VME counters (doesnt clear header)
+  assign gem_cnt_snapshot        = gem_cnt_ctrl_wr[1];    // RW  1=take snapshot of current count
+  assign gem_cnt_stop_on_ovf     = gem_cnt_ctrl_wr[2];    // RW  1=Stop all counters if any overflows
+  assign gem_cnt_alct_debug      = gem_cnt_ctrl_wr[5];    // RW  1=Enable alct lct error alct debug counter
+  assign gem_cnt_clear_on_resync = gem_cnt_ctrl_wr[6];    // RW  1=Clear VME    counters on ttc_resync
+  assign gem_hdr_clear_on_resync = gem_cnt_ctrl_wr[7];    // RW  1=Clear Header counters on ttc_resync
+  assign gem_cnt_adr_lsb         = gem_cnt_ctrl_wr[8];    // RW  0=read counter lower 16 bits, 1=upper 14
+  assign gem_cnt_select[6:0]     = gem_cnt_ctrl_wr[15:9]; // RW  Counter address
+
+  assign gem_cnt_ctrl_rd[2:0]    = gem_cnt_ctrl_wr[2:0];  // RW  Readback
+  assign gem_cnt_ctrl_rd[3]      = gem_cnt_any_ovf_alct;  // R  At least one alct counter overflowed
+  assign gem_cnt_ctrl_rd[4]      = gem_cnt_any_ovf_seq;   // R  At least one sequencer counter overflowed
+  assign gem_cnt_ctrl_rd[15:5]   = gem_cnt_ctrl_wr[15:5]; // RW  Readback
+
+  assign gem_cnt_all_reset       = gem_cnt_all_reset_vme || (ttc_resync && gem_cnt_clear_on_resync);
+
+  // x_oneshot is Digital One-Shot defined in utils/x_oneshot.v
+  x_oneshot usnap (.d(gem_cnt_snapshot),.clock(clock),.q(gem_cnt_snapshot_os));
+
+//------------------------------------------------------------------------------------------------------------------
+// ADR_GEM_CNT_RDATA=0x316  GEM Counter Data Register
+//------------------------------------------------------------------------------------------------------------------
+// Remap 1D counters to 2D, because XST does not support 2D ports
+  parameter MXCNT = 93;                     // Number of counters, last counter id is mxcnt-1
+  reg  [MXCNTVME-1:0] gem_cnt_snap [MXCNT-1:0]; // Event counter snapshot 2D
+  wire [MXCNTVME-1:0] gem_cnt      [MXCNT-1:0]; // Event counter 2D map
+
+  assign gem_cnt[0]   = gem_counter0;
+  assign gem_cnt[1]   = gem_counter1;
+  assign gem_cnt[2]   = gem_counter2;
+  assign gem_cnt[3]   = gem_counter3;
+  assign gem_cnt[4]   = gem_counter4;
+  assign gem_cnt[5]   = gem_counter5;
+  assign gem_cnt[6]   = gem_counter6;
+  assign gem_cnt[7]   = gem_counter7;
+  assign gem_cnt[8]   = gem_counter8;
+  assign gem_cnt[9]   = gem_counter9;
+  assign gem_cnt[10]  = gem_counter10;
+  assign gem_cnt[11]  = gem_counter11;
+  assign gem_cnt[12]  = gem_counter12;
+  assign gem_cnt[13]  = gem_counter13;
+  assign gem_cnt[14]  = gem_counter14;
+  assign gem_cnt[15]  = gem_counter15;
+  assign gem_cnt[16]  = gem_counter16;
+  assign gem_cnt[17]  = gem_counter17;
+  assign gem_cnt[18]  = gem_counter18;
+  assign gem_cnt[19]  = gem_counter19;
+  assign gem_cnt[20]  = gem_counter20;
+  assign gem_cnt[21]  = gem_counter21;
+  assign gem_cnt[22]  = gem_counter22;
+  assign gem_cnt[23]  = gem_counter23;
+  assign gem_cnt[24]  = gem_counter24;
+  assign gem_cnt[25]  = gem_counter25;
+  assign gem_cnt[26]  = gem_counter26;
+  assign gem_cnt[27]  = gem_counter27;
+  assign gem_cnt[28]  = gem_counter28;
+  assign gem_cnt[29]  = gem_counter29;
+  assign gem_cnt[30]  = gem_counter30;
+  assign gem_cnt[31]  = gem_counter31;
+  assign gem_cnt[32]  = gem_counter32;
+  assign gem_cnt[33]  = gem_counter33;
+  assign gem_cnt[34]  = gem_counter34;
+  assign gem_cnt[35]  = gem_counter35;
+  assign gem_cnt[36]  = gem_counter36;
+  assign gem_cnt[37]  = gem_counter37;
+  assign gem_cnt[38]  = gem_counter38;
+  assign gem_cnt[39]  = gem_counter39;
+  assign gem_cnt[40]  = gem_counter40;
+  assign gem_cnt[41]  = gem_counter41;
+  assign gem_cnt[42]  = gem_counter42;
+  assign gem_cnt[43]  = gem_counter43;
+  assign gem_cnt[44]  = gem_counter44;
+  assign gem_cnt[45]  = gem_counter45;
+  assign gem_cnt[46]  = gem_counter46;
+  assign gem_cnt[47]  = gem_counter47;
+  assign gem_cnt[48]  = gem_counter48;
+  assign gem_cnt[49]  = gem_counter49;
+  assign gem_cnt[50]  = gem_counter50;
+  assign gem_cnt[51]  = gem_counter51;
+  assign gem_cnt[52]  = gem_counter52;
+  assign gem_cnt[53]  = gem_counter53;
+  assign gem_cnt[54]  = gem_counter54;
+  assign gem_cnt[55]  = gem_counter55;
+  assign gem_cnt[56]  = gem_counter56;
+  assign gem_cnt[57]  = gem_counter57;
+  assign gem_cnt[58]  = gem_counter58;
+  assign gem_cnt[59]  = gem_counter59;
+  assign gem_cnt[60]  = gem_counter60;
+  assign gem_cnt[61]  = gem_counter61;
+  assign gem_cnt[62]  = gem_counter62;
+  assign gem_cnt[63]  = gem_counter63;
+  assign gem_cnt[64]  = gem_counter64;
+  assign gem_cnt[65]  = gem_counter65;
+  assign gem_cnt[66]  = gem_counter66;
+  assign gem_cnt[67]  = gem_counter67;
+  assign gem_cnt[68]  = gem_counter68;
+  assign gem_cnt[69]  = gem_counter69;
+  assign gem_cnt[70]  = gem_counter70;
+  assign gem_cnt[71]  = gem_counter71;
+  assign gem_cnt[72]  = gem_counter72;
+  assign gem_cnt[73]  = gem_counter73;
+  assign gem_cnt[74]  = gem_counter74;
+  assign gem_cnt[75]  = gem_counter75;
+  assign gem_cnt[76]  = gem_counter76;
+  assign gem_cnt[77]  = gem_counter77;
+  assign gem_cnt[78]  = gem_counter78;
+  assign gem_cnt[79]  = gem_counter79;
+  assign gem_cnt[80]  = gem_counter80;
+  assign gem_cnt[81]  = gem_counter81;
+  assign gem_cnt[82]  = gem_counter82;
+  assign gem_cnt[83]  = gem_counter83;
+  assign gem_cnt[84]  = gem_counter84;
+  assign gem_cnt[85]  = gem_counter85;
+  assign gem_cnt[86]  = gem_counter86;
+  assign gem_cnt[87]  = gem_counter87;
+  assign gem_cnt[88]  = gem_counter88;
+  assign gem_cnt[89]  = gem_counter89;
+  assign gem_cnt[90]  = gem_counter90;
+  assign gem_cnt[91]  = gem_counter91;
+  assign gem_cnt[92]  = gem_counter92;
+  assign gem_cnt[93]  = gem_counter93;
+  assign gem_cnt[94]  = gem_counter94;
+  assign gem_cnt[95]  = gem_counter95;
+  assign gem_cnt[96]  = gem_counter96;
+  assign gem_cnt[97]  = gem_counter97;
+  assign gem_cnt[98]  = gem_counter98;
+  assign gem_cnt[99]  = gem_counter99;
+  assign gem_cnt[100] = gem_counter100;
+  assign gem_cnt[101] = gem_counter101;
+  assign gem_cnt[102] = gem_counter102;
+  assign gem_cnt[103] = gem_counter103;
+  assign gem_cnt[104] = gem_counter104;
+  assign gem_cnt[105] = gem_counter105;
+  assign gem_cnt[106] = gem_counter106;
+  assign gem_cnt[107] = gem_counter107;
+  assign gem_cnt[108] = gem_counter108;
+  assign gem_cnt[109] = gem_counter109;
+  assign gem_cnt[110] = gem_counter110;
+  assign gem_cnt[111] = gem_counter111;
+  assign gem_cnt[112] = gem_counter112;
+  assign gem_cnt[113] = gem_counter113;
+  assign gem_cnt[114] = gem_counter114;
+  assign gem_cnt[115] = gem_counter115;
+  assign gem_cnt[116] = gem_counter116;
+  assign gem_cnt[117] = gem_counter117;
+  assign gem_cnt[118] = gem_counter118;
+  assign gem_cnt[119] = gem_counter119;
+  assign gem_cnt[120] = gem_counter120;
+  assign gem_cnt[121] = gem_counter121;
+  assign gem_cnt[122] = gem_counter122;
+  assign gem_cnt[123] = gem_counter123;
+  assign gem_cnt[124] = gem_counter124;
+  assign gem_cnt[125] = gem_counter125;
+  assign gem_cnt[126] = gem_counter126;
+  assign gem_cnt[127] = gem_counter127;
+
+// Snapshot current value of all counters at once
+  genvar j;
+  generate
+    for (j=0; j<MXCNT; j=j+1) begin: gensnap_gem
+      always @(posedge clock) begin
+        if (!power_up      )     gem_cnt_snap[j] < = {MXCNTVME{1'b1}}; // Load 1s on startup, defeats warnings for short counters
+        if (gem_cnt_snapshot_os) gem_cnt_snap[j] < = gem_cnt[j];           // Snapshot of j-th counter
+      end
+    end
+  endgenerate
+
+// Latch addressed counter for readout
+  reg [29:0] gem_cnt_rdata=0; // Full 30-bit width register
+
+  always @(posedge clock) begin
+    gem_cnt_rdata <= gem_cnt_snap[gem_cnt_select];
+  end
+
+// Muliplex counter halves to fit in VMED16, if lsb=0 select lower 16 bits, if lsb=1 select upper 14
+  assign gem_cnt_rdata_rd = (gem_cnt_adr_lsb) ? gem_cnt_rdata[29:16] : gem_cnt_rdata[15:0];
 
 //------------------------------------------------------------------------------------------------------------------
 //
