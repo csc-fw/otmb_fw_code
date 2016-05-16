@@ -2189,20 +2189,20 @@
 //------------------------------------------------------------------------------------------------------------------
 // Trigger Source Section
 //
-//  Type  Source      Delay  External  Description
-//  ----  --------------  -----  --------  --------------------------------------------------------
-//  0    CLCT VPF    No    N      Cathode LCT Pattern Trigger, this is the normal trigger mode
-//  1    ALCT Active    Adj    Y      ALCT Trigger acting as Scintillator
-//  2    CLCT*ALCT Act  Adj    N      CLCT*ALCT Pattern Trigger
-//  3    ADB  Test Pulse  Adj    Y      Anode Test Pulse Trigger
-//  4    DMB  Ext Trig  Adj    Y      DMB Calibration Trigger, delay usually adjusted by DMB
-//  5    CLCT Ext Trig  Adj    Y      FAST Site Scintillator Trigger
-//  6    ALCT Ext Trig  Adj    Y      ALCT External trigger, force TMB readout only if ALCT VPF not present
-//  7    VME  Ext Trig  No    Y      VME  External trigger, for self-test
+// Type  Source          Delay  External  Description
+// ----  --------------  -----  --------  --------------------------------------------------------
+// 0     CLCT VPF        No     N         Cathode LCT Pattern Trigger, this is the normal trigger mode
+// 1     ALCT Active     Adj    Y         ALCT Trigger acting as Scintillator
+// 2     CLCT*ALCT Act   Adj    N         CLCT*ALCT Pattern Trigger
+// 3     ADB  Test Pulse Adj    Y         Anode Test Pulse Trigger
+// 4     DMB  Ext Trig   Adj    Y         DMB Calibration Trigger, delay usually adjusted by DMB
+// 5     CLCT Ext Trig   Adj    Y         FAST Site Scintillator Trigger
+// 6     ALCT Ext Trig   Adj    Y         ALCT External trigger, force TMB readout only if ALCT VPF not present
+// 7     VME  Ext Trig   No     Y         VME  External trigger, for self-test
 //
 //
 //    CLCT Pattern Trigger:
-//       CFEB logic modules compare pattern numbers to the number-of-planes-hit threshold value,
+//      CFEB logic modules compare pattern numbers to the number-of-planes-hit threshold value,
 //      and send list of key layers hit.
 //
 //    ALCT Trigger:
@@ -2836,10 +2836,215 @@
   assign event_counter64  = cnt[64];
   assign event_counter65  = cnt[65];
 
-  //assign event_counter100 = cnt[100];
-  //assign event_counter101 = cnt[101];
-  //assign event_counter102 = cnt[102];
-  //assign event_counter103 = cnt[103];
+//------------------------------------------------------------------------------------------------------------------
+// GEM VME Counter Section
+//------------------------------------------------------------------------------------------------------------------
+
+// Counter registers
+  parameter MNGEMCNT        = 0;   // First sequencer counter, not number of counters because they start elsewhere
+  parameter MXGEMCNT        = 127; // Last  sequencer counter, not number of counters becouse they end elsewhere
+
+  reg [MXCNTVME-1:0] gem_cnt [MXCNT:MNCNT]; //
+  reg [MXCNT:MNCNT]  gem_cnt_en = 0;        // Counter increment enables
+
+// Counter enable strobes
+  always @(posedge clock) begin
+
+    gem_cnt_en[0] <= gem_copad_matched;
+
+    gem_cnt_en[1] <= gem0_sync_err; 
+    gem_cnt_en[2] <= gem1_sync_err; 
+    gem_cnt_en[3] <= gems_sync_err; 
+    
+    gem_cnt_en[4] <= gem_hit_at_clct_pretrig[0]; 
+    gem_cnt_en[5] <= gem_hit_at_clct_pretrig[1]; 
+
+    //gem_cnt_en[10] <= gem0_vpf0; 
+    //gem_cnt_en[11] <= gem0_vpf1; 
+    //gem_cnt_en[12] <= gem0_vpf2; 
+    //gem_cnt_en[13] <= gem0_vpf3; 
+    //gem_cnt_en[14] <= gem0_vpf4; 
+    //gem_cnt_en[15] <= gem0_vpf5; 
+    //gem_cnt_en[16] <= gem0_vpf6; 
+    //gem_cnt_en[17] <= gem0_vpf7; 
+
+    //gem_cnt_en[18] <= gem1_vpf0; 
+    //gem_cnt_en[19] <= gem1_vpf1; 
+    //gem_cnt_en[20] <= gem1_vpf2; 
+    //gem_cnt_en[21] <= gem1_vpf3; 
+    //gem_cnt_en[22] <= gem1_vpf4; 
+    //gem_cnt_en[23] <= gem1_vpf5; 
+    //gem_cnt_en[24] <= gem1_vpf6; 
+    //gem_cnt_en[25] <= gem1_vpf7; 
+
+  end
+
+// Counter overflow disable
+  wire [MXCNT:MNCNT]  gem_cnt_nof;
+
+  genvar j;
+  generate
+    for (j=MNCNT; j<=MXCNT; j=j+1) begin: gennof_gem
+      assign gem_cnt_nof[j] = (gem_cnt[j] < cnt_fullscale);    // 1=counter j not overflowed
+    end
+  endgenerate
+
+  wire gem_cnt_any_ovf_clct = !(&gem_cnt_nof);        // 1 or more counters overflowed
+
+  reg gem_cnt_en_all      = 0;
+  reg gem_cnt_any_ovf_seq = 0;
+
+  always @(posedge clock) begin
+    gem_cnt_any_ovf_seq <= gem_cnt_any_ovf_clct;
+    gem_cnt_en_all      <= !((gem_cnt_any_ovf_clct || gem_cnt_any_ovf_alct) && gem_cnt_stop_on_ovf);
+  end
+
+// Counting
+  wire gem_vme_cnt_reset = ccb_evcntres || gem_cnt_all_reset;
+
+  generate
+    for (j=MNCNT; j<=MXCNT; j=j+1) begin: gencnt_gem
+      always @(posedge clock) begin
+        if (gem_vme_cnt_reset) begin
+          if (!(j==RESYNCCNT_ID && ttc_resync)) // Don't let ttc_resync clear the resync counter, eh
+            gem_cnt[j] = cnt_fatzero;           // Clear counter j
+        end
+        else if (cnt_en_all) begin
+          if (gem_cnt_en[j] && gem_cnt_nof[j]) gem_cnt[j] = gem_cnt[j]+1'b1;  // Increment counter j if it has not overflowed
+        end
+      end
+    end
+  endgenerate
+
+// Map 2D counter array to 1D for io ports
+  assign gem_counter0   = gem_cnt[0];
+  assign gem_counter1   = gem_cnt[1];
+  assign gem_counter2   = gem_cnt[2];
+  assign gem_counter3   = gem_cnt[3];
+  assign gem_counter4   = gem_cnt[4];
+  assign gem_counter5   = gem_cnt[5];
+  assign gem_counter6   = gem_cnt[6];
+  assign gem_counter7   = gem_cnt[7];
+  assign gem_counter8   = gem_cnt[8];
+  assign gem_counter9   = gem_cnt[9];
+  assign gem_counter10  = gem_cnt[10];
+  assign gem_counter11  = gem_cnt[11];
+  assign gem_counter12  = gem_cnt[12];
+  assign gem_counter13  = gem_cnt[13];
+  assign gem_counter14  = gem_cnt[14];
+  assign gem_counter15  = gem_cnt[15];
+  assign gem_counter16  = gem_cnt[16];
+  assign gem_counter17  = gem_cnt[17];
+  assign gem_counter18  = gem_cnt[18];
+  assign gem_counter19  = gem_cnt[19];
+  assign gem_counter20  = gem_cnt[20];
+  assign gem_counter21  = gem_cnt[21];
+  assign gem_counter22  = gem_cnt[22];
+  assign gem_counter23  = gem_cnt[23];
+  assign gem_counter24  = gem_cnt[24];
+  assign gem_counter25  = gem_cnt[25];
+  assign gem_counter26  = gem_cnt[26];
+  assign gem_counter27  = gem_cnt[27];
+  assign gem_counter28  = gem_cnt[28];
+  assign gem_counter29  = gem_cnt[29];
+  assign gem_counter30  = gem_cnt[30];
+  assign gem_counter31  = gem_cnt[31];
+  assign gem_counter32  = gem_cnt[32];
+  assign gem_counter33  = gem_cnt[33];
+  assign gem_counter34  = gem_cnt[34];
+  assign gem_counter35  = gem_cnt[35];
+  assign gem_counter36  = gem_cnt[36];
+  assign gem_counter37  = gem_cnt[37];
+  assign gem_counter38  = gem_cnt[38];
+  assign gem_counter39  = gem_cnt[39];
+  assign gem_counter40  = gem_cnt[40];
+  assign gem_counter41  = gem_cnt[41];
+  assign gem_counter42  = gem_cnt[42];
+  assign gem_counter43  = gem_cnt[43];
+  assign gem_counter44  = gem_cnt[44];
+  assign gem_counter45  = gem_cnt[45];
+  assign gem_counter46  = gem_cnt[46];
+  assign gem_counter47  = gem_cnt[47];
+  assign gem_counter48  = gem_cnt[48];
+  assign gem_counter49  = gem_cnt[49];
+  assign gem_counter50  = gem_cnt[50];
+  assign gem_counter51  = gem_cnt[51];
+  assign gem_counter52  = gem_cnt[52];
+  assign gem_counter53  = gem_cnt[53];
+  assign gem_counter54  = gem_cnt[54];
+  assign gem_counter55  = gem_cnt[55];
+  assign gem_counter56  = gem_cnt[56];
+  assign gem_counter57  = gem_cnt[57];
+  assign gem_counter58  = gem_cnt[58];
+  assign gem_counter59  = gem_cnt[59];
+  assign gem_counter60  = gem_cnt[60];
+  assign gem_counter61  = gem_cnt[61];
+  assign gem_counter62  = gem_cnt[62];
+  assign gem_counter63  = gem_cnt[63];
+  assign gem_counter64  = gem_cnt[64];
+  assign gem_counter65  = gem_cnt[65];
+  assign gem_counter66  = gem_cnt[66];
+  assign gem_counter67  = gem_cnt[67];
+  assign gem_counter68  = gem_cnt[68];
+  assign gem_counter69  = gem_cnt[69];
+  assign gem_counter70  = gem_cnt[70];
+  assign gem_counter71  = gem_cnt[71];
+  assign gem_counter72  = gem_cnt[72];
+  assign gem_counter73  = gem_cnt[73];
+  assign gem_counter74  = gem_cnt[74];
+  assign gem_counter75  = gem_cnt[75];
+  assign gem_counter76  = gem_cnt[76];
+  assign gem_counter77  = gem_cnt[77];
+  assign gem_counter78  = gem_cnt[78];
+  assign gem_counter79  = gem_cnt[79];
+  assign gem_counter80  = gem_cnt[80];
+  assign gem_counter81  = gem_cnt[81];
+  assign gem_counter82  = gem_cnt[82];
+  assign gem_counter83  = gem_cnt[83];
+  assign gem_counter84  = gem_cnt[84];
+  assign gem_counter85  = gem_cnt[85];
+  assign gem_counter86  = gem_cnt[86];
+  assign gem_counter87  = gem_cnt[87];
+  assign gem_counter88  = gem_cnt[88];
+  assign gem_counter89  = gem_cnt[89];
+  assign gem_counter90  = gem_cnt[90];
+  assign gem_counter91  = gem_cnt[91];
+  assign gem_counter92  = gem_cnt[92];
+  assign gem_counter93  = gem_cnt[93];
+  assign gem_counter94  = gem_cnt[94];
+  assign gem_counter95  = gem_cnt[95];
+  assign gem_counter96  = gem_cnt[96];
+  assign gem_counter97  = gem_cnt[97];
+  assign gem_counter98  = gem_cnt[98];
+  assign gem_counter99  = gem_cnt[99];
+  assign gem_counter100 = gem_cnt[100];
+  assign gem_counter101 = gem_cnt[101];
+  assign gem_counter102 = gem_cnt[102];
+  assign gem_counter103 = gem_cnt[103];
+  assign gem_counter104 = gem_cnt[104];
+  assign gem_counter105 = gem_cnt[105];
+  assign gem_counter106 = gem_cnt[106];
+  assign gem_counter107 = gem_cnt[107];
+  assign gem_counter108 = gem_cnt[108];
+  assign gem_counter109 = gem_cnt[109];
+  assign gem_counter110 = gem_cnt[110];
+  assign gem_counter111 = gem_cnt[111];
+  assign gem_counter112 = gem_cnt[112];
+  assign gem_counter113 = gem_cnt[113];
+  assign gem_counter114 = gem_cnt[114];
+  assign gem_counter115 = gem_cnt[115];
+  assign gem_counter116 = gem_cnt[116];
+  assign gem_counter117 = gem_cnt[117];
+  assign gem_counter118 = gem_cnt[118];
+  assign gem_counter119 = gem_cnt[119];
+  assign gem_counter120 = gem_cnt[120];
+  assign gem_counter121 = gem_cnt[121];
+  assign gem_counter122 = gem_cnt[122];
+  assign gem_counter123 = gem_cnt[123];
+  assign gem_counter124 = gem_cnt[124];
+  assign gem_counter125 = gem_cnt[125];
+  assign gem_counter126 = gem_cnt[126];
+  assign gem_counter127 = gem_cnt[127];
 
 //------------------------------------------------------------------------------------------------------------------
 // Multi-buffer storage for event header
@@ -2850,18 +3055,18 @@
   wire [MXXPRE-1:0] xpre_wdata; // Mapping array
   wire [MXXPRE-1:0] xpre_rdata; // Mapping array
 
-  assign xpre_wdata[6:0]   =  active_feb_list_pre[6:0]; // Active FEB list sent to DAQMB
-  assign xpre_wdata[17:7]  =  trig_source_s0_mod[10:0]; // Trigger source vector
-  assign xpre_wdata[29:18] =  bxn_counter[11:0];        // Full Bunch Crossing number at pretrig
-  assign xpre_wdata[59:30] =  orbit_counter[29:0];      // Orbit count at pre-trigger
-  assign xpre_wdata[60]    =  sync_err;                 // BXN sync error
-  assign xpre_wdata[64:61] =  alct_preClct_win[3:0];    // ALCT active_feb_flag position in pretrig window
+  assign xpre_wdata[6:0]   = active_feb_list_pre[6:0]; // Active FEB list sent to DAQMB
+  assign xpre_wdata[17:7]  = trig_source_s0_mod[10:0]; // Trigger source vector
+  assign xpre_wdata[29:18] = bxn_counter[11:0];        // Full Bunch Crossing number at pretrig
+  assign xpre_wdata[59:30] = orbit_counter[29:0];      // Orbit count at pre-trigger
+  assign xpre_wdata[60]    = sync_err;                 // BXN sync error
+  assign xpre_wdata[64:61] = alct_preClct_win[3:0];    // ALCT active_feb_flag position in pretrig window
 
-  assign xpre_wdata[75:65] =  wr_buf_adr[MXBADR-1:0]; // Address of write buffer at pretrig
-  assign xpre_wdata[86:76] =  buf_fence_dist[10:0];   // Distance to 1st fence address at pretrigger
-  assign xpre_wdata[87]    =  wr_buf_avail;           // Write buffer is ready or bypassed
-  assign xpre_wdata[88]    =  wr_buf_ready;           // Write buffer is ready
-  assign xpre_wdata[89]    =  buf_stalled;            // All buffer memory space is in use
+  assign xpre_wdata[75:65] = wr_buf_adr[MXBADR-1:0];   // Address of write buffer at pretrig
+  assign xpre_wdata[86:76] = buf_fence_dist[10:0];     // Distance to 1st fence address at pretrigger
+  assign xpre_wdata[87]    = wr_buf_avail;             // Write buffer is ready or bypassed
+  assign xpre_wdata[88]    = wr_buf_ready;             // Write buffer is ready
+  assign xpre_wdata[89]    = buf_stalled;              // All buffer memory space is in use
 
 // Pre-trigger+1bx: store pre-trigger counter 1bx after pretrig to give it time to count current event
   parameter MXXPRE1 = 60; // Pre-trig+1bx data bits
