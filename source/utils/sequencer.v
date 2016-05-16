@@ -3483,8 +3483,8 @@
 
   always @(posedge clock) begin
     if (buf_pop) begin
-      deb_buf_pop_adr    <=  buf_pop_adr; // Buffer pop address at last xpop
-      deb_buf_pop_data  <=  l1a_rdata;    // Buffer pop data at last xpop
+      deb_buf_pop_adr   <=  buf_pop_adr; // Buffer pop address at last xpop
+      deb_buf_pop_data  <=  l1a_rdata;   // Buffer pop data at last xpop
     end
   end
 
@@ -3620,10 +3620,10 @@
   wire  buf_stalled_hdr  = (r_has_hdr) ? r_buf_stalled : buf_stalled;
   
   always @(posedge clock) begin
-  if      (!full_dump && !local_dump &&  header_only ) readout_type = 0; // dump: No  header: Full
-  else if ( full_dump && !local_dump && !header_only ) readout_type = 1; // dump: Full  header: Full
+  if      (!full_dump && !local_dump &&  header_only ) readout_type = 0; // dump: No     header: Full
+  else if ( full_dump && !local_dump && !header_only ) readout_type = 1; // dump: Full   header: Full
   else if (!full_dump &&  local_dump && !header_only ) readout_type = 2; // dump: Local  header: Full
-  else if (!full_dump && !local_dump &&  short_header) readout_type = 3; // dump: No  header: Short
+  else if (!full_dump && !local_dump &&  short_header) readout_type = 3; // dump: No     header: Short
   else                                                 readout_type = 0; // no daq
   end
 
@@ -3723,14 +3723,14 @@
   );
 
   always @(posedge clock) begin
-  if    (crc_reset) crc_ff <= 0;
+  if       (crc_reset) crc_ff <= 0;
   else if  (crc_latch) crc_ff <= crc;
   end
 
 // Fence queue pop wait 1bx for RAM access
   always @(posedge clock) begin
-  if (read_sm != xpop) xpop_done <= 0;
-  else         xpop_done <= 1;
+  if   (read_sm != xpop) xpop_done <= 0;
+  else                   xpop_done <= 1;
   end
 
 // Startup delay waits for buf_q_empty to update after a reset
@@ -3742,7 +3742,7 @@
 
 // Readout State Machine
   always @(posedge clock or posedge sm_reset) begin
-  if    (sm_reset  ) read_sm = xstartup;
+  if       (sm_reset  ) read_sm = xstartup;
   else if  (ttc_resync) read_sm = xstartup;
   else begin
   case (read_sm)
@@ -3791,11 +3791,11 @@
   //TODO: consider using different headers for GEM vs. RPC ? 
   xb04:                        // Send b04 frame to begin RPC/GEM
     // Don't read fifo if it is empty
-    if ((gem_read_enable && gems_all_empty) || (!(|gem_exists) && rpc_read_enable && rpcs_all_empty)) 
+    if ((gem_read_enable && gems_all_empty) || ((!gem_read_enable) && rpc_read_enable && rpcs_all_empty)) 
       read_sm = xe04;
     else begin
-      if   (|gem_exists) read_sm = xgem;
-      else               read_sm = xrpc;
+      if   (gem_read_enable) read_sm = xgem;
+      else                   read_sm = xrpc;
     end
 
   xrpc:                // Send RPC frames
@@ -4123,7 +4123,7 @@
   assign  header36_gem_[14:10] = fifo_pretrig_gem[4:0]; // Number GEM FIFO time bins before pretrigger
   assign  header36_gem_[18:15] = 0;                     // DDU+DMB control flags
 
-  assign  header36_ [18:0]     = (|gem_exists) ? header36_gem_ : header36_rpc_; 
+  assign  header36_ [18:0]     = (gem_read_enable) ? header36_gem_ : header36_rpc_; 
 
 // Buffer Status
 
@@ -4284,7 +4284,7 @@
   reg [MXRPC-1:0]  rd_list_rpc=0;
 
   // Start readout sequence, send fifo dump to DMB
-  assign rd_start_rpc  = (read_sm == xdump) && fifo_read_done && rpc_read_enable && !(|gem_exists) && !no_daq; // don't start rpc if gem exists
+  assign rd_start_rpc  = (read_sm == xdump) && fifo_read_done && rpc_read_enable && (!gem_read_enable) && !no_daq; // don't start rpc if gem exists
   assign rd_abort_rpc  = 0;              // Cancel readout
   assign rpc_fifo_done = !rpc_fifo_busy; // Readout busy sending data to sequencer
   assign rd_rpc_offset = 0;              // RAM address rd_fifo_adr offset for rpc read out
@@ -4414,8 +4414,8 @@
 // RPC+GEM Raw hits
 
   // use a different header if GEMs are enabled, to distinguish from RPC data
-  wire [11:0] b04_frame_mux = (|gem_exists) ? 12'hC04 : 12'hB04; 
-  wire [11:0] e04_frame_mux = (|gem_exists) ? 12'hD04 : 12'hE04; 
+  wire [11:0] b04_frame_mux = (gem_read_enable) ? 12'hC04 : 12'hB04; 
+  wire [11:0] e04_frame_mux = (gem_read_enable) ? 12'hD04 : 12'hE04; 
 
   assign b04_frame[11:0]   =  b04_frame_mux;        // Beginning of GEM/RPC block
   assign b04_frame[14:12]  =  3'b110;               // Marker
