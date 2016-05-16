@@ -10,13 +10,13 @@ module gem_sync_mon (
   input [7:0] gem2_kchar,
   input [7:0] gem3_kchar,
 
-  output reg gem0_synced,  // fibers from same OH are desynced
-  output reg gem1_synced,  // fibers from same OH are desynced
+  output reg gemA_synced,  // fibers from same OH are desynced
+  output reg gemB_synced,  // fibers from same OH are desynced
   output reg gems_synced,  // fibers from both GEM chambers are synched
 
   // latched copies that gems have lost sync in past
-  output reg gem0_lostsync,
-  output reg gem1_lostsync,
+  output reg gemA_lostsync,
+  output reg gemB_lostsync,
   output reg gems_lostsync
 );
 
@@ -47,32 +47,32 @@ assign gem_sync [1] = (gem2_kchar==gem3_kchar);  // two fibers from gem chamber 
 assign gems_sync    = (gem0_kchar==gem2_kchar) && (&gem_sync[1:0]); // gem super chamber is synced
 
 
-initial gem0_synced = 1'b1;
-initial gem1_synced = 1'b1;
+initial gemA_synced = 1'b1;
+initial gemB_synced = 1'b1;
 initial gems_synced = 1'b1;
 
-initial gem0_lostsync = 1'b0;
-initial gem1_lostsync = 1'b0;
+initial gemA_lostsync = 1'b0;
+initial gemB_lostsync = 1'b0;
 initial gems_lostsync = 1'b0;
 
 
 always @(posedge clock) begin
   if (reset)  begin
-    gem0_synced     <= 1'b1;
-    gem1_synced     <= 1'b1;
+    gemA_synced     <= 1'b1;
+    gemB_synced     <= 1'b1;
     gems_synced     <= 1'b1;
 
-    gem0_lostsync   <= 1'b0;
-    gem1_lostsync   <= 1'b0;
+    gemA_lostsync   <= 1'b0;
+    gemB_lostsync   <= 1'b0;
     gems_lostsync   <= 1'b0;
   end
   else begin
-    gem0_synced <= gem_sync [0];
-    gem1_synced <= gem_sync [1];
+    gemA_synced <= gem_sync [0];
+    gemB_synced <= gem_sync [1];
     gems_synced <= gems_sync;
 
-    gem0_lostsync <= gem0_lostsync | ~gem_sync[0];
-    gem1_lostsync <= gem1_lostsync | ~gem_sync[1];
+    gemA_lostsync <= gemA_lostsync | ~gem_sync[0];
+    gemB_lostsync <= gemB_lostsync | ~gem_sync[1];
     gems_lostsync <= gems_lostsync | ~gems_synced;
 
   end

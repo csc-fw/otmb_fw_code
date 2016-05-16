@@ -263,7 +263,7 @@
   parameter MXMPCDLY  =  4;  // MPC delay time bits
 
   parameter MXGEM     =  4;  // Number GEM FIBERS == 2x number of GEM chambers == 4x number of GEM superchambers
-  parameter MXGEMB    =  2;  // Number GEM ID bits. 0=gem0fiber0, 1=gem0fiber1, 2=gem1fiber0, 3=gem1fiber1
+  parameter MXGEMB    =  2;  // Number GEM ID bits. 0=gemAfiber0, 1=gemAfiber1, 2=gemBfiber0, 3=gemBfiber1
 
 // RPC Constants
   parameter MXRPC     =  2;  // Number RPCs
@@ -562,8 +562,8 @@
   .clock_cfeb5_rxd (clock_cfeb_rxd[5]),  // Out  40MHz CFEB receive  data clock 1x
   .clock_cfeb6_rxd (clock_cfeb_rxd[6]),  // Out  40MHz CFEB receive  data clock 1x
 
-  .clock_gem0_rxd (clock_gem_rxd[0]),  // Out 40MHz GEM receive  data clock 1x
-  .clock_gem1_rxd (clock_gem_rxd[1]),  // Out 40MHz GEM receive  data clock 1x
+  .clock_gemA_rxd (clock_gem_rxd[0]),  // Out 40MHz GEM receive  data clock 1x
+  .clock_gemB_rxd (clock_gem_rxd[1]),  // Out 40MHz GEM receive  data clock 1x
                                        // these clocks are ganged together inside of the clock control module
 
 // Global reset
@@ -1372,25 +1372,25 @@
   wire  [MXGEM-1:0]     gem_link_good;                 // link stability monitor: always good, no errors since last resync
   wire  [MXGEM-1:0]     gem_link_bad;                  // link stability monitor: errors happened over 100 times
 
-  wire gem0_rxd_posneg;
-  wire gem1_rxd_posneg;
+  wire gemA_rxd_posneg;
+  wire gemB_rxd_posneg;
 
-  wire [3:0] gem0_rxd_int_delay;
-  wire [3:0] gem1_rxd_int_delay;
+  wire [3:0] gemA_rxd_int_delay;
+  wire [3:0] gemB_rxd_int_delay;
 
-  // both fibers on gem0, and both fibers on gem1 share posnegs and int_delays
+  // both fibers on gemA, and both fibers on gemB share posnegs and int_delays
   wire  [MXGEM-1:0]     gem_rxd_posneg;
   wire  [MXGEM-1:0]     gem_rxd_int_delay [3:0];
 
-  assign gem_rxd_posneg[0] = gem0_rxd_posneg;
-  assign gem_rxd_posneg[1] = gem0_rxd_posneg;
-  assign gem_rxd_posneg[2] = gem1_rxd_posneg;
-  assign gem_rxd_posneg[3] = gem1_rxd_posneg;
+  assign gem_rxd_posneg[0] = gemA_rxd_posneg;
+  assign gem_rxd_posneg[1] = gemA_rxd_posneg;
+  assign gem_rxd_posneg[2] = gemB_rxd_posneg;
+  assign gem_rxd_posneg[3] = gemB_rxd_posneg;
 
-  assign gem_rxd_int_delay[0] = gem0_rxd_int_delay;
-  assign gem_rxd_int_delay[1] = gem0_rxd_int_delay;
-  assign gem_rxd_int_delay[2] = gem1_rxd_int_delay;
-  assign gem_rxd_int_delay[3] = gem1_rxd_int_delay;
+  assign gem_rxd_int_delay[0] = gemA_rxd_int_delay;
+  assign gem_rxd_int_delay[1] = gemA_rxd_int_delay;
+  assign gem_rxd_int_delay[2] = gemB_rxd_int_delay;
+  assign gem_rxd_int_delay[3] = gemB_rxd_int_delay;
 
   wire  [13:0] gem_debug_fifo_rdata [MXGEM-1:0];    // GEM FIFO RAM read data
 
@@ -1512,23 +1512,23 @@
     .gem2_kchar(gem_kchar[2]), // In  Copy of GEM2 k-char
     .gem3_kchar(gem_kchar[3]), // In  Copy of GEM3 k-char
 
-    .gem0_synced(gem0_synced),  // Out fibers from same OH are synced
-    .gem1_synced(gem1_synced),  // Out fibers from same OH are synced
+    .gemA_synced(gemA_synced),  // Out fibers from same OH are synced
+    .gemB_synced(gemB_synced),  // Out fibers from same OH are synced
 
     .gems_synced(gems_synced),  // Out fibers from both GEM chambers are synched
 
     // latched copies that gems have lost sync in past
-    .gem0_lostsync(gem0_lostsync), // Out
-    .gem1_lostsync(gem1_lostsync), // Out
+    .gemA_lostsync(gemA_lostsync), // Out
+    .gemB_lostsync(gemB_lostsync), // Out
     .gems_lostsync(gems_lostsync)  // Out
   );
 
   wire gem_sync_mon_sump =
-      gem0_synced
-    | gem1_synced
+      gemA_synced
+    | gemB_synced
     | gems_synced
-    | gem0_lostsync
-    | gem1_lostsync
+    | gemA_lostsync
+    | gemB_lostsync
     | gems_lostsync;
 
   // GEM Co-pad Matching
@@ -1547,26 +1547,26 @@
     .clock(clock),
 
     // gem chamber 0 clusters
-    .gem0_cluster0(gem_cluster0[0]),
-    .gem0_cluster1(gem_cluster1[0]),
-    .gem0_cluster2(gem_cluster2[0]),
-    .gem0_cluster3(gem_cluster3[0]),
+    .gemA_cluster0(gem_cluster0[0]),
+    .gemA_cluster1(gem_cluster1[0]),
+    .gemA_cluster2(gem_cluster2[0]),
+    .gemA_cluster3(gem_cluster3[0]),
 
-    .gem0_cluster4(gem_cluster0[1]),
-    .gem0_cluster5(gem_cluster1[1]),
-    .gem0_cluster6(gem_cluster2[1]),
-    .gem0_cluster7(gem_cluster3[1]),
+    .gemA_cluster4(gem_cluster0[1]),
+    .gemA_cluster5(gem_cluster1[1]),
+    .gemA_cluster6(gem_cluster2[1]),
+    .gemA_cluster7(gem_cluster3[1]),
 
     // gem chamber 1 clusters
-    .gem1_cluster0(gem_cluster0[2]),
-    .gem1_cluster1(gem_cluster1[2]),
-    .gem1_cluster2(gem_cluster2[2]),
-    .gem1_cluster3(gem_cluster3[2]),
+    .gemB_cluster0(gem_cluster0[2]),
+    .gemB_cluster1(gem_cluster1[2]),
+    .gemB_cluster2(gem_cluster2[2]),
+    .gemB_cluster3(gem_cluster3[2]),
 
-    .gem1_cluster4(gem_cluster0[3]),
-    .gem1_cluster5(gem_cluster1[3]),
-    .gem1_cluster6(gem_cluster2[3]),
-    .gem1_cluster7(gem_cluster3[3]),
+    .gemB_cluster4(gem_cluster0[3]),
+    .gemB_cluster5(gem_cluster1[3]),
+    .gemB_cluster6(gem_cluster2[3]),
+    .gemB_cluster7(gem_cluster3[3]),
 
     // control whether to match on neighboring (+-1) clusters
     .match_neighbors(gem_match_neighbors),
@@ -1679,7 +1679,7 @@
   .cfeb2_ly1hs (cfeb_ly1hs[2][MXHS-1:0]), // In  1/2-strip pulses
   .cfeb2_ly2hs (cfeb_ly2hs[2][MXHS-1:0]), // In  1/2-strip pulses
   .cfeb2_ly3hs (cfeb_ly3hs[2][MXHS-1:0]), // In  1/2-strip pulses
-  .cfeb2_ly4hs (cfeb_ly4hs[2][MXHS-1:0]), // In   1/2-strip pulses
+  .cfeb2_ly4hs (cfeb_ly4hs[2][MXHS-1:0]), // In  1/2-strip pulses
   .cfeb2_ly5hs (cfeb_ly5hs[2][MXHS-1:0]), // In  1/2-strip pulses
 
   .cfeb3_ly0hs (cfeb_ly0hs[3][MXHS-1:0]), // In  1/2-strip pulses
@@ -1981,8 +1981,8 @@
 
 // Sequencer GEM Ports
   .gem_copad_matched (gem_any_match), // GEM co-pad match was found
-  .gem0_sync_err     (~gem0_synced),  // GEM0 has intra-chamber sync error
-  .gem1_sync_err     (~gem1_synced),  // GEM1 has intra-chamber sync error
+  .gemA_sync_err     (~gemA_synced),  // GEM0 has intra-chamber sync error
+  .gemB_sync_err     (~gemB_synced),  // GEM1 has intra-chamber sync error
   .gems_sync_err     (~gems_synced),  // GEM Super Chamber has sync error
 
 // Sequencer External Triggers
@@ -4172,8 +4172,8 @@
       .cfeb4_rxd_posneg (cfeb4_rxd_posneg), // Out  CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
       .cfeb5_rxd_posneg (cfeb5_rxd_posneg), // Out  CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
       .cfeb6_rxd_posneg (cfeb6_rxd_posneg), // Out  CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
-      .gem0_rxd_posneg  (gem0_rxd_posneg),  // Out  GEM  gem-to-tmb inter-stage clock select 0 or 180 degrees
-      .gem1_rxd_posneg  (gem1_rxd_posneg),  // Out  GEM  gem-to-tmb inter-stage clock select 0 or 180 degrees
+      .gemA_rxd_posneg  (gemA_rxd_posneg),  // Out  GEM  gem-to-tmb inter-stage clock select 0 or 180 degrees
+      .gemB_rxd_posneg  (gemB_rxd_posneg),  // Out  GEM  gem-to-tmb inter-stage clock select 0 or 180 degrees
 
       // Phaser VME control/status ports
       .dps_fire  (dps_fire [MXDPS-1:0]), // Out  Set new phase
@@ -4214,8 +4214,8 @@
       .cfeb5_rxd_int_delay (cfeb_rxd_int_delay[5][3:0]), // Out  Interstage delay
       .cfeb6_rxd_int_delay (cfeb_rxd_int_delay[6][3:0]), // Out  Interstage delay
 
-      .gem0_rxd_int_delay (gem0_rxd_int_delay[3:0]), // Out  Interstage delay
-      .gem1_rxd_int_delay (gem1_rxd_int_delay[3:0]), // Out  Interstage delay
+      .gemA_rxd_int_delay (gemA_rxd_int_delay[3:0]), // Out  Interstage delay
+      .gemB_rxd_int_delay (gemB_rxd_int_delay[3:0]), // Out  Interstage delay
 
       // Sync error source enables
       .sync_err_reset         (sync_err_reset),         // Out  VME sync error reset

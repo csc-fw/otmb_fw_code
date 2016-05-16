@@ -401,8 +401,8 @@
 
 // GEM 
   gem_copad_matched, 
-  gem0_sync_err, 
-  gem1_sync_err,
+  gemA_sync_err, 
+  gemB_sync_err,
   gems_sync_err, 
   
 // External Triggers
@@ -1126,8 +1126,8 @@
 
 // GEM 
   input          gem_copad_matched; // GEM co-pad match was found
-  input          gem0_sync_err;     // GEM0 has sync error
-  input          gem1_sync_err;     // GEM1 has sync error
+  input          gemA_sync_err;     // GEM A has sync error
+  input          gemB_sync_err;     // GEM B has sync error
   input          gems_sync_err;     // GEM Super Chamber has sync error
 
 // External Triggers
@@ -2733,8 +2733,8 @@
     cnt_en[65]  <= perr_pulse;                // STAT Raw hits RAM parity errors
 
     // cnt_en[100] <= gem_copad_matched; // STAT Raw hits RAM parity errors
-    // cnt_en[101] <= gem0_sync_err; 
-    // cnt_en[102] <= gem1_sync_err; 
+    // cnt_en[101] <= gemA_sync_err; 
+    // cnt_en[102] <= gemB_sync_err; 
     // cnt_en[103] <= gems_sync_err; 
     
     // cnt_en[104] <= gem_hit_at_clct_pretrig[0]; 
@@ -2852,30 +2852,30 @@
 
     gem_cnt_en[0] <= gem_copad_matched;
 
-    gem_cnt_en[1] <= gem0_sync_err; 
-    gem_cnt_en[2] <= gem1_sync_err; 
+    gem_cnt_en[1] <= gemA_sync_err; 
+    gem_cnt_en[2] <= gemB_sync_err; 
     gem_cnt_en[3] <= gems_sync_err; 
     
     gem_cnt_en[4] <= gem_hit_at_clct_pretrig[0]; 
     gem_cnt_en[5] <= gem_hit_at_clct_pretrig[1]; 
 
-    //gem_cnt_en[10] <= gem0_vpf0; 
-    //gem_cnt_en[11] <= gem0_vpf1; 
-    //gem_cnt_en[12] <= gem0_vpf2; 
-    //gem_cnt_en[13] <= gem0_vpf3; 
-    //gem_cnt_en[14] <= gem0_vpf4; 
-    //gem_cnt_en[15] <= gem0_vpf5; 
-    //gem_cnt_en[16] <= gem0_vpf6; 
-    //gem_cnt_en[17] <= gem0_vpf7; 
-
-    //gem_cnt_en[18] <= gem1_vpf0; 
-    //gem_cnt_en[19] <= gem1_vpf1; 
-    //gem_cnt_en[20] <= gem1_vpf2; 
-    //gem_cnt_en[21] <= gem1_vpf3; 
-    //gem_cnt_en[22] <= gem1_vpf4; 
-    //gem_cnt_en[23] <= gem1_vpf5; 
-    //gem_cnt_en[24] <= gem1_vpf6; 
-    //gem_cnt_en[25] <= gem1_vpf7; 
+    //gem_cnt_en[10] <= gemA_vpf0; 
+    //gem_cnt_en[11] <= gemA_vpf1; 
+    //gem_cnt_en[12] <= gemA_vpf2; 
+    //gem_cnt_en[13] <= gemA_vpf3; 
+    //gem_cnt_en[14] <= gemA_vpf4; 
+    //gem_cnt_en[15] <= gemA_vpf5; 
+    //gem_cnt_en[16] <= gemA_vpf6; 
+    //gem_cnt_en[17] <= gemA_vpf7; 
+                           
+    //gem_cnt_en[18] <= gemB_vpf0; 
+    //gem_cnt_en[19] <= gemB_vpf1; 
+    //gem_cnt_en[20] <= gemB_vpf2; 
+    //gem_cnt_en[21] <= gemB_vpf3; 
+    //gem_cnt_en[22] <= gemB_vpf4; 
+    //gem_cnt_en[23] <= gemB_vpf5; 
+    //gem_cnt_en[24] <= gemB_vpf6; 
+    //gem_cnt_en[25] <= gemB_vpf7; 
 
   end
 
@@ -3668,7 +3668,7 @@
   end
 
 // VME debug register latches
-  reg  [MXBADR-1:0] deb_wr_buf_adr    = 0;
+  reg [MXBADR-1:0]  deb_wr_buf_adr    = 0;
   reg [MXBADR-1:0]  deb_buf_push_adr  = 0;
   reg [MXBADR-1:0]  deb_buf_pop_adr   = 0;
   reg [MXBDATA-1:0] deb_buf_push_data = 0;

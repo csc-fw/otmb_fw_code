@@ -21,28 +21,28 @@ module copad (
 
     input match_neighbors, // set high for the copad finder to match on neighboring (+/- one) pads
 
-    // 8 clusters from gem0
-    input [13:0] gem0_cluster0,
-    input [13:0] gem0_cluster1,
-    input [13:0] gem0_cluster2,
-    input [13:0] gem0_cluster3,
-    input [13:0] gem0_cluster4,
-    input [13:0] gem0_cluster5,
-    input [13:0] gem0_cluster6,
-    input [13:0] gem0_cluster7,
+    // 8 clusters from gemA
+    input [13:0] gemA_cluster0,
+    input [13:0] gemA_cluster1,
+    input [13:0] gemA_cluster2,
+    input [13:0] gemA_cluster3,
+    input [13:0] gemA_cluster4,
+    input [13:0] gemA_cluster5,
+    input [13:0] gemA_cluster6,
+    input [13:0] gemA_cluster7,
 
-    // 8 clusters from gem1
-    input [13:0] gem1_cluster0,
-    input [13:0] gem1_cluster1,
-    input [13:0] gem1_cluster2,
-    input [13:0] gem1_cluster3,
-    input [13:0] gem1_cluster4,
-    input [13:0] gem1_cluster5,
-    input [13:0] gem1_cluster6,
-    input [13:0] gem1_cluster7,
+    // 8 clusters from gemB
+    input [13:0] gemB_cluster0,
+    input [13:0] gemB_cluster1,
+    input [13:0] gemB_cluster2,
+    input [13:0] gemB_cluster3,
+    input [13:0] gemB_cluster4,
+    input [13:0] gemB_cluster5,
+    input [13:0] gemB_cluster6,
+    input [13:0] gemB_cluster7,
 
 
-    // ff'd copies (1bx delay) of the gem0 inputs
+    // ff'd copies (1bx delay) of the gemA inputs
     output reg [MXCLSTB-1:0] cluster0,
     output reg [MXCLSTB-1:0] cluster1,
     output reg [MXCLSTB-1:0] cluster2,
@@ -52,11 +52,11 @@ module copad (
     output reg [MXCLSTB-1:0] cluster6,
     output reg [MXCLSTB-1:0] cluster7,
 
-    // 8 bit ff'd register of matches found, with respect to the address in gem0
+    // 8 bit ff'd register of matches found, with respect to the address in gemA
     output reg [MXCLUSTERS-1:0] match,
 
-    output reg [MXCLUSTERS-1:0] match_right, // 8 bit flag that the match was found on the rhs of gem0 adr
-    output reg [MXCLUSTERS-1:0] match_left,  // 8 bit flag that the match was found on the lhs of gem0 adr
+    output reg [MXCLUSTERS-1:0] match_right, // 8 bit flag that the match was found on the rhs of gemA adr
+    output reg [MXCLUSTERS-1:0] match_left,  // 8 bit flag that the match was found on the lhs of gemA adr
 
     output reg any_match, // Output: 1 bit, any match was found
 
@@ -81,44 +81,44 @@ parameter MXCLSTB    = 14;
     reg [MXCLSTB-1:0] gem_cluster [1:0][7:0];
 
     always @(posedge clock) begin
-      gem_cluster[0][0] <= gem0_cluster0;
-      gem_cluster[0][1] <= gem0_cluster1;
-      gem_cluster[0][2] <= gem0_cluster2;
-      gem_cluster[0][3] <= gem0_cluster3;
-      gem_cluster[0][4] <= gem0_cluster4;
-      gem_cluster[0][5] <= gem0_cluster5;
-      gem_cluster[0][6] <= gem0_cluster6;
-      gem_cluster[0][7] <= gem0_cluster7;
+      gem_cluster[0][0] <= gemA_cluster0;
+      gem_cluster[0][1] <= gemA_cluster1;
+      gem_cluster[0][2] <= gemA_cluster2;
+      gem_cluster[0][3] <= gemA_cluster3;
+      gem_cluster[0][4] <= gemA_cluster4;
+      gem_cluster[0][5] <= gemA_cluster5;
+      gem_cluster[0][6] <= gemA_cluster6;
+      gem_cluster[0][7] <= gemA_cluster7;
 
-      gem_cluster[1][0] <= gem1_cluster0;
-      gem_cluster[1][1] <= gem1_cluster1;
-      gem_cluster[1][2] <= gem1_cluster2;
-      gem_cluster[1][3] <= gem1_cluster3;
-      gem_cluster[1][4] <= gem1_cluster4;
-      gem_cluster[1][5] <= gem1_cluster5;
-      gem_cluster[1][6] <= gem1_cluster6;
-      gem_cluster[1][7] <= gem1_cluster7;
+      gem_cluster[1][0] <= gemB_cluster0;
+      gem_cluster[1][1] <= gemB_cluster1;
+      gem_cluster[1][2] <= gemB_cluster2;
+      gem_cluster[1][3] <= gemB_cluster3;
+      gem_cluster[1][4] <= gemB_cluster4;
+      gem_cluster[1][5] <= gemB_cluster5;
+      gem_cluster[1][6] <= gemB_cluster6;
+      gem_cluster[1][7] <= gemB_cluster7;
     end
  `else
     wire [MXCLSTB-1:0] gem_cluster [1:0][7:0];
 
-    assign gem_cluster[0][0] = gem0_cluster0;
-    assign gem_cluster[0][1] = gem0_cluster1;
-    assign gem_cluster[0][2] = gem0_cluster2;
-    assign gem_cluster[0][3] = gem0_cluster3;
-    assign gem_cluster[0][4] = gem0_cluster4;
-    assign gem_cluster[0][5] = gem0_cluster5;
-    assign gem_cluster[0][6] = gem0_cluster6;
-    assign gem_cluster[0][7] = gem0_cluster7;
+    assign gem_cluster[0][0] = gemA_cluster0;
+    assign gem_cluster[0][1] = gemA_cluster1;
+    assign gem_cluster[0][2] = gemA_cluster2;
+    assign gem_cluster[0][3] = gemA_cluster3;
+    assign gem_cluster[0][4] = gemA_cluster4;
+    assign gem_cluster[0][5] = gemA_cluster5;
+    assign gem_cluster[0][6] = gemA_cluster6;
+    assign gem_cluster[0][7] = gemA_cluster7;
 
-    assign gem_cluster[1][0] = gem1_cluster0;
-    assign gem_cluster[1][1] = gem1_cluster1;
-    assign gem_cluster[1][2] = gem1_cluster2;
-    assign gem_cluster[1][3] = gem1_cluster3;
-    assign gem_cluster[1][4] = gem1_cluster4;
-    assign gem_cluster[1][5] = gem1_cluster5;
-    assign gem_cluster[1][6] = gem1_cluster6;
-    assign gem_cluster[1][7] = gem1_cluster7;
+    assign gem_cluster[1][0] = gemB_cluster0;
+    assign gem_cluster[1][1] = gemB_cluster1;
+    assign gem_cluster[1][2] = gemB_cluster2;
+    assign gem_cluster[1][3] = gemB_cluster3;
+    assign gem_cluster[1][4] = gemB_cluster4;
+    assign gem_cluster[1][5] = gemB_cluster5;
+    assign gem_cluster[1][6] = gemB_cluster6;
+    assign gem_cluster[1][7] = gemB_cluster7;
 
  `endif
 
@@ -221,43 +221,43 @@ for (iclst=0; iclst<MXCLUSTERS; iclst=iclst+1) begin: clust_match_loop
                                      (adr[0][iclst] == 1151 - 7) |
                                      (adr[0][iclst] == 1535 - 7);
 
-  // match is in the center of gem0 cluster (full match)
-  assign match_c  [iclst] =  vpf[0][iclst] &            // gem0 cluster is valid
-                           ( adr[0][iclst] == adr[1][0] // full match to gem1 cluster0
-                           | adr[0][iclst] == adr[1][1] // full match to gem1 cluster1
-                           | adr[0][iclst] == adr[1][2] // full match to gem1 cluster2
-                           | adr[0][iclst] == adr[1][3] // full match to gem1 cluster3
-                           | adr[0][iclst] == adr[1][4] // full match to gem1 cluster4
-                           | adr[0][iclst] == adr[1][5] // full match to gem1 cluster5
-                           | adr[0][iclst] == adr[1][6] // full match to gem1 cluster6
-                           | adr[0][iclst] == adr[1][7] // full match to gem1 cluster7
-                          );                            // gem1 cluster automatically valid if there is a match
+  // match is in the center of gemA cluster (full match)
+  assign match_c  [iclst] =  vpf[0][iclst] &            // gemA cluster is valid
+                           ( adr[0][iclst] == adr[1][0] // full match to gemB cluster0
+                           | adr[0][iclst] == adr[1][1] // full match to gemB cluster1
+                           | adr[0][iclst] == adr[1][2] // full match to gemB cluster2
+                           | adr[0][iclst] == adr[1][3] // full match to gemB cluster3
+                           | adr[0][iclst] == adr[1][4] // full match to gemB cluster4
+                           | adr[0][iclst] == adr[1][5] // full match to gemB cluster5
+                           | adr[0][iclst] == adr[1][6] // full match to gemB cluster6
+                           | adr[0][iclst] == adr[1][7] // full match to gemB cluster7
+                          );                            // gemB cluster automatically valid if there is a match
 
-  // match is on the left side of gem0 cluster
+  // match is on the left side of gemA cluster
   assign match_l [iclst] = !adr_at_left_edge[iclst] & // don't form matches at right edge
-                            vpf[0][iclst] &           // gem0 cluster is valid
-                          ( adr0_m[iclst]==adr[1][0]  // left side match to gem1 cluster0
-                          | adr0_m[iclst]==adr[1][1]  // left side match to gem1 cluster1
-                          | adr0_m[iclst]==adr[1][2]  // left side match to gem1 cluster2
-                          | adr0_m[iclst]==adr[1][3]  // left side match to gem1 cluster3
-                          | adr0_m[iclst]==adr[1][4]  // left side match to gem1 cluster4
-                          | adr0_m[iclst]==adr[1][5]  // left side match to gem1 cluster5
-                          | adr0_m[iclst]==adr[1][6]  // left side match to gem1 cluster6
-                          | adr0_m[iclst]==adr[1][7]  // left side match to gem1 cluster7
-                          );                          // gem1 cluster automatically valid if there is a match
+                            vpf[0][iclst] &           // gemA cluster is valid
+                          ( adr0_m[iclst]==adr[1][0]  // left side match to gemB cluster0
+                          | adr0_m[iclst]==adr[1][1]  // left side match to gemB cluster1
+                          | adr0_m[iclst]==adr[1][2]  // left side match to gemB cluster2
+                          | adr0_m[iclst]==adr[1][3]  // left side match to gemB cluster3
+                          | adr0_m[iclst]==adr[1][4]  // left side match to gemB cluster4
+                          | adr0_m[iclst]==adr[1][5]  // left side match to gemB cluster5
+                          | adr0_m[iclst]==adr[1][6]  // left side match to gemB cluster6
+                          | adr0_m[iclst]==adr[1][7]  // left side match to gemB cluster7
+                          );                          // gemB cluster automatically valid if there is a match
 
-  // match is on the right side of gem0 cluster
+  // match is on the right side of gemA cluster
   assign match_r [iclst] = !adr_at_right_edge[iclst] & // don't form matches at right edge
-                            vpf[0][iclst] &            // gem0 cluster is valid
-                          ( adr0_p[iclst]==adr[1][0]   // right side match to gem1 cluster0
-                          | adr0_p[iclst]==adr[1][1]   // right side match to gem1 cluster1
-                          | adr0_p[iclst]==adr[1][2]   // right side match to gem1 cluster2
-                          | adr0_p[iclst]==adr[1][3]   // right side match to gem1 cluster3
-                          | adr0_p[iclst]==adr[1][4]   // right side match to gem1 cluster4
-                          | adr0_p[iclst]==adr[1][5]   // right side match to gem1 cluster5
-                          | adr0_p[iclst]==adr[1][6]   // right side match to gem1 cluster6
-                          | adr0_p[iclst]==adr[1][7]   // right side match to gem1 cluster7
-                          );                           // gem1 cluster automatically valid if there is a match
+                            vpf[0][iclst] &            // gemA cluster is valid
+                          ( adr0_p[iclst]==adr[1][0]   // right side match to gemB cluster0
+                          | adr0_p[iclst]==adr[1][1]   // right side match to gemB cluster1
+                          | adr0_p[iclst]==adr[1][2]   // right side match to gemB cluster2
+                          | adr0_p[iclst]==adr[1][3]   // right side match to gemB cluster3
+                          | adr0_p[iclst]==adr[1][4]   // right side match to gemB cluster4
+                          | adr0_p[iclst]==adr[1][5]   // right side match to gemB cluster5
+                          | adr0_p[iclst]==adr[1][6]   // right side match to gemB cluster6
+                          | adr0_p[iclst]==adr[1][7]   // right side match to gemB cluster7
+                          );                           // gemB cluster automatically valid if there is a match
 end
 endgenerate
 
@@ -273,7 +273,7 @@ always @ (posedge clock) begin
   match_left    [7:0] <= match_l;
   match_right   [7:0] <= match_r;
 
-  // ff copy the clusters from gem0 to delay 1bx to lineup with output
+  // ff copy the clusters from gemA to delay 1bx to lineup with output
   cluster0 <= gem_cluster[0][0];
   cluster1 <= gem_cluster[0][1];
   cluster2 <= gem_cluster[0][2];
@@ -286,7 +286,7 @@ end
 
 
 
-// form a list of 8 Active FEBs with clusters in GEM0
+// form a list of 8 Active FEBs with clusters in gemA
 //wire [4:0] cluster_feb [MXCLUSTERS-1:0];
 reg [4:0] cluster_feb [MXCLUSTERS-1:0];
 generate
@@ -347,7 +347,7 @@ for (iclst=0; iclst<MXCLUSTERS; iclst=iclst+1) begin: feb_assign_loop
 end
 endgenerate
 
-// form a 24 bit list of active febs, based on presence of cluster in gem0
+// form a 24 bit list of active febs, based on presence of cluster in gemA
 genvar ifeb;
 generate
 for (ifeb=0; ifeb<MXFEB; ifeb=ifeb+1)     begin:   feb_match_loop

@@ -637,10 +637,10 @@
   fifo_pretrig_gem,
 
 // GEM Configuration Ports
-  gem0_rxd_posneg,
-  gem1_rxd_posneg,
-  gem0_rxd_int_delay,
-  gem1_rxd_int_delay,
+  gemA_rxd_posneg,
+  gemB_rxd_posneg,
+  gemA_rxd_int_delay,
+  gemB_rxd_int_delay,
 
 // RPC VME Configuration Ports
   rpc_done,
@@ -1486,8 +1486,8 @@
   parameter ADR_GEM_GTX_RX2           = 10'h304;
   parameter ADR_GEM_GTX_RX3           = 10'h306;
 
-  parameter ADR_V6_PHASER9            = 10'h308; // Phaser 9  GEM0 Phaser
-  parameter ADR_V6_PHASER10           = 10'h30a; // Phaser 10 GEM1 Phaser
+  parameter ADR_V6_PHASER9            = 10'h308; // Phaser 9  GEMA Phaser
+  parameter ADR_V6_PHASER10           = 10'h30a; // Phaser 10 GEMB Phaser
 
   parameter ADR_GEM_DEBUG_FIFO_CTRL   = 10'h30c;
   parameter ADR_GEM_DEBUG_FIFO_DATA   = 10'h30e;
@@ -2136,11 +2136,11 @@
   output [MXTBIN-1:0] fifo_tbins_gem;    // Out  Number GEM FIFO time bins to read out
   output [MXTBIN-1:0] fifo_pretrig_gem;  // Out  Number GEM FIFO time bins before pretrigger
 
-  output gem0_rxd_posneg;  // Out gem chamber 0 (fiber0,1) rxd posneg value
-  output gem1_rxd_posneg;  // Out gem chamber 1 (fiber2,3) rxd posneg value
+  output gemA_rxd_posneg;  // Out gem chamber 0 (fiber0,1) rxd posneg value
+  output gemB_rxd_posneg;  // Out gem chamber 1 (fiber2,3) rxd posneg value
 
-  output [3:0] gem0_rxd_int_delay; // Out gem chamber 0 (fiber0,1) bxn delay
-  output [3:0] gem1_rxd_int_delay; // Out gem chamber 1 (fiber2,3) bxn delay
+  output [3:0] gemA_rxd_int_delay; // Out gem chamber 0 (fiber0,1) bxn delay
+  output [3:0] gemB_rxd_int_delay; // Out gem chamber 1 (fiber2,3) bxn delay
 
 // RPC Ports: RAT Control
   output          rpc_sync;     // Sync mode
@@ -7215,8 +7215,8 @@
 // ADR_PHASER6     = 0x11A DCM Phase Shifter Register: CFEB4 rxd
 // ADR_V6_PHASER7  = 0x16A DCM Phase Shifter Register: CFEB5 rxd "ME1/1A-side"
 // ADR_V6_PHASER8  = 0x16C DCM Phase Shifter Register: CFEB6 rxd "ME1/1B-side"
-// ADR_V6_PHASER9  = 0x206 DCM Phase Shifter Register: GEM0  rxd "GEM super-chamber"
-// ADR_V6_PHASER10 = 0x208 DCM Phase Shifter Register: GEM1
+// ADR_V6_PHASER9  = 0x206 DCM Phase Shifter Register: GEMA  rxd "GEM super-chamber"
+// ADR_V6_PHASER10 = 0x208 DCM Phase Shifter Register: GEMB
 //------------------------------------------------------------------------------------------------------------------
 
   wire [MXDPS-1:0] dps_fire_vme;
@@ -7450,7 +7450,7 @@
   assign phaser8_rd[6:4]  = dps3_sm_vec[2:0];     // R  Phase shifter machine state
   assign phaser8_rd[15:7] = phaser8_wr[15:7];     // RW  Readback
 
-  // Phaser 9: gem0 rxd  Virtex-6 only
+  // Phaser 9: gemA rxd  Virtex-6 only
   //--------------------------------------------------------------------------------------------------------------------
   initial begin
   phaser9_wr[0]    = 0;  // RW  Set new phase, software sets then unsets
@@ -7464,7 +7464,7 @@
 
   assign dps_fire_vme[9] = phaser9_wr[0];        // RW  Set new phase, software sets then unsets
   assign dps_reset[9]    = phaser9_wr[1];        // RW  Reset current phase to 32
-  assign gem0_rxd_posneg = phaser9_wr[7];        // RW  Posneg
+  assign gemA_rxd_posneg = phaser9_wr[7];        // RW  Posneg
   assign dps9_phase[7:0] = phaser9_wr[15:8];     // RW  Phase to set, 0-255
 
   assign phaser9_rd[1:0]  = phaser9_wr[1:0];  // RW  Readback
@@ -7473,7 +7473,7 @@
   assign phaser9_rd[6:4]  = dps9_sm_vec[2:0]; // R  Phase shifter machine state
   assign phaser9_rd[15:7] = phaser9_wr[15:7]; // RW  Readback
 
-  // Phaser 10: gem1 rxd  Virtex-6 only
+  // Phaser 10: gemB rxd  Virtex-6 only
   //--------------------------------------------------------------------------------------------------------------------
   initial begin
   phaser10_wr[0]     =  0;  // RW  Set new phase, software sets then unsets
@@ -7487,7 +7487,7 @@
 
   assign dps_fire_vme[10]  =  phaser10_wr[0];    // RW  Set new phase, software sets then unsets
   assign dps_reset[10]     =  phaser10_wr[1];    // RW  Reset current phase to 32
-  assign gem1_rxd_posneg   =  phaser10_wr[7];    // RW  Posneg
+  assign gemB_rxd_posneg   =  phaser10_wr[7];    // RW  Posneg
   assign dps10_phase[7:0]  =  phaser10_wr[15:8]; // RW  Phase to set, 0-255
 
   assign phaser10_rd[1:0]   =  phaser10_wr[1:0];  // RW  Readback
@@ -8046,24 +8046,24 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 //------------------------------------------------------------------------------------------------------------------
 
   initial begin
-  gem_cfg_wr[3:0]   = 4'd0;    // RW GEM0 Rxd Integer BX Delay
-  gem_cfg_wr[7:4]   = 4'd0;    // RW GEM1 Rxd Integer BX Delay
+  gem_cfg_wr[3:0]   = 4'd0;    // RW GEMA Rxd Integer BX Delay
+  gem_cfg_wr[7:4]   = 4'd0;    // RW GEMB Rxd Integer BX Delay
   gem_cfg_wr[8]     = 1'b0;    // 1=Independent GEM RXD Integer BX delays
   gem_cfg_wr[12:9]  = 4'b1111; // GEM exists [3:0]
   gem_cfg_wr[15:13] = 2'b00;   // Unassigned
   end
 
-  wire [3:0] gem0_rxd_int_delay_wr = gem_cfg_wr[3:0];
-  wire [3:0] gem1_rxd_int_delay_wr = gem_cfg_wr[7:4];
+  wire [3:0] gemA_rxd_int_delay_wr = gem_cfg_wr[3:0];
+  wire [3:0] gemB_rxd_int_delay_wr = gem_cfg_wr[7:4];
 
   wire gem_rxd_int_delay_decouple = gem_cfg_wr[8];
 
   // FF Buffer gem rxd integer delay
-  reg [3:0] gem0_rxd_int_delay = 0;
-  reg [3:0] gem1_rxd_int_delay = 0;
+  reg [3:0] gemA_rxd_int_delay = 0;
+  reg [3:0] gemB_rxd_int_delay = 0;
   always @(posedge clock) begin
-    gem0_rxd_int_delay <= (gem_rxd_int_delay_decouple) ? (gem0_rxd_int_delay_wr[3:0]) : (gem0_rxd_int_delay_wr[3:0]);
-    gem1_rxd_int_delay <= (gem_rxd_int_delay_decouple) ? (gem1_rxd_int_delay_wr[3:0]) : (gem0_rxd_int_delay_wr[3:0]);
+    gemA_rxd_int_delay <= (gem_rxd_int_delay_decouple) ? (gemA_rxd_int_delay_wr[3:0]) : (gemA_rxd_int_delay_wr[3:0]);
+    gemB_rxd_int_delay <= (gem_rxd_int_delay_decouple) ? (gemB_rxd_int_delay_wr[3:0]) : (gemA_rxd_int_delay_wr[3:0]);
   end
 
   assign gem_exists = gem_cfg_wr[12:9];
