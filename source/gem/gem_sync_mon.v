@@ -39,12 +39,22 @@ module gem_sync_mon (
 //
 //----------------------------------------------------------------------------------------------------------------------
 
+wire gem0_is_overflow = (gem0_kchar==8'hFC); 
+wire gem1_is_overflow = (gem1_kchar==8'hFC); 
+wire gem2_is_overflow = (gem2_kchar==8'hFC); 
+wire gem3_is_overflow = (gem3_kchar==8'hFC); 
+
+wire gemA_is_overflow = (gem0_is_overflow || gem1_is_overflow); 
+wire gemB_is_overflow = (gem2_is_overflow || gem3_is_overflow); 
+
+wire gem_overflow = gemA_is_overflow || gemB_is_overflow; 
+
 wire [1:0] gem_sync;
 wire       gems_sync;
 
-assign gem_sync [0] = (gem0_kchar==gem1_kchar);  // two fibers from gem chamber 1 are synced to eachother
-assign gem_sync [1] = (gem2_kchar==gem3_kchar);  // two fibers from gem chamber 2 are synced to eachother
-assign gems_sync    = (gem0_kchar==gem2_kchar) && (&gem_sync[1:0]); // gem super chamber is synced
+assign gem_sync [0] = (gem0_kchar==gem1_kchar) || gemA_is_overflow;                   // two fibers from gem chamber 1 are synced to eachother
+assign gem_sync [1] = (gem2_kchar==gem3_kchar) || gemB_is_overflow;                   // two fibers from gem chamber 2 are synced to eachother
+assign gems_sync    = ((gem0_kchar==gem2_kchar) && (&gem_sync[1:0])) || gem_overflow; // gem super chamber is synced
 
 
 initial gemA_synced = 1'b1;

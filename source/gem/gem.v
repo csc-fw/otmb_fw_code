@@ -71,11 +71,14 @@ module gem (
 
     output [MXCLST-1:0]    parity_err_gem,
 
+    output overflow, 
+
     // GEM Outputs
     output [13:0] gem_cluster0,
     output [13:0] gem_cluster1,
     output [13:0] gem_cluster2,
     output [13:0] gem_cluster3,
+
 
     output gem_vpf0,
     output gem_vpf1,
@@ -154,6 +157,8 @@ parameter CLSTBITS = 14;
         .link_bad             (link_bad),
 
         .k_char               (k_char),  // latched copy of the last k-char received
+
+        .overflow             (overflow), 
 
         .gtx_rx_sump          (gtx_rx_sump)             // Unused signals
     );

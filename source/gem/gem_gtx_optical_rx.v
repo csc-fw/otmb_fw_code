@@ -52,6 +52,8 @@
 
   k_char, 
 
+  overflow, 
+
 // Sump
   gtx_rx_sump
   );
@@ -95,6 +97,8 @@
   output          link_bad;
 
   output  [7:0]   k_char; 
+
+  output          overflow; 
 
 // Sump
   output          gtx_rx_sump;    // Unused signals
@@ -144,6 +148,7 @@
     .link_had_err     (link_had_err),
     .link_good        (link_good),
     .link_bad         (link_bad),
+    .overflow         (overflow),
     .sump             (sump_comp_fiber)           // Out  Unused signals
   );
 

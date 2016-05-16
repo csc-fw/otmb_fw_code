@@ -44,7 +44,9 @@ module gtx_gem_fiber_in
     output     [7:0]  errcount,
     output            link_had_err,
     output reg        link_good,
-    output            link_bad
+    output            link_bad, 
+
+    output            overflow
 );
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -100,6 +102,8 @@ module gtx_gem_fiber_in
     reg [7:0]  w0_reg     = 0;
     reg [15:0] w1_reg     = 0;
     reg [15:0] w2_reg     = 0;
+
+    assign overflow = (k_char == 8'hFC); 
 
 //-------------------------------------------------------------------------------------------------------------------
 // GTX instance
