@@ -40,8 +40,8 @@
   clock_cfeb5_rxd,
   clock_cfeb6_rxd,
 
-  clock_gem0_rxd,
-  clock_gem1_rxd,
+  clock_gemA_rxd,
+  clock_gemB_rxd,
 
 // Global reset
   mmcm_reset,
@@ -137,8 +137,8 @@
   output        clock_cfeb5_rxd;    // 40MHz CFEB5 receive  data clock 1x
   output        clock_cfeb6_rxd;    // 40MHz CFEB6 receive  data clock 1x
 
-  output        clock_gem0_rxd;    // 40MHz GEM0 receive  data clock 1x
-  output        clock_gem1_rxd;    // 40MHz GEM1 receive  data clock 1x
+  output        clock_gemA_rxd;    // 40MHz GEMA receive  data clock 1x
+  output        clock_gemB_rxd;    // 40MHz GEMB receive  data clock 1x
 
 // Global reset
   input         mmcm_reset;          // PLL reset input, for simulation only
@@ -409,8 +409,8 @@
   assign clock_cfeb5_rxd    = dps_clock[2]; // JGhere:   another ME1/1a
   assign clock_cfeb6_rxd    = dps_clock[2]; // JGhere:   another ME1/1a
 
-  assign clock_gem0_rxd     = dps_clock[4];  // gem0  and gem1 shared
-  assign clock_gem1_rxd     = dps_clock[4];
+  assign clock_gemA_rxd     = dps_clock[4];  // gemA  and gemB shared
+  assign clock_gemB_rxd     = dps_clock[4];
 
 // PLL phase shifters
   genvar i;

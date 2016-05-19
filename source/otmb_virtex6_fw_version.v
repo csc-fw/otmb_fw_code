@@ -4,7 +4,7 @@
 // Firmware version global definitions
   `define FIRMWARE_TYPE 04'hC    // C=Normal CLCT/TMB, D=Debug PCB loopback version
   `define VERSION       04'hE    // Version revision number, A=TMB2004 and earlier, E=TMB2005E production
-  `define MONTHDAY      16'h0510 // Version date
+  `define MONTHDAY      16'h0519 // Version date
   `define YEAR          16'h2016 // Version year
 
   `define AUTO_VME         01'h1 // Automatically initialize VME registers from PROM data,   0=do not
@@ -77,7 +77,7 @@
 //  01/13/2015  Now RXDLYALIGNDISABLE is driven High ALWAYS!  Fixed a minor "bug" in clock_ctrl.v  (1-b0 typo)
 //  01/14/2015  Now RXDLYALIGNDISABLE is driven Low for a while as before; modified power_up logic to always wait for lock_tmb_clock0
 //  01/15/2015  Debug TMB startup timer for ALCT jtag config, now stops at jsm_ok
-//  01/18/2015  Testing fast6count logic in vme Adr 186, and it seems to work!  Adr 186 should be reused or not used from now on 
+//  01/18/2015  Testing fast6count logic in vme Adr 186, and it seems to work!  Adr 186 should be reused or not used from now on
 //  01/19/2015  Revert GTX dlyalign and sync methods to the "standard" method (affects 4 gtx...v files), but keep just 4 phaser clocks;
 //	            also improved startup timer resolution from 400ns to 100ns
 //  01/20/2015  Convert timing control registers 16A, 16C, 11E for cfebs 5/6 to control me11a and me11b cfebs respectively

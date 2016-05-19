@@ -814,10 +814,7 @@
   wire  [MXCNTVME-1:0]  event_counter0;
   wire  [MXCNTVME-1:0]  event_counter1;
   wire  [MXCNTVME-1:0]  event_counter2;
-  wire  [MXCNTVME-1:0]  event_counter3;
-  wire  [MXCNTVME-1:0]  event_counter4;
-  wire  [MXCNTVME-1:0]  event_counter5;
-  wire  [MXCNTVME-1:0]  event_counter6;
+  wire  [MXCNTVME-1:0]  event_counter3; wire  [MXCNTVME-1:0]  event_counter4; wire  [MXCNTVME-1:0]  event_counter5; wire  [MXCNTVME-1:0]  event_counter6;
   wire  [MXCNTVME-1:0]  event_counter7;
   wire  [MXCNTVME-1:0]  event_counter8;
   wire  [MXCNTVME-1:0]  event_counter9;
@@ -909,6 +906,136 @@
   wire  [MXCNTVME-1:0] active_cfeb4_event_counter;       // CFEB4 active flag sent to DMB
   wire  [MXCNTVME-1:0] active_cfeb5_event_counter;       // CFEB5 active flag sent to DMB
   wire  [MXCNTVME-1:0] active_cfeb6_event_counter;       // CFEB6 active flag sent to DMB
+
+// GEM Counters
+  wire  [MXCNTVME-1:0]  gem_counter0;
+  wire  [MXCNTVME-1:0]  gem_counter1;
+  wire  [MXCNTVME-1:0]  gem_counter2;
+  wire  [MXCNTVME-1:0]  gem_counter3;
+  wire  [MXCNTVME-1:0]  gem_counter4;
+  wire  [MXCNTVME-1:0]  gem_counter5;
+  wire  [MXCNTVME-1:0]  gem_counter6;
+  wire  [MXCNTVME-1:0]  gem_counter7;
+  wire  [MXCNTVME-1:0]  gem_counter8;
+  wire  [MXCNTVME-1:0]  gem_counter9;
+  wire  [MXCNTVME-1:0]  gem_counter10;
+  wire  [MXCNTVME-1:0]  gem_counter11;
+  wire  [MXCNTVME-1:0]  gem_counter12;
+  wire  [MXCNTVME-1:0]  gem_counter13;
+  wire  [MXCNTVME-1:0]  gem_counter14;
+  wire  [MXCNTVME-1:0]  gem_counter15;
+  wire  [MXCNTVME-1:0]  gem_counter16;
+  wire  [MXCNTVME-1:0]  gem_counter17;
+  wire  [MXCNTVME-1:0]  gem_counter18;
+  wire  [MXCNTVME-1:0]  gem_counter19;
+  wire  [MXCNTVME-1:0]  gem_counter20;
+  wire  [MXCNTVME-1:0]  gem_counter21;
+  wire  [MXCNTVME-1:0]  gem_counter22;
+  wire  [MXCNTVME-1:0]  gem_counter23;
+  wire  [MXCNTVME-1:0]  gem_counter24;
+  wire  [MXCNTVME-1:0]  gem_counter25;
+  wire  [MXCNTVME-1:0]  gem_counter26;
+  wire  [MXCNTVME-1:0]  gem_counter27;
+  wire  [MXCNTVME-1:0]  gem_counter28;
+  wire  [MXCNTVME-1:0]  gem_counter29;
+  wire  [MXCNTVME-1:0]  gem_counter30;
+  wire  [MXCNTVME-1:0]  gem_counter31;
+  wire  [MXCNTVME-1:0]  gem_counter32;
+  wire  [MXCNTVME-1:0]  gem_counter33;
+  wire  [MXCNTVME-1:0]  gem_counter34;
+  wire  [MXCNTVME-1:0]  gem_counter35;
+  wire  [MXCNTVME-1:0]  gem_counter36;
+  wire  [MXCNTVME-1:0]  gem_counter37;
+  wire  [MXCNTVME-1:0]  gem_counter38;
+  wire  [MXCNTVME-1:0]  gem_counter39;
+  wire  [MXCNTVME-1:0]  gem_counter40;
+  wire  [MXCNTVME-1:0]  gem_counter41;
+  wire  [MXCNTVME-1:0]  gem_counter42;
+  wire  [MXCNTVME-1:0]  gem_counter43;
+  wire  [MXCNTVME-1:0]  gem_counter44;
+  wire  [MXCNTVME-1:0]  gem_counter45;
+  wire  [MXCNTVME-1:0]  gem_counter46;
+  wire  [MXCNTVME-1:0]  gem_counter47;
+  wire  [MXCNTVME-1:0]  gem_counter48;
+  wire  [MXCNTVME-1:0]  gem_counter49;
+  wire  [MXCNTVME-1:0]  gem_counter50;
+  wire  [MXCNTVME-1:0]  gem_counter51;
+  wire  [MXCNTVME-1:0]  gem_counter52;
+  wire  [MXCNTVME-1:0]  gem_counter53;
+  wire  [MXCNTVME-1:0]  gem_counter54;
+  wire  [MXCNTVME-1:0]  gem_counter55;
+  wire  [MXCNTVME-1:0]  gem_counter56;
+  wire  [MXCNTVME-1:0]  gem_counter57;
+  wire  [MXCNTVME-1:0]  gem_counter58;
+  wire  [MXCNTVME-1:0]  gem_counter59;
+  wire  [MXCNTVME-1:0]  gem_counter60;
+  wire  [MXCNTVME-1:0]  gem_counter61;
+  wire  [MXCNTVME-1:0]  gem_counter62;
+  wire  [MXCNTVME-1:0]  gem_counter63;
+  wire  [MXCNTVME-1:0]  gem_counter64;
+  wire  [MXCNTVME-1:0]  gem_counter65;
+  wire  [MXCNTVME-1:0]  gem_counter66;
+  wire  [MXCNTVME-1:0]  gem_counter67;
+  wire  [MXCNTVME-1:0]  gem_counter68;
+  wire  [MXCNTVME-1:0]  gem_counter69;
+  wire  [MXCNTVME-1:0]  gem_counter70;
+  wire  [MXCNTVME-1:0]  gem_counter71;
+  wire  [MXCNTVME-1:0]  gem_counter72;
+  wire  [MXCNTVME-1:0]  gem_counter73;
+  wire  [MXCNTVME-1:0]  gem_counter74;
+  wire  [MXCNTVME-1:0]  gem_counter75;
+  wire  [MXCNTVME-1:0]  gem_counter76;
+  wire  [MXCNTVME-1:0]  gem_counter77;
+  wire  [MXCNTVME-1:0]  gem_counter78;
+  wire  [MXCNTVME-1:0]  gem_counter79;
+  wire  [MXCNTVME-1:0]  gem_counter80;
+  wire  [MXCNTVME-1:0]  gem_counter81;
+  wire  [MXCNTVME-1:0]  gem_counter82;
+  wire  [MXCNTVME-1:0]  gem_counter83;
+  wire  [MXCNTVME-1:0]  gem_counter84;
+  wire  [MXCNTVME-1:0]  gem_counter85;
+  wire  [MXCNTVME-1:0]  gem_counter86;
+  wire  [MXCNTVME-1:0]  gem_counter87;
+  wire  [MXCNTVME-1:0]  gem_counter88;
+  wire  [MXCNTVME-1:0]  gem_counter89;
+  wire  [MXCNTVME-1:0]  gem_counter90;
+  wire  [MXCNTVME-1:0]  gem_counter91;
+  wire  [MXCNTVME-1:0]  gem_counter92;
+  wire  [MXCNTVME-1:0]  gem_counter93;
+  wire  [MXCNTVME-1:0]  gem_counter94;
+  wire  [MXCNTVME-1:0]  gem_counter95;
+  wire  [MXCNTVME-1:0]  gem_counter96;
+  wire  [MXCNTVME-1:0]  gem_counter97;
+  wire  [MXCNTVME-1:0]  gem_counter98;
+  wire  [MXCNTVME-1:0]  gem_counter99;
+  wire  [MXCNTVME-1:0]  gem_counter100;
+  wire  [MXCNTVME-1:0]  gem_counter101;
+  wire  [MXCNTVME-1:0]  gem_counter102;
+  wire  [MXCNTVME-1:0]  gem_counter103;
+  wire  [MXCNTVME-1:0]  gem_counter104;
+  wire  [MXCNTVME-1:0]  gem_counter105;
+  wire  [MXCNTVME-1:0]  gem_counter106;
+  wire  [MXCNTVME-1:0]  gem_counter107;
+  wire  [MXCNTVME-1:0]  gem_counter108;
+  wire  [MXCNTVME-1:0]  gem_counter109;
+  wire  [MXCNTVME-1:0]  gem_counter110;
+  wire  [MXCNTVME-1:0]  gem_counter111;
+  wire  [MXCNTVME-1:0]  gem_counter112;
+  wire  [MXCNTVME-1:0]  gem_counter113;
+  wire  [MXCNTVME-1:0]  gem_counter114;
+  wire  [MXCNTVME-1:0]  gem_counter115;
+  wire  [MXCNTVME-1:0]  gem_counter116;
+  wire  [MXCNTVME-1:0]  gem_counter117;
+  wire  [MXCNTVME-1:0]  gem_counter118;
+  wire  [MXCNTVME-1:0]  gem_counter119;
+  wire  [MXCNTVME-1:0]  gem_counter120;
+  wire  [MXCNTVME-1:0]  gem_counter121;
+  wire  [MXCNTVME-1:0]  gem_counter122;
+  wire  [MXCNTVME-1:0]  gem_counter123;
+  wire  [MXCNTVME-1:0]  gem_counter124;
+  wire  [MXCNTVME-1:0]  gem_counter125;
+  wire  [MXCNTVME-1:0]  gem_counter126;
+  wire  [MXCNTVME-1:0]  gem_counter127;
 
 // CFEB injector RAM map 2D arrays into 1D for ALCT
   wire  [MXCFEB-1:0]  inj_ramout_pulse;
@@ -1403,6 +1530,9 @@
   wire  [0:0]   gem_vpf1 [MXGEM-1:0];
   wire  [0:0]   gem_vpf2 [MXGEM-1:0];
   wire  [0:0]   gem_vpf3 [MXGEM-1:0];
+
+  wire [7:0] gemA_vpf = {gem_vpf3[1], gem_vpf2[1], gem_vpf1[1], gem_vpf0[1], gem_vpf3[0], gem_vpf2[0], gem_vpf1[0], gem_vpf0[0]};
+  wire [7:0] gemB_vpf = {gem_vpf3[3], gem_vpf2[3], gem_vpf1[3], gem_vpf0[3], gem_vpf3[2], gem_vpf2[2], gem_vpf1[2], gem_vpf0[2]};
 
   wire [9:0]   gem_debug_fifo_adr;    // FIFO RAM read tbin address
   wire [1:0]   gem_debug_fifo_sel;    // FIFO RAM read layer clusters 0-3
@@ -2466,10 +2596,6 @@
   .event_counter64 (event_counter64[MXCNTVME-1:0]), // Out
   .event_counter65 (event_counter65[MXCNTVME-1:0]), // Out
 
-// CLCT pre-trigger coincidence counters
-  .preClct_l1a_counter   (preClct_l1a_counter[MXCNTVME-1:0]),  // Out
-  .preClct_alct_counter  (preClct_alct_counter[MXCNTVME-1:0]), // Out
-
 // Active CFEB(s) counters
   .active_cfebs_event_counter      (active_cfebs_event_counter[MXCNTVME-1:0]),      // Out
   .active_cfebs_me1a_event_counter (active_cfebs_me1a_event_counter[MXCNTVME-1:0]), // Out
@@ -2491,6 +2617,144 @@
   .l1a_rx_counter      (l1a_rx_counter[MXL1ARX-1:0]),   // Out  L1As received from ccb counter
   .readout_counter     (readout_counter[MXL1ARX-1:0]),  // Out  Readout counter
   .orbit_counter       (orbit_counter[MXORBIT-1:0]),    // Out  Orbit counter
+
+// GEM Sequencer Trigger/Readout Counters
+  .gem_cnt_all_reset    (gem_cnt_all_reset),    // In  Trigger/Readout counter reset
+  .gem_cnt_stop_on_ovf  (gem_cnt_stop_on_ovf),  // In  Stop all counters if any overflows
+  .gem_cnt_any_ovf_seq  (gem_cnt_any_ovf_seq),  // Out  At least one sequencer counter overflowed
+
+  .gem_counter0       (gem_counter0[MXCNTVME-1:0]),   // Out
+  .gem_counter1       (gem_counter1[MXCNTVME-1:0]),   // Out
+  .gem_counter2       (gem_counter2[MXCNTVME-1:0]),   // Out
+  .gem_counter3       (gem_counter3[MXCNTVME-1:0]),   // Out
+  .gem_counter4       (gem_counter4[MXCNTVME-1:0]),   // Out
+  .gem_counter5       (gem_counter5[MXCNTVME-1:0]),   // Out
+  .gem_counter6       (gem_counter6[MXCNTVME-1:0]),   // Out
+  .gem_counter7       (gem_counter7[MXCNTVME-1:0]),   // Out
+  .gem_counter8       (gem_counter8[MXCNTVME-1:0]),   // Out
+  .gem_counter9       (gem_counter9[MXCNTVME-1:0]),   // Out
+  .gem_counter10      (gem_counter10[MXCNTVME-1:0]),  // Out
+  .gem_counter11      (gem_counter11[MXCNTVME-1:0]),  // Out
+  .gem_counter12      (gem_counter12[MXCNTVME-1:0]),  // Out
+  .gem_counter13      (gem_counter13[MXCNTVME-1:0]),  // Out
+  .gem_counter14      (gem_counter14[MXCNTVME-1:0]),  // Out
+  .gem_counter15      (gem_counter15[MXCNTVME-1:0]),  // Out
+  .gem_counter16      (gem_counter16[MXCNTVME-1:0]),  // Out
+  .gem_counter17      (gem_counter17[MXCNTVME-1:0]),  // Out
+  .gem_counter18      (gem_counter18[MXCNTVME-1:0]),  // Out
+  .gem_counter19      (gem_counter19[MXCNTVME-1:0]),  // Out
+  .gem_counter20      (gem_counter20[MXCNTVME-1:0]),  // Out
+  .gem_counter21      (gem_counter21[MXCNTVME-1:0]),  // Out
+  .gem_counter22      (gem_counter22[MXCNTVME-1:0]),  // Out
+  .gem_counter23      (gem_counter23[MXCNTVME-1:0]),  // Out
+  .gem_counter24      (gem_counter24[MXCNTVME-1:0]),  // Out
+  .gem_counter25      (gem_counter25[MXCNTVME-1:0]),  // Out
+  .gem_counter26      (gem_counter26[MXCNTVME-1:0]),  // Out
+  .gem_counter27      (gem_counter27[MXCNTVME-1:0]),  // Out
+  .gem_counter28      (gem_counter28[MXCNTVME-1:0]),  // Out
+  .gem_counter29      (gem_counter29[MXCNTVME-1:0]),  // Out
+  .gem_counter30      (gem_counter30[MXCNTVME-1:0]),  // Out
+  .gem_counter31      (gem_counter31[MXCNTVME-1:0]),  // Out
+  .gem_counter32      (gem_counter32[MXCNTVME-1:0]),  // Out
+  .gem_counter33      (gem_counter33[MXCNTVME-1:0]),  // Out
+  .gem_counter34      (gem_counter34[MXCNTVME-1:0]),  // Out
+  .gem_counter35      (gem_counter35[MXCNTVME-1:0]),  // Out
+  .gem_counter36      (gem_counter36[MXCNTVME-1:0]),  // Out
+  .gem_counter37      (gem_counter37[MXCNTVME-1:0]),  // Out
+  .gem_counter38      (gem_counter38[MXCNTVME-1:0]),  // Out
+  .gem_counter39      (gem_counter39[MXCNTVME-1:0]),  // Out
+  .gem_counter40      (gem_counter40[MXCNTVME-1:0]),  // Out
+  .gem_counter41      (gem_counter41[MXCNTVME-1:0]),  // Out
+  .gem_counter42      (gem_counter42[MXCNTVME-1:0]),  // Out
+  .gem_counter43      (gem_counter43[MXCNTVME-1:0]),  // Out
+  .gem_counter44      (gem_counter44[MXCNTVME-1:0]),  // Out
+  .gem_counter45      (gem_counter45[MXCNTVME-1:0]),  // Out
+  .gem_counter46      (gem_counter46[MXCNTVME-1:0]),  // Out
+  .gem_counter47      (gem_counter47[MXCNTVME-1:0]),  // Out
+  .gem_counter48      (gem_counter48[MXCNTVME-1:0]),  // Out
+  .gem_counter49      (gem_counter49[MXCNTVME-1:0]),  // Out
+  .gem_counter50      (gem_counter50[MXCNTVME-1:0]),  // Out
+  .gem_counter51      (gem_counter51[MXCNTVME-1:0]),  // Out
+  .gem_counter52      (gem_counter52[MXCNTVME-1:0]),  // Out
+  .gem_counter53      (gem_counter53[MXCNTVME-1:0]),  // Out
+  .gem_counter54      (gem_counter54[MXCNTVME-1:0]),  // Out
+  .gem_counter55      (gem_counter55[MXCNTVME-1:0]),  // Out
+  .gem_counter56      (gem_counter56[MXCNTVME-1:0]),  // Out
+  .gem_counter57      (gem_counter57[MXCNTVME-1:0]),  // Out
+  .gem_counter58      (gem_counter58[MXCNTVME-1:0]),  // Out
+  .gem_counter59      (gem_counter59[MXCNTVME-1:0]),  // Out
+  .gem_counter60      (gem_counter60[MXCNTVME-1:0]),  // Out
+  .gem_counter61      (gem_counter61[MXCNTVME-1:0]),  // Out
+  .gem_counter62      (gem_counter62[MXCNTVME-1:0]),  // Out
+  .gem_counter63      (gem_counter63[MXCNTVME-1:0]),  // Out
+  .gem_counter64      (gem_counter64[MXCNTVME-1:0]),  // Out
+  .gem_counter65      (gem_counter65[MXCNTVME-1:0]),  // Out
+  .gem_counter66      (gem_counter66[MXCNTVME-1:0]),  // Out
+  .gem_counter67      (gem_counter67[MXCNTVME-1:0]),  // Out
+  .gem_counter68      (gem_counter68[MXCNTVME-1:0]),  // Out
+  .gem_counter69      (gem_counter69[MXCNTVME-1:0]),  // Out
+  .gem_counter70      (gem_counter70[MXCNTVME-1:0]),  // Out
+  .gem_counter71      (gem_counter71[MXCNTVME-1:0]),  // Out
+  .gem_counter72      (gem_counter72[MXCNTVME-1:0]),  // Out
+  .gem_counter73      (gem_counter73[MXCNTVME-1:0]),  // Out
+  .gem_counter74      (gem_counter74[MXCNTVME-1:0]),  // Out
+  .gem_counter75      (gem_counter75[MXCNTVME-1:0]),  // Out
+  .gem_counter76      (gem_counter76[MXCNTVME-1:0]),  // Out
+  .gem_counter77      (gem_counter77[MXCNTVME-1:0]),  // Out
+  .gem_counter78      (gem_counter78[MXCNTVME-1:0]),  // Out
+  .gem_counter79      (gem_counter79[MXCNTVME-1:0]),  // Out
+  .gem_counter80      (gem_counter80[MXCNTVME-1:0]),  // Out
+  .gem_counter81      (gem_counter81[MXCNTVME-1:0]),  // Out
+  .gem_counter82      (gem_counter82[MXCNTVME-1:0]),  // Out
+  .gem_counter83      (gem_counter83[MXCNTVME-1:0]),  // Out
+  .gem_counter84      (gem_counter84[MXCNTVME-1:0]),  // Out
+  .gem_counter85      (gem_counter85[MXCNTVME-1:0]),  // Out
+  .gem_counter86      (gem_counter86[MXCNTVME-1:0]),  // Out
+  .gem_counter87      (gem_counter87[MXCNTVME-1:0]),  // Out
+  .gem_counter88      (gem_counter88[MXCNTVME-1:0]),  // Out
+  .gem_counter89      (gem_counter89[MXCNTVME-1:0]),  // Out
+  .gem_counter90      (gem_counter90[MXCNTVME-1:0]),  // Out
+  .gem_counter91      (gem_counter91[MXCNTVME-1:0]),  // Out
+  .gem_counter92      (gem_counter92[MXCNTVME-1:0]),  // Out
+  .gem_counter93      (gem_counter93[MXCNTVME-1:0]),  // Out
+  .gem_counter94      (gem_counter94[MXCNTVME-1:0]),  // Out
+  .gem_counter95      (gem_counter95[MXCNTVME-1:0]),  // Out
+  .gem_counter96      (gem_counter96[MXCNTVME-1:0]),  // Out
+  .gem_counter97      (gem_counter97[MXCNTVME-1:0]),  // Out
+  .gem_counter98      (gem_counter98[MXCNTVME-1:0]),  // Out
+  .gem_counter99      (gem_counter99[MXCNTVME-1:0]),  // Out
+  .gem_counter100     (gem_counter100[MXCNTVME-1:0]), // Out
+  .gem_counter101     (gem_counter101[MXCNTVME-1:0]), // Out
+  .gem_counter102     (gem_counter102[MXCNTVME-1:0]), // Out
+  .gem_counter103     (gem_counter103[MXCNTVME-1:0]), // Out
+  .gem_counter104     (gem_counter104[MXCNTVME-1:0]), // Out
+  .gem_counter105     (gem_counter105[MXCNTVME-1:0]), // Out
+  .gem_counter106     (gem_counter106[MXCNTVME-1:0]), // Out
+  .gem_counter107     (gem_counter107[MXCNTVME-1:0]), // Out
+  .gem_counter108     (gem_counter108[MXCNTVME-1:0]), // Out
+  .gem_counter109     (gem_counter109[MXCNTVME-1:0]), // Out
+  .gem_counter110     (gem_counter110[MXCNTVME-1:0]), // Out
+  .gem_counter111     (gem_counter111[MXCNTVME-1:0]), // Out
+  .gem_counter112     (gem_counter112[MXCNTVME-1:0]), // Out
+  .gem_counter113     (gem_counter113[MXCNTVME-1:0]), // Out
+  .gem_counter114     (gem_counter114[MXCNTVME-1:0]), // Out
+  .gem_counter115     (gem_counter115[MXCNTVME-1:0]), // Out
+  .gem_counter116     (gem_counter116[MXCNTVME-1:0]), // Out
+  .gem_counter117     (gem_counter117[MXCNTVME-1:0]), // Out
+  .gem_counter118     (gem_counter118[MXCNTVME-1:0]), // Out
+  .gem_counter119     (gem_counter119[MXCNTVME-1:0]), // Out
+  .gem_counter120     (gem_counter120[MXCNTVME-1:0]), // Out
+  .gem_counter121     (gem_counter121[MXCNTVME-1:0]), // Out
+  .gem_counter122     (gem_counter122[MXCNTVME-1:0]), // Out
+  .gem_counter123     (gem_counter123[MXCNTVME-1:0]), // Out
+  .gem_counter124     (gem_counter124[MXCNTVME-1:0]), // Out
+  .gem_counter125     (gem_counter125[MXCNTVME-1:0]), // Out
+  .gem_counter126     (gem_counter126[MXCNTVME-1:0]), // Out
+  .gem_counter127     (gem_counter127[MXCNTVME-1:0]), // Out
+
+// CLCT pre-trigger coincidence counters
+  .preClct_l1a_counter   (preClct_l1a_counter[MXCNTVME-1:0]),  // Out
+  .preClct_alct_counter  (preClct_alct_counter[MXCNTVME-1:0]), // Out
 
 // Sequencer Parity Errors
   .perr_pulse   (perr_pulse),               // In  Parity error pulse for counting
@@ -4120,6 +4384,11 @@
       .active_cfeb4_event_counter      (active_cfeb4_event_counter[MXCNTVME-1:0]),      // In
       .active_cfeb5_event_counter      (active_cfeb5_event_counter[MXCNTVME-1:0]),      // In
       .active_cfeb6_event_counter      (active_cfeb6_event_counter[MXCNTVME-1:0]),      // In
+
+      // GEM Trigger/Readout Counter Ports
+      .gem_cnt_all_reset    (gem_cnt_all_reset),     // Out  Trigger/Readout counter reset
+      .gem_cnt_stop_on_ovf  (gem_cnt_stop_on_ovf),   // Out  Stop all counters if any overflows
+      .gem_cnt_any_ovf_seq  (gem_cnt_any_ovf_seq),   // In   At least one gem sequencer counter overflowed
 
       // CSC Orientation Ports
       .csc_type        (csc_type[3:0]),   // In  Firmware compile type

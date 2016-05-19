@@ -277,7 +277,7 @@
 //  08/12/2009  Remove clock_vme again
 //  08/25/2009  Mod clct sm re-trigger to stay busy only for enabled trigger sources
 //  09/14/2009  Move sync error processing to sync_err_ctrl.v module
-//  09/16/2009  Add sync errors stop pretrig and l1a readout 
+//  09/16/2009  Add sync errors stop pretrig and l1a readout
 //  09/21/2009  Restrict bxn offsets to be in the interval 0 < lhc_cycle to prevent non-physical bxns
 //  09/28/2009  Push dmb ffs into iobs
 //  10/07/2009  Fix record type
@@ -326,11 +326,11 @@
 //  e   mpc     header      MPC frames
 //  e   buf     header      Buffer status
 //  e   rpc     header      RPC status
-//  e  6E0B     header      End of header block 
-//  n   hits                FEB0 raw hits 
-//  n   hits                FEB1 raw hits 
-//  n   hits                FEB2 raw hits 
-//  n   hits                FEB3 raw hits 
+//  e  6E0B     header      End of header block
+//  n   hits                FEB0 raw hits
+//  n   hits                FEB1 raw hits
+//  n   hits                FEB2 raw hits
+//  n   hits                FEB3 raw hits
 //  n   hits                FEB4 raw hits
 //  1  6B04       (option)  Start of RPC data
 //  n   RPC pads  (option)  RPC data
@@ -399,12 +399,15 @@
   alct1_valid,
   read_sm_xdmb,
 
-// GEM 
-  gem_copad_matched, 
-  gemA_sync_err, 
+// GEM
+  gem_copad_matched,
+  gemA_sync_err,
   gemB_sync_err,
-  gems_sync_err, 
-  
+  gems_sync_err,
+
+  gemA_vpf,
+  gemB_vpf,
+
 // External Triggers
   alct_adb_pulse_sync,
   dmb_ext_trig,
@@ -562,7 +565,7 @@
 
   seq_trigger,
   sequencer_state,
-  
+
   event_clear_vme,
   clct0_vme,
   clct1_vme,
@@ -883,11 +886,6 @@
   event_counter64,
   event_counter65,
 
-  //event_counter100,
-  //event_counter101,
-  //event_counter102,
-  //event_counter103,
-
 // Event Counter Ports
   hdr_clear_on_resync,
   pretrig_counter,
@@ -913,6 +911,140 @@
   active_cfeb4_event_counter,      // CFEB4 active flag sent to DMB
   active_cfeb5_event_counter,      // CFEB5 active flag sent to DMB
   active_cfeb6_event_counter,      // CFEB6 active flag sent to DMB
+
+// GEM Trigger/Readout Counter Ports
+  gem_cnt_all_reset,
+  gem_cnt_stop_on_ovf,
+  gem_cnt_any_ovf_seq,
+
+  gem_counter0,
+  gem_counter1,
+  gem_counter2,
+  gem_counter3,
+  gem_counter4,
+  gem_counter5,
+  gem_counter6,
+  gem_counter7,
+  gem_counter8,
+  gem_counter9,
+  gem_counter10,
+  gem_counter11,
+  gem_counter12,
+  gem_counter13,
+  gem_counter14,
+  gem_counter15,
+  gem_counter16,
+  gem_counter17,
+  gem_counter18,
+  gem_counter19,
+  gem_counter20,
+  gem_counter21,
+  gem_counter22,
+  gem_counter23,
+  gem_counter24,
+  gem_counter25,
+  gem_counter26,
+  gem_counter27,
+  gem_counter28,
+  gem_counter29,
+  gem_counter30,
+  gem_counter31,
+  gem_counter32,
+  gem_counter33,
+  gem_counter34,
+  gem_counter35,
+  gem_counter36,
+  gem_counter37,
+  gem_counter38,
+  gem_counter39,
+  gem_counter40,
+  gem_counter41,
+  gem_counter42,
+  gem_counter43,
+  gem_counter44,
+  gem_counter45,
+  gem_counter46,
+  gem_counter47,
+  gem_counter48,
+  gem_counter49,
+  gem_counter50,
+  gem_counter51,
+  gem_counter52,
+  gem_counter53,
+  gem_counter54,
+  gem_counter55,
+  gem_counter56,
+  gem_counter57,
+  gem_counter58,
+  gem_counter59,
+  gem_counter60,
+  gem_counter61,
+  gem_counter62,
+  gem_counter63,
+  gem_counter64,
+  gem_counter65,
+  gem_counter66,
+  gem_counter67,
+  gem_counter68,
+  gem_counter69,
+  gem_counter70,
+  gem_counter71,
+  gem_counter72,
+  gem_counter73,
+  gem_counter74,
+  gem_counter75,
+  gem_counter76,
+  gem_counter77,
+  gem_counter78,
+  gem_counter79,
+  gem_counter80,
+  gem_counter81,
+  gem_counter82,
+  gem_counter83,
+  gem_counter84,
+  gem_counter85,
+  gem_counter86,
+  gem_counter87,
+  gem_counter88,
+  gem_counter89,
+  gem_counter90,
+  gem_counter91,
+  gem_counter92,
+  gem_counter93,
+  gem_counter94,
+  gem_counter95,
+  gem_counter96,
+  gem_counter97,
+  gem_counter98,
+  gem_counter99,
+  gem_counter100,
+  gem_counter101,
+  gem_counter102,
+  gem_counter103,
+  gem_counter104,
+  gem_counter105,
+  gem_counter106,
+  gem_counter107,
+  gem_counter108,
+  gem_counter109,
+  gem_counter110,
+  gem_counter111,
+  gem_counter112,
+  gem_counter113,
+  gem_counter114,
+  gem_counter115,
+  gem_counter116,
+  gem_counter117,
+  gem_counter118,
+  gem_counter119,
+  gem_counter120,
+  gem_counter121,
+  gem_counter122,
+  gem_counter123,
+  gem_counter124,
+  gem_counter125,
+  gem_counter126,
+  gem_counter127,
 
 // Parity Errors
   perr_pulse,
@@ -972,7 +1104,7 @@
   ,l1a_wdata_notmb
   ,l1a_rdata
   ,wr_avail_xl1a
-  
+
   ,discard_tmbreject
   ,tmb_trig_write
 
@@ -989,14 +1121,14 @@
   ,pretrig_data
   ,postdrift_data
   ,postdrift_adr
-  
+
   ,clct_push_xtmb
   ,bxn_counter_xtmb
 
   ,active_feb_flag
   ,startup_done
   ,sm_reset
-  
+
   ,deb_dmb_tx
   ,deb_dmb_nwr
 
@@ -1004,7 +1136,7 @@
   ,clct_wr_adr_xtmb
   ,clct_wr_avail_xtmb
 
-  ,l1a_delay_wadr  
+  ,l1a_delay_wadr
   ,l1a_delay_radr
   ,l1a_delay_adj
 `endif
@@ -1046,9 +1178,9 @@
   parameter MXL1DELAY    = 8;          // Number L1Acc delay counter bits
   parameter MXL1WIND     = 4;          // Number L1ACC window width bits
   parameter L1ADLYOFFSET = 7;          // Correction to programmed n L1A delay so status window is n after pretrig
-  
+
   parameter MXBUF        = 16;        // Number of buffers
-  parameter MXBUFB       = 4;         // Buffer address width 
+  parameter MXBUFB       = 4;         // Buffer address width
   parameter MXFMODE      = 3;         // Number FIFO Mode bits
   parameter MXTBIN       = 5;         // Number FIFO time bin bits
   parameter MXFIFO       = 8;         // FIFO Slice data width
@@ -1124,11 +1256,14 @@
   input          alct1_valid;     // ALCT has valid LCT
   output         read_sm_xdmb;    // TMB sequencer starting a readout
 
-// GEM 
+// GEM
   input          gem_copad_matched; // GEM co-pad match was found
   input          gemA_sync_err;     // GEM A has sync error
   input          gemB_sync_err;     // GEM B has sync error
   input          gems_sync_err;     // GEM Super Chamber has sync error
+
+  input [7:0]    gemA_vpf; // GEM 8-bit VPF flag
+  input [7:0]    gemB_vpf; // GEM 8-bit VPF flag
 
 // External Triggers
   input          alct_adb_pulse_sync; // ADB Test pulse trigger
@@ -1186,7 +1321,7 @@
   input [MXCFEB-1:0] triad_tp;             // Triad test point at input to raw hits RAM
   input [MXCFEB-1:0] cfeb_badbits_found;   // CFEB[n] has at least 1 bad bit
   input              cfeb_badbits_blocked; // A CFEB had bad bits that were blocked
-  
+
 // Pattern Finder PreTrigger Ports
   input  [MXCFEB-1:0]  cfeb_hit;        // This CFEB has a pattern over pre-trigger threshold
   input  [MXCFEB-1:0]  cfeb_active;     // CFEBs marked for DMB readout
@@ -1194,7 +1329,7 @@
   input          cfeb_layer_trig;    // Layer pretrigger
   input  [MXLY-1:0]    cfeb_layer_or;      // OR of hstrips on each layer at pre-trigger
   input  [MXHITB-1:0]  cfeb_nlayers_hit;    // Number of CSC layers hit
-  
+
 // Pattern Finder CLCT results
   input  [MXHITB-1:0]  hs_hit_1st;        // 1st CLCT pattern hits
   input  [MXPIDB-1:0]  hs_pid_1st;        // 1st CLCT pattern ID
@@ -1249,7 +1384,7 @@
   input  [3:0] alct_delay;  // Delay ALCT for CLCT match window
   input  [3:0] clct_window; // CLCT match window width
 
-  input tmb_allow_alct;  // Allow ALCT only 
+  input tmb_allow_alct;  // Allow ALCT only
   input tmb_allow_clct;  // Allow CLCT only
   input tmb_allow_match; // Allow Match only
 
@@ -1298,7 +1433,7 @@
   output  [MXBXN-1:0]    bxn_clct_vme;    // CLCT BXN at pre-trigger
   output  [MXBXN-1:0]    bxn_l1a_vme;    // CLCT BXN at L1A
 
-// RPC VME Configuration Ports 
+// RPC VME Configuration Ports
   input  [MXRPC-1:0]   rpc_exists;       // RPC Readout list
   input                rpc_read_enable;  // 1 Enable RPC Readout
   input  [MXTBIN-1:0]  fifo_tbins_rpc;   // Number RPC FIFO time bins to read out
@@ -1334,7 +1469,7 @@
 // Buffer Write Control
   output          buf_reset;      // Free all buffer space
   output          buf_push;      // Allocate write buffer
-  output  [MXBADR-1:0]  buf_push_adr;    // Address of write buffer to allocate  
+  output  [MXBADR-1:0]  buf_push_adr;    // Address of write buffer to allocate
   output  [MXBDATA-1:0]  buf_push_data;    // Data associated with push_adr
 
   input          wr_buf_ready;    // Write buffer is ready
@@ -1402,7 +1537,7 @@
   input          bcb_first_frame;  // First frame valid 2bx after rd_start
   input          bcb_last_frame;    // Last frame valid 1bx after busy goes down
   input  [11:0]      bcb_blkbits;    // CFEB blocked bits frame data
-  input  [MXCFEBB-1:0]  bcb_cfeb_adr;    // CFEB ID  
+  input  [MXCFEBB-1:0]  bcb_cfeb_adr;    // CFEB ID
   input          bcb_fifo_busy;    // Readout busy sending data to sequencer, goes down 1bx early
 
 // GEM Sequencer Frame
@@ -1530,7 +1665,7 @@
   input  [8:0]      scp_radr;      // Channel data read address
   input          scp_nowrite;    // Preserves initial RAM contents for testing
   output          scp_waiting;    // Waiting for trigger
-  output          scp_trig_done;    // Trigger done, ready for readout 
+  output          scp_trig_done;    // Trigger done, ready for readout
   output  [15:0]      scp_rdata;      // Recorded channel data
 
 // Miniscope
@@ -1608,11 +1743,6 @@
   output  [MXCNTVME-1:0]  event_counter64;
   output  [MXCNTVME-1:0]  event_counter65;
 
-  // output  [MXCNTVME-1:0]  event_counter100;
-  // output  [MXCNTVME-1:0]  event_counter101;
-  // output  [MXCNTVME-1:0]  event_counter102;
-  // output  [MXCNTVME-1:0]  event_counter103;
-
 // Event Counter Ports
   input                   hdr_clear_on_resync; // Clear header counters on ttc_resync
   output  [MXCNTVME-1:0]  pretrig_counter;     // Pre-trigger counter
@@ -1638,6 +1768,140 @@
   output  [MXCNTVME-1:0] active_cfeb4_event_counter;      // CFEB4 active flag sent to DMB
   output  [MXCNTVME-1:0] active_cfeb5_event_counter;      // CFEB5 active flag sent to DMB
   output  [MXCNTVME-1:0] active_cfeb6_event_counter;      // CFEB6 active flag sent to DMB
+
+// Trigger/Readout Counter Ports
+  input  gem_cnt_all_reset;    // Trigger/Readout counter reset
+  input  gem_cnt_stop_on_ovf;  // Stop all counters if any overflows
+  output gem_cnt_any_ovf_seq;  // At least one sequencer counter overflowed
+
+  output  [MXCNTVME-1:0]  gem_counter0;   // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter1;   // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter2;   // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter3;   // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter4;   // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter5;   // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter6;   // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter7;   // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter8;   // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter9;   // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter10;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter11;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter12;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter13;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter14;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter15;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter16;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter17;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter18;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter19;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter20;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter21;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter22;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter23;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter24;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter25;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter26;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter27;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter28;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter29;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter30;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter31;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter32;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter33;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter34;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter35;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter36;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter37;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter38;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter39;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter40;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter41;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter42;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter43;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter44;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter45;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter46;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter47;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter48;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter49;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter50;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter51;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter52;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter53;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter54;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter55;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter56;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter57;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter58;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter59;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter60;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter61;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter62;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter63;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter64;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter65;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter66;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter67;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter68;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter69;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter70;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter71;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter72;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter73;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter74;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter75;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter76;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter77;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter78;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter79;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter80;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter81;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter82;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter83;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter84;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter85;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter86;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter87;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter88;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter89;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter90;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter91;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter92;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter93;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter94;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter95;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter96;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter97;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter98;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter99;  // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter100; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter101; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter102; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter103; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter104; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter105; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter106; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter107; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter108; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter109; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter110; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter111; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter112; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter113; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter114; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter115; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter116; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter117; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter118; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter119; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter120; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter121; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter122; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter123; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter124; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter125; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter126; // Event counter 1D remap
+  output  [MXCNTVME-1:0]  gem_counter127; // Event counter 1D remap
 
 // Parity Errors
   input                perr_pulse;   // Parity error pulse for counting
@@ -1681,7 +1945,7 @@
   output       r_has_buf;
   output       r_has_hdr;
   output [1:0] l1a_type;
-  output [1:0] readout_type;          
+  output [1:0] readout_type;
 
   output  [MXL1WIND-1:0]  l1a_match_win;
   output  [MXL1ARX-1:0]  l1a_cnt_win;
@@ -1697,11 +1961,11 @@
   output  [32-1:0]    l1a_wdata;
   output  [32-1:0]    l1a_wdata_notmb;
   output  [32-1:0]    l1a_rdata;
-  output          wr_avail_xl1a;  
+  output          wr_avail_xl1a;
 
   output           discard_tmbreject;
   output          tmb_trig_write;
-  
+
   output          wr_en_xpre;
   output          wr_en_xpre1;
   output          wr_en_xtmb;
@@ -1714,14 +1978,14 @@
   output  [21-1:0]    pretrig_data;
   output  [21-1:0]    postdrift_data;
   output  [3:0]      postdrift_adr;
-  
+
   output          clct_push_xtmb;
   output  [1:0]      bxn_counter_xtmb;
-  
+
   output          active_feb_flag;
   output          startup_done;
   output          sm_reset;
-  
+
   output   [15:0]      deb_dmb_tx;
   output              deb_dmb_nwr;
 
@@ -1729,7 +1993,7 @@
   output  [MXBADR-1:0]  clct_wr_adr_xtmb;
   output          clct_wr_avail_xtmb;
 
-  output  [7:0]      l1a_delay_wadr;  
+  output  [7:0]      l1a_delay_wadr;
   output  [7:0]      l1a_delay_radr;
   output  [7:0]      l1a_delay_adj;
 `endif
@@ -1747,7 +2011,7 @@
   wire no_daq;
 
   wire l1a_match;
-  wire l1a_notmb;  
+  wire l1a_notmb;
   wire l1a_received;
   wire l1a_forced;
 
@@ -1814,7 +2078,7 @@
 
 // Blockedbits related
   wire          bcb_fifo_done;
-  
+
 // RPC related
   wire   rpc_fifo_done;
   reg    rpcs_all_empty=0;
@@ -1917,7 +2181,7 @@
 //      L1A tx Counts level 1 accepts requested by counting TMB pre-triggers.
 //      L1A rx Increments by 1 for each CCB l1a or for each pretrigger with internal l1a.
 //      Resets to l1a_offset when evcntres | resync is received.
-//      
+//
 //------------------------------------------------------------------------------------------------------------------
 // Restrict bxn offsets to be in the interval 0 < lhc_cycle to prevent non-physical bxns
   reg [MXBXN-1:0] bxn_offset_pretrig_lim = 0;
@@ -1925,7 +2189,7 @@
 
   always @(posedge clock) begin
   bxn_offset_pretrig_lim <= (bxn_offset_pretrig >= lhc_cycle) ? (lhc_cycle-1'b1) : (bxn_offset_pretrig);
-  bxn_offset_l1a_lim     <= (bxn_offset_l1a     >= lhc_cycle) ? (lhc_cycle-1'b1) : (bxn_offset_l1a); 
+  bxn_offset_l1a_lim     <= (bxn_offset_l1a     >= lhc_cycle) ? (lhc_cycle-1'b1) : (bxn_offset_l1a);
   end
 
 // Bunch Crossing Counter, counts 0 to 3563, presets at resync or bxreset, stops counting, resumes at bx0
@@ -1940,9 +2204,9 @@
 
   wire bx0_local = bxn_counter == 0;                        // This TMBs bxn is at 0
   wire bx0_xmpc  = (mpc_sel_ttc_bx0) ? ttc_bx0 : bx0_local; // Send ttc bx0 or local bx0 to mpc
-  
+
   always @(posedge clock) begin
-    if      ( bxn_reset ) bxn_hold <= 1; // Count hold FF 
+    if      ( bxn_reset ) bxn_hold <= 1; // Count hold FF
     else if ( ttc_bx0   ) bxn_hold <= 0;
 
     if      (bxn_preset) bxn_counter  <= bxn_offset_pretrig_lim;  // Counter
@@ -2006,12 +2270,12 @@
   // add delay to CLCT pre-trigger
   wire preClct = (clct_sm == pretrig);
 //  wire preClct_ff;         // delayed CLCT pre-trigger
-//  x_delay_os #( .MXDLY(8) ) upreClct_delay (.d(clct_pretrig),.clock(clock),.delay(l1a_preClct_dly),.q(preClct_ff)); 
+//  x_delay_os #( .MXDLY(8) ) upreClct_delay (.d(clct_pretrig),.clock(clock),.delay(l1a_preClct_dly),.q(preClct_ff));
   wire preClct_ff = preClct;         // Lets not delay CLCT pre-trigger for now
-  
+
   // open CLCT pre-trigger window
   reg  [3:0] preClct_width_cnt = 0;
-  wire       preClct_width_bsy = (preClct_width_cnt != 0); 
+  wire       preClct_width_bsy = (preClct_width_cnt != 0);
   //
   always @(posedge clock) begin
     if      ( ttc_resync        ) preClct_width_cnt = 0;                        // Clear on reset
@@ -2068,7 +2332,7 @@
   wire active_cfeb4_event_counter_reset      = vme_cnt_reset;
   wire active_cfeb5_event_counter_reset      = vme_cnt_reset;
   wire active_cfeb6_event_counter_reset      = vme_cnt_reset;
-  
+
   wire active_cfebs_event_counter_ovf      = (active_cfebs_event_counter      == {MXCNTVME{1'b1}});
   wire active_cfebs_me1a_event_counter_ovf = (active_cfebs_me1a_event_counter == {MXCNTVME{1'b1}});
   wire active_cfebs_me1b_event_counter_ovf = (active_cfebs_me1b_event_counter == {MXCNTVME{1'b1}});
@@ -2079,7 +2343,7 @@
   wire active_cfeb4_event_counter_ovf      = (active_cfeb4_event_counter      == {MXCNTVME{1'b1}});
   wire active_cfeb5_event_counter_ovf      = (active_cfeb5_event_counter      == {MXCNTVME{1'b1}});
   wire active_cfeb6_event_counter_ovf      = (active_cfeb6_event_counter      == {MXCNTVME{1'b1}});
-  
+
   wire active_cfebs_event_counter_en      = (|active_feb_list) && !active_cfebs_event_counter_ovf;
   wire active_cfebs_me1a_event_counter_en =  (|active_feb_list[6:4]) && !(|active_feb_list[3:0]) && !active_cfebs_me1a_event_counter_ovf; // Only ME1A was active
   wire active_cfebs_me1b_event_counter_en = !(|active_feb_list[6:4]) &&  (|active_feb_list[3:0]) && !active_cfebs_me1b_event_counter_ovf; // Only ME1B was active
@@ -2090,7 +2354,7 @@
   wire active_cfeb4_event_counter_en      = active_feb_list[4] && !active_cfeb4_event_counter_ovf;
   wire active_cfeb5_event_counter_en      = active_feb_list[5] && !active_cfeb5_event_counter_ovf;
   wire active_cfeb6_event_counter_en      = active_feb_list[6] && !active_cfeb6_event_counter_ovf;
-  
+
   always @(posedge clock) begin
     if      (active_cfebs_event_counter_reset) active_cfebs_event_counter = cnt_fatzero;
     else if (active_cfebs_event_counter_en   ) active_cfebs_event_counter = active_cfebs_event_counter + 1'b1;
@@ -2122,7 +2386,7 @@
     if      (active_cfeb6_event_counter_reset) active_cfeb6_event_counter = cnt_fatzero;
     else if (active_cfeb6_event_counter_en   ) active_cfeb6_event_counter = active_cfeb6_event_counter + 1'b1;
   end
-  
+
 // CLCT counter, presets at evcntres or resync
   reg   [MXCNTVME-1:0]  clct_counter = 0;
 
@@ -2253,9 +2517,9 @@
   wire wr_buf_avail          = (wr_buf_ready || !wr_buf_required);        // clct_sm may process new triggers
   wire buf_fence_cnt_is_peak = (buf_fence_cnt_peak[11:0]==buf_fence_cnt[11:0]);  // Peak number of fences in fence RAM
 
-// CLCT Pattern Trigger on hit cfebs, includes only cfebs with actual hits, and not overlaps from adjacent cfebs 
+// CLCT Pattern Trigger on hit cfebs, includes only cfebs with actual hits, and not overlaps from adjacent cfebs
   wire [MXCFEB-1:0] active_feb;
-  wire any_cfeb_hit;    
+  wire any_cfeb_hit;
 
   assign any_cfeb_hit           = (|cfeb_hit[MXCFEB-1:0]);                               // Any CFEB has a hit
   assign active_feb[MXCFEB-1:0] = cfeb_active[MXCFEB-1:0] | {MXCFEB{all_cfebs_active}};  // Active list includes boundary overlaps
@@ -2268,10 +2532,10 @@
   wire  clct_ext_trig_os; // CLCT external trigger from ccb (scintillator)
   wire  alct_ext_trig_os; // ALCT external trigger from ccb
 
-  x_delay_os #(4) udly0 (.d(alct_active_feb    ),.clock(clock),.delay(alct_preClct_dly ),.q(alct_pre_trig_os));  
-  x_delay_os #(4) udly1 (.d(alct0_valid        ),.clock(clock),.delay(alct_pat_trig_dly),.q(alct_pat_trig_os));  
-  x_delay_os #(4) udly2 (.d(alct_adb_pulse_sync),.clock(clock),.delay(adb_ext_trig_dly ),.q(adb_ext_trig_os ));  
-  x_delay_os #(4) udly3 (.d(dmb_ext_trig       ),.clock(clock),.delay(dmb_ext_trig_dly ),.q(dmb_ext_trig_os ));  
+  x_delay_os #(4) udly0 (.d(alct_active_feb    ),.clock(clock),.delay(alct_preClct_dly ),.q(alct_pre_trig_os));
+  x_delay_os #(4) udly1 (.d(alct0_valid        ),.clock(clock),.delay(alct_pat_trig_dly),.q(alct_pat_trig_os));
+  x_delay_os #(4) udly2 (.d(alct_adb_pulse_sync),.clock(clock),.delay(adb_ext_trig_dly ),.q(adb_ext_trig_os ));
+  x_delay_os #(4) udly3 (.d(dmb_ext_trig       ),.clock(clock),.delay(dmb_ext_trig_dly ),.q(dmb_ext_trig_os ));
   x_delay_os #(4) udly4 (.d(clct_ext_trig      ),.clock(clock),.delay(clct_ext_trig_dly),.q(clct_ext_trig_os));
   x_delay_os #(4) udly5 (.d(alct_ext_trig      ),.clock(clock),.delay(alct_ext_trig_dly),.q(alct_ext_trig_os));
 
@@ -2279,9 +2543,9 @@
   reg  [3:0] alct_width_cnt=0;
   wire [3:0] alct_preClct_win;
 
-  wire alct_width_bsy   = (alct_width_cnt != 0); 
+  wire alct_width_bsy   = (alct_width_cnt != 0);
   wire alct_open_window = alct_pre_trig_os; // ALCT match window opens on alct_active_feb
-  
+
   always @(posedge clock) begin
     if      (ttc_resync      )  alct_width_cnt = 0;                         // Clear on reset
     else if (alct_open_window)  alct_width_cnt = alct_preClct_width - 1'b1; // Load persistence count
@@ -2321,7 +2585,7 @@
 // *****************************************************************************
   wire clct_pat_trig  = any_cfeb_hit && clct_pat_trig_en;        // Trigger source is a CLCT pattern
   wire clct_retrigger = clct_pat_trig && noflush && nothrottle;  // Immediate re-trigger
-  wire clct_notbusy   = !clct_pretrig_rqst;                      // Ready for next pretrig  
+  wire clct_notbusy   = !clct_pretrig_rqst;                      // Ready for next pretrig
   wire clct_deadtime  = (clct_sm==flush) || (clct_sm==throttle); // CLCT Bx pretrig machine waited for triads to dissipate before rearm
 
 // Pre-trigger keep or discard
@@ -2351,7 +2615,7 @@
 
         pretrig:                    // Pre-triggered, send Active FEB bits to DMB
           if (!nothrottle)          // Throttle trigger rate before re-arming
-           clct_sm = throttle;    
+           clct_sm = throttle;
           else if (!noflush)        // Flush triads before re-arming
            clct_sm = flush;
           else if (!clct_retrigger) // Stay in pre-trig for immediate re-trigger
@@ -2366,7 +2630,7 @@
             else
              clct_sm = idle;       // Otherwise go directly from throttle to idle
 
-        flush:                   // Wait fixed time for 1/2-strip one-shots to dissipate  
+        flush:                   // Wait fixed time for 1/2-strip one-shots to dissipate
           if (flush_done) begin  // Countdown timer
             if (pretrig_halt)    // Pretrigger and halt mode
              clct_sm = halt;
@@ -2401,7 +2665,7 @@
   always @(posedge clock) begin
     nothrottle <= (clct_throttle == 0);
   end
-  
+
 // Trigger flush state timer. Wait for 1/2-strip one-shots and raw hits fifo to clear
   reg   [MXFLUSH-1:0] flush_cnt=0;
 
@@ -2463,7 +2727,7 @@
 
 // Modify trig_source[2] if there were ALCT coincidence, and add sources 9,10 for ME1A ME1B
   wire [10:0] trig_source_s0_mod;
-  
+
   assign trig_source_s0_mod[1:0] = trig_source_s0[1:0];      // Copy non-alct trigger source bits
   assign trig_source_s0_mod[2]   = alct_preClct_window && clct_pretrig && alct_match_trig_en;  // ALCT window was open at pretrig
   assign trig_source_s0_mod[8:3] = trig_source_s0[8:3];      // Copy non-alct trigger source bits
@@ -2487,12 +2751,12 @@
       bxn_clct_vme    <= bxn_counter;
     end
   end
-  
+
 // On Pretrigger send Active FEB word to DMB, persist 1 cycle per event
   wire [MXCFEB-1:0] active_feb_list_pre; // Active FEB list to DMB at pretrig time
   wire [MXCFEB-1:0] active_feb_list_tmb; // Active FEB list to DMB at tmb match time
   wire [MXCFEB-1:0] active_feb_list;     // Active FEB list selection
-  
+
   wire              active_feb_flag_pre; // Active FEB flag to DMB at pretrig time
   wire              active_feb_flag_tmb; // Active FEB flag to DMB at tmb match time
   wire              active_feb_flag;     // Active FEB flag selection
@@ -2508,7 +2772,7 @@
 
 // Delay TMB active feb list 1bx so it can share tmb+1bx RAM
   reg [MXCFEB-1:0] tmb_aff_list_ff = 0;
-  
+
   always @(posedge clock) begin
     tmb_aff_list_ff <= tmb_aff_list;
   end
@@ -2621,7 +2885,7 @@
 
 // Discard event if there was no valid first pattern after drift
   wire [1:0] clct_invp;
-  
+
   assign clct_invp[0] = !(clct0_vpf || trig_source_ext_xtmb);                     // Force valid for external trigger
   assign clct_invp[1] = !(clct1_vpf || trig_source_ext_xtmb) && (hs_hit_2nd !=0); // clct1 invalid if it has hits below thresh
 
@@ -2725,20 +2989,12 @@
     cnt_en[58]  <= tmb_nol1a_cnt_en;          // L1A  TMB triggered, no L1A in window
     cnt_en[59]  <= (read_sm == xcrc0);        // L1A  TMB readouts completed
     cnt_en[60]  <= l1a_los_win;               // L1A  TMB readouts lost due to L1A prioritizing
-    
+
     cnt_en[61]  <= (|triad_skip[MXCFEB-1:0]); // STAT  CLCT Triads skipped
     cnt_en[62]  <= buf_reset && startup_done; // STAT  Raw hits buffer had to be reset due to ovf, error
     cnt_en[63]  <= ttc_resync;                // STAT  TTC Resyncs received
     cnt_en[64]  <= sync_err_cnt_en;           // STAT  TTC sync errors
     cnt_en[65]  <= perr_pulse;                // STAT Raw hits RAM parity errors
-
-    // cnt_en[100] <= gem_copad_matched; // STAT Raw hits RAM parity errors
-    // cnt_en[101] <= gemA_sync_err; 
-    // cnt_en[102] <= gemB_sync_err; 
-    // cnt_en[103] <= gems_sync_err; 
-    
-    // cnt_en[104] <= gem_hit_at_clct_pretrig[0]; 
-    // cnt_en[105] <= gem_hit_at_clct_pretrig[1]; 
 
   end
 
@@ -2844,59 +3100,58 @@
   parameter MNGEMCNT        = 0;   // First sequencer counter, not number of counters because they start elsewhere
   parameter MXGEMCNT        = 127; // Last  sequencer counter, not number of counters becouse they end elsewhere
 
-  reg [MXCNTVME-1:0] gem_cnt [MXCNT:MNCNT]; //
-  reg [MXCNT:MNCNT]  gem_cnt_en = 0;        // Counter increment enables
+  reg [MXCNTVME-1:0] gem_cnt [MXGEMCNT:MNGEMCNT]; //
+  reg [MXGEMCNT:MNGEMCNT]  gem_cnt_en = 0;        // Counter increment enables
 
 // Counter enable strobes
   always @(posedge clock) begin
 
     gem_cnt_en[0] <= gem_copad_matched;
 
-    gem_cnt_en[1] <= gemA_sync_err; 
-    gem_cnt_en[2] <= gemB_sync_err; 
-    gem_cnt_en[3] <= gems_sync_err; 
-    
-    gem_cnt_en[4] <= gem_hit_at_clct_pretrig[0]; 
-    gem_cnt_en[5] <= gem_hit_at_clct_pretrig[1]; 
+    gem_cnt_en[1] <= gemA_sync_err;
+    gem_cnt_en[2] <= gemB_sync_err;
+    gem_cnt_en[3] <= gems_sync_err;
 
-    //gem_cnt_en[10] <= gemA_vpf0; 
-    //gem_cnt_en[11] <= gemA_vpf1; 
-    //gem_cnt_en[12] <= gemA_vpf2; 
-    //gem_cnt_en[13] <= gemA_vpf3; 
-    //gem_cnt_en[14] <= gemA_vpf4; 
-    //gem_cnt_en[15] <= gemA_vpf5; 
-    //gem_cnt_en[16] <= gemA_vpf6; 
-    //gem_cnt_en[17] <= gemA_vpf7; 
-                           
-    //gem_cnt_en[18] <= gemB_vpf0; 
-    //gem_cnt_en[19] <= gemB_vpf1; 
-    //gem_cnt_en[20] <= gemB_vpf2; 
-    //gem_cnt_en[21] <= gemB_vpf3; 
-    //gem_cnt_en[22] <= gemB_vpf4; 
-    //gem_cnt_en[23] <= gemB_vpf5; 
-    //gem_cnt_en[24] <= gemB_vpf6; 
-    //gem_cnt_en[25] <= gemB_vpf7; 
+    //gem_cnt_en[4] <= gem_hit_at_clct_pretrig[0];
+    //gem_cnt_en[5] <= gem_hit_at_clct_pretrig[1];
+
+    gem_cnt_en[10] <= gemA_vpf[0];
+    gem_cnt_en[11] <= gemA_vpf[1];
+    gem_cnt_en[12] <= gemA_vpf[2];
+    gem_cnt_en[13] <= gemA_vpf[3];
+    gem_cnt_en[14] <= gemA_vpf[4];
+    gem_cnt_en[15] <= gemA_vpf[5];
+    gem_cnt_en[16] <= gemA_vpf[6];
+    gem_cnt_en[17] <= gemA_vpf[7];
+
+    gem_cnt_en[18] <= gemB_vpf[0];
+    gem_cnt_en[19] <= gemB_vpf[1];
+    gem_cnt_en[20] <= gemB_vpf[2];
+    gem_cnt_en[21] <= gemB_vpf[3];
+    gem_cnt_en[22] <= gemB_vpf[4];
+    gem_cnt_en[23] <= gemB_vpf[5];
+    gem_cnt_en[24] <= gemB_vpf[6];
+    gem_cnt_en[25] <= gemB_vpf[7];
 
   end
 
 // Counter overflow disable
   wire [MXCNT:MNCNT]  gem_cnt_nof;
 
-  genvar j;
   generate
     for (j=MNCNT; j<=MXCNT; j=j+1) begin: gennof_gem
       assign gem_cnt_nof[j] = (gem_cnt[j] < cnt_fullscale);    // 1=counter j not overflowed
     end
   endgenerate
 
-  wire gem_cnt_any_ovf_clct = !(&gem_cnt_nof);        // 1 or more counters overflowed
+  wire gem_cnt_any_ovf = !(&gem_cnt_nof);        // 1 or more counters overflowed
 
   reg gem_cnt_en_all      = 0;
   reg gem_cnt_any_ovf_seq = 0;
 
   always @(posedge clock) begin
-    gem_cnt_any_ovf_seq <= gem_cnt_any_ovf_clct;
-    gem_cnt_en_all      <= !((gem_cnt_any_ovf_clct || gem_cnt_any_ovf_alct) && gem_cnt_stop_on_ovf);
+    gem_cnt_any_ovf_seq <= gem_cnt_any_ovf;
+    gem_cnt_en_all      <= !((gem_cnt_any_ovf) && gem_cnt_stop_on_ovf);
   end
 
 // Counting
@@ -3081,7 +3336,7 @@
   parameter MXXTMB = 44;                    // Post drift CLCT data
   wire [MXXTMB-1:0]  xtmb_wdata;                // Mapping array
   wire [MXXTMB-1:0]  xtmb_rdata;                // Mapping array
-  
+
   assign xtmb_wdata[15:0]  =  clct0_xtmb[15:0]; // CLCT0 after drift
   assign xtmb_wdata[31:16] =  clct1_xtmb[15:0]; // CLCT1 after drift
   assign xtmb_wdata[34:32] =  clctc_xtmb[2:0];  // CLCT0/1 common after drift
@@ -3322,7 +3577,7 @@
   end
 
 // L1A parallel shifter write address increments every cycle, read address is later in time by l1a_delay
-  reg [7:0]  l1a_delay_wadr=0;  
+  reg [7:0]  l1a_delay_wadr=0;
   reg [7:0]  l1a_delay_radr=8'hFF;
 
   always @(posedge clock) begin
@@ -3381,7 +3636,7 @@
     .DIPBDIP       (),              //  2-bit B port parity/MSB parity input
     .DOBDO         (l1a_dob[15:0]), // 16-bit B port data/MSB data output
     .DOPBDOP       ()               //  2-bit B port parity/MSB parity output
-  );                
+  );
 
 // After ~128bx L1A delay, unpack data stored in L1A parallel shifter
   wire        tmb_push_dly      =   l1a_dob[0];
@@ -3410,7 +3665,7 @@
   assign wr_adr_xl1a   = xl1a_rdata[10:0];
   assign wr_avail_xl1a = xl1a_rdata[11];
 
-// FF buffer l1a_window index for fanout, points to 1st position window is closed 
+// FF buffer l1a_window index for fanout, points to 1st position window is closed
   always @(posedge clock) begin
     winclosed <= l1a_window;
   end
@@ -3469,7 +3724,7 @@
   wire   l1a_int      = l1a_internal && l1a_internal_pulse;
   assign l1a_pulse    = l1a_ccb || l1a_int;
   assign l1a_received = l1a_pulse;
-  
+
 // L1A window matching register declarations
   reg [15:0] l1a_tag_sr = 0;    // Readout tag
   reg [3:0]  l1a_win_sr [15:0]; // L1A Window position at LCT*L1A coincidence, init=1 removes spurious warnings
@@ -3577,7 +3832,7 @@
     end
 
     else if (clear_sr) begin      // Sych reset all stages
-      i=0;                // Loop over 15 window positions 0 to 15 
+      i=0;                // Loop over 15 window positions 0 to 15
       while (i<=15) begin
         l1a_tag_sr          <= 0; // Readout tag
         l1a_win_sr[i][3:0]  <= 0; // L1A Window position at LCT*L1A coincidence
@@ -3588,7 +3843,7 @@
     end
 
     else begin
-      i=0;                // Loop over 15 window positions 0 to 14 
+      i=0;                // Loop over 15 window positions 0 to 14
       while (i<=14) begin
         if (l1a_match && l1a_vpf_sr[i] && l1a_sr_include[i] && !l1a_tag_sr[i] && ((l1a_win_best==i) || nl1a_win_pri_en)) begin
           l1a_tag_sr[i+1]       <= 1;                          // Readout tag
@@ -3617,7 +3872,7 @@
   assign l1a_bxn_win   = l1a_bxn_sr[winclosed];
   assign l1a_see_win   = l1a_see_sr[winclosed];
 
-// L1A window width is generated by a pulse propagating down the enabled l1a_vpf_sr stages  
+// L1A window width is generated by a pulse propagating down the enabled l1a_vpf_sr stages
   assign l1a_window_open    = |(l1a_vpf_sr & l1a_sr_include);
   assign l1a_window_haslcts = |(l1a_vpf_sr & l1a_sr_include & ~l1a_tag_sr);
 
@@ -3809,7 +4064,7 @@
   end
 
 // Readout type code depends on selected FIFO mode and whether event buffer data exists
-  reg [1:0] readout_type = 0;          
+  reg [1:0] readout_type = 0;
 
   wire  r_has_buf    = r_wr_avail_xl1a;
   wire  r_has_hdr    = r_wr_avail_xl1a && (!r_l1a_notmb || clct_wr_continuous);
@@ -3823,7 +4078,7 @@
 
   wire  sync_err_hdr  = (r_has_hdr) ? r_sync_err    : sync_err;
   wire  buf_stalled_hdr  = (r_has_hdr) ? r_buf_stalled : buf_stalled;
-  
+
   always @(posedge clock) begin
   if      (!full_dump && !local_dump &&  header_only ) readout_type = 0; // dump: No     header: Full
   else if ( full_dump && !local_dump && !header_only ) readout_type = 1; // dump: Full   header: Full
@@ -3834,9 +4089,9 @@
 
 // Determine active_feb list source, pretrig or at TMB match
   wire [MXCFEB-1:0] active_feb_mux;
-  
+
   assign active_feb_mux = (active_feb_src) ? r_tmb_aff_list : r_active_feb;
-  
+
 // Latch FIFO list of hit FEBs, set all for full dump, clear all for no dump
   always @* begin
   if      (full_dump ) cfebs_read = {MXCFEB{1'b1}};
@@ -3861,7 +4116,7 @@
   reg  [MXRPCB-1+1:0]  rd_nrpcs=0;
   wire [MXRPCB-1+1:0]  r_nrpcs_read;
 
-  reg  [MXGEMB-1+1:0]  rd_ngems=3'h4; 
+  reg  [MXGEMB-1+1:0]  rd_ngems=3'h4;
   wire [MXGEMB-1+1:0]  r_ngems_read;
 
   wire include_rawhits = r_has_buf && (full_dump || local_dump);
@@ -3940,7 +4195,7 @@
 
 // Startup delay waits for buf_q_empty to update after a reset
   reg xstartup_done = 0;
-  
+
   always @(posedge clock) begin
   xstartup_done <= (read_sm==xstartup);
   end
@@ -3981,7 +4236,7 @@
   xdump:                // Send fifo dump to DMB
     if (fifo_read_done)  begin    // Wait for clct fifo done
      if (gem_read_enable || rpc_read_enable)   // Read RPCs/GEMs if enabled
-     read_sm = xb04;        
+     read_sm = xb04;
      else if (scp_auto)
      read_sm = xb05;        // Skip to scope, if enabled
      else if (mini_read_enable)
@@ -3992,11 +4247,11 @@
      read_sm = xe0c;        // Otherwise go to eoc
     end
 
-// RPCs & GEM shared header 
-  //TODO: consider using different headers for GEM vs. RPC ? 
+// RPCs & GEM shared header
+  //TODO: consider using different headers for GEM vs. RPC ?
   xb04:                        // Send b04 frame to begin RPC/GEM
     // Don't read fifo if it is empty
-    if ((gem_read_enable && gems_all_empty) || ((!gem_read_enable) && rpc_read_enable && rpcs_all_empty)) 
+    if ((gem_read_enable && gems_all_empty) || ((!gem_read_enable) && rpc_read_enable && rpcs_all_empty))
       read_sm = xe04;
     else begin
       if   (gem_read_enable) read_sm = xgem;
@@ -4072,10 +4327,10 @@
     else              // Word count is only even, need to add 2 frames
     read_sm = xmod40;
 
-  xmod40:                // Send 1st of 2 frames to make wordcount multiple of 4  
+  xmod40:                // Send 1st of 2 frames to make wordcount multiple of 4
     read_sm = xmod41;
 
-  xmod41:                // Send 2nd of 2 frames to make wordcount multiple of 4  
+  xmod41:                // Send 2nd of 2 frames to make wordcount multiple of 4
     read_sm = xe0f;
 
 // CRC
@@ -4083,10 +4338,10 @@
     read_sm = xcrc0;
 
   xcrc0:                // Send 1s of 2 crc frames
-    read_sm = xcrc1;  
+    read_sm = xcrc1;
 
   xcrc1:                // Send 1s of 2 crc frames
-    read_sm = xlast;  
+    read_sm = xlast;
 
 // Trailer
   xlast:              // Send last word to DMB
@@ -4193,7 +4448,7 @@
   assign  header17_[18:15]  =  0;                      // DDU+DMB control flags
   assign  header18_[14:0]   =  r_orbit_counter[29:15]; // BX0s since last hard reset
   assign  header18_[18:15]  =  0;                      // DDU+DMB control flags
-  
+
 // CLCT Raw Hits Size
   assign  header19_[2:0]    =  r_ncfebs[2:0];          // Number of CFEBs read out
   assign  header19_[7:3]    =  r_fifo_tbins_cfeb[4:0]; // Number of time bins per CFEB in dump
@@ -4311,8 +4566,8 @@
 
 // RPC/GEM Configuration
 
-  wire [18:0] header36_rpc_;  
-  wire [18:0] header36_gem_;  
+  wire [18:0] header36_rpc_;
+  wire [18:0] header36_gem_;
 
   assign  header36_rpc_[1:0]   = rd_list_rpc[1:0];      // RPCs included in read out
   assign  header36_rpc_[3:2]   = r_nrpcs_read[1:0];     // Number of RPCs in readout, 0,1,2, 0 if head-only event
@@ -4328,7 +4583,7 @@
   assign  header36_gem_[14:10] = fifo_pretrig_gem[4:0]; // Number GEM FIFO time bins before pretrigger
   assign  header36_gem_[18:15] = 0;                     // DDU+DMB control flags
 
-  assign  header36_ [18:0]     = (gem_read_enable) ? header36_gem_ : header36_rpc_; 
+  assign  header36_ [18:0]     = (gem_read_enable) ? header36_gem_ : header36_rpc_;
 
 // Buffer Status
 
@@ -4392,7 +4647,7 @@
   end
   end
   else
-  if (read_sm == xdmb) begin            
+  if (read_sm == xdmb) begin
   header_bbl[0]   <=  header00_;
   header_bbl[1]   <=  header01_;
   header_bbl[2]   <=  header02_;
@@ -4536,7 +4791,7 @@
 
 // Miniscope Readout
   wire mini_start_from_xdump = (read_sm == xdump) && fifo_read_done && !rpc_read_enable && !scp_auto;
-  wire mini_start_from_xe04  = (read_sm == xe04)  && !scp_auto; 
+  wire mini_start_from_xe04  = (read_sm == xe04)  && !scp_auto;
   wire mini_start_from_xe05  = (read_sm == xe05);
   wire mini_start_lookahead  = (mini_start_from_xdump || mini_start_from_xe04 || mini_start_from_xe05);
 
@@ -4619,8 +4874,8 @@
 // RPC+GEM Raw hits
 
   // use a different header if GEMs are enabled, to distinguish from RPC data
-  wire [11:0] b04_frame_mux = (gem_read_enable) ? 12'hC04 : 12'hB04; 
-  wire [11:0] e04_frame_mux = (gem_read_enable) ? 12'hD04 : 12'hE04; 
+  wire [11:0] b04_frame_mux = (gem_read_enable) ? 12'hC04 : 12'hB04;
+  wire [11:0] e04_frame_mux = (gem_read_enable) ? 12'hD04 : 12'hE04;
 
   assign b04_frame[11:0]   =  b04_frame_mux;        // Beginning of GEM/RPC block
   assign b04_frame[14:12]  =  3'b110;               // Marker
@@ -4990,7 +5245,7 @@
 // Scope channel multiplexer overloads special inputs if selected
 //------------------------------------------------------------------------------------------------------------------
   wire [159:0] scp_ch_mux;
-  
+
   assign scp_ch_mux[103:0]   = scp_ch[103:0];                        // Channels not multiplexed
   assign scp_ch_mux[159:104] = (scp_ch_overlay) ? scp_alct_rx[55:0] : scp_ch[159:104];  // Channels multiplexed
 
@@ -5019,7 +5274,7 @@
     .radr_vme   (scp_radr[8:0]),       // In  Channel data read address
     .start_read (scp_start_read),      // In  Start sequencer readout
     .waiting    (scp_waiting),         // Out  Waiting for trigger
-    .trig_done  (scp_trig_done),       // Out  Trigger done, ready for readout 
+    .trig_done  (scp_trig_done),       // Out  Trigger done, ready for readout
     .rdata      (scp_rdata[15:0]),     // Out  Recorded channel data
     .read_busy  (scp_read_busy),       // Out  Readout busy sending data to sequencer
     .read_done  (scp_read_done)        // Out  Read done
@@ -5058,7 +5313,7 @@
   assign clct_status[7] = stat_tmb_flush;
   assign clct_status[8] = stat_nol1a_flush;
 
-// Condense state machine vectors into binary encoding for diagnostic status readout  
+// Condense state machine vectors into binary encoding for diagnostic status readout
   always @* begin
     case (clct_sm)
       startup:  clct_sm_vec <= 0;
@@ -5126,11 +5381,11 @@
     led_l1a_intime_ff  <=  l1a_keep;                     // L1A arrived in window or forced L1A
     led_invpat_ff      <=  discard_event_led;            // Invalid pattern after drift
     led_nol1a_flush_ff <=  tmb_nol1a;                    // L1A never arrived, event flushed
-    led_nomatch_ff     <=  tmb_trig_pulse && !tmb_match; // Trigger but no match 
+    led_nomatch_ff     <=  tmb_trig_pulse && !tmb_match; // Trigger but no match
   end
 
 // Front Panel: Normal Mode LED Digital pulse stretch for visual persistence
-  x_flashsm #(19) uflashf0  (.trigger(led_lct_ff),        .hold(led_hold), .clock(clock), .out(led_lct_os)        );  // LED0  Blue  LCT  
+  x_flashsm #(19) uflashf0  (.trigger(led_lct_ff),        .hold(led_hold), .clock(clock), .out(led_lct_os)        );  // LED0  Blue  LCT
   x_flashsm #(19) uflashf1  (.trigger(led_alct_ff),       .hold(led_hold), .clock(clock), .out(led_alct_os)       );  // LED1  Green  ALCT
   x_flashsm #(19) uflashf2  (.trigger(led_clct_ff),       .hold(led_hold), .clock(clock), .out(led_clct_os)       );  // LED2  Green  CLCT
   x_flashsm #(19) uflashf3  (.trigger(led_l1a_intime_ff), .hold(led_hold), .clock(clock), .out(led_l1a_intime_os) );  // LED3  Green  L1A
@@ -5189,7 +5444,7 @@
 
   assign dmb_busy = seq_wr;
 
-// Store DMB raw hits readout word stream: 
+// Store DMB raw hits readout word stream:
   wire [1:0]  seq_wea;
   wire [1:0]  dmb_web;
   wire [35:0] dmb_rdata_mux;
@@ -5210,12 +5465,12 @@
 // Dual port Block RAM 18x4K built from 9x2K+9x2K cascaded to a second bank of 9x2K+9x2K
 //  Port A wo written by sequencer
 //  Port B rw read/write by VME
-  
+
   initial $display("sequencer: generating Virtex6 RAMB18E1_S9_S9 dmb_bram");
 
   assign seq_dopa = 0;      // Port A dummy not needed for Virtex6
   wire [8:0] db [1:0][1:0]; // Port B dummy for Virtex6, does not need sump
-  
+
   generate
   for (jdepth=0; jdepth<=1; jdepth=jdepth+1) begin: depth_2x2048
   for (iwidth=0; iwidth<=1; iwidth=iwidth+1) begin: width_2x9
@@ -5305,18 +5560,18 @@
 //-------------------------------------------------------------------------------------------------------------------
 // Sump unused signals
 //-------------------------------------------------------------------------------------------------------------------
-  wire clct_sump = 
+  wire clct_sump =
   cfeb_first_frame | cfeb_last_frame |
-  rpc_first_frame  | rpc_last_frame  | 
-  gem_first_frame  | gem_last_frame  | 
+  rpc_first_frame  | rpc_last_frame  |
+  gem_first_frame  | gem_last_frame  |
   mini_first_frame | mini_last_frame |
   bcb_first_frame  | bcb_last_frame;
 
-  wire header_sump=  
+  wire header_sump=
   (|r_mpc_reserved) |
   r_wr_buf_avail    |
   rpc_tbinbxn[4]    |
-  (|header36_rpc_)  | 
+  (|header36_rpc_)  |
   mini_rdata[15];
 
   wire scope_sump =
@@ -5325,7 +5580,7 @@
   (|scp_rpc0_nhits[3:0])  | // RPC0 number of pads hit
   (|scp_rpc1_nhits[3:0]);   // RPC1 number of pads hit
 
-  assign sequencer_sump = 
+  assign sequencer_sump =
   (|tmb_match_pri[3:0])   | // Priority of clct in clct window
   (|l1a_pri_best[3:0])    |
   (|dang)                 |
@@ -5497,14 +5752,14 @@
 // DMB frame that looks like DDU data
   reg [15:0] deb_dmb_tx  = 0;
   reg        deb_dmb_nwr = 0;
-  
+
   always @(posedge clock or posedge startup_blank) begin
     if (startup_blank) begin // async preset
       deb_dmb_tx[15:0]<= 0;  // fifo data
       deb_dmb_nwr    <= 1;
     end
     else begin                // sync load
-      deb_dmb_tx[14:0] <= dmb_ffdly[14:0]; // fifo data  
+      deb_dmb_tx[14:0] <= dmb_ffdly[14:0]; // fifo data
       deb_dmb_tx[15]   <= dmb_ffdly[15];   // DDU special
       deb_dmb_nwr      <= dmb_ffdly[18];   // DMB /wr
     end

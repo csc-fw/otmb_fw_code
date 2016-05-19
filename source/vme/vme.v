@@ -696,6 +696,11 @@
   cnt_any_ovf_alct,
   cnt_any_ovf_seq,
 
+// GEM Trigger/Readout Counter Ports
+  gem_cnt_all_reset,
+  gem_cnt_stop_on_ovf,
+  gem_cnt_any_ovf_seq,
+
 // ALCT Event Counters
   event_counter0,
   event_counter1,
@@ -771,12 +776,6 @@
   event_counter63,
   event_counter64,
   event_counter65,
-
-// GEM Counters
-  //gem_event_counter0,
-  //gem_event_counter1,
-  //gem_event_counter2,
-  //gem_event_counter3,
 
 // Header Counters
   hdr_clear_on_resync,
@@ -2188,6 +2187,11 @@
   output cnt_alct_debug;   // Enable ALCT debug lct error counter
   input  cnt_any_ovf_alct; // At least one alct counter overflowed
   input  cnt_any_ovf_seq;  // At least one sequencer counter overflowed
+
+// GEM Trigger/Readout Counter Ports
+  output gem_cnt_all_reset;    // Trigger/Readout counter reset
+  output gem_cnt_stop_on_ovf;  // Stop all counters if any overflows
+  input  gem_cnt_any_ovf_seq;  // At least one sequencer counter overflowed
 
 // ALCT Event Counters
   input  [MXCNTVME-1:0]  event_counter0; // Event counter 1D remap
@@ -3712,6 +3716,7 @@
 
   ADR_CNT_CTRL:              data_out <= cnt_ctrl_rd;
   ADR_CNT_RDATA:             data_out <= cnt_rdata_rd;
+  ADR_GEM_CNT_RDATA:         data_out <= gem_cnt_rdata_rd;
 
   ADR_JTAGSM0:               data_out <= jtagsm0_rd;
   ADR_JTAGSM1:               data_out <= jtagsm1_rd;
@@ -3938,6 +3943,7 @@
 
   assign wr_scp_trigger_ch        =  (reg_adr==ADR_SCP_TRIG               && clk_en);
   assign wr_cnt_ctrl              =  (reg_adr==ADR_CNT_CTRL               && clk_en);
+  assign wr_gem_cnt_ctrl          =  (reg_adr==ADR_GEM_CNT_CTRL           && clk_en);
 
   assign wr_jtagsm0               =  (reg_adr==ADR_JTAGSM0                && clk_en);
   assign wr_vmesm0                =  (reg_adr==ADR_VMESM0                 && clk_en);
@@ -6525,7 +6531,7 @@
   assign cnt_all_reset       = cnt_all_reset_vme || (ttc_resync && cnt_clear_on_resync);
 
   // x_oneshot is Digital One-Shot defined in utils/x_oneshot.v
-  x_oneshot usnap (.d(cnt_snapshot),.clock(clock),.q(cnt_snapshot_os));
+  x_oneshot ugemsnap (.d(cnt_snapshot),.clock(clock),.q(cnt_snapshot_os));
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_CNT_RDATA=0xD2  Trigger/Readout Counter Data Register
@@ -6707,16 +6713,13 @@
   assign gem_cnt_all_reset_vme   = gem_cnt_ctrl_wr[0];    // RW  1=reset all VME counters (doesnt clear header)
   assign gem_cnt_snapshot        = gem_cnt_ctrl_wr[1];    // RW  1=take snapshot of current count
   assign gem_cnt_stop_on_ovf     = gem_cnt_ctrl_wr[2];    // RW  1=Stop all counters if any overflows
-  assign gem_cnt_alct_debug      = gem_cnt_ctrl_wr[5];    // RW  1=Enable alct lct error alct debug counter
+  //assign gem_cnt_alct_debug      = gem_cnt_ctrl_wr[5];  // RW  1=Enable alct lct error alct debug counter
   assign gem_cnt_clear_on_resync = gem_cnt_ctrl_wr[6];    // RW  1=Clear VME    counters on ttc_resync
-  assign gem_hdr_clear_on_resync = gem_cnt_ctrl_wr[7];    // RW  1=Clear Header counters on ttc_resync
+  //assign gem_hdr_clear_on_resync = gem_cnt_ctrl_wr[7];  // RW  1=Clear Header counters on ttc_resync
   assign gem_cnt_adr_lsb         = gem_cnt_ctrl_wr[8];    // RW  0=read counter lower 16 bits, 1=upper 14
   assign gem_cnt_select[6:0]     = gem_cnt_ctrl_wr[15:9]; // RW  Counter address
 
-  assign gem_cnt_ctrl_rd[2:0]    = gem_cnt_ctrl_wr[2:0];  // RW  Readback
-  assign gem_cnt_ctrl_rd[3]      = gem_cnt_any_ovf_alct;  // R  At least one alct counter overflowed
-  assign gem_cnt_ctrl_rd[4]      = gem_cnt_any_ovf_seq;   // R  At least one sequencer counter overflowed
-  assign gem_cnt_ctrl_rd[15:5]   = gem_cnt_ctrl_wr[15:5]; // RW  Readback
+  assign gem_cnt_ctrl_rd[15:0]   = gem_cnt_ctrl_wr[15:0]; // RW  Readback
 
   assign gem_cnt_all_reset       = gem_cnt_all_reset_vme || (ttc_resync && gem_cnt_clear_on_resync);
 
@@ -6727,9 +6730,9 @@
 // ADR_GEM_CNT_RDATA=0x316  GEM Counter Data Register
 //------------------------------------------------------------------------------------------------------------------
 // Remap 1D counters to 2D, because XST does not support 2D ports
-  parameter MXCNT = 93;                     // Number of counters, last counter id is mxcnt-1
-  reg  [MXCNTVME-1:0] gem_cnt_snap [MXCNT-1:0]; // Event counter snapshot 2D
-  wire [MXCNTVME-1:0] gem_cnt      [MXCNT-1:0]; // Event counter 2D map
+  parameter MXGEMCNT = 128;                        // Number of counters, last counter id is mxcnt-1
+  reg  [MXCNTVME-1:0] gem_cnt_snap [MXGEMCNT-1:0]; // Event counter snapshot 2D
+  wire [MXCNTVME-1:0] gem_cnt      [MXGEMCNT-1:0]; // Event counter 2D map
 
   assign gem_cnt[0]   = gem_counter0;
   assign gem_cnt[1]   = gem_counter1;
@@ -6861,12 +6864,11 @@
   assign gem_cnt[127] = gem_counter127;
 
 // Snapshot current value of all counters at once
-  genvar j;
   generate
     for (j=0; j<MXCNT; j=j+1) begin: gensnap_gem
       always @(posedge clock) begin
-        if (!power_up      )     gem_cnt_snap[j] < = {MXCNTVME{1'b1}}; // Load 1s on startup, defeats warnings for short counters
-        if (gem_cnt_snapshot_os) gem_cnt_snap[j] < = gem_cnt[j];           // Snapshot of j-th counter
+        if (!power_up      )     gem_cnt_snap[j] <= {MXCNTVME{1'b1}}; // Load 1s on startup, defeats warnings for short counters
+        if (gem_cnt_snapshot_os) gem_cnt_snap[j] <= gem_cnt[j];       // Snapshot of j-th counter
       end
     end
   endgenerate
@@ -6880,16 +6882,6 @@
 
 // Muliplex counter halves to fit in VMED16, if lsb=0 select lower 16 bits, if lsb=1 select upper 14
   assign gem_cnt_rdata_rd = (gem_cnt_adr_lsb) ? gem_cnt_rdata[29:16] : gem_cnt_rdata[15:0];
-
-//------------------------------------------------------------------------------------------------------------------
-//
-//------------------------------------------------------------------------------------------------------------------
-
-// GEM Counters
-//   assign cnt[100]  = gem_event_counter0;
-//   assign cnt[101]  = gem_event_counter1;
-//   assign cnt[102]  = gem_event_counter2;
-//   assign cnt[103]  = gem_event_counter3;
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_UPTIME=E8  Uptime Counter Register, Readonly
@@ -8153,6 +8145,7 @@ always @(posedge clock_vme) begin
   if    (wr_non_trig_ro)           non_trig_ro_wr          <= d[15:0];
   if    (wr_scp_trigger_ch)        scp_trigger_ch_wr       <= d[15:0];
   if    (wr_cnt_ctrl)              cnt_ctrl_wr             <= d[15:0];
+  if    (wr_gem_cnt_ctrl)          gem_cnt_ctrl_wr         <= d[15:0];
   if    (wr_jtagsm0)               jtagsm0_wr              <= d[15:0];
   if    (wr_vmesm0)                vmesm0_wr               <= d[15:0];
   if    (wr_vmesm4)                vmesm4_wr               <= d[15:0];
