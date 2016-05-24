@@ -904,7 +904,7 @@ TIMESPEC "TS_clock_160"  = PERIOD "clock_160" 6.25 ns HIGH 50%;
 NET "clock_cfeb_rxd<*>"	TIG;
 NET "clock_alct_rxd"	TIG;
 NET "clock_alct_txd"	TIG;
-NET "clock_gem_rxd"	    TIG;
+NET "clock_gem_rxd<*>"	TIG;
 
 #----------------------------------------------------------------------------------------------------------
 # End of TMB2012 UCF
