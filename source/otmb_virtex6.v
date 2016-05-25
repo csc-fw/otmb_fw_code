@@ -1550,6 +1550,11 @@
 
   wire  [7:0] gem_kchar [MXGEM-1:0];
 
+  wire  [3:0] gem_overflow;
+
+  wire gemA_overflow = |gem_overflow[1:0];
+  wire gemB_overflow = |gem_overflow[3:2];
+
 // Main GEM Generate Loop
   genvar igem;
   generate
@@ -1596,6 +1601,8 @@
   .link_bad             (gem_link_bad         [igem]                  ), // Out  link stability monitor: errors happened over 100 times
 
   .k_char               (gem_kchar            [igem]                  ), // Out latched copy of last Received K-Char
+
+  .overflow (gem_overflow[igem]), // GEM received cluster overflow
 
   // Debug Dummy FIFO Control Ports
   .debug_fifo_radr  (gem_debug_fifo_adr),         // In  FIFO RAM read tbin address
@@ -1652,14 +1659,6 @@
     .gemB_lostsync(gemB_lostsync), // Out
     .gems_lostsync(gems_lostsync)  // Out
   );
-
-  wire gem_sync_mon_sump =
-      gemA_synced
-    | gemB_synced
-    | gems_synced
-    | gemA_lostsync
-    | gemB_lostsync
-    | gems_lostsync;
 
   // GEM Co-pad Matching
   //--------------------------------------------------------------------------------------------------------------------
@@ -1737,10 +1736,7 @@
   | (|gem_copad[5])
   | (|gem_copad[6])
   | (|gem_copad[7])
-  | (|gem_match)
-  | (|gem_active_feb_list)
-  | (|gem_match_right)
-  | (gem_any_match);
+  | (|gem_match_right);
 
 //-------------------------------------------------------------------------------------------------------------------
 // Pattern Finder declarations, common to ME1A+ME1B+ME234
@@ -2108,12 +2104,20 @@
   .alct0_valid     (alct0_valid),     // In  ALCT has valid LCT
   .alct1_valid     (alct1_valid),     // In  ALCT has valid LCT
 
-
 // Sequencer GEM Ports
-  .gem_copad_matched (gem_any_match), // GEM co-pad match was found
+  .gem_any_match     (gem_any_match), // GEM co-pad match was found
+  .gem_match         (gem_match),     // 8 Bit GEM Match Flag
   .gemA_sync_err     (~gemA_synced),  // GEM0 has intra-chamber sync error
   .gemB_sync_err     (~gemB_synced),  // GEM1 has intra-chamber sync error
   .gems_sync_err     (~gems_synced),  // GEM Super Chamber has sync error
+
+  .gemA_overflow     (gemA_overflow),
+  .gemB_overflow     (gemB_overflow),
+
+  .gemA_vpf          (gemA_vpf),
+  .gemB_vpf          (gemB_vpf),
+
+  .gem_active_feb_list (gem_active_feb_list),
 
 // Sequencer External Triggers
   .alct_adb_pulse_sync (alct_adb_pulse_sync), // In  ADB Test pulse trigger
@@ -3482,11 +3486,10 @@
   .D2           (set_sw[8] ? 1'b0 : (!set_sw[7] ? bpi_rd_stat : link_good[0])), // In   1-bit data input tx on negative edge
   .Q            (mez_tp[1]));                                                   // Out  1-bit DDR output
 
-  wire gem_vpf = gem_vpf0[0] | gem_vpf1[0] | gem_vpf2[0] | gem_vpf3[0];
+  wire gem_vpf = (|gemA_vpf) | (|gemB_vpf);
 
   x_flashsm #(22) uflash_blink_cfeb_led (.trigger(|cfeb_rx_nonzero ),    .hold(1'b0), .clock(clock), .out(blink_cfeb_led));
   x_flashsm #(22) uflash_blink_gem_led  (.trigger(gem_vpf),              .hold(1'b0), .clock(clock), .out(blink_gem_led));
-  x_flashsm #(22) uflash_blink_gnz_led  (.trigger(|gem_rx_nonzero[3:0]), .hold(1'b0), .clock(clock), .out(blink_gem_nonzero));
 
   assign mez_led[0] = ~|link_had_err ^ blink_gem_led;       // blue OFF.  was ~alct_wait_cfg
   assign mez_led[1] = ~l_tmbclk0_lock ^ blink_cfeb_led;     // green
@@ -4390,6 +4393,135 @@
       .gem_cnt_stop_on_ovf  (gem_cnt_stop_on_ovf),   // Out  Stop all counters if any overflows
       .gem_cnt_any_ovf_seq  (gem_cnt_any_ovf_seq),   // In   At least one gem sequencer counter overflowed
 
+      .gem_counter0   (gem_counter0),
+      .gem_counter1   (gem_counter1),
+      .gem_counter2   (gem_counter2),
+      .gem_counter3   (gem_counter3),
+      .gem_counter4   (gem_counter4),
+      .gem_counter5   (gem_counter5),
+      .gem_counter6   (gem_counter6),
+      .gem_counter7   (gem_counter7),
+      .gem_counter8   (gem_counter8),
+      .gem_counter9   (gem_counter9),
+      .gem_counter10  (gem_counter10),
+      .gem_counter11  (gem_counter11),
+      .gem_counter12  (gem_counter12),
+      .gem_counter13  (gem_counter13),
+      .gem_counter14  (gem_counter14),
+      .gem_counter15  (gem_counter15),
+      .gem_counter16  (gem_counter16),
+      .gem_counter17  (gem_counter17),
+      .gem_counter18  (gem_counter18),
+      .gem_counter19  (gem_counter19),
+      .gem_counter20  (gem_counter20),
+      .gem_counter21  (gem_counter21),
+      .gem_counter22  (gem_counter22),
+      .gem_counter23  (gem_counter23),
+      .gem_counter24  (gem_counter24),
+      .gem_counter25  (gem_counter25),
+      .gem_counter26  (gem_counter26),
+      .gem_counter27  (gem_counter27),
+      .gem_counter28  (gem_counter28),
+      .gem_counter29  (gem_counter29),
+      .gem_counter30  (gem_counter30),
+      .gem_counter31  (gem_counter31),
+      .gem_counter32  (gem_counter32),
+      .gem_counter33  (gem_counter33),
+      .gem_counter34  (gem_counter34),
+      .gem_counter35  (gem_counter35),
+      .gem_counter36  (gem_counter36),
+      .gem_counter37  (gem_counter37),
+      .gem_counter38  (gem_counter38),
+      .gem_counter39  (gem_counter39),
+      .gem_counter40  (gem_counter40),
+      .gem_counter41  (gem_counter41),
+      .gem_counter42  (gem_counter42),
+      .gem_counter43  (gem_counter43),
+      .gem_counter44  (gem_counter44),
+      .gem_counter45  (gem_counter45),
+      .gem_counter46  (gem_counter46),
+      .gem_counter47  (gem_counter47),
+      .gem_counter48  (gem_counter48),
+      .gem_counter49  (gem_counter49),
+      .gem_counter50  (gem_counter50),
+      .gem_counter51  (gem_counter51),
+      .gem_counter52  (gem_counter52),
+      .gem_counter53  (gem_counter53),
+      .gem_counter54  (gem_counter54),
+      .gem_counter55  (gem_counter55),
+      .gem_counter56  (gem_counter56),
+      .gem_counter57  (gem_counter57),
+      .gem_counter58  (gem_counter58),
+      .gem_counter59  (gem_counter59),
+      .gem_counter60  (gem_counter60),
+      .gem_counter61  (gem_counter61),
+      .gem_counter62  (gem_counter62),
+      .gem_counter63  (gem_counter63),
+      .gem_counter64  (gem_counter64),
+      .gem_counter65  (gem_counter65),
+      .gem_counter66  (gem_counter66),
+      .gem_counter67  (gem_counter67),
+      .gem_counter68  (gem_counter68),
+      .gem_counter69  (gem_counter69),
+      .gem_counter70  (gem_counter70),
+      .gem_counter71  (gem_counter71),
+      .gem_counter72  (gem_counter72),
+      .gem_counter73  (gem_counter73),
+      .gem_counter74  (gem_counter74),
+      .gem_counter75  (gem_counter75),
+      .gem_counter76  (gem_counter76),
+      .gem_counter77  (gem_counter77),
+      .gem_counter78  (gem_counter78),
+      .gem_counter79  (gem_counter79),
+      .gem_counter80  (gem_counter80),
+      .gem_counter81  (gem_counter81),
+      .gem_counter82  (gem_counter82),
+      .gem_counter83  (gem_counter83),
+      .gem_counter84  (gem_counter84),
+      .gem_counter85  (gem_counter85),
+      .gem_counter86  (gem_counter86),
+      .gem_counter87  (gem_counter87),
+      .gem_counter88  (gem_counter88),
+      .gem_counter89  (gem_counter89),
+      .gem_counter90  (gem_counter90),
+      .gem_counter91  (gem_counter91),
+      .gem_counter92  (gem_counter92),
+      .gem_counter93  (gem_counter93),
+      .gem_counter94  (gem_counter94),
+      .gem_counter95  (gem_counter95),
+      .gem_counter96  (gem_counter96),
+      .gem_counter97  (gem_counter97),
+      .gem_counter98  (gem_counter98),
+      .gem_counter99  (gem_counter99),
+      .gem_counter100 (gem_counter100),
+      .gem_counter101 (gem_counter101),
+      .gem_counter102 (gem_counter102),
+      .gem_counter103 (gem_counter103),
+      .gem_counter104 (gem_counter104),
+      .gem_counter105 (gem_counter105),
+      .gem_counter106 (gem_counter106),
+      .gem_counter107 (gem_counter107),
+      .gem_counter108 (gem_counter108),
+      .gem_counter109 (gem_counter109),
+      .gem_counter110 (gem_counter110),
+      .gem_counter111 (gem_counter111),
+      .gem_counter112 (gem_counter112),
+      .gem_counter113 (gem_counter113),
+      .gem_counter114 (gem_counter114),
+      .gem_counter115 (gem_counter115),
+      .gem_counter116 (gem_counter116),
+      .gem_counter117 (gem_counter117),
+      .gem_counter118 (gem_counter118),
+      .gem_counter119 (gem_counter119),
+      .gem_counter120 (gem_counter120),
+      .gem_counter121 (gem_counter121),
+      .gem_counter122 (gem_counter122),
+      .gem_counter123 (gem_counter123),
+      .gem_counter124 (gem_counter124),
+      .gem_counter125 (gem_counter125),
+      .gem_counter126 (gem_counter126),
+      .gem_counter127 (gem_counter127),
+
       // CSC Orientation Ports
       .csc_type        (csc_type[3:0]),   // In  Firmware compile type
       .csc_me1ab       (csc_me1ab),       // In  1=ME1A or ME1B CSC type
@@ -4605,6 +4737,7 @@
    // Sump
    assign sump =
      ccb_sump
+   | copad_sump
    | alct_sump
    | rpc_sump
    | sequencer_sump

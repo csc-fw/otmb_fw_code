@@ -400,13 +400,19 @@
   read_sm_xdmb,
 
 // GEM
-  gem_copad_matched,
+  gem_any_match,
+  gem_match,
   gemA_sync_err,
   gemB_sync_err,
   gems_sync_err,
 
+  gemA_overflow,
+  gemB_overflow,
+
   gemA_vpf,
   gemB_vpf,
+
+  gem_active_feb_list,
 
 // External Triggers
   alct_adb_pulse_sync,
@@ -1257,13 +1263,19 @@
   output         read_sm_xdmb;    // TMB sequencer starting a readout
 
 // GEM
-  input          gem_copad_matched; // GEM co-pad match was found
-  input          gemA_sync_err;     // GEM A has sync error
-  input          gemB_sync_err;     // GEM B has sync error
-  input          gems_sync_err;     // GEM Super Chamber has sync error
+  input          gem_any_match; // GEM co-pad match was found
+  input [7:0]    gem_match;     // GEM co-pad match was found
+  input          gemA_sync_err; // GEM A has sync error
+  input          gemB_sync_err; // GEM B has sync error
+  input          gems_sync_err; // GEM Super Chamber has sync error
+
+  input          gemA_overflow; // GEM A had cluster overflow
+  input          gemB_overflow; // GEM B had cluster overflow
 
   input [7:0]    gemA_vpf; // GEM 8-bit VPF flag
   input [7:0]    gemB_vpf; // GEM 8-bit VPF flag
+
+  input [23:0]   gem_active_feb_list;  // 24 bit list of active GEMs
 
 // External Triggers
   input          alct_adb_pulse_sync; // ADB Test pulse trigger
@@ -3097,49 +3109,91 @@
 //------------------------------------------------------------------------------------------------------------------
 
 // Counter registers
-  parameter MNGEMCNT        = 0;   // First sequencer counter, not number of counters because they start elsewhere
-  parameter MXGEMCNT        = 127; // Last  sequencer counter, not number of counters becouse they end elsewhere
+  parameter MNCNTGEM        = 0;   // First GEM counter, not number of counters because they start elsewhere
+  parameter MXCNTGEM        = 127; // Last  GEM counter, not number of counters becouse they end elsewhere
 
-  reg [MXCNTVME-1:0] gem_cnt [MXGEMCNT:MNGEMCNT]; //
-  reg [MXGEMCNT:MNGEMCNT]  gem_cnt_en = 0;        // Counter increment enables
+  reg [MXCNTVME-1:0] gem_cnt [MXCNTGEM:MNCNTGEM]; //
+  reg [MXCNTGEM:MNCNTGEM]  gem_cnt_en = 0;        // Counter increment enables
 
 // Counter enable strobes
   always @(posedge clock) begin
 
-    gem_cnt_en[0] <= gem_copad_matched;
+    gem_cnt_en[0] <= gem_any_match;
 
-    gem_cnt_en[1] <= gemA_sync_err;
-    gem_cnt_en[2] <= gemB_sync_err;
-    gem_cnt_en[3] <= gems_sync_err;
+    gem_cnt_en[1] <= gem_match[0];
+    gem_cnt_en[2] <= gem_match[1];
+    gem_cnt_en[3] <= gem_match[2];
+    gem_cnt_en[4] <= gem_match[3];
+    gem_cnt_en[5] <= gem_match[4];
+    gem_cnt_en[6] <= gem_match[5];
+    gem_cnt_en[7] <= gem_match[6];
+    gem_cnt_en[8] <= gem_match[7];
 
-    //gem_cnt_en[4] <= gem_hit_at_clct_pretrig[0];
-    //gem_cnt_en[5] <= gem_hit_at_clct_pretrig[1];
+    gem_cnt_en[9] <= 1'b1;
 
-    gem_cnt_en[10] <= gemA_vpf[0];
-    gem_cnt_en[11] <= gemA_vpf[1];
-    gem_cnt_en[12] <= gemA_vpf[2];
-    gem_cnt_en[13] <= gemA_vpf[3];
-    gem_cnt_en[14] <= gemA_vpf[4];
-    gem_cnt_en[15] <= gemA_vpf[5];
-    gem_cnt_en[16] <= gemA_vpf[6];
-    gem_cnt_en[17] <= gemA_vpf[7];
+    gem_cnt_en[10] <= gemA_sync_err;
+    gem_cnt_en[11] <= gemB_sync_err;
+    gem_cnt_en[12] <= gems_sync_err;
 
-    gem_cnt_en[18] <= gemB_vpf[0];
-    gem_cnt_en[19] <= gemB_vpf[1];
-    gem_cnt_en[20] <= gemB_vpf[2];
-    gem_cnt_en[21] <= gemB_vpf[3];
-    gem_cnt_en[22] <= gemB_vpf[4];
-    gem_cnt_en[23] <= gemB_vpf[5];
-    gem_cnt_en[24] <= gemB_vpf[6];
-    gem_cnt_en[25] <= gemB_vpf[7];
+    gem_cnt_en[13] <= gemA_overflow;
+    gem_cnt_en[14] <= gemB_overflow;
+
+    gem_cnt_en[15] <= 1'b1;
+    gem_cnt_en[16] <= 1'b1;
+    gem_cnt_en[17] <= 1'b1;
+    gem_cnt_en[18] <= 1'b1;
+    gem_cnt_en[19] <= 1'b1;
+
+    gem_cnt_en[20] <= gemA_vpf[0];
+    gem_cnt_en[21] <= gemA_vpf[1];
+    gem_cnt_en[22] <= gemA_vpf[2];
+    gem_cnt_en[23] <= gemA_vpf[3];
+    gem_cnt_en[24] <= gemA_vpf[4];
+    gem_cnt_en[25] <= gemA_vpf[5];
+    gem_cnt_en[26] <= gemA_vpf[6];
+    gem_cnt_en[27] <= gemA_vpf[7];
+
+    gem_cnt_en[28] <= gemB_vpf[0];
+    gem_cnt_en[29] <= gemB_vpf[1];
+    gem_cnt_en[30] <= gemB_vpf[2];
+    gem_cnt_en[31] <= gemB_vpf[3];
+    gem_cnt_en[32] <= gemB_vpf[4];
+    gem_cnt_en[33] <= gemB_vpf[5];
+    gem_cnt_en[34] <= gemB_vpf[6];
+    gem_cnt_en[35] <= gemB_vpf[7];
+
+    gem_cnt_en[36] <= gem_active_feb_list[0];
+    gem_cnt_en[37] <= gem_active_feb_list[1];
+    gem_cnt_en[38] <= gem_active_feb_list[2];
+    gem_cnt_en[39] <= gem_active_feb_list[3];
+    gem_cnt_en[40] <= gem_active_feb_list[4];
+    gem_cnt_en[41] <= gem_active_feb_list[5];
+    gem_cnt_en[42] <= gem_active_feb_list[6];
+    gem_cnt_en[43] <= gem_active_feb_list[7];
+    gem_cnt_en[44] <= gem_active_feb_list[8];
+    gem_cnt_en[45] <= gem_active_feb_list[9];
+    gem_cnt_en[46] <= gem_active_feb_list[10];
+    gem_cnt_en[47] <= gem_active_feb_list[11];
+    gem_cnt_en[48] <= gem_active_feb_list[12];
+    gem_cnt_en[49] <= gem_active_feb_list[13];
+    gem_cnt_en[50] <= gem_active_feb_list[14];
+    gem_cnt_en[51] <= gem_active_feb_list[15];
+    gem_cnt_en[52] <= gem_active_feb_list[16];
+    gem_cnt_en[53] <= gem_active_feb_list[17];
+    gem_cnt_en[54] <= gem_active_feb_list[18];
+    gem_cnt_en[55] <= gem_active_feb_list[19];
+    gem_cnt_en[56] <= gem_active_feb_list[20];
+    gem_cnt_en[57] <= gem_active_feb_list[21];
+    gem_cnt_en[58] <= gem_active_feb_list[22];
+    gem_cnt_en[59] <= gem_active_feb_list[23];
 
   end
 
 // Counter overflow disable
-  wire [MXCNT:MNCNT]  gem_cnt_nof;
+  wire [MXCNTGEM:MNCNTGEM]  gem_cnt_nof;
 
   generate
-    for (j=MNCNT; j<=MXCNT; j=j+1) begin: gennof_gem
+    for (j=MNCNTGEM; j<=MXCNTGEM; j=j+1) begin: gennof_gem
       assign gem_cnt_nof[j] = (gem_cnt[j] < cnt_fullscale);    // 1=counter j not overflowed
     end
   endgenerate
@@ -3158,13 +3212,15 @@
   wire gem_vme_cnt_reset = ccb_evcntres || gem_cnt_all_reset;
 
   generate
-    for (j=MNCNT; j<=MXCNT; j=j+1) begin: gencnt_gem
+    for (j=MNCNTGEM; j<=MXCNTGEM; j=j+1) begin: gencnt_gem
+
+      initial gem_cnt[j] = 0;
+
       always @(posedge clock) begin
         if (gem_vme_cnt_reset) begin
-          if (!(j==RESYNCCNT_ID && ttc_resync)) // Don't let ttc_resync clear the resync counter, eh
             gem_cnt[j] = cnt_fatzero;           // Clear counter j
         end
-        else if (cnt_en_all) begin
+        else if (gem_cnt_en_all) begin
           if (gem_cnt_en[j] && gem_cnt_nof[j]) gem_cnt[j] = gem_cnt[j]+1'b1;  // Increment counter j if it has not overflowed
         end
       end

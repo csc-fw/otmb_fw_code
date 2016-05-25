@@ -3715,6 +3715,8 @@
   ADR_SCP_TRIG:              data_out <= scp_trigger_ch_rd;
 
   ADR_CNT_CTRL:              data_out <= cnt_ctrl_rd;
+  ADR_GEM_CNT_CTRL:          data_out <= gem_cnt_ctrl_rd;
+
   ADR_CNT_RDATA:             data_out <= cnt_rdata_rd;
   ADR_GEM_CNT_RDATA:         data_out <= gem_cnt_rdata_rd;
 
@@ -6695,31 +6697,33 @@
     gem_cnt_ctrl_wr[0]    = 0; // RW  1=reset all counters
     gem_cnt_ctrl_wr[1]    = 0; // RW  1=take snapshot of current count
     gem_cnt_ctrl_wr[2]    = 0; // RW  1=Stop all counters if any overflows
-    gem_cnt_ctrl_wr[3]    = 0; // R   At least one alct counter overflowed
-    gem_cnt_ctrl_wr[4]    = 0; // R   At least one sequencer counter overflowed
-    gem_cnt_ctrl_wr[5]    = 1; // RW  1=Enable alct lct error alct debug counter
+    gem_cnt_ctrl_wr[3]    = 0; // RW  1=Ungang GEM and TMB counter settings
+    gem_cnt_ctrl_wr[4]    = 0; // R   At least counter overflowed
+    gem_cnt_ctrl_wr[5]    = 0; // Unused
     gem_cnt_ctrl_wr[6]    = 0; // RW  1=Clear VME    counters on ttc_resync
-    gem_cnt_ctrl_wr[7]    = 1; // RW  1=Clear Header counters on ttc_resync
+    gem_cnt_ctrl_wr[7]    = 0; // Unused
     gem_cnt_ctrl_wr[8]    = 0; // RW  0=read counter lower 16 bits, 1=upper 14
     gem_cnt_ctrl_wr[14:9] = 0; // RW  Counter address
     gem_cnt_ctrl_wr[15]   = 0; // RW  Parity error reset
   end
 
+  wire       unganged_counter_controls;
   wire [6:0] gem_cnt_select;
   wire       gem_cnt_snapshot;
   wire       gem_cnt_all_reset_vme;
   wire       gem_cnt_clear_on_resync;
 
-  assign gem_cnt_all_reset_vme   = gem_cnt_ctrl_wr[0];    // RW  1=reset all VME counters (doesnt clear header)
-  assign gem_cnt_snapshot        = gem_cnt_ctrl_wr[1];    // RW  1=take snapshot of current count
-  assign gem_cnt_stop_on_ovf     = gem_cnt_ctrl_wr[2];    // RW  1=Stop all counters if any overflows
-  //assign gem_cnt_alct_debug      = gem_cnt_ctrl_wr[5];  // RW  1=Enable alct lct error alct debug counter
-  assign gem_cnt_clear_on_resync = gem_cnt_ctrl_wr[6];    // RW  1=Clear VME    counters on ttc_resync
-  //assign gem_hdr_clear_on_resync = gem_cnt_ctrl_wr[7];  // RW  1=Clear Header counters on ttc_resync
-  assign gem_cnt_adr_lsb         = gem_cnt_ctrl_wr[8];    // RW  0=read counter lower 16 bits, 1=upper 14
-  assign gem_cnt_select[6:0]     = gem_cnt_ctrl_wr[15:9]; // RW  Counter address
+  assign gem_cnt_all_reset_vme     = (unganged_counter_controls) ? (gem_cnt_ctrl_wr[0]) : (cnt_ctrl_wr[0]) ; // RW  1=reset all VME counters (doesnt clear header)
+  assign gem_cnt_snapshot          = (unganged_counter_controls) ? (gem_cnt_ctrl_wr[1]) : (cnt_ctrl_wr[1]) ; // RW  1=take snapshot of current count
+  assign gem_cnt_stop_on_ovf       = (unganged_counter_controls) ? (gem_cnt_ctrl_wr[2]) : (cnt_ctrl_wr[1]) ; // RW  1=Stop all counters if any overflows
+  assign unganged_counter_controls = gem_cnt_ctrl_wr[3]                                                    ; // RW  1=Gang together GEM and TMB counter settings
+  assign gem_cnt_clear_on_resync   = (unganged_counter_controls) ?  gem_cnt_ctrl_wr[6]  : (cnt_ctrl_wr[6]) ; // RW  1=Clear VME    counters on ttc_resync
+  assign gem_cnt_adr_lsb           =                                gem_cnt_ctrl_wr[8]                     ; // RW  0=read counter lower 16 bits, 1=upper 14
+  assign gem_cnt_select[6:0]       =                                gem_cnt_ctrl_wr[15:9]                  ; // RW  Counter address
 
-  assign gem_cnt_ctrl_rd[15:0]   = gem_cnt_ctrl_wr[15:0]; // RW  Readback
+  assign gem_cnt_ctrl_rd[3:0]  = gem_cnt_ctrl_wr[3:0];  // RW  Readback
+  assign gem_cnt_ctrl_rd[4]    = gem_cnt_any_ovf_seq;   // R   Readback
+  assign gem_cnt_ctrl_rd[15:5] = gem_cnt_ctrl_wr[15:5]; // RW  Readback
 
   assign gem_cnt_all_reset       = gem_cnt_all_reset_vme || (ttc_resync && gem_cnt_clear_on_resync);
 
@@ -6730,9 +6734,9 @@
 // ADR_GEM_CNT_RDATA=0x316  GEM Counter Data Register
 //------------------------------------------------------------------------------------------------------------------
 // Remap 1D counters to 2D, because XST does not support 2D ports
-  parameter MXGEMCNT = 128;                        // Number of counters, last counter id is mxcnt-1
-  reg  [MXCNTVME-1:0] gem_cnt_snap [MXGEMCNT-1:0]; // Event counter snapshot 2D
-  wire [MXCNTVME-1:0] gem_cnt      [MXGEMCNT-1:0]; // Event counter 2D map
+  parameter MXCNTGEM = 128;                        // Number of counters, last counter id is mxcnt-1
+  reg  [MXCNTVME-1:0] gem_cnt_snap [MXCNTGEM-1:0]; // Event counter snapshot 2D
+  wire [MXCNTVME-1:0] gem_cnt      [MXCNTGEM-1:0]; // Event counter 2D map
 
   assign gem_cnt[0]   = gem_counter0;
   assign gem_cnt[1]   = gem_counter1;
@@ -6865,7 +6869,7 @@
 
 // Snapshot current value of all counters at once
   generate
-    for (j=0; j<MXCNT; j=j+1) begin: gensnap_gem
+    for (j=0; j<MXCNTGEM; j=j+1) begin: gensnap_gem
       always @(posedge clock) begin
         if (!power_up      )     gem_cnt_snap[j] <= {MXCNTVME{1'b1}}; // Load 1s on startup, defeats warnings for short counters
         if (gem_cnt_snapshot_os) gem_cnt_snap[j] <= gem_cnt[j];       // Snapshot of j-th counter
@@ -8249,6 +8253,7 @@ end
   (|rpc_raw_delay_wr[15:8])  |
   (|rpc_inj_wr[13:11])       |
   (|cnt_ctrl_wr[4:3])        |
+  (|gem_cnt_ctrl_wr[4])      |
   (|jtagsm0_wr[10:3])        |
   (|layer_trig_wr[6:4])      |
   (|alct_sync_ctrl_wr[9:6])  |
