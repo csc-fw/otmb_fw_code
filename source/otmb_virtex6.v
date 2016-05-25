@@ -1639,10 +1639,14 @@
 
   gem_sync_mon u_gem_sync_mon (
 
-    .clock(clock),  // 40 MHz Fabric Clock
+    .clock(clock),              // 40 MHz Fabric Clock
+    .clk_lock(lock_tmb_clock0), // 40 MHz MMCM Locked
 
     .global_reset (global_reset  ), // In  Global reset
     .ttc_resync   (ttc_resync    ), // In  TTC resync
+
+    .gemA_overflow (gemA_overflow),
+    .gemB_overflow (gemB_overflow),
 
     .gem0_kchar(gem_kchar[0]), // In  Copy of GEM0 k-char
     .gem1_kchar(gem_kchar[1]), // In  Copy of GEM1 k-char

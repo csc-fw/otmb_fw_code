@@ -2,6 +2,8 @@ module gem_sync_mon (
 
   input clock,
 
+  input clk_lock,
+
   input global_reset,
   input ttc_resync,
 
@@ -9,6 +11,9 @@ module gem_sync_mon (
   input [7:0] gem1_kchar,
   input [7:0] gem2_kchar,
   input [7:0] gem3_kchar,
+
+  input gemA_overflow,
+  input gemB_overflow,
 
   output reg gemA_synced,  // fibers from same OH are desynced
   output reg gemB_synced,  // fibers from same OH are desynced
@@ -39,23 +44,13 @@ module gem_sync_mon (
 //
 //----------------------------------------------------------------------------------------------------------------------
 
-wire gem0_is_overflow = (gem0_kchar==8'hFC); 
-wire gem1_is_overflow = (gem1_kchar==8'hFC); 
-wire gem2_is_overflow = (gem2_kchar==8'hFC); 
-wire gem3_is_overflow = (gem3_kchar==8'hFC); 
-
-wire gemA_is_overflow = (gem0_is_overflow || gem1_is_overflow); 
-wire gemB_is_overflow = (gem2_is_overflow || gem3_is_overflow); 
-
-wire gem_overflow = gemA_is_overflow || gemB_is_overflow; 
-
 wire [1:0] gem_sync;
 wire       gems_sync;
 
-assign gem_sync [0] = (gem0_kchar==gem1_kchar) || gemA_is_overflow;                   // two fibers from gem chamber 1 are synced to eachother
-assign gem_sync [1] = (gem2_kchar==gem3_kchar) || gemB_is_overflow;                   // two fibers from gem chamber 2 are synced to eachother
-assign gems_sync    = ((gem0_kchar==gem2_kchar) && (&gem_sync[1:0])) || gem_overflow; // gem super chamber is synced
+assign gem_sync [0] = (gem0_kchar==gem1_kchar) || gemA_overflow; // two fibers from gem chamber 1 are synced to eachother
+assign gem_sync [1] = (gem2_kchar==gem3_kchar) || gemB_overflow; // two fibers from gem chamber 2 are synced to eachother
 
+assign gems_sync    = ((gem0_kchar==gem2_kchar) && (&gem_sync[1:0])) || gemA_overflow || gemB_overflow; // gem super chamber is synced
 
 initial gemA_synced = 1'b1;
 initial gemB_synced = 1'b1;
