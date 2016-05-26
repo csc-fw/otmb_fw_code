@@ -3495,14 +3495,14 @@
   x_flashsm #(22) uflash_blink_cfeb_led (.trigger(|cfeb_rx_nonzero ),    .hold(1'b0), .clock(clock), .out(blink_cfeb_led));
   x_flashsm #(22) uflash_blink_gem_led  (.trigger(gem_vpf),              .hold(1'b0), .clock(clock), .out(blink_gem_led));
 
-  assign mez_led[0] = ~|link_had_err ^ blink_gem_led;       // blue OFF.  was ~alct_wait_cfg
-  assign mez_led[1] = ~l_tmbclk0_lock ^ blink_cfeb_led;     // green
-  assign mez_led[2] =  lock_tmb_clock0 ^ blink_gem_nonzero; // yellow
-  assign mez_led[3] = ~tmbmmcm_locklost;                    // red
-  assign mez_led[4] = ~l_qpll_lock;                         // green
-  assign mez_led[5] = qpll_lock;                            // yellow
-  assign mez_led[6] = ~qpll_locklost;                       // red
-  assign mez_led[7] = ~|link_good;                          // green DIM.  --NAND this later?  was sump
+  assign mez_led[0] = ~|link_had_err ^ blink_gem_led;   // blue OFF.  was ~alct_wait_cfg
+  assign mez_led[1] = ~l_tmbclk0_lock ^ blink_cfeb_led; // green
+  assign mez_led[2] =  lock_tmb_clock0;                 // yellow
+  assign mez_led[3] = ~tmbmmcm_locklost;                // red
+  assign mez_led[4] = ~l_qpll_lock;                     // green
+  assign mez_led[5] = qpll_lock;                        // yellow
+  assign mez_led[6] = ~qpll_locklost;                   // red
+  assign mez_led[7] = ~|link_good;                      // green DIM.  --NAND this later?  was sump
 
 //  assign meztp20 = alct_startup_msec;
 //  assign meztp21 = alct_wait_dll;
