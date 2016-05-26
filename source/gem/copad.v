@@ -315,7 +315,7 @@ for (iclst=0; iclst<MXCLUSTERS; iclst=iclst+1) begin: feb_assign_loop
   //  21  22   23
 
   always @(*) begin
-  case (adr[0][iclst][10:5])
+  case (adr[0][iclst][10:6])
     5'd0:    cluster_feb[iclst] = 5'd0;
     5'd1:    cluster_feb[iclst] = 5'd8;
     5'd2:    cluster_feb[iclst] = 5'd16;
