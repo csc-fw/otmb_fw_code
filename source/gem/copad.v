@@ -293,7 +293,7 @@ generate
 for (iclst=0; iclst<MXCLUSTERS; iclst=iclst+1) begin: feb_assign_loop
   // assign cluster_feb[iclst] = adr[0][iclst] >> 6;  // shr6 is a floored div64, which gives us the 5 bit VFAT-ID of the cluster
 
-  // chamber looks like this  (for dumbass reasons that can't be helped)
+  // chamber looks like this  (for dumb reasons that can't be helped)
   //  0  8  16
   //  1  9  17
   //  2  10 18

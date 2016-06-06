@@ -1533,6 +1533,7 @@
 
   wire [7:0] gemA_vpf = {gem_vpf3[1], gem_vpf2[1], gem_vpf1[1], gem_vpf0[1], gem_vpf3[0], gem_vpf2[0], gem_vpf1[0], gem_vpf0[0]};
   wire [7:0] gemB_vpf = {gem_vpf3[3], gem_vpf2[3], gem_vpf1[3], gem_vpf0[3], gem_vpf3[2], gem_vpf2[2], gem_vpf1[2], gem_vpf0[2]};
+  wire        gem_any = (|gemA_vpf) | (|gemB_vpf);
 
   wire [9:0]   gem_debug_fifo_adr;    // FIFO RAM read tbin address
   wire [1:0]   gem_debug_fifo_sel;    // FIFO RAM read layer clusters 0-3
@@ -1560,14 +1561,12 @@
   generate
   for (igem=0; igem<MXGEM; igem=igem+1) begin: gengem
 
-  // gem_exists gets assigned by VME!!
-
   gem #(.IGEM(igem)) ugem (
 
   // Clock
   .clock             (clock),                        // In  40MHz TMB system clock from MMCM
   .clk_lock          (lock_tmb_clock0),              // In  40MHz TMB system clock MMCM locked
-  .clock_4x          (clock_4x),                     // In  4*40MHz TMB system clock from MMCM
+  .clock_4x          (clock_4x),                     // In  4*40MHz clock for GTX Reference
   .clock_gem_rxd     (clock_gem_rxd[0]),             // In  GEM cfeb-to-tmb inter-stage clock select 0 or 180 degrees
   .gem_rxd_posneg    (gem_rxd_posneg[igem]),         // In  GEM cfeb-to-tmb inter-stage clock select 0 or 180 degrees
   .gem_rxd_int_delay (gem_rxd_int_delay[igem][3:0]), // In  Interstage delay, integer bx
@@ -2109,17 +2108,17 @@
   .alct1_valid     (alct1_valid),     // In  ALCT has valid LCT
 
 // Sequencer GEM Ports
-  .gem_any_match     (gem_any_match), // GEM co-pad match was found
-  .gem_match         (gem_match),     // 8 Bit GEM Match Flag
-  .gemA_sync_err     (~gemA_synced),  // GEM0 has intra-chamber sync error
-  .gemB_sync_err     (~gemB_synced),  // GEM1 has intra-chamber sync error
-  .gems_sync_err     (~gems_synced),  // GEM Super Chamber has sync error
+  .gem_any_match     (gem_any_match), // In  GEM co-pad match was found
+  .gem_match         (gem_match),     // In  8 Bit GEM Match Flag
+  .gemA_sync_err     (~gemA_synced),  // In  GEM0 has intra-chamber sync error
+  .gemB_sync_err     (~gemB_synced),  // In  GEM1 has intra-chamber sync error
+  .gems_sync_err     (~gems_synced),  // In  GEM Super Chamber has sync error
 
-  .gemA_overflow     (gemA_overflow),
-  .gemB_overflow     (gemB_overflow),
+  .gemA_overflow     (gemA_overflow), // In  GEM A received overflow flag
+  .gemB_overflow     (gemB_overflow), // In  GEM B received overflow flag
 
-  .gemA_vpf          (gemA_vpf),
-  .gemB_vpf          (gemB_vpf),
+  .gemA_vpf          (gemA_vpf),      // In  8-bit mask of valid cluster received
+  .gemB_vpf          (gemB_vpf),      // In  8-bit mask of valid cluster received
 
   .gem_active_feb_list (gem_active_feb_list),
 
@@ -2300,8 +2299,8 @@
   .fifo_pretrig_rpc (fifo_pretrig_rpc[MXTBIN-1:0]), // In  Number RPC FIFO time bins before pretrigger
 
 // Sequencer GEM VME Configuration Ports
-  .gem_exists        (gem_exists[MXGEM-1:0]),        // In  GEM Readout list
   .gem_read_enable   (gem_read_enable),              // In  1 Enable GEM Readout
+  .gem_exists        (gem_exists[MXGEM-1:0]),        // In  GEM Readout list
   .gem_zero_suppress (gem_zero_suppress),            // In  1 Enable GEM Readout
   .fifo_tbins_gem    (fifo_tbins_gem[MXTBIN-1:0]),   // In  Number GEM FIFO time bins to read out
   .fifo_pretrig_gem  (fifo_pretrig_gem[MXTBIN-1:0]), // In  Number GEM FIFO time bins before pretrigger
@@ -3490,10 +3489,9 @@
   .D2           (set_sw[8] ? 1'b0 : (!set_sw[7] ? bpi_rd_stat : link_good[0])), // In   1-bit data input tx on negative edge
   .Q            (mez_tp[1]));                                                   // Out  1-bit DDR output
 
-  wire gem_vpf = (|gemA_vpf) | (|gemB_vpf);
 
   x_flashsm #(22) uflash_blink_cfeb_led (.trigger(|cfeb_rx_nonzero ),    .hold(1'b0), .clock(clock), .out(blink_cfeb_led));
-  x_flashsm #(22) uflash_blink_gem_led  (.trigger(gem_vpf),              .hold(1'b0), .clock(clock), .out(blink_gem_led));
+  x_flashsm #(22) uflash_blink_gem_led  (.trigger(gem_any),              .hold(1'b0), .clock(clock), .out(blink_gem_led));
 
   assign mez_led[0] = ~|link_had_err ^ blink_gem_led;   // blue OFF.  was ~alct_wait_cfg
   assign mez_led[1] = ~l_tmbclk0_lock ^ blink_cfeb_led; // green
@@ -4236,11 +4234,11 @@
       .fifo_pretrig_rpc (fifo_pretrig_rpc[MXTBIN-1:0]), // Out  Number RPC FIFO time bins before pretrigger
 
       // GEM VME Configuration Ports
-      .gem_read_enable   (gem_read_enable),              // Out  1 Enable GEM Readout
-      .gem_zero_suppress (gem_zero_suppress),            // Out  1 Enable GEM Readout Zero-suppression
+      .gem_read_enable   (gem_read_enable),              // Out  1 = Enable GEM Readout
+      .gem_exists        (gem_exists[MXGEM-1:0]),        // Out  GEM existence flags
+      .gem_zero_suppress (gem_zero_suppress),            // Out  1 = Enable GEM Readout Zero-suppression
       .fifo_tbins_gem    (fifo_tbins_gem[MXTBIN-1:0]),   // Out  Number GEM FIFO time bins to read out
       .fifo_pretrig_gem  (fifo_pretrig_gem[MXTBIN-1:0]), // Out  Number GEM FIFO time bins before pretrigger
-      .gem_exists        (gem_exists[MXGEM-1:0]),        // Out  GEM Readout list
 
       // RPC Ports: RAT Control
       .rpc_sync     (rpc_sync),     // Out  Sync mode

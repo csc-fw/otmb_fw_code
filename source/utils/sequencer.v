@@ -4624,7 +4624,7 @@
   assign  header36_rpc_[14:10] = fifo_pretrig_rpc[4:0]; // Number RPC FIFO time bins before pretrigger
   assign  header36_rpc_[18:15] = 0;                     // DDU+DMB control flags
 
-  assign  header36_gem_[0]     = gem_zero_suppress;     // GEM zero-suppression enabled
+  assign  header36_gem_[3:0]   = gem_zero_suppress;     // GEM zero-suppression enabled
   assign  header36_gem_[3:1]   = 0;                     // unused.. so far...
   assign  header36_gem_[4]     = gem_read_enable;       // GEM readout enabled
   assign  header36_gem_[9:5]   = fifo_tbins_gem[4:0];   // Number GEM FIFO time bins to read out
@@ -4782,7 +4782,9 @@
   always @(posedge clock) begin
     rd_list_gem [MXGEM-1:0] <= gem_exists[3:0]; // List of GEMs to read out
     rd_ngems    [MXGEMB :0] <= 3'd4;            // Number of GEMs in gem_list (should be 4)
-    gems_all_empty          <= !(|gem_exists);  // At least 1 GEM to read
+    gems_all_empty          <= !(|gem_exists);  // At least 1 GEM to read;
+                                                // Right now we read all the GEMs with every DAQ readout; might
+                                                // want to include Zero-suppression later
   end
 
 //------------------------------------------------------------------------------------------------------------------
@@ -5619,7 +5621,6 @@
   (|r_mpc_reserved) |
   r_wr_buf_avail    |
   rpc_tbinbxn[4]    |
-  (|header36_rpc_)  |
   mini_rdata[15];
 
   wire scope_sump =
