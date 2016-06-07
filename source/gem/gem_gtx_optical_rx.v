@@ -50,6 +50,10 @@
   link_good,
   link_bad,
 
+  k_char, 
+
+  overflow, 
+
 // Sump
   gtx_rx_sump
   );
@@ -91,6 +95,11 @@
   output          link_had_err;
   output          link_good;
   output          link_bad;
+
+  output  [7:0]   k_char; 
+
+  output          overflow; 
+
 // Sump
   output          gtx_rx_sump;    // Unused signals
 
@@ -106,39 +115,41 @@
 // Received clock time domain
   wire [3:0]  cew;
   wire [3:0]  nonzero_word;
-  wire [55:0]   gem_dat;
-  wire [55:0]  prompt_dat;
+  wire [55:0] gem_dat;
+  wire [55:0] prompt_dat;
 
 // GTX instance
   gtx_gem_fiber_in ugtx_gem_fiber_in
   (
-    .RST              ( rst),                      // In  use this to reset GTX_RX & SYNC module...
-    .GTX_DISABLE      ( clear_sync | !clocks_rdy), // In  use this to put GTX_RX in Reset state
-    .CLOCK_4X         ( clock_4x),                 // In  4 * global TMB clock
-    .ttc_resync       ( ttc_resync),               // use this to clear the link status monitor
-    .GEM_RX_N         ( rxn),                      // In  SNAP12- fiber input for GTX
-    .GEM_RX_P         ( rxp),                      // In  SNAP12+ fiber input for GTX
-    .GEM_RX_REFCLK    ( clock_160),                // In  QPLL 160 via GTX Clock
-    .RX_POLARITY_SWAP ( gtx_rx_pol_swap),          // In  Inputs 5 & 6 have swapped rx board routes
-    .GEM_RX_CLK160    ( rx_clk160),                // Out  Rx recovered clock out.  Use for internal Logic Fabric clock. Needed to sync all 7 CFEBs with Fabric clock
-    .STRT_MTCH        ( rx_start),                 // Out  Gets set when the Start Pattern is present, N/A for me.  To TP for debug only.  --sw8,7
-    .VALID            ( rx_valid),                 // Out  Send this output to TP                                                                                  ( only valid after StartMtch has come by)
-    .MATCH            ( rx_match),                 // Out  Send this output to TP  AND use for counting errors. VALID="should match" when true, !MATCH is an error
-    .RCV_DATA         (  gem_dat   [55:0]),        // Out  56 bit gem data output; stable for 25ns
-    .PROMPT_DATA      ( prompt_dat [55:0]),        // Out  56 bit gem data output, but 6.25ns sooner; only good for 6.25ns though!
-    .NONZERO_WORD     ( nonzero_word[3:0]),        // Out
-    .CEW0             ( cew[0]),                   // Out  Access four phases of 40 MHz cycle, frame separated output from GTX
-    .CEW1             ( cew[1]),                   // Out
-    .CEW2             ( cew[2]),                   // Out
-    .CEW3             ( cew[3]),                   // Out  On CEW3_r                                                                                                     ( == CEW3 + 1) the RCV_DATA is valid, use to clock into pipeline
-    .LTNCY_TRIG       ( rx_fc),                    // Out  Flags when RX sees "FC" for latency measurement.  Send raw to TP or LED
-    .RX_RST_DONE      ( rx_rst_done),              // Out  set when gtx_reset is complete, then the rxsync cycle can begin
-    .RX_SYNC_DONE     ( rx_sync_done),             // Out  set when gtx_rxsync is complete                                 ( after gtx_reset)
-    .errcount         ( link_errcount[7:0]),
-    .link_had_err     ( link_had_err),
-    .link_good        ( link_good),
-    .link_bad         ( link_bad),
-    .sump             ( sump_comp_fiber)           // Out  Unused signals
+    .RST              (rst),                      // In  use this to reset GTX_RX & SYNC module...
+    .GTX_DISABLE      (clear_sync | !clocks_rdy), // In  use this to put GTX_RX in Reset state
+    .CLOCK_4X         (clock_4x),                 // In  4 * global TMB clock
+    .ttc_resync       (ttc_resync),               // use this to clear the link status monitor
+    .GEM_RX_N         (rxn),                      // In  SNAP12- fiber input for GTX
+    .GEM_RX_P         (rxp),                      // In  SNAP12+ fiber input for GTX
+    .GEM_RX_REFCLK    (clock_160),                // In  QPLL 160 via GTX Clock
+    .RX_POLARITY_SWAP (gtx_rx_pol_swap),          // In  Inputs 5 & 6 have swapped rx board routes
+    .GEM_RX_CLK160    (rx_clk160),                // Out  Rx recovered clock out.  Use for internal Logic Fabric clock. Needed to sync all 7 CFEBs with Fabric clock
+    .STRT_MTCH        (rx_start),                 // Out  Gets set when the Start Pattern is present, N/A for me.  To TP for debug only.  --sw8,7
+    .VALID            (rx_valid),                 // Out  Send this output to TP                                                                                  ( only valid after StartMtch has come by)
+    .MATCH            (rx_match),                 // Out  Send this output to TP  AND use for counting errors. VALID="should match" when true, !MATCH is an error
+    .RCV_DATA         (gem_dat    [55:0]),        // Out  56 bit gem data output; stable for 25ns
+    .PROMPT_DATA      (prompt_dat [55:0]),        // Out  56 bit gem data output, but 6.25ns sooner; only good for 6.25ns though!
+    .NONZERO_WORD     (nonzero_word[3:0]),        // Out
+    .CEW0             (cew[0]),                   // Out  Access four phases of 40 MHz cycle, frame separated output from GTX
+    .CEW1             (cew[1]),                   // Out
+    .CEW2             (cew[2]),                   // Out
+    .CEW3             (cew[3]),                   // Out  On CEW3_r                                                                                                     ( == CEW3 + 1) the RCV_DATA is valid, use to clock into pipeline
+    .LTNCY_TRIG       (rx_fc),                    // Out  Flags when RX sees "FC" for latency measurement.  Send raw to TP or LED
+    .RX_RST_DONE      (rx_rst_done),              // Out  set when gtx_reset is complete, then the rxsync cycle can begin
+    .RX_SYNC_DONE     (rx_sync_done),             // Out  set when gtx_rxsync is complete                                 ( after gtx_reset)
+    .errcount         (link_errcount[7:0]),
+    .k_char           (k_char[7:0]), 
+    .link_had_err     (link_had_err),
+    .link_good        (link_good),
+    .link_bad         (link_bad),
+    .overflow         (overflow),
+    .sump             (sump_comp_fiber)           // Out  Unused signals
   );
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -146,11 +157,11 @@
 //-------------------------------------------------------------------------------------------------------------------
     // Signals to bring into fabric clock domain
     reg  [15:0] prbs_errcount = 0;
-    reg         err       = 0;
+    reg         err           = 0;
 
     // Signals in received clock domain
-    reg [55:0]  gem_dat_r    = 0;
-    reg        rst_errcount_r  = 0;
+    reg [55:0] gem_dat_r      = 0;
+    reg        rst_errcount_r = 0;
 
     wire [7:0]  link_errcount;
 
@@ -161,10 +172,10 @@
 
         // Reset case
         if (gtx_rx_reset | snap_wait) begin
-             gem_dat_r <= 0;
+            gem_dat_r      <= 0;
             rst_errcount_r <= 1;
-            prbs_errcount <= 0;
-            err <= 0;
+            prbs_errcount  <= 0;
+            err            <= 0;
         end
 
         // Not Reset case
@@ -270,7 +281,7 @@
 
     // Unused muonic signals
     reg muonic_sump=0;
-    always @(posedge clock_iob) begin
+    always @(posedge clock) begin
         muonic_sump <= posneg;
     end
 
@@ -282,7 +293,11 @@
     sump_comp_fiber  &
     (|nonzero_word[3:0]) |
     (|cew[3:1])          |
-    muonic_sump
+    muonic_sump |
+    (|gtx_rx_data_raw) |
+    (|dly) |
+    dly_is_0 | 
+    gtx_rx_reset_err_cnt
     ;
 
 //------------------------------------------------------------------------------------------------------------------

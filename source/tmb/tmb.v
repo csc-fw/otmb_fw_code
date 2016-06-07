@@ -403,174 +403,174 @@
 // Parameters
 //------------------------------------------------------------------------------------------------------------------
 // Raw hits RAM parameters
-  parameter RAM_DEPTH    = 2048;        // Storage bx depth
-  parameter RAM_ADRB    = 11;        // Address width=log2(ram_depth)
-  parameter RAM_WIDTH    = 8;        // Data width
-  parameter MXBADR    = RAM_ADRB;      // Header buffer data address bits
+  parameter RAM_DEPTH = 2048;     // Storage bx depth
+  parameter RAM_ADRB  = 11;       // Address width=log2(ram_depth)
+  parameter RAM_WIDTH = 8;        // Data width
+  parameter MXBADR    = RAM_ADRB; // Header buffer data address bits
 
 // Constants
-  parameter MXCFEB    =   7;        // Number of CFEBs on CSC
-  parameter MXALCT    =  16;        // Number bits per ALCT word
-  parameter MXCLCT    =  16;        // Number bits per CLCT word
-  parameter MXCLCTC    =  3;        // Number bits per CLCT common data word
-  parameter MXMPCRX    =  2;        // Number bits from MPC
-  parameter MXMPCTX    =  32;        // Number bits sent to MPC
-  parameter MXFRAME    =  16;        // Number bits per muon frame
-  parameter MXALCTPIPE  =  6;        // Number clocks to delay ALCT
-  parameter MXMPCPIPE    =  16;        // Number clocks to delay mpc response
-  parameter MXMPCDLY    =  4;        // MPC delay time bits
+  parameter MXCFEB     = 7;  // Number of CFEBs on CSC
+  parameter MXALCT     = 16; // Number bits per ALCT word
+  parameter MXCLCT     = 16; // Number bits per CLCT word
+  parameter MXCLCTC    = 3;  // Number bits per CLCT common data word
+  parameter MXMPCRX    = 2;  // Number bits from MPC
+  parameter MXMPCTX    = 32; // Number bits sent to MPC
+  parameter MXFRAME    = 16; // Number bits per muon frame
+  parameter MXALCTPIPE = 6;  // Number clocks to delay ALCT
+  parameter MXMPCPIPE  = 16; // Number clocks to delay mpc response
+  parameter MXMPCDLY   = 4;  // MPC delay time bits
 
 //------------------------------------------------------------------------------------------------------------------
 //Ports
 //------------------------------------------------------------------------------------------------------------------
 // CCB
-  input          clock;        // 40MHz TMB main clock
-  input          ttc_resync;      // Purge CLCT pipeline
+  input          clock;      // 40MHz TMB main clock
+  input          ttc_resync; // Purge CLCT pipeline
 
 // ALCT
-  input  [MXALCT-1:0]  alct0_tmb;      // ALCT best muon
-  input  [MXALCT-1:0]  alct1_tmb;      // ALCT second best muon
-  input          alct_bx0_rx;    // ALCT bx0 received
-  input  [1:0]      alct_ecc_err;    // ALCT ecc syndrome code
+  input  [MXALCT-1:0]  alct0_tmb;    // ALCT best muon
+  input  [MXALCT-1:0]  alct1_tmb;    // ALCT second best muon
+  input                alct_bx0_rx;  // ALCT bx0 received
+  input  [1:0]         alct_ecc_err; // ALCT ecc syndrome code
 
 // TMB-Sequencer Pipelines
-  input  [MXBADR-1:0]  wr_adr_xtmb;    // Buffer write address after drift time
-  output  [MXBADR-1:0]  wr_adr_rtmb;    // Buffer write address at TMB matching time
-  output  [MXBADR-1:0]  wr_adr_xmpc;    // Buffer write address at MPC xmit to sequencer
-  output  [MXBADR-1:0]  wr_adr_rmpc;    // Buffer write address at MPC received
+  input  [MXBADR-1:0]  wr_adr_xtmb; // Buffer write address after drift time
+  output [MXBADR-1:0]  wr_adr_rtmb; // Buffer write address at TMB matching time
+  output [MXBADR-1:0]  wr_adr_xmpc; // Buffer write address at MPC xmit to sequencer
+  output [MXBADR-1:0]  wr_adr_rmpc; // Buffer write address at MPC received
 
-  input          wr_push_xtmb;    // Buffer write strobe after drift time
-  output          wr_push_rtmb;    // Buffer write strobe at TMB matching time
-  output          wr_push_xmpc;    // Buffer write strobe at MPC xmit to sequencer
-  output          wr_push_rmpc;    // Buffer write strobe at MPC received
+  input          wr_push_xtmb; // Buffer write strobe after drift time
+  output         wr_push_rtmb; // Buffer write strobe at TMB matching time
+  output         wr_push_xmpc; // Buffer write strobe at MPC xmit to sequencer
+  output         wr_push_rmpc; // Buffer write strobe at MPC received
 
-  input          wr_avail_xtmb;    // Buffer available after drift time
-  output          wr_avail_rtmb;    // Buffer available at TMB matching time
-  output          wr_avail_xmpc;    // Buffer available at MPC xmit to sequencer
-  output          wr_avail_rmpc;    // Buffer available at MPC received
+  input          wr_avail_xtmb; // Buffer available after drift time
+  output         wr_avail_rtmb; // Buffer available at TMB matching time
+  output         wr_avail_xmpc; // Buffer available at MPC xmit to sequencer
+  output         wr_avail_rmpc; // Buffer available at MPC received
 
 // Sequencer
-  input  [MXCLCT-1:0]  clct0_xtmb;      // First  CLCT
-  input  [MXCLCT-1:0]  clct1_xtmb;      // Second CLCT
-  input  [MXCLCTC-1:0]  clctc_xtmb;      // Common to CLCT0/1 to TMB
-  input  [MXCFEB-1:0]  clctf_xtmb;      // Active feb list to TMB
-  input          bx0_xmpc;      // bx0 to mpc
+  input  [MXCLCT-1:0]  clct0_xtmb; // First  CLCT
+  input  [MXCLCT-1:0]  clct1_xtmb; // Second CLCT
+  input  [MXCLCTC-1:0] clctc_xtmb; // Common to CLCT0/1 to TMB
+  input  [MXCFEB-1:0]  clctf_xtmb; // Active feb list to TMB
+  input                bx0_xmpc;   // bx0 to mpc
 
-  output          tmb_trig_pulse;    // ALCT or CLCT or both triggered
-  output          tmb_trig_keep;    // ALCT or CLCT or both triggered, and trigger is allowed
-  output          tmb_non_trig_keep;  // Event did not trigger, but keep it for readout
-  output          tmb_match;      // ALCT and CLCT matched in time
-  output          tmb_alct_only;    // Only ALCT triggered
-  output          tmb_clct_only;    // Only CLCT triggered
-  output  [3:0]      tmb_match_win;    // Location of alct in clct window
-  output  [3:0]      tmb_match_pri;    // Priority of clct in clct window
-  output          tmb_alct_discard;  // ALCT pair was not used for LCT
-  output          tmb_clct_discard;  // CLCT pair was not used for LCT
-  output          tmb_clct0_discard;  // CLCT0 was discarded from ME1A
-  output          tmb_clct1_discard;  // CLCT1 was discarded from ME1A
-  output  [MXCFEB-1:0]  tmb_aff_list;    // Active CFEBs for CLCT used in TMB match
+  output                tmb_trig_pulse;    // ALCT or CLCT or both triggered
+  output                tmb_trig_keep;     // ALCT or CLCT or both triggered, and trigger is allowed
+  output                tmb_non_trig_keep; // Event did not trigger, but keep it for readout
+  output                tmb_match;         // ALCT and CLCT matched in time
+  output                tmb_alct_only;     // Only ALCT triggered
+  output                tmb_clct_only;     // Only CLCT triggered
+  output  [3:0]         tmb_match_win;     // Location of alct in clct window
+  output  [3:0]         tmb_match_pri;     // Priority of clct in clct window
+  output                tmb_alct_discard;  // ALCT pair was not used for LCT
+  output                tmb_clct_discard;  // CLCT pair was not used for LCT
+  output                tmb_clct0_discard; // CLCT0 was discarded from ME1A
+  output                tmb_clct1_discard; // CLCT1 was discarded from ME1A
+  output  [MXCFEB-1:0]  tmb_aff_list;      // Active CFEBs for CLCT used in TMB match
 
-  output          tmb_match_ro;    // ALCT and CLCT matched in time, non-triggering readout
-  output          tmb_alct_only_ro;  // Only ALCT triggered, non-triggering readout
-  output          tmb_clct_only_ro;  // Only CLCT triggered, non-triggering readout
+  output          tmb_match_ro;     // ALCT and CLCT matched in time, non-triggering readout
+  output          tmb_alct_only_ro; // Only ALCT triggered, non-triggering readout
+  output          tmb_clct_only_ro; // Only CLCT triggered, non-triggering readout
 
-  output          tmb_no_alct;    // No ALCT
-  output          tmb_no_clct;    // No CLCT
-  output          tmb_one_alct;    // One ALCT
-  output          tmb_one_clct;    // One CLCT
-  output          tmb_two_alct;    // Two ALCTs
-  output          tmb_two_clct;    // Two CLCTs
-  output          tmb_dupe_alct;    // ALCT0 copied into ALCT1 to make 2nd LCT
-  output          tmb_dupe_clct;    // CLCT0 copied into CLCT1 to make 2nd LCT
-  output          tmb_rank_err;    // LCT1 has higher quality than LCT0
+  output          tmb_no_alct;   // No ALCT
+  output          tmb_no_clct;   // No CLCT
+  output          tmb_one_alct;  // One ALCT
+  output          tmb_one_clct;  // One CLCT
+  output          tmb_two_alct;  // Two ALCTs
+  output          tmb_two_clct;  // Two CLCTs
+  output          tmb_dupe_alct; // ALCT0 copied into ALCT1 to make 2nd LCT
+  output          tmb_dupe_clct; // CLCT0 copied into CLCT1 to make 2nd LCT
+  output          tmb_rank_err;  // LCT1 has higher quality than LCT0
 
-  output  [10:0]      tmb_alct0;      // ALCT best muon latched at trigger
-  output  [10:0]      tmb_alct1;      // ALCT second best muon latched at trigger
-  output  [4:0]      tmb_alctb;      // ALCT bxn latched at trigger
-  output  [1:0]      tmb_alcte;      // ALCT ecc error syndrome latched at trigger
+  output  [10:0]     tmb_alct0; // ALCT best muon latched at trigger
+  output  [10:0]     tmb_alct1; // ALCT second best muon latched at trigger
+  output  [4:0]      tmb_alctb; // ALCT bxn latched at trigger
+  output  [1:0]      tmb_alcte; // ALCT ecc error syndrome latched at trigger
 
 // MPC Status
-  output          mpc_frame_ff;    // MPC frame latch
-  output  [MXFRAME-1:0]  mpc0_frame0_ff;    // MPC best muon 1st frame
-  output  [MXFRAME-1:0]  mpc0_frame1_ff;    // MPC best buon 2nd frame
-  output  [MXFRAME-1:0]  mpc1_frame0_ff;    // MPC second best muon 1st frame
-  output  [MXFRAME-1:0]  mpc1_frame1_ff;    // MPC second best buon 2nd frame
+  output                 mpc_frame_ff;   // MPC frame latch
+  output  [MXFRAME-1:0]  mpc0_frame0_ff; // MPC best muon 1st frame
+  output  [MXFRAME-1:0]  mpc0_frame1_ff; // MPC best buon 2nd frame
+  output  [MXFRAME-1:0]  mpc1_frame0_ff; // MPC second best muon 1st frame
+  output  [MXFRAME-1:0]  mpc1_frame1_ff; // MPC second best buon 2nd frame
 
-  output          mpc_xmit_lct0;    // MPC LCT0 sent
-  output          mpc_xmit_lct1;    // MPC LCT1 sent
+  output          mpc_xmit_lct0; // MPC LCT0 sent
+  output          mpc_xmit_lct1; // MPC LCT1 sent
 
-  output          mpc_response_ff;  // MPC accept is ready
-  output  [1:0]      mpc_accept_ff;    // MPC muon accept response
-  output  [1:0]      mpc_reserved_ff;  // MPC reserved
+  output             mpc_response_ff; // MPC accept is ready
+  output  [1:0]      mpc_accept_ff;   // MPC muon accept response
+  output  [1:0]      mpc_reserved_ff; // MPC reserved
 
 // MPC IOBs
-  input  [MXMPCRX-1:0]  _mpc_rx;      // MPC 80MHz tx data
-  output  [MXMPCTX-1:0]  _mpc_tx;      // MPC 80MHz rx data
+  input   [MXMPCRX-1:0]  _mpc_rx; // MPC 80MHz tx data
+  output  [MXMPCTX-1:0]  _mpc_tx; // MPC 80MHz rx data
 
 // VME Configuration
-  input  [3:0]      alct_delay;      // Delay ALCT for CLCT match window
-  input  [3:0]      clct_window;    // CLCT match window width
+  input  [3:0]      alct_delay;  // Delay ALCT for CLCT match window
+  input  [3:0]      clct_window; // CLCT match window width
 
-  input  [1:0]      tmb_sync_err_en;  // Allow sync_err to MPC for either muon
-  input          tmb_allow_alct;    // Allow ALCT only 
-  input          tmb_allow_clct;    // Allow CLCT only
-  input          tmb_allow_match;  // Allow Match only
+  input  [1:0]   tmb_sync_err_en; // Allow sync_err to MPC for either muon
+  input          tmb_allow_alct;  // Allow ALCT only
+  input          tmb_allow_clct;  // Allow CLCT only
+  input          tmb_allow_match; // Allow Match only
 
   input          tmb_allow_alct_ro;  // Allow ALCT only  readout, non-triggering
   input          tmb_allow_clct_ro;  // Allow CLCT only  readout, non-triggering
-  input          tmb_allow_match_ro;  // Allow Match only readout, non-triggering
+  input          tmb_allow_match_ro; // Allow Match only readout, non-triggering
 
-  input  [3:0]      csc_id;        // CSC station number
-  input          csc_me1ab;      // 1=ME1A or ME1B CSC type
-  input  [3:0]      alct_bx0_delay;    // ALCT bx0 delay to mpc transmitter
-  input  [3:0]      clct_bx0_delay;    // CLCT bx0 delay to mpc transmitter
-  input          alct_bx0_enable;  // Enable using alct bx0, else copy clct bx0
+  input  [3:0]   csc_id;          // CSC station number
+  input          csc_me1ab;       // 1=ME1A or ME1B CSC type
+  input  [3:0]   alct_bx0_delay;  // ALCT bx0 delay to mpc transmitter
+  input  [3:0]   clct_bx0_delay;  // CLCT bx0 delay to mpc transmitter
+  input          alct_bx0_enable; // Enable using alct bx0, else copy clct bx0
   input          bx0_vpf_test;    // Sets clct_bx0=lct0_vpf for bx0 alignment tests
-  output          bx0_match;      // ALCT bx0 and CLCT bx0 match in time
+  output         bx0_match;       // ALCT bx0 and CLCT bx0 match in time
 
-  input  [MXMPCDLY-1:0]  mpc_rx_delay;    // Wait for MPC accept
-  input  [MXMPCDLY-1:0]  mpc_tx_delay;    // Delay LCT to MPC
-  input          mpc_idle_blank;    // Blank mpc output except on trigger, block bx0 too
-  input          mpc_me1a_block;    // Block ME1A LCTs to MPC, but still queue for L1A readout
-  input          mpc_oe;        // MPC output enable, 1=en
-  input          sync_err_blanks_mpc;// Sync error blanks LCTs to MPC
+  input  [MXMPCDLY-1:0]  mpc_rx_delay;        // Wait for MPC accept
+  input  [MXMPCDLY-1:0]  mpc_tx_delay;        // Delay LCT to MPC
+  input                  mpc_idle_blank;      // Blank mpc output except on trigger, block bx0 too
+  input                  mpc_me1a_block;      // Block ME1A LCTs to MPC, but still queue for L1A readout
+  input                  mpc_oe;              // MPC output enable, 1=en
+  input                  sync_err_blanks_mpc; // Sync error blanks LCTs to MPC
 
 // VME Status
-  input          event_clear_vme;  // Event clear for aff,clct,mpc vme diagnostic registers
-  output          mpc_frame_vme;    // MPC frame latch
+  input                  event_clear_vme;  // Event clear for aff,clct,mpc vme diagnostic registers
+  output                 mpc_frame_vme;    // MPC frame latch
   output  [MXFRAME-1:0]  mpc0_frame0_vme;  // MPC best muon 1st frame
   output  [MXFRAME-1:0]  mpc0_frame1_vme;  // MPC best buon 2nd frame
   output  [MXFRAME-1:0]  mpc1_frame0_vme;  // MPC second best muon 1st frame
   output  [MXFRAME-1:0]  mpc1_frame1_vme;  // MPC second best buon 2nd frame
-  output  [1:0]      mpc_accept_vme;    // MPC accept latched for VME
-  output  [1:0]      mpc_reserved_vme;  // MPC reserved latched for VME
+  output  [1:0]          mpc_accept_vme;   // MPC accept latched for VME
+  output  [1:0]          mpc_reserved_vme; // MPC reserved latched for VME
 
 // MPC Injector
-  input          mpc_inject;      // Start MPC test pattern injector, VME
-  input          ttc_mpc_inject;    // Start MPC injector, TTC command
-  input          ttc_mpc_inj_en;    // Enable TTC inject command
-  input  [7:0]      mpc_nframes;    // Number frames to inject
-  input  [3:0]      mpc_wen;      // Select RAM to write
-  input  [3:0]      mpc_ren;      // Select RAM to read 
-  input  [7:0]      mpc_adr;      // Injector RAM read/write address
-  input  [15:0]      mpc_wdata;      // Injector RAM write data
-  output  [15:0]      mpc_rdata;      // Injector RAM read  data
-  output  [3:0]      mpc_accept_rdata;  // MPC response stored in RAM
-  input          mpc_inj_alct_bx0;  // ALCT bx0 injector
-  input          mpc_inj_clct_bx0;  // CLCT bx0 injector
+  input             mpc_inject;       // Start MPC test pattern injector, VME
+  input             ttc_mpc_inject;   // Start MPC injector, TTC command
+  input             ttc_mpc_inj_en;   // Enable TTC inject command
+  input   [7:0]     mpc_nframes;      // Number frames to inject
+  input   [3:0]     mpc_wen;          // Select RAM to write
+  input   [3:0]     mpc_ren;          // Select RAM to read
+  input   [7:0]     mpc_adr;          // Injector RAM read/write address
+  input   [15:0]    mpc_wdata;        // Injector RAM write data
+  output  [15:0]    mpc_rdata;        // Injector RAM read  data
+  output  [3:0]     mpc_accept_rdata; // MPC response stored in RAM
+  input             mpc_inj_alct_bx0; // ALCT bx0 injector
+  input             mpc_inj_clct_bx0; // CLCT bx0 injector
 
 // Status
   output          alct_vpf_tp;    // Timing test point, FF buffered for IOBs
   output          clct_vpf_tp;    // Timing test point
-  output          clct_window_tp;    // Timing test point
+  output          clct_window_tp; // Timing test point
   
-  output          alct0_vpf_tprt;    // Timing test point, unbuffered real time for internal scope
-  output          alct1_vpf_tprt;    // Timing test point
+  output          alct0_vpf_tprt;   // Timing test point, unbuffered real time for internal scope
+  output          alct1_vpf_tprt;   // Timing test point
   output          clct_vpf_tprt;    // Timing test point
-  output          clct_window_tprt;  // Timing test point
+  output          clct_window_tprt; // Timing test point
 
 // Sump
-  output          tmb_sump;      // Unused signals
+  output          tmb_sump; // Unused signals
 
 //------------------------------------------------------------------------------------------------------------------
 // Debug Ports
@@ -578,11 +578,11 @@
 `ifdef DEBUG_TMB
   output  [MXALCT-1:0]  alct0_pipe;
   output  [MXALCT-1:0]  alct1_pipe;
-  output           alct0_pipe_vpf;
+  output                alct0_pipe_vpf;
 
   output  [MXCLCT-1:0]  clct0_pipe;
   output  [MXCLCT-1:0]  clct1_pipe;
-  output  [MXCLCTC-1:0]  clctc_pipe;
+  output  [MXCLCTC-1:0] clctc_pipe;
   output  [MXCFEB-1:0]  clctf_pipe;
 
   output  [MXALCT-1:0]  alct0_real;
@@ -590,17 +590,17 @@
 
   output  [MXCLCT-1:0]  clct0_real;
   output  [MXCLCT-1:0]  clct1_real;
-  output  [MXCLCTC-1:0]  clctc_real;
+  output  [MXCLCTC-1:0] clctc_real;
 
   output  [3:0]      winclosing;
-  output  [15:0]      clct_sr_include;
-  output  [15:0]      clct_vpf_sr;
-  output  [15:1]      clct_vpf_sre;
+  output  [15:0]     clct_sr_include;
+  output  [15:0]     clct_vpf_sr;
+  output  [15:1]     clct_vpf_sre;
 
   output           clct_window_open;
   output           clct_window_haslcts;
 
-  output  [15:0]      clct_tag_sr;  
+  output  [15:0]   clct_tag_sr;  
   output           clct_last_vpf;
   output           clct_last_tag;
   output           clct_last_win;
@@ -611,63 +611,63 @@
   output          clct_noalct;
   output          clct_noalct_lost;
 
-  output  [3:0]      clct_win_center;
-  output  [3:0]      clct_win_best;
-  output  [3:0]      clct_pri_best;
+  output  [3:0]  clct_win_center;
+  output  [3:0]  clct_win_best;
+  output  [3:0]  clct_pri_best;
 
   output          clct_tag_me;
-  output  [3:0]      clct_tag_win;
-  output  [3:0]      clct_srl_adr;
-  output  [15:0]      win_ena;
+  output  [3:0]   clct_tag_win;
+  output  [3:0]   clct_srl_adr;
+  output  [15:0]  win_ena;
 
-  output  [71:0]      mpc_sm_dsp;      // Injector state machine ascii states
-  output          mpc_set;      // mpc_tx  sync set at power up  
-  output  [MXFRAME-1:0]  mpc0_inj0;      // injected 1st muon 1st frame
-  output  [MXFRAME-1:0]  mpc0_inj1;      // injected 1st muon 2nd frame
-  output  [MXFRAME-1:0]  mpc1_inj0;      // injected 2nd muon 1st frame
-  output  [MXFRAME-1:0]  mpc1_inj1;      // injected 2nd muon 2nd frame
-  output  [15:0]      mpc_rdata_01;
-  output  [15:0]      mpc_rdata_23;
-  output          bank01;
-  output          bank23;
+  output  [71:0]         mpc_sm_dsp; // Injector state machine ascii states
+  output                 mpc_set;    // mpc_tx  sync set at power up
+  output  [MXFRAME-1:0]  mpc0_inj0;  // injected 1st muon 1st frame
+  output  [MXFRAME-1:0]  mpc0_inj1;  // injected 1st muon 2nd frame
+  output  [MXFRAME-1:0]  mpc1_inj0;  // injected 2nd muon 1st frame
+  output  [MXFRAME-1:0]  mpc1_inj1;  // injected 2nd muon 2nd frame
+  output  [15:0]         mpc_rdata_01;
+  output  [15:0]         mpc_rdata_23;
+  output                 bank01;
+  output                 bank23;
 
 // Decompose ALCT muons
-  output          alct0_valid;    // Valid pattern flag
-  output  [1:0]      alct0_quality;    // Pattern quality
-  output          alct0_amu;      // Accelerator muon
-  output  [6:0]      alct0_key;      // Key Wire Group
-  output  [4:0]      alct0_bxn;      // Bunch crossing number, reduced width for mpc
+  output          alct0_valid;   // Valid pattern flag
+  output  [1:0]   alct0_quality; // Pattern quality
+  output          alct0_amu;     // Accelerator muon
+  output  [6:0]   alct0_key;     // Key Wire Group
+  output  [4:0]   alct0_bxn;     // Bunch crossing number, reduced width for mpc
 
-  output          alct1_valid;    // Valid pattern flag
-  output  [1:0]      alct1_quality;    // Pattern quality
-  output          alct1_amu;      // Accelerator muon
-  output  [6:0]      alct1_key;      // Key Wire Group
-  output  [4:0]      alct1_bxn;      // Bunch crossing number, reduced width for mpc
+  output          alct1_valid;   // Valid pattern flag
+  output  [1:0]   alct1_quality; // Pattern quality
+  output          alct1_amu;     // Accelerator muon
+  output  [6:0]   alct1_key;     // Key Wire Group
+  output  [4:0]   alct1_bxn;     // Bunch crossing number, reduced width for mpc
 
 // Decompose CLCT muons
-  output          clct0_valid;    // Valid pattern flag
-  output  [2:0]      clct0_nhit;      // Hits on pattern
-  output  [3:0]      clct0_pat;      // Pattern shape
-  output          clct0_bend;      // Bend direction
-  output  [4:0]      clct0_key;      // Key 1/2-Strip
-  output  [2:0]      clct0_cfeb;      // Key CFEB ID
+  output          clct0_valid; // Valid pattern flag
+  output  [2:0]   clct0_nhit;  // Hits on pattern
+  output  [3:0]   clct0_pat;   // Pattern shape
+  output          clct0_bend;  // Bend direction
+  output  [4:0]   clct0_key;   // Key 1/2-Strip
+  output  [2:0]   clct0_cfeb;  // Key CFEB ID
 
-  output          clct1_valid;    // Valid pattern flag
-  output  [2:0]      clct1_nhit;      // Hits on pattern
-  output  [3:0]      clct1_pat;      // Pattern shape
-  output          clct1_bend;      // Bend direction
-  output  [4:0]      clct1_key;      // Key 1/2-Strip
-  output  [2:0]      clct1_cfeb;      // Key CFEB ID
+  output          clct1_valid; // Valid pattern flag
+  output  [2:0]   clct1_nhit;  // Hits on pattern
+  output  [3:0]   clct1_pat;   // Pattern shape
+  output          clct1_bend;  // Bend direction
+  output  [4:0]   clct1_key;   // Key 1/2-Strip
+  output  [2:0]   clct1_cfeb;  // Key CFEB ID
 
-  output  [1:0]      clct_bxn;      // Bunch crossing number
+  output  [1:0]   clct_bxn;      // Bunch crossing number
   output          clct_sync_err;    // Bx0 disagreed with bxn counter
 
 // CLCT is from ME1A
-  output          clct0_cfeb456;    // CLCT0 is on CFEB4,5,6 hence ME1A
-  output          clct1_cfeb456;    // CLCT1 is on CFEB4,5,6 hence ME1A
-  output          kill_clct0;      // Delete CLCT0 from ME1A
-  output          kill_clct1;      // Delete CLCT1 from ME1A
-  output          kill_trig;      // Kill clct-trig, both CLCTs are ME1As, and there is no alct in alct-only mode
+  output          clct0_cfeb456; // CLCT0 is on CFEB4,5,6 hence ME1A
+  output          clct1_cfeb456; // CLCT1 is on CFEB4,5,6 hence ME1A
+  output          kill_clct0;    // Delete CLCT0 from ME1A
+  output          kill_clct1;    // Delete CLCT1 from ME1A
+  output          kill_trig;     // Kill clct-trig, both CLCTs are ME1As, and there is no alct in alct-only mode
 
 // Trig keep elements
   output          tmb_trig_keep_ff;
@@ -678,8 +678,8 @@
   output          alct_keep_ro;
   output          clct_discard;
   output          alct_discard;
-  output  [3:0]      match_win;
-  output  [3:0]       clct_srl_ptr;
+  output  [3:0]   match_win;
+  output  [3:0]   clct_srl_ptr;
   output          trig_pulse;
   output          trig_keep;
   output          non_trig_keep;
@@ -743,16 +743,16 @@
   reg   [MXFRAME-1:0]  mpc1_frame0_vme = 0;
   reg   [MXFRAME-1:0]  mpc1_frame1_vme = 0;
 
-  reg   [7:0]      mpc_frame_cnt  = 0;
+  reg   [7:0] mpc_frame_cnt  = 0;
   wire        mpc_frame_done;
-  wire [7:0]      mpc_inj_adr;
-  wire [7:0]      vme_adr;
+  wire [7:0]  mpc_inj_adr;
+  wire [7:0]  vme_adr;
 
 //------------------------------------------------------------------------------------------------------------------
 // Startup timer to force mpc output high at power up
 //------------------------------------------------------------------------------------------------------------------
   wire [3:0]  pdly = 1;      // Power-up reset delay
-  wire powerup_q;
+  wire  powerup_q;
   reg   powerup_ff  = 0;
 
   SRL16E upowerup (.CLK(clock),.CE(~powerup_q),.D(1'b1),.A0(pdly[0]),.A1(pdly[1]),.A2(pdly[2]),.A3(pdly[3]),.Q(powerup_q));
@@ -1024,8 +1024,8 @@
 
   wire clct_kept = (clct_keep || clct_keep_ro);
 
-  assign match_win_mux = (clct_noalct) ? winclosing    : clct_tag_win;          // if clct only, disregard priority and take last window position                          // Pointer to SRL delayed CLCT signals
-  assign match_win     = (clct_kept  ) ? match_win_mux : clct_win_center;          // Default window position for alct-only events
+  assign match_win_mux = (clct_noalct) ? winclosing    : clct_tag_win;    // if clct only, disregard priority and take last window position // Pointer to SRL delayed CLCT signals
+  assign match_win     = (clct_kept  ) ? match_win_mux : clct_win_center; // Default window position for alct-only events
 
 //!  assign match_win   = (clct_keep || clct_keep_ro) ? clct_tag_win : clct_win_center;  // Default window position for alct-only events
   assign clct_srl_ptr   = match_win;
@@ -1033,42 +1033,42 @@
 //  wire trig_pulse    = clct_match || clct_noalct || clct_noalct_lost || alct_noclct;    // Event pulse
   wire trig_pulse    = clct_match || clct_noalct || clct_noalct_lost || alct_only_trig;  // Event pulse
   
-  wire trig_keep    = (clct_keep    || alct_keep);                    // Keep event for trigger and readout
-  wire non_trig_keep  = (clct_keep_ro || alct_keep_ro);                  // Keep non-triggering event for readout only
+  wire trig_keep     = (clct_keep    || alct_keep);    // Keep event for trigger and readout
+  wire non_trig_keep = (clct_keep_ro || alct_keep_ro); // Keep non-triggering event for readout only
 
-  wire alct_only    = (alct_noclct && tmb_allow_alct) && !clct_keep;          // An alct-only trigger
-  wire wr_push_mux  = (alct_only) ? trig_pulse : (wr_push_xtmb_pipe  && trig_pulse);  // Buffer write strobe at TMB matching time
+  wire alct_only   = (alct_noclct && tmb_allow_alct) && !clct_keep;                 // An alct-only trigger
+  wire wr_push_mux = (alct_only) ? trig_pulse : (wr_push_xtmb_pipe  && trig_pulse); // Buffer write strobe at TMB matching time
 
-  wire clct_match_tr  = clct_match  && trig_keep;    // ALCT and CLCT matched in time, nontriggering event
-  wire alct_noclct_tr  = alct_noclct && trig_keep;    // Only ALCT triggered, nontriggering event
-  wire clct_noalct_tr  = clct_noalct && trig_keep;    // Only CLCT triggered, nontriggering event
+  wire clct_match_tr  = clct_match  && trig_keep; // ALCT and CLCT matched in time, nontriggering event
+  wire alct_noclct_tr = alct_noclct && trig_keep; // Only ALCT triggered, nontriggering event
+  wire clct_noalct_tr = clct_noalct && trig_keep; // Only CLCT triggered, nontriggering event
 
-  wire clct_match_ro  = clct_match  && non_trig_keep;  // ALCT and CLCT matched in time, nontriggering event
-  wire alct_noclct_ro  = alct_noclct && non_trig_keep;  // Only ALCT triggered, nontriggering event
-  wire clct_noalct_ro  = clct_noalct && non_trig_keep;  // Only CLCT triggered, nontriggering event
+  wire clct_match_ro  = clct_match  && non_trig_keep; // ALCT and CLCT matched in time, nontriggering event
+  wire alct_noclct_ro = alct_noclct && non_trig_keep; // Only ALCT triggered, nontriggering event
+  wire clct_noalct_ro = clct_noalct && non_trig_keep; // Only CLCT triggered, nontriggering event
 
   assign alct_only_trig = (alct_noclct && tmb_allow_alct) || (alct_noclct_ro && tmb_allow_alct_ro);// ALCT-only triggers are allowed
 
 // Latch clct match results for TMB and MPC pathways
-  reg  tmb_trig_pulse       = 0;
-  reg  tmb_trig_keep_ff     = 0;
+  reg tmb_trig_pulse       = 0;
+  reg tmb_trig_keep_ff     = 0;
   reg tmb_non_trig_keep_ff = 0;
 
-  reg  tmb_match         = 0;
-  reg  tmb_alct_only       = 0;
-  reg  tmb_clct_only       = 0;
+  reg tmb_match            = 0;
+  reg tmb_alct_only        = 0;
+  reg tmb_clct_only        = 0;
 
-  reg  tmb_match_ro_ff       = 0;
-  reg  tmb_alct_only_ro_ff  = 0;
-  reg  tmb_clct_only_ro_ff  = 0;
+  reg tmb_match_ro_ff      = 0;
+  reg tmb_alct_only_ro_ff  = 0;
+  reg tmb_clct_only_ro_ff  = 0;
 
   reg tmb_alct_discard     = 0;
   reg tmb_clct_discard     = 0;
 
-  reg [10:0]  tmb_alct0    = 0;                // ALCT best muon latched at trigger
-  reg [10:0]  tmb_alct1    = 0;                // ALCT second best muon latched at trigger
-  reg [ 4:0]  tmb_alctb    = 0;                // ALCT bxn latched at trigger
-  reg  [ 1:0]  tmb_alcte    = 0;                // ALCT ecc latched at trigger
+  reg [10:0]  tmb_alct0    = 0; // ALCT best muon latched at trigger
+  reg [10:0]  tmb_alct1    = 0; // ALCT second best muon latched at trigger
+  reg [ 4:0]  tmb_alctb    = 0; // ALCT bxn latched at trigger
+  reg [ 1:0]  tmb_alcte    = 0; // ALCT ecc latched at trigger
 
   always @(posedge clock) begin
     tmb_trig_pulse       <= trig_pulse;    // ALCT or CLCT or both triggered
@@ -1165,9 +1165,9 @@
 
   wire   kill_clct0  = clct0_cfeb456 && kill_me1a_clcts;  // Delete CLCT0 from ME1A
   wire   kill_clct1  = clct1_cfeb456 && kill_me1a_clcts;  // Delete CLCT1 from ME1A
-  assign kill_trig  = ((kill_clct0 && clct0_exists) && (kill_clct1 && clct1_exists))  // Kill both clcts
-  ||                 ((kill_clct0 && clct0_exists) && !clct1_exists)
-  ||                ((kill_clct1 && clct1_exists) && !clct0_exists);
+  assign kill_trig   = ((kill_clct0 && clct0_exists) && (kill_clct1 && clct1_exists))  // Kill both clcts
+     ||                ((kill_clct0 && clct0_exists) && !clct1_exists)
+     ||                ((kill_clct1 && clct1_exists) && !clct0_exists);
 
   assign tmb_clct0_discard = kill_clct0;
   assign tmb_clct1_discard = kill_clct1;
@@ -1227,35 +1227,35 @@
   wire lct1_vpf  = alct1_vpf || clct1_vpf;      // Second muon exists
 
 // Decompose ALCT muons
-  wire      alct0_valid    = alct0[0];      // Valid pattern flag
-  wire  [1:0]  alct0_quality  = alct0[2:1];    // Pattern quality
-  wire      alct0_amu    = alct0[3];      // Accelerator muon
-  wire  [6:0]  alct0_key    = alct0[10:4];    // Key Wire Group
-  wire  [4:0]  alct0_bxn    = alct0[15:11];    // Bunch crossing number
+  wire         alct0_valid   = alct0[0];     // Valid pattern flag
+  wire  [1:0]  alct0_quality = alct0[2:1];   // Pattern quality
+  wire         alct0_amu     = alct0[3];     // Accelerator muon
+  wire  [6:0]  alct0_key     = alct0[10:4];  // Key Wire Group
+  wire  [4:0]  alct0_bxn     = alct0[15:11]; // Bunch crossing number
 
-  wire      alct1_valid    = alct1[0];      // Valid pattern flag
-  wire  [1:0]  alct1_quality  = alct1[2:1];    // Pattern quality
-  wire      alct1_amu    = alct1[3];      // Accelerator muon
-  wire  [6:0]  alct1_key    = alct1[10:4];    // Key Wire Group
-  wire  [4:0]  alct1_bxn    = alct1[15:11];    // Bunch crossing number
+  wire         alct1_valid   = alct1[0];     // Valid pattern flag
+  wire  [1:0]  alct1_quality = alct1[2:1];   // Pattern quality
+  wire         alct1_amu     = alct1[3];     // Accelerator muon
+  wire  [6:0]  alct1_key     = alct1[10:4];  // Key Wire Group
+  wire  [4:0]  alct1_bxn     = alct1[15:11]; // Bunch crossing number
 
 // Decompose CLCT muons
-  wire       clct0_valid    = clct0[0];      // Valid pattern flag
-  wire  [2:0]  clct0_nhit    = clct0[3:1];    // Hits on pattern 0-6
-  wire  [3:0]  clct0_pat    = clct0[7:4];    // Pattern shape 0-A
-  wire      clct0_bend    = clct0[4];      // Bend direction, same as pid lsb
-  wire  [4:0]  clct0_key    = clct0[12:8];    // 1/2-strip ID number
-  wire  [2:0]  clct0_cfeb    = clct0[15:13];    // Key CFEB ID
+  wire         clct0_valid = clct0[0];     // Valid pattern flag
+  wire  [2:0]  clct0_nhit  = clct0[3:1];   // Hits on pattern 0-6
+  wire  [3:0]  clct0_pat   = clct0[7:4];   // Pattern shape 0-A
+  wire         clct0_bend  = clct0[4];     // Bend direction, same as pid lsb
+  wire  [4:0]  clct0_key   = clct0[12:8];  // 1/2-strip ID number
+  wire  [2:0]  clct0_cfeb  = clct0[15:13]; // Key CFEB ID
 
-  wire  [1:0]  clct_bxn    = clctc[1:0];    // Bunch crossing number
-  wire      clct_sync_err  = clctc[2];      // Bx0 disagreed with bxn counter
+  wire  [1:0]  clct_bxn      = clctc[1:0]; // Bunch crossing number
+  wire         clct_sync_err = clctc[2];   // Bx0 disagreed with bxn counter
 
-  wire       clct1_valid    = clct1[0];      // Valid pattern flag
-  wire  [2:0]  clct1_nhit    = clct1[3:1];    // Hits on pattern 0-6
-  wire  [3:0]  clct1_pat    = clct1[7:4];    // Pattern shape 0-A
-  wire      clct1_bend    = clct1[4];      // Bend direction, same as pid lsb
-  wire  [4:0]  clct1_key    = clct1[12:8];    // 1/2-strip ID number
-  wire  [2:0]  clct1_cfeb    = clct1[15:13];    // Key CFEB ID
+  wire         clct1_valid = clct1[0];     // Valid pattern flag
+  wire  [2:0]  clct1_nhit  = clct1[3:1];   // Hits on pattern 0-6
+  wire  [3:0]  clct1_pat   = clct1[7:4];   // Pattern shape 0-A
+  wire         clct1_bend  = clct1[4];     // Bend direction, same as pid lsb
+  wire  [4:0]  clct1_key   = clct1[12:8];  // 1/2-strip ID number
+  wire  [2:0]  clct1_cfeb  = clct1[15:13]; // Key CFEB ID
 
 //------------------------------------------------------------------------------------------------------------------
 // LCT Quality
@@ -1270,27 +1270,27 @@
   wire clct1_cpat = (clct1_nhit >= 2);
 
   lct_quality ulct0quality
-  (
-  .ACC  (alct0_amu),      // In  ALCT accelerator muon bit
+        (
+  .ACC  (alct0_amu),        // In  ALCT accelerator muon bit
   .A    (alct0_valid),      // In  bit: ALCT was found
   .C    (clct0_valid),      // In  bit: CLCT was found
-  .A4    (alct0_nhit[2]),    // In  bit (N_A>=4), where N_A=number of ALCT layers
-  .C4    (clct0_nhit[2]),    // In  bit (N_C>=4), where N_C=number of CLCT layers
-  .P    (clct0_pat[3:0]),    // In  4-bit CLCT pattern number that is presently 1 for n-layer triggers, 2-10 for current patterns, 11-15 "for future expansion".
-  .CPAT  (clct0_cpat),      // In  bit for cathode .pattern trigger., i.e. (P>=2 && P<=10) at present
-  .Q    (lct0_quality[3:0])    // Out  4-bit TMB quality output
+  .A4   (alct0_nhit[2]),    // In  bit (N_A>=4), where N_A=number of ALCT layers
+  .C4   (clct0_nhit[2]),    // In  bit (N_C>=4), where N_C=number of CLCT layers
+  .P    (clct0_pat[3:0]),   // In  4-bit CLCT pattern number that is presently 1 for n-layer triggers, 2-10 for current patterns, 11-15 "for future expansion".
+  .CPAT (clct0_cpat),       // In  bit for cathode .pattern trigger., i.e. (P>=2 && P<=10) at present
+  .Q    (lct0_quality[3:0]) // Out  4-bit TMB quality output
   );
 
   lct_quality ulct1quality
-  (
-  .ACC  (alct1_amu),      // In  ALCT accelerator muon bit
+        (
+  .ACC  (alct1_amu),        // In  ALCT accelerator muon bit
   .A    (alct1_valid),      // In  bit: ALCT was found
   .C    (clct1_valid),      // In  bit: CLCT was found
-  .A4    (alct1_nhit[2]),    // In  bit (N_A>=4), where N_A=number of ALCT layers
-  .C4    (clct1_nhit[2]),    // In  bit (N_C>=4), where N_C=number of CLCT layers
-  .P    (clct1_pat[3:0]),    // In  4-bit CLCT pattern number that is presently 1 for n-layer triggers, 2-10 for current patterns, 11-15 "for future expansion".
-  .CPAT  (clct1_cpat),      // In  bit for cathode .pattern trigger., i.e. (P>=2 && P<=10) at present
-  .Q    (lct1_quality[3:0])    // Out  4-bit TMB quality output
+  .A4   (alct1_nhit[2]),    // In  bit (N_A>=4), where N_A=number of ALCT layers
+  .C4   (clct1_nhit[2]),    // In  bit (N_C>=4), where N_C=number of CLCT layers
+  .P    (clct1_pat[3:0]),   // In  4-bit CLCT pattern number that is presently 1 for n-layer triggers, 2-10 for current patterns, 11-15 "for future expansion".
+  .CPAT (clct1_cpat),       // In  bit for cathode .pattern trigger., i.e. (P>=2 && P<=10) at present
+  .Q    (lct1_quality[3:0]) // Out  4-bit TMB quality output
   );
 
 //------------------------------------------------------------------------------------------------------------------
@@ -1302,8 +1302,8 @@
   x_oneshot uinjalctbx0 (.d(mpc_inj_alct_bx0),.clock(clock),.q(inj_alct_bx0_pulse));  // VME bx0 injector
   x_oneshot uinjclctbx0 (.d(mpc_inj_clct_bx0),.clock(clock),.q(inj_clct_bx0_pulse));
 
-  wire clct_bx0_mux = (bx0_vpf_test)   ?  lct0_vpf    : bx0_xmpc;    // Use lct0 vpf if enabled, use use real clct bx0
-  wire alct_bx0_mux = (alct_bx0_enable) ? alct_bx0_rx : clct_bx0_mux;  // Use alct bx0 if enabled, else copy clct bx0
+  wire clct_bx0_mux = (bx0_vpf_test)    ? lct0_vpf    : bx0_xmpc;     // Use lct0 vpf if enabled, use use real clct bx0
+  wire alct_bx0_mux = (alct_bx0_enable) ? alct_bx0_rx : clct_bx0_mux; // Use alct bx0 if enabled, else copy clct bx0
 
   wire alct_bx0_src = alct_bx0_mux || inj_alct_bx0_pulse;
   wire clct_bx0_src = clct_bx0_mux || inj_clct_bx0_pulse;
@@ -1326,29 +1326,29 @@
 //------------------------------------------------------------------------------------------------------------------
 // Format MPC output words
 //------------------------------------------------------------------------------------------------------------------
-  assign  mpc0_frame0[6:0]  =  alct0_key[6:0];
-  assign  mpc0_frame0[10:7]  =  clct0_pat[3:0];
-  assign  mpc0_frame0[14:11]  =  lct0_quality[3:0];
-  assign  mpc0_frame0[15]    =  lct0_vpf;
+  assign  mpc0_frame0[6:0]   = alct0_key[6:0];
+  assign  mpc0_frame0[10:7]  = clct0_pat[3:0];
+  assign  mpc0_frame0[14:11] = lct0_quality[3:0];
+  assign  mpc0_frame0[15]    = lct0_vpf;
 
-  assign  mpc0_frame1[7:0]  =  {clct0_cfeb[2:0],clct0_key[4:0]};
-  assign  mpc0_frame1[8]    =  clct0_bend;
-  assign  mpc0_frame1[9]    =  clct_sync_err & tmb_sync_err_en[0];
-  assign  mpc0_frame1[10]    =  alct0_bxn[0];
-  assign  mpc0_frame1[11]    =  clct_bx0;  // bx0 gets replaced after mpc_tx_delay, keep here to mollify xst
-  assign  mpc0_frame1[15:12]  =  csc_id[3:0];
+  assign  mpc0_frame1[7:0]   = {clct0_cfeb[2:0],clct0_key[4:0]};
+  assign  mpc0_frame1[8]     = clct0_bend;
+  assign  mpc0_frame1[9]     = clct_sync_err & tmb_sync_err_en[0];
+  assign  mpc0_frame1[10]    = alct0_bxn[0];
+  assign  mpc0_frame1[11]    = clct_bx0;  // bx0 gets replaced after mpc_tx_delay, keep here to mollify xst
+  assign  mpc0_frame1[15:12] = csc_id[3:0];
 
-  assign  mpc1_frame0[6:0]  =  alct1_key[6:0];
-  assign  mpc1_frame0[10:7]  =  clct1_pat[3:0];
-  assign  mpc1_frame0[14:11]  =  lct1_quality[3:0];
-  assign  mpc1_frame0[15]    =  lct1_vpf;
+  assign  mpc1_frame0[6:0]   = alct1_key[6:0];
+  assign  mpc1_frame0[10:7]  = clct1_pat[3:0];
+  assign  mpc1_frame0[14:11] = lct1_quality[3:0];
+  assign  mpc1_frame0[15]    = lct1_vpf;
 
-  assign  mpc1_frame1[7:0]  =  {clct1_cfeb[2:0],clct1_key[4:0]};
-  assign  mpc1_frame1[8]    =  clct1_bend;
-  assign  mpc1_frame1[9]    =  clct_sync_err & tmb_sync_err_en[1];
-  assign  mpc1_frame1[10]    =  alct1_bxn[0];
-  assign  mpc1_frame1[11]    =  alct_bx0;  // bx0 gets replaced after mpc_tx_delay, keep here to mollify xst
-  assign  mpc1_frame1[15:12]  =  csc_id[3:0];
+  assign  mpc1_frame1[7:0]   = {clct1_cfeb[2:0],clct1_key[4:0]};
+  assign  mpc1_frame1[8]     = clct1_bend;
+  assign  mpc1_frame1[9]     = clct_sync_err & tmb_sync_err_en[1];
+  assign  mpc1_frame1[10]    = alct1_bxn[0];
+  assign  mpc1_frame1[11]    = alct_bx0;  // bx0 gets replaced after mpc_tx_delay, keep here to mollify xst
+  assign  mpc1_frame1[15:12] = csc_id[3:0];
 
 // Construct MPC output words for MPC, blanked if no muons present, except bx0 [inserted after mpc_tx_delay]
   wire [MXFRAME-1:0]  mpc0_frame0_pulse;
@@ -1374,14 +1374,14 @@
 // Mulitplex MPC data with VME RAM
   reg  pass_ff=0;
 
-  wire [MXMPCTX-1:0] mpc_real_fr0    = {mpc1_frame0_pulse,mpc0_frame0_pulse};
-  wire [MXMPCTX-1:0] mpc_real_fr1    = {mpc1_frame1_pulse,mpc0_frame1_pulse};
+  wire [MXMPCTX-1:0] mpc_real_fr0 = {mpc1_frame0_pulse,mpc0_frame0_pulse};
+  wire [MXMPCTX-1:0] mpc_real_fr1 = {mpc1_frame1_pulse,mpc0_frame1_pulse};
 
-  wire [MXMPCTX-1:0] mpc_inject_fr0  = {mpc1_inj0,mpc0_inj0};
-  wire [MXMPCTX-1:0] mpc_inject_fr1  = {mpc1_inj1,mpc0_inj1};
+  wire [MXMPCTX-1:0] mpc_inject_fr0 = {mpc1_inj0,mpc0_inj0};
+  wire [MXMPCTX-1:0] mpc_inject_fr1 = {mpc1_inj1,mpc0_inj1};
 
-  wire [MXMPCTX-1:0] mpc_frame0    = (pass_ff) ? mpc_real_fr0 : mpc_inject_fr0;
-  wire [MXMPCTX-1:0] mpc_frame1    = (pass_ff) ? mpc_real_fr1 : mpc_inject_fr1;
+  wire [MXMPCTX-1:0] mpc_frame0 = (pass_ff) ? mpc_real_fr0 : mpc_inject_fr0;
+  wire [MXMPCTX-1:0] mpc_frame1 = (pass_ff) ? mpc_real_fr1 : mpc_inject_fr1;
 
 // Parallel shifter to delay MPC data: delay=0 bypasses srl16s, delay=1 uses adr=0 in srl16s
   wire [MXMPCTX-1:0]  mpc_frame0_srl, mpc_frame0_mux, mpc_frame0_dly;
@@ -1389,8 +1389,8 @@
 
   reg [3:0] mpc_tx_delaym1    = 0;
   reg [3:0] mpc_rx_delaym1    = 0;
-  reg      mpc_tx_delay_is_0 = 0;
-  reg      mpc_rx_delay_is_0 = 0;
+  reg       mpc_tx_delay_is_0 = 0;
+  reg       mpc_rx_delay_is_0 = 0;
 
   always @(posedge clock) begin
   mpc_tx_delaym1    <= mpc_tx_delay -  4'h1;
@@ -1410,10 +1410,10 @@
 
 // Insert bx0 into LCTs after mpc_tx_delay
   assign mpc_frame1_mod[10:0]  = mpc_frame1_mux[10:0];
-  assign mpc_frame1_mod[11]  = clct_bx0 && !mpc_idle_blank;  // insert bx0 into mpc0_frame1[11] aka frame1[11]
-  assign mpc_frame1_mod[26:12]= mpc_frame1_mux[26:12];
-  assign mpc_frame1_mod[27]  = alct_bx0 && !mpc_idle_blank;  // insert bx0 into mpc1_frame1[11] aka frame1[27]
-  assign mpc_frame1_mod[31:28]= mpc_frame1_mux[31:28];
+  assign mpc_frame1_mod[11]    = clct_bx0 && !mpc_idle_blank;  // insert bx0 into mpc0_frame1[11] aka frame1[11]
+  assign mpc_frame1_mod[26:12] = mpc_frame1_mux[26:12];
+  assign mpc_frame1_mod[27]    = alct_bx0 && !mpc_idle_blank;  // insert bx0 into mpc1_frame1[11] aka frame1[27]
+  assign mpc_frame1_mod[31:28] = mpc_frame1_mux[31:28];
 
   assign mpc_frame0_dly = mpc_frame0_mux;            // Send frame 0 unmodified
   assign mpc_frame1_dly = mpc_frame1_mod;            // Send frame 1 with bx0s inserted
@@ -1437,15 +1437,14 @@
 
 // Push MPC frames into header RAM after mpc_tx_delay
   reg  mpc_frame_ff=0;
-
   always @(posedge clock) begin
-  wr_adr_xmpc   <= wr_adr_rtmb_dly;
-  wr_push_xmpc  <= wr_push_rtmb_dly;
-  wr_avail_xmpc <= wr_avail_rtmb_dly;
-  mpc_frame_ff  <= trig_mpc_rtmb_dly;            // Pipeline strobes
+    wr_adr_xmpc   <= wr_adr_rtmb_dly;
+    wr_push_xmpc  <= wr_push_rtmb_dly;
+    wr_avail_xmpc <= wr_avail_rtmb_dly;
+    mpc_frame_ff  <= trig_mpc_rtmb_dly;                // Pipeline strobes
 
-  {mpc1_frame0_ff,mpc0_frame0_ff} <= mpc_frame0_dly; // Pulsed copy of LCTs for header
-  {mpc1_frame1_ff,mpc0_frame1_ff} <= mpc_frame1_dly;
+    {mpc1_frame0_ff,mpc0_frame0_ff} <= mpc_frame0_dly; // Pulsed copy of LCTs for header
+    {mpc1_frame1_ff,mpc0_frame1_ff} <= mpc_frame1_dly;
   end
 
 // Latch MPC output words for VME
@@ -1482,10 +1481,10 @@
 // MPC Injector State Machine Declarations
 //------------------------------------------------------------------------------------------------------------------
   reg [3:0]    mpc_sm;      // synthesis attribute safe_implementation of mpc_sm is "yes";
-  parameter     pass    =  0;
-  parameter    start    =  1;
-  parameter     injecting  =  2;
-  parameter    hold    =  3;
+  parameter  pass      = 0;
+  parameter  start     = 1;
+  parameter  injecting = 2;
+  parameter  hold      = 3;
 
 // MPC Injector start FF
   reg mpc_inj_start;
@@ -1512,13 +1511,13 @@
 
 // MPC Injector frame Counter
   always @(posedge clock) begin
-  if (mpc_sm==injecting)  mpc_frame_cnt = mpc_frame_cnt + 1'b1;  // Sync  count
-  else          mpc_frame_cnt = 0;            // Sync  load
+  if   (mpc_sm==injecting)  mpc_frame_cnt = mpc_frame_cnt + 1'b1; // Sync  count
+  else                      mpc_frame_cnt = 0;                    // Sync  load
   end
 
-  assign  mpc_frame_done  = mpc_frame_cnt == (mpc_nframes-8'h01);  // fails for 256 unless use 8'h01
+  assign  mpc_frame_done = mpc_frame_cnt == (mpc_nframes-8'h01);  // fails for 256 unless use 8'h01
   assign  mpc_inj_adr    = mpc_frame_cnt;
-  assign   vme_adr      = mpc_adr;
+  assign  vme_adr        = mpc_adr;
 
 // Pass state FF delays output mux 1 cycle
   always @(posedge clock) begin
@@ -1529,10 +1528,10 @@
   wire [15:0] mpc_rdata_01;
   wire [15:0] mpc_rdata_23;
 
-  wire wea01  = |mpc_wen[1:0];      // VME writes to one of the two inj01 RAM address banks
-  wire wea23  = |mpc_wen[3:2];      // VME writes to one of the two inj23 RAM address banks
-  wire bank01  =  mpc_wen[1] | mpc_ren[1];  // bank=0 for mpc0_inj0, bank=1 for mpc0_inj1
-  wire bank23  =  mpc_wen[3] | mpc_ren[3];  // bank=0 for mpc1_inj0, bank=1 for mpc1_inj1
+  wire wea01  = |mpc_wen[1:0];           // VME writes to one of the two inj01 RAM address banks
+  wire wea23  = |mpc_wen[3:2];           // VME writes to one of the two inj23 RAM address banks
+  wire bank01 = mpc_wen[1] | mpc_ren[1]; // bank=0 for mpc0_inj0, bank=1 for mpc0_inj1
+  wire bank23 = mpc_wen[3] | mpc_ren[3]; // bank=0 for mpc1_inj0, bank=1 for mpc1_inj1
 
 //------------------------------------------------------------------------------------------------------------------
 // MPC Injector RAMs
@@ -1573,100 +1572,100 @@
   
 // MPC Injector RAM: first muon
   RAMB36E1 #(
-  .INIT_00 (256'hB007A007B006A006B005A005B004A004B003A003B002A002B001A001B000A000),
-  .INIT_01 (256'hB00FA00FA00EA00EB00DA00DB00CA00CB00BA00BB00AA00AB009A009B008A008),
-  .RAM_MODE      ("TDP"),            // "SDP" or "TDP"
-  .READ_WIDTH_A    (18),              // 0, 1, 2, 4, 9, 18, 36 or 72
-  .WRITE_WIDTH_A    (18),              // 0, 1, 2, 4, 9, 18, 36
-  .READ_WIDTH_B    (36),              // 0, 1, 2, 4, 9, 18, 36
-  .WRITE_WIDTH_B    (0),              // 0, 1, 2, 4, 9, 18, 36 or 72
-  .WRITE_MODE_A    ("READ_FIRST"),          // ("READ_FIRST"), "READ_FIRST", or "NO_CHANGE"
-  .WRITE_MODE_B    ("READ_FIRST"),
-  .SIM_COLLISION_CHECK("ALL")              // "ALL", "WARNING_ONLY", "GENERATE_X_ONLY" or "NONE"
+  .INIT_00            (256'hB007A007B006A006B005A005B004A004B003A003B002A002B001A001B000A000),
+  .INIT_01            (256'hB00FA00FA00EA00EB00DA00DB00CA00CB00BA00BB00AA00AB009A009B008A008),
+  .RAM_MODE           ("TDP"),        // "SDP" or "TDP"
+  .READ_WIDTH_A       (18),           // 0, 1, 2, 4, 9, 18, 36 or 72
+  .WRITE_WIDTH_A      (18),           // 0, 1, 2, 4, 9, 18, 36
+  .READ_WIDTH_B       (36),           // 0, 1, 2, 4, 9, 18, 36
+  .WRITE_WIDTH_B      (0),            // 0, 1, 2, 4, 9, 18, 36 or 72
+  .WRITE_MODE_A       ("READ_FIRST"), // ("READ_FIRST"), "READ_FIRST", or "NO_CHANGE"
+  .WRITE_MODE_B       ("READ_FIRST"),
+  .SIM_COLLISION_CHECK("ALL")         // "ALL", "WARNING_ONLY", "GENERATE_X_ONLY" or "NONE"
   ) uinjram01 (
-  .WEA        ({4{wea01}}),          //  4-bit A port write enable input
-  .ENARDEN      (1'b1),              //  1-bit A port enable/Read enable input
-  .REGCEAREGCE    (1'b0),              //  1-bit A port register enable/Register enable input
-  .RSTRAMARSTRAM    (1'b0),              //  1-bit A port set/reset input
-  .RSTREGARSTREG    (1'b0),              //  1-bit A port register set/reset input
-  .CLKARDCLK      (clock),            //  1-bit A port clock/Read clock input
-  .ADDRARDADDR    (injram01_adra[15:0]),      // 16-bit A port address/Read address input 18b->[14:4]
-  .DIADI        ({16'h0000,mpc_wdata[15:0]}),  // 32-bit A port data/LSB data input
-  .DIPADIP      (),                //  4-bit A port parity/LSB parity input
-  .DOADO        ({injdum0,mpc_rdata_01[15:0]}),  // 32-bit A port data/LSB data output
-  .DOPADOP      (),                //  4-bit A port parity/LSB parity output
+  .WEA           ({4{wea01}}),                   // 4-bit  A port write enable input
+  .ENARDEN       (1'b1),                         // 1-bit  A port enable/Read enable input
+  .REGCEAREGCE   (1'b0),                         // 1-bit  A port register enable/Register enable input
+  .RSTRAMARSTRAM (1'b0),                         // 1-bit  A port set/reset input
+  .RSTREGARSTREG (1'b0),                         // 1-bit  A port register set/reset input
+  .CLKARDCLK     (clock),                        // 1-bit  A port clock/Read clock input
+  .ADDRARDADDR   (injram01_adra[15:0]),          // 16-bit A port address/Read address input 18b->[14:4]
+  .DIADI         ({16'h0000,mpc_wdata[15:0]}),   // 32-bit A port data/LSB data input
+  .DIPADIP       (),                             // 4-bit  A port parity/LSB parity input
+  .DOADO         ({injdum0,mpc_rdata_01[15:0]}), // 32-bit A port data/LSB data output
+  .DOPADOP       (),                             // 4-bit  A port parity/LSB parity output
 
-  .WEBWE        (),                //  8-bit B port write enable/Write enable input
-  .ENBWREN      (1'b1),              //  1-bit B port enable/Write enable input
-  .REGCEB        (1'b0),              //  1-bit B port register enable input
-  .RSTRAMB      (1'b0),              //  1-bit B port set/reset input
-  .RSTREGB      (1'b0),              //  1-bit B port register set/reset input
-  .CLKBWRCLK      (clock),            //  1-bit B port clock/Write clock input
-  .ADDRBWRADDR    (injram01_adrb[15:0]),      // 16-bit B port address/Write address input  36b->[14:5]
-  .DIBDI        (),                // 32-bit B port data/MSB data input
-  .DIPBDIP      (),                //  4-bit B port parity/MSB parity input
-  .DOBDO        ({mpc0_inj1,mpc0_inj0}),    // 32-bit B port data/MSB data output
-  .DOPBDOP      (),                //  4-bit B port parity/MSB parity output
+  .WEBWE         (),                             // 8-bit  B port write enable/Write enable input
+  .ENBWREN       (1'b1),                         // 1-bit  B port enable/Write enable input
+  .REGCEB        (1'b0),                         // 1-bit  B port register enable input
+  .RSTRAMB       (1'b0),                         // 1-bit  B port set/reset input
+  .RSTREGB       (1'b0),                         // 1-bit  B port register set/reset input
+  .CLKBWRCLK     (clock),                        // 1-bit  B port clock/Write clock input
+  .ADDRBWRADDR   (injram01_adrb[15:0]),          // 16-bit B port address/Write address input  36b->[14:5]
+  .DIBDI         (),                             // 32-bit B port data/MSB data input
+  .DIPBDIP       (),                             // 4-bit  B port parity/MSB parity input
+  .DOBDO         ({mpc0_inj1,mpc0_inj0}),        // 32-bit B port data/MSB data output
+  .DOPBDOP       (),                             // 4-bit  B port parity/MSB parity output
 
-  .CASCADEINA      (),                //  1-bit A port cascade input
-  .CASCADEINB      (),                //  1-bit B port cascade input
-  .CASCADEOUTA    (),                //  1-bit A port cascade output
-  .CASCADEOUTB    (),                //  1-bit B port cascade output
-  .INJECTDBITERR    (),                //  1-bit Inject a double bit error
-  .INJECTSBITERR    (),                //  1-bit Inject a single bit error
-  .DBITERR      (),                //  1-bit double bit error status output
-  .ECCPARITY      (),                //  8-bit generated error correction parity
-  .RDADDRECC      (),                //  9-bit ECC read address
-  .SBITERR      ()                //  1-bit Single bit error status output
+  .CASCADEINA    (),                             // 1-bit A port cascade input
+  .CASCADEINB    (),                             // 1-bit B port cascade input
+  .CASCADEOUTA   (),                             // 1-bit A port cascade output
+  .CASCADEOUTB   (),                             // 1-bit B port cascade output
+  .INJECTDBITERR (),                             // 1-bit Inject a double bit error
+  .INJECTSBITERR (),                             // 1-bit Inject a single bit error
+  .DBITERR       (),                             // 1-bit double bit error status output
+  .ECCPARITY     (),                             // 8-bit generated error correction parity
+  .RDADDRECC     (),                             // 9-bit ECC read address
+  .SBITERR       ()                              // 1-bit Single bit error status output
   );
 
 // MPC Injector RAM: second muon
   RAMB36E1 #(
-  .INIT_00 (256'hD007C007D006C006D005C005D004C004D003C003D002C002D001C001D000C000),
-  .INIT_01 (256'hD00FC00FD00EC00ED00DC00DD00CC00CD00BC00BD00AC00AD009C009D008C008),
-  .RAM_MODE      ("TDP"),            // "SDP" or "TDP"
-  .READ_WIDTH_A    (18),              // 0, 1, 2, 4, 9, 18, 36 or 72
-  .WRITE_WIDTH_A    (18),              // 0, 1, 2, 4, 9, 18, 36
-  .READ_WIDTH_B    (36),              // 0, 1, 2, 4, 9, 18, 36
-  .WRITE_WIDTH_B    (0),              // 0, 1, 2, 4, 9, 18, 36 or 72
-  .WRITE_MODE_A    ("READ_FIRST"),          // ("READ_FIRST"), "READ_FIRST", or "NO_CHANGE"
-  .WRITE_MODE_B    ("READ_FIRST"),
-  .SIM_COLLISION_CHECK("ALL")              // "ALL", "WARNING_ONLY", "GENERATE_X_ONLY" or "NONE"
+  .INIT_00             (256'hD007C007D006C006D005C005D004C004D003C003D002C002D001C001D000C000),
+  .INIT_01             (256'hD00FC00FD00EC00ED00DC00DD00CC00CD00BC00BD00AC00AD009C009D008C008),
+  .RAM_MODE            ("TDP"),        // "SDP" or "TDP"
+  .READ_WIDTH_A        (18),           // 0, 1, 2, 4, 9, 18, 36 or 72
+  .WRITE_WIDTH_A       (18),           // 0, 1, 2, 4, 9, 18, 36
+  .READ_WIDTH_B        (36),           // 0, 1, 2, 4, 9, 18, 36
+  .WRITE_WIDTH_B       (0),            // 0, 1, 2, 4, 9, 18, 36 or 72
+  .WRITE_MODE_A        ("READ_FIRST"), // ("READ_FIRST"), "READ_FIRST", or "NO_CHANGE"
+  .WRITE_MODE_B        ("READ_FIRST"),
+  .SIM_COLLISION_CHECK ("ALL")         // "ALL", "WARNING_ONLY", "GENERATE_X_ONLY" or "NONE"
   ) uinjram23 (
-  .WEA        ({4{wea23}}),          //  4-bit A port write enable input
-  .ENARDEN      (1'b1),              //  1-bit A port enable/Read enable input
-  .REGCEAREGCE    (1'b0),              //  1-bit A port register enable/Register enable input
-  .RSTRAMARSTRAM    (1'b0),              //  1-bit A port set/reset input
-  .RSTREGARSTREG    (1'b0),              //  1-bit A port register set/reset input
-  .CLKARDCLK      (clock),            //  1-bit A port clock/Read clock input
-  .ADDRARDADDR    (injram23_adra[15:0]),      // 16-bit A port address/Read address input 36b->[14:5]
-  .DIADI        ({16'h0000,mpc_wdata[15:0]}),  // 32-bit A port data/LSB data input
-  .DIPADIP      (),                //  4-bit A port parity/LSB parity input
-  .DOADO        ({injdum1,mpc_rdata_23[15:0]}),  // 32-bit A port data/LSB data output
-  .DOPADOP      (),                //  4-bit A port parity/LSB parity output
+  .WEA           ({4{wea23}}),                   // 4-bit  A port write enable input
+  .ENARDEN       (1'b1),                         // 1-bit  A port enable/Read enable input
+  .REGCEAREGCE   (1'b0),                         // 1-bit  A port register enable/Register enable input
+  .RSTRAMARSTRAM (1'b0),                         // 1-bit  A port set/reset input
+  .RSTREGARSTREG (1'b0),                         // 1-bit  A port register set/reset input
+  .CLKARDCLK     (clock),                        // 1-bit  A port clock/Read clock input
+  .ADDRARDADDR   (injram23_adra[15:0]),          // 16-bit A port address/Read address input 36b->[14:5]
+  .DIADI         ({16'h0000,mpc_wdata[15:0]}),   // 32-bit A port data/LSB data input
+  .DIPADIP       (),                             // 4-bit  A port parity/LSB parity input
+  .DOADO         ({injdum1,mpc_rdata_23[15:0]}), // 32-bit A port data/LSB data output
+  .DOPADOP       (),                             // 4-bit  A port parity/LSB parity output
 
-  .WEBWE        (),                //  8-bit B port write enable/Write enable input
-  .ENBWREN      (1'b1),              //  1-bit B port enable/Write enable input
-  .REGCEB        (1'b0),              //  1-bit B port register enable input
-  .RSTRAMB      (1'b0),              //  1-bit B port set/reset input
-  .RSTREGB      (1'b0),              //  1-bit B port register set/reset input
-  .CLKBWRCLK      (clock),            //  1-bit B port clock/Write clock input
-  .ADDRBWRADDR    (injram23_adrb[15:0]),      // 16-bit B port address/Write address input  18b->[14:5]
-  .DIBDI        (),                // 32-bit B port data/MSB data input
-  .DIPBDIP      (),                //  4-bit B port parity/MSB parity input
-  .DOBDO        ({mpc1_inj1,mpc1_inj0}),    // 32-bit B port data/MSB data output
-  .DOPBDOP      (),                //  4-bit B port parity/MSB parity output
+  .WEBWE         (),                             // 8-bit  B port write enable/Write enable input
+  .ENBWREN       (1'b1),                         // 1-bit  B port enable/Write enable input
+  .REGCEB        (1'b0),                         // 1-bit  B port register enable input
+  .RSTRAMB       (1'b0),                         // 1-bit  B port set/reset input
+  .RSTREGB       (1'b0),                         // 1-bit  B port register set/reset input
+  .CLKBWRCLK     (clock),                        // 1-bit  B port clock/Write clock input
+  .ADDRBWRADDR   (injram23_adrb[15:0]),          // 16-bit B port address/Write address input  18b->[14:5]
+  .DIBDI         (),                             // 32-bit B port data/MSB data input
+  .DIPBDIP       (),                             // 4-bit  B port parity/MSB parity input
+  .DOBDO         ({mpc1_inj1,mpc1_inj0}),        // 32-bit B port data/MSB data output
+  .DOPBDOP       (),                             // 4-bit  B port parity/MSB parity output
 
-  .CASCADEINA      (),                //  1-bit A port cascade input
-  .CASCADEINB      (),                //  1-bit B port cascade input
-  .CASCADEOUTA    (),                //  1-bit A port cascade output
-  .CASCADEOUTB    (),                //  1-bit B port cascade output
-  .INJECTDBITERR    (),                //  1-bit Inject a double bit error
-  .INJECTSBITERR    (),                //  1-bit Inject a single bit error
-  .DBITERR      (),                //  1-bit double bit error status output
-  .ECCPARITY      (),                //  8-bit generated error correction parity
-  .RDADDRECC      (),                //  9-bit ECC read address
-  .SBITERR      ()                //  1-bit Single bit error status output
+  .CASCADEINA    (),                             // 1-bit A port cascade input
+  .CASCADEINB    (),                             // 1-bit B port cascade input
+  .CASCADEOUTA   (),                             // 1-bit A port cascade output
+  .CASCADEOUTB   (),                             // 1-bit B port cascade output
+  .INJECTDBITERR (),                             // 1-bit Inject a double bit error
+  .INJECTSBITERR (),                             // 1-bit Inject a single bit error
+  .DBITERR       (),                             // 1-bit double bit error status output
+  .ECCPARITY     (),                             // 8-bit generated error correction parity
+  .RDADDRECC     (),                             // 9-bit ECC read address
+  .SBITERR       ()                              // 1-bit Single bit error status output
   );
 
 // Multiplex Injector RAM VME read data
@@ -1678,7 +1677,7 @@
   4'b0010: mpc_rdata <= mpc_rdata_01;
   4'b0100: mpc_rdata <= mpc_rdata_23;
   4'b1000: mpc_rdata <= mpc_rdata_23;
-  default   mpc_rdata <= mpc_rdata_01;
+  default  mpc_rdata <= mpc_rdata_01;
   endcase
   end
 
@@ -1690,11 +1689,11 @@
   wire  [1:0]  _mpc_rx_2nd;
 
   x_demux_ddr_mpc #(MXMPCRX) umpcdemux (  // must use ddr and not ddr2 beco we can't shift mpc rx data a half cycle
-  .clock    (clock),
-  .set    (powerup_n),
-  .din    (_mpc_rx[1:0]),
-  .dout1st  (_mpc_rx_1st[1:0]),
-  .dout2nd  (_mpc_rx_2nd[1:0]));
+  .clock   (clock),
+  .set     (powerup_n),
+  .din     (_mpc_rx[1:0]),
+  .dout1st (_mpc_rx_1st[1:0]),
+  .dout2nd (_mpc_rx_2nd[1:0]));
 
 // Map and un-invert demultiplexed signal names
   wire [1:0] mpc_accept;
@@ -1733,13 +1732,13 @@
   reg [1:0]  mpc_reserved_ff = 0;
 
   always @(posedge clock) begin
-  wr_adr_rmpc    <= wr_adr_rmpc_dly;
+  wr_adr_rmpc   <= wr_adr_rmpc_dly;
   wr_push_rmpc  <= wr_push_rmpc_dly;
-  wr_avail_rmpc  <= wr_avail_rmpc_dly;
+  wr_avail_rmpc <= wr_avail_rmpc_dly;
 
-  mpc_response_ff  <= mpc_response;
-  mpc_accept_ff  <= mpc_accept[1:0];
-  mpc_reserved_ff  <= mpc_reserved[1:0];
+  mpc_response_ff <= mpc_response;
+  mpc_accept_ff   <= mpc_accept[1:0];
+  mpc_reserved_ff <= mpc_reserved[1:0];
   end
 
 // Latch MPC response for VME readout
@@ -1766,39 +1765,39 @@
 
   initial $display("tmb: generating Virtex6 RAMB18E1_S18_S18 umpcacc");
 
-  RAMB18E1 #(                      // Virtex6
-  .RAM_MODE      ("TDP"),            // SDP or TDP
-   .READ_WIDTH_A    (18),              // 0,1,2,4,9,18,36 Read/write width per port
-  .WRITE_WIDTH_A    (0),              // 0,1,2,4,9,18
-  .READ_WIDTH_B    (0),              // 0,1,2,4,9,18
-  .WRITE_WIDTH_B    (18),              // 0,1,2,4,9,18,36
-  .WRITE_MODE_A    ("READ_FIRST"),          // Must be same for both ports in SDP mode: WRITE_FIRST, READ_FIRST, or NO_CHANGE)
-  .WRITE_MODE_B    ("READ_FIRST"),
-  .SIM_COLLISION_CHECK("ALL")              // ALL, WARNING_ONLY, GENERATE_X_ONLY or NONE)
+  RAMB18E1 #(                          // Virtex6
+  .RAM_MODE            ("TDP"),        // SDP or TDP
+   .READ_WIDTH_A       (18),           // 0,1,2,4,9,18,36 Read/write width per port
+  .WRITE_WIDTH_A       (0),            // 0,1,2,4,9,18
+  .READ_WIDTH_B        (0),            // 0,1,2,4,9,18
+  .WRITE_WIDTH_B       (18),           // 0,1,2,4,9,18,36
+  .WRITE_MODE_A        ("READ_FIRST"), // Must be same for both ports in SDP mode: WRITE_FIRST, READ_FIRST, or NO_CHANGE)
+  .WRITE_MODE_B        ("READ_FIRST"),
+  .SIM_COLLISION_CHECK ("ALL")         // ALL, WARNING_ONLY, GENERATE_X_ONLY or NONE)
   ) uram (
-  .WEA        (),                //  2-bit A port write enable input
-  .ENARDEN      (1'b1),              //  1-bit A port enable/Read enable input
-  .RSTRAMARSTRAM    (1'b0),              //  1-bit A port set/reset input
-  .RSTREGARSTREG    (1'b0),              //  1-bit A port register set/reset input
-  .REGCEAREGCE    (1'b0),              //  1-bit A port register enable/Register enable input
-  .CLKARDCLK      (clock),            //  1-bit A port clock/Read clock input
-  .ADDRARDADDR    ({2'h0,vme_adr[7:0],4'hF}),    // 14-bit A port address/Read address input 18b->[13:4]
-  .DIADI        (),                // 16-bit A port data/LSB data input
-  .DIPADIP      (),                //  2-bit A port parity/LSB parity input
-  .DOADO        (mpcacc_rdata[15:0]),      // 16-bit A port data/LSB data output
-  .DOPADOP      (),                //  2-bit A port parity/LSB parity output
+  .WEA           (),                             // 2-bit  A port write enable input
+  .ENARDEN       (1'b1),                         // 1-bit  A port enable/Read enable input
+  .RSTRAMARSTRAM (1'b0),                         // 1-bit  A port set/reset input
+  .RSTREGARSTREG (1'b0),                         // 1-bit  A port register set/reset input
+  .REGCEAREGCE   (1'b0),                         // 1-bit  A port register enable/Register enable input
+  .CLKARDCLK     (clock),                        // 1-bit  A port clock/Read clock input
+  .ADDRARDADDR   ({2'h0,vme_adr[7:0],4'hF}),     // 14-bit A port address/Read address input 18b->[13:4]
+  .DIADI         (),                             // 16-bit A port data/LSB data input
+  .DIPADIP       (),                             // 2-bit  A port parity/LSB parity input
+  .DOADO         (mpcacc_rdata[15:0]),           // 16-bit A port data/LSB data output
+  .DOPADOP       (),                             // 2-bit  A port parity/LSB parity output
 
-  .WEBWE        ({4{mpc_sm==injecting}}),    //  4-bit B port write enable/Write enable input
-  .ENBWREN      (1'b1),              //  1-bit B port enable/Write enable input
-  .REGCEB        (1'b0),              //  1-bit B port register enable input
-  .RSTRAMB      (1'b0),              //  1-bit B port set/reset input
-  .RSTREGB      (1'b0),              //  1-bit B port register set/reset input
-  .CLKBWRCLK      (clock),            //  1-bit B port clock/Write clock input
-  .ADDRBWRADDR    ({2'h0,mpc_inj_adr[7:0],4'hF}),  // 14-bit B port address/Write address input 18b->[13:4]
-  .DIBDI        (mpcacc_wdata[15:0]),      // 16-bit B port data/MSB data input
-  .DIPBDIP      (),                //  2-bit B port parity/MSB parity input
-  .DOBDO        (),                // 16-bit B port data/MSB data output
-  .DOPBDOP      ()                //  2-bit B port parity/MSB parity output
+  .WEBWE         ({4{mpc_sm==injecting}}),       // 4-bit  B port write enable/Write enable input
+  .ENBWREN       (1'b1),                         // 1-bit  B port enable/Write enable input
+  .REGCEB        (1'b0),                         // 1-bit  B port register enable input
+  .RSTRAMB       (1'b0),                         // 1-bit  B port set/reset input
+  .RSTREGB       (1'b0),                         // 1-bit  B port register set/reset input
+  .CLKBWRCLK     (clock),                        // 1-bit  B port clock/Write clock input
+  .ADDRBWRADDR   ({2'h0,mpc_inj_adr[7:0],4'hF}), // 14-bit B port address/Write address input 18b->[13:4]
+  .DIBDI         (mpcacc_wdata[15:0]),           // 16-bit B port data/MSB data input
+  .DIPBDIP       (),                             // 2-bit  B port parity/MSB parity input
+  .DOBDO         (),                             // 16-bit B port data/MSB data output
+  .DOPBDOP       ()                              // 2-bit  B port parity/MSB parity output
   );
 
 //------------------------------------------------------------------------------------------------------------------
@@ -1825,11 +1824,11 @@
   reg[71:0] mpc_sm_dsp;
   always @* begin
   case (mpc_sm)
-  pass:    mpc_sm_dsp <= "pass     ";
-  start:    mpc_sm_dsp <= "start    ";
+  pass:       mpc_sm_dsp <= "pass     ";
+  start:      mpc_sm_dsp <= "start    ";
   injecting:  mpc_sm_dsp <= "injecting";
-  hold  :  mpc_sm_dsp <= "hold     ";
-  default    mpc_sm_dsp <= "pass     ";
+  hold  :     mpc_sm_dsp <= "hold     ";
+  default     mpc_sm_dsp <= "pass     ";
   endcase
   end
 

@@ -723,38 +723,36 @@ NET "rxp[3]"		LOC = AA3 | IOSTANDARD = "LVDS_25";	# MGTRXP0_114
 NET "rxn[3]"		LOC = AA4 | IOSTANDARD = "LVDS_25";	# MGTRXN0_114
 
 # Snap fiber10 mgt: gtx10/rx9
-NET "rxp[4]"		LOC = W3  | IOSTANDARD = "LVDS_25";     # MGTRXP1_114	RX p|n swapped at snap12 end
+NET "rxp[4]"		LOC = W3  | IOSTANDARD = "LVDS_25"; # MGTRXP1_114	RX p|n swapped at snap12 end
 NET "rxn[4]"		LOC = W4  | IOSTANDARD = "LVDS_25";	# MGTRXN1_114	RX p|n swapped at snap12 end
 
 # Snap fiber11 mgt: gtx11/rx10
-NET "rxp[5]"		LOC = U3  | IOSTANDARD = "LVDS_25";     # MGTRXP2_114	RX p|n swapped at snap12 end
-NET "rxn[5]"		LOC = U4  | IOSTANDARD = "LVDS_25";     # MGTRXN2_114	RX p|n swapped at snap12 end
+NET "rxp[5]"		LOC = U3  | IOSTANDARD = "LVDS_25"; # MGTRXP2_114	RX p|n swapped at snap12 end
+NET "rxn[5]"		LOC = U4  | IOSTANDARD = "LVDS_25"; # MGTRXN2_114	RX p|n swapped at snap12 end
 
 # Snap fiber12 mgt: gtx2/rx11
 NET "rxp[6]"		LOC = R3  | IOSTANDARD = "LVDS_25";	# MGTRXP3_114
 NET "rxn[6]"		LOC = R4  | IOSTANDARD = "LVDS_25";	# MGTRXN3_114
 
-#
 # Snap fiber5, gemRx0
-#NET "gemrxp[0]"		LOC = AG3  | IOSTANDARD = "LVDS_25";	# MTP fiber 5 on GTX4, Rx Only
-#NET "gemrxn[0]"		LOC = AG4  | IOSTANDARD = "LVDS_25";	#
+NET "gemrxp[0]"		LOC = AG3  | IOSTANDARD = "LVDS_25";	# MTP fiber 5 on GTX4, Rx Only
+NET "gemrxn[0]"		LOC = AG4  | IOSTANDARD = "LVDS_25";	#
 
 # Snap fiber6, gemRx1
-#NET "gemrxp[1]"		LOC = AF5  | IOSTANDARD = "LVDS_25";	# MTP fiber 6 on GTX5, Rx Only
-#NET "gemrxn[1]"		LOC = AF6  | IOSTANDARD = "LVDS_25";	#
+NET "gemrxp[1]"		LOC = AF5  | IOSTANDARD = "LVDS_25";	# MTP fiber 6 on GTX5, Rx Only
+NET "gemrxn[1]"		LOC = AF6  | IOSTANDARD = "LVDS_25";	#
 
 # Snap fiber7, gemRx2
-#NET "gemrxp[2]"		LOC = AE3  | IOSTANDARD = "LVDS_25";	# MTP fiber 7 on GTX6, Rx Only
-#NET "gemrxn[2]"		LOC = AE4  | IOSTANDARD = "LVDS_25";	#
+NET "gemrxp[2]"		LOC = AE3  | IOSTANDARD = "LVDS_25";	# MTP fiber 7 on GTX6, Rx Only
+NET "gemrxn[2]"		LOC = AE4  | IOSTANDARD = "LVDS_25";	#
 
 # Snap fiber8, gemRx3
-#NET "gemrxp[3]"		LOC = AC3  | IOSTANDARD = "LVDS_25";	# MTP fiber 8 on GTX7, Rx Only
-#NET "gemrxn[3]"		LOC = AC4  | IOSTANDARD = "LVDS_25";	#
+NET "gemrxp[3]"		LOC = AC3  | IOSTANDARD = "LVDS_25";	# MTP fiber 8 on GTX7, Rx Only
+NET "gemrxn[3]"		LOC = AC4  | IOSTANDARD = "LVDS_25";	#
 
-#
 # Snap fiber1, only used by emulator board in some test stands
-NET "xtrarxp[0]"		LOC = AP5  | IOSTANDARD = "LVDS_25";	# MTP fiber 1, Rx on GTX0
-NET "xtrarxn[0]"		LOC = AP6  | IOSTANDARD = "LVDS_25";	#
+#NET "xtrarxp[0]"		LOC = AP5  | IOSTANDARD = "LVDS_25";	# MTP fiber 1, Rx on GTX0
+#NET "xtrarxn[0]"		LOC = AP6  | IOSTANDARD = "LVDS_25";	#
 
 #----------------------------------------------------------------------------------------------------------
 # IO Bank Impedances, just for reference, do not lock these pins
@@ -906,6 +904,7 @@ TIMESPEC "TS_clock_160"  = PERIOD "clock_160" 6.25 ns HIGH 50%;
 NET "clock_cfeb_rxd<*>"	TIG;
 NET "clock_alct_rxd"	TIG;
 NET "clock_alct_txd"	TIG;
+NET "clock_gem_rxd<*>"	TIG;
 
 #----------------------------------------------------------------------------------------------------------
 # End of TMB2012 UCF

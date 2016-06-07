@@ -39,11 +39,14 @@ module gtx_gem_fiber_in
     output reg        LTNCY_TRIG,
     output            RX_RST_DONE,
     output            RX_SYNC_DONE,
+    output reg [7:0]  k_char, 
     output            sump,
     output     [7:0]  errcount,
     output            link_had_err,
     output reg        link_good,
-    output            link_bad
+    output            link_bad, 
+
+    output            overflow
 );
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -99,6 +102,8 @@ module gtx_gem_fiber_in
     reg [7:0]  w0_reg     = 0;
     reg [15:0] w1_reg     = 0;
     reg [15:0] w2_reg     = 0;
+
+    assign overflow = (k_char == 8'hFC); 
 
 //-------------------------------------------------------------------------------------------------------------------
 // GTX instance
@@ -280,10 +285,19 @@ module gtx_gem_fiber_in
         else begin
         if(CEW0)    begin     // this gets set for the first time after the first CEW3
             lt_trg_reg <= lt_trg;
+            k_char <= gem_rx_data [7:0]; 
             w0_reg <= gem_rx_data [15:8];
             NONZERO_WORD[0] <= |gem_rx_data[15:8];
 
             mon_in[0] <= (!gem_rx_lossofsync[1]) && (gem_rx_isk==2'b01) && (gem_rx_notintable[1:0]==2'b00) && ({gem_rx_data[7],gem_rx_data[5:4]}==3'h7); 
+            // GEM should be sending a cycle of 4 frames: bc, f7, fb, fd
+            // in the case of overflow, it should send fc
+            // 0xbc = 10110111
+            // 0xf7 = 11110111
+            // 0xfb = 11111011
+            // 0xfd = 11111101
+            // 0xfc = 11111100
+
             // allows 8 possible EOF markers:
             // 1C,3C,5C,7C,9C,BC,DC,FD are valid K-words available to represent 3 extra bits in the data stream. --Skip F7, FB, FC and FE.
             // So we could identify that BC=0 (very common), 1C=1, 3C=2, 5C=3, 7C=4, 9C=5, DC=6, FD=7 (all less common).
