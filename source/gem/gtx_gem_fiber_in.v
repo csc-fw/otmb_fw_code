@@ -44,9 +44,7 @@ module gtx_gem_fiber_in
     output     [7:0]  errcount,
     output            link_had_err,
     output reg        link_good,
-    output            link_bad, 
-
-    output            overflow
+    output            link_bad
 );
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -99,11 +97,9 @@ module gtx_gem_fiber_in
     wire       lt_trg;
 
     reg        lt_trg_reg = 0;
-    reg [7:0]  w0_reg     = 0;
+    reg [15:0] w0_reg     = 0;
     reg [15:0] w1_reg     = 0;
     reg [15:0] w2_reg     = 0;
-
-    assign overflow = (k_char == 8'hFC); 
 
 //-------------------------------------------------------------------------------------------------------------------
 // GTX instance
@@ -242,22 +238,21 @@ module gtx_gem_fiber_in
 //-------------------------------------------------------------------------------------------------------------------
 // Receive data
 //-------------------------------------------------------------------------------------------------------------------
-   reg [3:0] mon_in = 0;
-   reg       mon_rst = 1;
-   reg [3:0] mon_count = 0;
-   reg [7:0] err_count = 0;   // at least bit 7 needs to be output for "link_bad" signal
-   reg       link_err = 0;
+   reg [3:0] mon_in         = 0;
+   reg       mon_rst        = 1;
+   reg [3:0] mon_count      = 0;
+   reg [7:0] err_count      = 0; // at least bit 7 needs to be output for "link_bad" signal
+   reg       link_err       = 0;
 // reg       link_went_down = 0;
-// reg       link_had_err = 0; // needs to be output
+// reg       link_had_err   = 0; // needs to be output
 
 
-   assign   link_bad     = err_count[7]; // needs to be output
-   assign   errcount     = err_count[7:0]; // can be a useful output
-   assign   link_had_err = (link_err | mon_rst); // output, signals the link had a problem or was never alive
-
+   assign   link_bad       = err_count[7];           // needs to be output
+   assign   errcount       = err_count[7:0];         // can be a useful output
+   assign   link_had_err   = (link_err | mon_rst);   // output, signals the link had a problem or was never alive
    wire     link_went_down = (link_good && mon_rst); // use to signal the link was OK then had a problem
 
-   assign   PROMPT_DATA[55:0]  = {gem_rx_data,w2_reg,w1_reg,w0_reg};
+   assign   PROMPT_DATA[55:0] = {gem_rx_data,w2_reg,w1_reg,w0_reg[15:8]};
 
    assign   lt_trg     = (gem_rx_isk==2'b01) && (gem_rx_data[7:0] == 8'hFC);
    assign   sync_match = (gem_rx_isk==2'b01);
@@ -272,24 +267,26 @@ module gtx_gem_fiber_in
 
     always @(posedge GEM_RX_CLK160) begin
         if(!RX_SYNC_DONE || ttc_resync) begin
+            k_char[7:0]       <= 8'd0;
             NONZERO_WORD[3:0] <= 3'h0;
-            RCV_DATA          <= 0;
-            LTNCY_TRIG        <= 0;
+            RCV_DATA[55:0]    <= 56'hffffffffffffff;
+            LTNCY_TRIG        <= 1'b0;
             mon_in[3:0]       <= 4'h0;
-            mon_rst           <= 1;
-            mon_count[3:0]    <= 4'h0;    // counter to track when 15 good BX cycles are completed
-            link_good         <= 0;
-            link_err          <= 0; // clear the error register on resync
-            err_count[7:0]    <= 8'h00;   // use err_count[7] to signal the link is bad
+            mon_rst           <= 1'b1;
+            mon_count[3:0]    <= 4'h0;  // counter to track when 15 good BX cycles are completed
+            link_good         <= 1'b0;
+            link_err          <= 1'b0;     // clear the error register on resync
+            err_count[7:0]    <= 8'h00; // use err_count[7] to signal the link is bad
         end
         else begin
         if(CEW0)    begin     // this gets set for the first time after the first CEW3
             lt_trg_reg <= lt_trg;
-            k_char <= gem_rx_data [7:0]; 
-            w0_reg <= gem_rx_data [15:8];
+
+            w0_reg <= gem_rx_data;
             NONZERO_WORD[0] <= |gem_rx_data[15:8];
 
             mon_in[0] <= (!gem_rx_lossofsync[1]) && (gem_rx_isk==2'b01) && (gem_rx_notintable[1:0]==2'b00) && ({gem_rx_data[7],gem_rx_data[5:4]}==3'h7); 
+
             // GEM should be sending a cycle of 4 frames: bc, f7, fb, fd
             // in the case of overflow, it should send fc
             // 0xbc = 10110111
@@ -318,7 +315,8 @@ module gtx_gem_fiber_in
         end
 
         else if(CEW3) begin
-            RCV_DATA        <= {gem_rx_data,w2_reg,w1_reg,w0_reg};
+            RCV_DATA        <= {gem_rx_data,w2_reg,w1_reg,w0_reg[15:8]};
+            k_char[7:0]     <= w0_reg[7:0]; 
             LTNCY_TRIG      <=  lt_trg_reg;
             NONZERO_WORD[3] <= |gem_rx_data;
             mon_in[3]       <= (!gem_rx_lossofsync[1]) && (gem_rx_notintable[1:0]==2'b00) && (gem_rx_isk==2'b00); // no k-bits set
@@ -327,7 +325,7 @@ module gtx_gem_fiber_in
         else begin
             mon_in[3:0]       <= 4'h0; // this will set mon_rst next cycle any time the link is down or goes bad
             NONZERO_WORD[3:0] <= 3'h0;
-            RCV_DATA          <= 0;
+            RCV_DATA          <= 56'hffffffffffffff;
             LTNCY_TRIG        <= 0;
         end
 

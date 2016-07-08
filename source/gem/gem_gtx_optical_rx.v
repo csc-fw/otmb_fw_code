@@ -117,6 +117,7 @@
   wire [3:0]  nonzero_word;
   wire [55:0] gem_dat;
   wire [55:0] prompt_dat;
+  wire [7:0]  k_char_raw;
 
 // GTX instance
   gtx_gem_fiber_in ugtx_gem_fiber_in
@@ -139,16 +140,15 @@
     .CEW0             (cew[0]),                   // Out  Access four phases of 40 MHz cycle, frame separated output from GTX
     .CEW1             (cew[1]),                   // Out
     .CEW2             (cew[2]),                   // Out
-    .CEW3             (cew[3]),                   // Out  On CEW3_r                                                                                                     ( == CEW3 + 1) the RCV_DATA is valid, use to clock into pipeline
+    .CEW3             (cew[3]),                   // Out  On CEW3_r (==CEW3 + 1) the RCV_DATA is valid, use to clock into pipeline
     .LTNCY_TRIG       (rx_fc),                    // Out  Flags when RX sees "FC" for latency measurement.  Send raw to TP or LED
     .RX_RST_DONE      (rx_rst_done),              // Out  set when gtx_reset is complete, then the rxsync cycle can begin
     .RX_SYNC_DONE     (rx_sync_done),             // Out  set when gtx_rxsync is complete                                 ( after gtx_reset)
     .errcount         (link_errcount[7:0]),
-    .k_char           (k_char[7:0]), 
+    .k_char           (k_char_raw[7:0]), 
     .link_had_err     (link_had_err),
     .link_good        (link_good),
     .link_bad         (link_bad),
-    .overflow         (overflow),
     .sump             (sump_comp_fiber)           // Out  Unused signals
   );
 
@@ -170,36 +170,36 @@
     always @(posedge rx_clk160 or posedge gtx_rx_reset or posedge snap_wait)
     begin
 
-        // Reset case
-        if (gtx_rx_reset | snap_wait) begin
-            gem_dat_r      <= 0;
-            rst_errcount_r <= 1;
-            prbs_errcount  <= 0;
-            err            <= 0;
+    // Reset case
+    if (gtx_rx_reset | snap_wait) begin
+        gem_dat_r      <= 0;
+        rst_errcount_r <= 1;
+        prbs_errcount  <= 0;
+        err            <= 0;
+    end
+
+    // Not Reset case
+    else begin
+        // JRG        rst_errcount_r <= gtx_rx_reset_err_cnt;
+        rst_errcount_r <= 0;
+
+        if (cew[0]) begin            // Store comparator data using received fiber clock
+              gem_dat_r <=  gem_dat; // JRG: could we save a BX here by using PROMPT_DAT to load this reg on CEW3?
+        end                          // JRG:  ...probably not.  Using comp_dat directly is likely the best we can do; skip comp_dat_r?
+
+        if (rst_errcount_r) begin    // Error counter reset
+            prbs_errcount <= 0;
+            err  <= 0;
         end
 
-        // Not Reset case
-        else begin
-            // JRG        rst_errcount_r <= gtx_rx_reset_err_cnt;
-            rst_errcount_r <= 0;
-
-            if (cew[0]) begin           // Store comparator data using received fiber clock
-                 gem_dat_r <=  gem_dat; // JRG: could we save a BX here by using PROMPT_DAT to load this reg on CEW3?
-            end                         // JRG:  ...probably not.  Using comp_dat directly is likely the best we can do; skip comp_dat_r?
-
-            if (rst_errcount_r) begin    // Error counter reset
-                prbs_errcount <= 0;
-                err  <= 0;
+        else if (gtx_rx_en_prbs_test & cew[0] & !snap_wait & gtx_ready) begin  // Wait 3000 clocks after Reset
+            if (!rx_match & rx_valid ) begin
+                err            <= 1'b1;                 // Take this to testLEDs for monitoring on scope
+                prbs_errcount  <= prbs_errcount + 1'b1; // This goes to Results Reg for software monitoring
             end
-
-            else if (gtx_rx_en_prbs_test & cew[0] & !snap_wait & gtx_ready) begin  // Wait 3000 clocks after Reset
-                if (!rx_match & rx_valid ) begin
-                    err      <= 1'b1;  // Take this to testLEDs for monitoring on scope
-                    prbs_errcount  <= prbs_errcount + 1'b1;  // This goes to Results Reg for software monitoring
-                end
-                else
-                    err     <= 0;
-            end
+            else
+                err     <= 0;
+        end
 
         end    // close not reset case
         end    // close always
@@ -229,7 +229,7 @@
             gtx_rx_err_count      <= 0;
         end
         else begin
-            gtx_rx_data_raw[55:0]  <=  gem_dat_r[55:0];  // JRG: for optimal timing use comp_dat, not gtx_rx_data_raw
+            gtx_rx_data_raw[55:0]  <= gem_dat_r[55:0];  // JRG: for optimal timing use comp_dat, not gtx_rx_data_raw
             gtx_rx_start           <= rx_start;
             gtx_rx_fc              <= rx_fc;
             gtx_rx_valid           <= rx_valid;
@@ -249,9 +249,14 @@
     wire [55:0] gem_dat_mux;
     reg  [55:0] gem_dat_180;
     reg  [55:0] gem_dat_phaser;
-    reg  [3:0]  idly=0;  // JRG, simple phase delay selector
-    reg  [3:0]  dly=0;   // JRG, complex phase delay selector
-    reg         dly_is_0=0;
+
+    wire  [7:0] k_char_mux;
+    reg   [7:0] k_char_180;
+    reg   [7:0] k_char_phaser;
+
+    reg   [3:0] idly     = 0; // JRG, simple phase delay selector
+    reg   [3:0] dly      = 0; // JRG, complex phase delay selector
+    reg         dly_is_0 = 0;
 
     always @(negedge clock) begin     // JRG: comp data goes out on FALLING LHC_CLOCK edge (~clock) to save .5BX latency
         idly      <=  delay_is;       // Pointer to clct SRL, integer 1-16 clock delay for comparator data
@@ -263,21 +268,31 @@
     wire ignore_link = !link_good | link_bad; // jghere: this is new, to keep bad links from contaminating the triads == hot comps
 
     // JRG: add custom muonic CLCT logic. Note that comparator data leaves this module on FALLING LHC_CLOCK edge (~clock)
-    always @(posedge clock_iob) begin  // JRG, comment this for test with no recclk or phaser clocks in use
-        if   (!ignore_link)  gem_dat_phaser[55:0] <=  gem_dat[55:0];  // JRG: bring data into phase-tuned time domain
-        else                 gem_dat_phaser[55:0] <= 56'b0;           // JRG: bring data into phase-tuned time domain
+    always @(posedge clock_iob) begin                                    // JRG, comment this for test with no recclk or phaser clocks in use
+        if   (!ignore_link)  gem_dat_phaser[55:0] <= gem_dat[55:0];      // JRG: bring data into phase-tuned time domain
+        else                 gem_dat_phaser[55:0] <= 56'hffffffffffffff; // JRG: bring data into phase-tuned time domain
+
+        if   (!ignore_link)  k_char_phaser[7:0] <= k_char_raw[7:0]; // JRG: bring data into phase-tuned time domain
+        else                 k_char_phaser[7:0] <= 8'h00;           // JRG: bring data into phase-tuned time domain
     end
 
     always @(posedge clock) begin
-         gem_dat_180[55:0] <=  gem_dat_phaser[55:0];  // JRG: push data to opposite lhc clock edge (if needed) for SRL
+         gem_dat_180[55:0] <=  gem_dat_phaser[55:0]; // JRG: push data to opposite lhc clock edge (if needed) for SRL
+         k_char_180  [7:0] <=  k_char_phaser[7:0];   // JRG: push data to opposite lhc clock edge (if needed) for SRL
     end
+
     assign  gem_dat_mux[55:0] = (posneg_ff) ?  gem_dat_180[55:0] :  gem_dat_phaser[55:0];
+    assign  k_char_mux[7:0]   = (posneg_ff) ?  k_char_180[7:0]   :  k_char_phaser[7:0];
 
 
     //  JRG: for muonic timing use  gem_dat_r, not gtx_rx_data_raw; also force a minimum single clock delay (no zero bypass)
     // old  srl16e_bbl #(48) udcfebdly (.clock(clock),.ce(1'b1),.adr(dly),.d(gtx_rx_data_raw[47:0]),.q(gtx_rx_data_srl[47:0]));
     // old  assign gtx_rx_data[47:0] = (dly_is_0) ? gtx_rx_data_raw[47:0] : gtx_rx_data_srl[47:0];
-    srl16e_bbl #(56) ugemdly (.clock(~clock),.ce(1'b1),.adr(idly),.d( gem_dat_mux[55:0]),.q(gtx_rx_data[55:0])); // JRG: comp data leaves module on FALLING LHC_CLOCK edge (~clock)
+
+    srl16e_bbl #(56) ugemdly     (.clock(~clock), .ce(1'b1), .adr(idly), .d( gem_dat_mux[55:0]), .q(gtx_rx_data[55:0])); // JRG: comp data leaves module on FALLING LHC_CLOCK edge (~clock)
+    srl16e_bbl #(8)  ukchardelay (.clock(~clock), .ce(1'b1), .adr(idly), .d(   k_char_mux[7:0]), .q(      k_char[7:0])); // JRG: comp data leaves module on FALLING LHC_CLOCK edge (~clock)
+
+    assign overflow = (k_char==8'hFC); 
 
     // Unused muonic signals
     reg muonic_sump=0;
