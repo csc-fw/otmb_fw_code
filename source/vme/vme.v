@@ -4907,7 +4907,7 @@
   assign step_dmb              = step_wr[1];
   assign step_rpc              = step_wr[2];
   assign step_cfeb             = step_wr[3];
-  assign step_run              = step_wr[4];
+  assign step_run              = 1'b0; // This should be hardcoded on OTMB; but not on regular TMBs where the step function works. 
   assign cfeb_clock_en[4:0]    = step_wr[9:5];
   assign alct_clock_en         = step_wr[10];
   assign _hard_reset_alct_fpga = step_wr[11];
@@ -6485,7 +6485,7 @@
   scp_trigger_ch_wr[15]   = 0; // Channel source overlay
   end
 
-  assign scp_trigger_ch[7:0]    = scp_trigger_ch_wr[7:0];  // RW  Scope trigger channel
+  assign scp_trigger_ch[7:0] = scp_trigger_ch_wr[7:0]; // RW  Scope trigger channel
   assign scp_ch_overlay      = scp_trigger_ch_wr[15];  // RW  Channel source overlay
 
   assign scp_trigger_ch_rd[15:0]  = scp_trigger_ch_wr[15:0];  //    Readback
@@ -7332,10 +7332,10 @@
 
   // JRG: dps4-8 do not exist anymore, and phaser 4-6 do nothing
   // we need to hijack this dps slot, and assign it to GEM chambers...
-  assign dps_fire_vme[4]   =  phaser9_wr[0];    // RW  Set new phase, software sets then unsets
-  assign dps_reset[4]      =  phaser9_wr[1];    // RW  Reset current phase to 32
+  assign dps_fire_vme[4]   =  phaser4_wr[0];    // RW  Set new phase, software sets then unsets
+  assign dps_reset[4]      =  phaser4_wr[1];    // RW  Reset current phase to 32
   assign cfeb2_rxd_posneg  =  phaser4_wr[7];    // RW  Posneg
-  assign dps4_phase[7:0]   =  phaser9_wr[15:8]; // RW  Phase to set, 0-255
+  assign dps4_phase[7:0]   =  phaser4_wr[15:8]; // RW  Phase to set, 0-255
 
   // JRG: readbacks from phaser 2-6 are meaningless, you should look at phaser 7 & 8
   assign phaser4_rd[1:0]   =  phaser4_wr[1:0];  // RW  Readback
