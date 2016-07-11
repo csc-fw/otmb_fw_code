@@ -12,6 +12,8 @@ module gem_sync_mon (
   input [7:0] gem2_kchar,
   input [7:0] gem3_kchar,
 
+  input [3:0] link_good, 
+
   input gemA_overflow,
   input gemB_overflow,
 
@@ -47,8 +49,8 @@ module gem_sync_mon (
 wire [1:0] gem_sync;
 wire       gems_sync;
 
-assign gem_sync [0] = (gem0_kchar==gem1_kchar) || gemA_overflow; // two fibers from gem chamber 1 are synced to eachother
-assign gem_sync [1] = (gem2_kchar==gem3_kchar) || gemB_overflow; // two fibers from gem chamber 2 are synced to eachother
+assign gem_sync [0] = (gem0_kchar==gem1_kchar) || gemA_overflow || (|link_good[1:0]); // two fibers from gem chamber 1 are synced to eachother; wait until link_good before checking
+assign gem_sync [1] = (gem2_kchar==gem3_kchar) || gemB_overflow || (|link_good[3:2]); // two fibers from gem chamber 2 are synced to eachother; wait until link_good before checking
 
 assign gems_sync    = ((gem0_kchar==gem2_kchar) && (&gem_sync[1:0])) || gemA_overflow || gemB_overflow; // gem super chamber is synced
 
@@ -62,25 +64,13 @@ initial gems_lostsync = 1'b0;
 
 
 always @(posedge clock) begin
-  if (reset)  begin
-    gemA_synced     <= 1'b1;
-    gemB_synced     <= 1'b1;
-    gems_synced     <= 1'b1;
+    gemA_synced <= (reset) ? 1'b1 : gem_sync [0];
+    gemB_synced <= (reset) ? 1'b1 : gem_sync [1];
+    gems_synced <= (reset) ? 1'b1 : gems_sync;
 
-    gemA_lostsync   <= 1'b0;
-    gemB_lostsync   <= 1'b0;
-    gems_lostsync   <= 1'b0;
-  end
-  else begin
-    gemA_synced <= gem_sync [0];
-    gemB_synced <= gem_sync [1];
-    gems_synced <= gems_sync;
-
-    gemA_lostsync <= gemA_lostsync | ~gem_sync[0];
-    gemB_lostsync <= gemB_lostsync | ~gem_sync[1];
-    gems_lostsync <= gems_lostsync | ~gems_synced;
-
-  end
+    gemA_lostsync <= (reset) ? 1'b0 : gemA_lostsync | ~gem_sync[0];
+    gemB_lostsync <= (reset) ? 1'b0 : gemB_lostsync | ~gem_sync[1];
+    gems_lostsync <= (reset) ? 1'b0 : gems_lostsync | ~gems_synced;
 end
 
 

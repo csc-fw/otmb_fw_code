@@ -1646,6 +1646,8 @@
 
     .gemA_overflow (gemA_overflow),
     .gemB_overflow (gemB_overflow),
+    
+    .link_good (gem_link_good[3:0]), 
 
     .gem0_kchar(gem_kchar[0]), // In  Copy of GEM0 k-char
     .gem1_kchar(gem_kchar[1]), // In  Copy of GEM1 k-char
