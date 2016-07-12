@@ -632,6 +632,7 @@
 // GEM VME Configuration Ports
   gem_read_enable,
   gem_exists,
+  gem_enable, 
   gem_zero_suppress,
   fifo_tbins_gem,
   fifo_pretrig_gem,
@@ -2130,7 +2131,8 @@
 
 // GEM VME Configuration Ports
   output              gem_read_enable;   // Out  1 Enable GEM Readout
-  output [3:0]        gem_exists;        // Out  1 GEM Exists
+  input  [3:0]        gem_exists;        // In   1 GEM Exists Read only
+  output [3:0]        gem_enable;        // Out  1 GEM Enabled
   output              gem_zero_suppress; // Out  1 Enable GEM Readout Zero-suppression
   output [MXTBIN-1:0] fifo_tbins_gem;    // Out  Number GEM FIFO time bins to read out
   output [MXTBIN-1:0] fifo_pretrig_gem;  // Out  Number GEM FIFO time bins before pretrigger
@@ -8042,7 +8044,7 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   gem_cfg_wr[3:0]   = 4'd0; // RW GEMA Rxd Integer BX Delay
   gem_cfg_wr[7:4]   = 4'd0; // RW GEMB Rxd Integer BX Delay
   gem_cfg_wr[8]     = 1'b0; // 1=Independent GEM RXD Integer BX delays
-  gem_cfg_wr[12:9]  = 4'hF; // GEM Fiber Enable
+  gem_cfg_wr[12:9]  = 4'hF; // Enable GEM for readout
   gem_cfg_wr[15:13] = 3'h0; // Unassigned
   end
 
@@ -8050,7 +8052,7 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   wire [3:0] gemB_rxd_int_delay_wr = gem_cfg_wr[7:4];
 
   wire gem_rxd_int_delay_decouple = gem_cfg_wr[8];
-  assign gem_exists = gem_cfg_wr[12:9];
+  assign gem_enable               = gem_cfg_wr[12:9];
 
   // FF Buffer gem rxd integer delay
   reg [3:0] gemA_rxd_int_delay = 0;
@@ -8060,7 +8062,7 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
     gemB_rxd_int_delay <= (gem_rxd_int_delay_decouple) ? (gemB_rxd_int_delay_wr[3:0]) : (gemA_rxd_int_delay_wr[3:0]);
   end
 
-  assign gem_cfg_rd [15:0] = gem_cfg_wr [15:0];  // Readback
+  assign gem_cfg_rd [15:0] = gem_cfg_wr [15:0]; // Readback
 
 //------------------------------------------------------------------------------------------------------------------
 // VME Write-Registers latch data when addressed + latch power-up defaults

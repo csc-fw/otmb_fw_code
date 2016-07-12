@@ -590,6 +590,7 @@
 
 // GEM VME Configuration
   gem_exists,
+  gem_enable,
   gem_read_enable,
   gem_zero_suppress,
   fifo_tbins_gem,
@@ -1452,7 +1453,8 @@
   input  [MXTBIN-1:0]  fifo_pretrig_rpc; // Number RPC FIFO time bins before pretrigger
 
 // GEM VME Configuration Ports
-  input  [MXGEM-1:0]   gem_exists;        // GEM Readout list
+  input  [MXGEM-1:0]   gem_exists;        // GEM Existence list
+  input  [MXGEM-1:0]   gem_enable;        // GEM Readout list
   input                gem_read_enable;   // 1 Enable GEM Readout
   input                gem_zero_suppress; // 1 Enable GEM Readout Zero-suppression
   input  [MXTBIN-1:0]  fifo_tbins_gem;    // Number GEM FIFO time bins to read out
@@ -4780,9 +4782,9 @@
   assign rd_gem_offset = 0;                                                                  // RAM address rd_fifo_adr offset for gem read out
 
   always @(posedge clock) begin
-    rd_list_gem [MXGEM-1:0] <= gem_exists[3:0]; // List of GEMs to read out
+    rd_list_gem [MXGEM-1:0] <= gem_enable[3:0]; // List of GEMs to read out
     rd_ngems    [MXGEMB :0] <= 3'd4;            // Number of GEMs in gem_list (should be 4)
-    gems_all_empty          <= !(|gem_exists);  // At least 1 GEM to read;
+    gems_all_empty          <= !(|gem_enable);  // At least 1 GEM to read;
                                                 // Right now we read all the GEMs with every DAQ readout; might
                                                 // want to include Zero-suppression later
   end
