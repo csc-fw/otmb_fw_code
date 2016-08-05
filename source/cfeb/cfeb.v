@@ -654,17 +654,18 @@
   genvar ids;
   genvar ily;
   generate
-     for (ids=0; ids<MXDS; ids=ids+1) begin: ckbitds
-	for (ily=0; ily<MXLY; ily=ily+1) begin: ckbitly
-	   cfeb_bit_check ucfeb_bit_check (
-		.clock      (clock),        // 40MHz main clock
-		.reset      (cfeb_badbits_reset),  // Clear stuck bit FFs
-		.check_pulse  (check_pulse),      // Periodic checking
-		.single_bx_mode  (single_bx_mode),    // Check for single bx pulses    
-		.bit_in      (triad_s1[ily][ids]),  // Bit to check
-		.bit_bad    (badbits[ily][ids]) );  // Bit went bad flag
-	end
-     end
+    for (ids=0; ids<MXDS; ids=ids+1) begin: ckbitds
+      for (ily=0; ily<MXLY; ily=ily+1) begin: ckbitly
+        cfeb_bit_check ucfeb_bit_check (
+          .clock          (clock),              // 40MHz main clock
+          .reset          (cfeb_badbits_reset), // Clear stuck bit FFs
+          .check_pulse    (check_pulse),        // Periodic checking
+          .single_bx_mode (single_bx_mode),     // Check for single bx pulses
+          .bit_in         (triad_s1[ily][ids]), // Bit to check
+          .bit_bad        (badbits[ily][ids])   // Bit went bad flag
+        );
+      end
+    end
   endgenerate
 
 // Summary badbits for this CFEB
@@ -686,12 +687,12 @@
   reg [MXDS-1:0] blockedbits [MXLY-1:0];
 
   always @(posedge clock) begin
-  blockedbits[0] <= ~ly0_hcm | (badbits[0] & {MXDS {cfeb_badbits_block_ena}});
-  blockedbits[1] <= ~ly1_hcm | (badbits[1] & {MXDS {cfeb_badbits_block_ena}});
-  blockedbits[2] <= ~ly2_hcm | (badbits[2] & {MXDS {cfeb_badbits_block_ena}});
-  blockedbits[3] <= ~ly3_hcm | (badbits[3] & {MXDS {cfeb_badbits_block_ena}});
-  blockedbits[4] <= ~ly4_hcm | (badbits[4] & {MXDS {cfeb_badbits_block_ena}});
-  blockedbits[5] <= ~ly5_hcm | (badbits[5] & {MXDS {cfeb_badbits_block_ena}});
+    blockedbits[0] <= ~ly0_hcm | (badbits[0] & {MXDS {cfeb_badbits_block_ena}});
+    blockedbits[1] <= ~ly1_hcm | (badbits[1] & {MXDS {cfeb_badbits_block_ena}});
+    blockedbits[2] <= ~ly2_hcm | (badbits[2] & {MXDS {cfeb_badbits_block_ena}});
+    blockedbits[3] <= ~ly3_hcm | (badbits[3] & {MXDS {cfeb_badbits_block_ena}});
+    blockedbits[4] <= ~ly4_hcm | (badbits[4] & {MXDS {cfeb_badbits_block_ena}});
+    blockedbits[5] <= ~ly5_hcm | (badbits[5] & {MXDS {cfeb_badbits_block_ena}});
   end
 
 // Apply Hot Channel Mask to block Errant DiStrips: 1=enable DiStrip, not blocking hstrips, they share a triad start bit
@@ -737,42 +738,42 @@
   wire dopa=0;                      // Virtex2 doa dummy
 
   generate
-  for (ily=0; ily<=MXLY-1; ily=ily+1) begin: raw
-  RAMB18E1 #(                        // Virtex6
-  .RAM_MODE      ("TDP"),              // SDP or TDP
-  .READ_WIDTH_A    (0),                // 0,1,2,4,9,18,36 Read/write width per port
-  .WRITE_WIDTH_A    (9),                // 0,1,2,4,9,18
-  .READ_WIDTH_B    (9),                // 0,1,2,4,9,18
-  .WRITE_WIDTH_B    (0),                // 0,1,2,4,9,18,36
-  .WRITE_MODE_A    ("READ_FIRST"),            // WRITE_FIRST, READ_FIRST, or NO_CHANGE
-  .WRITE_MODE_B    ("READ_FIRST"),
-  .SIM_COLLISION_CHECK("ALL")                // ALL, WARNING_ONLY, GENERATE_X_ONLY or NONE)
-  ) rawhits_ram (
-  .WEA        ({2{fifo_wen}}),          //  2-bit A port write enable input
-  .ENARDEN      (1'b1),                //  1-bit A port enable/Read enable input
-  .RSTRAMARSTRAM    (1'b0),                //  1-bit A port set/reset input
-  .RSTREGARSTREG    (1'b0),                //  1-bit A port register set/reset input
-  .REGCEAREGCE    (1'b0),                //  1-bit A port register enable/Register enable input
-  .CLKARDCLK      (clock),              //  1-bit A port clock/Read clock input
-  .ADDRARDADDR    ({fifo_wadr[10:0],3'h7}),      // 14-bit A port address/Read address input 9b->[13:3]
-  .DIADI        ({8'h00,triad_s2[ily]}),      // 16-bit A port data/LSB data input
-  .DIPADIP      ({1'b0,parity_wr[ily]}),      //  2-bit A port parity/LSB parity input
-  .DOADO        (),                  // 16-bit A port data/LSB data output
-  .DOPADOP      (),                  //  2-bit A port parity/LSB parity output
+    for (ily=0; ily<=MXLY-1; ily=ily+1) begin: raw
+      RAMB18E1 #(                        // Virtex6
+        .RAM_MODE      ("TDP"),              // SDP or TDP
+        .READ_WIDTH_A    (0),                // 0,1,2,4,9,18,36 Read/write width per port
+        .WRITE_WIDTH_A    (9),                // 0,1,2,4,9,18
+        .READ_WIDTH_B        (9),                // 0,1,2,4,9,18
+        .WRITE_WIDTH_B       (0),                // 0,1,2,4,9,18,36
+        .WRITE_MODE_A        ("READ_FIRST"),            // WRITE_FIRST, READ_FIRST, or NO_CHANGE
+        .WRITE_MODE_B        ("READ_FIRST"),
+        .SIM_COLLISION_CHECK("ALL")                // ALL, WARNING_ONLY, GENERATE_X_ONLY or NONE)
+      ) rawhits_ram (
+        .WEA        ({2{fifo_wen}}),          //  2-bit A port write enable input
+        .ENARDEN      (1'b1),                //  1-bit A port enable/Read enable input
+        .RSTRAMARSTRAM    (1'b0),                //  1-bit A port set/reset input
+        .RSTREGARSTREG    (1'b0),                //  1-bit A port register set/reset input
+        .REGCEAREGCE    (1'b0),                //  1-bit A port register enable/Register enable input
+        .CLKARDCLK      (clock),              //  1-bit A port clock/Read clock input
+        .ADDRARDADDR    ({fifo_wadr[10:0],3'h7}),      // 14-bit A port address/Read address input 9b->[13:3]
+        .DIADI        ({8'h00,triad_s2[ily]}),      // 16-bit A port data/LSB data input
+        .DIPADIP      ({1'b0,parity_wr[ily]}),      //  2-bit A port parity/LSB parity input
+        .DOADO        (),                  // 16-bit A port data/LSB data output
+        .DOPADOP      (),                  //  2-bit A port parity/LSB parity output
 
-  .WEBWE        (),                  //  4-bit B port write enable/Write enable input
-  .ENBWREN      (1'b1),                //  1-bit B port enable/Write enable input
-  .REGCEB        (1'b0),                //  1-bit B port register enable input
-  .RSTRAMB      (1'b0),                //  1-bit B port set/reset input
-  .RSTREGB      (1'b0),                //  1-bit B port register set/reset input
-  .CLKBWRCLK      (clock),              //  1-bit B port clock/Write clock input
-  .ADDRBWRADDR    ({fifo_radr[10:0],3'hF}),      // 14-bit B port address/Write address input 18b->[13:4]
-  .DIBDI        (),                  // 16-bit B port data/MSB data input
-  .DIPBDIP      (),                  //  2-bit B port parity/MSB parity input
-  .DOBDO        ({db[ily][7:0],fifo_rdata_ly[ily]}),// 16-bit B port data/MSB data output
-  .DOPBDOP      ({db[ily][8],parity_rd[ily]})    //  2-bit B port parity/MSB parity output
-  );
-  end
+        .WEBWE        (),                  //  4-bit B port write enable/Write enable input
+        .ENBWREN      (1'b1),                //  1-bit B port enable/Write enable input
+        .REGCEB        (1'b0),                //  1-bit B port register enable input
+        .RSTRAMB      (1'b0),                //  1-bit B port set/reset input
+        .RSTREGB      (1'b0),                //  1-bit B port register set/reset input
+        .CLKBWRCLK      (clock),              //  1-bit B port clock/Write clock input
+        .ADDRBWRADDR    ({fifo_radr[10:0],3'hF}),      // 14-bit B port address/Write address input 18b->[13:4]
+        .DIBDI        (),                  // 16-bit B port data/MSB data input
+        .DIPBDIP      (),                  //  2-bit B port parity/MSB parity input
+        .DOBDO        ({db[ily][7:0],fifo_rdata_ly[ily]}),// 16-bit B port data/MSB data output
+        .DOPBDOP      ({db[ily][8],parity_rd[ily]})    //  2-bit B port parity/MSB parity output
+      );
+    end
   endgenerate
 
 // Compare read parity to write parity
