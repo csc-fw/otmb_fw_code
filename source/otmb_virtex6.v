@@ -1472,17 +1472,17 @@
   wire  [MXBADR-1:0]  wr_adr_xmpc;      // wr_adr at mpc xmit to sequencer
   wire  [MXBADR-1:0]  wr_adr_rmpc;      // wr_adr at mpc received
 
-  wire  [MXCFEB-1:0]  injector_mask_cfeb;
-  wire  [3:0]      inj_delay_rat;      // CFEB/RPC Injector waits for RAT injector
+  wire  [MXCFEB-1:0] injector_mask_cfeb;
+  wire  [3:0]        inj_delay_rat;      // CFEB/RPC Injector waits for RAT injector
 
-  wire  [MXBXN-1:0]    bxn_offset_pretrig;
-  wire  [MXBXN-1:0]    bxn_offset_l1a;
-  wire  [MXL1ARX-1:0]  l1a_offset;
-  wire  [MXDRIFT-1:0]  drift_delay;
-  wire  [MXHITB-1:0]  hit_thresh_postdrift;
-  wire  [MXPIDB-1:0]  pid_thresh_postdrift;
-  wire  [MXFLUSH-1:0]  clct_flush_delay;
-  wire  [MXTHROTTLE-1:0]clct_throttle;
+  wire  [MXBXN-1:0]      bxn_offset_pretrig;
+  wire  [MXBXN-1:0]      bxn_offset_l1a;
+  wire  [MXL1ARX-1:0]    l1a_offset;
+  wire  [MXDRIFT-1:0]    drift_delay;
+  wire  [MXHITB-1:0]     hit_thresh_postdrift;
+  wire  [MXPIDB-1:0]     pid_thresh_postdrift;
+  wire  [MXFLUSH-1:0]    clct_flush_delay;
+  wire  [MXTHROTTLE-1:0] clct_throttle;
 
   wire  [MXBDID-1:0]  board_id;
   wire  [MXCSC-1:0]    csc_id;
