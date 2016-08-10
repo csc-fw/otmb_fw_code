@@ -1081,10 +1081,10 @@
 
 // Raw Hits FIFO RAM Ports
   wire          fifo_wen;
-  wire  [RAM_ADRB-1:0]  fifo_wadr;            // FIFO RAM write address
+  wire  [RAM_ADRB-1:0]  fifo_wadr;               // FIFO RAM write address
   wire  [RAM_ADRB-1:0]  fifo_radr_cfeb;          // FIFO RAM read tbin address
-  wire  [2:0]      fifo_sel_cfeb;          // FIFO RAM read layer address 0-5
-  wire  [RAM_WIDTH-1:0] fifo_rdata [MXCFEB-1:0];    // FIFO RAM read data
+  wire  [2:0]           fifo_sel_cfeb;           // FIFO RAM read layer address 0-5
+  wire  [RAM_WIDTH-1:0] fifo_rdata [MXCFEB-1:0]; // FIFO RAM read data
 
 // Hot Channel Masks
   wire  [MXDS-1:0]    cfeb_ly0_hcm [MXCFEB-1:0];    // 1=enable DiStrip
@@ -1109,9 +1109,9 @@
   wire  [MXDS-1:0]    cfeb_ly5_badbits[MXCFEB-1:0];  // 1=CFEB rx bit went bad
 
 // Triad Decoder Ports
-  wire  [3:0]      triad_persist;
-  wire  [MXCFEB-1:0]  triad_skip;
-  wire          triad_clr;
+  wire  [3:0]        triad_persist;
+  wire  [MXCFEB-1:0] triad_skip;
+  wire               triad_clr;
 
 // Triad Decoder Outputs
   wire  [MXHS-1:0]    cfeb_ly0hs [MXCFEB-1:0];    // Decoded 1/2-strip pulses
@@ -1224,11 +1224,11 @@
   .inj_ramout_pulse    (inj_ramout_pulse[icfeb]),      // Out  Injector RAM is injecting
 
 // Raw Hits FIFO RAM Ports
-  .fifo_wen        (fifo_wen),              // In  1=Write enable FIFO RAM
-  .fifo_wadr        (fifo_wadr[RAM_ADRB-1:0]),      // In  FIFO RAM write address
-  .fifo_radr        (fifo_radr_cfeb[RAM_ADRB-1:0]),    // In  FIFO RAM read tbin address
-  .fifo_sel        (fifo_sel_cfeb[2:0]),        // In  FIFO RAM read layer address 0-5
-  .fifo_rdata        (fifo_rdata[icfeb][RAM_WIDTH-1:0]),  // Out  FIFO RAM read data
+  .fifo_wen   (fifo_wen),                         // In  1=Write enable FIFO RAM
+  .fifo_wadr  (fifo_wadr[RAM_ADRB-1:0]),          // In  FIFO RAM write address
+  .fifo_radr  (fifo_radr_cfeb[RAM_ADRB-1:0]),     // In  FIFO RAM read tbin address
+  .fifo_sel   (fifo_sel_cfeb[2:0]),               // In  FIFO RAM read layer address 0-5
+  .fifo_rdata (fifo_rdata[icfeb][RAM_WIDTH-1:0]), // Out  FIFO RAM read data
 
 // Hot Channel Mask Ports
   .ly0_hcm        (cfeb_ly0_hcm[icfeb][MXDS-1:0]),  // In  1=enable DiStrip
@@ -1253,9 +1253,9 @@
   .ly5_badbits      (cfeb_ly5_badbits[icfeb][MXDS-1:0]),// Out  1=CFEB rx bit went bad
 
 // Triad Decoder Ports
-  .triad_persist      (triad_persist[3:0]),      // In  Triad 1/2-strip persistence
-  .triad_clr        (triad_clr),      // In  Triad one-shot clear
-  .triad_skip        (triad_skip[icfeb]),    // Out  Triads skipped
+  .triad_persist  (triad_persist[3:0]), // In  Triad 1/2-strip persistence
+  .triad_clr      (triad_clr),          // In  Triad one-shot clear
+  .triad_skip     (triad_skip[icfeb]),  // Out  Triads skipped
 
 // Triad Decoder Outputs
   .ly0hs          (cfeb_ly0hs[icfeb][MXHS-1:0]),    // Out  Decoded 1/2-strip pulses
@@ -2245,12 +2245,12 @@
   .rpc1_delay        (rpc1_delay[3:0]),        /// In  RPC1 raw hits delay
 
 // Raw Hits FIFO RAM Ports
-  .fifo_wen        (fifo_wen),            // In  1=Write enable FIFO RAM
-  .fifo_wadr        (fifo_wadr[RAM_ADRB-1:0]),    // In  FIFO RAM write address
-  .fifo_radr        (fifo_radr_rpc[RAM_ADRB-1:0]),  // In  FIFO RAM read address
-  .fifo_sel        (fifo_sel_rpc[0:0]),      // In  FIFO RAM select bank 0-4
-  .fifo0_rdata      (fifo0_rdata_rpc[RAM_WIDTH-1+4:0]),// Out  FIFO RAM read data
-  .fifo1_rdata      (fifo1_rdata_rpc[RAM_WIDTH-1+4:0]),// Out  FIFO RAM read data
+  .fifo_wen    (fifo_wen),                         // In  1=Write enable FIFO RAM
+  .fifo_wadr   (fifo_wadr[RAM_ADRB-1:0]),          // In  FIFO RAM write address
+  .fifo_radr   (fifo_radr_rpc[RAM_ADRB-1:0]),      // In  FIFO RAM read address
+  .fifo_sel    (fifo_sel_rpc[0:0]),                // In  FIFO RAM select bank 0-4
+  .fifo0_rdata (fifo0_rdata_rpc[RAM_WIDTH-1+4:0]), // Out  FIFO RAM read data
+  .fifo1_rdata (fifo1_rdata_rpc[RAM_WIDTH-1+4:0]), // Out  FIFO RAM read data
 
 // RPC Scope
   .scp_rpc0_bxn      (scp_rpc0_bxn[2:0]),      // Out  RPC0 bunch crossing number
@@ -3236,7 +3236,7 @@
       .inj_ramout_busy    (inj_ramout_busy),        // In  Injector busy
 
       // CFEB Triad Decoder Ports
-      .triad_persist      (triad_persist[3:0]),      // Out  Triad 1/2-strip persistence
+      .triad_persist  (triad_persist[3:0]), // Out  Triad 1/2-strip persistence
       .triad_clr      (triad_clr),          // Out  Triad one-shot clear
 
       // CFEB PreTrigger Ports

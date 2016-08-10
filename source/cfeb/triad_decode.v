@@ -57,34 +57,32 @@
   initial $display ("triad_decode: Instantiating 1-SRL Version");
 
 // Ports
-  input      clock;        // 40MHz system clock
-  input      reset;        // State machine to idle
-  input  [3:0]  persist;      // Output persistence-1, ie 5 gives 6-clk width
-  input      persist1;      // Output persistence is 1, use with  persist=0
-  input      triad;        // 3-bit serial triad
-  output  [3:0]  h_strip;      // 4-bit parallel 1/2-strips
-  output      triad_skip;      // Triad was skipped while busy with previus triad
+  input        clock;      // 40MHz system clock
+  input        reset;      // State machine to idle
+  input  [3:0] persist;    // Output persistence-1, ie 5 gives 6-clk width
+  input        persist1;   // Output persistence is 1, use with  persist=0
+  input        triad;      // 3-bit serial triad
+  output [3:0] h_strip;    // 4-bit parallel 1/2-strips
+  output       triad_skip; // Triad was skipped while busy with previus triad
 
 // Triad Decode State Machine declarations
-  parameter NSTATEB  =  2;      // number of state vector bits
-  reg  [NSTATEB-1:0] triad_sm;      // synthesis attribute safe_implementation of triad_sm is yes;
-  parameter idle    =  2'b00;    // synthesis attribute fsm_encoding        of triad_sm is gray;
+  parameter NSTATEB  =  2;    // number of state vector bits
+  reg [NSTATEB-1:0] triad_sm; // synthesis attribute safe_implementation of triad_sm is yes;
+  parameter idle    =  2'b00; // synthesis attribute fsm_encoding        of triad_sm is gray;
   parameter lstrip  =  2'b01;
-  parameter lhstrip  =  2'b11;
+  parameter lhstrip =  2'b11;
   parameter skip    =  2'b10;
 
 // FF Buffer triad input stream for simulation only, needed for correct simulation of combinatorial fast h_strip output
   `ifdef triad_decode_debug
-  initial $display ("triad_decode: Inserting simulation flip-flop on triad input signal !!!!");
-  
-  reg triad_ff=0;
-  always @(posedge clock) begin        // FF triad input stream only for simulation
-  triad_ff <= triad;
-  end
-
+    initial $display ("triad_decode: Inserting simulation flip-flop on triad input signal !!!!");
+    reg triad_ff=0;
+    always @(posedge clock) begin // FF triad input stream only for simulation
+      triad_ff <= triad;
+    end
   `else
-  initial $display ("triad_decode: Using direct triad input signal");
-  wire triad_ff = triad;            // take direct triad stream for synthesis
+    initial $display ("triad_decode: Using direct triad input signal");
+    wire triad_ff = triad; // take direct triad stream for synthesis
   `endif
 
 // Triad Decode State Machine
@@ -94,16 +92,16 @@
   wire skip_sm = busy_hs_ff && !srl_out;    // skips latching new triad if busy with previous triad
 
   always @(posedge clock) begin
-  if(reset)         triad_sm <= idle;
-  else begin
-  case (triad_sm)
-  idle:  if (triad_ff) triad_sm <= lstrip;  // start bit arrived
-  lstrip:  if (skip_sm ) triad_sm <= skip;    // skip it if busy with last triad
-          else      triad_sm <= lhstrip;  // not busy, so latch strip bit
-  lhstrip:        triad_sm <= idle;    // not busy, so latch 1/2 strip bit
-  skip:          triad_sm <= idle;    // triad skipped
-  endcase
-  end
+    if(reset) triad_sm <= idle;
+    else begin
+      case (triad_sm)
+        idle:   if (triad_ff) triad_sm <= lstrip;  // start bit arrived
+        lstrip: if (skip_sm ) triad_sm <= skip;    // skip it if busy with last triad
+                else          triad_sm <= lhstrip; // not busy, so latch strip bit
+        lhstrip:              triad_sm <= idle;    // not busy, so latch 1/2 strip bit
+        skip:                 triad_sm <= idle;    // triad skipped
+      endcase
+    end
   end
 
   assign triad_skip = (triad_sm==skip);    // triad was skipped
@@ -118,29 +116,29 @@
   wire latch_hstrip =  (triad_sm==lhstrip);
   wire hstrip       = ((triad_sm==lhstrip) && !busy_sm && triad_ff) || hstrip_ff;  // fast output of hs saves 1bx
 
-  always @(posedge clock) begin            // latch strip bit from triad string
-  if (latch_strip) strip <= triad_ff;
+  always @(posedge clock) begin // latch strip bit from triad string
+    if (latch_strip) strip <= triad_ff;
   end
 
-  always @(posedge clock) begin            // latch 1/2-strip bit from triad string
-  if    (latch_strip ) hstrip_ff <= 0;        // clear 1/2-strip while loading strip bit, so hstrip OR is correct
-  else if (latch_hstrip) hstrip_ff <= triad_ff;
+  always @(posedge clock) begin // latch 1/2-strip bit from triad string
+    if      (latch_strip ) hstrip_ff <= 0; // clear 1/2-strip while loading strip bit, so hstrip OR is correct
+    else if (latch_hstrip) hstrip_ff <= triad_ff;
   end
 
 // Pulse-width persistence SRL
   wire fire_hs  = (triad_sm==lhstrip);        // fire the decoded hstrip
   wire clear_hs = (srl_out || reset ) && !fire_hs;  // unfire it, unless 2nd triad arrived at same time
-  wire srl_in    = latch_strip;
+  wire srl_in   = latch_strip;
 
   always @(posedge clock or posedge persist1) begin
-  if (persist1) busy_hs_ff <= 0;            // never go busy if pulse width is 1
-  else begin
-  if (clear_hs) busy_hs_ff <= 0;            // go unbusy next bx
-  if (fire_hs ) busy_hs_ff <= 1;            // go busy next bx
-  end
+    if (persist1) busy_hs_ff <= 0;   // never go busy if pulse width is 1
+    else begin
+      if (clear_hs) busy_hs_ff <= 0; // go unbusy next bx
+      if (fire_hs ) busy_hs_ff <= 1; // go busy next bx
+    end
   end
 
-  assign busy_hs = busy_hs_ff || fire_hs;        // asserts decoded h_strip outputs
+  assign busy_hs = busy_hs_ff || fire_hs; // asserts decoded h_strip outputs
 
   SRL16E usrl (.CLK(clock),.CE(1'b1),.D(srl_in),.A0(persist[0]),.A1(persist[1]),.A2(persist[2]),.A3(persist[3]),.Q(srl_out));
 
@@ -151,13 +149,13 @@
   assign adr = {strip,hstrip};
 
   always @(posedge clock) begin
-  casex ({!busy_hs,adr})
-  3'b000: h_strip <= 4'b0001;
-  3'b001: h_strip <= 4'b0010;
-  3'b010: h_strip <= 4'b0100; 
-  3'b011: h_strip <= 4'b1000;
-  3'b1xx: h_strip <= 4'b0000;
-  endcase
+    casex ({!busy_hs,adr})
+      3'b000: h_strip <= 4'b0001;
+      3'b001: h_strip <= 4'b0010;
+      3'b010: h_strip <= 4'b0100; 
+      3'b011: h_strip <= 4'b1000;
+      3'b1xx: h_strip <= 4'b0000;
+    endcase
   end
 
 // Debug

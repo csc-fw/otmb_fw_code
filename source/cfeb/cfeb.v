@@ -230,53 +230,53 @@
 //------------------------------------------------------------------------------------------------------------------
 // Bus Widths
 //------------------------------------------------------------------------------------------------------------------
-  parameter MXLY      = 6;          // Number of Layers in CSC
-  parameter MXMUX      = 24;          // Number of multiplexed CFEB bits
-  parameter MXTR      = MXMUX*2;        // Number of Triad bits per CFEB
-  parameter MXDS      = 8;          // Number of DiStrips per layer
-  parameter MXHS      = 32;          // Number of 1/2-Strips per layer
-  parameter MXKEY      = MXHS;          // Number of Key 1/2-strips
-  parameter MXKEYB    = 5;          // Number of key bits
+  parameter MXLY   = 6;       // Number of Layers in CSC
+  parameter MXMUX  = 24;      // Number of multiplexed CFEB bits
+  parameter MXTR   = MXMUX*2; // Number of Triad bits per CFEB
+  parameter MXDS   = 8;       // Number of DiStrips per layer
+  parameter MXHS   = 32;      // Number of 1/2-Strips per layer
+  parameter MXKEY  = MXHS;    // Number of Key 1/2-strips
+  parameter MXKEYB = 5;       // Number of key bits
 
 // Raw hits RAM parameters
-  parameter RAM_DEPTH    = 2048;          // Storage bx depth
-  parameter RAM_ADRB    = 11;          // Address width=log2(ram_depth)
-  parameter RAM_WIDTH    = 8;          // Data width
+  parameter RAM_DEPTH = 2048; // Storage bx depth
+  parameter RAM_ADRB  = 11;   // Address width=log2(ram_depth)
+  parameter RAM_WIDTH = 8;    // Data width
   
 //------------------------------------------------------------------------------------------------------------------
 // CFEB Ports
 //------------------------------------------------------------------------------------------------------------------
 // Clock
-  input          clock;       // 40MHz TMB system clock
-  input 	 clk_lock;    // In  40MHz TMB system clock MMCM locked
-  input          clock_4x;          // 4*40MHz TMB system clock
-  input          clock_cfeb_rxd;      // 40MHz iob ddr clock
-  input          cfeb_rxd_posneg;    // CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
-  input  [3:0]      cfeb_rxd_int_delay;    // Interstage delay, integer bx
+  input       clock;              // 40MHz TMB system clock
+  input       clk_lock;           // In  40MHz TMB system clock MMCM locked
+  input       clock_4x;           // 4*40MHz TMB system clock
+  input       clock_cfeb_rxd;     // 40MHz iob ddr clock
+  input       cfeb_rxd_posneg;    // CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
+  input [3:0] cfeb_rxd_int_delay; // Interstage delay, integer bx
 
 // Global reset
-  input          global_reset;      // 1=Reset everything
-  input          ttc_resync;        // 1=Reset everything
-  input          mask_all;        // 1=Enable, 0=Turn off all inputs
+  input global_reset; // 1=Reset everything
+  input ttc_resync;   // 1=Reset everything
+  input mask_all;     // 1=Enable, 0=Turn off all inputs
 
 // Injector
-  input          inj_febsel;        // 1=Enable RAM write
-  input          inject;          // 1=Start pattern injector
-  input  [11:0]      inj_last_tbin;      // Last tbin, may wrap past 1024 ram adr
-  input  [2:0]      inj_wen;        // 1=Write enable injector RAM
-  input  [9:0]      inj_rwadr;        // Injector RAM read/write address
-  input  [17:0]      inj_wdata;        // Injector RAM write data
-  input  [2:0]      inj_ren;        // Injector RAM select
-  output  [17:0]      inj_rdata;        // Injector RAM read data
-  output  [5:0]      inj_ramout;        // Injector RAM read data for ALCT and L1A
-  output          inj_ramout_pulse;    // Injector RAM is injecting
+  input         inj_febsel;       // 1=Enable RAM write
+  input         inject;           // 1=Start pattern injector
+  input  [11:0] inj_last_tbin;    // Last tbin, may wrap past 1024 ram adr
+  input  [2:0]  inj_wen;          // 1=Write enable injector RAM
+  input  [9:0]  inj_rwadr;        // Injector RAM read/write address
+  input  [17:0] inj_wdata;        // Injector RAM write data
+  input  [2:0]  inj_ren;          // Injector RAM select
+  output [17:0] inj_rdata;        // Injector RAM read data
+  output [5:0]  inj_ramout;       // Injector RAM read data for ALCT and L1A
+  output        inj_ramout_pulse; // Injector RAM is injecting
 
 // Raw Hits FIFO RAM
-  input          fifo_wen;        // 1=Write enable FIFO RAM
-  input  [RAM_ADRB-1:0]  fifo_wadr;        // FIFO RAM write address
-  input  [RAM_ADRB-1:0]  fifo_radr;        // FIFO RAM read tbin address
-  input  [2:0]      fifo_sel;        // FIFO RAM read layer address 0-5
-  output  [RAM_WIDTH-1:0]  fifo_rdata;        // FIFO RAM read data
+  input                  fifo_wen;   // 1=Write enable FIFO RAM
+  input  [RAM_ADRB-1:0]  fifo_wadr;  // FIFO RAM write address
+  input  [RAM_ADRB-1:0]  fifo_radr;  // FIFO RAM read tbin address
+  input  [2:0]           fifo_sel;   // FIFO RAM read layer address 0-5
+  output [RAM_WIDTH-1:0] fifo_rdata; // FIFO RAM read data
 
 // Hot Channel Mask
   input  [MXDS-1:0]    ly0_hcm;        // 1=enable DiStrip
@@ -287,11 +287,11 @@
   input  [MXDS-1:0]    ly5_hcm;        // 1=enable DiStrip
 
 // Bad CFEB rx bit detection
-  input          cfeb_badbits_reset;    // Reset bad cfeb bits FFs
-  input          cfeb_badbits_block;    // Allow bad bits to block triads
-  input  [15:0]      cfeb_badbits_nbx;    // Cycles a bad bit must be continuously high
-  output          cfeb_badbits_found;    // This CFEB has at least 1 bad bit
-  output  [MXDS*MXLY-1:0]  cfeb_blockedbits;    // 1=CFEB rx bit blocked by hcm or went bad, packed
+  input                  cfeb_badbits_reset; // Reset bad cfeb bits FFs
+  input                  cfeb_badbits_block; // Allow bad bits to block triads
+  input  [15:0]          cfeb_badbits_nbx;   // Cycles a bad bit must be continuously high
+  output                 cfeb_badbits_found; // This CFEB has at least 1 bad bit
+  output [MXDS*MXLY-1:0] cfeb_blockedbits;   // 1=CFEB rx bit blocked by hcm or went bad, packed
 
   output  [MXDS-1:0]    ly0_badbits;      // 1=CFEB rx bit went bad
   output  [MXDS-1:0]    ly1_badbits;      // 1=CFEB rx bit went bad
@@ -315,33 +315,33 @@
   output gtx_rx_data_bits_or;
 
 // Status
-  output          demux_tp_1st;      // Demultiplexer test point first-in-time
-  output          demux_tp_2nd;      // Demultiplexer test point second-in-time
-  output          triad_tp;        // Triad test point at raw hits RAM input
-  output  [MXLY-1:0]    parity_err_cfeb;    // Raw hits RAM parity error detected
-  output          cfeb_sump;        // Unused signals wot must be connected
+  output            demux_tp_1st;    // Demultiplexer test point first-in-time
+  output            demux_tp_2nd;    // Demultiplexer test point second-in-time
+  output            triad_tp;        // Triad test point at raw hits RAM input
+  output [MXLY-1:0] parity_err_cfeb; // Raw hits RAM parity error detected
+  output            cfeb_sump;       // Unused signals wot must be connected
 
 // SNAP12 optical receiver
-  input          clock_160;        // 160 MHz from QPLL for GTX reference clock
-  input          qpll_lock;        // QPLL was locked
-  input          rxp;          // SNAP12+ fiber input for GTX
-  input          rxn;          // SNAP12- fiber input for GTX
+  input          clock_160; // 160 MHz from QPLL for GTX reference clock
+  input          qpll_lock; // QPLL was locked
+  input          rxp;       // SNAP12+ fiber input for GTX
+  input          rxn;       // SNAP12- fiber input for GTX
 
 // Optical receiver status
-  input          gtx_rx_enable;   // Enable/Unreset GTX_RX optical input, disables copper SCSI
-  input          gtx_rx_reset;    // Reset GTX receiver rx_sync module
-  input          gtx_rx_reset_err_cnt; // Resets the PRBS test error counters
-  input          gtx_rx_en_prbs_test;  // Select random input test data mode
-  output          gtx_rx_start;   // Set when the DCFEB Start Pattern is present
-  output          gtx_rx_fc;      // Flags when Rx sees "FC" code (sent by Tx) for latency measurement
-  output          gtx_rx_valid;   // Valid data detected on link
-  output          gtx_rx_match;   // PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
-  output          gtx_rx_rst_done;     // This has to complete before rxsync can start
-  output          gtx_rx_sync_done;    // Use these to determine gtx_ready
-  output          gtx_rx_pol_swap;     // GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
-  output          gtx_rx_err;          // PRBS test detects an error
-  output  [15:0]  gtx_rx_err_count;    // Error count on this fiber channel
-  output          gtx_rx_sump;    // Unused signals
+  input         gtx_rx_enable;        // Enable/Unreset GTX_RX optical input, disables copper SCSI
+  input         gtx_rx_reset;         // Reset GTX receiver rx_sync module
+  input         gtx_rx_reset_err_cnt; // Resets the PRBS test error counters
+  input         gtx_rx_en_prbs_test;  // Select random input test data mode
+  output        gtx_rx_start;         // Set when the DCFEB Start Pattern is present
+  output        gtx_rx_fc;            // Flags when Rx sees "FC" code (sent by Tx) for latency measurement
+  output        gtx_rx_valid;         // Valid data detected on link
+  output        gtx_rx_match;         // PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
+  output        gtx_rx_rst_done;     // This has to complete before rxsync can start
+  output        gtx_rx_sync_done;    // Use these to determine gtx_ready
+  output        gtx_rx_pol_swap;     // GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
+  output        gtx_rx_err;          // PRBS test detects an error
+  output [15:0] gtx_rx_err_count;    // Error count on this fiber channel
+  output        gtx_rx_sump;         // Unused signals
 
   output link_had_err; // link stability monitor: error happened at least once
   output link_good;    // link stability monitor: always good, no errors since last resync
@@ -349,11 +349,11 @@
 
 // Debug
 `ifdef DEBUG_CFEB
-  output  [71:0]      inj_sm_dsp;        // Injector state machine ascii display
-  output  [MXLY-1:0]    parity_wr;
-  output  [MXLY-1:0]    parity_rd;
-  output  [MXLY-1:0]    parity_expect;
-  output          pass_ff;
+  output [71:0]     inj_sm_dsp; // Injector state machine ascii display
+  output [MXLY-1:0] parity_wr;
+  output [MXLY-1:0] parity_rd;
+  output [MXLY-1:0] parity_expect;
+  output            pass_ff;
 
   output  [MXDS-1+1:0]  fifo_rdata_lyr0;
   output  [MXDS-1+1:0]  fifo_rdata_lyr1;
@@ -377,9 +377,9 @@
 //-------------------------------------------------------------------------------------------------------------------
 // State machine power-up reset + global reset
 //-------------------------------------------------------------------------------------------------------------------
-  wire [3:0]  pdly   = 1;    // Power-up reset delay
-  reg      ready  = 0;
-  reg      tready = 0;
+  wire [3:0] pdly   = 1;    // Power-up reset delay
+  reg        ready  = 0;
+  reg        tready = 0;
 
   SRL16E upup (.CLK(clock),.CE(!power_up & clk_lock),.D(1'b1),.A0(pdly[0]),.A1(pdly[1]),.A2(pdly[2]),.A3(pdly[3]),.Q(power_up));
 
@@ -389,7 +389,7 @@
   end
 
   wire reset  = !ready;  // injector state machine reset
-  wire treset = !tready;  // triad decoder state machine reset
+  wire treset = !tready; // triad decoder state machine reset
 
 //-------------------------------------------------------------------------------------------------------------------
 // Stage bx0: Read optical serial CFEB data stream into comparator triads.
@@ -397,7 +397,7 @@
 // Virtex6 DCFEB optical receivers
   wire [47:0] gtx_rx_data;
   wire        gtx_rx_data_bits_or = (|gtx_rx_data); // CFEB data received on optical link
-  wire gtx_rx_pol_swap = (ICFEB==4 || ICFEB==5);
+  wire        gtx_rx_pol_swap     = (ICFEB==4 || ICFEB==5);
 
   gtx_optical_rx ugtx_optical_rx
   (
@@ -415,10 +415,10 @@
   
 // SNAP12 optical receiver
 //  .clocks_rdy (qpll_lock), // In  QPLL & MMCM were locked after power-up... AND is done at top level in l_qpll_lock logic; was AND of real-time lock signals
-  .clocks_rdy (qpll_lock & clk_lock), // In  QPLL & MMCM are locked
-  .rxp          (rxp),                // In  SNAP12+ fiber input for GTX
-  .rxn          (rxn),                // In  SNAP12- fiber input for GTX
-  .gtx_rx_pol_swap (gtx_rx_pol_swap), // In  Inputs 5,6 [ie icfeb 4,5] have swapped rx board routes
+  .clocks_rdy      (qpll_lock & clk_lock), // In  QPLL & MMCM are locked
+  .rxp             (rxp),                  // In  SNAP12+ fiber input for GTX
+  .rxn             (rxn),                  // In  SNAP12- fiber input for GTX
+  .gtx_rx_pol_swap (gtx_rx_pol_swap),      // In  Inputs 5,6 [ie icfeb 4,5] have swapped rx board routes
 
 // Optical receiver status
   .gtx_rx_reset         (gtx_rx_reset),           // In  Reset GTX rx & sync module... 
@@ -439,15 +439,15 @@
   .gtx_rx_sump          (gtx_rx_sump)        // Unused signals
   );
 
-// Map DCFEB Signal names into Triad names per BB email:{L2,L4,L6,L5,L1,L3} --> {L1,L3,L5,L4,L0,L2}in TMB convention
-  wire [MXDS-1:0]  triad_s0 [MXLY-1:0];
+// Map DCFEB Signal names into Triad names per BB email:{L2,L4,L6,L5,L1,L3} --> {L1,L3,L5,L4,L0,L2} in TMB convention
+  wire [MXDS-1:0] triad_s0 [MXLY-1:0];
 
-  assign triad_s0[2][7:0]  = gtx_rx_data[7:0];   // Layer 2
-  assign triad_s0[0][7:0]  = gtx_rx_data[15:8];  // Layer 0
-  assign triad_s0[4][7:0]  = gtx_rx_data[23:16]; // Layer 4
-  assign triad_s0[5][7:0]  = gtx_rx_data[31:24]; // Layer 5
-  assign triad_s0[3][7:0]  = gtx_rx_data[39:32]; // Layer 3
-  assign triad_s0[1][7:0]  = gtx_rx_data[47:40]; // Layer 1
+  assign triad_s0[2][7:0] = gtx_rx_data[7:0];   // Layer 2
+  assign triad_s0[0][7:0] = gtx_rx_data[15:8];  // Layer 0
+  assign triad_s0[4][7:0] = gtx_rx_data[23:16]; // Layer 4
+  assign triad_s0[5][7:0] = gtx_rx_data[31:24]; // Layer 5
+  assign triad_s0[3][7:0] = gtx_rx_data[39:32]; // Layer 3
+  assign triad_s0[1][7:0] = gtx_rx_data[47:40]; // Layer 1
 
 // De-multiplexer test points: rx0 pins 1+2- Ly0Tr0  Ly3Tr0
   reg demux_tp_1st = 0;
@@ -499,23 +499,23 @@
   initial inj_sm = pass;
 
   always @(posedge clock) begin
-     if   (reset)                     inj_sm <= pass;
-     else begin
-	case (inj_sm)
-	  pass:    if (inject           ) inj_sm <= injecting;
-	  injecting:  if (inj_tbin_cnt_done) inj_sm <= pass;
-	  default                            inj_sm <= pass;
-	endcase
-     end
+    if (reset) inj_sm <= pass;
+    else begin
+      case (inj_sm)
+        pass:      if (inject           ) inj_sm <= injecting;
+        injecting: if (inj_tbin_cnt_done) inj_sm <= pass;
+        default                           inj_sm <= pass;
+      endcase
+    end
   end
 
 // Injector Time Bin Counter
   reg  [11:0] inj_tbin_cnt=0;  // Counter runs 0-4095
-  wire [9:0]  inj_tbin_adr;  // Injector adr runs 0-1023
+  wire [9:0]  inj_tbin_adr;    // Injector adr runs 0-1023
 
   always @(posedge clock) begin
-     if    (inj_sm==pass     ) inj_tbin_cnt <= 0;          // Sync  load
-     else if  (inj_sm==injecting) inj_tbin_cnt <= inj_tbin_cnt+1'b1;  // Sync  count
+     if       (inj_sm==pass     ) inj_tbin_cnt <= 0;                 // Sync  load
+     else if  (inj_sm==injecting) inj_tbin_cnt <= inj_tbin_cnt+1'b1; // Sync  count
   end
 
   assign inj_tbin_cnt_done = (inj_tbin_cnt==inj_last_tbin);    // Counter may wrap past 1024 ram adr limit
@@ -532,51 +532,52 @@
 // Injector RAM: 3 RAMs each 2 layers x 8 triads wide x 1024 tbins deep
 // Port A: rw 18-bits via VME
 // Port B: r  18-bits via injector SM
-  wire [17:0]    inj_rdataa  [2:0];
-  wire [1:0]    inj_ramoutb [2:0];
+  wire [17:0]     inj_rdataa  [2:0];
+  wire [1:0]      inj_ramoutb [2:0];
   wire [MXDS-1:0] triad_inj   [MXLY-1:0];
 
   initial $display("cfeb: generating Virtex6 RAMB18E1_S18_S18 ram.inj");
 
   genvar i;
   generate
-  for (i=0; i<=2; i=i+1) begin: ram
-  RAMB18E1 #(                        // Virtex6
-  .INIT_00 (256'h0000000000000000000000000000000000000000000000000000400242400202),                          
-  .INIT_01 (256'h0000000000000000000000000000000000000000000000000000000000000000),                          
-  .RAM_MODE      ("TDP"),              // SDP or TDP
-   .READ_WIDTH_A    (18),                // 0,1,2,4,9,18,36 Read/write width per port
-  .WRITE_WIDTH_A    (18),                // 0,1,2,4,9,18
-  .READ_WIDTH_B    (18),                // 0,1,2,4,9,18
-  .WRITE_WIDTH_B    (0),                // 0,1,2,4,9,18,36
-  .WRITE_MODE_A    ("READ_FIRST"),            // WRITE_FIRST, READ_FIRST, or NO_CHANGE
-  .WRITE_MODE_B    ("READ_FIRST"),
-  .SIM_COLLISION_CHECK("ALL")                // ALL, WARNING_ONLY, GENERATE_X_ONLY or NONE)
-  ) inj (
-  .WEA        ({2{inj_wen[i] & inj_febsel}}),    //  2-bit A port write enable input
-  .ENARDEN      (1'b1),                //  1-bit A port enable/Read enable input
-  .RSTRAMARSTRAM    (1'b0),                //  1-bit A port set/reset input
-  .RSTREGARSTREG    (1'b0),                //  1-bit A port register set/reset input
-  .REGCEAREGCE    (1'b0),                //  1-bit A port register enable/Register enable input
-  .CLKARDCLK      (clock),              //  1-bit A port clock/Read clock input
-  .ADDRARDADDR    ({inj_rwadr[9:0],4'hF}),      // 14-bit A port address/Read address input 18b->[13:4]
-  .DIADI        (inj_wdata[15:0]),          // 16-bit A port data/LSB data input
-  .DIPADIP      (inj_wdata[17:16]),          //  2-bit A port parity/LSB parity input
-  .DOADO        (inj_rdataa[i][15:0]),        // 16-bit A port data/LSB data output
-  .DOPADOP      (inj_rdataa[i][17:16]),        //  2-bit A port parity/LSB parity output
+    for (i=0; i<=2; i=i+1) begin: ram
+      RAMB18E1 #( // Virtex6
+        .INIT_00 (256'h0000000000000000000000000000000000000000000000000000400242400202),                          
+        .INIT_01 (256'h0000000000000000000000000000000000000000000000000000000000000000),                          
+        .RAM_MODE      ("TDP"),        // SDP or TDP
+        .READ_WIDTH_A  (18),           // 0,1,2,4,9,18,36 Read/write width per port
+        .WRITE_WIDTH_A (18),           // 0,1,2,4,9,18
+        .READ_WIDTH_B  (18),           // 0,1,2,4,9,18
+        .WRITE_WIDTH_B (0),            // 0,1,2,4,9,18,36
+        .WRITE_MODE_A  ("READ_FIRST"), // WRITE_FIRST, READ_FIRST, or NO_CHANGE
+        .WRITE_MODE_B  ("READ_FIRST"), //
+        .SIM_COLLISION_CHECK("ALL")    // ALL, WARNING_ONLY, GENERATE_X_ONLY or NONE)
+      ) inj (
+        .WEA           ({2{inj_wen[i] & inj_febsel}}), //  2-bit A port write enable input
+        .ENARDEN       (1'b1),                  //  1-bit A port enable/Read enable input
+        .RSTRAMARSTRAM (1'b0),                  //  1-bit A port set/reset input
+        .RSTREGARSTREG (1'b0),                  //  1-bit A port register set/reset input
+        .REGCEAREGCE   (1'b0),                  //  1-bit A port register enable/Register enable input
+        .CLKARDCLK     (clock),                 //  1-bit A port clock/Read clock input
+        .ADDRARDADDR   ({inj_rwadr[9:0],4'hF}), // 14-bit A port address/Read address input 18b->[13:4]
+        .DIADI         (inj_wdata[15:0]),       // 16-bit A port data/LSB data input
+        .DIPADIP       (inj_wdata[17:16]),      //  2-bit A port parity/LSB parity input
+        .DOADO         (inj_rdataa[i][15:0]),   // 16-bit A port data/LSB data output
+        .DOPADOP       (inj_rdataa[i][17:16]),  //  2-bit A port parity/LSB parity output
 
-  .WEBWE        (),                  //  4-bit B port write enable/Write enable input
-  .ENBWREN      (1'b1),                //  1-bit B port enable/Write enable input
-  .REGCEB        (1'b0),                //  1-bit B port register enable input
-  .RSTRAMB      (1'b0),                //  1-bit B port set/reset input
-  .RSTREGB      (1'b0),                //  1-bit B port register set/reset input
-  .CLKBWRCLK      (clock),              //  1-bit B port clock/Write clock input
-  .ADDRBWRADDR    ({inj_tbin_adr[9:0],4'hF}),      // 14-bit B port address/Write address input 18b->[13:4]
-  .DIBDI        (),                  // 16-bit B port data/MSB data input
-  .DIPBDIP      (),                  //  2-bit B port parity/MSB parity input
-  .DOBDO        ({triad_inj[2*i+1],triad_inj[2*i]}),// 16-bit B port data/MSB data output
-  .DOPBDOP      (inj_ramoutb[i][1:0]));        //  2-bit B port parity/MSB parity output
-  end
+        .WEBWE       (),                         //  4-bit B port write enable/Write enable input
+        .ENBWREN     (1'b1),                     //  1-bit B port enable/Write enable input
+        .REGCEB      (1'b0),                     //  1-bit B port register enable input
+        .RSTRAMB     (1'b0),                     //  1-bit B port set/reset input
+        .RSTREGB     (1'b0),                     //  1-bit B port register set/reset input
+        .CLKBWRCLK   (clock),                    //  1-bit B port clock/Write clock input
+        .ADDRBWRADDR ({inj_tbin_adr[9:0],4'hF}), // 14-bit B port address/Write address input 18b->[13:4]
+        .DIBDI       (),                         // 16-bit B port data/MSB data input
+        .DIPBDIP     (),                         //  2-bit B port parity/MSB parity input
+        .DOBDO       ({triad_inj[2*i+1],triad_inj[2*i]}),// 16-bit B port data/MSB data output
+        .DOPBDOP     (inj_ramoutb[i][1:0])       //  2-bit B port parity/MSB parity output
+      );
+    end
   endgenerate
 
 // ME1A/B Non-Staggered CSC
@@ -625,14 +626,14 @@
 // Stage 2: Check for CFEB bits stuck at logic 1 for too long + Apply hot channel mask
 //-------------------------------------------------------------------------------------------------------------------
 // FF buffer control inputs
-  reg [15:0]  cfeb_badbits_nbx_minus1 = 16'hFFFF;
-  reg      cfeb_badbits_block_ena  = 0;
-  reg      single_bx_mode = 0;
+  reg [15:0] cfeb_badbits_nbx_minus1 = 16'hFFFF;
+  reg        cfeb_badbits_block_ena  = 0;
+  reg        single_bx_mode          = 0;
 
   always @(posedge clock) begin
      cfeb_badbits_block_ena  <= cfeb_badbits_block;
-     cfeb_badbits_nbx_minus1  <= cfeb_badbits_nbx-1'b1;
-     single_bx_mode      <= cfeb_badbits_nbx==1;
+     cfeb_badbits_nbx_minus1 <= cfeb_badbits_nbx-1'b1;
+     single_bx_mode          <= cfeb_badbits_nbx==1;
   end
 
 // Periodic check pulse counter
@@ -734,44 +735,44 @@
   wire [MXDS-1:0] fifo_rdata_ly [MXLY-1:0];
 
   initial $display("cfeb: generating Virtex6 RAMB18E1_S9_S9 raw.rawhits_ram");
-  wire [8:0] db [MXLY-1:0];                // Virtex6 dob dummy, no sump needed
-  wire dopa=0;                      // Virtex2 doa dummy
+  wire [8:0] db [MXLY-1:0]; // Virtex6 dob dummy, no sump needed
+  wire       dopa=0;        // Virtex2 doa dummy
 
   generate
     for (ily=0; ily<=MXLY-1; ily=ily+1) begin: raw
-      RAMB18E1 #(                        // Virtex6
-        .RAM_MODE      ("TDP"),              // SDP or TDP
-        .READ_WIDTH_A    (0),                // 0,1,2,4,9,18,36 Read/write width per port
-        .WRITE_WIDTH_A    (9),                // 0,1,2,4,9,18
-        .READ_WIDTH_B        (9),                // 0,1,2,4,9,18
-        .WRITE_WIDTH_B       (0),                // 0,1,2,4,9,18,36
-        .WRITE_MODE_A        ("READ_FIRST"),            // WRITE_FIRST, READ_FIRST, or NO_CHANGE
-        .WRITE_MODE_B        ("READ_FIRST"),
-        .SIM_COLLISION_CHECK("ALL")                // ALL, WARNING_ONLY, GENERATE_X_ONLY or NONE)
+      RAMB18E1 #( // Virtex6
+        .RAM_MODE      ("TDP"),        // SDP or TDP
+        .READ_WIDTH_A  (0),            // 0,1,2,4,9,18,36 Read/write width per port
+        .WRITE_WIDTH_A (9),            // 0,1,2,4,9,18
+        .READ_WIDTH_B  (9),            // 0,1,2,4,9,18
+        .WRITE_WIDTH_B (0),            // 0,1,2,4,9,18,36
+        .WRITE_MODE_A  ("READ_FIRST"), // WRITE_FIRST, READ_FIRST, or NO_CHANGE
+        .WRITE_MODE_B  ("READ_FIRST"), //
+        .SIM_COLLISION_CHECK("ALL")    // ALL, WARNING_ONLY, GENERATE_X_ONLY or NONE)
       ) rawhits_ram (
-        .WEA        ({2{fifo_wen}}),          //  2-bit A port write enable input
-        .ENARDEN      (1'b1),                //  1-bit A port enable/Read enable input
-        .RSTRAMARSTRAM    (1'b0),                //  1-bit A port set/reset input
-        .RSTREGARSTREG    (1'b0),                //  1-bit A port register set/reset input
-        .REGCEAREGCE    (1'b0),                //  1-bit A port register enable/Register enable input
-        .CLKARDCLK      (clock),              //  1-bit A port clock/Read clock input
-        .ADDRARDADDR    ({fifo_wadr[10:0],3'h7}),      // 14-bit A port address/Read address input 9b->[13:3]
-        .DIADI        ({8'h00,triad_s2[ily]}),      // 16-bit A port data/LSB data input
-        .DIPADIP      ({1'b0,parity_wr[ily]}),      //  2-bit A port parity/LSB parity input
-        .DOADO        (),                  // 16-bit A port data/LSB data output
-        .DOPADOP      (),                  //  2-bit A port parity/LSB parity output
+        .WEA           ({2{fifo_wen}}),          //  2-bit A port write enable input
+        .ENARDEN       (1'b1),                   //  1-bit A port enable/Read enable input
+        .RSTRAMARSTRAM (1'b0),                   //  1-bit A port set/reset input
+        .RSTREGARSTREG (1'b0),                   //  1-bit A port register set/reset input
+        .REGCEAREGCE   (1'b0),                   //  1-bit A port register enable/Register enable input
+        .CLKARDCLK     (clock),                  //  1-bit A port clock/Read clock input
+        .ADDRARDADDR   ({fifo_wadr[10:0],3'h7}), // 14-bit A port address/Read address input 9b->[13:3]
+        .DIADI         ({8'h00,triad_s2[ily]}),  // 16-bit A port data/LSB data input
+        .DIPADIP       ({1'b0,parity_wr[ily]}),  //  2-bit A port parity/LSB parity input
+        .DOADO         (),                       // 16-bit A port data/LSB data output
+        .DOPADOP       (),                       //  2-bit A port parity/LSB parity output
 
-        .WEBWE        (),                  //  4-bit B port write enable/Write enable input
-        .ENBWREN      (1'b1),                //  1-bit B port enable/Write enable input
-        .REGCEB        (1'b0),                //  1-bit B port register enable input
-        .RSTRAMB      (1'b0),                //  1-bit B port set/reset input
-        .RSTREGB      (1'b0),                //  1-bit B port register set/reset input
-        .CLKBWRCLK      (clock),              //  1-bit B port clock/Write clock input
-        .ADDRBWRADDR    ({fifo_radr[10:0],3'hF}),      // 14-bit B port address/Write address input 18b->[13:4]
-        .DIBDI        (),                  // 16-bit B port data/MSB data input
-        .DIPBDIP      (),                  //  2-bit B port parity/MSB parity input
-        .DOBDO        ({db[ily][7:0],fifo_rdata_ly[ily]}),// 16-bit B port data/MSB data output
-        .DOPBDOP      ({db[ily][8],parity_rd[ily]})    //  2-bit B port parity/MSB parity output
+        .WEBWE       (),                         //  4-bit B port write enable/Write enable input
+        .ENBWREN     (1'b1),                     //  1-bit B port enable/Write enable input
+        .REGCEB      (1'b0),                     //  1-bit B port register enable input
+        .RSTRAMB     (1'b0),                     //  1-bit B port set/reset input
+        .RSTREGB     (1'b0),                     //  1-bit B port register set/reset input
+        .CLKBWRCLK   (clock),                    //  1-bit B port clock/Write clock input
+        .ADDRBWRADDR ({fifo_radr[10:0],3'hF}),   // 14-bit B port address/Write address input 18b->[13:4]
+        .DIBDI       (),                         // 16-bit B port data/MSB data input
+        .DIPBDIP     (),                         //  2-bit B port parity/MSB parity input
+        .DOBDO       ({db[ily][7:0],fifo_rdata_ly[ily]}), // 16-bit B port data/MSB data output
+        .DOPBDOP     ({db[ily][8],parity_rd[ily]})//  2-bit B port parity/MSB parity output
       );
     end
   endgenerate
@@ -798,8 +799,8 @@
 //      Hot channel mask applied to Triad DiStrips after storage, but before Triad decoder
 //-------------------------------------------------------------------------------------------------------------------
 // Local buffer Triad Decoder controls
-  reg      persist1 = 0;
-  reg  [3:0]  persist  = 0;
+  reg       persist1 = 0;
+  reg [3:0] persist  = 0;
 
   always @(posedge clock) begin
      persist  <=   triad_persist-1'b1;
@@ -811,11 +812,19 @@
   wire [MXHS-1:0] hs    [MXLY-1:0];  // Decoded 1/2-strip pulses
 
   generate
-     for (ily=0; ily<=MXLY-1; ily=ily+1) begin: ily_loop
-	for (ids=0; ids<=MXDS-1; ids=ids+1) begin: ids_loop
-	   triad_decode utriad(clock,treset,persist,persist1,triad_s2[ily][ids],hs[ily][3+ids*4:ids*4],tskip[ily][ids]);
-	end
-     end
+    for (ily=0; ily<=MXLY-1; ily=ily+1) begin: ily_loop
+      for (ids=0; ids<=MXDS-1; ids=ids+1) begin: ids_loop
+        triad_decode utriad(
+          clock,
+          treset,
+          persist,
+          persist1,
+          triad_s2[ily][ids],
+          hs[ily][3+ids*4:ids*4],
+          tskip[ily][ids]
+        );
+      end
+    end
   endgenerate
 
   assign triad_skip = (|tskip[0]) | (|tskip[1]) | (|tskip[2]) | (|tskip[3]) | (|tskip[4]) | (|tskip[5]);
@@ -839,8 +848,8 @@
   reg[71:0] inj_sm_dsp;
   always @* begin
      case (inj_sm)
-       pass:    inj_sm_dsp <= "pass     ";
-       injecting:  inj_sm_dsp <= "injecting";
+       pass:      inj_sm_dsp <= "pass     ";
+       injecting: inj_sm_dsp <= "injecting";
        default    inj_sm_dsp <= "pass     ";
      endcase
   end

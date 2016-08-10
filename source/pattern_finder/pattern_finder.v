@@ -984,7 +984,7 @@ module pattern_finder (
       hs_hit_1st <= 0;
       hs_key_1st <= 0;
     end
-    else if (lyr_trig_1st) begin      // layer-trigger mode
+    else if (lyr_trig_1st) begin       // layer-trigger mode
       hs_pid_1st <= 1;                  // Pattern id=1 for layer triggers
       hs_hit_1st <= hs_nlayers_hit_dly; // Insert number of layers hit
       hs_key_1st <= 0;                  // Dummy key

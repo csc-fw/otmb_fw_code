@@ -5286,21 +5286,21 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  seq_clct_wr[3:0]        = 4'd6;            // Triad output persistence, a 6 gives 6 clock-wide output
-  seq_clct_wr[6:4]        = 3'd4;            // Hits on pattern template pre-trigger threshold
-  seq_clct_wr[9:7]        = 3'd4;            // dmb_thresh_pretrig[2:0]=hit_thresh_pretrig default
-  seq_clct_wr[12:10]        = 3'd4;            // Minimum post-drift pattern hits for a valid pattern
-  seq_clct_wr[14:13]        = 2'd2;            // CSC Drift delay clocks
-  seq_clct_wr[15]          = 1'b0;            // Pretrigger and halt until unhalt arrives
+  seq_clct_wr[3:0]   = 4'd6; // Triad output persistence, a 6 gives 6 clock-wide output
+  seq_clct_wr[6:4]   = 3'd4; // Hits on pattern template pre-trigger threshold
+  seq_clct_wr[9:7]   = 3'd4; // dmb_thresh_pretrig[2:0]=hit_thresh_pretrig default
+  seq_clct_wr[12:10] = 3'd4; // Minimum post-drift pattern hits for a valid pattern
+  seq_clct_wr[14:13] = 2'd2; // CSC Drift delay clocks
+  seq_clct_wr[15]    = 1'b0; // Pretrigger and halt until unhalt arrives
   end
 
-  assign triad_persist[3:0]    = seq_clct_wr[3:0];      // RW  Triad 1/2-strip persistence
-  assign hit_thresh_pretrig[2:0]  = seq_clct_wr[6:4];      // RW  Hits on pattern template pre-trigger threshold
-  assign dmb_thresh_pretrig[2:0]  = seq_clct_wr[9:7];      // RW  dmb_thresh_pretrig[2:0]=hit_thresh_pretrig default
-  assign hit_thresh_postdrift[2:0]= seq_clct_wr[12:10];    // RW  Minimum post-drift pattern hits for a valid pattern
-  assign drift_delay[1:0]      = seq_clct_wr[14:13];    // RW  CSC Drift delay clocks
-  assign pretrig_halt        = seq_clct_wr[15];      // RW  Pretrigger and halt until unhalt arrives
-  assign seq_clct_rd[15:0]    = seq_clct_wr[15:0];    //    Readback
+  assign triad_persist[3:0]        = seq_clct_wr[3:0];   // RW  Triad 1/2-strip persistence
+  assign hit_thresh_pretrig[2:0]   = seq_clct_wr[6:4];   // RW  Hits on pattern template pre-trigger threshold
+  assign dmb_thresh_pretrig[2:0]   = seq_clct_wr[9:7];   // RW  dmb_thresh_pretrig[2:0]=hit_thresh_pretrig default
+  assign hit_thresh_postdrift[2:0] = seq_clct_wr[12:10]; // RW  Minimum post-drift pattern hits for a valid pattern
+  assign drift_delay[1:0]          = seq_clct_wr[14:13]; // RW  CSC Drift delay clocks
+  assign pretrig_halt              = seq_clct_wr[15];    // RW  Pretrigger and halt until unhalt arrives
+  assign seq_clct_rd[15:0]         = seq_clct_wr[15:0];  //     Readback
 
 // Clear triad one-shots if persistence is changed
   parameter triad_clr_width = 3;
