@@ -1898,12 +1898,12 @@
   .rd_ncfebs_bcb    (rd_ncfebs_bcb[MXCFEBB-1:0]),    // Out  Number of CFEBs in bcb_list (0 to 5)
 
 // Sequencer RPC Sequencer Readout Control
-  .rd_start_rpc    (rd_start_rpc),        // Out  Start readout sequence
-  .rd_abort_rpc    (rd_abort_rpc),        // Out  Cancel readout
-  .rd_list_rpc    (rd_list_rpc[MXRPC-1:0]),    // Out  List of RPCs to read out
-  .rd_nrpcs    (rd_nrpcs[MXRPCB-1+1:0]),    // Out  Number of RPCs in rpc_list (0 or 1-to-2 depending on CSC type)
-  .rd_rpc_offset    (rd_rpc_offset[RAM_ADRB-1:0]),    // Out  RAM address rd_fifo_adr offset for rpc read out
-  .clct_pretrig    (clct_pretrig),        // Out  Pre-trigger marker at (clct_sm==pretrig)
+  .rd_start_rpc  (rd_start_rpc),                // Out  Start readout sequence
+  .rd_abort_rpc  (rd_abort_rpc),                // Out  Cancel readout
+  .rd_list_rpc   (rd_list_rpc[MXRPC-1:0]),      // Out  List of RPCs to read out
+  .rd_nrpcs      (rd_nrpcs[MXRPCB-1+1:0]),      // Out  Number of RPCs in rpc_list (0 or 1-to-2 depending on CSC type)
+  .rd_rpc_offset (rd_rpc_offset[RAM_ADRB-1:0]), // Out  RAM address rd_fifo_adr offset for rpc read out
+  .clct_pretrig  (clct_pretrig),                // Out  Pre-trigger marker at (clct_sm==pretrig)
 
 // Sequencer CFEB Sequencer Frame
   .cfeb_first_frame  (cfeb_first_frame),      // In  First frame valid 2bx after rd_start
@@ -2273,8 +2273,8 @@
   .rpc1_bxn_diff      (rpc1_bxn_diff[3:0]),      // Out  RPC - offset
 
 // Status Ports
-  .clct_pretrig      (clct_pretrig),          // In  Pre-trigger marker at (clct_sm==pretrig)
-  .parity_err_rpc      (parity_err_rpc[4:0]),      // Out  Raw hits RAM parity error detected
+  .clct_pretrig   (clct_pretrig),        // In  Pre-trigger marker at (clct_sm==pretrig)
+  .parity_err_rpc (parity_err_rpc[4:0]), // Out  Raw hits RAM parity error detected
 
 // Sump
   .rpc_sump        (rpc_sump)            // Out  Unused signals

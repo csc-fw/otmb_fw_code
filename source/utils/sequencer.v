@@ -1761,14 +1761,14 @@
   reg [2:0] clct_sm_vec;
 
   parameter startup  =  0;  // Startup waiting for initial debris to clear
-  parameter idle    =  1;  // Idling, waiting for pretrig
+  parameter idle     =  1;  // Idling, waiting for pretrig
   parameter pretrig  =  2;  // Pretriggered, pushed event into pretrigger pipeline
-  parameter throttle  =  3;  // Reduce trigger rate
+  parameter throttle =  3;  // Reduce trigger rate
   parameter flush    =  4;  // Flushing event, throttling trigger rate
-  parameter halt    =  5;  // Halted, waiting for un-halt from VME
+  parameter halt     =  5;  // Halted, waiting for un-halt from VME
 
 // Readout State Declarations
-  reg  [23:0] read_sm;      // synthesis attribute safe_implementation of read_sm is "yes";
+  reg [23:0] read_sm;      // synthesis attribute safe_implementation of read_sm is "yes";
   reg [4:0]  read_sm_vec;
 
   parameter xstartup  =  0;  // Startup wait for buffer status to update after a reset
@@ -2295,10 +2295,10 @@
 
         halt:                    // Halted, wait for resume from VME or FMM
           if (!fmm_trig_stop && !pretrig_halt)
-          if (!noflush)
-           clct_sm = flush;      // Flush if required
-          else
-           clct_sm = idle;       // Otherwise go directly from halt to idle
+            if (!noflush)
+             clct_sm = flush;      // Flush if required
+            else
+             clct_sm = idle;       // Otherwise go directly from halt to idle
 
         default
           clct_sm = idle;
@@ -2328,7 +2328,7 @@
   wire flush_cnt_ena = (clct_sm == flush);
 
   always @(posedge clock) begin
-    if    (flush_cnt_clr) flush_cnt = clct_flush_delay-1'b1; // sync load before entering flush state
+    if      (flush_cnt_clr) flush_cnt = clct_flush_delay-1'b1; // sync load before entering flush state
     else if (flush_cnt_ena) flush_cnt = flush_cnt-1'b1;      // only count during flush
   end
 
@@ -4117,11 +4117,11 @@
 // Send read start commands to FIFO controller
   assign rd_start_cfeb  = (read_sm == xheader) && header_done && r_fifo_dump && !no_daq;
   assign rd_abort_cfeb  = 0;
-  assign rd_list_cfeb    = cfebs_read;
-  assign rd_ncfebs    = ncfebs;
+  assign rd_list_cfeb   = cfebs_read;
+  assign rd_ncfebs      = ncfebs;
   assign rd_fifo_adr    = r_wr_buf_adr;
 
-  assign fifo_read_done  = !cfeb_fifo_busy;    // CLCT FIFO signals completion
+  assign fifo_read_done = !cfeb_fifo_busy; // CLCT FIFO signals completion
 
 //------------------------------------------------------------------------------------------------------------------
 // Readout RPC Raw Hits FIFO Controller Section
@@ -4129,14 +4129,14 @@
   reg [MXRPC-1:0]  rd_list_rpc=0;
 
   assign rd_start_rpc  = (read_sm == xdump) && fifo_read_done && rpc_read_enable && !no_daq;// Start readout sequence, send fifo dump to DMB
-  assign rd_abort_rpc  = 0;                                // Cancel readout
-  assign rpc_fifo_done   = !rpc_fifo_busy;                        // Readout busy sending data to sequencer
-  assign rd_rpc_offset = 0;                                // RAM address rd_fifo_adr offset for rpc read out
+  assign rd_abort_rpc  = 0;              // Cancel readout
+  assign rpc_fifo_done = !rpc_fifo_busy; // Readout busy sending data to sequencer
+  assign rd_rpc_offset = 0;              // RAM address rd_fifo_adr offset for rpc read out
 
   always @(posedge clock) begin
-  rd_list_rpc[MXRPC-1:0]  <= rpc_exists;                          // List of RPCs to read out
-  rd_nrpcs[MXRPCB-1+1:0]  <= rpc_exists[0]+rpc_exists[1];                  // Number of RPCs in rpc_list (0 or 1-to-2 depending on CSC type)
-  rpcs_all_empty      <= !(|rpc_exists);                        // At least 1 RPC to read
+  rd_list_rpc[MXRPC-1:0] <= rpc_exists;                  // List of RPCs to read out
+  rd_nrpcs[MXRPCB-1+1:0] <= rpc_exists[0]+rpc_exists[1]; // Number of RPCs in rpc_list (0 or 1-to-2 depending on CSC type)
+  rpcs_all_empty         <= !(|rpc_exists);              // At least 1 RPC to read
   end
 
 //------------------------------------------------------------------------------------------------------------------

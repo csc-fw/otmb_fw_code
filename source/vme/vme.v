@@ -6268,20 +6268,20 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  layer_trig_wr[0]        = 1'b0;          // RW  1=Enable layer trigger mode
-  layer_trig_wr[3:1]        = 3'd4;          // RW  Layer-wide threshold
-  layer_trig_wr[6:4]        = 0;          // R  Number layers hit on layer trigger, readonly
-  layer_trig_wr[7]        = 0;          // RW  Free
-  layer_trig_wr[15:8]       = 0;          // RW  CLCT pre-trigger throttle
+  layer_trig_wr[0]    = 1'b0; // RW  1=Enable layer trigger mode
+  layer_trig_wr[3:1]  = 3'd4; // RW  Layer-wide threshold
+  layer_trig_wr[6:4]  = 0;    // R   Number layers hit on layer trigger, readonly
+  layer_trig_wr[7]    = 0;    // RW  Free
+  layer_trig_wr[15:8] = 0;    // RW  CLCT pre-trigger throttle
   end
 
-  assign layer_trig_en      = layer_trig_wr[0];    // RW  Scope trigger channel
-  assign lyr_thresh_pretrig[2:0]  = layer_trig_wr[3:1];  // RW  Number layers required for layer trigger
-  assign clct_throttle[7:0]    = layer_trig_wr[15:8];  // RW  CLCT pre-trigger throttle
+  assign layer_trig_en           = layer_trig_wr[0];    // RW  Scope trigger channel
+  assign lyr_thresh_pretrig[2:0] = layer_trig_wr[3:1];  // RW  Number layers required for layer trigger
+  assign clct_throttle[7:0]      = layer_trig_wr[15:8]; // RW  CLCT pre-trigger throttle
 
-  assign layer_trig_rd[3:0]    = layer_trig_wr[3:0];  // RW  Readback
-  assign layer_trig_rd[6:4]    = nlayers_hit_vme[2:0];  // R  Number layers hit on layer trigger
-  assign layer_trig_rd[15:7]    = layer_trig_wr[15:7];  // RW
+  assign layer_trig_rd[3:0]  = layer_trig_wr[3:0];   // RW  Readback
+  assign layer_trig_rd[6:4]  = nlayers_hit_vme[2:0]; // R  Number layers hit on layer trigger
+  assign layer_trig_rd[15:7] = layer_trig_wr[15:7];  // RW
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_ISE_VERSION=F2  ISE Compiler version Regster
