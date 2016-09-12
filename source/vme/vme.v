@@ -4421,12 +4421,12 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-     jtagsm0_wr[0]    = 0;  // RW  Manual cycle start command
-     jtagsm0_wr[1]    = 0;  // RW  Status signal reset
-     jtagsm0_wr[2]    = 0;  // RW  1=select new JTAG format, 0=select old format
-     jtagsm0_wr[10:3]  = 0;  // R  Readonly
-     jtagsm0_wr[11]    = 0;  // RW  1=disable writes to adr_usr_jtag
-     jtagsm0_wr[15:12]  = 0;  // RW  JTAG speed control, 0=fastest
+     jtagsm0_wr[0]     = 0; // RW  Manual cycle start command
+     jtagsm0_wr[1]     = 0; // RW  Status signal reset
+     jtagsm0_wr[2]     = 0; // RW  1=select new JTAG format, 0=select old format
+     jtagsm0_wr[10:3]  = 0; // R  Readonly
+     jtagsm0_wr[11]    = 0; // RW  1=disable writes to adr_usr_jtag
+     jtagsm0_wr[15:12] = 0; // RW  JTAG speed control, 0=fastest
   end
 
   wire [15:0]  jsm_wdcnt,    jsm_wdcnt_new,    jsm_wdcnt_old;
@@ -7210,8 +7210,8 @@
 // ADR_PHASER6     = 0x11A DCM Phase Shifter Register: CFEB4 rxd
 // ADR_V6_PHASER7  = 0x16A DCM Phase Shifter Register: CFEB5 rxd "ME1/1A-side"
 // ADR_V6_PHASER8  = 0x16C DCM Phase Shifter Register: CFEB6 rxd "ME1/1B-side"
-// ADR_V6_PHASER9  = 0x206 DCM Phase Shifter Register: GEMA  rxd "GEM super-chamber"
-// ADR_V6_PHASER10 = 0x208 DCM Phase Shifter Register: GEMB
+// ADR_V6_PHASER9  = 0x308 DCM Phase Shifter Register: GEMA  rxd "GEM super-chamber"
+// ADR_V6_PHASER10 = 0x30A DCM Phase Shifter Register: GEMB
 //------------------------------------------------------------------------------------------------------------------
 
   wire [MXDPS-1:0] dps_fire_vme;
