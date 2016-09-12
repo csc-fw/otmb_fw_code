@@ -1,2 +1,2 @@
 #!/usr/bin/bash
-xtclsh genproms.tcl    
+tclsh genproms.tcl    
