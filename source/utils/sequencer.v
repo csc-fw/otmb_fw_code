@@ -4626,9 +4626,8 @@
   assign  header36_rpc_[14:10] = fifo_pretrig_rpc[4:0]; // Number RPC FIFO time bins before pretrigger
   assign  header36_rpc_[18:15] = 0;                     // DDU+DMB control flags
 
-  assign  header36_gem_[3:0]   = gem_zero_suppress;     // GEM zero-suppression enabled
-  assign  header36_gem_[3:1]   = 0;                     // unused.. so far...
-  assign  header36_gem_[4]     = gem_read_enable;       // GEM readout enabled
+  assign  header36_gem_[3:0]   = gem_enable[3:0];       // GEM Fiber Enabled
+  assign  header36_gem_[4:4]   = gem_zero_suppress;     // GEM zero-suppression enabled
   assign  header36_gem_[9:5]   = fifo_tbins_gem[4:0];   // Number GEM FIFO time bins to read out
   assign  header36_gem_[14:10] = fifo_pretrig_gem[4:0]; // Number GEM FIFO time bins before pretrigger
   assign  header36_gem_[18:15] = 0;                     // DDU+DMB control flags
