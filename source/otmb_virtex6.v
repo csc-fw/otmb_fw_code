@@ -3467,7 +3467,7 @@
   .SRTYPE       ("SYNC")           // Set/Reset type: "SYNC" or "ASYNC"
   ) test_led_2  (
 //.C            (clock_alct_rxd),                  // In  1-bit clock input
-  .C            (clock_1mhz),                      // In  1-bit clock input... 1MHz is for BPI_ctrl Timer
+  .C            (clock_gem_rxd[0]),                // In  1-bit clock input... 1MHz is for BPI_ctrl Timer
   .CE           (1'b1),                            // In  1-bit clock enable input
   .S            (1'b0),                            // In  1-bit set
   .R            (1'b0),                            // In  1-bit reset
