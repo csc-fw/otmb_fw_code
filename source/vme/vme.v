@@ -7463,8 +7463,8 @@
   assign dps9_phase[7:0] = phaser9_wr[15:8];     // RW  Phase to set, 0-255
 
   assign phaser9_rd[1:0]  = phaser9_wr[1:0];  // RW  Readback
-  assign phaser9_rd[2]    = dps_busy[4];      // R  Phase shifter busy; this comes from clock_ctrl, so we have to copy it from dps4
-  assign phaser9_rd[3]    = dps_lock[4];      // R  DCM lock status; this comes from clock_ctrl, so we have to copy it from dps4
+  assign phaser9_rd[2]    = dps_busy[9];      // R  Phase shifter busy; this comes from clock_ctrl, so we have to copy it from dps4
+  assign phaser9_rd[3]    = dps_lock[9];      // R  DCM lock status; this comes from clock_ctrl, so we have to copy it from dps4
   assign phaser9_rd[6:4]  = dps9_sm_vec[2:0]; // R  Phase shifter machine state
   assign phaser9_rd[15:7] = phaser9_wr[15:7]; // RW  Readback
 
@@ -7486,9 +7486,9 @@
   assign dps10_phase[7:0]  =  phaser10_wr[15:8]; // RW  Phase to set, 0-255
 
   assign phaser10_rd[1:0]   =  phaser10_wr[1:0];  // RW  Readback
-  assign phaser10_rd[2]     =  dps_busy[4];       // R  Phase shifter busy
-  assign phaser10_rd[3]     =  dps_lock[4];       // R  DCM lock status
-  assign phaser10_rd[6:4]   =  dps9_sm_vec[2:0];  // R  Phase shifter machine state
+  assign phaser10_rd[2]     =  dps_busy[10];       // R  Phase shifter busy
+  assign phaser10_rd[3]     =  dps_lock[10];       // R  DCM lock status
+  assign phaser10_rd[6:4]   =  dps10_sm_vec[2:0];  // R  Phase shifter machine state
   assign phaser10_rd[15:7]  =  phaser10_wr[15:7]; // RW  Readback
 
 // Phaser autostart after vmesm completes reading user PROM

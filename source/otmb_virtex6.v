@@ -583,10 +583,10 @@
   .lock_alct_rxclock  (lock_alct_rxclock),   // Out  DCM lock status
 
 // Phaser VME control/status ports
-  .dps_fire  (dps_fire [MXDPS-6-1:0]), // In  Set new phase ; take only the first 5 bits of these fields.. since the others are unused
-  .dps_reset (dps_reset[MXDPS-6-1:0]), // In  VME Reset current phase
-  .dps_busy  (dps_busy [MXDPS-6-1:0]), // Out  Phase shifter busy
-  .dps_lock  (dps_lock [MXDPS-6-1:0]), // Out  PLL lock status
+  .dps_fire  ({dps_fire [9], dps_fire [3:0]}), // In  Set new phase ; take only the first 5 bits of these fields.. since the others are unused
+  .dps_reset ({dps_reset[9], dps_reset[3:0]}), // In  VME Reset current phase
+  .dps_busy  ({dps_busy [9], dps_busy [3:0]}), // Out  Phase shifter busy
+  .dps_lock  ({dps_lock [9], dps_lock [3:0]}), // Out  PLL lock status
 
   .dps0_phase  (dps0_phase[7:0]),   // In  Phase to set, 0-255
   .dps1_phase  (dps1_phase[7:0]),   // In  Phase to set, 0-255
@@ -614,10 +614,6 @@
 
   .clock_ctrl_sump (clock_ctrl_sump)
   );
-
-  // tie off the unused dps outputs to squelch ISE
-  assign dps_busy[MXDPS-1:5] = 0;
-  assign dps_lock[MXDPS-1:5] = 0;
 
 //-------------------------------------------------------------------------------------------------------------------
 // Optical receivers
