@@ -1518,15 +1518,27 @@
 
   wire  [13:0] gem_debug_fifo_rdata [MXGEM-1:0];    // GEM FIFO RAM read data
 
-  wire [13:0] gem_cluster0 [MXGEM-1:0];
-  wire [13:0] gem_cluster1 [MXGEM-1:0];
-  wire [13:0] gem_cluster2 [MXGEM-1:0];
-  wire [13:0] gem_cluster3 [MXGEM-1:0];
+  wire [13:0] gem_cluster0 [MXGEM-1:0]; // cluster0 in GEM coordinates (0-1535)
+  wire [13:0] gem_cluster1 [MXGEM-1:0]; // cluster1 in GEM coordinates (0-1535)
+  wire [13:0] gem_cluster2 [MXGEM-1:0]; // cluster2 in GEM coordinates (0-1535)
+  wire [13:0] gem_cluster3 [MXGEM-1:0]; // cluster3 in GEM coordinates (0-1535)
 
-  wire  [0:0]   gem_vpf0 [MXGEM-1:0];
-  wire  [0:0]   gem_vpf1 [MXGEM-1:0];
-  wire  [0:0]   gem_vpf2 [MXGEM-1:0];
-  wire  [0:0]   gem_vpf3 [MXGEM-1:0];
+  wire [7:0]  gem_strip0 [MXGEM-1:0]; // cluster0 flattened to strip coordinates (0-191)
+  wire [7:0]  gem_strip1 [MXGEM-1:0]; // cluster1 flattened to strip coordinates (0-191)
+  wire [7:0]  gem_strip2 [MXGEM-1:0]; // cluster2 flattened to strip coordinates (0-191)
+  wire [7:0]  gem_strip3 [MXGEM-1:0]; // cluster3 flattened to strip coordinates (0-191)
+
+  wire  [0:0]   gem_vpf0 [MXGEM-1:0]; // cluster0 valid flag
+  wire  [0:0]   gem_vpf1 [MXGEM-1:0]; // cluster1 valid flag
+  wire  [0:0]   gem_vpf2 [MXGEM-1:0]; // cluster2 valid flag
+  wire  [0:0]   gem_vpf3 [MXGEM-1:0]; // cluster3 valid flag
+
+  // join fibers together into the two GEM chambers
+ wire [13:0] gemA_clusters [7:0] = { gem_cluster3[1], gem_cluster2[1], gem_cluster1[1], gem_cluster0[1], gem_cluster3[0], gem_cluster2[0], gem_cluster1[0], gem_cluster0[0]};
+ wire [13:0] gemB_clusters [7:0] = { gem_cluster3[3], gem_cluster2[3], gem_cluster3[3], gem_cluster1[3], gem_cluster3[2], gem_cluster2[2], gem_cluster3[2], gem_cluster1[2]};
+
+ wire  [7:0] gemA_strips [7:0] = { gem_strip3[1], gem_strip2[1], gem_strip1[1], gem_strip0[1], gem_strip3[0], gem_strip2[0], gem_strip1[0], gem_strip0[0]};
+ wire  [7:0] gemB_strips [7:0] = { gem_strip3[3], gem_strip2[3], gem_strip3[3], gem_strip1[3], gem_strip3[2], gem_strip2[2], gem_strip3[2], gem_strip1[2]};
 
   wire [7:0] gemA_vpf = {gem_vpf3[1], gem_vpf2[1], gem_vpf1[1], gem_vpf0[1], gem_vpf3[0], gem_vpf2[0], gem_vpf1[0], gem_vpf0[0]};
   wire [7:0] gemB_vpf = {gem_vpf3[3], gem_vpf2[3], gem_vpf1[3], gem_vpf0[3], gem_vpf3[2], gem_vpf2[2], gem_vpf1[2], gem_vpf0[2]};
@@ -1618,16 +1630,21 @@
   .parity_err_gem (parity_err_gem[igem]),  // RAW hits RAM parity error
 
   // GEM Cluster Outputs
-  .gem_cluster0 (gem_cluster0[igem]), // Out GEM Cluster
-  .gem_cluster1 (gem_cluster1[igem]), // Out GEM Cluster
-  .gem_cluster2 (gem_cluster2[igem]), // Out GEM Cluster
-  .gem_cluster3 (gem_cluster3[igem]), // Out GEM Cluster
+  .cluster0 (gem_cluster0[igem]), // Out GEM Cluster
+  .cluster1 (gem_cluster1[igem]), // Out GEM Cluster
+  .cluster2 (gem_cluster2[igem]), // Out GEM Cluster
+  .cluster3 (gem_cluster3[igem]), // Out GEM Cluster
+
+  .strip0   (gem_strip0[igem]), // Out GEM Strip; 1bx late
+  .strip1   (gem_strip1[igem]), // Out GEM Strip; 1bx late
+  .strip2   (gem_strip2[igem]), // Out GEM Strip; 1bx late
+  .strip3   (gem_strip3[igem]), // Out GEM Strip; 1bx late
 
   // GEM Valid Data Output Flags
-  .gem_vpf0 (gem_vpf0[igem]), // Out GEM valid data
-  .gem_vpf1 (gem_vpf1[igem]), // Out GEM valid data
-  .gem_vpf2 (gem_vpf2[igem]), // Out GEM valid data
-  .gem_vpf3 (gem_vpf3[igem])  // Out GEM valid data
+  .vpf0 (gem_vpf0[igem]), // Out GEM valid data
+  .vpf1 (gem_vpf1[igem]), // Out GEM valid data
+  .vpf2 (gem_vpf2[igem]), // Out GEM valid data
+  .vpf3 (gem_vpf3[igem])  // Out GEM valid data
   );
   end
   endgenerate // end GEM
@@ -1645,8 +1662,8 @@
 
     .gemA_overflow (gemA_overflow),
     .gemB_overflow (gemB_overflow),
-    
-    .link_good (gem_link_good[3:0]), 
+
+    .link_good (gem_link_good[3:0]),
 
     .gem0_kchar(gem_kchar[0]), // In  Copy of GEM0 k-char
     .gem1_kchar(gem_kchar[1]), // In  Copy of GEM1 k-char
@@ -1680,26 +1697,26 @@
     .clock(clock),
 
     // gem chamber 0 clusters
-    .gemA_cluster0(gem_cluster0[0]),
-    .gemA_cluster1(gem_cluster1[0]),
-    .gemA_cluster2(gem_cluster2[0]),
-    .gemA_cluster3(gem_cluster3[0]),
+    .gemA_cluster0(gemA_cluster[0]),
+    .gemA_cluster1(gemA_cluster[1]),
+    .gemA_cluster2(gemA_cluster[2]),
+    .gemA_cluster3(gemA_cluster[3]),
 
-    .gemA_cluster4(gem_cluster0[1]),
-    .gemA_cluster5(gem_cluster1[1]),
-    .gemA_cluster6(gem_cluster2[1]),
-    .gemA_cluster7(gem_cluster3[1]),
+    .gemA_cluster4(gemA_cluster[4]),
+    .gemA_cluster5(gemA_cluster[5]),
+    .gemA_cluster6(gemA_cluster[6]),
+    .gemA_cluster7(gemA_cluster[7]),
 
     // gem chamber 1 clusters
-    .gemB_cluster0(gem_cluster0[2]),
-    .gemB_cluster1(gem_cluster1[2]),
-    .gemB_cluster2(gem_cluster2[2]),
-    .gemB_cluster3(gem_cluster3[2]),
+    .gemB_cluster0(gemB_cluster[0]),
+    .gemB_cluster1(gemB_cluster[1]),
+    .gemB_cluster2(gemB_cluster[2]),
+    .gemB_cluster3(gemB_cluster[3]),
 
-    .gemB_cluster4(gem_cluster0[3]),
-    .gemB_cluster5(gem_cluster1[3]),
-    .gemB_cluster6(gem_cluster2[3]),
-    .gemB_cluster7(gem_cluster3[3]),
+    .gemB_cluster4(gemB_cluster[4]),
+    .gemB_cluster5(gemB_cluster[5]),
+    .gemB_cluster6(gemB_cluster[6]),
+    .gemB_cluster7(gemB_cluster[7]),
 
     // control whether to match on neighboring (+-1) clusters
     .match_neighbors(gem_match_neighbors),

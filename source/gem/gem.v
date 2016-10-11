@@ -15,7 +15,7 @@
 module gem (
     // Clock
     input          clock,             // 40MHz TMB system clock
-    input 	       clk_lock,          // In  40MHz TMB system clock MMCM locked
+    input          clk_lock,          // In  40MHz TMB system clock MMCM locked
     input          clock_4x,          // 4*40MHz TMB system clock
     input          clock_gem_rxd,     // 40MHz iob ddr clock
     input          gem_rxd_posneg,    // CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
@@ -56,7 +56,7 @@ module gem (
     output link_good,    // link stability monitor: always good, no errors since last resync
     output link_bad,     // link stability monitor: errors happened over 100 times
 
-    // Raw Hits FIFO RAM
+    // Debug Raw Hits FIFO RAM
     input  [9:0]    debug_fifo_radr,       // FIFO RAM read tbin address
     input  [1:0]    debug_fifo_sel,        // FIFO RAM read layer clusters 0-3
     output [13:0]   debug_fifo_rdata,      // FIFO RAM read data
@@ -71,19 +71,23 @@ module gem (
 
     output [MXCLST-1:0]    parity_err_gem,
 
-    output overflow, 
+    output overflow,
 
     // GEM Outputs
-    output [13:0] gem_cluster0,
-    output [13:0] gem_cluster1,
-    output [13:0] gem_cluster2,
-    output [13:0] gem_cluster3,
+    output [13:0] cluster0, // cluster0 in GEM coordinates (0-1535)
+    output [13:0] cluster1, // cluster1 in GEM coordinates (0-1535)
+    output [13:0] cluster2, // cluster2 in GEM coordinates (0-1535)
+    output [13:0] cluster3, // cluster3 in GEM coordinates (0-1535)
 
+    output [7:0] strip0,  // cluster0 flattened to strip coordinates (0-191)
+    output [7:0] strip1,  // cluster1 flattened to strip coordinates (0-191)
+    output [7:0] strip1,  // cluster2 flattened to strip coordinates (0-191)
+    output [7:0] strip3,  // cluster3 flattened to strip coordinates (0-191)
 
-    output gem_vpf0,
-    output gem_vpf1,
-    output gem_vpf2,
-    output gem_vpf3
+    output vpf0, // cluster0 valid flag
+    output vpf1, // cluster1 valid flag
+    output vpf2, // cluster2 valid flag
+    output vpf3  // cluster3 valid flag
 );
 
 // Raw hits RAM parameters
@@ -158,7 +162,7 @@ parameter CLSTBITS = 14;
 
         .k_char               (k_char),  // latched copy of the last k-char received
 
-        .overflow             (overflow), 
+        .overflow             (overflow),
 
         .gtx_rx_sump          (gtx_rx_sump)             // Unused signals
     );
@@ -169,16 +173,18 @@ parameter CLSTBITS = 14;
 // Decompose packed GEM data format
 //------------------------------------------------------------------------------------------------------------------
 
-  assign  gem_cluster0 = gtx_rx_data[13: 0];
-  assign  gem_cluster1 = gtx_rx_data[27:14];
-  assign  gem_cluster2 = gtx_rx_data[41:28];
-  assign  gem_cluster3 = gtx_rx_data[55:42];
+  wire [13:0] cluster          [3:0];
 
-  wire [13:0] cluster [3:0];
-  assign cluster[0] = gem_cluster0;
-  assign cluster[1] = gem_cluster1;
-  assign cluster[2] = gem_cluster2;
-  assign cluster[3] = gem_cluster3;
+  assign cluster[0] = gtx_rx_data[13: 0];
+  assign cluster[1] = gtx_rx_data[27:14];
+  assign cluster[2] = gtx_rx_data[41:28];
+  assign cluster[3] = gtx_rx_data[55:42];
+
+  assign  cluster0 = cluster[0];
+  assign  cluster1 = cluster[1];
+  assign  cluster2 = cluster[2];
+  assign  cluster3 = cluster[3];
+
 
 //----------------------------------------------------------------------------------------------------------------------
 // Decompose GEM Hits
@@ -201,7 +207,32 @@ parameter CLSTBITS = 14;
       gtx_rx_nonzero    <= (|gtx_rx_data[55:0]);
   end
 
-  wire gem_has_data = (vpf[0] | vpf[1] | vpf[2] | vpf[3]);
+  wire gem_has_data = (|vpf[3:0]);
+
+//----------------------------------------------------------------------------------------------------------------------
+// outputs
+//----------------------------------------------------------------------------------------------------------------------
+
+cluster_to_gemstrip01 (
+    .clock    (clock),
+    .cluster0 (cluster0),
+    .cluster1 (cluster1),
+    .strip0   (strip0),
+    .strip1   (strip1),
+);
+
+cluster_to_gemstrip23 (
+    .clock    (clock),
+    .cluster0 (cluster2),
+    .cluster1 (cluster3),
+    .strip0   (strip2),
+    .strip1   (strip3),
+);
+
+assign gem_vpf0 = vpf[0];
+assign gem_vpf1 = vpf[1];
+assign gem_vpf2 = vpf[2];
+assign gem_vpf3 = vpf[3];
 
 //----------------------------------------------------------------------------------------------------------------------
 // GEM Raw Hits Dummy RAM
@@ -452,14 +483,6 @@ parameter CLSTBITS = 14;
   // Multiplex Raw Hits FIFO RAM output data
   assign fifo_rdata = fifo_rdata_clst[fifo_sel];
 
-//----------------------------------------------------------------------------------------------------------------------
-// outputs
-//----------------------------------------------------------------------------------------------------------------------
-
-assign gem_vpf0 = vpf[0];
-assign gem_vpf1 = vpf[1];
-assign gem_vpf2 = vpf[2];
-assign gem_vpf3 = vpf[3];
 
 // Sump
 assign gem_sump = gtx_sump | (|debug_parity_err_gem[3:0]);
