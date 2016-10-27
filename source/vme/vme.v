@@ -1133,6 +1133,8 @@
   
   parameter ADR_TMB_LATENCY_SR    = 9'h196; // Shift register for "CFEB data received on optical link" latched with MPC frame latch strobe for VME
   
+  parameter ADR_NEWALGO_CTRL = 9'h198; // Controls parameters of new trigger algorithm
+  
   parameter ADR_MPC_INJ      = 9'h90;  // MPC Injector Control
   parameter ADR_MPC_RAM_ADR    = 9'h92;  // MPC Injector RAM address
   parameter ADR_MPC_RAM_WDATA    = 9'h94;  // MPC Injector RAM Write Data
@@ -2438,6 +2440,9 @@
   
   reg  [15:0] mpc_frames_fifo_ctrl_wr;
   wire [15:0] mpc_frames_fifo_ctrl_rd;
+  
+  reg [15:0] newalgo_ctrl_wr;
+  wire [15:0] newalgo_ctrl_rd;
 
 // counters to monitor startup timing...
 //   Read bits 20:5 or 19:4 or 17:2 to VME... 800 or 400 or 100 ns resolution, counts to 52.4 or 26.2 or 6.5 ms
@@ -2853,6 +2858,7 @@
 
 
   wire wr_mpc_frames_fifo_ctrl;
+  wire wr_newalgo_ctrl;
   
 //---------------------------------------------------------------------------------------------------------------------
 //  Power-up Section
@@ -3227,7 +3233,9 @@
   ADR_GTX_SYNC_DONE_TIME:    data_out  <= gtx_sync_done_time_rd;    // Adr 192
   
   ADR_TMB_LATENCY_SR: data_out  <= tmb_latency_sr_rd; // Adr 196
-
+  
+  ADR_NEWALGO_CTRL: data_out <= newalgo_ctrl_rd; // Adr 198
+  
   ADR_MPC_INJ:      data_out  <= mpc_inj_rd;
   ADR_MPC_RAM_ADR:    data_out  <= mpc_ram_adr_rd;  
   ADR_MPC_RAM_WDATA:    data_out  <= mpc_ram_wdata_rd;
@@ -3455,7 +3463,7 @@
   assign wr_mpc_inj       = (reg_adr==ADR_MPC_INJ       && clk_en);
   assign wr_mpc_ram_adr   = (reg_adr==ADR_MPC_RAM_ADR   && clk_en);
   assign wr_mpc_ram_wdata = (reg_adr==ADR_MPC_RAM_WDATA && clk_en);
-
+  
   assign wr_scp_ctrl  = (reg_adr==ADR_SCP_CTRL  && clk_en);
   assign wr_scp_rdata = (reg_adr==ADR_SCP_RDATA && clk_en);
 
@@ -3536,7 +3544,9 @@
   assign wr_virtex6_extend  = (reg_adr==ADR_V6_EXTEND    && clk_en);
   assign wr_adr_cap    = (adr_cap);
   
-  assign wr_mpc_frames_fifo_ctrl = (reg_adr==  ADR_MPC_FRAMES_FIFO_CTRL && clk_en);
+  assign wr_mpc_frames_fifo_ctrl = (reg_adr==ADR_MPC_FRAMES_FIFO_CTRL && clk_en);
+  
+  assign wr_newalgo_ctrl = (reg_adr==ADR_NEWALGO_CTRL && clk_en);
   
 //------------------------------------------------------------------------------------------------------------------
 // VME Bidirectional Data Bus
@@ -5750,27 +5760,27 @@
   assign seq_smstat_rd[15:12]    = 0;
 
 // Sequencer Register: CLCT MSBs
-  assign seq_clctmsb_rd[2:0]    = clctc_vme[2:0];      // R  Common to CLCT0/1 to TMB
-  assign seq_clctmsb_rd[9:3]    = clctf_vme[6:0];      // R  Active cfeb list at TMB match
-  assign seq_clctmsb_rd[13:10]  = 0;            // R  Unassigned
-  assign seq_clctmsb_rd[14]    = clock_lock_lost_err;    // R  40MHz main clock lost lock FF
-  assign seq_clctmsb_rd[15]    = clct_bx0_sync_err;    // R  Sync error: BXN counter==0 did not match bx0
+  assign seq_clctmsb_rd[2:0]   = clctc_vme[2:0];      // R  Common to CLCT0/1 to TMB
+  assign seq_clctmsb_rd[9:3]   = clctf_vme[6:0];      // R  Active cfeb list at TMB match
+  assign seq_clctmsb_rd[13:10] = 0;                   // R  Unassigned
+  assign seq_clctmsb_rd[14]    = clock_lock_lost_err; // R  40MHz main clock lost lock FF
+  assign seq_clctmsb_rd[15]    = clct_bx0_sync_err;   // R  Sync error: BXN counter==0 did not match bx0
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_TMBTIM = 0xB2  TMB ALCT*CLCT Coincidence Timing Register
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  tmb_timing_wr[3:0]        = 4;            // Delay ALCT for CLCT match window 6/22/07
-  tmb_timing_wr[7:4]        = 3;            // CLCT match window width
-  tmb_timing_wr[11:8]        = 4'd0;            // MPC transmit delay
-  tmb_timing_wr[15:12]      = 0;
+  tmb_timing_wr[3:0]   = 4;    // Delay ALCT for CLCT match window 6/22/07
+  tmb_timing_wr[7:4]   = 3;    // CLCT match window width
+  tmb_timing_wr[11:8]  = 4'd0; // MPC transmit delay
+  tmb_timing_wr[15:12] = 0;
   end
 
-  assign alct_delay[3:0]      = tmb_timing_wr[3:0];    // RW  Delay ALCT for CLCT match window
-  assign clct_window[3:0]      = tmb_timing_wr[7:4];    // RW  CLCT match window width
-  assign mpc_tx_delay[3:0]    = tmb_timing_wr[11:8];    // RW  MPC transmit delay
-  assign tmb_timing_rd[15:0]    = tmb_timing_wr[15:0];    // RW  Readback
+  assign alct_delay[3:0]     = tmb_timing_wr[3:0];  // RW  Delay ALCT for CLCT match window
+  assign clct_window[3:0]    = tmb_timing_wr[7:4];  // RW  CLCT match window width
+  assign mpc_tx_delay[3:0]   = tmb_timing_wr[11:8]; // RW  MPC transmit delay
+  assign tmb_timing_rd[15:0] = tmb_timing_wr[15:0]; // RW  Readback
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_LHC_CYCLE = 0xB4    LHC Cycle Counter Maximum BXN Register
@@ -7179,6 +7189,48 @@
   end
 
 //------------------------------------------------------------------------------------------------------------------
+// ADR_NEWALGO_CTRL=198    Controls parameters of new trigger algorithm
+//------------------------------------------------------------------------------------------------------------------
+// Power-up defaults
+  initial begin
+    // New algo OFF:
+    newalgo_ctrl_wr[0]   = 1'b0;  // newAlgo_useDeadTimeZonning
+    newalgo_ctrl_wr[5:1] = 5'd15; // newAlgo_deadTimeZoneSize
+    newalgo_ctrl_wr[6]   = 1'b0;  // newAlgo_useDynamicDeadTimeZone
+    newalgo_ctrl_wr[7]   = 1'b0;  // newAlgo_clctToAlct
+    newalgo_ctrl_wr[8]   = 1'b0;  // newAlgo_tmbDropUsedClcts
+    newalgo_ctrl_wr[9]   = 1'b0;  // newAlgo_tmbCrossBxAlgorithm
+    newalgo_ctrl_wr[10]  = 1'b0;  // newAlgo_clctUseCorrectedBx
+    // New algo ON:    
+//    newalgo_ctrl_wr[0]   = 1'b1;  // newAlgo_useDeadTimeZonning
+//    newalgo_ctrl_wr[5:1] = 5'd15; // newAlgo_deadTimeZoneSize
+//    newalgo_ctrl_wr[6]   = 1'b1;  // newAlgo_useDynamicDeadTimeZone
+//    newalgo_ctrl_wr[7]   = 1'b1;  // newAlgo_clctToAlct
+//    newalgo_ctrl_wr[8]   = 1'b0;  // newAlgo_tmbDropUsedClcts
+//    newalgo_ctrl_wr[9]   = 1'b1;  // newAlgo_tmbCrossBxAlgorithm
+//    newalgo_ctrl_wr[10]  = 1'b1;  // newAlgo_clctUseCorrectedBx
+  end
+  
+  // remove these wires, change them to input
+  wire       newAlgo_useDeadTimeZonning;
+  wire [4:0] newAlgo_deadTimeZoneSize;
+  wire       newAlgo_useDynamicDeadTimeZone;
+  wire       newAlgo_clctToAlct;
+  wire       newAlgo_tmbDropUsedClcts;
+  wire       newAlgo_tmbCrossBxAlgorithm;
+  wire       newAlgo_clctUseCorrectedBx;
+  
+  assign newAlgo_useDeadTimeZonning     = newalgo_ctrl_wr[0];   // 
+  assign newAlgo_deadTimeZoneSize[4:0]  = newalgo_ctrl_wr[5:1]; // 
+  assign newAlgo_useDynamicDeadTimeZone = newalgo_ctrl_wr[6];   // 
+  assign newAlgo_clctToAlct             = newalgo_ctrl_wr[7];   // 
+  assign newAlgo_tmbDropUsedClcts       = newalgo_ctrl_wr[8];   // 
+  assign newAlgo_tmbCrossBxAlgorithm    = newalgo_ctrl_wr[9];   // 
+  assign newAlgo_clctUseCorrectedBx     = newalgo_ctrl_wr[10];  // 
+
+  assign newalgo_ctrl_rd[15:0] = newalgo_ctrl_wr[15:0];
+
+//------------------------------------------------------------------------------------------------------------------
 // VME Write-Registers latch data when addressed + latch power-up defaults
 //------------------------------------------------------------------------------------------------------------------
   always @(posedge clock_vme) begin
@@ -7306,6 +7358,7 @@
   if (wr_virtex6_sysmon)      virtex6_sysmon_wr    <=  d[15:0];
   if (wr_virtex6_extend)      virtex6_extend_wr    <=  d[15:0];
   if (wr_mpc_frames_fifo_ctrl) mpc_frames_fifo_ctrl_wr <= d[15:0];
+  if (wr_newalgo_ctrl) newalgo_ctrl_wr <= d[15:0];
   end
 
 //------------------------------------------------------------------------------------------------------------------

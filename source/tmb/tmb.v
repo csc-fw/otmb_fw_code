@@ -450,25 +450,25 @@
   output          wr_avail_rmpc;    // Buffer available at MPC received
 
 // Sequencer
-  input  [MXCLCT-1:0]  clct0_xtmb;      // First  CLCT
-  input  [MXCLCT-1:0]  clct1_xtmb;      // Second CLCT
-  input  [MXCLCTC-1:0]  clctc_xtmb;      // Common to CLCT0/1 to TMB
-  input  [MXCFEB-1:0]  clctf_xtmb;      // Active feb list to TMB
-  input          bx0_xmpc;      // bx0 to mpc
+  input [MXCLCT-1:0]  clct0_xtmb; // First  CLCT
+  input [MXCLCT-1:0]  clct1_xtmb; // Second CLCT
+  input [MXCLCTC-1:0] clctc_xtmb; // Common to CLCT0/1 to TMB
+  input [MXCFEB-1:0]  clctf_xtmb; // Active feb list to TMB
+  input               bx0_xmpc;   // bx0 to mpc
 
-  output          tmb_trig_pulse;    // ALCT or CLCT or both triggered
-  output          tmb_trig_keep;    // ALCT or CLCT or both triggered, and trigger is allowed
-  output          tmb_non_trig_keep;  // Event did not trigger, but keep it for readout
-  output          tmb_match;      // ALCT and CLCT matched in time
-  output          tmb_alct_only;    // Only ALCT triggered
-  output          tmb_clct_only;    // Only CLCT triggered
-  output  [3:0]      tmb_match_win;    // Location of alct in clct window
-  output  [3:0]      tmb_match_pri;    // Priority of clct in clct window
-  output          tmb_alct_discard;  // ALCT pair was not used for LCT
-  output          tmb_clct_discard;  // CLCT pair was not used for LCT
-  output          tmb_clct0_discard;  // CLCT0 was discarded from ME1A
-  output          tmb_clct1_discard;  // CLCT1 was discarded from ME1A
-  output  [MXCFEB-1:0]  tmb_aff_list;    // Active CFEBs for CLCT used in TMB match
+  output              tmb_trig_pulse;    // ALCT or CLCT or both triggered
+  output              tmb_trig_keep;     // ALCT or CLCT or both triggered, and trigger is allowed
+  output              tmb_non_trig_keep; // Event did not trigger, but keep it for readout
+  output              tmb_match;         // ALCT and CLCT matched in time
+  output              tmb_alct_only;     // Only ALCT triggered
+  output              tmb_clct_only;     // Only CLCT triggered
+  output [3:0]        tmb_match_win;     // Location of alct in clct window
+  output [3:0]        tmb_match_pri;     // Priority of clct in clct window
+  output              tmb_alct_discard;  // ALCT pair was not used for LCT
+  output              tmb_clct_discard;  // CLCT pair was not used for LCT
+  output              tmb_clct0_discard; // CLCT0 was discarded from ME1A
+  output              tmb_clct1_discard; // CLCT1 was discarded from ME1A
+  output [MXCFEB-1:0] tmb_aff_list;      // Active CFEBs for CLCT used in TMB match
 
   output          tmb_match_ro;    // ALCT and CLCT matched in time, non-triggering readout
   output          tmb_alct_only_ro;  // Only ALCT triggered, non-triggering readout
@@ -777,10 +777,10 @@
   wire [MXALCT-1:0] alct0_pipe, alct0_srl;
   wire [MXALCT-1:0] alct1_pipe, alct1_srl;
   wire [1:0]        alcte_pipe, alcte_srl, alcte_tmb;
-  reg  [3:0] alct_srl_adr = 0;
+  reg  [3:0]        alct_srl_adr = 0;
 
   always @(posedge clock) begin
-  alct_srl_adr <= alct_delay-1'b1;
+    alct_srl_adr <= alct_delay-1'b1;
   end
 
   assign alcte_tmb[1:0] = alct_ecc_err[1:0];
@@ -791,9 +791,9 @@
 
   wire alct_ptr_is_0 = (alct_delay == 0);               // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
 
-  assign alct0_pipe = (alct_ptr_is_0) ? alct0_tmb : alct0_srl;  // First  CLCT after clct pipe delay
-  assign alct1_pipe = (alct_ptr_is_0) ? alct1_tmb : alct1_srl;  // Second CLCT after clct pipe delay
-  assign alcte_pipe = (alct_ptr_is_0) ? alcte_tmb : alcte_srl;  // Second CLCT after clct pipe delay 
+  assign alct0_pipe = (alct_ptr_is_0) ? alct0_tmb : alct0_srl;  // First  ALCT after alct pipe delay
+  assign alct1_pipe = (alct_ptr_is_0) ? alct1_tmb : alct1_srl;  // Second ALCT after alct pipe delay
+  assign alcte_pipe = (alct_ptr_is_0) ? alcte_tmb : alcte_srl;  // ALCT ecc syndrome code after clct pipe delay
 
   wire   alct0_pipe_vpf = alct0_pipe[0];
   wire   alct1_pipe_vpf = alct1_pipe[0];
@@ -837,7 +837,7 @@
   reg [3:0] winclosing=0;
 
   always @(posedge clock) begin
-  winclosing <= clct_window-1'b1;
+    winclosing <= clct_window-1'b1;
   end
 
   wire dynamic_zero = bx0_vpf_test;      // Dynamic zero to mollify xst for certain FF inits
@@ -847,20 +847,19 @@
   integer i;
 
   always @(posedge clock) begin
-  if (powerup_n) begin            // Sych reset on resync or not power up
-  clct_sr_include  <= {16{dynamic_zero}};    // Power up bit 15 to mollify xst compiler warning about [15] constant 0
-  end
-
-  else begin
-  i=0;
-  while (i<=15) begin
-  if (clct_window!=0)
-  clct_sr_include[i] <= (i<=clct_window-1);  // clct_window=3, enables sr stages 0,1,2
-  else
-  clct_sr_include[i] <= 0;          // clct_window=0, disables all sr stages
-  i=i+1;
-  end
-  end
+    if (powerup_n) begin                      // Sych reset on resync or not power up
+      clct_sr_include  <= {16{dynamic_zero}}; // Power up bit 15 to mollify xst compiler warning about [15] constant 0
+    end
+    else begin
+      i=0;
+      while (i<=15) begin
+          if (clct_window!=0)
+          clct_sr_include[i] <= (i<=clct_window-1);  // clct_window=3, enables sr stages 0,1,2
+          else
+          clct_sr_include[i] <= 0;          // clct_window=0, disables all sr stages
+        i=i+1;
+      end
+    end
   end
 
 // Calculate dynamic clct window center and positional priorities
@@ -868,64 +867,64 @@
   wire [3:0] clct_win_center = clct_window/2;  // Gives priority to higher winbx for even widths
 
   always @(posedge clock) begin
-  i=0;
-  while (i<=15) begin
-  if    (ttc_resync            ) clct_win_priority[i] <= 4'hF;
-  else if (i>=clct_window || i==0) clct_win_priority[i] <= 0;                          // i >  lastwin or i=0
-  else if (i<=clct_win_center    ) clct_win_priority[i] <= clct_window-4'd1-((clct_win_center-i[3:0]) << 1);  // i <= center
-  else                             clct_win_priority[i] <= clct_window-4'd0-((i[3:0]-clct_win_center) << 1);  // i >  center
-  i=i+1;
-  end
+    i=0;
+    while (i<=15) begin
+      if      (ttc_resync            ) clct_win_priority[i] <= 4'hF;
+      else if (i>=clct_window || i==0) clct_win_priority[i] <= 0;                                                // i >  lastwin or i=0
+      else if (i<=clct_win_center    ) clct_win_priority[i] <= clct_window-4'd1-((clct_win_center-i[3:0]) << 1); // i <= center
+      else                             clct_win_priority[i] <= clct_window-4'd0-((i[3:0]-clct_win_center) << 1); // i >  center
+        i=i+1;
+    end
   end
 
 //------------------------------------------------------------------------------------------------------------------
 // ALCT*CLCT Matching Section
 //------------------------------------------------------------------------------------------------------------------
 // Push CLCT vpf into a 16-stage FF shift register for ALCT matching
-  reg  [15:1] clct_vpf_sre=0;        // CLCT valid pattern flag 
-  wire [15:0] clct_vpf_sr;        // Extend CLCT vpf shift register 1bx earlier in time to minimize latency
+  reg  [15:1] clct_vpf_sre=0; // CLCT valid pattern flag 
+  wire [15:0] clct_vpf_sr;    // Extend CLCT vpf shift register 1bx earlier in time to minimize latency
 
   assign clct_vpf_sr[0]    = wr_push_xtmb;// Extend CLCT vpf shift register 1bx earlier in time
   assign clct_vpf_sr[15:1] = clct_vpf_sre[15:1];
 
-  always @(posedge clock) begin      // Load stage 0 with incoming CLCT
-  clct_vpf_sre[1]    <= clct_vpf_sr[0];  // Vpf=1 for pattern triggers, may be =0 for external triggers, so use push flag
-  i=1;                  // Loop over window positions 1 to 14, 15th is shifted into and 0th is non-ff
-  while (i<=14) begin            // Parallel shift all data left
-  clct_vpf_sre[i+1]  <= clct_vpf_sre[i];
-  i=i+1;
-  end  // close while
+  always @(posedge clock) begin           // Load stage 0 with incoming CLCT
+    clct_vpf_sre[1]    <= clct_vpf_sr[0]; // Vpf=1 for pattern triggers, may be =0 for external triggers, so use push flag
+    i=1;                                  // Loop over window positions 1 to 14, 15th is shifted into and 0th is non-ff
+    while (i<=14) begin                   // Parallel shift all data left
+      clct_vpf_sre[i+1]  <= clct_vpf_sre[i];
+      i=i+1;
+    end  // close while
   end  // close clock
 
 // CLCT allocation tag shift register
-  reg [15:0]  clct_tag_sr=0;        // CLCT allocated tag
-  wire    clct_tag_me;        // Tag pulse
-  wire [3:0]  clct_tag_win;        // SR stage to insert tag
+  reg [15:0] clct_tag_sr=0; // CLCT allocated tag
+  wire       clct_tag_me;   // Tag pulse
+  wire [3:0] clct_tag_win;  // SR stage to insert tag
 
   always @(posedge clock) begin
-  if (reset_sr) begin            // Sych reset on resync or not power up
-  clct_tag_sr  <= dynamic_zero;      // Load a dynamic 0 on reset, mollify xst
-  end
+    if (reset_sr) begin             // Sych reset on resync or not power up
+      clct_tag_sr  <= dynamic_zero; // Load a dynamic 0 on reset, mollify xst
+    end
 
-  i=0;                  // Loop over 15 window positions 0 to 14 
-  while (i<=14) begin
-  if (clct_tag_me==1 && clct_tag_win==i && clct_sr_include[i]) clct_tag_sr[i+1] <= 1;
-  else                  // Otherwise parallel shift all data left
-  clct_tag_sr[i+1] <= clct_tag_sr[i];
-  i=i+1;
-  end  // close while
+    i=0;                  // Loop over 15 window positions 0 to 14 
+    while (i<=14) begin
+      if (clct_tag_me==1 && clct_tag_win==i && clct_sr_include[i]) clct_tag_sr[i+1] <= 1;
+      else                  // Otherwise parallel shift all data left
+        clct_tag_sr[i+1] <= clct_tag_sr[i];
+      i=i+1;
+    end  // close while
   end  // close clock
 
 // Find highest priority window position that has a non-tagged clct
-  wire [15:0] win_ena;          // Table of enabled window positions
-  wire [3:0]  win_pri [15:0];        // Table of window position priorities that are enabled
+  wire [15:0] win_ena;        // Table of enabled window positions
+  wire [3:0]  win_pri [15:0]; // Table of window position priorities that are enabled
 
-  genvar j;                // Table window priorities multipled by windwo position enables
+  genvar j;                // Table window priorities multipled by window position enables
   generate
-  for (j=0; j<=15; j=j+1) begin: genpri
-  assign win_ena[j] = (clct_sr_include[j]==1 && clct_vpf_sr[j]==1 && clct_tag_sr[j]==0);
-  assign win_pri[j] = (clct_win_priority[j] * win_ena[j]);
-  end
+    for (j=0; j<=15; j=j+1) begin: genpri
+      assign win_ena[j] = (clct_sr_include[j]==1 && clct_vpf_sr[j]==1 && clct_tag_sr[j]==0);
+      assign win_pri[j] = (clct_win_priority[j] * win_ena[j]);
+    end
   endgenerate
 
   wire [0:0] win_s0  [7:0];        // Tree encoder Finds best 4 of 16 window positions
@@ -1001,7 +1000,7 @@
 
 // ALCT*CLCT match: alct arrived while there were 1 or more un-tagged clcts in the window
   assign clct_tag_me  = clct_match;    // Tag the matching clct
-  assign clct_tag_win = clct_win_best;   // But get the one with highest priority
+  assign clct_tag_win = clct_win_best; // But get the one with highest priority
 
 // Event trigger disposition
   reg  [MXCFEB-1:0] tmb_aff_list  = 0;
@@ -1129,8 +1128,8 @@
   reg [MXALCT-1:0] alct1_real = 0;
 
   always @(posedge clock) begin
-  alct0_real <= alct0_pipe;
-  alct1_real <= alct1_pipe;
+    alct0_real <= alct0_pipe;
+    alct1_real <= alct1_pipe;
   end
 
 // Output vpf test point signals for timing-in, removed FFs so internal scope will be in real-time

@@ -2230,7 +2230,7 @@
   wire flush_done;
   wire throttle_done;
 
-  wire clct_pretrig_rqst= (| trig_source[7:0]) && !sync_err_stops_pretrig; // CLCT pretrigger requested, dont trig on [8]
+  wire clct_pretrig_rqst= (| trig_source[7:0]) && !sync_err_stops_pretrig; // CLCT pretrigger requested, dont trig on [8] which is Layer-wide trigger
 
   assign clct_pretrig = (clct_sm == pretrig);                        // CLCT pre-triggered
   assign alct_preClct = (clct_sm == pretrig) && alct_preClct_window; // ALCT*CLCT pre-trigger coincidence
@@ -2239,7 +2239,8 @@
 // YP: THIS IS WHERE CLCT DEADTIME IS
 // *****************************************************************************
   wire clct_pat_trig  = any_cfeb_hit && clct_pat_trig_en;        // Trigger source is a CLCT pattern
-  wire clct_retrigger = clct_pat_trig && noflush && nothrottle;  // Immediate re-trigger
+//  wire clct_retrigger = clct_pat_trig && noflush && nothrottle;  // Immediate re-trigger
+  wire clct_retrigger = noflush && nothrottle;  // Immediate re-trigger (remove deadtime)
   wire clct_notbusy   = !clct_pretrig_rqst;                      // Ready for next pretrig  
   wire clct_deadtime  = (clct_sm==flush) || (clct_sm==throttle); // CLCT Bx pretrig machine waited for triads to dissipate before rearm
 
