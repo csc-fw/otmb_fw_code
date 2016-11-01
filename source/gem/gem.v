@@ -81,7 +81,7 @@ module gem (
 
     output [7:0] strip0,  // cluster0 flattened to strip coordinates (0-191)
     output [7:0] strip1,  // cluster1 flattened to strip coordinates (0-191)
-    output [7:0] strip1,  // cluster2 flattened to strip coordinates (0-191)
+    output [7:0] strip2,  // cluster2 flattened to strip coordinates (0-191)
     output [7:0] strip3,  // cluster3 flattened to strip coordinates (0-191)
 
     output vpf0, // cluster0 valid flag
@@ -207,26 +207,26 @@ parameter CLSTBITS = 14;
       gtx_rx_nonzero    <= (|gtx_rx_data[55:0]);
   end
 
-  wire gem_has_data = (|vpf[3:0]);
+  wire gem_has_data = (vpf[0]|vpf[1]|vpf[2]|vpf[3]);
 
 //----------------------------------------------------------------------------------------------------------------------
 // outputs
 //----------------------------------------------------------------------------------------------------------------------
 
-cluster_to_gemstrip01 (
+cluster_to_gemstrip cluster_to_gemstrip01 (
     .clock    (clock),
     .cluster0 (cluster0),
     .cluster1 (cluster1),
     .strip0   (strip0),
-    .strip1   (strip1),
+    .strip1   (strip1)
 );
 
-cluster_to_gemstrip23 (
+cluster_to_gemstrip cluster_to_gemstrip23 (
     .clock    (clock),
     .cluster0 (cluster2),
     .cluster1 (cluster3),
     .strip0   (strip2),
-    .strip1   (strip3),
+    .strip1   (strip3)
 );
 
 assign gem_vpf0 = vpf[0];

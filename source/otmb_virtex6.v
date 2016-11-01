@@ -1534,11 +1534,11 @@
   wire  [0:0]   gem_vpf3 [MXGEM-1:0]; // cluster3 valid flag
 
   // join fibers together into the two GEM chambers
- wire [13:0] gemA_clusters [7:0] = { gem_cluster3[1], gem_cluster2[1], gem_cluster1[1], gem_cluster0[1], gem_cluster3[0], gem_cluster2[0], gem_cluster1[0], gem_cluster0[0]};
- wire [13:0] gemB_clusters [7:0] = { gem_cluster3[3], gem_cluster2[3], gem_cluster3[3], gem_cluster1[3], gem_cluster3[2], gem_cluster2[2], gem_cluster3[2], gem_cluster1[2]};
+ wire [13:0] gemA_cluster [7:0] = { gem_cluster3[1], gem_cluster2[1], gem_cluster1[1], gem_cluster0[1], gem_cluster3[0], gem_cluster2[0], gem_cluster1[0], gem_cluster0[0]};
+ wire [13:0] gemB_cluster [7:0] = { gem_cluster3[3], gem_cluster2[3], gem_cluster3[3], gem_cluster1[3], gem_cluster3[2], gem_cluster2[2], gem_cluster3[2], gem_cluster1[2]};
 
- wire  [7:0] gemA_strips [7:0] = { gem_strip3[1], gem_strip2[1], gem_strip1[1], gem_strip0[1], gem_strip3[0], gem_strip2[0], gem_strip1[0], gem_strip0[0]};
- wire  [7:0] gemB_strips [7:0] = { gem_strip3[3], gem_strip2[3], gem_strip3[3], gem_strip1[3], gem_strip3[2], gem_strip2[2], gem_strip3[2], gem_strip1[2]};
+ wire  [7:0] gemA_strip [7:0] = { gem_strip3[1], gem_strip2[1], gem_strip1[1], gem_strip0[1], gem_strip3[0], gem_strip2[0], gem_strip1[0], gem_strip0[0]};
+ wire  [7:0] gemB_strip [7:0] = { gem_strip3[3], gem_strip2[3], gem_strip3[3], gem_strip1[3], gem_strip3[2], gem_strip2[2], gem_strip3[2], gem_strip1[2]};
 
   wire [7:0] gemA_vpf = {gem_vpf3[1], gem_vpf2[1], gem_vpf1[1], gem_vpf0[1], gem_vpf3[0], gem_vpf2[0], gem_vpf1[0], gem_vpf0[0]};
   wire [7:0] gemB_vpf = {gem_vpf3[3], gem_vpf2[3], gem_vpf1[3], gem_vpf0[3], gem_vpf3[2], gem_vpf2[2], gem_vpf1[2], gem_vpf0[2]};

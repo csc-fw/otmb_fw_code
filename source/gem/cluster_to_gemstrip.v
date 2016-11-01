@@ -5,7 +5,7 @@
 // matching considerably but at what cost? 
 
 module cluster_to_gemstrip (
-		input                     clock_in,
+		input                     clock,
 
 		input      [13:0]         cluster0,  // save block ram resources by doing 2 lookups from each RAM in parallel
 		input      [13:0]         cluster1, 
@@ -24,9 +24,9 @@ reg [DATABITS-1:0] rom_port0, rom_port1;
 wire we = 0;
 wire [DATABITS-1:0] din = 0;
 
-assign clock = ~clock_in;
+assign clock_inv = ~clock;
 
-always @(posedge clock) begin
+always @(posedge clock_inv) begin
 		if (we)      rom[cluster0[ADDRBITS-1:0]]<=din;  // dummy write to help Xilinx infer a dual port block RAM 
 
 		rom_port0 <= rom[cluster0[ADDRBITS-1:0]+cluster0[13:10]]; // take the cluster + size>>1 (divide by 2) to get roughly the cluster center 
