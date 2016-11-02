@@ -1790,6 +1790,10 @@
   .algo2016_clct_window  (algo2016_clct_window[3:0]), // In CLCT match window width (for ALCT-centric 2016 algorithm)
   .algo2016_clct_to_alct (algo2016_clct_to_alct),     // In ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
   
+  .algo2016_use_dead_time_zone         (algo2016_use_dead_time_zone),         // In Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
+  .algo2016_dead_time_zone_size        (algo2016_dead_time_zone_size[4:0]),   // In Constant size of the dead time zone
+  .algo2016_use_dynamic_dead_time_zone (algo2016_use_dynamic_dead_time_zone), // In Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
+  
   .tmb_allow_alct  (tmb_allow_alct),  // In  Allow ALCT only 
   .tmb_allow_clct  (tmb_allow_clct),  // In  Allow CLCT only
   .tmb_allow_match (tmb_allow_match), // In  Allow ALCT+CLCT match
