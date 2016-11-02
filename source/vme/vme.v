@@ -573,6 +573,7 @@
 // TMB Ports: Configuration
   alct_delay,
   clct_window,
+  algo2016_clct_window,
 
   tmb_sync_err_en,
   tmb_allow_alct,
@@ -932,6 +933,15 @@
   comp_phaser_b_ready,
   auto_gtx_reset,
 
+// ALGO2016 control parameters
+  algo2016_use_dead_time_zone,
+  algo2016_dead_time_zone_size,
+  algo2016_use_dynamic_dead_time_zone,
+  algo2016_clct_to_alct,
+  algo2016_drop_used_clcts,
+  algo2016_cross_bx_algorithm,
+  algo2016_clct_use_corrected_bx,
+
 // Sump
   vme_sump
   );
@@ -1133,7 +1143,7 @@
   
   parameter ADR_TMB_LATENCY_SR    = 9'h196; // Shift register for "CFEB data received on optical link" latched with MPC frame latch strobe for VME
   
-  parameter ADR_NEWALGO_CTRL = 9'h198; // Controls parameters of new trigger algorithm
+  parameter ADR_ALGO2016_CTRL = 9'h198; // Controls parameters of new trigger algorithm
   
   parameter ADR_MPC_INJ      = 9'h90;  // MPC Injector Control
   parameter ADR_MPC_RAM_ADR    = 9'h92;  // MPC Injector RAM address
@@ -1859,9 +1869,10 @@
   output  [MXTBIN-1:0]  fifo_pretrig_mini;    // Number Mini FIFO time bins before pretrigger
 
 // TMB Ports: Configuration
-  output  [3:0]      alct_delay;        //  Delay ALCT for CLCT match window
-  output  [3:0]      clct_window;      //  CLCT match window width
-  output  [1:0]      tmb_sync_err_en;    // Allow sync_err to MPC for either muon
+  output  [3:0] alct_delay;           // Delay ALCT for CLCT match window
+  output  [3:0] clct_window;          // CLCT match window width (for CLCT-centric "old" algorithm)
+  output  [3:0] algo2016_clct_window; // CLCT match window width (for ALCT-centric 2016 algorithm)
+  output  [1:0] tmb_sync_err_en;      // Allow sync_err to MPC for either muon
 
   output          tmb_allow_alct;      // Allow ALCT only 
   output          tmb_allow_clct;      // Allow CLCT only
@@ -2225,6 +2236,16 @@
   output    comp_phaser_b_ready;
   output    auto_gtx_reset;
 
+// ALGO2016 Control Parameters
+  
+  output       algo2016_use_dead_time_zone;         // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
+  output [4:0] algo2016_dead_time_zone_size;        // Constant size of the dead time zone
+  output       algo2016_use_dynamic_dead_time_zone; // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
+  output       algo2016_clct_to_alct;               // ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
+  output       algo2016_drop_used_clcts;            // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - similar to "old" behavior of CLCT-centric algorithm when ALCTs are droped from further usage
+  output       algo2016_cross_bx_algorithm;         // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
+  output       algo2016_clct_use_corrected_bx;      // Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
+
 // Sump
   output          vme_sump;        // Unused signals
 
@@ -2441,8 +2462,8 @@
   reg  [15:0] mpc_frames_fifo_ctrl_wr;
   wire [15:0] mpc_frames_fifo_ctrl_rd;
   
-  reg [15:0] newalgo_ctrl_wr;
-  wire [15:0] newalgo_ctrl_rd;
+  reg  [15:0] algo2016_ctrl_wr;
+  wire [15:0] algo2016_ctrl_rd;
 
 // counters to monitor startup timing...
 //   Read bits 20:5 or 19:4 or 17:2 to VME... 800 or 400 or 100 ns resolution, counts to 52.4 or 26.2 or 6.5 ms
@@ -2858,7 +2879,7 @@
 
 
   wire wr_mpc_frames_fifo_ctrl;
-  wire wr_newalgo_ctrl;
+  wire wr_algo2016_ctrl;
   
 //---------------------------------------------------------------------------------------------------------------------
 //  Power-up Section
@@ -3234,7 +3255,7 @@
   
   ADR_TMB_LATENCY_SR: data_out  <= tmb_latency_sr_rd; // Adr 196
   
-  ADR_NEWALGO_CTRL: data_out <= newalgo_ctrl_rd; // Adr 198
+  ADR_ALGO2016_CTRL: data_out <= algo2016_ctrl_rd; // Adr 198
   
   ADR_MPC_INJ:      data_out  <= mpc_inj_rd;
   ADR_MPC_RAM_ADR:    data_out  <= mpc_ram_adr_rd;  
@@ -3244,19 +3265,19 @@
   ADR_SCP_CTRL:      data_out  <= scp_ctrl_rd;
   ADR_SCP_RDATA:      data_out  <= scp_rdata_rd;
                  
-  ADR_CCB_CMD:      data_out  <= ccb_cmd_rd;
-  ADR_BUF_STAT0:      data_out  <= buf_stat0_rd;
-  ADR_BUF_STAT1:      data_out  <= buf_stat1_rd;
-  ADR_BUF_STAT2:      data_out  <= buf_stat2_rd;
-  ADR_BUF_STAT3:      data_out  <= buf_stat3_rd;
-  ADR_BUF_STAT4:      data_out  <= buf_stat4_rd;
-  ADR_ALCTFIFO1:      data_out  <= alct_fifo1_rd;
-  ADR_ALCTFIFO2:      data_out  <= alct_fifo2_rd;
-  ADR_SEQMOD:      data_out  <= seq_trigmod_rd;
-  ADR_SEQSM:      data_out  <= seq_smstat_rd;
-  ADR_SEQCLCTM:      data_out  <= seq_clctmsb_rd;
-  ADR_TMBTIM:      data_out  <= tmb_timing_rd;
-  ADR_LHC_CYCLE:      data_out  <= lhc_cycle_rd;
+  ADR_CCB_CMD:   data_out  <= ccb_cmd_rd;
+  ADR_BUF_STAT0: data_out  <= buf_stat0_rd;
+  ADR_BUF_STAT1: data_out  <= buf_stat1_rd;
+  ADR_BUF_STAT2: data_out  <= buf_stat2_rd;
+  ADR_BUF_STAT3: data_out  <= buf_stat3_rd;
+  ADR_BUF_STAT4: data_out  <= buf_stat4_rd;
+  ADR_ALCTFIFO1: data_out  <= alct_fifo1_rd;
+  ADR_ALCTFIFO2: data_out  <= alct_fifo2_rd;
+  ADR_SEQMOD:    data_out  <= seq_trigmod_rd;
+  ADR_SEQSM:     data_out  <= seq_smstat_rd;
+  ADR_SEQCLCTM:  data_out  <= seq_clctmsb_rd;
+  ADR_TMBTIM:    data_out  <= tmb_timing_rd;
+  ADR_LHC_CYCLE: data_out  <= lhc_cycle_rd;
                  
   ADR_RPC_CFG:      data_out  <= rpc_cfg_rd;
   ADR_RPC_RDATA:      data_out  <= rpc_rdata_rd;
@@ -3467,11 +3488,11 @@
   assign wr_scp_ctrl  = (reg_adr==ADR_SCP_CTRL  && clk_en);
   assign wr_scp_rdata = (reg_adr==ADR_SCP_RDATA && clk_en);
 
-  assign wr_ccb_cmd    = (reg_adr==ADR_CCB_CMD      && clk_en);
-  assign wr_alct_fifo1    = (reg_adr==ADR_ALCTFIFO1    && clk_en);
-  assign wr_seq_trigmod    = (reg_adr==ADR_SEQMOD      && clk_en);
-  assign wr_tmb_timing    = (reg_adr==ADR_TMBTIM      && clk_en);
-  assign wr_lhc_cycle    = (reg_adr==ADR_LHC_CYCLE    && clk_en);
+  assign wr_ccb_cmd     = (reg_adr==ADR_CCB_CMD   && clk_en);
+  assign wr_alct_fifo1  = (reg_adr==ADR_ALCTFIFO1 && clk_en);
+  assign wr_seq_trigmod = (reg_adr==ADR_SEQMOD    && clk_en);
+  assign wr_tmb_timing  = (reg_adr==ADR_TMBTIM    && clk_en);
+  assign wr_lhc_cycle   = (reg_adr==ADR_LHC_CYCLE && clk_en);
 
   assign wr_rpc_cfg    = (reg_adr==ADR_RPC_CFG      && clk_en);
   assign wr_rpc_raw_delay    = (reg_adr==ADR_RPC_RAW_DELAY    && clk_en);
@@ -3546,7 +3567,7 @@
   
   assign wr_mpc_frames_fifo_ctrl = (reg_adr==ADR_MPC_FRAMES_FIFO_CTRL && clk_en);
   
-  assign wr_newalgo_ctrl = (reg_adr==ADR_NEWALGO_CTRL && clk_en);
+  assign wr_algo2016_ctrl = (reg_adr==ADR_ALGO2016_CTRL && clk_en);
   
 //------------------------------------------------------------------------------------------------------------------
 // VME Bidirectional Data Bus
@@ -5772,15 +5793,16 @@
 // Power-up defaults
   initial begin
   tmb_timing_wr[3:0]   = 4;    // Delay ALCT for CLCT match window 6/22/07
-  tmb_timing_wr[7:4]   = 3;    // CLCT match window width
+  tmb_timing_wr[7:4]   = 3;    // CLCT match window width (for CLCT-centric "old" algorithm)
   tmb_timing_wr[11:8]  = 4'd0; // MPC transmit delay
-  tmb_timing_wr[15:12] = 0;
+  tmb_timing_wr[15:12] = 3;    // CLCT match window width (for ALCT-centric 2016 algorithm)
   end
 
-  assign alct_delay[3:0]     = tmb_timing_wr[3:0];  // RW  Delay ALCT for CLCT match window
-  assign clct_window[3:0]    = tmb_timing_wr[7:4];  // RW  CLCT match window width
-  assign mpc_tx_delay[3:0]   = tmb_timing_wr[11:8]; // RW  MPC transmit delay
-  assign tmb_timing_rd[15:0] = tmb_timing_wr[15:0]; // RW  Readback
+  assign alct_delay[3:0]           = tmb_timing_wr[3:0];   // RW  Delay ALCT for CLCT match window
+  assign clct_window[3:0]          = tmb_timing_wr[7:4];   // RW  CLCT match window width (for CLCT-centric "old" algorithm)
+  assign mpc_tx_delay[3:0]         = tmb_timing_wr[11:8];  // RW  MPC transmit delay
+  assign algo2016_clct_window[3:0] = tmb_timing_wr[15:12]; // RW  CLCT match window width (for ALCT-centric 2016 algorithm)
+  assign tmb_timing_rd[15:0]       = tmb_timing_wr[15:0];  // RW  Readback
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_LHC_CYCLE = 0xB4    LHC Cycle Counter Maximum BXN Register
@@ -7189,46 +7211,37 @@
   end
 
 //------------------------------------------------------------------------------------------------------------------
-// ADR_NEWALGO_CTRL=198    Controls parameters of new trigger algorithm
+// ADR_ALGO2016_CTRL=198    Controls parameters of new trigger algorithm
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-    // New algo OFF:
-    newalgo_ctrl_wr[0]   = 1'b0;  // newAlgo_useDeadTimeZonning
-    newalgo_ctrl_wr[5:1] = 5'd15; // newAlgo_deadTimeZoneSize
-    newalgo_ctrl_wr[6]   = 1'b0;  // newAlgo_useDynamicDeadTimeZone
-    newalgo_ctrl_wr[7]   = 1'b0;  // newAlgo_clctToAlct
-    newalgo_ctrl_wr[8]   = 1'b0;  // newAlgo_tmbDropUsedClcts
-    newalgo_ctrl_wr[9]   = 1'b0;  // newAlgo_tmbCrossBxAlgorithm
-    newalgo_ctrl_wr[10]  = 1'b0;  // newAlgo_clctUseCorrectedBx
-    // New algo ON:    
-//    newalgo_ctrl_wr[0]   = 1'b1;  // newAlgo_useDeadTimeZonning
-//    newalgo_ctrl_wr[5:1] = 5'd15; // newAlgo_deadTimeZoneSize
-//    newalgo_ctrl_wr[6]   = 1'b1;  // newAlgo_useDynamicDeadTimeZone
-//    newalgo_ctrl_wr[7]   = 1'b1;  // newAlgo_clctToAlct
-//    newalgo_ctrl_wr[8]   = 1'b0;  // newAlgo_tmbDropUsedClcts
-//    newalgo_ctrl_wr[9]   = 1'b1;  // newAlgo_tmbCrossBxAlgorithm
-//    newalgo_ctrl_wr[10]  = 1'b1;  // newAlgo_clctUseCorrectedBx
+    // "Old" algorithm switched ON by default:
+    algo2016_ctrl_wr[0]   = 1'b0;  // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
+    algo2016_ctrl_wr[5:1] = 5'd15; // Constant size of the dead time zone
+    algo2016_ctrl_wr[6]   = 1'b0;  // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
+    algo2016_ctrl_wr[7]   = 1'b0;  // ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
+    algo2016_ctrl_wr[8]   = 1'b0;  // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - similar to "old" behavior of CLCT-centric algorithm when ALCTs are droped from further usage
+    algo2016_ctrl_wr[9]   = 1'b0;  // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
+    algo2016_ctrl_wr[10]  = 1'b0;  // Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
+    // Algo2016 ON:    
+//    algo2016_ctrl_wr[0]   = 1'b1;  // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
+//    algo2016_ctrl_wr[5:1] = 5'd15; // Constant size of the dead time zone
+//    algo2016_ctrl_wr[6]   = 1'b1;  // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
+//    algo2016_ctrl_wr[7]   = 1'b1;  // ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
+//    algo2016_ctrl_wr[8]   = 1'b0;  // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - similar to "old" behavior of CLCT-centric algorithm when ALCTs are droped from further usage
+//    algo2016_ctrl_wr[9]   = 1'b1;  // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
+//    algo2016_ctrl_wr[10]  = 1'b1;  // Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
   end
   
-  // remove these wires, change them to input
-  wire       newAlgo_useDeadTimeZonning;
-  wire [4:0] newAlgo_deadTimeZoneSize;
-  wire       newAlgo_useDynamicDeadTimeZone;
-  wire       newAlgo_clctToAlct;
-  wire       newAlgo_tmbDropUsedClcts;
-  wire       newAlgo_tmbCrossBxAlgorithm;
-  wire       newAlgo_clctUseCorrectedBx;
-  
-  assign newAlgo_useDeadTimeZonning     = newalgo_ctrl_wr[0];   // 
-  assign newAlgo_deadTimeZoneSize[4:0]  = newalgo_ctrl_wr[5:1]; // 
-  assign newAlgo_useDynamicDeadTimeZone = newalgo_ctrl_wr[6];   // 
-  assign newAlgo_clctToAlct             = newalgo_ctrl_wr[7];   // 
-  assign newAlgo_tmbDropUsedClcts       = newalgo_ctrl_wr[8];   // 
-  assign newAlgo_tmbCrossBxAlgorithm    = newalgo_ctrl_wr[9];   // 
-  assign newAlgo_clctUseCorrectedBx     = newalgo_ctrl_wr[10];  // 
+  assign algo2016_use_dead_time_zone         = algo2016_ctrl_wr[0];   // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
+  assign algo2016_dead_time_zone_size[4:0]   = algo2016_ctrl_wr[5:1]; // Constant size of the dead time zone
+  assign algo2016_use_dynamic_dead_time_zone = algo2016_ctrl_wr[6];   // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
+  assign algo2016_clct_to_alct               = algo2016_ctrl_wr[7];   // ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
+  assign algo2016_drop_used_clcts            = algo2016_ctrl_wr[8];   // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - similar to "old" behavior of CLCT-centric algorithm when ALCTs are droped from further usage
+  assign algo2016_cross_bx_algorithm         = algo2016_ctrl_wr[9];   // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
+  assign algo2016_clct_use_corrected_bx      = algo2016_ctrl_wr[10];  // Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
 
-  assign newalgo_ctrl_rd[15:0] = newalgo_ctrl_wr[15:0];
+  assign algo2016_ctrl_rd[15:0] = algo2016_ctrl_wr[15:0];
 
 //------------------------------------------------------------------------------------------------------------------
 // VME Write-Registers latch data when addressed + latch power-up defaults
@@ -7358,7 +7371,7 @@
   if (wr_virtex6_sysmon)      virtex6_sysmon_wr    <=  d[15:0];
   if (wr_virtex6_extend)      virtex6_extend_wr    <=  d[15:0];
   if (wr_mpc_frames_fifo_ctrl) mpc_frames_fifo_ctrl_wr <= d[15:0];
-  if (wr_newalgo_ctrl) newalgo_ctrl_wr <= d[15:0];
+  if (wr_algo2016_ctrl) algo2016_ctrl_wr <= d[15:0];
   end
 
 //------------------------------------------------------------------------------------------------------------------

@@ -516,6 +516,8 @@
 
   alct_delay,
   clct_window,
+  algo2016_clct_window,
+  algo2016_clct_to_alct,
 
   tmb_allow_alct,
   tmb_allow_clct,
@@ -1181,13 +1183,13 @@
   input          reverse_hs_me1b;    // 1=reverse me1b hstrips prior to pattern sorting
 
 // CLCT VME Configuration Ports
-  input          clct_blanking;      // Clct_blanking=1 clears clcts with 0 hits
-  input  [MXBXN-1:0]    bxn_offset_pretrig;    // BXN offset at reset for pretrig
-  input  [MXBXN-1:0]    bxn_offset_l1a;      // BXN offset at reset for L1A
-  input  [MXBXN-1:0]    lhc_cycle;        // LHC period, max BXN count+1
-  input  [MXL1ARX-1:0]  l1a_offset;        // L1A counter preset value
-  input  [MXDRIFT-1:0]  drift_delay;      // CSC Drift delay clocks
-  input  [3:0]      triad_persist;      // Triad 1/2-strip persistence
+  input               clct_blanking;      // Clct_blanking=1 clears clcts with 0 hits
+  input [MXBXN-1:0]   bxn_offset_pretrig; // BXN offset at reset for pretrig
+  input [MXBXN-1:0]   bxn_offset_l1a;     // BXN offset at reset for L1A
+  input [MXBXN-1:0]   lhc_cycle;          // LHC period, max BXN count+1
+  input [MXL1ARX-1:0] l1a_offset;         // L1A counter preset value
+  input [MXDRIFT-1:0] drift_delay;        // CSC Drift delay clocks
+  input [3:0]         triad_persist;      // Triad 1/2-strip persistence
 
   input  [MXHITB-1:0]  lyr_thresh_pretrig;    // Layers hit pre-trigger threshold
   input  [MXHITB-1:0]  hit_thresh_pretrig;    // Hits on pattern template pre-trigger threshold
@@ -1200,8 +1202,10 @@
   input [MXFLUSH-1:0]    clct_flush_delay;   // Pre-trigger sequencer flush state timer
   input                  clct_wr_continuous; // 1=allow continuous header buffer writing for invalid triggers
 
-  input  [3:0] alct_delay;  // Delay ALCT for CLCT match window
-  input  [3:0] clct_window; // CLCT match window width
+  input [3:0] alct_delay;            // Delay ALCT for CLCT match window
+  input [3:0] clct_window;           // CLCT match window width (for CLCT-centric "old" algorithm)
+  input [3:0] algo2016_clct_window;  // CLCT match window width (for ALCT-centric 2016 algorithm)
+  input       algo2016_clct_to_alct; // ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
 
   input tmb_allow_alct;  // Allow ALCT only 
   input tmb_allow_clct;  // Allow CLCT only
@@ -1635,10 +1639,10 @@
   output          wr_en_xmpc;
   output          wr_en_rmpc;
 
-  output          alct_preClct_window;
-  output  [21-1:0]    pretrig_data;
-  output  [21-1:0]    postdrift_data;
-  output  [3:0]      postdrift_adr;
+  output           alct_preClct_window;
+  output  [21-1:0] pretrig_data;
+  output  [21-1:0] postdrift_data;
+  output  [3:0]    postdrift_adr;
   
   output          clct_push_xtmb;
   output  [1:0]      bxn_counter_xtmb;
@@ -2239,8 +2243,8 @@
 // YP: THIS IS WHERE CLCT DEADTIME IS
 // *****************************************************************************
   wire clct_pat_trig  = any_cfeb_hit && clct_pat_trig_en;        // Trigger source is a CLCT pattern
-//  wire clct_retrigger = clct_pat_trig && noflush && nothrottle;  // Immediate re-trigger
-  wire clct_retrigger = noflush && nothrottle;  // Immediate re-trigger (remove deadtime)
+  wire clct_retrigger = clct_pat_trig && noflush && nothrottle;  // Immediate re-trigger
+//  wire clct_retrigger = noflush && nothrottle;  // Immediate re-trigger (remove deadtime)
   wire clct_notbusy   = !clct_pretrig_rqst;                      // Ready for next pretrig  
   wire clct_deadtime  = (clct_sm==flush) || (clct_sm==throttle); // CLCT Bx pretrig machine waited for triads to dissipate before rearm
 
@@ -2325,15 +2329,16 @@
 // Trigger flush state timer. Wait for 1/2-strip one-shots and raw hits fifo to clear
   reg   [MXFLUSH-1:0] flush_cnt=0;
 
-  wire flush_cnt_clr = (clct_sm != flush) || !clct_notbusy;  // Flush timer resets if triad debris remains
+  wire flush_cnt_clr;
+  assign flush_cnt_clr = algo2016_use_dead_time_zone ? (clct_sm != flush) | ((clct_sm != flush) || !clct_notbusy);  // Flush timer resets if triad debris remains
   wire flush_cnt_ena = (clct_sm == flush);
 
   always @(posedge clock) begin
-    if      (flush_cnt_clr) flush_cnt = clct_flush_delay-1'b1; // sync load before entering flush state
+    if      (flush_cnt_clr) flush_cnt = clct_flush_delay - 1'b1; // sync load before entering flush state
     else if (flush_cnt_ena) flush_cnt = flush_cnt-1'b1;      // only count during flush
   end
 
-  assign flush_done = ((flush_cnt == 0) || noflush) && clct_notbusy;
+  assign flush_done = algo2016_use_dead_time_zone ? ((flush_cnt == 0) || noflush) | (((flush_cnt == 0) || noflush) && clct_notbusy);
 
   always @(posedge clock) begin
     noflush  <= (clct_flush_delay == 0);
@@ -2458,18 +2463,33 @@
 // After drift, send CLCT words to TMB, persist 1 cycle only, blank invalid CLCTs unless override
   wire clct0_hit_valid = (hs_hit_1st >= hit_thresh_postdrift);    // CLCT is over hit thresh
   wire clct0_pid_valid = (hs_pid_1st >= pid_thresh_postdrift);    // CLCT is over pid thresh
-
+// Algo2016: check if new clct0 key half-strip is outside of dead zone around clct0
+  wire clct0_key_valid = (hs_key_1st >= hs_key_1st_algo2016 + algo2016_dead_time_zone_size) || (hs_key_1st <= hs_key_1st_algo2016 - algo2016_dead_time_zone_size);
+  
   wire clct1_hit_valid = (hs_hit_2nd >= hit_thresh_postdrift);    // CLCT is over hit thresh
   wire clct1_pid_valid = (hs_pid_2nd >= pid_thresh_postdrift);    // CLCT is over pid thresh
+// Algo2016: check if new clct1 key half-strip is outside of dead zone around clct1
+  wire clct1_key_valid = (hs_key_2nd >= hs_key_2nd_algo2016 + algo2016_dead_time_zone_size) || (hs_key_2nd <= hs_key_2nd_algo2016 - algo2016_dead_time_zone_size);
 
-  wire clct0_really_valid = (clct0_hit_valid && clct0_pid_valid);    // CLCT is over thresh and not external
-  wire clct1_really_valid = (clct1_hit_valid && clct1_pid_valid);    // CLCT is over thresh and not external
+  wire clct0_really_valid = algo2016_use_dead_time_zone ? (clct0_key_valid && clct0_hit_valid && clct0_pid_valid) | (clct0_hit_valid && clct0_pid_valid); // CLCT is over thresh, not in dead zone and not external
+  wire clct1_really_valid = algo2016_use_dead_time_zone ? (clct1_key_valid && clct1_hit_valid && clct1_pid_valid) | (clct1_hit_valid && clct1_pid_valid);    // CLCT is over thresh, not in dead zone and not external
 
   wire clct0_valid = clct0_really_valid || trig_source_ext_xtmb || !valid_clct_required;
   wire clct1_valid = clct1_really_valid || trig_source_ext_xtmb || !valid_clct_required;
 
   assign clct0_vpf = clct0_valid && clct_pop_xtmb;
   assign clct1_vpf = clct1_valid && clct_pop_xtmb;
+
+// Algo2016: latch key half-strips for valid clct0 and clct1
+  reg [MXKEYBX-1:0] hs_key_1st_algo2016;
+  always @(posedge clock) begin
+    if (clct0_vpf) begin
+      hs_key_1st_algo2016 <= hs_key_1st
+    end
+    if (clct1_vpf) begin
+      hs_key_2nd_algo2016 <= hs_key_2nd
+    end
+  end
 
 // Construct CLCTs for sending to TMB matching. These are node names only
   wire [MXCLCT-1:0]  clct0, clct0_xtmb;
@@ -3889,11 +3909,11 @@
   assign  header20_[14]    =  stagger_hs_csc;        // CSC Staggering ON
   assign  header20_[18:15]  =  0;              // DDU+DMB control flags
 
-  assign  header21_[3:0]   =  triad_persist[3:0];      // CLCT Triad persistence
-  assign  header21_[6:4]   =  dmb_thresh_pretrig[2:0]; // DMB pre-trigger threshold for active-feb
-  assign  header21_[10:7]  =  alct_delay[3:0];         // Delay ALCT for CLCT match window
-  assign  header21_[14:11] =  clct_window[3:0];        // CLCT match window width
-  assign  header21_[18:15] =  0;                       // DDU+DMB control flags
+  assign  header21_[3:0]   = triad_persist[3:0];        // CLCT Triad persistence
+  assign  header21_[6:4]   = dmb_thresh_pretrig[2:0];   // DMB pre-trigger threshold for active-feb
+  assign  header21_[10:7]  = alct_delay[3:0];           // Delay ALCT for CLCT match window
+  assign  header21_[14:11] = (algo2016_clct_to_alct ? algo2016_clct_window[3:0] : clct_window[3:0] ); // CLCT match window width (if algo2016_clct_to_alct = 1 then set window to ALCT-centric 2016 algorithm else to CLCT-centric "old" algorithm)
+  assign  header21_[18:15] = 0;                         // DDU+DMB control flags
 
 // CLCT Trigger Status
   assign  header22_[8:0]    =  r_trig_source_vec[8:0];    // Trigger source vector

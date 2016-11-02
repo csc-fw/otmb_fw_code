@@ -745,7 +745,7 @@ module pattern_finder (
 
 //-------------------------------------------------------------------------------------------------------------------
 // Stage 5A: Pre-Trigger Look-ahead
-//     Set active FEB bit ASAP if any pattern is over threshold.
+//    Set active FEB bit ASAP if any pattern is over threshold.
 //    It comes out before the priority encoder result
 //-------------------------------------------------------------------------------------------------------------------
   // Flag keys with pattern hits over threshold, use fast-out hit numbers before s0 latch

@@ -206,6 +206,8 @@
 // VME Configuration
   alct_delay,
   clct_window,
+  algo2016_clct_window,
+  algo2016_clct_to_alct,
 
   tmb_sync_err_en,
   tmb_allow_alct,
@@ -508,8 +510,10 @@
   output  [MXMPCTX-1:0]  _mpc_tx;      // MPC 80MHz rx data
 
 // VME Configuration
-  input  [3:0]      alct_delay;      // Delay ALCT for CLCT match window
-  input  [3:0]      clct_window;    // CLCT match window width
+  input [3:0] alct_delay;            // Delay ALCT for CLCT match window
+  input [3:0] clct_window;           // CLCT match window width (for CLCT-centric "old" algorithm)
+  input [3:0] algo2016_clct_window;  // CLCT match window width (for ALCT-centric 2016 algorithm)
+  input       algo2016_clct_to_alct; // ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
 
   input  [1:0]      tmb_sync_err_en;  // Allow sync_err to MPC for either muon
   input          tmb_allow_alct;    // Allow ALCT only 

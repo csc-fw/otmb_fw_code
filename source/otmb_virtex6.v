@@ -1525,11 +1525,20 @@
   wire  [MXRAMDATA-1:0]  dmb_rdata;
   wire  [MXRAMADR-1:0]  dmb_wdcnt;
 
-  wire  [3:0]      alct_delay;
-  wire  [3:0]      clct_window;
-  wire  [3:0]      alct_bx0_delay;      // ALCT bx0 delay to mpc transmitter
-  wire  [3:0]      clct_bx0_delay;      // CLCT bx0 delay to mpc transmitter
-
+  wire [3:0] alct_delay;            // Delay ALCT for CLCT match window
+  wire [3:0] clct_window;           // CLCT match window width (for CLCT-centric "old" algorithm)
+  wire [3:0] algo2016_clct_window;  // CLCT match window width (for ALCT-centric 2016 algorithm)
+  wire       algo2016_clct_to_alct; // ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
+  wire [3:0] alct_bx0_delay;        // ALCT bx0 delay to mpc transmitter
+  wire [3:0] clct_bx0_delay;        // CLCT bx0 delay to mpc transmitter
+  
+  wire       algo2016_use_dead_time_zone;         // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
+  wire [4:0] algo2016_dead_time_zone_size;        // Constant size of the dead time zone
+  wire       algo2016_use_dynamic_dead_time_zone; // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
+  wire       algo2016_drop_used_clcts;            // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - similar to "old" behavior of CLCT-centric algorithm when ALCTs are droped from further usage
+  wire       algo2016_cross_bx_algorithm;         // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
+  wire       algo2016_clct_use_corrected_bx;      // Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
+  
   wire  [MXMPCDLY-1:0]  mpc_rx_delay;
   wire  [MXMPCDLY-1:0]  mpc_tx_delay;
   wire  [MXFRAME-1:0]  mpc0_frame0_ff;
@@ -1776,9 +1785,11 @@
   .clct_throttle      (clct_throttle[MXTHROTTLE-1:0]), // In  Pre-trigger throttle to reduce trigger rate
   .clct_wr_continuous (clct_wr_continuous),            // In  1=allow continuous header buffer writing for invalid triggers
 
-  .alct_delay  (alct_delay[3:0]),  // In  Delay ALCT for CLCT match window
-  .clct_window (clct_window[3:0]), // In  CLCT match window width
-
+  .alct_delay            (alct_delay[3:0]),           // In Delay ALCT for CLCT match window
+  .clct_window           (clct_window[3:0]),          // In CLCT match window width (for CLCT-centric "old" algorithm)
+  .algo2016_clct_window  (algo2016_clct_window[3:0]), // In CLCT match window width (for ALCT-centric 2016 algorithm)
+  .algo2016_clct_to_alct (algo2016_clct_to_alct),     // In ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
+  
   .tmb_allow_alct  (tmb_allow_alct),  // In  Allow ALCT only 
   .tmb_allow_clct  (tmb_allow_clct),  // In  Allow CLCT only
   .tmb_allow_match (tmb_allow_match), // In  Allow ALCT+CLCT match
@@ -2623,8 +2634,10 @@
   ._mpc_tx      (_mpc_tx[MXMPCTX-1:0]),      // Out  MPC 80MHz rx data
 
 // VME Configuration
-  .alct_delay      (alct_delay[3:0]),        // In  Delay ALCT for CLCT match window
-  .clct_window    (clct_window[3:0]),        // In  CLCT match window width
+  .alct_delay            (alct_delay[3:0]),           // In Delay ALCT for CLCT match window
+  .clct_window           (clct_window[3:0]),          // In CLCT match window width (for CLCT-centric "old" algorithm)
+  .algo2016_clct_window  (algo2016_clct_window[3:0]), // In CLCT match window width (for ALCT-centric 2016 algorithm)
+  .algo2016_clct_to_alct (algo2016_clct_to_alct),     // In ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
 
   .tmb_sync_err_en  (tmb_sync_err_en[1:0]),      // In  Allow sync_err to MPC for either muon
   .tmb_allow_alct    (tmb_allow_alct),        // In  Allow ALCT only 
@@ -3496,52 +3509,60 @@
       .fifo_pretrig_mini    (fifo_pretrig_mini[MXTBIN-1:0]),// Out  Number Mini FIFO time bins before pretrigger
 
       // TMB Ports: Configuration
-      .alct_delay      (alct_delay[3:0]),        // Out  Delay ALCT for CLCT match window
-      .clct_window      (clct_window[3:0]),        // Out  CLCT match window width
+      .alct_delay            (alct_delay[3:0]),           // Out Delay ALCT for CLCT match window
+      .clct_window           (clct_window[3:0]),          // Out CLCT match window width (for CLCT-centric "old" algorithm)
+      .algo2016_clct_window  (algo2016_clct_window[3:0]), // Out CLCT match window width (for ALCT-centric 2016 algorithm)
+      .algo2016_clct_to_alct (algo2016_clct_to_alct),     // Out ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
+      .tmb_sync_err_en       (tmb_sync_err_en[1:0]),      // Out Allow sync_err to MPC for either muon
+      .tmb_allow_alct        (tmb_allow_alct),            // Out Allow ALCT only 
+      .tmb_allow_clct        (tmb_allow_clct),            // Out Allow CLCT only
+      .tmb_allow_match       (tmb_allow_match),           // Out Allow ALCT+CLCT match
+      
+      .algo2016_use_dead_time_zone         (algo2016_use_dead_time_zone),         // Out Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
+      .algo2016_dead_time_zone_size        (algo2016_dead_time_zone_size[4:0]),   // Out Constant size of the dead time zone
+      .algo2016_use_dynamic_dead_time_zone (algo2016_use_dynamic_dead_time_zone), // Out Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
+      .algo2016_drop_used_clcts            (algo2016_drop_used_clcts),            // Out Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - similar to "old" behavior of CLCT-centric algorithm when ALCTs are droped from further usage
+      .algo2016_cross_bx_algorithm         (algo2016_cross_bx_algorithm),         // Out LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
+      .algo2016_clct_use_corrected_bx      (algo2016_clct_use_corrected_bx),      // Out Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
 
-      .tmb_sync_err_en    (tmb_sync_err_en[1:0]),      // Out  Allow sync_err to MPC for either muon
-      .tmb_allow_alct      (tmb_allow_alct),        // Out  Allow ALCT only 
-      .tmb_allow_clct      (tmb_allow_clct),        // Out  Allow CLCT only
-      .tmb_allow_match    (tmb_allow_match),        // Out  Allow ALCT+CLCT match
+      .tmb_allow_alct_ro  (tmb_allow_alct_ro),  // Out  Allow ALCT only  readout, non-triggering
+      .tmb_allow_clct_ro  (tmb_allow_clct_ro),  // Out  Allow CLCT only  readout, non-triggering
+      .tmb_allow_match_ro (tmb_allow_match_ro), // Out  Allow Match only readout, non-triggering
 
-      .tmb_allow_alct_ro    (tmb_allow_alct_ro),      // Out  Allow ALCT only  readout, non-triggering
-      .tmb_allow_clct_ro    (tmb_allow_clct_ro),      // Out  Allow CLCT only  readout, non-triggering
-      .tmb_allow_match_ro    (tmb_allow_match_ro),      // Out  Allow Match only readout, non-triggering
+      .alct_bx0_delay  (alct_bx0_delay[3:0]), // Out  ALCT bx0 delay to mpc transmitter
+      .clct_bx0_delay  (clct_bx0_delay[3:0]), // Out  CLCT bx0 delay to mpc transmitter
+      .alct_bx0_enable (alct_bx0_enable),     // Out  Enable using alct bx0, else copy clct bx0
+      .bx0_vpf_test    (bx0_vpf_test),        // Out  Sets clct_bx0=lct0_vpf for bx0 alignment tests
+      .bx0_match       (bx0_match),           // In  ALCT bx0 and CLCT bx0 match in time
 
-      .alct_bx0_delay      (alct_bx0_delay[3:0]),      // Out  ALCT bx0 delay to mpc transmitter
-      .clct_bx0_delay      (clct_bx0_delay[3:0]),      // Out  CLCT bx0 delay to mpc transmitter
-      .alct_bx0_enable    (alct_bx0_enable),        // Out  Enable using alct bx0, else copy clct bx0
-      .bx0_vpf_test      (bx0_vpf_test),          // Out  Sets clct_bx0=lct0_vpf for bx0 alignment tests
-      .bx0_match      (bx0_match),          // In  ALCT bx0 and CLCT bx0 match in time
-
-      .mpc_rx_delay      (mpc_rx_delay[MXMPCDLY-1:0]),  // Out  MPC response delay
-      .mpc_tx_delay      (mpc_tx_delay[MXMPCDLY-1:0]),  // Out  MPC transmit delay
-      .mpc_sel_ttc_bx0    (mpc_sel_ttc_bx0),        // Out  MPC gets ttc_bx0 or bx0_local
-      .mpc_me1a_block      (mpc_me1a_block),        // Out  Block ME1A LCTs from MPC, but still queue for L1A readout
-      .mpc_idle_blank      (mpc_idle_blank),        // Out  Blank mpc output except on trigger, block bx0 too
-      .mpc_oe        (mpc_oe),            // Out  MPC output enable, 1=en
+      .mpc_rx_delay    (mpc_rx_delay[MXMPCDLY-1:0]), // Out  MPC response delay
+      .mpc_tx_delay    (mpc_tx_delay[MXMPCDLY-1:0]), // Out  MPC transmit delay
+      .mpc_sel_ttc_bx0 (mpc_sel_ttc_bx0),            // Out  MPC gets ttc_bx0 or bx0_local
+      .mpc_me1a_block  (mpc_me1a_block),             // Out  Block ME1A LCTs from MPC, but still queue for L1A readout
+      .mpc_idle_blank  (mpc_idle_blank),             // Out  Blank mpc output except on trigger, block bx0 too
+      .mpc_oe          (mpc_oe),                     // Out  MPC output enable, 1=en
 
       // TMB Ports: Status
       .mpc_frame_vme    (mpc_frame_vme),                // In MPC frame latch strobe for VME
-      .mpc0_frame0_vme  (mpc0_frame0_vme[MXFRAME-1:0]),  // In  MPC best muon 1st frame
-      .mpc0_frame1_vme  (mpc0_frame1_vme[MXFRAME-1:0]),  // In  MPC best buon 2nd frame
-      .mpc1_frame0_vme  (mpc1_frame0_vme[MXFRAME-1:0]),  // In  MPC second best muon 1st frame
-      .mpc1_frame1_vme  (mpc1_frame1_vme[MXFRAME-1:0]),  // In  MPC second best buon 2nd frame
-      .mpc_accept_vme   (mpc_accept_vme[1:0]),          // In  MPC accept response
-      .mpc_reserved_vme (mpc_reserved_vme[1:0]),        // In  MPC reserved response
+      .mpc0_frame0_vme  (mpc0_frame0_vme[MXFRAME-1:0]), // In MPC best muon 1st frame
+      .mpc0_frame1_vme  (mpc0_frame1_vme[MXFRAME-1:0]), // In MPC best buon 2nd frame
+      .mpc1_frame0_vme  (mpc1_frame0_vme[MXFRAME-1:0]), // In MPC second best muon 1st frame
+      .mpc1_frame1_vme  (mpc1_frame1_vme[MXFRAME-1:0]), // In MPC second best buon 2nd frame
+      .mpc_accept_vme   (mpc_accept_vme[1:0]),          // In MPC accept response
+      .mpc_reserved_vme (mpc_reserved_vme[1:0]),        // In MPC reserved response
 
       // TMB Ports: MPC Injector Control
-      .mpc_inject      (mpc_inject),          // Out  Start MPC test pattern injector
-      .ttc_mpc_inj_en      (ttc_mpc_inj_en),        // Out  Enable ttc_mpc_inject
-      .mpc_nframes      (mpc_nframes[7:0]),        // Out  Number frames to inject
-      .mpc_wen      (mpc_wen[3:0]),          // Out  Select RAM to write
-      .mpc_ren      (mpc_ren[3:0]),          // Out  Select RAM to read 
-      .mpc_adr      (mpc_adr[7:0]),          // Out  Injector RAM read/write address
-      .mpc_wdata      (mpc_wdata[15:0]),        // Out  Injector RAM write data
-      .mpc_rdata      (mpc_rdata[15:0]),        // In  Injector RAM read  data
-      .mpc_accept_rdata    (mpc_accept_rdata[3:0]),    // In  MPC response stored in RAM
-      .mpc_inj_alct_bx0    (mpc_inj_alct_bx0),        // Out  ALCT bx0 injector
-      .mpc_inj_clct_bx0    (mpc_inj_clct_bx0),        // Out  CLCT bx0 injector
+      .mpc_inject       (mpc_inject),            // Out Start MPC test pattern injector
+      .ttc_mpc_inj_en   (ttc_mpc_inj_en),        // Out Enable ttc_mpc_inject
+      .mpc_nframes      (mpc_nframes[7:0]),      // Out Number frames to inject
+      .mpc_wen          (mpc_wen[3:0]),          // Out Select RAM to write
+      .mpc_ren          (mpc_ren[3:0]),          // Out Select RAM to read 
+      .mpc_adr          (mpc_adr[7:0]),          // Out Injector RAM read/write address
+      .mpc_wdata        (mpc_wdata[15:0]),       // Out Injector RAM write data
+      .mpc_rdata        (mpc_rdata[15:0]),       // In  Injector RAM read  data
+      .mpc_accept_rdata (mpc_accept_rdata[3:0]), // In  MPC response stored in RAM
+      .mpc_inj_alct_bx0 (mpc_inj_alct_bx0),      // Out ALCT bx0 injector
+      .mpc_inj_clct_bx0 (mpc_inj_clct_bx0),      // Out CLCT bx0 injector
       
       // CFEB data received on optical link
       .gtx_rx_data_bits_or(|gtx_rx_data_bits_or), // In  CFEB data received on optical link = OR of all bits for ALL CFEBs
