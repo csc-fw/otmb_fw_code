@@ -895,6 +895,10 @@
   deb_buf_push_data,
   deb_buf_pop_data,
 
+// Algo2016: configuration
+  algo2016_use_dead_time_zone,
+  algo2016_dead_time_zone_size,
+  algo2016_use_dynamic_dead_time_zone,
 // Sump
   sequencer_sump
 
@@ -1582,6 +1586,11 @@
   output  [MXBADR-1:0]  deb_buf_pop_adr;    // Queue pop  address at last pop
   output  [MXBDATA-1:0]  deb_buf_push_data;    // Queue push data at last push
   output  [MXBDATA-1:0]  deb_buf_pop_data;    // Queue pop  data at last pop
+
+// Algo2016: configuration
+  input       algo2016_use_dead_time_zone;         // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
+  input [4:0] algo2016_dead_time_zone_size;        // Constant size of the dead time zone
+  input       algo2016_use_dynamic_dead_time_zone; // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
 
 // Sump
   output          sequencer_sump;      // Unused signals
@@ -2330,7 +2339,7 @@
   reg   [MXFLUSH-1:0] flush_cnt=0;
 
   wire flush_cnt_clr;
-  assign flush_cnt_clr = algo2016_use_dead_time_zone ? (clct_sm != flush) | ((clct_sm != flush) || !clct_notbusy);  // Flush timer resets if triad debris remains
+  assign flush_cnt_clr = algo2016_use_dead_time_zone ? (clct_sm != flush) : ((clct_sm != flush) || !clct_notbusy);  // Flush timer resets if triad debris remains
   wire flush_cnt_ena = (clct_sm == flush);
 
   always @(posedge clock) begin
@@ -2338,7 +2347,7 @@
     else if (flush_cnt_ena) flush_cnt = flush_cnt-1'b1;      // only count during flush
   end
 
-  assign flush_done = algo2016_use_dead_time_zone ? ((flush_cnt == 0) || noflush) | (((flush_cnt == 0) || noflush) && clct_notbusy);
+  assign flush_done = algo2016_use_dead_time_zone ? ((flush_cnt == 0) || noflush) : (((flush_cnt == 0) || noflush) && clct_notbusy);
 
   always @(posedge clock) begin
     noflush  <= (clct_flush_delay == 0);
@@ -2460,19 +2469,53 @@
   wire              trig_source_ext_xtmb = postdrift_data[15];    // Trigger source was not CLCT pattern
   wire [MXCFEB-1:0] aff_list_xtmb        = postdrift_data[22:16]; // Active feb list
 
+  reg [4:0] algo2016_dead_time_zone_size_1st;
+  reg [4:0] algo2016_dead_time_zone_size_2nd;
+  always @(posedge clock) begin
+    if (algo2016_use_dynamic_dead_time_zone) begin // Define dynamic dead zones around CLCTs that depend on pattern ID
+      case (hs_pid_1st)
+        4'h2 :    algo2016_dead_time_zone_size_1st <= 5'd10;
+        4'h3 :    algo2016_dead_time_zone_size_1st <= 5'd10;
+        4'h4 :    algo2016_dead_time_zone_size_1st <= 5'd8;
+        4'h5 :    algo2016_dead_time_zone_size_1st <= 5'd8;
+        4'h6 :    algo2016_dead_time_zone_size_1st <= 5'd7;
+        4'h7 :    algo2016_dead_time_zone_size_1st <= 5'd7;
+        4'h8 :    algo2016_dead_time_zone_size_1st <= 5'd6;
+        4'h9 :    algo2016_dead_time_zone_size_1st <= 5'd6;
+        4'hA :    algo2016_dead_time_zone_size_1st <= 5'd2;
+        default : algo2016_dead_time_zone_size_1st <= algo2016_dead_time_zone_size;
+      endcase
+      case (hs_pid_2nd)
+        4'h2 :    algo2016_dead_time_zone_size_2nd <= 5'd10;
+        4'h3 :    algo2016_dead_time_zone_size_2nd <= 5'd10;
+        4'h4 :    algo2016_dead_time_zone_size_2nd <= 5'd8;
+        4'h5 :    algo2016_dead_time_zone_size_2nd <= 5'd8;
+        4'h6 :    algo2016_dead_time_zone_size_2nd <= 5'd7;
+        4'h7 :    algo2016_dead_time_zone_size_2nd <= 5'd7;
+        4'h8 :    algo2016_dead_time_zone_size_2nd <= 5'd6;
+        4'h9 :    algo2016_dead_time_zone_size_2nd <= 5'd6;
+        4'hA :    algo2016_dead_time_zone_size_2nd <= 5'd2;
+        default : algo2016_dead_time_zone_size_2nd <= algo2016_dead_time_zone_size;
+      endcase
+    end
+    else begin // Define constant dead zone around CLCTs configured through VME register 0x198
+      algo2016_dead_time_zone_size_1st <= algo2016_dead_time_zone_size;
+      algo2016_dead_time_zone_size_2nd <= algo2016_dead_time_zone_size;
+    end
+  end
 // After drift, send CLCT words to TMB, persist 1 cycle only, blank invalid CLCTs unless override
   wire clct0_hit_valid = (hs_hit_1st >= hit_thresh_postdrift);    // CLCT is over hit thresh
   wire clct0_pid_valid = (hs_pid_1st >= pid_thresh_postdrift);    // CLCT is over pid thresh
 // Algo2016: check if new clct0 key half-strip is outside of dead zone around clct0
-  wire clct0_key_valid = (hs_key_1st >= hs_key_1st_algo2016 + algo2016_dead_time_zone_size) || (hs_key_1st <= hs_key_1st_algo2016 - algo2016_dead_time_zone_size);
+  wire clct0_key_valid = (hs_key_1st >= hs_key_1st_algo2016 + algo2016_dead_time_zone_size_1st) || (hs_key_1st <= hs_key_1st_algo2016 - algo2016_dead_time_zone_size_1st);
   
   wire clct1_hit_valid = (hs_hit_2nd >= hit_thresh_postdrift);    // CLCT is over hit thresh
   wire clct1_pid_valid = (hs_pid_2nd >= pid_thresh_postdrift);    // CLCT is over pid thresh
 // Algo2016: check if new clct1 key half-strip is outside of dead zone around clct1
-  wire clct1_key_valid = (hs_key_2nd >= hs_key_2nd_algo2016 + algo2016_dead_time_zone_size) || (hs_key_2nd <= hs_key_2nd_algo2016 - algo2016_dead_time_zone_size);
+  wire clct1_key_valid = (hs_key_2nd >= hs_key_2nd_algo2016 + algo2016_dead_time_zone_size_2nd) || (hs_key_2nd <= hs_key_2nd_algo2016 - algo2016_dead_time_zone_size_2nd);
 
-  wire clct0_really_valid = algo2016_use_dead_time_zone ? (clct0_key_valid && clct0_hit_valid && clct0_pid_valid) | (clct0_hit_valid && clct0_pid_valid); // CLCT is over thresh, not in dead zone and not external
-  wire clct1_really_valid = algo2016_use_dead_time_zone ? (clct1_key_valid && clct1_hit_valid && clct1_pid_valid) | (clct1_hit_valid && clct1_pid_valid);    // CLCT is over thresh, not in dead zone and not external
+  wire clct0_really_valid = algo2016_use_dead_time_zone ? (clct0_key_valid && clct0_hit_valid && clct0_pid_valid) : (clct0_hit_valid && clct0_pid_valid); // CLCT is over thresh, not in dead zone and not external
+  wire clct1_really_valid = algo2016_use_dead_time_zone ? (clct1_key_valid && clct1_hit_valid && clct1_pid_valid) : (clct1_hit_valid && clct1_pid_valid);    // CLCT is over thresh, not in dead zone and not external
 
   wire clct0_valid = clct0_really_valid || trig_source_ext_xtmb || !valid_clct_required;
   wire clct1_valid = clct1_really_valid || trig_source_ext_xtmb || !valid_clct_required;
@@ -2482,12 +2525,13 @@
 
 // Algo2016: latch key half-strips for valid clct0 and clct1
   reg [MXKEYBX-1:0] hs_key_1st_algo2016;
+  reg [MXKEYBX-1:0] hs_key_2nd_algo2016;
   always @(posedge clock) begin
     if (clct0_vpf) begin
-      hs_key_1st_algo2016 <= hs_key_1st
+      hs_key_1st_algo2016 <= hs_key_1st;
     end
     if (clct1_vpf) begin
-      hs_key_2nd_algo2016 <= hs_key_2nd
+      hs_key_2nd_algo2016 <= hs_key_2nd;
     end
   end
 
