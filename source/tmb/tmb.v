@@ -129,6 +129,10 @@
   alct_bx0_rx,
   alct_ecc_err,
 
+// GEM
+  gemA_vpf,
+  gemB_vpf,
+
 // TMB-Sequencer Pipelines
   wr_adr_xtmb,
   wr_adr_rtmb,
@@ -184,6 +188,12 @@
   tmb_alct1,
   tmb_alctb,
   tmb_alcte,
+
+  alct_gem,
+  clct_gem,
+  alct_clct_gem,
+  clct_gem_noalct,
+  alct_gem_noclct,
 
 // MPC Status
   mpc_frame_ff,
@@ -382,6 +392,7 @@
   ,clct_noalct_ro
   ,alct_only_trig
 
+
 // Window priority table
   ,deb_clct_win_priority0,  deb_clct_win_priority1,  deb_clct_win_priority2,  deb_clct_win_priority3
   ,deb_clct_win_priority4,  deb_clct_win_priority5,  deb_clct_win_priority6,  deb_clct_win_priority7
@@ -432,6 +443,10 @@
   input  [MXALCT-1:0]  alct1_tmb;    // ALCT second best muon
   input                alct_bx0_rx;  // ALCT bx0 received
   input  [1:0]         alct_ecc_err; // ALCT ecc syndrome code
+
+// GEM
+  input  [7:0]         gemA_vpf;
+  input  [7:0]         gemB_vpf;
 
 // TMB-Sequencer Pipelines
   input  [MXBADR-1:0]  wr_adr_xtmb; // Buffer write address after drift time
@@ -488,6 +503,13 @@
   output  [10:0]     tmb_alct1; // ALCT second best muon latched at trigger
   output  [4:0]      tmb_alctb; // ALCT bxn latched at trigger
   output  [1:0]      tmb_alcte; // ALCT ecc error syndrome latched at trigger
+
+  output  alct_gem;        // GEM matched (in time) to ALCT
+  output  clct_gem;        // GEM in CLCT open window
+  output  alct_clct_gem;   // CLCT*(ALCT*GEM) match
+  output  clct_gem_noalct; // CLCT lost (no alct), but with GEM
+  output  alct_gem_noclct; // ALCT lost (no clct), but with GEM
+
 
 // MPC Status
   output                 mpc_frame_ff;   // MPC frame latch
@@ -1032,7 +1054,7 @@
 
 //  wire trig_pulse    = clct_match || clct_noalct || clct_noalct_lost || alct_noclct;    // Event pulse
   wire trig_pulse    = clct_match || clct_noalct || clct_noalct_lost || alct_only_trig;  // Event pulse
-  
+
   wire trig_keep     = (clct_keep    || alct_keep);    // Keep event for trigger and readout
   wire non_trig_keep = (clct_keep_ro || alct_keep_ro); // Keep non-triggering event for readout only
 
@@ -1048,6 +1070,17 @@
   wire clct_noalct_ro = clct_noalct && non_trig_keep; // Only CLCT triggered, nontriggering event
 
   assign alct_only_trig = (alct_noclct && tmb_allow_alct) || (alct_noclct_ro && tmb_allow_alct_ro);// ALCT-only triggers are allowed
+
+
+  wire gem_pulse = (|gemA_vpf || |gemB_vpf);
+  srl16e_bbl #(1)      ugempulsedly (.clock(clock),.ce(1'b1),.adr(winclosing-clct_win_center),.d(gem_pulse),.q(gem_pulse_dly));
+
+  // gem matching
+  assign alct_gem        = alct_pulse                   && (gem_pulse);
+  assign clct_gem        = clct_vpf_sr[clct_win_center] && (gem_pulse);
+  assign alct_clct_gem   = clct_match                   && (gem_pulse);
+  assign clct_gem_noalct = clct_noalct                  && (gem_pulse_dly);
+  assign alct_gem_noclct = alct_discard                 && (gem_pulse_dly);
 
 // Latch clct match results for TMB and MPC pathways
   reg tmb_trig_pulse       = 0;

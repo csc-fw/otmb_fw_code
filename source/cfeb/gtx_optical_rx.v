@@ -230,7 +230,8 @@
         gtx_rx_match           <= rx_match;
         gtx_rx_sync_done       <= rx_sync_done;
         gtx_rx_err             <= err;
-        gtx_rx_err_count[15:0] <= (gtx_rx_en_prbs_test) ? prbs_errcount[15:0] : {link_errcount[15:0]};
+        gtx_rx_err_count[7:0]  <= (gtx_rx_en_prbs_test) ? prbs_errcount[7:0] : {link_errcount[7:0]};
+        gtx_rx_err_count[15:8] <= 0;
 
 //        if (gtx_rx_en_prbs_test) gtx_rx_err_count[15:0] <= prbs_errcount[15:0];
 //        else gtx_rx_err_count[15:0]                     <= {8'h00,link_errcount[7:0]};

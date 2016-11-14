@@ -301,7 +301,7 @@
 
   parameter link_bad_thresh = 128;
   always @ (posedge CMP_RX_CLK160) begin
-    link_bad <= (err_count >= link_bad_thresh);
+    link_bad <= err_count[7]; //(err_count >= link_bad_thresh);
   end
 
   assign    errcount        = err_count[15:0];        // can be a useful output
@@ -381,7 +381,7 @@
      link_good <= !mon_rst & (mon_count[3:0]==4'hf);  // use to signal the link is alive after 1 + 15 complete BX cycles
 
      if (!link_err) link_err <= (link_went_down); // use to signal the link was OK then had a problem (== link_went_down) at least once
-     if ((err_inj || link_went_down) && err_count!=16'hFFFE) err_count <= err_count + 1'b1; // how many times the link was lost
+     if ((err_inj || link_went_down) && err_count[7:0]!=8'hFE) err_count <= err_count + 1'b1; // how many times the link was lost
 
   end // else: !if(!RX_SYNC_DONE || ttc_resync)
      end // always @ (posedge CMP_RX_CLK160)

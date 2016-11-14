@@ -229,10 +229,10 @@ cluster_to_gemstrip cluster_to_gemstrip23 (
     .strip1   (strip3)
 );
 
-assign gem_vpf0 = vpf[0];
-assign gem_vpf1 = vpf[1];
-assign gem_vpf2 = vpf[2];
-assign gem_vpf3 = vpf[3];
+assign vpf0 = vpf[0];
+assign vpf1 = vpf[1];
+assign vpf2 = vpf[2];
+assign vpf3 = vpf[3];
 
 //----------------------------------------------------------------------------------------------------------------------
 // GEM Raw Hits Dummy RAM

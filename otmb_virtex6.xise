@@ -388,9 +388,6 @@
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="168"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="49"/>
     </file>
-    <file xil_pn:name="otmb.cdc" xil_pn:type="FILE_CDC">
-      <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
-    </file>
   </files>
 
   <properties>
@@ -722,7 +719,6 @@
 
   <bindings>
     <binding xil_pn:location="/otmb_virtex6" xil_pn:name="source/otmb_virtex6_pinout.ucf"/>
-    <binding xil_pn:location="/otmb_virtex6" xil_pn:name="otmb.cdc"/>
   </bindings>
 
   <libraries>

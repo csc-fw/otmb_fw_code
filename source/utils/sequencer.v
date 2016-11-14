@@ -772,6 +772,12 @@
   tmb_alctb,
   tmb_alcte,
 
+  alct_gem,
+  clct_gem,
+  alct_clct_gem,
+  clct_gem_noalct,
+  alct_gem_noclct,
+
 // MPC Status
   mpc_frame_ff,
   mpc0_frame0_ff,
@@ -1636,6 +1642,12 @@
   input  [10:0]      tmb_alct1;      // ALCT second best muon latched at trigger
   input  [4:0]      tmb_alctb;      // ALCT bxn latched at trigger
   input  [1:0]      tmb_alcte;      // ALCT ecc error syndrome latched at trigger
+
+  input  alct_gem;        // GEM matched (in time) to ALCT
+  input  clct_gem;        // GEM in CLCT open window
+  input  alct_clct_gem;   // CLCT*(ALCT*GEM) match
+  input  clct_gem_noalct; // CLCT lost (no alct), but with GEM
+  input  alct_gem_noclct; // ALCT lost (no clct), but with GEM
 
 // MPC Status
   input          mpc_frame_ff;    // MPC frame latch strobe
@@ -3180,6 +3192,12 @@
     gem_cnt_en[51] <= gem_active_feb_list[21];
     gem_cnt_en[52] <= gem_active_feb_list[22];
     gem_cnt_en[53] <= gem_active_feb_list[23];
+
+    gem_cnt_en[54] <= alct_gem;
+    gem_cnt_en[55] <= clct_gem;
+    gem_cnt_en[56] <= alct_clct_gem;
+    gem_cnt_en[57] <= clct_gem_noalct;
+    gem_cnt_en[58] <= alct_gem_noclct;
 
   end
 

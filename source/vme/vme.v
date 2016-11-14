@@ -3289,8 +3289,6 @@
   assign gtx_rx_err_count[5][7:0] = gtx_rx_err_count5[7:0];      //      Error count on this fiber channel
   assign gtx_rx_err_count[6][7:0] = gtx_rx_err_count6[7:0];      //      Error count on this fiber channel
 
-  wire [11:0] gtx_rx_err_count_all; // R      JRG: create a sum of all GTX error counts
-
 //rdk
 	wire	[7:0]		gem_rx_err_count [3:0];
 
@@ -7790,6 +7788,10 @@
   assign virtex6_gtx_rx_all_rd[7]   = |gtx_rx_pol_swap[MXCFEB-1:0];  // R    JRG: was bit9, and not very useful to read this signal -- GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes that are corrected within the GTX module
 //assign virtex6_gtx_rx_all_rd[10]  = |gtx_rx_err[MXCFEB-1:0];       // R    PRBS test detects an error
 
+  reg [11:0] gtx_rx_err_count_all;
+  always @ (posedge clock) begin
+    gtx_rx_err_count_all[11:0] <= gtx_rx_err_count0[7:0]+gtx_rx_err_count1[7:0]+gtx_rx_err_count2[7:0]+gtx_rx_err_count3[7:0]+gtx_rx_err_count4[7:0]+gtx_rx_err_count5[7:0]+gtx_rx_err_count6[7:0];
+  end
 
   assign virtex6_gtx_rx_all_rd[15:8] = (gtx_rx_err_count_all[11:8]==4'h0) ? gtx_rx_err_count_all[7:0] : 8'hFE; // R JRG: a sum of all GTX error counts, full scale set at hex FE
 //assign virtex6_gtx_rx_all_rd[15:11] = virtex6_gtx_rx_all_wr[15:11]; // RW       JRG: was Unused
@@ -7797,9 +7799,7 @@
   wire virtex6_gtx_rx_err_count_sump = (|gtx_rx_err_count0[15:8]) | (|gtx_rx_err_count1[15:8]) | (|gtx_rx_err_count2[15:8]) | (|gtx_rx_err_count3[15:8]) | (|gtx_rx_err_count4[15:8]) | (|gtx_rx_err_count5[15:8]) | (|gtx_rx_err_count6[15:8]);
   wire virtex6_gtx_rx_all_sump    = (|virtex6_gtx_rx_all_wr[15:11]) | (|virtex6_gtx_rx_all_wr[10:3]); // R    Unused write bits. JRG: used to be [10:4]
 
-  wire dcfeb_rx_sump = virtex6_gtx_rx_err_count_sump | virtex6_gtx_rx_all_sump | (|gtx_rx_fc) | (|gtx_rx_valid) | (|gtx_rx_match) | (|gtx_rx_rst_done) | (|gtx_rx_err) | (|gtx_rx_start);
-
-  assign gtx_rx_err_count_all[11:0] = gtx_rx_err_count0[7:0]+gtx_rx_err_count1[7:0]+gtx_rx_err_count2[7:0]+gtx_rx_err_count3[7:0]+gtx_rx_err_count4[7:0]+gtx_rx_err_count5[7:0]+gtx_rx_err_count6[7:0];
+  wire dcfeb_rx_sump = virtex6_gtx_rx_err_count_sump | virtex6_gtx_rx_all_sump | (|gtx_rx_fc) | (|gtx_rx_match) | (|gtx_rx_rst_done) | (|gtx_rx_start);
 
 //------------------------------------------------------------------------------------------------------------------
 // Virtex-6 GTX receiver 0 = 0x14C through receiver 6 = 0x158

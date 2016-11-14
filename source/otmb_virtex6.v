@@ -2501,6 +2501,12 @@
   .tmb_alctb (tmb_alctb[4:0]),  // In  ALCT bxn latched at trigger
   .tmb_alcte (tmb_alcte[1:0]),  // In  ALCT ecc error syndrome latched at trigger
 
+  .alct_gem         (alct_gem),        // In GEM matched (in time) to ALCT
+  .clct_gem         (clct_gem),        // In GEM in CLCT open window
+  .alct_clct_gem    (alct_clct_gem),   // In CLCT*(ALCT*GEM) match
+  .clct_gem_noalct  (clct_gem_noalct), // In CLCT lost (no alct), but with GEM
+  .alct_gem_noclct  (alct_gem_noclct), // In ALCT lost (no clct), but with GEM
+
 // Sequencer MPC Status
   .mpc_frame_ff   (mpc_frame_ff),                // In  MPC frame latch strobe
   .mpc0_frame0_ff (mpc0_frame0_ff[MXFRAME-1:0]), // In  MPC best muon 1st frame
@@ -3229,6 +3235,10 @@
   .alct_bx0_rx  (alct_bx0_rx),           // In  ALCT bx0 received
   .alct_ecc_err (alct_ecc_err[1:0]),     // In  ALCT ecc syndrome code
 
+// GEM
+  .gemA_vpf     (gemA_vpf[7:0]),
+  .gemB_vpf     (gemB_vpf[7:0]),
+
 // TMB-Sequencer Pipelines
   .wr_adr_xtmb (wr_adr_xtmb[MXBADR-1:0]), // In  Buffer write address after drift time
   .wr_adr_rtmb (wr_adr_rtmb[MXBADR-1:0]), // Out  Buffer write address at TMB matching time
@@ -3284,6 +3294,12 @@
   .tmb_alct1 (tmb_alct1[10:0]), // Out  ALCT second best muon latched at trigger
   .tmb_alctb (tmb_alctb[4:0]),  // Out  ALCT bxn latched at trigger
   .tmb_alcte (tmb_alcte[1:0]),  // Out  ALCT ecc error syndrome latched at trigger
+
+  .alct_gem         (alct_gem),        // Out GEM matched (in time) to ALCT
+  .clct_gem         (clct_gem),        // Out GEM in CLCT open window
+  .alct_clct_gem    (alct_clct_gem),   // Out CLCT*(ALCT*GEM) match
+  .clct_gem_noalct  (clct_gem_noalct), // Out CLCT lost (no alct), but with GEM
+  .alct_gem_noclct  (alct_gem_noclct), // Out ALCT lost (no clct), but with GEM
 
 // MPC Status
   .mpc_frame_ff   (mpc_frame_ff),                // Out  MPC frame latch strobe
