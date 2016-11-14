@@ -224,7 +224,7 @@ if {![file isdirectory $releasedir]} {
 
 file copy -force $mcs_filename   ${releasedir}/${fullname}.mcs
 file copy -force $bit_filename   ${releasedir}/${fullname}.bit
-file copy -force $svf_verify     ${releasedir}/${fullname}_verify.svf
-file copy -force $svf_noverify   ${releasedir}/${fullname}_noverify.svf
+#file copy -force $svf_verify     ${releasedir}/${fullname}_verify.svf
+#file copy -force $svf_noverify   ${releasedir}/${fullname}_noverify.svf
 file copy -force $prm_filename   ${releasedir}/${fullname}.prm
 file copy -force $cfi_filename   ${releasedir}/${fullname}.cfi

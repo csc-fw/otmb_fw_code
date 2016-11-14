@@ -869,8 +869,8 @@ NET "smb_data"				SLEW=FAST | DRIVE=4;
 NET "mez_sn"				SLEW=FAST | DRIVE=4;
 NET "adc_io<*>"				SLEW=FAST | DRIVE=4;
 NET "smb_clk"				SLEW=FAST | DRIVE=4;
-NET "mez_tp10_busy"				SLEW=FAST | DRIVE=4;
-NET "led_fp<*>"				SLEW=FAST | DRIVE=4;
+NET "mez_tp10_busy"			SLEW=FAST | DRIVE=4;
+NET "led_fp<*>"				SLEW=FAST | DRIVE=12;
 
 # General Purpose I/Os
 NET "gp_io0"				SLEW=FAST | DRIVE=4;
@@ -882,14 +882,14 @@ NET "gp_io6"				SLEW=FAST | DRIVE=4;
 NET "gp_io7"				SLEW=FAST | DRIVE=4;
 
 # Mezzanine Test Points
-NET "led_mezD1"				SLEW=FAST | DRIVE=4;
-NET "led_mezD2"				SLEW=FAST | DRIVE=4;
-NET "led_mezD3"				SLEW=FAST | DRIVE=4;
-NET "led_mezD4"				SLEW=FAST | DRIVE=4;
-NET "led_mezD5"				SLEW=FAST | DRIVE=4;
-NET "led_mezD6"				SLEW=FAST | DRIVE=4;
-NET "led_mezD7"				SLEW=FAST | DRIVE=4;
-NET "led_mezD8"				SLEW=FAST | DRIVE=4;
+NET "led_mezD1"				SLEW=FAST | DRIVE=12;
+NET "led_mezD2"				SLEW=FAST | DRIVE=12;
+NET "led_mezD3"				SLEW=FAST | DRIVE=12;
+NET "led_mezD4"				SLEW=FAST | DRIVE=12;
+NET "led_mezD5"				SLEW=FAST | DRIVE=12;
+NET "led_mezD6"				SLEW=FAST | DRIVE=12;
+NET "led_mezD7"				SLEW=FAST | DRIVE=12;
+NET "led_mezD8"				SLEW=FAST | DRIVE=12;
 
 #----------------------------------------------------------------------------------------------------------
 # Timing
