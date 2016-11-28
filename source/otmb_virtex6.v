@@ -246,14 +246,14 @@
   parameter MXRAMDATA    =  18;        // Number Raw Hits RAM data bits, does not include fifo wren
 
 // TMB Constants
-  parameter MXCLCT    =  16;        // Number bits per CLCT word
-  parameter MXCLCTC    =  3;        // Number bits per CLCT common data word
-  parameter MXALCT    =  16;        // Number bits per ALCT word
-  parameter MXMPCRX    =  2;        // Number bits from MPC
-  parameter MXMPCTX    =  32;        // Number bits sent to MPC
-  parameter MXFRAME    =  16;        // Number bits per muon frame
-  parameter NHBITS    =  6;        // Number bits needed for header count
-  parameter MXMPCDLY    =  4;        // MPC delay time bits
+  parameter MXCLCT   = 16; // Number bits per CLCT word
+  parameter MXCLCTC  =  3; // Number bits per CLCT common data word
+  parameter MXALCT   = 16; // Number bits per ALCT word
+  parameter MXMPCRX  =  2; // Number bits from MPC
+  parameter MXMPCTX  = 32; // Number bits sent to MPC
+  parameter MXFRAME  = 16; // Number bits per muon frame
+  parameter NHBITS   =  6; // Number bits needed for header count
+  parameter MXMPCDLY =  4; // MPC delay time bits
 
 // RPC Constants
   parameter MXRPC      =  2;        // Number RPCs
@@ -743,19 +743,19 @@
 //  ALCT Instantiation
 //-------------------------------------------------------------------------------------------------------------------
 // Local
-  wire  [MXALCT-1:0]  alct0_tmb;
-  wire  [MXALCT-1:0]  alct1_tmb;
-  wire  [15:0]      alct0_vme;
-  wire  [15:0]      alct1_vme;
-  wire  [18:0]      alct_dmb;
-  wire  [4:0]      bxn_alct_vme;      // ALCT bxn on last alct valid pattern flag
-  wire  [1:0]      alct_ecc_err;      // ALCT ecc syndrome code
-  wire  [3:0]      alct_seq_cmd;
-  wire  [55:0]      scp_alct_rx;
-  wire  [3:0]      alct_txd_int_delay;
-  wire  [4:0]      alct_inj_delay;
-  wire  [15:0]      alct0_inj;      
-  wire  [15:0]      alct1_inj;
+  wire [MXALCT-1:0] alct0_tmb;
+  wire [MXALCT-1:0] alct1_tmb;
+  wire [15:0]       alct0_vme;
+  wire [15:0]       alct1_vme;
+  wire [18:0]       alct_dmb;
+  wire [4:0]        bxn_alct_vme; // ALCT bxn on last alct valid pattern flag
+  wire [1:0]        alct_ecc_err; // ALCT ecc syndrome code
+  wire [3:0]        alct_seq_cmd;
+  wire [55:0]       scp_alct_rx;
+  wire [3:0]        alct_txd_int_delay;
+  wire [4:0]        alct_inj_delay;
+  wire [15:0]       alct0_inj;      
+  wire [15:0]       alct1_inj;
 
 // VME ALCT sync mode ports
   wire  [28:1]      alct_sync_rxdata_1st;  // Demux data for demux timing-in
@@ -943,23 +943,23 @@
   .read_sm_xdmb    (read_sm_xdmb),    // In  TMB sequencer starting a readout
 
 // TMB Ports
-  .alct0_tmb        (alct0_tmb[MXALCT-1:0]),  // Out  ALCT best muon
-  .alct1_tmb        (alct1_tmb[MXALCT-1:0]),  // Out  ALCT second best muon
-  .alct_bx0_rx      (alct_bx0_rx),        // Out  ALCT bx0 received
-  .alct_ecc_err      (alct_ecc_err[1:0]),    // Out  ALCT ecc syndrome code
-  .alct_ecc_rx_err    (alct_ecc_rx_err),      // Out  ALCT uncorrected ECC error in data ALCT received from TMB
-  .alct_ecc_tx_err    (alct_ecc_tx_err),      // Out  ALCT uncorrected ECC error in data ALCT transmitted to TMB
+  .alct0_tmb       (alct0_tmb[MXALCT-1:0]), // Out  ALCT best muon
+  .alct1_tmb       (alct1_tmb[MXALCT-1:0]), // Out  ALCT second best muon
+  .alct_ecc_err    (alct_ecc_err[1:0]),     // Out  ALCT ecc syndrome code
+  .alct_bx0_rx     (alct_bx0_rx),           // Out  ALCT bx0 received
+  .alct_ecc_rx_err (alct_ecc_rx_err),       // Out  ALCT uncorrected ECC error in data ALCT received from TMB
+  .alct_ecc_tx_err (alct_ecc_tx_err),       // Out  ALCT uncorrected ECC error in data ALCT transmitted to TMB
 
 // VME Ports
-  .alct_ecc_en      (alct_ecc_en),          // In  Enable ALCT ECC decoder, else do no ECC correction
-  .alct_ecc_err_blank    (alct_ecc_err_blank),      // In  Blank alcts with uncorrected ecc errors
-  .alct_txd_int_delay    (alct_txd_int_delay[3:0]),    // In  ALCT data transmit delay, integer bx
-  .alct_clock_en_vme    (alct_clock_en_vme),      // In  Enable ALCT 40MHz clock
-  .alct_seq_cmd      (alct_seq_cmd[3:0]),      // In  ALCT Sequencer command
-  .event_clear_vme    (event_clear_vme),        // In  Event clear for aff,alct,clct,mpc vme diagnostic registers
-  .alct0_vme        (alct0_vme[15:0]),        // Out  LCT latched last valid pattern
-  .alct1_vme        (alct1_vme[15:0]),        // Out  LCT latched last valid pattern
-  .bxn_alct_vme      (bxn_alct_vme),          // Out  ALCT bxn on last alct valid pattern flag
+  .alct_ecc_en        (alct_ecc_en),             // In  Enable ALCT ECC decoder, else do no ECC correction
+  .alct_ecc_err_blank (alct_ecc_err_blank),      // In  Blank alcts with uncorrected ecc errors
+  .alct_txd_int_delay (alct_txd_int_delay[3:0]), // In  ALCT data transmit delay, integer bx
+  .alct_clock_en_vme  (alct_clock_en_vme),       // In  Enable ALCT 40MHz clock
+  .alct_seq_cmd       (alct_seq_cmd[3:0]),       // In  ALCT Sequencer command
+  .event_clear_vme    (event_clear_vme),         // In  Event clear for aff,alct,clct,mpc vme diagnostic registers
+  .alct0_vme          (alct0_vme[15:0]),         // Out  LCT latched last valid pattern
+  .alct1_vme          (alct1_vme[15:0]),         // Out  LCT latched last valid pattern
+  .bxn_alct_vme       (bxn_alct_vme),            // Out  ALCT bxn on last alct valid pattern flag
 
 // VME ALCT sync mode ports
   .alct_sync_txdata_1st  (alct_sync_txdata_1st[9:0]),  // In  ALCT sync mode data to send for loopback
@@ -1198,30 +1198,30 @@
   cfeb #(.ICFEB(icfeb)) ucfeb
   (
 // Clock
-  .clock          (clock),              // In  40MHz TMB system clock from MMCM
-  .clk_lock       (lock_tmb_clock0),    // In  40MHz TMB system clock MMCM locked
-  .clock_4x       (clock_4x),           // In  4*40MHz TMB system clock from MMCM
-  .clock_cfeb_rxd      (clock_cfeb_rxd[icfeb]),      // In  CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
-  .cfeb_rxd_posneg    (cfeb_rxd_posneg[icfeb]),      // In  CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
-  .cfeb_rxd_int_delay    (cfeb_rxd_int_delay[icfeb][3:0]),  // In  Interstage delay, integer bx
+  .clock              (clock),                          // In  40MHz TMB system clock from MMCM
+  .clk_lock           (lock_tmb_clock0),                // In  40MHz TMB system clock MMCM locked
+  .clock_4x           (clock_4x),                       // In  4*40MHz TMB system clock from MMCM
+  .clock_cfeb_rxd     (clock_cfeb_rxd[icfeb]),          // In  CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
+  .cfeb_rxd_posneg    (cfeb_rxd_posneg[icfeb]),         // In  CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
+  .cfeb_rxd_int_delay (cfeb_rxd_int_delay[icfeb][3:0]), // In  Interstage delay, integer bx
 //      .phaser_ready (ready_phaser[icfeb]),   // new In
 
 // Resets
-  .global_reset      (global_reset),            // In  Global reset
-  .ttc_resync        (ttc_resync),            // In  TTC resync
-  .mask_all        (mask_all[icfeb]),          // In  1=Enable, 0=Turn off all inputs
+  .global_reset (global_reset),    // In  Global reset
+  .ttc_resync   (ttc_resync),      // In  TTC resync
+  .mask_all     (mask_all[icfeb]), // In  1=Enable, 0=Turn off all inputs
 
 // Injector Ports
-  .inj_febsel        (inj_febsel[icfeb]),        // In  1=Enable RAM write
-  .inject          (injector_go_cfeb[icfeb]),      // In  1=Start pattern injector
-  .inj_last_tbin      (inj_last_tbin[11:0]),        // In  Last tbin, may wrap past 1024 ram adr
-  .inj_wen        (inj_wen[2:0]),            // In  1=Write enable injector RAM
+  .inj_febsel       (inj_febsel[icfeb]),       // In  1=Enable RAM write
+  .inject           (injector_go_cfeb[icfeb]), // In  1=Start pattern injector
+  .inj_last_tbin    (inj_last_tbin[11:0]),     // In  Last tbin, may wrap past 1024 ram adr
+  .inj_wen          (inj_wen[2:0]),            // In  1=Write enable injector RAM
   .inj_rwadr        (inj_rwadr[9:0]),          // In  Injector RAM read/write address
-  .inj_wdata        (inj_wdata[17:0]),          // In  Injector RAM write data
-  .inj_ren        (inj_ren[2:0]),            // In  1=Read enable Injector RAM
-  .inj_rdata        (inj_rdata[icfeb][17:0]),      // Out  Injector RAM read data
-  .inj_ramout        (inj_ramout[icfeb][5:0]),      // Out  Injector RAM read data for ALCT and L1A
-  .inj_ramout_pulse    (inj_ramout_pulse[icfeb]),      // Out  Injector RAM is injecting
+  .inj_wdata        (inj_wdata[17:0]),         // In  Injector RAM write data
+  .inj_ren          (inj_ren[2:0]),            // In  1=Read enable Injector RAM
+  .inj_rdata        (inj_rdata[icfeb][17:0]),  // Out  Injector RAM read data
+  .inj_ramout       (inj_ramout[icfeb][5:0]),  // Out  Injector RAM read data for ALCT and L1A
+  .inj_ramout_pulse (inj_ramout_pulse[icfeb]), // Out  Injector RAM is injecting
 
 // Raw Hits FIFO RAM Ports
   .fifo_wen   (fifo_wen),                         // In  1=Write enable FIFO RAM
@@ -1231,19 +1231,19 @@
   .fifo_rdata (fifo_rdata[icfeb][RAM_WIDTH-1:0]), // Out  FIFO RAM read data
 
 // Hot Channel Mask Ports
-  .ly0_hcm        (cfeb_ly0_hcm[icfeb][MXDS-1:0]),  // In  1=enable DiStrip
-  .ly1_hcm        (cfeb_ly1_hcm[icfeb][MXDS-1:0]),  // In  1=enable DiStrip
-  .ly2_hcm        (cfeb_ly2_hcm[icfeb][MXDS-1:0]),  // In  1=enable DiStrip
-  .ly3_hcm        (cfeb_ly3_hcm[icfeb][MXDS-1:0]),  // In  1=enable DiStrip
-  .ly4_hcm        (cfeb_ly4_hcm[icfeb][MXDS-1:0]),  // In  1=enable DiStrip
-  .ly5_hcm        (cfeb_ly5_hcm[icfeb][MXDS-1:0]),  // In  1=enable DiStrip
+  .ly0_hcm        (cfeb_ly0_hcm[icfeb][MXDS-1:0]), // In  1=enable DiStrip
+  .ly1_hcm        (cfeb_ly1_hcm[icfeb][MXDS-1:0]), // In  1=enable DiStrip
+  .ly2_hcm        (cfeb_ly2_hcm[icfeb][MXDS-1:0]), // In  1=enable DiStrip
+  .ly3_hcm        (cfeb_ly3_hcm[icfeb][MXDS-1:0]), // In  1=enable DiStrip
+  .ly4_hcm        (cfeb_ly4_hcm[icfeb][MXDS-1:0]), // In  1=enable DiStrip
+  .ly5_hcm        (cfeb_ly5_hcm[icfeb][MXDS-1:0]), // In  1=enable DiStrip
 
 // Bad CFEB rx bit detection
-  .cfeb_badbits_reset    (cfeb_badbits_reset[icfeb]),    // In  Reset bad cfeb bits FFs
-  .cfeb_badbits_block    (cfeb_badbits_block[icfeb]),    // In  Allow bad bits to block triads
-  .cfeb_badbits_nbx    (cfeb_badbits_nbx[15:0]),      // In  Cycles a bad bit must be continuously high
-  .cfeb_badbits_found    (cfeb_badbits_found[icfeb]),    // Out  CFEB[n] has at least 1 bad bit
-  .cfeb_blockedbits    (cfeb_blockedbits[icfeb]),      // Out  1=CFEB rx bit blocked by hcm or went bad, packed
+  .cfeb_badbits_reset (cfeb_badbits_reset[icfeb]), // In  Reset bad cfeb bits FFs
+  .cfeb_badbits_block (cfeb_badbits_block[icfeb]), // In  Allow bad bits to block triads
+  .cfeb_badbits_nbx   (cfeb_badbits_nbx[15:0]),    // In  Cycles a bad bit must be continuously high
+  .cfeb_badbits_found (cfeb_badbits_found[icfeb]), // Out  CFEB[n] has at least 1 bad bit
+  .cfeb_blockedbits   (cfeb_blockedbits[icfeb]),   // Out  1=CFEB rx bit blocked by hcm or went bad, packed
 
   .ly0_badbits      (cfeb_ly0_badbits[icfeb][MXDS-1:0]),// Out  1=CFEB rx bit went bad
   .ly1_badbits      (cfeb_ly1_badbits[icfeb][MXDS-1:0]),// Out  1=CFEB rx bit went bad
@@ -1527,7 +1527,7 @@
 
   wire [3:0] alct_delay;            // Delay ALCT for CLCT match window
   wire [3:0] clct_window;           // CLCT match window width (for CLCT-centric "old" algorithm)
-  wire [3:0] algo2016_clct_window;  // CLCT match window width (for ALCT-centric 2016 algorithm)
+  wire [3:0] algo2016_window;       // CLCT match window width (for ALCT-centric 2016 algorithm)
   wire       algo2016_clct_to_alct; // ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
   wire [3:0] alct_bx0_delay;        // ALCT bx0 delay to mpc transmitter
   wire [3:0] clct_bx0_delay;        // CLCT bx0 delay to mpc transmitter
@@ -1535,9 +1535,9 @@
   wire       algo2016_use_dead_time_zone;         // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
   wire [4:0] algo2016_dead_time_zone_size;        // Constant size of the dead time zone
   wire       algo2016_use_dynamic_dead_time_zone; // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
-  wire       algo2016_drop_used_clcts;            // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - similar to "old" behavior of CLCT-centric algorithm when ALCTs are droped from further usage
+  wire       algo2016_drop_used_clcts;            // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - drop used CLCTs
   wire       algo2016_cross_bx_algorithm;         // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
-  wire       algo2016_clct_use_corrected_bx;      // Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
+  wire       algo2016_clct_use_corrected_bx;      // NOT YET IMPLEMENTED: Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
   
   wire  [MXMPCDLY-1:0]  mpc_rx_delay;
   wire  [MXMPCDLY-1:0]  mpc_tx_delay;
@@ -1551,11 +1551,11 @@
   wire  [ 4:0]      tmb_alctb;
   wire  [ 1:0]      tmb_alcte;
 
-  wire  [1:0]      mpc_accept_ff;
-  wire  [1:0]      mpc_reserved_ff;
-  wire  [3:0]      tmb_match_win;
-  wire  [3:0]      tmb_match_pri;
-  wire  [MXCFEB-1:0]  tmb_aff_list;      // Active CFEBs for CLCT used in TMB match
+  wire [1:0]        mpc_accept_ff;
+  wire [1:0]        mpc_reserved_ff;
+  wire [3:0]        tmb_match_win;
+  wire [3:0]        tmb_match_pri;
+  wire [MXCFEB-1:0] tmb_aff_list; // Active CFEBs for CLCT used in TMB match
 
 // Sequencer Buffer Arrays
   wire [MXFMODE-1:0]    fifo_mode;
@@ -1785,10 +1785,8 @@
   .clct_throttle      (clct_throttle[MXTHROTTLE-1:0]), // In  Pre-trigger throttle to reduce trigger rate
   .clct_wr_continuous (clct_wr_continuous),            // In  1=allow continuous header buffer writing for invalid triggers
 
-  .alct_delay            (alct_delay[3:0]),           // In Delay ALCT for CLCT match window
-  .clct_window           (clct_window[3:0]),          // In CLCT match window width (for CLCT-centric "old" algorithm)
-  .algo2016_clct_window  (algo2016_clct_window[3:0]), // In CLCT match window width (for ALCT-centric 2016 algorithm)
-  .algo2016_clct_to_alct (algo2016_clct_to_alct),     // In ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
+  .alct_delay            (alct_delay[3:0]),       // In Delay ALCT for CLCT match window
+  .clct_window        (clct_window[3:0]),      // In CLCT match window width (for CLCT-centric "old" algorithm)
   
   .algo2016_use_dead_time_zone         (algo2016_use_dead_time_zone),         // In Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
   .algo2016_dead_time_zone_size        (algo2016_dead_time_zone_size[4:0]),   // In Constant size of the dead time zone
@@ -1971,45 +1969,46 @@
   .wr_avail_rmpc    (wr_avail_rmpc),      // In  Buffer available at MPC received
 
 // Sequencer TMB LCT Match results
-  .clct0_xtmb    (clct0_xtmb[MXCLCT-1:0]),    // Out  First  CLCT
-  .clct1_xtmb    (clct1_xtmb[MXCLCT-1:0]),    // Out  Second CLCT
-  .clctc_xtmb    (clctc_xtmb[MXCLCTC-1:0]),    // Out  Common to CLCT0/1 to TMB
-  .clctf_xtmb    (clctf_xtmb[MXCFEB-1:0]),    // Out  Active cfeb list to TMB
-  .bx0_xmpc    (bx0_xmpc),        // Out  bx0 to tmb aligned with clct0/1
-  .bx0_match    (bx0_match),        // In  ALCT bx0 and CLCT bx0 match in time
+  .clct0_xtmb (clct0_xtmb[MXCLCT-1:0]),  // Out  First  CLCT
+  .clct1_xtmb (clct1_xtmb[MXCLCT-1:0]),  // Out  Second CLCT
+  .clctc_xtmb (clctc_xtmb[MXCLCTC-1:0]), // Out  Common to CLCT0/1 to TMB
+  .clctf_xtmb (clctf_xtmb[MXCFEB-1:0]),  // Out  Active cfeb list to TMB
 
-  .tmb_trig_pulse    (tmb_trig_pulse),      // In  ALCT or CLCT or both triggered
-  .tmb_trig_keep    (tmb_trig_keep),      // In  ALCT or CLCT or both triggered, and trigger is allowed
-  .tmb_non_trig_keep  (tmb_non_trig_keep),      // In  Event did not trigger, but keep it for readout
-  .tmb_match    (tmb_match),        // In  ALCT and CLCT matched in time
-  .tmb_alct_only    (tmb_alct_only),      // In  Only ALCT triggered
-  .tmb_clct_only    (tmb_clct_only),      // In  Only CLCT triggered
-  .tmb_match_win    (tmb_match_win[3:0]),      // In  Location of alct in clct window
-  .tmb_match_pri    (tmb_match_pri[3:0]),      // In  Priority of clct in clct window
-  .tmb_alct_discard  (tmb_alct_discard),      // In  ALCT pair was not used for LCT
-  .tmb_clct_discard  (tmb_clct_discard),      // In  CLCT pair was not used for LCT
-  .tmb_clct0_discard  (tmb_clct0_discard),      // In  CLCT0 was not used for LCT because from ME1A
-  .tmb_clct1_discard  (tmb_clct1_discard),      // In  CLCT1 was not used for LCT because from ME1A
-  .tmb_aff_list    (tmb_aff_list[MXCFEB-1:0]),    // In  Active CFEBs for CLCT used in TMB match
+  .bx0_xmpc   (bx0_xmpc),  // Out  bx0 to tmb aligned with clct0/1
+  .bx0_match  (bx0_match), // In  ALCT bx0 and CLCT bx0 match in time
 
-  .tmb_match_ro    (tmb_match_ro),        // In  ALCT and CLCT matched in time, non-triggering readout
-  .tmb_alct_only_ro  (tmb_alct_only_ro),      // In  Only ALCT triggered, non-triggering readout
-  .tmb_clct_only_ro  (tmb_clct_only_ro),      // In  Only CLCT triggered, non-triggering readout
+  .tmb_trig_pulse    (tmb_trig_pulse),           // In  ALCT or CLCT or both triggered
+  .tmb_trig_keep     (tmb_trig_keep),            // In  ALCT or CLCT or both triggered, and trigger is allowed
+  .tmb_non_trig_keep (tmb_non_trig_keep),        // In  Event did not trigger, but keep it for readout
+  .tmb_match         (tmb_match),                // In  ALCT and CLCT matched in time
+  .tmb_alct_only     (tmb_alct_only),            // In  Only ALCT triggered
+  .tmb_clct_only     (tmb_clct_only),            // In  Only CLCT triggered
+  .tmb_match_win     (tmb_match_win[3:0]),       // In  Location of alct in clct window
+  .tmb_match_pri     (tmb_match_pri[3:0]),       // In  Priority of clct in clct window
+  .tmb_alct_discard  (tmb_alct_discard),         // In  ALCT pair was not used for LCT
+  .tmb_clct_discard  (tmb_clct_discard),         // In  CLCT pair was not used for LCT
+  .tmb_clct0_discard (tmb_clct0_discard),        // In  CLCT0 was not used for LCT because from ME1A
+  .tmb_clct1_discard (tmb_clct1_discard),        // In  CLCT1 was not used for LCT because from ME1A
+  .tmb_aff_list      (tmb_aff_list[MXCFEB-1:0]), // In  Active CFEBs for CLCT used in TMB match
 
-  .tmb_no_alct    (tmb_no_alct),        // In  No  ALCT
-  .tmb_no_clct    (tmb_no_clct),        // In  No  CLCT
-  .tmb_one_alct    (tmb_one_alct),        // In  One ALCT
-  .tmb_one_clct    (tmb_one_clct),        // In  One CLCT
-  .tmb_two_alct    (tmb_two_alct),        // In  Two ALCTs
-  .tmb_two_clct    (tmb_two_clct),        // In  Two CLCTs
-  .tmb_dupe_alct    (tmb_dupe_alct),      // In  ALCT0 copied into ALCT1 to make 2nd LCT
-  .tmb_dupe_clct    (tmb_dupe_clct),      // In  CLCT0 copied into CLCT1 to make 2nd LCT
-  .tmb_rank_err    (tmb_rank_err),        // In  LCT1 has higher quality than LCT0
+  .tmb_match_ro     (tmb_match_ro),     // In  ALCT and CLCT matched in time, non-triggering readout
+  .tmb_alct_only_ro (tmb_alct_only_ro), // In  Only ALCT triggered, non-triggering readout
+  .tmb_clct_only_ro (tmb_clct_only_ro), // In  Only CLCT triggered, non-triggering readout
 
-  .tmb_alct0    (tmb_alct0[10:0]),      // In  ALCT best muon latched at trigger
-  .tmb_alct1    (tmb_alct1[10:0]),      // In  ALCT second best muon latched at trigger
-  .tmb_alctb    (tmb_alctb[4:0]),      // In  ALCT bxn latched at trigger
-  .tmb_alcte    (tmb_alcte[1:0]),      // In  ALCT ecc error syndrome latched at trigger
+  .tmb_no_alct   (tmb_no_alct),   // In  No  ALCT
+  .tmb_no_clct   (tmb_no_clct),   // In  No  CLCT
+  .tmb_one_alct  (tmb_one_alct),  // In  One ALCT
+  .tmb_one_clct  (tmb_one_clct),  // In  One CLCT
+  .tmb_two_alct  (tmb_two_alct),  // In  Two ALCTs
+  .tmb_two_clct  (tmb_two_clct),  // In  Two CLCTs
+  .tmb_dupe_alct (tmb_dupe_alct), // In  ALCT0 copied into ALCT1 to make 2nd LCT
+  .tmb_dupe_clct (tmb_dupe_clct), // In  CLCT0 copied into CLCT1 to make 2nd LCT
+  .tmb_rank_err  (tmb_rank_err),  // In  LCT1 has higher quality than LCT0
+
+  .tmb_alct0 (tmb_alct0[10:0]), // In  ALCT best muon latched at trigger
+  .tmb_alct1 (tmb_alct1[10:0]), // In  ALCT second best muon latched at trigger
+  .tmb_alctb (tmb_alctb[4:0]),  // In  ALCT bxn latched at trigger
+  .tmb_alcte (tmb_alcte[1:0]),  // In  ALCT ecc error syndrome latched at trigger
 
 // Sequencer MPC Status
   .mpc_frame_ff    (mpc_frame_ff),        // In  MPC frame latch strobe
@@ -2558,10 +2557,10 @@
   .ttc_resync      (ttc_resync),          // In  TTC resync
 
 // ALCT
-  .alct0_tmb      (alct0_tmb[MXALCT-1:0]),    // In  ALCT best muon
-  .alct1_tmb      (alct1_tmb[MXALCT-1:0]),    // In  ALCT second best muon
-  .alct_bx0_rx    (alct_bx0_rx),          // In  ALCT bx0 received
-  .alct_ecc_err    (alct_ecc_err[1:0]),      // In  ALCT ecc syndrome code
+  .alct0_tmb    (alct0_tmb[MXALCT-1:0]), // In  ALCT best muon
+  .alct1_tmb    (alct1_tmb[MXALCT-1:0]), // In  ALCT second best muon
+  .alct_bx0_rx  (alct_bx0_rx),           // In  ALCT bx0 received
+  .alct_ecc_err (alct_ecc_err[1:0]),     // In  ALCT ecc syndrome code
 
 // TMB-Sequencer Pipelines
   .wr_adr_xtmb    (wr_adr_xtmb[MXBADR-1:0]),    // In  Buffer write address after drift time
@@ -2580,44 +2579,45 @@
   .wr_avail_rmpc    (wr_avail_rmpc),        // Out  Buffer available at MPC received
 
 // Sequencer
-  .clct0_xtmb      (clct0_xtmb[MXCLCT-1:0]),    // In  First  CLCT
-  .clct1_xtmb      (clct1_xtmb[MXCLCT-1:0]),    // In  Second CLCT
-  .clctc_xtmb      (clctc_xtmb[MXCLCTC-1:0]),    // In  Common to CLCT0/1 to TMB
-  .clctf_xtmb      (clctf_xtmb[MXCFEB-1:0]),    // In  Active cfeb list to TMB
-  .bx0_xmpc      (bx0_xmpc),            // In  bx0 to mpc
+  .clct0_xtmb (clct0_xtmb[MXCLCT-1:0]),  // In  First  CLCT
+  .clct1_xtmb (clct1_xtmb[MXCLCT-1:0]),  // In  Second CLCT
+  .clctc_xtmb (clctc_xtmb[MXCLCTC-1:0]), // In  Common to CLCT0/1 to TMB
+  .clctf_xtmb (clctf_xtmb[MXCFEB-1:0]),  // In  Active cfeb list to TMB
 
-  .tmb_trig_pulse    (tmb_trig_pulse),        // Out  ALCT or CLCT or both triggered
-  .tmb_trig_keep    (tmb_trig_keep),        // Out  ALCT or CLCT or both triggered, and trigger is allowed
-  .tmb_non_trig_keep  (tmb_non_trig_keep),      // Out  Event did not trigger, but keep it for readout
-  .tmb_match      (tmb_match),          // Out  ALCT and CLCT matched in time
-  .tmb_alct_only    (tmb_alct_only),        // Out  Only ALCT triggered
-  .tmb_clct_only    (tmb_clct_only),        // Out  Only CLCT triggered
-  .tmb_match_win    (tmb_match_win[3:0]),      // Out  Location of alct in clct window
-  .tmb_match_pri    (tmb_match_pri[3:0]),      // Out  Priority of clct in clct window
-  .tmb_alct_discard  (tmb_alct_discard),        // Out  ALCT pair was not used for LCT
-  .tmb_clct_discard  (tmb_clct_discard),        // Out  CLCT pair was not used for LCT
-  .tmb_clct0_discard  (tmb_clct0_discard),      // Out  CLCT0 was not used for LCT because from ME1A
-  .tmb_clct1_discard  (tmb_clct1_discard),      // Out  CLCT1 was not used for LCT because from ME1A
-  .tmb_aff_list    (tmb_aff_list[MXCFEB-1:0]),    // Out  Active CFEBs for CLCT used in TMB match
+  .bx0_xmpc (bx0_xmpc), // In  bx0 to mpc
 
-  .tmb_match_ro    (tmb_match_ro),          // Out  ALCT and CLCT matched in time, non-triggering readout
-  .tmb_alct_only_ro  (tmb_alct_only_ro),        // Out  Only ALCT triggered, non-triggering readout
-  .tmb_clct_only_ro  (tmb_clct_only_ro),        // Out  Only CLCT triggered, non-triggering readout
+  .tmb_trig_pulse    (tmb_trig_pulse),           // Out  ALCT or CLCT or both triggered
+  .tmb_trig_keep     (tmb_trig_keep),            // Out  ALCT or CLCT or both triggered, and trigger is allowed
+  .tmb_non_trig_keep (tmb_non_trig_keep),        // Out  Event did not trigger, but keep it for readout
+  .tmb_match         (tmb_match),                // Out  ALCT and CLCT matched in time
+  .tmb_alct_only     (tmb_alct_only),            // Out  Only ALCT triggered
+  .tmb_clct_only     (tmb_clct_only),            // Out  Only CLCT triggered
+  .tmb_match_win     (tmb_match_win[3:0]),       // Out  Location of alct in clct window
+  .tmb_match_pri     (tmb_match_pri[3:0]),       // Out  Priority of clct in clct window
+  .tmb_alct_discard  (tmb_alct_discard),         // Out  ALCT pair was not used for LCT
+  .tmb_clct_discard  (tmb_clct_discard),         // Out  CLCT pair was not used for LCT
+  .tmb_clct0_discard (tmb_clct0_discard),        // Out  CLCT0 was not used for LCT because from ME1A
+  .tmb_clct1_discard (tmb_clct1_discard),        // Out  CLCT1 was not used for LCT because from ME1A
+  .tmb_aff_list      (tmb_aff_list[MXCFEB-1:0]), // Out  Active CFEBs for CLCT used in TMB match
 
-  .tmb_no_alct    (tmb_no_alct),          // Out  No  ALCT
-  .tmb_no_clct    (tmb_no_clct),          // Out  No  CLCT
-  .tmb_one_alct    (tmb_one_alct),          // Out  One ALCT
-  .tmb_one_clct    (tmb_one_clct),          // Out  One CLCT
-  .tmb_two_alct    (tmb_two_alct),          // Out  Two ALCTs
-  .tmb_two_clct    (tmb_two_clct),          // Out  Two CLCTs
-  .tmb_dupe_alct    (tmb_dupe_alct),        // Out  ALCT0 copied into ALCT1 to make 2nd LCT
-  .tmb_dupe_clct    (tmb_dupe_clct),        // Out  CLCT0 copied into CLCT1 to make 2nd LCT
-  .tmb_rank_err    (tmb_rank_err),          // Out  LCT1 has higher quality than LCT0
+  .tmb_match_ro     (tmb_match_ro),     // Out  ALCT and CLCT matched in time, non-triggering readout
+  .tmb_alct_only_ro (tmb_alct_only_ro), // Out  Only ALCT triggered, non-triggering readout
+  .tmb_clct_only_ro (tmb_clct_only_ro), // Out  Only CLCT triggered, non-triggering readout
 
-  .tmb_alct0      (tmb_alct0[10:0]),        // Out  ALCT best muon latched at trigger
-  .tmb_alct1      (tmb_alct1[10:0]),        // Out  ALCT second best muon latched at trigger
-  .tmb_alctb      (tmb_alctb[4:0]),        // Out  ALCT bxn latched at trigger
-  .tmb_alcte      (tmb_alcte[1:0]),        // Out  ALCT ecc error syndrome latched at trigger
+  .tmb_no_alct   (tmb_no_alct),   // Out  No  ALCT
+  .tmb_no_clct   (tmb_no_clct),   // Out  No  CLCT
+  .tmb_one_alct  (tmb_one_alct),  // Out  One ALCT
+  .tmb_one_clct  (tmb_one_clct),  // Out  One CLCT
+  .tmb_two_alct  (tmb_two_alct),  // Out  Two ALCTs
+  .tmb_two_clct  (tmb_two_clct),  // Out  Two CLCTs
+  .tmb_dupe_alct (tmb_dupe_alct), // Out  ALCT0 copied into ALCT1 to make 2nd LCT
+  .tmb_dupe_clct (tmb_dupe_clct), // Out  CLCT0 copied into CLCT1 to make 2nd LCT
+  .tmb_rank_err  (tmb_rank_err),  // Out  LCT1 has higher quality than LCT0
+
+  .tmb_alct0 (tmb_alct0[10:0]), // Out  ALCT best muon latched at trigger
+  .tmb_alct1 (tmb_alct1[10:0]), // Out  ALCT second best muon latched at trigger
+  .tmb_alctb (tmb_alctb[4:0]),  // Out  ALCT bxn latched at trigger
+  .tmb_alcte (tmb_alcte[1:0]),  // Out  ALCT ecc error syndrome latched at trigger
 
 // MPC Status
   .mpc_frame_ff    (mpc_frame_ff),          // Out  MPC frame latch strobe
@@ -2638,34 +2638,38 @@
   ._mpc_tx      (_mpc_tx[MXMPCTX-1:0]),      // Out  MPC 80MHz rx data
 
 // VME Configuration
-  .alct_delay            (alct_delay[3:0]),           // In Delay ALCT for CLCT match window
-  .clct_window           (clct_window[3:0]),          // In CLCT match window width (for CLCT-centric "old" algorithm)
-  .algo2016_clct_window  (algo2016_clct_window[3:0]), // In CLCT match window width (for ALCT-centric 2016 algorithm)
-  .algo2016_clct_to_alct (algo2016_clct_to_alct),     // In ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
+  .alct_delay            (alct_delay[3:0]),       // In Delay ALCT for CLCT match window
+  .clct_window_in        (clct_window[3:0]),      // In CLCT match window width (for CLCT-centric "old" algorithm)
+  .algo2016_window       (algo2016_window[3:0]),  // In CLCT match window width (for ALCT-centric 2016 algorithm)
+  .algo2016_clct_to_alct (algo2016_clct_to_alct), // In ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
 
   .tmb_sync_err_en  (tmb_sync_err_en[1:0]),      // In  Allow sync_err to MPC for either muon
   .tmb_allow_alct    (tmb_allow_alct),        // In  Allow ALCT only 
   .tmb_allow_clct    (tmb_allow_clct),        // In  Allow CLCT only
   .tmb_allow_match  (tmb_allow_match),        // In  Allow ALCT+CLCT match
 
-  .tmb_allow_alct_ro  (tmb_allow_alct_ro),      // In  Allow ALCT only  readout, non-triggering
-  .tmb_allow_clct_ro  (tmb_allow_clct_ro),      // In  Allow CLCT only  readout, non-triggering
-  .tmb_allow_match_ro  (tmb_allow_match_ro),      // In  Allow Match only readout, non-triggering
+  .tmb_allow_alct_ro  (tmb_allow_alct_ro),  // In  Allow ALCT only  readout, non-triggering
+  .tmb_allow_clct_ro  (tmb_allow_clct_ro),  // In  Allow CLCT only  readout, non-triggering
+  .tmb_allow_match_ro (tmb_allow_match_ro), // In  Allow Match only readout, non-triggering
+  
+  .algo2016_drop_used_clcts(algo2016_drop_used_clcts),             // In Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - drop used CLCTs
+  .algo2016_cross_bx_algorithm(algo2016_cross_bx_algorithm),       // In LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
+  .algo2016_clct_use_corrected_bx(algo2016_clct_use_corrected_bx), // In Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits NOT YET IMPLEMENTED:
+  
+  .csc_id          (csc_id[MXCSC-1:0]),   // In  CSC station number
+  .csc_me1ab       (csc_me1ab),           // In  1=ME1A or ME1B CSC type
+  .alct_bx0_delay  (alct_bx0_delay[3:0]), // In  ALCT bx0 delay to mpc transmitter
+  .clct_bx0_delay  (clct_bx0_delay[3:0]), // In  CLCT bx0 delay to mpc transmitter
+  .alct_bx0_enable (alct_bx0_enable),     // In  Enable using alct bx0, else copy clct bx0
+  .bx0_vpf_test    (bx0_vpf_test),        // In  Sets clct_bx0=lct0_vpf for bx0 alignment tests
+  .bx0_match       (bx0_match),           // Out  ALCT bx0 and CLCT bx0 match in time
 
-  .csc_id        (csc_id[MXCSC-1:0]),      // In  CSC station number
-  .csc_me1ab      (csc_me1ab),          // In  1=ME1A or ME1B CSC type
-  .alct_bx0_delay    (alct_bx0_delay[3:0]),      // In  ALCT bx0 delay to mpc transmitter
-  .clct_bx0_delay    (clct_bx0_delay[3:0]),      // In  CLCT bx0 delay to mpc transmitter
-  .alct_bx0_enable  (alct_bx0_enable),        // In  Enable using alct bx0, else copy clct bx0
-  .bx0_vpf_test    (bx0_vpf_test),          // In  Sets clct_bx0=lct0_vpf for bx0 alignment tests
-  .bx0_match      (bx0_match),          // Out  ALCT bx0 and CLCT bx0 match in time
-
-  .mpc_rx_delay    (mpc_rx_delay[MXMPCDLY-1:0]),  // In  MPC response delay
-  .mpc_tx_delay    (mpc_tx_delay[MXMPCDLY-1:0]),  // In  MPC transmit delay
-  .mpc_idle_blank    (mpc_idle_blank),        // In  Blank mpc output except on trigger, block bx0 too
-  .mpc_me1a_block    (mpc_me1a_block),        // In  Block ME1A LCTs from MPC, but still queue for L1A readout
-  .mpc_oe        (mpc_oe),            // In  MPC output enable, 1=en
-  .sync_err_blanks_mpc(sync_err_blanks_mpc),      // In  Sync error blanks LCTs to MPC
+  .mpc_rx_delay        (mpc_rx_delay[MXMPCDLY-1:0]), // In  MPC response delay
+  .mpc_tx_delay        (mpc_tx_delay[MXMPCDLY-1:0]), // In  MPC transmit delay
+  .mpc_idle_blank      (mpc_idle_blank),             // In  Blank mpc output except on trigger, block bx0 too
+  .mpc_me1a_block      (mpc_me1a_block),             // In  Block ME1A LCTs from MPC, but still queue for L1A readout
+  .mpc_oe              (mpc_oe),                     // In  MPC output enable, 1=en
+  .sync_err_blanks_mpc (sync_err_blanks_mpc),        // In  Sync error blanks LCTs to MPC
 
 // VME Status
   .event_clear_vme  (event_clear_vme),        // In  Event clear for aff,clct,mpc vme diagnostic registers
@@ -3513,21 +3517,21 @@
       .fifo_pretrig_mini    (fifo_pretrig_mini[MXTBIN-1:0]),// Out  Number Mini FIFO time bins before pretrigger
 
       // TMB Ports: Configuration
-      .alct_delay            (alct_delay[3:0]),           // Out Delay ALCT for CLCT match window
-      .clct_window           (clct_window[3:0]),          // Out CLCT match window width (for CLCT-centric "old" algorithm)
-      .algo2016_clct_window  (algo2016_clct_window[3:0]), // Out CLCT match window width (for ALCT-centric 2016 algorithm)
-      .algo2016_clct_to_alct (algo2016_clct_to_alct),     // Out ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
-      .tmb_sync_err_en       (tmb_sync_err_en[1:0]),      // Out Allow sync_err to MPC for either muon
-      .tmb_allow_alct        (tmb_allow_alct),            // Out Allow ALCT only 
-      .tmb_allow_clct        (tmb_allow_clct),            // Out Allow CLCT only
-      .tmb_allow_match       (tmb_allow_match),           // Out Allow ALCT+CLCT match
+      .alct_delay            (alct_delay[3:0]),       // Out Delay ALCT for CLCT match window
+      .clct_window           (clct_window[3:0]),      // Out CLCT match window width (for CLCT-centric "old" algorithm)
+      .algo2016_window       (algo2016_window[3:0]),  // Out CLCT match window width (for ALCT-centric 2016 algorithm)
+      .algo2016_clct_to_alct (algo2016_clct_to_alct), // Out ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
+      .tmb_sync_err_en       (tmb_sync_err_en[1:0]),  // Out Allow sync_err to MPC for either muon
+      .tmb_allow_alct        (tmb_allow_alct),        // Out Allow ALCT only 
+      .tmb_allow_clct        (tmb_allow_clct),        // Out Allow CLCT only
+      .tmb_allow_match       (tmb_allow_match),       // Out Allow ALCT+CLCT match
       
       .algo2016_use_dead_time_zone         (algo2016_use_dead_time_zone),         // Out Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
       .algo2016_dead_time_zone_size        (algo2016_dead_time_zone_size[4:0]),   // Out Constant size of the dead time zone
       .algo2016_use_dynamic_dead_time_zone (algo2016_use_dynamic_dead_time_zone), // Out Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
-      .algo2016_drop_used_clcts            (algo2016_drop_used_clcts),            // Out Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - similar to "old" behavior of CLCT-centric algorithm when ALCTs are droped from further usage
+      .algo2016_drop_used_clcts            (algo2016_drop_used_clcts),            // Out Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - drop used CLCTs
       .algo2016_cross_bx_algorithm         (algo2016_cross_bx_algorithm),         // Out LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
-      .algo2016_clct_use_corrected_bx      (algo2016_clct_use_corrected_bx),      // Out Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
+      .algo2016_clct_use_corrected_bx      (algo2016_clct_use_corrected_bx),      // Out Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits NOT YET IMPLEMENTED:
 
       .tmb_allow_alct_ro  (tmb_allow_alct_ro),  // Out  Allow ALCT only  readout, non-triggering
       .tmb_allow_clct_ro  (tmb_allow_clct_ro),  // Out  Allow CLCT only  readout, non-triggering

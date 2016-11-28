@@ -473,14 +473,14 @@
 //
 //
 //  DiStrip      0           1           2           3           4           5           6           7
-//  Strip      0     1     0     1     0     1     0     1     0     1     0     1     0     1     0     1  
+//  Strip        0     1     0     1     0     1     0     1     0     1     0     1     0     1     0     1  
 //  HStrip       0  1  2  3  0  1  2  3  0  1  2  3  0  1  2  3  0  1  2  3  0  1  2  3  0  1  2  3  0  1  2  3
 //  1/2 Strip    00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
 //
 //                a5 b6 c5 d6 e5 f6
 //  DiStrip  1:    1  1  1  1  1  1
 //  Strip  0,1:    0  1  0  1  0  1
-//  HStrip 6,5:   1  0  1  0  1  0
+//  HStrip 6,5:    1  0  1  0  1  0
 //
 // 10/08/2001  Initial
 // 10/11/2001  Converted from CLB to RAM. CLB version used 198 Slices, 195 FFs, RAM version uses xx FFs and 3 BlockRAMs

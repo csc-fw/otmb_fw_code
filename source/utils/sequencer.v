@@ -1387,26 +1387,27 @@
   input          wr_avail_rmpc;    // Buffer available at MPC received
 
 // TMB LCT Match
-  output  [MXCLCT-1:0]  clct0_xtmb;      // 1st CLCT to TMB
-  output  [MXCLCT-1:0]  clct1_xtmb;      // 2nd CLCT to TMB
-  output  [MXCLCTC-1:0]  clctc_xtmb;      // Common to CLCT0/1 to TMB
-  output  [MXCFEB-1:0]  clctf_xtmb;      // Active cfeb list to TMB
-  output          bx0_xmpc;      // bx0 to mpc
-  input          bx0_match;      // ALCT bx0 and CLCT bx0 match in time
+  output [MXCLCT-1:0]  clct0_xtmb; // 1st CLCT to TMB
+  output [MXCLCT-1:0]  clct1_xtmb; // 2nd CLCT to TMB
+  output [MXCLCTC-1:0] clctc_xtmb; // Common to CLCT0/1 to TMB
+  output [MXCFEB-1:0]  clctf_xtmb; // Active cfeb list to TMB
 
-  input          tmb_trig_pulse;    // TMB Triggered on ALCT or CLCT or both
-  input          tmb_trig_keep;    // ALCT or CLCT or both triggered, and trigger is allowed
-  input          tmb_non_trig_keep;  // Event did not trigger, but keep it for readout
-  input          tmb_match;      // ALCT and CLCT matched in time
-  input          tmb_alct_only;    // Only ALCT triggered
-  input          tmb_clct_only;    // Only CLCT triggered
-  input  [3:0]      tmb_match_win;    // Location of alct in clct window
-  input  [3:0]      tmb_match_pri;    // Priority of clct in clct window
-  input          tmb_alct_discard;  // ALCT pair was not used for LCT
-  input          tmb_clct_discard;  // CLCT pair was not used for LCT
-  input          tmb_clct0_discard;  // CLCT0 was discarded from ME1A
-  input          tmb_clct1_discard;  // CLCT1 was discarded from ME1A
-  input  [MXCFEB-1:0]  tmb_aff_list;    // Active CFEBs for CLCT used in TMB match
+  output bx0_xmpc;  // bx0 to mpc
+  input  bx0_match; // ALCT bx0 and CLCT bx0 match in time
+
+  input              tmb_trig_pulse;    // TMB Triggered on ALCT or CLCT or both
+  input              tmb_trig_keep;     // ALCT or CLCT or both triggered, and trigger is allowed
+  input              tmb_non_trig_keep; // Event did not trigger, but keep it for readout
+  input              tmb_match;         // ALCT and CLCT matched in time
+  input              tmb_alct_only;     // Only ALCT triggered
+  input              tmb_clct_only;     // Only CLCT triggered
+  input [3:0]        tmb_match_win;     // Location of alct in clct window
+  input [3:0]        tmb_match_pri;     // Priority of clct in clct window
+  input              tmb_alct_discard;  // ALCT pair was not used for LCT
+  input              tmb_clct_discard;  // CLCT pair was not used for LCT
+  input              tmb_clct0_discard; // CLCT0 was discarded from ME1A
+  input              tmb_clct1_discard; // CLCT1 was discarded from ME1A
+  input [MXCFEB-1:0] tmb_aff_list;      // Active CFEBs for CLCT used in TMB match
 
   input          tmb_match_ro;    // ALCT and CLCT matched in time, non-triggering reaodut
   input          tmb_alct_only_ro;  // Only ALCT triggered, non-triggering reaodut
@@ -3485,30 +3486,30 @@
   wire [29:0] r_clct_counter = xtmb1_rdata[29:0]; // CLCTs sent to TMB section
 
 // Unpack TMB match results from RAM mapping array
-  wire       r_tmb_match     =  rtmb_rdata[0];   // ALCT and CLCT matched in time
-  wire       r_tmb_alct_only =  rtmb_rdata[1];   // Only ALCT triggered
-  wire       r_tmb_clct_only =  rtmb_rdata[2];   // Only CLCT triggered
-  wire [3:0] r_tmb_match_win =  rtmb_rdata[6:3]; // Location of alct in clct window
+  wire       r_tmb_match     =  rtmb_rdata[0];     // ALCT and CLCT matched in time
+  wire       r_tmb_alct_only =  rtmb_rdata[1];     // Only ALCT triggered
+  wire       r_tmb_clct_only =  rtmb_rdata[2];     // Only CLCT triggered
+  wire [3:0] r_tmb_match_win =  rtmb_rdata[6:3];   // Location of alct in clct window
 
-  wire     r_tmb_no_alct    =  rtmb_rdata[7];    // No ALCT
-  wire     r_tmb_one_alct    =  rtmb_rdata[8];    // One ALCT
-  wire     r_tmb_one_clct    =  rtmb_rdata[9];    // One CLCT
-  wire     r_tmb_two_alct    =  rtmb_rdata[10];    // Two ALCTs
-  wire     r_tmb_two_clct    =  rtmb_rdata[11];    // Two CLCTs
-  wire     r_tmb_dupe_alct    =  rtmb_rdata[12];    // ALCT0 copied into ALCT1 to make 2nd LCT
-  wire     r_tmb_dupe_clct    =  rtmb_rdata[13];    // CLCT0 copied into CLCT1 to make 2nd LCT
-  wire     r_tmb_rank_err    =  rtmb_rdata[14];    // LCT1 has higher quality than LCT0
+  wire       r_tmb_no_alct   =  rtmb_rdata[7];     // No ALCT
+  wire       r_tmb_one_alct  =  rtmb_rdata[8];     // One ALCT
+  wire       r_tmb_one_clct  =  rtmb_rdata[9];     // One CLCT
+  wire       r_tmb_two_alct  =  rtmb_rdata[10];    // Two ALCTs
+  wire       r_tmb_two_clct  =  rtmb_rdata[11];    // Two CLCTs
+  wire       r_tmb_dupe_alct =  rtmb_rdata[12];    // ALCT0 copied into ALCT1 to make 2nd LCT
+  wire       r_tmb_dupe_clct =  rtmb_rdata[13];    // CLCT0 copied into CLCT1 to make 2nd LCT
+  wire       r_tmb_rank_err  =  rtmb_rdata[14];    // LCT1 has higher quality than LCT0
 
-  wire    r_tmb_match_ro    =  rtmb_rdata[15];    // ALCT and CLCT matched in time, non-triggering readout
-  wire    r_tmb_alct_only_ro  =  rtmb_rdata[16];    // Only ALCT triggered, non-triggering readout
-  wire    r_tmb_clct_only_ro  =  rtmb_rdata[17];    // Only CLCT triggered, non-triggering readout
+  wire       r_tmb_match_ro     =  rtmb_rdata[15]; // ALCT and CLCT matched in time, non-triggering readout
+  wire       r_tmb_alct_only_ro =  rtmb_rdata[16]; // Only ALCT triggered, non-triggering readout
+  wire       r_tmb_clct_only_ro =  rtmb_rdata[17]; // Only CLCT triggered, non-triggering readout
 
-  wire    r_tmb_trig_pulse  =  rtmb_rdata[18];    // TMB trig pulse agreed with rtmb_push
-  wire    r_tmb_trig_keep    =  rtmb_rdata[19];    // TMB said keep triggering event
-  wire    r_tmb_non_trig_keep  =  rtmb_rdata[20];    // TMB said keep non-triggering event
+  wire       r_tmb_trig_pulse    = rtmb_rdata[18]; // TMB trig pulse agreed with rtmb_push
+  wire       r_tmb_trig_keep     = rtmb_rdata[19]; // TMB said keep triggering event
+  wire       r_tmb_non_trig_keep = rtmb_rdata[20]; // TMB said keep non-triggering event
 
-  wire    r_tmb_clct0_discard  =  rtmb_rdata[21];    // TMB discarded clct0 from ME1A
-  wire    r_tmb_clct1_discard  =  rtmb_rdata[22];    // TMB discarded clct1 from ME1A
+  wire       r_tmb_clct0_discard = rtmb_rdata[21]; // TMB discarded clct0 from ME1A
+  wire       r_tmb_clct1_discard = rtmb_rdata[22]; // TMB discarded clct1 from ME1A
 
 // Unpack ALCT + extra TMB trigger data from RAM mapping array
   wire [10:0]  r_tmb_alct0      =  alct_rdata[10:0];  // ALCT0
@@ -3964,44 +3965,44 @@
   assign  header22_[14:9]    =  r_layers_hit[5:0];      // CSC layers hit on layer trigger after drift
   assign  header22_[18:15]  =  0;              // DDU+DMB control flags
 
-  assign  header23_[4:0]    =  active_feb_mux[4:0];    // Active CFEB list sent to DMB
-  assign  header23_[9:5]    =  r_cfebs_read[4:0];      // CFEBs read out for this event
-  assign  header23_[13:10]  =  r_l1a_match_win[3:0];    // Position of l1a in window
+  assign  header23_[4:0]   =  active_feb_mux[4:0];    // Active CFEB list sent to DMB
+  assign  header23_[9:5]   =  r_cfebs_read[4:0];      // CFEBs read out for this event
+  assign  header23_[13:10] =  r_l1a_match_win[3:0];    // Position of l1a in window
   assign  header23_[14]    =  active_feb_src;        // Active CFEB list source, 0=pretrig, 1=tmb match
-  assign  header23_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header23_[18:15] =  0;              // DDU+DMB control flags
 
 // CLCT+ALCT Match Status
-  assign  header24_[0]    =  r_tmb_match;        // ALCT and CLCT matched in time, pushed on L1A stack
-  assign  header24_[1]    =  r_tmb_alct_only;      // Only ALCT triggered, pushed on L1a stack
-  assign  header24_[2]    =  r_tmb_clct_only;      // Only CLCT triggered, pushed on L1A stack
-  assign  header24_[6:3]    =  r_tmb_match_win[3:0];    // Location of alct in clct window, pushed on L1A stack
-  assign  header24_[7]    =  r_tmb_no_alct;        // No ALCT
-  assign  header24_[8]    =  r_tmb_one_alct;        // One ALCT
-  assign  header24_[9]    =  r_tmb_one_clct;        // One CLCT
-  assign  header24_[10]    =  r_tmb_two_alct;        // Two ALCTs
-  assign  header24_[11]    =  r_tmb_two_clct;        // Two CLCTs
-  assign  header24_[12]    =  r_tmb_dupe_alct;      // ALCT0 copied into ALCT1 to make 2nd LCT
-  assign  header24_[13]    =  r_tmb_dupe_clct;      // CLCT0 copied into CLCT1 to make 2nd LCT
-  assign  header24_[14]    =  r_tmb_rank_err;        // LCT1 has higher quality than LCT0
-  assign  header24_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header24_[0]     = r_tmb_match;          // ALCT and CLCT matched in time, pushed on L1A stack
+  assign  header24_[1]     = r_tmb_alct_only;      // Only ALCT triggered, pushed on L1a stack
+  assign  header24_[2]     = r_tmb_clct_only;      // Only CLCT triggered, pushed on L1A stack
+  assign  header24_[6:3]   = r_tmb_match_win[3:0]; // Location of alct in clct window, pushed on L1A stack
+  assign  header24_[7]     = r_tmb_no_alct;        // No ALCT
+  assign  header24_[8]     = r_tmb_one_alct;       // One ALCT
+  assign  header24_[9]     = r_tmb_one_clct;       // One CLCT
+  assign  header24_[10]    = r_tmb_two_alct;       // Two ALCTs
+  assign  header24_[11]    = r_tmb_two_clct;       // Two CLCTs
+  assign  header24_[12]    = r_tmb_dupe_alct;      // ALCT0 copied into ALCT1 to make 2nd LCT
+  assign  header24_[13]    = r_tmb_dupe_clct;      // CLCT0 copied into CLCT1 to make 2nd LCT
+  assign  header24_[14]    = r_tmb_rank_err;       // LCT1 has higher quality than LCT0
+  assign  header24_[18:15] = 0;                    // DDU+DMB control flags
 
 // CLCT Trigger Data
-  assign  header25_[14:0]    =  r_clct0_xtmb[14:0];      // CLCT0 after drift lsbs
-  assign  header25_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header25_[14:0]  = r_clct0_xtmb[14:0]; // CLCT0 after drift lsbs
+  assign  header25_[18:15] = 0;                  // DDU+DMB control flags
 
-  assign  header26_[14:0]    =  r_clct1_xtmb[14:0];      // CLCT1 after drift lsbs
-  assign  header26_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header26_[14:0]  = r_clct1_xtmb[14:0]; // CLCT1 after drift lsbs
+  assign  header26_[18:15] = 0;                  // DDU+DMB control flags
 
-  assign  header27_[0]    =  r_clct0_xtmb[15];      // CLCT0 after drift msbs
-  assign  header27_[1]    =  r_clct1_xtmb[15];      // CLCT1 after drift msbs
-  assign  header27_[4:2]    =  r_clctc_xtmb[2:0];      // CLCT0/1 common after drift msbs
-  assign  header27_[5]    =  r_clct0_invp;        // CLCT0 had invalid pattern after drift delay
-  assign  header27_[6]    =  r_clct1_invp;        // CLCT1 had invalid pattern after drift delay
-  assign  header27_[7]    =  r_clct1_busy;        // 2nd CLCT busy, logic error indicator
-  assign  header27_[12:8]    =  perr_cfeb_ff[4:0];      // CFEB RAM parity error, latched
-  assign  header27_[13]    =  perr_rpc_ff | perr_mini_ff;  // RPC  or Minicope RAM parity error, latched
+  assign  header27_[0]     =  r_clct0_xtmb[15];      // CLCT0 after drift msbs
+  assign  header27_[1]     =  r_clct1_xtmb[15];      // CLCT1 after drift msbs
+  assign  header27_[4:2]   =  r_clctc_xtmb[2:0];      // CLCT0/1 common after drift msbs
+  assign  header27_[5]     =  r_clct0_invp;        // CLCT0 had invalid pattern after drift delay
+  assign  header27_[6]     =  r_clct1_invp;        // CLCT1 had invalid pattern after drift delay
+  assign  header27_[7]     =  r_clct1_busy;        // 2nd CLCT busy, logic error indicator
+  assign  header27_[12:8]  =  perr_cfeb_ff[4:0];      // CFEB RAM parity error, latched
+  assign  header27_[13]    =  perr_rpc_ff | perr_mini_ff; // RPC  or Minicope RAM parity error, latched
   assign  header27_[14]    =  perr_ff;          // Parity error summary,  latched
-  assign  header27_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header27_[18:15] =  0;              // DDU+DMB control flags
 
 // ALCT Trigger Data
   assign  header28_[0]    =  r_alct0_valid;        // ALCT0 valid pattern flag

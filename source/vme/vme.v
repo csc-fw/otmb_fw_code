@@ -573,7 +573,7 @@
 // TMB Ports: Configuration
   alct_delay,
   clct_window,
-  algo2016_clct_window,
+  algo2016_window,
 
   tmb_sync_err_en,
   tmb_allow_alct,
@@ -1871,7 +1871,7 @@
 // TMB Ports: Configuration
   output  [3:0] alct_delay;           // Delay ALCT for CLCT match window
   output  [3:0] clct_window;          // CLCT match window width (for CLCT-centric "old" algorithm)
-  output  [3:0] algo2016_clct_window; // CLCT match window width (for ALCT-centric 2016 algorithm)
+  output  [3:0] algo2016_window; // CLCT match window width (for ALCT-centric 2016 algorithm)
   output  [1:0] tmb_sync_err_en;      // Allow sync_err to MPC for either muon
 
   output          tmb_allow_alct;      // Allow ALCT only 
@@ -2242,7 +2242,7 @@
   output [4:0] algo2016_dead_time_zone_size;        // Constant size of the dead time zone
   output       algo2016_use_dynamic_dead_time_zone; // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
   output       algo2016_clct_to_alct;               // ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
-  output       algo2016_drop_used_clcts;            // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - similar to "old" behavior of CLCT-centric algorithm when ALCTs are droped from further usage
+  output       algo2016_drop_used_clcts;            // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - drop used CLCTs
   output       algo2016_cross_bx_algorithm;         // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
   output       algo2016_clct_use_corrected_bx;      // Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
 
@@ -5461,30 +5461,30 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  tmb_trig_wr[1:0]        = 2'b11;          // 1=Allow sync_err to MPC for either muon
-  tmb_trig_wr[2]          = 1'b0;            // 1=Allow ALCT only
-  tmb_trig_wr[3]          = 1'b1;            // 1=Allow CLCT only
-  tmb_trig_wr[4]          = 1'b1;            // 1=Allow ALCT+CLCT match
-  tmb_trig_wr[8:5]        = 4'd7;            // Delay for MPC response
-  tmb_trig_wr[12:9]        = 0;            // Readonly
-  tmb_trig_wr[13]          = 1;            // 1=MPC gets ttc_bx0 or 0=bx0_local aka clct_bx0
-  tmb_trig_wr[14]          = 0;            // 1=blank mpc output except on trigger, blocks bx0 to mpc
-  tmb_trig_wr[15]          = 1;            // 1=enable output to mpc, 0 asets mpc driver FFs to 1s
+  tmb_trig_wr[1:0]  = 2'b11; // 1=Allow sync_err to MPC for either muon
+  tmb_trig_wr[2]    = 1'b0;  // 1=Allow ALCT only
+  tmb_trig_wr[3]    = 1'b1;  // 1=Allow CLCT only
+  tmb_trig_wr[4]    = 1'b1;  // 1=Allow ALCT+CLCT match
+  tmb_trig_wr[8:5]  = 4'd7;  // Delay for MPC response
+  tmb_trig_wr[12:9] = 0;     // Readonly
+  tmb_trig_wr[13]   = 1;     // 1=MPC gets ttc_bx0 or 0=bx0_local aka clct_bx0
+  tmb_trig_wr[14]   = 0;     // 1=blank mpc output except on trigger, blocks bx0 to mpc
+  tmb_trig_wr[15]   = 1;     // 1=enable output to mpc, 0 asets mpc driver FFs to 1s
   end
 
-  assign tmb_sync_err_en[1:0]    = tmb_trig_wr[1:0];      // RW  Allow sync_err to MPC for either muon
-  assign tmb_allow_alct      = tmb_trig_wr[2];      // RW  Allow ALCT only 
-  assign tmb_allow_clct      = tmb_trig_wr[3];      // RW  Allow CLCT only
-  assign tmb_allow_match      = tmb_trig_wr[4];      // RW  Allow ALCT+CLCT match
-  assign mpc_rx_delay[3:0]    = tmb_trig_wr[8:5];      // RW  Delay for MPC response
-  assign mpc_sel_ttc_bx0      = tmb_trig_wr[13];      // RW  1=MPC gets ttc_bx0 or 0=bx0_local
-  assign mpc_idle_blank      = tmb_trig_wr[14];      // RW  1=blank mpc output except on trigger, block bx0 too
-  assign mpc_oe          = tmb_trig_wr[15];      // RW  1=MPC output enable, 0=aset outputs to 1s
+  assign tmb_sync_err_en[1:0] = tmb_trig_wr[1:0]; // RW  Allow sync_err to MPC for either muon
+  assign tmb_allow_alct       = tmb_trig_wr[2];   // RW  Allow ALCT only 
+  assign tmb_allow_clct       = tmb_trig_wr[3];   // RW  Allow CLCT only
+  assign tmb_allow_match      = tmb_trig_wr[4];   // RW  Allow ALCT+CLCT match
+  assign mpc_rx_delay[3:0]    = tmb_trig_wr[8:5]; // RW  Delay for MPC response
+  assign mpc_sel_ttc_bx0      = tmb_trig_wr[13];  // RW  1=MPC gets ttc_bx0 or 0=bx0_local
+  assign mpc_idle_blank       = tmb_trig_wr[14];  // RW  1=blank mpc output except on trigger, block bx0 too
+  assign mpc_oe               = tmb_trig_wr[15];  // RW  1=MPC output enable, 0=aset outputs to 1s
 
-  assign tmb_trig_rd[ 8:0]    = tmb_trig_wr[ 8:0];    //    Readback
-  assign tmb_trig_rd[10:9]    = mpc_accept_vme[1:0];    // R  MPC accept response
-  assign tmb_trig_rd[12:11]    = mpc_reserved_vme[1:0];  // R  MPC reserved response
-  assign tmb_trig_rd[15:13]    = tmb_trig_wr[15:13];    //    Readback
+  assign tmb_trig_rd[ 8:0]  = tmb_trig_wr[ 8:0];     //    Readback
+  assign tmb_trig_rd[10:9]  = mpc_accept_vme[1:0];   // R  MPC accept response
+  assign tmb_trig_rd[12:11] = mpc_reserved_vme[1:0]; // R  MPC reserved response
+  assign tmb_trig_rd[15:13] = tmb_trig_wr[15:13];    //    Readback
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_MPC0_FRAME0=88    MPC0 Frame 0 Data sent to MPC, Readonly
@@ -5798,11 +5798,11 @@
   tmb_timing_wr[15:12] = 3;    // CLCT match window width (for ALCT-centric 2016 algorithm)
   end
 
-  assign alct_delay[3:0]           = tmb_timing_wr[3:0];   // RW  Delay ALCT for CLCT match window
-  assign clct_window[3:0]          = tmb_timing_wr[7:4];   // RW  CLCT match window width (for CLCT-centric "old" algorithm)
-  assign mpc_tx_delay[3:0]         = tmb_timing_wr[11:8];  // RW  MPC transmit delay
-  assign algo2016_clct_window[3:0] = tmb_timing_wr[15:12]; // RW  CLCT match window width (for ALCT-centric 2016 algorithm)
-  assign tmb_timing_rd[15:0]       = tmb_timing_wr[15:0];  // RW  Readback
+  assign alct_delay[3:0]      = tmb_timing_wr[3:0];   // RW  Delay ALCT for CLCT match window
+  assign clct_window[3:0]     = tmb_timing_wr[7:4];   // RW  CLCT match window width (for CLCT-centric "old" algorithm)
+  assign mpc_tx_delay[3:0]    = tmb_timing_wr[11:8];  // RW  MPC transmit delay
+  assign algo2016_window[3:0] = tmb_timing_wr[15:12]; // RW  CLCT match window width (for ALCT-centric 2016 algorithm)
+  assign tmb_timing_rd[15:0]  = tmb_timing_wr[15:0];  // RW  Readback
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_LHC_CYCLE = 0xB4    LHC Cycle Counter Maximum BXN Register
@@ -5996,36 +5996,36 @@
 // ADR_NON_TRIG_RO=CC  Non-Triggering Readout Events, ME1A/B reversal
 //------------------------------------------------------------------------------------------------------------------
   initial begin
-  non_trig_ro_wr[0]        = 0;            // RW  tmb_allow_alct_ro  Allow ALCT only  readout, non-triggering
-  non_trig_ro_wr[1]        = 1;            // RW  tmb_allow_clct_ro  Allow CLCT only  readout, non-triggering
-  non_trig_ro_wr[2]        = 1;            // RW  tmb_allow_match_ro  Allow Match only readout, non-triggering
-  non_trig_ro_wr[3]        = 1;            // RW  Block ME1A LCTs from MPC, but still queue for L1A readout
-  non_trig_ro_wr[4]        = 0;            // RW  1=allow clct pretrig counters 6,7 count non me1ab pretrigs
+    non_trig_ro_wr[0]     = 0; // RW  tmb_allow_alct_ro  Allow ALCT only  readout, non-triggering
+    non_trig_ro_wr[1]     = 1; // RW  tmb_allow_clct_ro  Allow CLCT only  readout, non-triggering
+    non_trig_ro_wr[2]     = 1; // RW  tmb_allow_match_ro  Allow Match only readout, non-triggering
+    non_trig_ro_wr[3]     = 1; // RW  Block ME1A LCTs from MPC, but still queue for L1A readout
+    non_trig_ro_wr[4]     = 0; // RW  1=allow clct pretrig counters 6,7 count non me1ab pretrigs
 
-  non_trig_ro_wr[5]        = 0;            // R  1=ME1A or ME1B CSC type
-  non_trig_ro_wr[6]        = 0;            // R  1=Staggered CSC, 0=non-staggered
-  non_trig_ro_wr[7]        = 0;            // R  1=Reverse staggered CSC, non-me1
-  non_trig_ro_wr[8]        = 0;            // R  1=reverse me1a hstrips prior to pattern sorting
-  non_trig_ro_wr[9]        = 0;            // R  1=reverse me1b hstrips prior to pattern sorting
+    non_trig_ro_wr[5]     = 0; // R  1=ME1A or ME1B CSC type
+    non_trig_ro_wr[6]     = 0; // R  1=Staggered CSC, 0=non-staggered
+    non_trig_ro_wr[7]     = 0; // R  1=Reverse staggered CSC, non-me1
+    non_trig_ro_wr[8]     = 0; // R  1=reverse me1a hstrips prior to pattern sorting
+    non_trig_ro_wr[9]     = 0; // R  1=reverse me1b hstrips prior to pattern sorting
 
-  non_trig_ro_wr[11:10]      = 0;            // RW  Free 2
-  non_trig_ro_wr[15:12]      = 0;            // R  Firmware compile type
+    non_trig_ro_wr[11:10] = 0; // RW  Free 2
+    non_trig_ro_wr[15:12] = 0; // R  Firmware compile type
   end
 
-  assign tmb_allow_alct_ro    = non_trig_ro_wr[0];    // RW  Allow ALCT only  readout, non-triggering
-  assign tmb_allow_clct_ro    = non_trig_ro_wr[1];    // RW  Allow CLCT only  readout, non-triggering
-  assign tmb_allow_match_ro    = non_trig_ro_wr[2];    // RW  Allow Match only readout, non-triggering
-  assign mpc_me1a_block      = non_trig_ro_wr[3];    // RW  Block ME1A LCTs from MPC, but still queue for L1A readout
-  assign cnt_non_me1ab_en      = non_trig_ro_wr[4];    // RW  Allow clct pretrig counters count non me1ab
+  assign tmb_allow_alct_ro  = non_trig_ro_wr[0]; // RW  Allow ALCT only  readout, non-triggering
+  assign tmb_allow_clct_ro  = non_trig_ro_wr[1]; // RW  Allow CLCT only  readout, non-triggering
+  assign tmb_allow_match_ro = non_trig_ro_wr[2]; // RW  Allow Match only readout, non-triggering
+  assign mpc_me1a_block     = non_trig_ro_wr[3]; // RW  Block ME1A LCTs from MPC, but still queue for L1A readout
+  assign cnt_non_me1ab_en   = non_trig_ro_wr[4]; // RW  Allow clct pretrig counters count non me1ab
 
-  assign non_trig_ro_rd[4:0]    = non_trig_ro_wr[4:0];    // RW  Readback
-  assign non_trig_ro_rd[5]    = csc_me1ab;        // R  1=ME1A or ME1B CSC type
-  assign non_trig_ro_rd[6]    = stagger_hs_csc;      // R  1=Staggered CSC, 0=non-staggered
-  assign non_trig_ro_rd[7]    = reverse_hs_csc;      // R  1=Reverse staggered CSC, non-me1
-  assign non_trig_ro_rd[8]    = reverse_hs_me1a;      // R  1=reverse me1a hstrips prior to pattern sorting
-  assign non_trig_ro_rd[9]    = reverse_hs_me1b;      // R  1=reverse me1b hstrips prior to pattern sorting
-  assign non_trig_ro_rd[11:10]  = non_trig_ro_wr[11:10];  // RW  Free 2
-  assign non_trig_ro_rd[15:12]  = csc_type[3:0];      // R  Firmware compile type
+  assign non_trig_ro_rd[4:0]   = non_trig_ro_wr[4:0];   // RW  Readback
+  assign non_trig_ro_rd[5]     = csc_me1ab;             // R  1=ME1A or ME1B CSC type
+  assign non_trig_ro_rd[6]     = stagger_hs_csc;        // R  1=Staggered CSC, 0=non-staggered
+  assign non_trig_ro_rd[7]     = reverse_hs_csc;        // R  1=Reverse staggered CSC, non-me1
+  assign non_trig_ro_rd[8]     = reverse_hs_me1a;       // R  1=reverse me1a hstrips prior to pattern sorting
+  assign non_trig_ro_rd[9]     = reverse_hs_me1b;       // R  1=reverse me1b hstrips prior to pattern sorting
+  assign non_trig_ro_rd[11:10] = non_trig_ro_wr[11:10]; // RW  Free 2
+  assign non_trig_ro_rd[15:12] = csc_type[3:0];         // R  Firmware compile type
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_SCP_TRIG=CE  Scope Channel Trigger Source Register
@@ -7237,7 +7237,7 @@
   assign algo2016_dead_time_zone_size[4:0]   = algo2016_ctrl_wr[5:1]; // Constant size of the dead time zone
   assign algo2016_use_dynamic_dead_time_zone = algo2016_ctrl_wr[6];   // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
   assign algo2016_clct_to_alct               = algo2016_ctrl_wr[7];   // ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
-  assign algo2016_drop_used_clcts            = algo2016_ctrl_wr[8];   // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - similar to "old" behavior of CLCT-centric algorithm when ALCTs are droped from further usage
+  assign algo2016_drop_used_clcts            = algo2016_ctrl_wr[8];   // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - drop used CLCTs
   assign algo2016_cross_bx_algorithm         = algo2016_ctrl_wr[9];   // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
   assign algo2016_clct_use_corrected_bx      = algo2016_ctrl_wr[10];  // Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
 
