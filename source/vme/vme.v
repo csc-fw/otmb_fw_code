@@ -636,6 +636,7 @@
   gem_zero_suppress,
   fifo_tbins_gem,
   fifo_pretrig_gem,
+  gem_delay,
 
 // GEM Configuration Ports
   gemA_rxd_posneg,
@@ -1493,6 +1494,7 @@
   parameter ADR_GEM_DEBUG_FIFO_DATA   = 10'h30e;
   parameter ADR_GEM_TBINS             = 10'h310;
   parameter ADR_GEM_CFG               = 10'h312;
+  parameter ADR_GEM_TRG               = 10'h318;
   parameter ADR_GEM_CNT_CTRL          = 10'h314;
   parameter ADR_GEM_CNT_RDATA         = 10'h316;
 
@@ -2136,6 +2138,7 @@
   output              gem_zero_suppress; // Out  1 Enable GEM Readout Zero-suppression
   output [MXTBIN-1:0] fifo_tbins_gem;    // Out  Number GEM FIFO time bins to read out
   output [MXTBIN-1:0] fifo_pretrig_gem;  // Out  Number GEM FIFO time bins before pretrigger
+  output [3:0]        gem_delay;         // Out  GEM Trigger Delay
 
   output gemA_rxd_posneg;  // Out gem chamber 0 (fiber0,1) rxd posneg value
   output gemB_rxd_posneg;  // Out gem chamber 1 (fiber2,3) rxd posneg value
@@ -3129,6 +3132,9 @@
   reg  [15:0] gem_cfg_wr;
   wire [15:0] gem_cfg_rd;
 
+  reg  [15:0] gem_trg_wr;
+  wire [15:0] gem_trg_rd;
+
 
 //------------------------------------------------------------------------------------------------------------------
 // Address Write Decodes
@@ -3275,6 +3281,7 @@
   wire      wr_gem_debug_fifo_ctrl;
   wire      wr_gem_tbins;
   wire      wr_gem_cfg;
+  wire      wr_gem_trg;
 
   wire      wr_adr_cap;
 
@@ -3843,6 +3850,7 @@
 
   ADR_GEM_TBINS:             data_out <= gem_tbins_rd;
   ADR_GEM_CFG:               data_out <= gem_cfg_rd;
+  ADR_GEM_TRG:               data_out <= gem_trg_rd;
 
   ADR_ODMB:                  data_out <= odmb_data;
 
@@ -4013,6 +4021,7 @@
   assign wr_gem_debug_fifo_ctrl   =  (reg_adr==ADR_GEM_DEBUG_FIFO_CTRL    && clk_en);
   assign wr_gem_tbins             =  (reg_adr==ADR_GEM_TBINS              && clk_en);
   assign wr_gem_cfg               =  (reg_adr==ADR_GEM_CFG                && clk_en);
+  assign wr_gem_trg               =  (reg_adr==ADR_GEM_TRG                && clk_en);
 
   assign wr_adr_cap               =  (adr_cap);
 
@@ -8065,6 +8074,18 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign gem_cfg_rd [15:0] = gem_cfg_wr [15:0]; // Readback
 
 //------------------------------------------------------------------------------------------------------------------
+// ADR_GEM_TRG=0x318    GEM Configuration
+//------------------------------------------------------------------------------------------------------------------
+
+  initial begin
+  gem_trg_wr[3:0]   = 4'd0; // RW GEM Trigger Delay
+  end
+
+  assign gem_delay [3:0] = gem_trg_wr[3:0];
+
+  assign gem_trg_rd [15:0] = gem_trg_wr [15:0]; // Readback
+
+//------------------------------------------------------------------------------------------------------------------
 // VME Write-Registers latch data when addressed + latch power-up defaults
 //------------------------------------------------------------------------------------------------------------------
 always @(posedge clock_vme) begin
@@ -8178,6 +8199,7 @@ always @(posedge clock_vme) begin
   if    (wr_phaser10)              phaser10_wr             <= d[15:0];
   if    (wr_gem_tbins)             gem_tbins_wr            <= d[15:0];
   if    (wr_gem_cfg)               gem_cfg_wr              <= d[15:0];
+  if    (wr_gem_trg)               gem_trg_wr              <= d[15:0];
   if    (wr_delay0_int)            delay0_int_wr           <= d[15:0];
   if    (wr_delay1_int)            delay1_int_wr           <= d[15:0];
   if    (wr_sync_err_ctrl)         sync_err_ctrl_wr        <= d[15:0];

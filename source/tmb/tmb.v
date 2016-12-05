@@ -133,6 +133,8 @@
   gemA_vpf,
   gemB_vpf,
 
+  gem_delay,
+
 // TMB-Sequencer Pipelines
   wr_adr_xtmb,
   wr_adr_rtmb,
@@ -447,6 +449,8 @@
 // GEM
   input  [7:0]         gemA_vpf;
   input  [7:0]         gemB_vpf;
+
+  input  [3:0]         gem_delay;
 
 // TMB-Sequencer Pipelines
   input  [MXBADR-1:0]  wr_adr_xtmb; // Buffer write address after drift time
@@ -1072,15 +1076,38 @@
   assign alct_only_trig = (alct_noclct && tmb_allow_alct) || (alct_noclct_ro && tmb_allow_alct_ro);// ALCT-only triggers are allowed
 
 
-  wire gem_pulse = (|gemA_vpf || |gemB_vpf);
-  srl16e_bbl #(1)      ugempulsedly (.clock(clock),.ce(1'b1),.adr(winclosing-clct_win_center),.d(gem_pulse),.q(gem_pulse_dly));
+//------------------------------------------------------------------------------------------------------------------
+// Push GEM data into a 1bx to 16bx pipeline delay to compensate for CLCT processing time
+//------------------------------------------------------------------------------------------------------------------
+  wire [7:0]  gemA_pipe,     gemA_srl;
+  wire [7:0]  gemB_pipe,     gemB_srl;
+
+  reg  [3:0] gem_srl_adr = 0;
+
+  always @(posedge clock) begin
+  gem_srl_adr <= gem_delay-1'b1;
+  end
+
+  srl16e_bbl #(1) ugemA (.clock(clock),.ce(1'b1),.adr(gem_srl_adr),.d(gemA_vpf[7:0]),.q(gemA_srl[7:0]));
+  srl16e_bbl #(1) ugemB (.clock(clock),.ce(1'b1),.adr(gem_srl_adr),.d(gemB_vpf[7:0]),.q(gemB_srl[7:0]));
+
+  wire gem_ptr_is_0 = (gem_delay == 0);               // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
+
+  assign gemA_pipe = (gem_ptr_is_0) ? gemA_vpf : gemA_srl;  // First  GEM after pipe delay
+  assign gemB_pipe = (gem_ptr_is_0) ? gemB_vpf : gemB_srl;  // Second GEM after pipe delay
+
+  wire gem_pulse = (|gemA_pipe || |gemB_pipe);
+
+
+  // delay the GEM pulse to re-do matching as it is leaving the window (to match to clct_noalct and alct_noclct)
+  srl16e_bbl #(1) ugempulsewinclose (.clock(clock),.ce(1'b1),.adr(winclosing-clct_win_center),.d(gem_pulse),.q(gem_pulse_winclose));
 
   // gem matching
   assign alct_gem        = alct_pulse                   && (gem_pulse);
   assign clct_gem        = clct_vpf_sr[clct_win_center] && (gem_pulse);
   assign alct_clct_gem   = clct_match                   && (gem_pulse);
-  assign clct_gem_noalct = clct_noalct                  && (gem_pulse_dly);
-  assign alct_gem_noclct = alct_discard                 && (gem_pulse_dly);
+  assign clct_gem_noalct = clct_noalct                  && (gem_pulse_winclose);
+  assign alct_gem_noclct = alct_discard                 && (gem_pulse_winclose);
 
 // Latch clct match results for TMB and MPC pathways
   reg tmb_trig_pulse       = 0;

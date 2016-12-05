@@ -1544,6 +1544,8 @@
   wire [7:0] gemB_vpf = {gem_vpf3[3], gem_vpf2[3], gem_vpf1[3], gem_vpf0[3], gem_vpf3[2], gem_vpf2[2], gem_vpf1[2], gem_vpf0[2]};
   wire        gem_any = (|gemA_vpf) | (|gemB_vpf);
 
+  wire [3:0] gem_delay;
+
   wire [9:0]   gem_debug_fifo_adr;    // FIFO RAM read tbin address
   wire [1:0]   gem_debug_fifo_sel;    // FIFO RAM read layer clusters 0-3
   wire [1:0]   gem_debug_fifo_igem;   // FIFO RAM read chamber 0-3
@@ -3238,6 +3240,7 @@
 // GEM
   .gemA_vpf     (gemA_vpf[7:0]),
   .gemB_vpf     (gemB_vpf[7:0]),
+  .gem_delay    (gem_delay[3:0]),
 
 // TMB-Sequencer Pipelines
   .wr_adr_xtmb (wr_adr_xtmb[MXBADR-1:0]), // In  Buffer write address after drift time
@@ -4275,7 +4278,7 @@
       .gem_zero_suppress (gem_zero_suppress),            // Out  1 = Enable GEM Readout Zero-suppression
       .fifo_tbins_gem    (fifo_tbins_gem[MXTBIN-1:0]),   // Out  Number GEM FIFO time bins to read out
       .fifo_pretrig_gem  (fifo_pretrig_gem[MXTBIN-1:0]), // Out  Number GEM FIFO time bins before pretrigger
-
+      .gem_delay         (gem_delay[3:0]),               // Out  GEM Trigger Delay
       // RPC Ports: RAT Control
       .rpc_sync     (rpc_sync),     // Out  Sync mode
       .rpc_posneg   (rpc_posneg),   // Out  Clock phase
