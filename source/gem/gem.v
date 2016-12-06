@@ -84,6 +84,16 @@ module gem (
     output [7:0] strip2,  // cluster2 flattened to strip coordinates (0-191)
     output [7:0] strip3,  // cluster3 flattened to strip coordinates (0-191)
 
+    output [7:0] halfstrip0,  // cluster0 translated to csc halfstrip coordinates
+    output [7:0] halfstrip1,  // cluster1 translated to csc halfstrip coordinates
+    output [7:0] halfstrip2,  // cluster2 translated to csc halfstrip coordinates
+    output [7:0] halfstrip3,  // cluster3 translated to csc halfstrip coordinates
+
+    output [2:0] halfstrip_size0,  // cluster0 translated to csc halfstrip size
+    output [2:0] halfstrip_size1,  // cluster1 translated to csc halfstrip size
+    output [2:0] halfstrip_size2,  // cluster2 translated to csc halfstrip size
+    output [2:0] halfstrip_size3,  // cluster3 translated to csc halfstrip size
+
     output vpf0, // cluster0 valid flag
     output vpf1, // cluster1 valid flag
     output vpf2, // cluster2 valid flag
@@ -213,6 +223,11 @@ parameter CLSTBITS = 14;
 // outputs
 //----------------------------------------------------------------------------------------------------------------------
 
+
+// RAM Lookups --- data leaves RAM on the falling edge of the clock
+
+//-Converted to GEM Strip (flattened)-----------------------------------------------------------------------------------
+
 cluster_to_gemstrip cluster_to_gemstrip01 (
     .clock    (clock),
     .cluster0 (cluster0),
@@ -227,6 +242,42 @@ cluster_to_gemstrip cluster_to_gemstrip23 (
     .cluster1 (cluster3),
     .strip0   (strip2),
     .strip1   (strip3)
+);
+
+//-Converted to CSC Halfstrip-------------------------------------------------------------------------------------------
+
+cluster_to_halfstrip cluster_to_halfstrip01 (
+    .clock      (clock),
+    .cluster0   (cluster0),
+    .cluster1   (cluster1),
+    .halfstrip0 (halfstrip0),
+    .halfstrip1 (halfstrip1)
+);
+
+cluster_to_halfstrip cluster_to_halfstrip23 (
+    .clock      (clock),
+    .cluster0   (cluster2),
+    .cluster1   (cluster3),
+    .halfstrip0 (halfstrip2),
+    .halfstrip1 (halfstrip3)
+);
+
+//-Size converted to CSC Halfstrips-------------------------------------------------------------------------------------
+
+cluster_to_halfstrip_size cluster_to_halfstrip_size01 (
+    .clock    (clock),
+    .cluster0 (cluster0),
+    .cluster1 (cluster1),
+    .size0    (halfstrip_size0),
+    .size1    (halfstrip_size1)
+);
+
+cluster_to_halfstrip_size cluster_to_halfstrip_size23 (
+    .clock    (clock),
+    .cluster0 (cluster2),
+    .cluster1 (cluster3),
+    .size0    (halfstrip_size2),
+    .size1    (halfstrip_size3)
 );
 
 assign vpf0 = vpf[0];

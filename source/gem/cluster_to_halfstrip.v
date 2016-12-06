@@ -4,14 +4,14 @@
 // just divide the chamber in thirds for example.. which would simplify this
 // matching considerably but at what cost? 
 
-module cluster_to_gemstrip (
+module cluster_to_halfstrip (
 		input                     clock,
 
 		input      [13:0]         cluster0,  // save block ram resources by doing 2 lookups from each RAM in parallel
 		input      [13:0]         cluster1, 
 
-		output [DATABITS-1:0] strip0, 
-		output [DATABITS-1:0] strip1
+		output [DATABITS-1:0] halfstrip0,
+		output [DATABITS-1:0] halfstrip1
 );
 
 parameter FALLING_EDGE = 0;
@@ -26,10 +26,6 @@ reg [DATABITS-1:0] rom_port0, rom_port1;
 wire we = 0;
 wire [DATABITS-1:0] din = 0;
 
-//----------------------------------------------------------------------------------------------------------------------
-// Clock
-//----------------------------------------------------------------------------------------------------------------------
-
 wire logic_clock;
 generate
 if (FALLING_EDGE)
@@ -38,24 +34,21 @@ else
   assign logic_clock = clock;
 endgenerate
 
-//----------------------------------------------------------------------------------------------------------------------
-//
-//----------------------------------------------------------------------------------------------------------------------
-
 always @(posedge logic_clock) begin
 		if (we)      rom[cluster0[ADDRBITS-1:0]]<=din;  // dummy write to help Xilinx infer a dual port block RAM 
 
-		rom_port0 <= rom[cluster0[ADDRBITS-1:0]+cluster0[13:10]]; // take the cluster + size>>1 (divide by 2) to get roughly the cluster center 
-		rom_port1 <= rom[cluster1[ADDRBITS-1:0]+cluster1[13:10]];
+		rom_port0 <= rom[cluster0[ADDRBITS-1:0]];
+		rom_port1 <= rom[cluster1[ADDRBITS-1:0]];
 end
 
-assign strip0 = rom_port0[DATABITS-1:0]; 
-assign strip1 = rom_port1[DATABITS-1:0]; 
+assign halfstrip0 = rom_port0[DATABITS-1:0];
+assign halfstrip1 = rom_port1[DATABITS-1:0];
 
 genvar istrip; 
 generate
   for (istrip=0; istrip<1536; istrip=istrip+1) begin: striploop
-    initial rom[istrip] = istrip % 192; 
+    // just use a rough static mapping for now
+    initial rom[istrip] = ((istrip % 192) * 128) / 192;
   end
 endgenerate
 
