@@ -3369,47 +3369,70 @@
   reg          comp_phaser3_done_r    =  1'b0;       // permanently set after first comp dps phaser lock cycle  is complete
   reg          gtx_sync_too_long      =  1'b0;
 
+  reg alct_phaser_done  = 0;
+  reg comp_phaser2_done = 0;
+  reg comp_phaser3_done = 0;
+
   always @(posedge tmb_clock0_ibufg) begin
     if (lock_tmb_clock0) mmcm_firstlock <= 1'b1;      // so it will only time the first mmcm lock cycle
 //  if (!lock_tmb_clock0 && !mmcm_firstlock && (tmb_mmcm_lock_time[17:10] != 8'hFF)) tmb_mmcm_lock_time <= tmb_mmcm_lock_time + 1'b1;
 
-    if (!power_up && (tmb_power_up_time[17:10] != 8'hFF)) tmb_power_up_time <= tmb_power_up_time + 1'b1;
-    if (!vsm_ready && (tmb_load_cfg_time[17:10] != 8'hFF)) tmb_load_cfg_time <= tmb_load_cfg_time + 1'b1; // time until TMB is ready
+    if (!power_up && (tmb_power_up_time[17:10] != 8'hFF))
+      tmb_power_up_time <= tmb_power_up_time + 1'b1;
+    if (!vsm_ready && (tmb_load_cfg_time[17:10] != 8'hFF))
+      tmb_load_cfg_time <= tmb_load_cfg_time + 1'b1; // time until TMB is ready
 
     if (phaser0_rd[2]) ldps_busy[0] <= 1'b1; // phaser 0 and 1 are for ALCT (dps 0,1)
     if (phaser1_rd[2]) ldps_busy[1] <= 1'b1;
     if (phaser7_rd[2]) ldps_busy[2] <= 1'b1; // phaser 7 and 8 are for comparator fiber links from DCFEBs (dps 2,3)
     if (phaser8_rd[2]) ldps_busy[3] <= 1'b1;
 
-    if (!alct_phaser_done_r) alct_phaser_done_r <= alct_phaser_done;
-    if (!comp_phaser2_done_r) comp_phaser2_done_r <= comp_phaser2_done;
-    if (!comp_phaser3_done_r) comp_phaser3_done_r <= comp_phaser3_done;
+    if (!alct_phaser_done_r && (alct_phaser_lock_time[17:10] != 8'hFF))
+      alct_phaser_lock_time <= alct_phaser_lock_time + 1'b1; // time until TMB clocks for alct are ready and locked
 
-    if (!alct_phaser_done_r && (alct_phaser_lock_time[17:10] != 8'hFF)) alct_phaser_lock_time <= alct_phaser_lock_time + 1'b1; // time until TMB clocks for alct are ready and locked
-    if ( (!comp_phaser2_done_r | !comp_phaser3_done_r) && (comp_phaser_lock_time[17:10] != 8'hFF)) comp_phaser_lock_time <= comp_phaser_lock_time + 1'b1; // time until TMB clocks for comp are ready and locked
+    if ( (!comp_phaser2_done_r | !comp_phaser3_done_r) && (comp_phaser_lock_time[17:10] != 8'hFF))
+      comp_phaser_lock_time <= comp_phaser_lock_time + 1'b1; // time until TMB clocks for comp are ready and locked
+
     gtx_sync_too_long  <=  (~|gtx_sync_done_time[15:10]) & (|gtx_sync_done_time[17:16]); // gtx s.b. done before 800us, so reset at 1638us and release at 1664us... repeats cycle 2 more times if needed at 3276 and 4915us
 
     // JRG, note that alct_startup_done means alct is ready to receive jtag cfg data.  use  jsm_ok  to indicate cfg is done!
-    if (jsm_ok) jsm_cfg_done <= 1'b1;
-    if (!jsm_cfg_done && alct_startup_done && (alct_load_cfg_time[17:10] != 8'hFF)) alct_load_cfg_time <= alct_load_cfg_time + 1'b1; // time to send alct config data after alct fpga is ready for it; for total delay add alct_startup_delay and the longer of power_up_time or tmb_load_cfg_time
+    if (jsm_ok)
+      jsm_cfg_done <= 1'b1;
 
-    if (gtx_rst_done && gem_rx_rst_done) gtx_rst_completed <= 1'b1;      // so it will only time the first reset cycle completion
-    if (!gtx_rst_completed && (gtx_rst_done_time[17:10] != 8'hFF)) gtx_rst_done_time <= gtx_rst_done_time + 1'b1; // note: reset is followed by sync
+    if (!jsm_cfg_done && alct_startup_done && (alct_load_cfg_time[17:10] != 8'hFF))
+      alct_load_cfg_time <= alct_load_cfg_time + 1'b1; // time to send alct config data after alct fpga is ready for it; for total delay add alct_startup_delay and the longer of power_up_time or tmb_load_cfg_time
 
-    if (virtex6_gtx_rx_all_rd[3]) gtx_sync_completed <= 1'b1;      // so it will only time the first sync cycle completion
-    if (!gtx_sync_completed && (gtx_sync_done_time[17:10] != 8'hFF)) gtx_sync_done_time <= gtx_sync_done_time + 1'b1; // note: sync comes after reset
+    if (gtx_rst_done && gem_rx_rst_done)
+      gtx_rst_completed <= 1'b1;      // so it will only time the first reset cycle completion
+
+    if (!gtx_rst_completed && (gtx_rst_done_time[17:10] != 8'hFF))
+      gtx_rst_done_time <= gtx_rst_done_time + 1'b1; // note: reset is followed by sync
+
+    if (virtex6_gtx_rx_all_rd[3])
+      gtx_sync_completed <= 1'b1;      // so it will only time the first sync cycle completion
+
+    if (!gtx_sync_completed && (gtx_sync_done_time[17:10] != 8'hFF))
+      gtx_sync_done_time <= gtx_sync_done_time + 1'b1; // note: sync comes after reset
 
     fast_sum <= absum + cdsum;   // Adr 186 --JGhere, test: count bits in phaser_lock + alct_load_cfg
   end
 
-  assign alct_phaser_done =  ( !(|dps_busy[1:0]) && (&ldps_busy[1:0]) && (&dps_lock[1:0]) );  //  use to time the first alct dps phaser cycle
-  assign comp_phaser2_done =  ( (!dps_busy[2]) && ldps_busy[2] && dps_lock[2]  );  // use to time the first comp dps phaser2 cycle
-  assign comp_phaser3_done =  ( (!dps_busy[3]) && ldps_busy[3] && dps_lock[3]  );  // use to time the first comp dps phaser3 cycle
+  always @(posedge tmb_clock0_ibufg) begin
+
+      if (!alct_phaser_done_r)  alct_phaser_done_r  <= alct_phaser_done;
+      if (!comp_phaser2_done_r) comp_phaser2_done_r <= comp_phaser2_done;
+      if (!comp_phaser3_done_r) comp_phaser3_done_r <= comp_phaser3_done;
+
+      alct_phaser_done  <= ( !(|dps_busy[1:0]) && (&ldps_busy[1:0]) && (&dps_lock[1:0]) ); // use to time the first alct dps phaser cycle
+      comp_phaser2_done <= ( !( dps_busy[2]  ) && ( ldps_busy[2]  ) && ( dps_lock[2]  ) ); // use to time the first comp dps phaser2 cycle
+      comp_phaser3_done <= ( !( dps_busy[3]  ) && ( ldps_busy[3]  ) && ( dps_lock[3]  ) ); // use to time the first comp dps phaser3 cycle
+  end
+
   assign gtx_rst_done = &gtx_rx_rst_done;
 
-  assign comp_phaser_a_ready =   comp_phaser2_done_r;    // permanently set after first comp dps phaser lock cycle  is complete
-  assign comp_phaser_b_ready =   comp_phaser3_done_r;    // permanently set after first comp dps phaser lock cycle  is complete
-  assign auto_gtx_reset = gtx_sync_too_long;  // gtx did not sync after hard reset, so force a gtx reset
+  assign comp_phaser_a_ready = comp_phaser2_done_r; // permanently set after first comp dps phaser lock cycle  is complete
+  assign comp_phaser_b_ready = comp_phaser3_done_r; // permanently set after first comp dps phaser lock cycle  is complete
+  assign auto_gtx_reset      = gtx_sync_too_long;   // gtx did not sync after hard reset, so force a gtx reset
 
 
   reg [4:0] fast_sum = 0;
