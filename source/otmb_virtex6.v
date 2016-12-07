@@ -3776,8 +3776,9 @@
 
    wire odmb_sel, bd_sel;
    wire [15:0] odmb_data;
-   wire [48:0] dmb_tx_odmb;
 
+   `ifdef ODMB_DEVICE_EN
+   wire [48:0] dmb_tx_odmb;
    odmb_device odmb_device_pm (
       .clock        (clock),        // In  TMB 40MHz clock
       .clock_vme    (clock_vme),    // In  VME 10MHz clock
@@ -3798,8 +3799,10 @@
 
       .sump (odmb_sump)
       );
-
-  wire odmb_device_sump = odmb_sump  | (|dmb_tx_odmb);
+  `else
+    assign odmb_sel    = 1'b0;
+    assign odmb_data   = 16'd0;
+  `endif
 
 //------------------------------------------------------------------------------------------------------------
 //  VME Interface Instantiation
@@ -4971,7 +4974,6 @@
    | inj_ram_sump
    | virtex6_sump
    | cfeb_rx_sump
-   | odmb_device_sump
    | (|gem_sump);
 
 
