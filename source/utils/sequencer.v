@@ -3199,6 +3199,77 @@
     gem_cnt_en[57] <= clct_gem_noalct;
     gem_cnt_en[58] <= alct_gem_noclct;
 
+    // connect the unused outputs to turn the counters ON
+    gem_cnt_en[59]  <= 1'b1;
+    gem_cnt_en[60]  <= 1'b1;
+    gem_cnt_en[61]  <= 1'b1;
+    gem_cnt_en[62]  <= 1'b1;
+    gem_cnt_en[63]  <= 1'b1;
+    gem_cnt_en[64]  <= 1'b1;
+    gem_cnt_en[65]  <= 1'b1;
+    gem_cnt_en[66]  <= 1'b1;
+    gem_cnt_en[67]  <= 1'b1;
+    gem_cnt_en[68]  <= 1'b1;
+    gem_cnt_en[69]  <= 1'b1;
+    gem_cnt_en[70]  <= 1'b1;
+    gem_cnt_en[71]  <= 1'b1;
+    gem_cnt_en[72]  <= 1'b1;
+    gem_cnt_en[73]  <= 1'b1;
+    gem_cnt_en[74]  <= 1'b1;
+    gem_cnt_en[75]  <= 1'b1;
+    gem_cnt_en[76]  <= 1'b1;
+    gem_cnt_en[77]  <= 1'b1;
+    gem_cnt_en[78]  <= 1'b1;
+    gem_cnt_en[79]  <= 1'b1;
+    gem_cnt_en[80]  <= 1'b1;
+    gem_cnt_en[81]  <= 1'b1;
+    gem_cnt_en[82]  <= 1'b1;
+    gem_cnt_en[83]  <= 1'b1;
+    gem_cnt_en[84]  <= 1'b1;
+    gem_cnt_en[85]  <= 1'b1;
+    gem_cnt_en[86]  <= 1'b1;
+    gem_cnt_en[87]  <= 1'b1;
+    gem_cnt_en[88]  <= 1'b1;
+    gem_cnt_en[89]  <= 1'b1;
+    gem_cnt_en[90]  <= 1'b1;
+    gem_cnt_en[91]  <= 1'b1;
+    gem_cnt_en[92]  <= 1'b1;
+    gem_cnt_en[93]  <= 1'b1;
+    gem_cnt_en[94]  <= 1'b1;
+    gem_cnt_en[95]  <= 1'b1;
+    gem_cnt_en[96]  <= 1'b1;
+    gem_cnt_en[97]  <= 1'b1;
+    gem_cnt_en[98]  <= 1'b1;
+    gem_cnt_en[99]  <= 1'b1;
+    gem_cnt_en[100] <= 1'b1;
+    gem_cnt_en[101] <= 1'b1;
+    gem_cnt_en[102] <= 1'b1;
+    gem_cnt_en[103] <= 1'b1;
+    gem_cnt_en[104] <= 1'b1;
+    gem_cnt_en[105] <= 1'b1;
+    gem_cnt_en[106] <= 1'b1;
+    gem_cnt_en[107] <= 1'b1;
+    gem_cnt_en[108] <= 1'b1;
+    gem_cnt_en[109] <= 1'b1;
+    gem_cnt_en[110] <= 1'b1;
+    gem_cnt_en[111] <= 1'b1;
+    gem_cnt_en[112] <= 1'b1;
+    gem_cnt_en[113] <= 1'b1;
+    gem_cnt_en[114] <= 1'b1;
+    gem_cnt_en[115] <= 1'b1;
+    gem_cnt_en[116] <= 1'b1;
+    gem_cnt_en[117] <= 1'b1;
+    gem_cnt_en[118] <= 1'b1;
+    gem_cnt_en[119] <= 1'b1;
+    gem_cnt_en[120] <= 1'b1;
+    gem_cnt_en[121] <= 1'b1;
+    gem_cnt_en[122] <= 1'b1;
+    gem_cnt_en[123] <= 1'b1;
+    gem_cnt_en[124] <= 1'b1;
+    gem_cnt_en[125] <= 1'b1;
+    gem_cnt_en[126] <= 1'b1;
+    gem_cnt_en[127] <= 1'b1;
+
   end
 
 // Counter overflow disable
