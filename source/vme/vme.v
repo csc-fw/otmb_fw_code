@@ -1,4 +1,8 @@
 `timescale 1ns / 1ps
+
+// debug firmware in Xilinx simulation
+//`define DEBUG_OTMB_FIRMWARE
+
 //------------------------------------------------------------------------------------------------------------------
 //  VME Section:
 //------------------------------------------------------------------------------------------------------------------
@@ -3145,7 +3149,11 @@
   wire [23:0] vsm_adr;
   wire        vsm_oe;
 
+`ifndef DEBUG_OTMB_FIRMWARE
   wire [8:0]  reg_adr = (vsm_oe) ? vsm_adr[8:0] : {a_vme[8:1],1'b0};  // Pad A0, multplex vme backplane with vmesm prom data
+`else
+  wire [8:0]  reg_adr = (vsm_oe) ? vsm_adr[8:0] : {1'b0,a_vme[8:1]};  // Pad A0, multplex vme backplane with vmesm prom data
+`endif
 
   always @* begin
   case (reg_adr)
