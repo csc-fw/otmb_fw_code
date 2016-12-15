@@ -470,6 +470,7 @@
   ext_trig_inject,
   injector_mask_rat,
   injector_mask_rpc,
+  injector_mask_gem,
   inj_delay_rat,
   rpc_tbins_test,
 
@@ -536,6 +537,13 @@
   gem_debug_fifo_sel,
   gem_debug_fifo_igem,
   gem_debug_fifo_data,
+
+// GEM Injector RAM
+  gem_inj_wen,
+  gem_inj_adr,
+  gem_inj_sel,
+  gem_inj_igem,
+  gem_inj_data,
 
 // Sequencer Ports: Buffer Status
   wr_buf_ready,
@@ -1492,6 +1500,8 @@
 
   parameter ADR_GEM_DEBUG_FIFO_CTRL   = 10'h30c;
   parameter ADR_GEM_DEBUG_FIFO_DATA   = 10'h30e;
+  parameter ADR_GEM_INJ_CTRL          = 10'h320;
+  parameter ADR_GEM_INJ_DATA          = 10'h322;
   parameter ADR_GEM_TBINS             = 10'h310;
   parameter ADR_GEM_CFG               = 10'h312;
   parameter ADR_GEM_TRG               = 10'h318;
@@ -1962,6 +1972,7 @@
   output                ext_trig_inject;    // Changes clct_ext_trig to fire pattern injector
   output                injector_mask_rat;  // Enable RAT for injector trigger
   output                injector_mask_rpc;  // Enable RPC for injector trigger
+  output                injector_mask_gem;  // Enable GEM for injector trigger
   output  [3:0]         inj_delay_rat;      // CFEB/RPC Injector waits for RAT injector
   output                rpc_tbins_test;     // Set write_data=address
 
@@ -2030,6 +2041,14 @@
   output [1:0]  gem_debug_fifo_igem;   // Select which gem Fiber to read
 
   input  [15:0] gem_debug_fifo_data;  // Raw hits RAM VME read data
+
+// GEM Injector RAM
+  output        gem_inj_wen;  // Injector RAM VME address reset
+  output [9:0]  gem_inj_adr;  // Injector RAM VME read/write address
+  output [1:0]  gem_inj_sel;  // Select which gem Cluster to write
+  output [1:0]  gem_inj_igem; // Select which gem Fiber to write
+
+  output [15:0] gem_inj_data; // Injector RAM VME write data
 
 // Sequencer Ports: Buffer Status
   input                   wr_buf_ready;       // Write buffer is ready
@@ -3126,6 +3145,12 @@
   reg  [15:0] gem_debug_fifo_ctrl_wr;
   wire [15:0] gem_debug_fifo_ctrl_rd;
 
+  reg  [15:0] gem_inj_data_wr;
+  wire [15:0] gem_inj_data_rd; 
+
+  reg  [15:0] gem_inj_ctrl_wr;
+  wire [15:0] gem_inj_ctrl_rd;
+
   reg  [15:0] gem_tbins_wr;
   wire [15:0] gem_tbins_rd;
 
@@ -3279,6 +3304,8 @@
   wire      wr_virtex6_extend;
 
   wire      wr_gem_debug_fifo_ctrl;
+  wire      wr_gem_inj_ctrl;
+  wire      wr_gem_inj_data;
   wire      wr_gem_tbins;
   wire      wr_gem_cfg;
   wire      wr_gem_trg;
@@ -3871,6 +3898,9 @@
   ADR_GEM_DEBUG_FIFO_CTRL:   data_out <= gem_debug_fifo_ctrl_rd;
   ADR_GEM_DEBUG_FIFO_DATA:   data_out <= gem_debug_fifo_data_rd;
 
+  ADR_GEM_INJ_CTRL:          data_out <= gem_inj_ctrl_rd;
+  ADR_GEM_INJ_DATA:          data_out <= gem_inj_data_rd;
+
   ADR_GEM_TBINS:             data_out <= gem_tbins_rd;
   ADR_GEM_CFG:               data_out <= gem_cfg_rd;
   ADR_GEM_TRG:               data_out <= gem_trg_rd;
@@ -4042,6 +4072,8 @@
   assign wr_virtex6_extend        =  (reg_adr==ADR_V6_EXTEND              && clk_en);
 
   assign wr_gem_debug_fifo_ctrl   =  (reg_adr==ADR_GEM_DEBUG_FIFO_CTRL    && clk_en);
+  assign wr_gem_inj_ctrl          =  (reg_adr==ADR_GEM_INJ_CTRL           && clk_en);
+  assign wr_gem_inj_data          =  (reg_adr==ADR_GEM_INJ_DATA           && clk_en);
   assign wr_gem_tbins             =  (reg_adr==ADR_GEM_TBINS              && clk_en);
   assign wr_gem_cfg               =  (reg_adr==ADR_GEM_CFG                && clk_en);
   assign wr_gem_trg               =  (reg_adr==ADR_GEM_TRG                && clk_en);
@@ -8033,6 +8065,8 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 
   assign gem_debug_fifo_data_rd = gem_debug_fifo_data;
 
+
+
 //------------------------------------------------------------------------------------------------------------------
 // ADR_GEM_TBINS=0x310    GEM Time bins
 //------------------------------------------------------------------------------------------------------------------
@@ -8107,6 +8141,36 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign gem_delay [3:0] = gem_trg_wr[3:0];
 
   assign gem_trg_rd [15:0] = gem_trg_wr [15:0]; // Readback
+
+//------------------------------------------------------------------------------------------------------------------
+// GEM_INJ_CTRL = 0x30C  GEM Raw Hits Readout RAM Simple Controller
+//------------------------------------------------------------------------------------------------------------------
+
+  initial begin
+  gem_inj_ctrl_wr[0]    = 1'b0;  // RW write enable
+  gem_inj_ctrl_wr[2:1]  = 2'b0;  // RW cluster select
+  gem_inj_ctrl_wr[4:3]  = 2'b0;  // RW gem select
+  gem_inj_ctrl_wr[14:5] = 10'b0; // RW address
+  gem_inj_ctrl_wr[15]   = 1'b0;  // RW inject enable
+  end
+
+  assign gem_inj_wen   = gem_inj_ctrl_wr[0];
+  assign gem_inj_sel   = gem_inj_ctrl_wr[2:1];
+  assign gem_inj_igem  = gem_inj_ctrl_wr[4:3];
+  assign gem_inj_adr   = gem_inj_ctrl_wr[14:5];
+  wire   gem_inj_mask  = gem_inj_ctrl_wr[15];
+
+  assign injector_mask_gem = gem_inj_mask;
+
+  //readback
+  assign gem_inj_ctrl_rd = gem_inj_ctrl_wr;
+
+//------------------------------------------------------------------------------------------------------------------
+// GEM_INJ_DATA = 0x30E  GEM Raw Hits Data
+//------------------------------------------------------------------------------------------------------------------
+
+  assign gem_inj_data    = gem_inj_data_wr;
+  assign gem_inj_data_rd = gem_inj_data_wr;
 
 //------------------------------------------------------------------------------------------------------------------
 // VME Write-Registers latch data when addressed + latch power-up defaults
@@ -8246,6 +8310,8 @@ always @(posedge clock_vme) begin
   if    (wr_virtex6_sysmon)        virtex6_sysmon_wr       <= d[15:0];
   if    (wr_virtex6_extend)        virtex6_extend_wr       <= d[15:0];
   if    (wr_gem_debug_fifo_ctrl)   gem_debug_fifo_ctrl_wr  <= d[15:0];
+  if    (wr_gem_inj_ctrl)          gem_inj_ctrl_wr         <= d[15:0];
+  if    (wr_gem_inj_data)          gem_inj_data_wr         <= d[15:0];
   if    (wr_mpc_frames_fifo_ctrl)  mpc_frames_fifo_ctrl_wr <= d[15:0];
 end
 

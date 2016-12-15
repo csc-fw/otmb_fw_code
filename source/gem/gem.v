@@ -4,6 +4,7 @@
 //  07/28/2015 Port from CFEB.v
 //  10/15/2015 Modifications for 56 data bits
 //  10/20/2015 Addition of GEM raw hits ram
+//  12/09/2016 Addition of GEM Injector RAMS
 //-------------------------------------------------------------------------------------------------------------------
 
 
@@ -61,6 +62,15 @@ module gem (
     input  [1:0]    debug_fifo_sel,        // FIFO RAM read layer clusters 0-3
     output [13:0]   debug_fifo_rdata,      // FIFO RAM read data
     input           debug_fifo_reset,      // FIFO RAM read data
+
+    // GEM Injector RAM
+    input  [9:0]    inj_rwadr,      // Injector RAM read tbin address
+    input  [1:0]    inj_sel,        // Injector RAM read layer clusters 0-3
+    input  [1:0]    inj_igem,       // Injector RAM GEM ID 0-3
+    input  [15:0]   inj_wdata,      // Injector RAM read data
+    input           inj_wen,        // Injector RAM read data
+    input           inj_go_gem,     // Start Injection (from Sequencer)
+    input  [11:0]   inj_last_tbin , //
 
     // Raw Hits FIFO RAM
     input                  fifo_wen,   // 1=Write enable FIFO RAM
@@ -183,35 +193,28 @@ parameter CLSTBITS = 14;
 // Decompose packed GEM data format
 //------------------------------------------------------------------------------------------------------------------
 
-  wire [13:0] cluster          [3:0];
+  wire [13:0] cluster     [3:0];
+  wire [13:0] cluster_raw [3:0];
+  wire [15:0] gem_inj     [3:0];
+  wire [13:0] cluster_inj [3:0];
+  wire [11:0] adr         [3:0];
+  wire [ 2:0] cnt         [3:0];
+  wire [ 0:0] vpf         [3:0];
 
-  assign cluster[0] = gtx_rx_data[13: 0];
-  assign cluster[1] = gtx_rx_data[27:14];
-  assign cluster[2] = gtx_rx_data[41:28];
-  assign cluster[3] = gtx_rx_data[55:42];
-
-  assign  cluster0 = cluster[0];
-  assign  cluster1 = cluster[1];
-  assign  cluster2 = cluster[2];
-  assign  cluster3 = cluster[3];
-
-
-//----------------------------------------------------------------------------------------------------------------------
-// Decompose GEM Hits
-//----------------------------------------------------------------------------------------------------------------------
-
-  wire [11:0] adr [3:0];
-  wire  [2:0] cnt [3:0];
-  wire  [0:0] vpf [3:0];
+  reg pass_ff=1; // pass raw data or use injector ?
 
   genvar iclst;
   generate
   for (iclst=0; iclst<4; iclst=iclst+1) begin: cluster_assignment
-    assign adr[iclst] = cluster[iclst][10:0];
-    assign cnt[iclst] = cluster[iclst][13:11];
-    assign vpf[iclst] = ~(adr[iclst][10:9]==2'b11);
+    assign cluster     [iclst] = (pass_ff) ? cluster_raw [iclst] : cluster_inj [iclst];
+    assign cluster_raw [iclst] = gtx_rx_data[(iclst+1)*14-1 : iclst*14];
+    assign cluster_inj [iclst] = gem_inj[iclst][13:0];
+    assign adr         [iclst] = cluster[iclst][10:0];
+    assign cnt         [iclst] = cluster[iclst][13:11];
+    assign vpf         [iclst] = ~(adr[iclst][10:9]==2'b11);
   end
   endgenerate
+
 
   always @(posedge clock) begin
       gtx_rx_nonzero    <= (|gtx_rx_data[55:0]);
@@ -535,8 +538,115 @@ assign vpf3 = vpf[3];
   assign fifo_rdata = fifo_rdata_clst[fifo_sel];
 
 
-// Sump
-assign gem_sump = gtx_sump | (|debug_parity_err_gem[3:0]);
+  // Sump
+  assign gem_sump = gtx_sump | (|debug_parity_err_gem[3:0]);
+
+  //----------------------------------------------------------------------------------------------------------------------
+  // GEM Raw Hits Injector
+  //----------------------------------------------------------------------------------------------------------------------
+  reg [1:0] inj_sm; // synthesis attribute safe_implementation of inj_sm is "yes"
+
+  parameter pass      = 0;
+  parameter injecting = 1;
+
+  wire inj_tbin_cnt_done;
+
+  wire sm_reset = global_reset;
+  always @(posedge clock) begin
+    if (sm_reset)
+      inj_sm <= pass;
+
+    else begin
+      case (inj_sm)
+        pass:      if (inj_go_gem)        inj_sm <= injecting;
+        injecting: if (inj_tbin_cnt_done) inj_sm <= pass;
+        default                           inj_sm <= pass;
+      endcase
+    end
+  end
+
+  // Injector Time Bin Counter
+  reg [11:0] inj_tbin_cnt; // 0-4095
+  wire [9:0] inj_tbin_adr; // 0-1023
+
+  always @(posedge clock) begin
+    if      (inj_sm==pass)      inj_tbin_cnt <= 0; // Sync load
+    else if (inj_sm==injecting) inj_tbin_cnt <= inj_tbin_cnt + 1'b1;
+  end
+
+  assign inj_tbin_cnt_done = (inj_tbin_cnt==inj_last_tbin); // counter can wraparound the RAM
+  assign inj_tbin_adr[9:0] = inj_tbin_cnt[9:0];
+
+  always @(posedge clock) begin
+    if (sm_reset) pass_ff <= 1;
+    else          pass_ff <= (inj_sm==pass);
+  end
+
+  // Injector RAM: RPC Pads
+  // Port A: rw 16 bits x 1024 tbins, read/write via VME
+  // Port B: ro 16 bits via injector SM
+  wire [15:0] inj_rdataa [3:0];
+
+  wire [3:0] wen;
+  wire wen_os;
+
+  x_oneshot uwen (inj_wen, clock, wen_os);
+
+  generate
+  for (iclst=0; iclst<4; iclst=iclst+1) begin: inj_ram
+
+    assign wen[iclst] = (wen_os) && (inj_igem==IGEM) && (inj_sel==iclst);
+
+    initial $display("gem: generating Virtex6 RAMB18E1_S18_S18 ram.uinjpads");
+
+    RAMB18E1 #(        // Virtex6
+      .INIT_00             (256'hFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF),
+      .RAM_MODE            ("TDP"),        // SDP or TDP
+      .READ_WIDTH_A        (18),           // 0,1,2,4,9,18,36 Read/write width per port
+      .WRITE_WIDTH_A       (18),           // 0,1,2,4,9,18
+      .READ_WIDTH_B        (18),           // 0,1,2,4,9,18
+      .WRITE_WIDTH_B       (0),            // 0,1,2,4,9,18,36
+      .WRITE_MODE_A        ("READ_FIRST"), // Must be same for both ports in SDP mode:
+      .WRITE_MODE_B        ("READ_FIRST"), // WRITE_FIRST, READ_FIRST, or NO_CHANGE)
+      .SIM_COLLISION_CHECK ("ALL")         // ALL, WARNING_ONLY, GENERATE_X_ONLY or NONE)
+    )
+    uinjpads0 (
+      .WEA           ({2{wen[iclst]}}),          // 2-bit  A port write enable input
+      .ENARDEN       (1'b1),                     // 1-bit  A port enable/Read enable input
+      .RSTRAMARSTRAM (1'b0),                     // 1-bit  A port set/reset input
+      .RSTREGARSTREG (1'b0),                     // 1-bit  A port register set/reset input
+      .REGCEAREGCE   (1'b0),                     // 1-bit  A port register enable/Register enable input
+      .CLKARDCLK     (clock),                    // 1-bit  A port clock/Read clock input
+      .ADDRARDADDR   ({inj_rwadr[9:0],4'hF}),    // 14-bit A port address/Read address input 18b->[13:4]
+      .DIADI         (inj_wdata[15:0]),          // 16-bit A port data/LSB data input
+      .DIPADIP       (),                         // 2-bit  A port parity/LSB parity input
+      .DOADO         (inj_rdataa[iclst][15:0]),  // 16-bit A port data/LSB data output
+      .DOPADOP       (),                         // 2-bit  A port parity/LSB parity output
+
+      .WEBWE         (),                         // 4-bit  B port write enable/Write enable input
+      .ENBWREN       (1'b1),                     // 1-bit  B port enable/Write enable input
+      .REGCEB        (1'b0),                     // 1-bit  B port register enable input
+      .RSTRAMB       (1'b0),                     // 1-bit  B port set/reset input
+      .RSTREGB       (1'b0),                     // 1-bit  B port register set/reset input
+      .CLKBWRCLK     (clock),                    // 1-bit  B port clock/Write clock input
+      .ADDRBWRADDR   ({inj_tbin_adr[9:0],4'hF}), // 14-bit B port address/Write address input 18b->[13:4]
+      .DIBDI         (),                         // 16-bit B port data/MSB data input
+      .DIPBDIP       (),                         // 2-bit  B port parity/MSB parity input
+      .DOBDO         (gem_inj[iclst][15:0]),     // 16-bit B port data/MSB data output
+      .DOPBDOP       ()                          // 2-bit  B port parity/MSB parity output
+    );
+
+  end
+  endgenerate
+
+//----------------------------------------------------------------------------------------------------------------------
+//
+//----------------------------------------------------------------------------------------------------------------------
+
+  assign  cluster0 = cluster [0];
+  assign  cluster1 = cluster [1];
+  assign  cluster2 = cluster [2];
+  assign  cluster3 = cluster [3];
 
 //-------------------------------------------------------------------------------------------------------------------
 endmodule

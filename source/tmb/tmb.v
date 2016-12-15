@@ -1088,8 +1088,8 @@
   gem_srl_adr <= gem_delay-1'b1;
   end
 
-  srl16e_bbl #(1) ugemA (.clock(clock),.ce(1'b1),.adr(gem_srl_adr),.d(gemA_vpf[7:0]),.q(gemA_srl[7:0]));
-  srl16e_bbl #(1) ugemB (.clock(clock),.ce(1'b1),.adr(gem_srl_adr),.d(gemB_vpf[7:0]),.q(gemB_srl[7:0]));
+  srl16e_bbl #(8) ugemA (.clock(clock),.ce(1'b1),.adr(gem_srl_adr),.d(gemA_vpf[7:0]),.q(gemA_srl[7:0]));
+  srl16e_bbl #(8) ugemB (.clock(clock),.ce(1'b1),.adr(gem_srl_adr),.d(gemB_vpf[7:0]),.q(gemB_srl[7:0]));
 
   wire gem_ptr_is_0 = (gem_delay == 0);               // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
 

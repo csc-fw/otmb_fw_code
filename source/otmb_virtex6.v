@@ -1665,6 +1665,13 @@
 
   wire [15:0]  gem_debug_fifo_data_vme = {2'b0,gem_debug_fifo_rdata[gem_debug_fifo_igem]};
 
+  wire [9:0]   gem_inj_adr;      // FIFO RAM read tbin address
+  wire [1:0]   gem_inj_sel;      // FIFO RAM read layer clusters 0-3
+  wire [1:0]   gem_inj_igem;     // FIFO RAM read chamber 0-3
+  wire [15:0]  gem_inj_data_vme; // FIFO RAM read chamber 0-3
+  wire         gem_inj_wen;      // GEM Injector Write Enable
+  wire         injector_go_gem;  // Start GEM injector
+
 // Raw Hits FIFO RAM Ports
   wire  [RAM_ADRB-1:0]      fifo_radr_gem;              // FIFO RAM read tbin address
   wire  [1:0]               fifo_sel_gem;               // FIFO RAM read cluster 0-3 from this fiber
@@ -1733,6 +1740,15 @@
   .debug_fifo_sel   (gem_debug_fifo_sel),         // In  FIFO RAM read layer clusters 0-3
   .debug_fifo_reset (gem_debug_fifo_reset),       // In  FIFO RAM reset
   .debug_fifo_rdata (gem_debug_fifo_rdata[igem]), // Out FIFO RAM read data
+
+  // GEM Ports: GEM Raw Hits Ram
+  .inj_wen       (gem_inj_wen),         // In  GEM injector write enable
+  .inj_rwadr     (gem_inj_adr),         // In  Select GEM injector Address
+  .inj_sel       (gem_inj_sel),         // In  Select GEM Fiber Cluster 0-3
+  .inj_igem      (gem_inj_igem),        // In  Select GEM Fiber 0-3
+  .inj_wdata     (gem_inj_data_vme),    // In  GEM injector RAM data
+  .inj_go_gem    (injector_go_gem),     // In  Start GEM injector
+  .inj_last_tbin (inj_last_tbin[11:0]), //
 
   // Raw Hits FIFO RAM Ports
   .fifo_wen   (fifo_wen),                                // In  1=Write enable FIFO RAM
@@ -2367,10 +2383,12 @@
   .injector_mask_cfeb (injector_mask_cfeb[MXCFEB-1:0]), // In  Enable CFEB(n) for injector trigger
   .injector_mask_rat  (injector_mask_rat),              // In  Enable RAT for injector trigger
   .injector_mask_rpc  (injector_mask_rpc),              // In  Enable RPC for injector trigger
+  .injector_mask_gem  (injector_mask_gem),              // In  Enable GEM for injector trigger
   .inj_delay_rat      (inj_delay_rat[3:0]),             // In  CFEB/RPC Injector waits for RAT injector
   .injector_go_cfeb   (injector_go_cfeb[MXCFEB-1:0]),   // Out  Start CFEB(n) pattern injector
   .injector_go_rat    (injector_go_rat),                // Out  Start RAT     pattern injector
   .injector_go_rpc    (injector_go_rpc),                // Out  Start RPC     pattern injector
+  .injector_go_gem    (injector_go_gem),                // Out  Start GEM     pattern injector
 
 // Sequencer Status from CFEBs
   .triad_skip           (triad_skip[MXCFEB-1:0]),                                    // In  Triads skipped
@@ -4286,6 +4304,7 @@
       .ext_trig_inject    (ext_trig_inject),                // Out  Changes clct_ext_trig to fire pattern injector
       .injector_mask_rat  (injector_mask_rat),              // Out  Enable RAT for injector trigger
       .injector_mask_rpc  (injector_mask_rpc),              // Out  Enable RPC for injector trigger
+      .injector_mask_gem  (injector_mask_gem),              // Out  Enable GEM for injector trigger
       .inj_delay_rat      (inj_delay_rat[3:0]),             // Out  CFEB/RPC Injector waits for RAT injector
       .rpc_tbins_test     (rpc_tbins_test),                 // Out  Set write_data=address
 
@@ -4352,6 +4371,14 @@
       .gem_debug_fifo_sel   (gem_debug_fifo_sel),       // Out Select GEM Fiber Cluster 0-3
       .gem_debug_fifo_igem  (gem_debug_fifo_igem[1:0]), // Out Select GEM Fiber 0-3
       .gem_debug_fifo_data  (gem_debug_fifo_data_vme),  // In  Multiplexed GEM Debug RAM Data
+
+      // GEM Ports: GEM Raw Hits Ram
+      .gem_inj_wen   (gem_inj_wen),      // Out GEM injector write enable
+      .gem_inj_adr   (gem_inj_adr),      // Out Select GEM injector Address
+      .gem_inj_sel   (gem_inj_sel),      // Out Select GEM Fiber Cluster 0-3
+      .gem_inj_igem  (gem_inj_igem),     // Out Select GEM Fiber 0-3
+      .gem_inj_data  (gem_inj_data_vme), // Out GEM injector RAM data
+
 
       // Sequencer Ports: Buffer Status
       .wr_buf_ready     (wr_buf_ready),                      // In  Write buffer is ready

@@ -460,10 +460,12 @@
   injector_mask_cfeb,
   injector_mask_rat,
   injector_mask_rpc,
+  injector_mask_gem,
   inj_delay_rat,
   injector_go_cfeb,
   injector_go_rat,
   injector_go_rpc,
+  injector_go_gem,
 
 // Status from CFEB
   triad_skip,
@@ -1330,10 +1332,12 @@
   input  [MXCFEB-1:0] injector_mask_cfeb; // Enable CFEB(n) for injector trigger
   input               injector_mask_rat;  // Enable RAT for injector trigger
   input               injector_mask_rpc;  // Enable RPC for injector trigger
+  input               injector_mask_gem;  // Enable RPC for injector trigger
   input  [3:0]        inj_delay_rat;      // CFEB/RPC Injector waits for RAT injector
   output [MXCFEB-1:0] injector_go_cfeb;   // Start CFEB(n) pattern injector
   output              injector_go_rat;    // Start RAT     pattern injector
   output              injector_go_rpc;    // Start RPC     pattern injector
+  output              injector_go_gem;    // Start GEM     pattern injector
 
 // CFEB Status Ports
   input [MXCFEB-1:0] triad_skip;           // Triads skipped
@@ -2522,9 +2526,10 @@
 //
 //------------------------------------------------------------------------------------------------------------------
 // On CCB or VME command, start CFEB pattern injectors
-  reg  [MXCFEB-1:0]  injector_go_cfeb = 0;
-  reg          injector_go_rat  = 0;
-  reg          injector_go_rpc  = 0;
+  reg  [MXCFEB-1:0] injector_go_cfeb = 0;
+  reg               injector_go_rat  = 0;
+  reg               injector_go_rpc  = 0;
+  reg               injector_go_gem  = 0;
 
   wire inj_trig_cmd = (clct_ext_trig && clct_ext_trig_en && ext_trig_inject) || inj_trig_vme;
   wire inj_trig_pulse;
@@ -2536,6 +2541,7 @@
   always@(posedge clock) begin
     injector_go_cfeb[MXCFEB-1:0] <= {MXCFEB{inj_trig_pulse_ff}} & injector_mask_cfeb; // waits for rat
     injector_go_rpc              <=         inj_trig_pulse_ff   & injector_mask_rpc;  // waits for rat
+    injector_go_gem              <=         inj_trig_pulse_ff   & injector_mask_gem;  // waits for rat
     injector_go_rat              <=         inj_trig_pulse      & injector_mask_rat;  // fires first
   end
 
@@ -2551,7 +2557,7 @@
   assign active_feb[MXCFEB-1:0] = cfeb_active[MXCFEB-1:0] | {MXCFEB{all_cfebs_active}};  // Active list includes boundary overlaps
 
 // Delay External trigger sources
-  wire  alct_pre_trig_os; // ALCT  pre-trigger before drift and priority encode
+  wire  alct_pre_trig_os; // ALCT pre-trigger before drift and priority encode
   wire  alct_pat_trig_os; // ALCT pattern trigger after drift
   wire  adb_ext_trig_os;  // ADB  test pulse trigger
   wire  dmb_ext_trig_os;  // DMB  calibration trigger
@@ -3730,7 +3736,7 @@
 
   wire tmb_push = tmb_trig_pulse && (tmb_trig_keep || tmb_non_trig_keep) && !no_daq && wr_avail_rtmb;
 
-  assign l1a_dia[0]    = tmb_push;
+  assign l1a_dia[0]     = tmb_push;
   assign l1a_dia[11:1]  = wr_adr_rtmb[10:0];
   assign l1a_dia[12]    = wr_avail_rtmb;
   assign l1a_dia[13]    = tmb_alct_only;

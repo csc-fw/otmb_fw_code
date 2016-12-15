@@ -583,15 +583,15 @@
   wire  [28:1]  alct_2nd_ff;
 
   x_demux_ddr_alct_muonic #(28) ux_demux_alct (
-  .clock    (clock),          // In  40MHz TMB main clock
-  .clock_2x  (clock_2x),          // In  80MHz commutator clock
-  .clock_lac  (clock_lac),        // In  40MHz logic accessible clock  .clock_iob  (clock_alct_rxd),      // In  40MHZ iob ddr clock
-  .clock_iob  (clock_alct_rxd),      // In  40MHZ iob ddr clock
-  .posneg    (alct_rxd_posneg),      // In  Select inter-stage clock 0 or 180 degrees
-  .clr    (alct_clear_ff),      // In  Sync clear
-  .din    (alct_rx[28:1]),      // In  80MHz data from ALCT
-  .dout1st  (alct_1st_ff[28:1]),    // Out  Data de-multiplexed 1st in time
-  .dout2nd  (alct_2nd_ff[28:1]));    // Out  Data de-multiplexed 2nd in time
+  .clock     (clock),              // In  40MHz TMB main clock
+  .clock_2x  (clock_2x),           // In  80MHz commutator clock
+  .clock_lac (clock_lac),          // In  40MHz logic accessible clock  .clock_iob  (clock_alct_rxd), // In  40MHZ iob ddr clock
+  .clock_iob (clock_alct_rxd),     // In  40MHZ iob ddr clock
+  .posneg    (alct_rxd_posneg),    // In  Select inter-stage clock 0 or 180 degrees
+  .clr       (alct_clear_ff),      // In  Sync clear
+  .din       (alct_rx[28:1]),      // In  80MHz data from ALCT
+  .dout1st   (alct_1st_ff[28:1]),  // Out  Data de-multiplexed 1st in time
+  .dout2nd   (alct_2nd_ff[28:1])); // Out  Data de-multiplexed 2nd in time
 
 // Copy ALCT rx data for VME readout, for use with alct debug firmware in sync mode
   reg [28:1] alct_sync_rxdata_1st = 0;
@@ -605,17 +605,17 @@
 // Determine ALCT sync mode set by seq_cmd
   wire [1:0] alct_sync_adr;
 
-  wire   alct_sync_mode      = (seq_cmd[2] | seq_cmd[0]);  // alct_rx[13] in both 1st and 2nd phase beco its DC level
-  wire   alct_sync_teventodd   = (seq_cmd[2] & seq_cmd[0]);  // alct_rx[13] in both 1st and 2nd phase asserts teven/todd mode
-  wire   alct_sync_random_loop = (seq_cmd[2] &!seq_cmd[0]);  // alct_rx[13] in just 2nd phase asserts pseudo random loopback
-  assign alct_sync_adr     = {seq_cmd[3] , seq_cmd[1]};  // alct_rx[14] in both 1st and 2nd phase multiplexed
-  wire   alct_sync_random     = (seq_cmd[3] & seq_cmd[1]) && alct_sync_mode;  // Engage lfsr random generator
+  wire   alct_sync_mode        = (seq_cmd[2] | seq_cmd[0]);                   // alct_rx[13] in both 1st and 2nd phase beco its DC level
+  wire   alct_sync_teventodd   = (seq_cmd[2] & seq_cmd[0]);                   // alct_rx[13] in both 1st and 2nd phase asserts teven/todd mode
+  wire   alct_sync_random_loop = (seq_cmd[2] &!seq_cmd[0]);                   // alct_rx[13] in just 2nd phase asserts pseudo random loopback
+  assign alct_sync_adr         = {seq_cmd[3] , seq_cmd[1]};                   // alct_rx[14] in both 1st and 2nd phase multiplexed
+  wire   alct_sync_random      = (seq_cmd[3] & seq_cmd[1]) && alct_sync_mode; // Engage lfsr random generator
 
 // Determine expected ALCT sync mode response to seq_cmd
-  reg  [28:1]  alct_sync_expect_1st=0;
-  reg  [28:1]  alct_sync_expect_2nd=0;
-  wire [28:1]  alct_rng_1st;
-  wire [28:1]  alct_rng_2nd;
+  reg  [28:1] alct_sync_expect_1st=0;
+  reg  [28:1] alct_sync_expect_2nd=0;
+  wire [28:1] alct_rng_1st;
+  wire [28:1] alct_rng_2nd;
   wire [9:0]  alct_rx_1st_tpat;
   wire [9:0]  alct_rx_2nd_tpat;
   wire [16:5] alct_tx_1st_tpat;
@@ -627,16 +627,16 @@
   always @(posedge clock) begin
   if (alct_sync_mode     ) begin              // Only if in loopback mode
   if (alct_sync_teventodd) begin              // Teven/Tod Mode:
-  alct_sync_expect_1st[28:01] <= 28'hAAAAAAA;        //   Load 1010 Teven in all banks
-  alct_sync_expect_2nd[28:01] <= 28'h5555555;        //   Load 0101 Todd  in all banks
+  alct_sync_expect_1st[28:01] <= 28'hAAAAAAA; // Load 1010 Teven in all banks
+  alct_sync_expect_2nd[28:01] <= 28'h5555555; // Load 0101 Todd  in all banks
   end
-  else if (alct_sync_random_loop) begin          // Random loopbback
-  alct_sync_expect_1st[10:01] <=  alct_rx_1st_tpat[9:0];  //   1st 10 bits are Randoms from TMB
-  alct_sync_expect_1st[20:11] <= ~alct_rx_1st_tpat[9:0];  //   2nd 10 bits are complemented Randoms from TMB
-  alct_sync_expect_1st[28:21] <=  alct_rx_1st_tpat[7:0];  //   Last 8 bits are duplicated Randoms from TMB
-  alct_sync_expect_2nd[10:01] <=  alct_rx_2nd_tpat[9:0];  //   1st 10 bits are Randoms from TMB
-  alct_sync_expect_2nd[20:11] <= ~alct_rx_2nd_tpat[9:0];  //   2nd 10 bits are complemented Randoms from TMB
-  alct_sync_expect_2nd[28:21] <=  alct_rx_2nd_tpat[7:0];  //   Last 8 bits are duplicated Randoms from TMB
+  else if (alct_sync_random_loop) begin                  // Random loopbback
+  alct_sync_expect_1st[10:01] <=  alct_rx_1st_tpat[9:0]; // 1st 10 bits are Randoms from TMB
+  alct_sync_expect_1st[20:11] <= ~alct_rx_1st_tpat[9:0]; // 2nd 10 bits are complemented Randoms from TMB
+  alct_sync_expect_1st[28:21] <=  alct_rx_1st_tpat[7:0]; // Last 8 bits are duplicated Randoms from TMB
+  alct_sync_expect_2nd[10:01] <=  alct_rx_2nd_tpat[9:0]; // 1st 10 bits are Randoms from TMB
+  alct_sync_expect_2nd[20:11] <= ~alct_rx_2nd_tpat[9:0]; // 2nd 10 bits are complemented Randoms from TMB
+  alct_sync_expect_2nd[28:21] <=  alct_rx_2nd_tpat[7:0]; // Last 8 bits are duplicated Randoms from TMB
   end
   else begin
   case (alct_sync_adr[1:0])                // Load 1 of 3 banks at a time
@@ -664,28 +664,28 @@
 // Assign random bits to alct signals for alct_sync_adr=3 mode
   wire [48:0]  alct_lfsr;
 
-  wire     rnd_first_valid    = alct_lfsr[0];    // First LCT
-  wire     rnd_first_amu    = alct_lfsr[1];
-  wire [1:0]  rnd_first_quality  = alct_lfsr[3:2];
-  wire [6:0]  rnd_first_key    = alct_lfsr[10:4];
+  wire        rnd_first_valid   = alct_lfsr[0];    // First LCT
+  wire        rnd_first_amu     = alct_lfsr[1];
+  wire [1:0]  rnd_first_quality = alct_lfsr[3:2];
+  wire [6:0]  rnd_first_key     = alct_lfsr[10:4];
 
-  wire     rnd_second_valid  = alct_lfsr[11];  // Second LCT
-  wire     rnd_second_amu    = alct_lfsr[12];
-  wire [1:0]  rnd_second_quality  = alct_lfsr[14:13];
-  wire [6:0]  rnd_second_key    = alct_lfsr[21:15];
+  wire        rnd_second_valid   = alct_lfsr[11];  // Second LCT
+  wire        rnd_second_amu     = alct_lfsr[12];
+  wire [1:0]  rnd_second_quality = alct_lfsr[14:13];
+  wire [6:0]  rnd_second_key     = alct_lfsr[21:15];
 
-  wire [4:0]  rnd_bxn        = alct_lfsr[26:22];  // Common to both LCTs
+  wire [4:0]  rnd_bxn = alct_lfsr[26:22]; // Common to both LCTs
 
-  wire     rnd_active_feb    = alct_lfsr[27];  // Non trigger path signals
-  wire     rnd_alct_bx0    = alct_lfsr[28];
-  wire     rnd_cfg_done    = alct_lfsr[29];
+  wire        rnd_active_feb = alct_lfsr[27]; // Non trigger path signals
+  wire        rnd_alct_bx0   = alct_lfsr[28];
+  wire        rnd_cfg_done   = alct_lfsr[29];
 
-  wire     rnd_first_frame    = alct_lfsr[30];  // DMB signals are not covered by ECC
-  wire     rnd_last_frame    = alct_lfsr[31];
+  wire         rnd_first_frame = alct_lfsr[30];  // DMB signals are not covered by ECC
+  wire         rnd_last_frame  = alct_lfsr[31];
   wire [13:0]  rnd_daq_data    = alct_lfsr[45:32];
-  wire     rnd_ddu_special    = alct_lfsr[46];
-  wire     rnd_lct_special    = alct_lfsr[47];
-  wire     rnd_nwr_fifo    = alct_lfsr[48];
+  wire         rnd_ddu_special = alct_lfsr[46];
+  wire         rnd_lct_special = alct_lfsr[47];
+  wire         rnd_nwr_fifo    = alct_lfsr[48];
 
 // Apply ECC to random alct signals for alct_sync_adr=3 mode
   wire [6:0]  rnd_parity_out;
@@ -694,9 +694,9 @@
   assign rnd_enc_in[29:0]  = alct_lfsr[29:0];
   assign rnd_enc_in[31:30] = 2'b00;  // TMB only decodes 29:0 to allow 1bx FF on alct trigger path
 
-  ecc32_encoder uecc32_rnd (      // ECC encode
-  .enc_in    (rnd_enc_in[31:0]),    // In
-  .parity_out  (rnd_parity_out[6:0]));  // Out
+  ecc32_encoder uecc32_rnd (          // ECC encode
+  .enc_in     (rnd_enc_in[31:0]),     // In
+  .parity_out (rnd_parity_out[6:0])); // Out
 
 // Pack random signals+ECC for transmission to TMB
   assign alct_rng_1st[1]  = rnd_parity_out[4];  // was reserved_out[0];
@@ -726,62 +726,62 @@
   assign alct_rng_1st[9]  = rnd_first_key[1];
   assign alct_rng_2nd[9]  = rnd_second_key[1];
 
-  assign alct_rng_1st[10]  = rnd_first_key[2];
-  assign alct_rng_2nd[10]  = rnd_second_key[2];
+  assign alct_rng_1st[10] = rnd_first_key[2];
+  assign alct_rng_2nd[10] = rnd_second_key[2];
 
-  assign alct_rng_1st[11]  = rnd_first_key[3];
-  assign alct_rng_2nd[11]  = rnd_second_key[3];
+  assign alct_rng_1st[11] = rnd_first_key[3];
+  assign alct_rng_2nd[11] = rnd_second_key[3];
 
-  assign alct_rng_1st[12]  = rnd_first_key[4];
-  assign alct_rng_2nd[12]  = rnd_second_key[4];
+  assign alct_rng_1st[12] = rnd_first_key[4];
+  assign alct_rng_2nd[12] = rnd_second_key[4];
 
-  assign alct_rng_1st[13]  = rnd_first_key[5];
-  assign alct_rng_2nd[13]  = rnd_second_key[5];
+  assign alct_rng_1st[13] = rnd_first_key[5];
+  assign alct_rng_2nd[13] = rnd_second_key[5];
 
-  assign alct_rng_1st[14]  = rnd_first_key[6];
-  assign alct_rng_2nd[14]  = rnd_second_key[6];
+  assign alct_rng_1st[14] = rnd_first_key[6];
+  assign alct_rng_2nd[14] = rnd_second_key[6];
 
-  assign alct_rng_1st[15]  = rnd_bxn[0];
-  assign alct_rng_2nd[15]  = rnd_bxn[3];
+  assign alct_rng_1st[15] = rnd_bxn[0];
+  assign alct_rng_2nd[15] = rnd_bxn[3];
 
-  assign alct_rng_1st[16]  = rnd_bxn[1];
-  assign alct_rng_2nd[16]  = rnd_bxn[4];
+  assign alct_rng_1st[16] = rnd_bxn[1];
+  assign alct_rng_2nd[16] = rnd_bxn[4];
 
-  assign alct_rng_1st[17]  = rnd_bxn[2];
-  assign alct_rng_2nd[17]  = rnd_nwr_fifo;
+  assign alct_rng_1st[17] = rnd_bxn[2];
+  assign alct_rng_2nd[17] = rnd_nwr_fifo;
 
-  assign alct_rng_1st[18]  = rnd_daq_data[0];
-  assign alct_rng_2nd[18]  = rnd_daq_data[7];
+  assign alct_rng_1st[18] = rnd_daq_data[0];
+  assign alct_rng_2nd[18] = rnd_daq_data[7];
 
-  assign alct_rng_1st[19]  = rnd_daq_data[1];
-  assign alct_rng_2nd[19]  = rnd_daq_data[8];
+  assign alct_rng_1st[19] = rnd_daq_data[1];
+  assign alct_rng_2nd[19] = rnd_daq_data[8];
 
-  assign alct_rng_1st[20]  = rnd_daq_data[2];
-  assign alct_rng_2nd[20]  = rnd_daq_data[9];
+  assign alct_rng_1st[20] = rnd_daq_data[2];
+  assign alct_rng_2nd[20] = rnd_daq_data[9];
 
-  assign alct_rng_1st[21]  = rnd_daq_data[3];
-  assign alct_rng_2nd[21]  = rnd_daq_data[10];
+  assign alct_rng_1st[21] = rnd_daq_data[3];
+  assign alct_rng_2nd[21] = rnd_daq_data[10];
 
-  assign alct_rng_1st[22]  = rnd_daq_data[4];
-  assign alct_rng_2nd[22]  = rnd_daq_data[11];
+  assign alct_rng_1st[22] = rnd_daq_data[4];
+  assign alct_rng_2nd[22] = rnd_daq_data[11];
 
-  assign alct_rng_1st[23]  = rnd_daq_data[5];
-  assign alct_rng_2nd[23]  = rnd_daq_data[12];
+  assign alct_rng_1st[23] = rnd_daq_data[5];
+  assign alct_rng_2nd[23] = rnd_daq_data[12];
 
-  assign alct_rng_1st[24]  = rnd_daq_data[6];
-  assign alct_rng_2nd[24]  = rnd_daq_data[13];
+  assign alct_rng_1st[24] = rnd_daq_data[6];
+  assign alct_rng_2nd[24] = rnd_daq_data[13];
 
-  assign alct_rng_1st[25]  = rnd_lct_special;
-  assign alct_rng_2nd[25]  = rnd_first_frame;
+  assign alct_rng_1st[25] = rnd_lct_special;
+  assign alct_rng_2nd[25] = rnd_first_frame;
 
-  assign alct_rng_1st[26]  = rnd_parity_out[0];  // was seq_status[0];
-  assign alct_rng_2nd[26]  = rnd_parity_out[2];  // was seu_status[0];
+  assign alct_rng_1st[26] = rnd_parity_out[0];  // was seq_status[0];
+  assign alct_rng_2nd[26] = rnd_parity_out[2];  // was seu_status[0];
 
-  assign alct_rng_1st[27]  = rnd_parity_out[1];  // was seq_status[1];
-  assign alct_rng_2nd[27]  = rnd_parity_out[3];  // was seu_status[1];
+  assign alct_rng_1st[27] = rnd_parity_out[1];  // was seq_status[1];
+  assign alct_rng_2nd[27] = rnd_parity_out[3];  // was seu_status[1];
 
-  assign alct_rng_1st[28]  = rnd_ddu_special;
-  assign alct_rng_2nd[28]  = rnd_last_frame;
+  assign alct_rng_1st[28] = rnd_ddu_special;
+  assign alct_rng_2nd[28] = rnd_last_frame;
 
 // Delay transmitted data for later comparison with received data, spans 8bx to 23bx
   wire [28:1] alct_sync_expect_1st_predly, alct_sync_expect_1st_dly;
@@ -794,11 +794,11 @@
   srl16e_bbl #(28) usyncdly2st (.clock(clock),.ce(alct_sync_mode),.adr(alct_sync_rxdata_dly),.d(alct_sync_expect_2nd_predly),.q(alct_sync_expect_2nd_dly[28:1]));
 
 // Compare received data to transmitted data at the selected delay depth
-  reg alct_sync_1st_err    = 0;
-  reg alct_sync_2nd_err    = 0;
-  reg alct_sync_1st_err_ff  = 0;
-  reg alct_sync_2nd_err_ff  = 0;
-  reg [1:0] alct_sync_ecc_err  = 0;
+  reg       alct_sync_1st_err    = 0;
+  reg       alct_sync_2nd_err    = 0;
+  reg       alct_sync_1st_err_ff = 0;
+  reg       alct_sync_2nd_err_ff = 0;
+  reg [1:0] alct_sync_ecc_err    = 0;
 
   always @(posedge clock) begin  // Current match state
   alct_sync_1st_err <= (alct_sync_rxdata_1st[28:1] != alct_sync_expect_1st_dly[28:1]);
@@ -940,7 +940,7 @@
   assign alct_dec_in[31]    = 0;
 
   ecc32_decoder uecc32_decoder (
-    .dec_in    (alct_dec_in[31:0]),    // In  Data from sender 
+    .dec_in    (alct_dec_in[31:0]),    // In  Data from sender
     .parity_in (alct_parity_out[6:0]), // In  Parity from sender
     .ecc_en    (alct_ecc_en),          // In  Enable ECC correction
     .dec_out   (dec_out[31:0]),        // Out  Corrected data or just pass thru if >1 error
@@ -1067,13 +1067,13 @@
   assign alct0_mux =  (pass_ff) ? alct0_rx : alct0_inj_ff;
   assign alct1_mux =  (pass_ff) ? alct1_rx : alct1_inj_ff;
 
-  assign alct0_valid        = alct0_mux[0];
-  assign alct1_valid        = alct1_mux[0];
+  assign alct0_valid = alct0_mux[0];
+  assign alct1_valid = alct1_mux[0];
   
-  assign alct0_tmb[MXALCT-1:0]  = alct0_mux[MXALCT-1:0];
-  assign alct1_tmb[MXALCT-1:0]  = alct1_mux[MXALCT-1:0];
+  assign alct0_tmb[MXALCT-1:0] = alct0_mux[MXALCT-1:0];
+  assign alct1_tmb[MXALCT-1:0] = alct1_mux[MXALCT-1:0];
 
-  assign alct_active_feb   = active_feb_flag_rx | inj_active_feb_flag;
+  assign alct_active_feb = active_feb_flag_rx | inj_active_feb_flag;
 
 // Latch full alct bxn for vme readout
   reg [4:0] bxn_alct_vme=0;
