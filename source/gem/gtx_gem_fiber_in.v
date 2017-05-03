@@ -247,7 +247,7 @@ module gtx_gem_fiber_in
 // reg       link_had_err   = 0; // needs to be output
 
 
-   assign   link_bad       = err_count[7];           // needs to be output
+   assign   link_bad       = err_count > 127;           // needs to be output
    assign   errcount       = err_count[7:0];         // can be a useful output
    assign   link_had_err   = (link_err | mon_rst);   // output, signals the link had a problem or was never alive
    wire     link_went_down = (link_good && mon_rst); // use to signal the link was OK then had a problem
@@ -335,7 +335,7 @@ module gtx_gem_fiber_in
 
         link_good <= !mon_rst & (mon_count[3:0]==4'hf);                            // use to signal the link is alive after 1 + 15 complete BX cycles
         if (!link_err) link_err <= (link_went_down);                               // use to signal the link was OK then had a problem (== link_went_down) at least once
-        if (link_went_down && err_count[7:4]!=4'hE) err_count <= err_count + 1'b1; // how many times the link was lost
+        if (link_went_down && err_count[7:0]!=8'hFE) err_count <= err_count + 1'b1; // how many times the link was lost
 
         end // else: !if(!RX_SYNC_DONE || ttc_resync)
      end // always @ (posedge GEM_RX_CLK160)
