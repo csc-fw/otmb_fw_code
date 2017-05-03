@@ -313,7 +313,7 @@
       if (lt_trg)  // wait until we "lock in" once before we start accumulating errors
         lt_trg_locked <= 1'b1;
 
-      lt_trg_err <=  lt_trg_locked ? ~(lt_trg_expect==lt_trg) : 0;
+      lt_trg_err <=  lt_trg_locked ? ~(lt_trg_expect==lt_trg) : 1'b0;
 
     end
   end
@@ -334,11 +334,16 @@
 // Sump unused signals
 //-------------------------------------------------------------------------------------------------------------------
   assign gtx_rx_sump =
-  sump_comp_fiber  &
-  (|nonzero_word[3:1]) |
-  (|cew[3:1])          |
-  muonic_sump | 
-  gtx_rx_reset_err_cnt
+    sump_comp_fiber  &
+  | (|nonzero_word[3:1])
+  | (|cew[3:1])          
+  | muonic_sump  
+  | gtx_rx_reset_err_cnt 
+  | (|prbs_errcount[15:8])
+  | (|prompt_dat)
+  | (|gtx_rx_data_raw)
+  | (|gtx_rx_err_count[15:9])
+  | (|dly)
   ;
 
 //------------------------------------------------------------------------------------------------------------------
