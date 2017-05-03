@@ -247,7 +247,7 @@ module gtx_gem_fiber_in
 // reg       link_had_err   = 0; // needs to be output
 
 
-   assign   link_bad       = err_count > 127;           // needs to be output
+   assign   link_bad       = err_count > 8'd127;           // needs to be output
    assign   errcount       = err_count[7:0];         // can be a useful output
    assign   link_had_err   = (link_err | mon_rst);   // output, signals the link had a problem or was never alive
    wire     link_went_down = (link_good && mon_rst); // use to signal the link was OK then had a problem

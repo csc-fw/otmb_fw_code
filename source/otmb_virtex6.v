@@ -1822,7 +1822,7 @@
   // GEM Co-pad Matching
   //--------------------------------------------------------------------------------------------------------------------
 
-  wire        gem_match_neighbors = 1'b1;
+  wire        gem_match_neighbors = 1'b0;
   wire [7:0]  gem_match;
   wire [7:0]  gem_match_left;
   wire [7:0]  gem_match_right;
@@ -1949,6 +1949,10 @@
   | (|gemB_halfstrip_size[5])
   | (|gemB_halfstrip_size[6])
   | (|gemB_halfstrip_size[7])
+
+  | gemA_lostsync
+  | gemB_lostsync
+  | gems_lostsync
 
   | (|gem_match_left) 
   | (|gem_match_right);
