@@ -42,7 +42,6 @@ module gem (
     input          gtx_rx_en_prbs_test,  // Select random input test data mode
   //output         gtx_rx_start,         // Set when the DCFEB Start Pattern is present
   //output         gtx_rx_fc,            // Flags when Rx sees "FC" code (sent by Tx) for latency measurement
-    output reg     gtx_rx_nonzero,       // rdk all gtx_tx_data or'ed together
     output         gtx_rx_valid,         // Valid data detected on link output gtx_rx_match;
     // PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
     output         gtx_rx_rst_done,      // This has to complete before rxsync can start
@@ -214,11 +213,6 @@ parameter CLSTBITS = 14;
     assign vpf         [iclst] = ~(adr[iclst][10:9]==2'b11);
   end
   endgenerate
-
-
-  always @(posedge clock) begin
-      gtx_rx_nonzero    <= (|gtx_rx_data[55:0]);
-  end
 
   wire gem_has_data = (vpf[0]|vpf[1]|vpf[2]|vpf[3]);
 

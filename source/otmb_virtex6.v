@@ -1484,7 +1484,6 @@
   wire  [MXGEM-1:0]     gem_rx_reset;                  // In  Reset this GTX rx & sync module
   wire  [MXGEM-1:0]     gem_rx_reset_err_cnt;          // In  Resets the PRBS test error counters
   wire  [MXGEM-1:0]     gem_rx_en_prbs_test;           // In  Select random input test data mode
-  wire  [MXGEM-1:0]     gem_rx_nonzero;                // Out  Nonzero data detected on link
   wire  [MXGEM-1:0]     gem_rx_valid;                  // Out  Valid data detected on link
   wire  [MXGEM-1:0]     gem_rx_rst_done;               // Out  These get set before rxsync cycle begins
   wire  [MXGEM-1:0]     gem_rx_sync_done;              // Out  Use these to determine gem_ready
@@ -1720,7 +1719,6 @@
   .gtx_rx_reset         (gem_rx_reset         [igem] | auto_gtx_reset ), // In   Reset this GTX rx & sync module; auto reset all if any take too long to phase lock
   .gtx_rx_reset_err_cnt (gem_rx_reset_err_cnt [igem]                  ), // In   Resets the PRBS test error counters
   .gtx_rx_en_prbs_test  (gem_rx_en_prbs_test  [igem]                  ), // In   Select random input test data mode
-  .gtx_rx_nonzero       (gem_rx_nonzero       [igem]                  ), // Out  Flags when Rx sees non-zero data
   .gtx_rx_valid         (gem_rx_valid         [igem]                  ), // Out  Valid data detected on link
   .gtx_rx_rst_done      (gem_rx_rst_done      [igem]                  ), // Out  These get set before rxsync cycle begins
   .gtx_rx_sync_done     (gem_rx_sync_done     [igem]                  ), // Out  Use these to determine gtx_ready
