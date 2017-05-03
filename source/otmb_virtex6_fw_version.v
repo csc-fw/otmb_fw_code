@@ -1,25 +1,32 @@
 //---------------------------------------------------------------------------------------------------------------------------------------
 //  OTMB_VIRTEX6 Virtex-6 Global Definitions
 //---------------------------------------------------------------------------------------------------------------------------------------
+
 // Firmware version global definitions
-  `define FIRMWARE_TYPE 04'hC    // C=Normal CLCT/TMB, D=Debug PCB loopback version
-  `define VERSION       04'hE    // Version revision number, A=TMB2004 and earlier, E=TMB2005E production
-  `define MONTHDAY      16'h1205 // Version date
-  `define YEAR          16'h2016 // Version year
-  `define REVISION      04'h01   // Firmware Revision 
+  `define FIRMWARE_TYPE        04'hC    // C=Normal CLCT/TMB, D=Debug PCB loopback version
+  `define VERSION              04'hE    // Version revision number, A=TMB2004 and earlier, E=TMB2005E production
+  `define MONTHDAY             16'h1205 // Version date
+  `define YEAR                 16'h2016 // Version year
+  `define REVISION             04'h01   // Firmware Revision
 
-  `define AUTO_VME         01'h1 // Automatically initialize VME registers from PROM data,   0=do not
-  `define AUTO_JTAG        01'h1 // Automatically initialize JTAG chain from PROM data,      0=do not
-  `define AUTO_PHASER      01'h1 // Automatically initialize PHASER machines from PROM data, 0=do not
-  `define ALCT_MUONIC      01'h1 // Floats ALCT board  in clock-space with independent time-of-flight delay
-  `define CFEB_MUONIC      01'h1 // Floats CFEB boards in clock-space with independent time-of-flight delay
-  `define CCB_BX0_EMULATOR 01'h0 // Turns on bx0 emulator at power up, must be 0 for all CERN versions
+  `define AUTO_VME             01'h1    // Automatically initialize VME registers from PROM data,   0=do not
+  `define AUTO_JTAG            01'h1    // Automatically initialize JTAG chain from PROM data,      0=do not
+  `define AUTO_PHASER          01'h1    // Automatically initialize PHASER machines from PROM data, 0=do not
+  `define ALCT_MUONIC          01'h1    // Floats ALCT board  in clock-space with independent time-of-flight delay
+  `define CFEB_MUONIC          01'h1    // Floats CFEB boards in clock-space with independent time-of-flight delay
+  `define CCB_BX0_EMULATOR     01'h0    // Turns on bx0 emulator at power up, must be 0 for all CERN versions
 
-  `define VIRTEX6      04'h6    // FPGA type is Virtex6
-  `define MEZCARD      04'hD    // Mezzanine Card: D=Virtex6
-  `define ISE_VERSION  16'h1470 // ISE Compiler version
-//`define FPGAID       16'h6195 // FPGA Type 6195 XC6VLX195T
-  `define FPGAID       16'h6240 // FPGA Type 6240 XC6VLX240T
+  `define VIRTEX6              04'h6    // FPGA type is Virtex6
+  `define MEZCARD              04'hD    // Mezzanine Card: D=Virtex6
+  `define ISE_VERSION          16'h1470 // ISE Compiler version
+//`define FPGAID               16'h6195 // FPGA Type 6195 XC6VLX195T
+  `define FPGAID               16'h6240 // FPGA Type 6240 XC6VLX240T
+
+  `define SEMANTIC_VERSIONING  01'b0
+
+  `define VERSION_BRANCH       03'd0;
+  `define VERSION_MAJOR        04'd0;
+  `define VERSION_MINOR        06'd0;
 
 // Conditional compile flags: Enable only one CSC_TYPE
   `define CSC_TYPE_C  04'hC // Normal   ME1B: ME1B   chambers facing toward IR.    ME1B hs =!reversed, ME1A hs = reversed
@@ -80,7 +87,7 @@
 //  01/15/2015  Debug TMB startup timer for ALCT jtag config, now stops at jsm_ok
 //  01/18/2015  Testing fast6count logic in vme Adr 186, and it seems to work!  Adr 186 should be reused or not used from now on
 //  01/19/2015  Revert GTX dlyalign and sync methods to the "standard" method (affects 4 gtx...v files), but keep just 4 phaser clocks;
-//	            also improved startup timer resolution from 400ns to 100ns
+//              also improved startup timer resolution from 400ns to 100ns
 //  01/20/2015  Convert timing control registers 16A, 16C, 11E for cfebs 5/6 to control me11a and me11b cfebs respectively
 //  04/05/2015  Count JTAG TCK ticks for the main FPGA JTAG bus (jtag_mez) and read it via my special count register adr 186
 //              also change the TMB Broadcast adress to dec 30 (was 26) (not tested until 04/07, ok)
@@ -92,14 +99,14 @@
 //  04/11/2015  Reactivate changes from 04/06 04/08 -- this works!
 //  04/12/2015  Activate auto-reset for GTX if they don't lock within 1.638 ms
 //  05/30/2015  Keep bad links from contaminating the triads == hot comps: triads load zeroes if !link_good OR link_bad
-//  06/09/2015	Fixed bug in posneg logic in top-level file
-//	06/10/2015	Changed cfeb_badbits_found reporting logic (at sequencer input) to add OR with link_had_err,
-//			        also changed cfeb_en to add AND with ~link_bad AND link_good
-//				      >>TO-DO: Add counters for coincidence of preCLCT with ALCT/L1A
-//	06/15/2015	Added GTX rx link for a single GEM input on physical snap12 fiber 1 (xtrarxp/n on pins AP5/6),
-//			        blinks Blue Mez LED when nonzero GEM data is detected
-// 			          -- created in gem.v which is basically a hacked copy of cfeb.v
-//			          -- later expand this to 4 GEM fibers on physical fibers 5-8
+//  06/09/2015  Fixed bug in posneg logic in top-level file
+//  06/10/2015  Changed cfeb_badbits_found reporting logic (at sequencer input) to add OR with link_had_err,
+//              also changed cfeb_en to add AND with ~link_bad AND link_good
+//              >>TO-DO: Add counters for coincidence of preCLCT with ALCT/L1A
+//  06/15/2015  Added GTX rx link for a single GEM input on physical snap12 fiber 1 (xtrarxp/n on pins AP5/6),
+//              blinks Blue Mez LED when nonzero GEM data is detected
+//              -- created in gem.v which is basically a hacked copy of cfeb.v
+//              -- later expand this to 4 GEM fibers on physical fibers 5-8
 //---------------------------------------------------------------------------------------------------------------------------------------
 //  End Global Definitions
 //---------------------------------------------------------------------------------------------------------------------------------------

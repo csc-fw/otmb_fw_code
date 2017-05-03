@@ -640,7 +640,7 @@
 // GEM VME Configuration Ports
   gem_read_enable,
   gem_exists,
-  gem_enable, 
+  gem_enable,
   gem_zero_suppress,
   fifo_tbins_gem,
   fifo_pretrig_gem,
@@ -1134,18 +1134,23 @@
 //------------------------------------------------------------------------------------------------------------------
 // Generic
 //------------------------------------------------------------------------------------------------------------------
-  parameter FIRMWARE_TYPE    = 4'h0;     // C=Normal TMB, D=Debug PCB loopback version
-  parameter VERSION          = 4'h0;     // Version revision number
-  parameter MONTHDAY         = 16'h0000; // Version date
-  parameter YEAR             = 16'h0000; // Version date
-  parameter FPGAID           = 16'h0000; // FPGA Type XCVnnnn
-  parameter ISE_VERSION      = 16'h1234; // ISE Compiler version
-  parameter AUTO_VME         = 1'b1;     // Auto init vme registers
-  parameter AUTO_JTAG        = 1'b1;     // Auto init jtag chain
-  parameter AUTO_PHASER      = 1'b1;     // Auto init digital phase shifters
-  parameter ALCT_MUONIC      = 1'b1;     // Floats ALCT board  in clock-space with independent time-of-flight delay
-  parameter CFEB_MUONIC      = 1'b1;     // Floats CFEB boards in clock-space with independent time-of-flight delay
-  parameter CCB_BX0_EMULATOR = 1'b0;     // Turns on bx0 emulator at power up, must be 0 for all CERN versions
+  parameter FIRMWARE_TYPE       = 4'h0;     // C=Normal TMB, D=Debug PCB loopback version
+  parameter VERSION             = 4'h0;     // Version revision number
+  parameter MONTHDAY            = 16'h0000; // Version date
+  parameter YEAR                = 16'h0000; // Version date
+  parameter YEAR                = 16'h0000; // Version date
+  parameter FPGAID              = 16'h0000; // FPGA Type XCVnnnn
+  parameter SEMANTIC_VERSIONING = 1'b1;     // Enable Semantic Versioning for TMB Output
+  parameter VERSION_BRANCH      = 3'h0;     // Version branch
+  parameter VERSION_MAJOR       = 4'h0;     // Major version
+  parameter VERSION_MINOR       = 6'h0;     // Minor version
+  parameter ISE_VERSION         = 16'h1234; // ISE Compiler version
+  parameter AUTO_VME            = 1'b1;     // Auto init vme registers
+  parameter AUTO_JTAG           = 1'b1;     // Auto init jtag chain
+  parameter AUTO_PHASER         = 1'b1;     // Auto init digital phase shifters
+  parameter ALCT_MUONIC         = 1'b1;     // Floats ALCT board  in clock-space with independent time-of-flight delay
+  parameter CFEB_MUONIC         = 1'b1;     // Floats CFEB boards in clock-space with independent time-of-flight delay
+  parameter CCB_BX0_EMULATOR    = 1'b0;     // Turns on bx0 emulator at power up, must be 0 for all CERN versions
 
   `include "../otmb_virtex6_fw_version.v"
 
@@ -1155,6 +1160,9 @@
   $display ("vme.MONTHDAY         = %H",MONTHDAY   );
   $display ("vme.YEAR             = %H",YEAR       );
   $display ("vme.FPGAID           = %H",FPGAID     );
+  $display ("vme.VERSION_BRANCH   = %H",VERSION_BRANCH);
+  $display ("vme.VERSION_MAJOR    = %H",VERSION_MAJOR);
+  $display ("vme.VERSION_MINOR    = %H",VERSION_MINOR);
   $display ("vme.ISE_VERSION      = %H",ISE_VERSION);
   $display ("vme.AUTO_VME         = %H",AUTO_VME   );
   $display ("vme.AUTO_JTAG        = %H",AUTO_JTAG  );
@@ -3146,7 +3154,7 @@
   wire [15:0] gem_debug_fifo_ctrl_rd;
 
   reg  [15:0] gem_inj_data_wr;
-  wire [15:0] gem_inj_data_rd; 
+  wire [15:0] gem_inj_data_rd;
 
   reg  [15:0] gem_inj_ctrl_wr;
   wire [15:0] gem_inj_ctrl_rd;
@@ -4223,13 +4231,19 @@
 //------------------------------------------------------------------------------------------------------------------
 // Construct firmware revcode from global define, truncate for DMB frame
   wire [15:0]  revcode_vme;
+  wire [15:0]  revcode_vme_new;
   wire [15:0]  version_slot;
 
-  assign revcode_vme[8:0]    = (MONTHDAY[15:12]*10 + MONTHDAY[11:8])*32+ (MONTHDAY[7:4]*10 + MONTHDAY[3:0]);
+  assign revcode_vme[8:0]   = (MONTHDAY[15:12]*10 + MONTHDAY[11:8])*32+ (MONTHDAY[7:4]*10 + MONTHDAY[3:0]);
   assign revcode_vme[12:9]  = YEAR[3:0]+4'hA;    // Need to reformat this in year 2018
-  assign revcode_vme[15:13]  = FPGAID[15:13];    // Virtex 2,4,6 etc
+  assign revcode_vme[15:13] = FPGAID[15:13];    // Virtex 2,4,6 etc
 
-  assign revcode[14:0]    = revcode_vme[14:0];  // Sequencer format is 15 bits, VME is 16
+  assign revcode_vme_new [2:0]   = VERSION_BRANCH;
+  assign revcode_vme_new [6:3]   = VERSION_MAJOR;
+  assign revcode_vme_new [12:7]  = VERSION_MINOR;
+  assign revcode_vme_new [15:13]  = 3'd0;
+
+  assign revcode[14:0] = ? (SEMANTIC_VERSIONING) ? revcode_vme_new[14:0] : revcode_vme[14:0];  // Sequencer format is 15 bits, VME is 16
 
 // VME ID Registers, Readonly
   assign version_slot[ 3: 0]  = FIRMWARE_TYPE[3:0];  // Firmware type, C=Normal TMB, D=Debug loopback
@@ -4971,7 +4985,7 @@
   assign step_dmb              = step_wr[1];
   assign step_rpc              = step_wr[2];
   assign step_cfeb             = step_wr[3];
-  assign step_run              = 1'b0; // This should be hardcoded on OTMB; but not on regular TMBs where the step function works. 
+  assign step_run              = 1'b0; // This should be hardcoded on OTMB; but not on regular TMBs where the step function works.
   assign cfeb_clock_en[4:0]    = step_wr[9:5];
   assign alct_clock_en         = step_wr[10];
   assign _hard_reset_alct_fpga = step_wr[11];
