@@ -1522,21 +1522,6 @@
   wire [13:0] gem_cluster2 [MXGEM-1:0]; // cluster2 in GEM coordinates (0-1535)
   wire [13:0] gem_cluster3 [MXGEM-1:0]; // cluster3 in GEM coordinates (0-1535)
 
-  wire [7:0]  gem_strip0 [MXGEM-1:0]; // cluster0 flattened to strip coordinates (0-191)
-  wire [7:0]  gem_strip1 [MXGEM-1:0]; // cluster1 flattened to strip coordinates (0-191)
-  wire [7:0]  gem_strip2 [MXGEM-1:0]; // cluster2 flattened to strip coordinates (0-191)
-  wire [7:0]  gem_strip3 [MXGEM-1:0]; // cluster3 flattened to strip coordinates (0-191)
-
-  wire [7:0]  gem_halfstrip0 [MXGEM-1:0]; // cluster0 translated to CSC halfstrip coordinates
-  wire [7:0]  gem_halfstrip1 [MXGEM-1:0]; // cluster1 translated to CSC halfstrip coordinates
-  wire [7:0]  gem_halfstrip2 [MXGEM-1:0]; // cluster2 translated to CSC halfstrip coordinates
-  wire [7:0]  gem_halfstrip3 [MXGEM-1:0]; // cluster3 translated to CSC halfstrip coordinates
-
-  wire [2:0]  gem_halfstrip_size0 [MXGEM-1:0]; // cluster0 size translated to CSC halfstrip coordinate size
-  wire [2:0]  gem_halfstrip_size1 [MXGEM-1:0]; // cluster1 size translated to CSC halfstrip coordinate size
-  wire [2:0]  gem_halfstrip_size2 [MXGEM-1:0]; // cluster2 size translated to CSC halfstrip coordinate size
-  wire [2:0]  gem_halfstrip_size3 [MXGEM-1:0]; // cluster3 size translated to CSC halfstrip coordinate size
-
   wire  [0:0]   gem_vpf0 [MXGEM-1:0]; // cluster0 valid flag
   wire  [0:0]   gem_vpf1 [MXGEM-1:0]; // cluster1 valid flag
   wire  [0:0]   gem_vpf2 [MXGEM-1:0]; // cluster2 valid flag
@@ -1563,72 +1548,6 @@
     gem_cluster2[2],
     gem_cluster1[2],
     gem_cluster0[2]
-  };
-
-  wire  [7:0] gemA_strip [7:0] = {
-    gem_strip3[1],
-    gem_strip2[1],
-    gem_strip1[1],
-    gem_strip0[1],
-    gem_strip3[0],
-    gem_strip2[0],
-    gem_strip1[0],
-    gem_strip0[0]
-  };
-
-  wire  [7:0] gemB_strip [7:0] = {
-    gem_strip3[3],
-    gem_strip2[3],
-    gem_strip1[3],
-    gem_strip0[3],
-    gem_strip3[2],
-    gem_strip2[2],
-    gem_strip1[2],
-    gem_strip0[2]
-  };
-
-  wire  [7:0] gemA_halfstrip [7:0] = {
-   gem_halfstrip3[1],
-   gem_halfstrip2[1],
-   gem_halfstrip1[1],
-   gem_halfstrip0[1],
-   gem_halfstrip3[0],
-   gem_halfstrip2[0],
-   gem_halfstrip1[0],
-   gem_halfstrip0[0]
-  };
-
-  wire  [7:0] gemB_halfstrip [7:0] = {
-   gem_halfstrip3[3],
-   gem_halfstrip2[3],
-   gem_halfstrip1[3],
-   gem_halfstrip0[3],
-   gem_halfstrip3[2],
-   gem_halfstrip2[2],
-   gem_halfstrip1[2],
-   gem_halfstrip0[2]
-  };
-
-  wire  [2:0] gemA_halfstrip_size [7:0] = {
-   gem_halfstrip_size3[1],
-   gem_halfstrip_size2[1],
-   gem_halfstrip_size1[1],
-   gem_halfstrip_size0[1],
-   gem_halfstrip_size3[0],
-   gem_halfstrip_size2[0],
-   gem_halfstrip_size1[0],
-   gem_halfstrip_size0[0]
-  };
-
-  wire  [2:0] gemB_halfstrip_size [7:0] = {
-   gem_halfstrip_size3[3],
-   gem_halfstrip_size2[3],
-   gem_halfstrip_size1[3],
-   gem_halfstrip_size0[3],
-   gem_halfstrip_size3[2],
-   gem_halfstrip_size2[2],
-   gem_halfstrip_size1[2],
-   gem_halfstrip_size0[2]
   };
 
   wire [7:0] gemA_vpf = {
@@ -1763,21 +1682,6 @@
   .cluster2 (gem_cluster2[igem]), // Out GEM Cluster
   .cluster3 (gem_cluster3[igem]), // Out GEM Cluster
 
-  .strip0   (gem_strip0[igem]), // Out GEM Strip; 1bx late
-  .strip1   (gem_strip1[igem]), // Out GEM Strip; 1bx late
-  .strip2   (gem_strip2[igem]), // Out GEM Strip; 1bx late
-  .strip3   (gem_strip3[igem]), // Out GEM Strip; 1bx late
-
-  .halfstrip0   (gem_halfstrip0[igem]), // Out GEM halfstrip; 1bx late
-  .halfstrip1   (gem_halfstrip1[igem]), // Out GEM halfstrip; 1bx late
-  .halfstrip2   (gem_halfstrip2[igem]), // Out GEM halfstrip; 1bx late
-  .halfstrip3   (gem_halfstrip3[igem]), // Out GEM halfstrip; 1bx late
-
-  .halfstrip_size0   (gem_halfstrip_size0[igem]), // Out GEM halfstrip_size; 1bx late
-  .halfstrip_size1   (gem_halfstrip_size1[igem]), // Out GEM halfstrip_size; 1bx late
-  .halfstrip_size2   (gem_halfstrip_size2[igem]), // Out GEM halfstrip_size; 1bx late
-  .halfstrip_size3   (gem_halfstrip_size3[igem]), // Out GEM halfstrip_size; 1bx late
-
   // GEM Valid Data Output Flags
   .vpf0 (gem_vpf0[igem]), // Out GEM valid data
   .vpf1 (gem_vpf1[igem]), // Out GEM valid data
@@ -1896,59 +1800,6 @@
   | (|gem_copad[5])
   | (|gem_copad[6])
   | (|gem_copad[7])
-
-  | (|gemA_strip[0])
-  | (|gemA_strip[1])
-  | (|gemA_strip[2])
-  | (|gemA_strip[3])
-  | (|gemA_strip[4])
-  | (|gemA_strip[5])
-  | (|gemA_strip[6])
-  | (|gemA_strip[7])
-  | (|gemB_strip[0])
-  | (|gemB_strip[1])
-  | (|gemB_strip[2])
-  | (|gemB_strip[3])
-  | (|gemB_strip[4])
-  | (|gemB_strip[5])
-  | (|gemB_strip[6])
-  | (|gemB_strip[7])
-
-  | (|gemA_halfstrip[0])
-  | (|gemA_halfstrip[1])
-  | (|gemA_halfstrip[2])
-  | (|gemA_halfstrip[3])
-  | (|gemA_halfstrip[4])
-  | (|gemA_halfstrip[5])
-  | (|gemA_halfstrip[6])
-  | (|gemA_halfstrip[7])
-
-  | (|gemB_halfstrip[0])
-  | (|gemB_halfstrip[1])
-  | (|gemB_halfstrip[2])
-  | (|gemB_halfstrip[3])
-  | (|gemB_halfstrip[4])
-  | (|gemB_halfstrip[5])
-  | (|gemB_halfstrip[6])
-  | (|gemB_halfstrip[7])
-
-  | (|gemA_halfstrip_size[0])
-  | (|gemA_halfstrip_size[1])
-  | (|gemA_halfstrip_size[2])
-  | (|gemA_halfstrip_size[3])
-  | (|gemA_halfstrip_size[4])
-  | (|gemA_halfstrip_size[5])
-  | (|gemA_halfstrip_size[6])
-  | (|gemA_halfstrip_size[7])
-
-  | (|gemB_halfstrip_size[0])
-  | (|gemB_halfstrip_size[1])
-  | (|gemB_halfstrip_size[2])
-  | (|gemB_halfstrip_size[3])
-  | (|gemB_halfstrip_size[4])
-  | (|gemB_halfstrip_size[5])
-  | (|gemB_halfstrip_size[6])
-  | (|gemB_halfstrip_size[7])
 
   | gemA_lostsync
   | gemB_lostsync
