@@ -34,34 +34,59 @@ set type  "0"
 set month "00"
 set day   "00"
 set year  "0000"
-set revision "01"
+set revision "00"
+set version_format "00"
+set version_minor "00"
+set version_major "00"
+
+set line  " "
+set matched  " "
 
 set fid [open $filename r]
 while {[gets $fid line] != -1} {
 
-    # type
-    if { [ regexp -all -- FIRMWARE_TYPE $line] } {
+    # csc type
+    if { (![ regexp -all -- {^\/\/} $line ]) && [ regexp -all -- CSC_TYPE $line ] } {
+        puts ${line}
         regexp {[0-9]{2}\'[A-z]{2}} $line matched
         set  type  [string range ${matched} 4 4]
     }
 
     # monthday
-    if { [ regexp -all -- MONTHDAY $line] } {
+    if { (![ regexp -all -- {^\/\/} $line ]) && [ regexp -all -- MONTHDAY $line] } {
         regexp {h[0-9]{4}} $line matched
         set  month  [string range ${matched} 1 2]
         set  day  [string range ${matched} 3 4]
     }
 
     # year
-    if { [ regexp -all -- YEAR $line] } {
+    if { (![ regexp -all -- {^\/\/} $line ]) &&  [ regexp -all -- YEAR $line] } {
         regexp {h[0-9]{4}} $line matched
         set  year  [string range ${matched} 1 4]
     }
 
     # revision
-    if { [ regexp -all -- REVISION $line] } {
+    if { (![ regexp -all -- {^\/\/} $line ]) && [ regexp -all -- REVISION $line] } {
         regexp {h[0-9]{2}} $line matched
         set  revision  [string range ${matched} 1 2]
+    }
+
+    # version format
+    if { (![ regexp -all -- {^\/\/} $line ]) && [ regexp -all -- VERSION_FORMAT $line] } {
+        regexp {h[0-9]{2}} $line matched
+        set  version_format  [string range ${matched} 1 1]
+    }
+
+    # version major
+    if { (![ regexp -all -- {^\/\/} $line ]) && [ regexp -all -- VERSION_MAJOR $line] } {
+        regexp {h[0-9]{2}} $line matched
+        set  version_major  [string range ${matched} 1 1]
+    }
+
+    # version minor
+    if { (![ regexp -all -- {^\/\/} $line ]) && [ regexp -all -- VERSION_MINOR $line] } {
+        regexp {h[0-9]{2}} $line matched
+        set  version_minor  [string range ${matched} 1 1]
     }
 
 
@@ -70,7 +95,7 @@ close $fid
 
 set datecode ${year}-${month}-${day}
 
-set fullname "${shortname}_${type}_${datecode}_v${revision}"
+set fullname "${shortname}_${type}_${datecode}_f${version_format}_v${version_major}.${version_minor}_r${revision}"
 
 puts "Generating PROM files for firmware version ${fullname}"
 
@@ -174,10 +199,10 @@ set impact_p [open "|impact -batch $impact_script" r]
 #puts [exec impact -batch "${impact_script}"]
 
 
-# echo impact output here: 
+# echo impact output here:
 while {![eof $impact_p]} { gets $impact_p line ; puts $line }
 
-puts "Finished Creating PROM Files" 
+puts "Finished Creating PROM Files"
 
 # adapted from https://forums.xilinx.com/t5/Vivado-TCL-Community/Vivado-TCL-set-generics-based-on-date-git-hash/td-p/426838
 
@@ -211,7 +236,9 @@ puts "Finished Creating PROM Files"
 #set_property generic "DATE_CODE=32'h$datecode HASH_CODE=32'h$git_hash" [current_fileset]
 
 
-set releasedir     release/${datecode}_v${revision}
+set releasedir     release/${datecode}_v${version_major}.${version_minor}_r${revision}
+
+set fullname "${shortname}_${type}_${datecode}_f${version_format}_v${version_major}.${version_minor}_r${revision}"
 
 if {![file isdirectory release]} {
     file mkdir release
@@ -221,10 +248,16 @@ if {![file isdirectory $releasedir]} {
     file mkdir $releasedir
 }
 
+if {![file isdirectory ${releasedir}/type${type}]} {
+    file mkdir ${releasedir}/type${type}
+}
 
-file copy -force $mcs_filename   ${releasedir}/${fullname}.mcs
-file copy -force $bit_filename   ${releasedir}/${fullname}.bit
-#file copy -force $svf_verify     ${releasedir}/${fullname}_verify.svf
-#file copy -force $svf_noverify   ${releasedir}/${fullname}_noverify.svf
-file copy -force $prm_filename   ${releasedir}/${fullname}.prm
-file copy -force $cfi_filename   ${releasedir}/${fullname}.cfi
+
+file copy -force $mcs_filename   ${releasedir}/type${type}/${fullname}.mcs
+file copy -force $bit_filename   ${releasedir}/type${type}/${fullname}.bit
+#file copy -force $svf_verify    ${releasedir}/type${type}/${fullname}_verify.svf
+#file copy -force $svf_noverify  ${releasedir}/type${type}/${fullname}_noverify.svf
+file copy -force $prm_filename   ${releasedir}/type${type}/${fullname}.prm
+file copy -force $cfi_filename   ${releasedir}/type${type}/${fullname}.cfi
+
+exec tar czvf ${releasedir}.tar.gz ${releasedir}

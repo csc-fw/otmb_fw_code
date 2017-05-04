@@ -1138,12 +1138,11 @@
   parameter VERSION             = 4'h0;     // Version revision number
   parameter MONTHDAY            = 16'h0000; // Version date
   parameter YEAR                = 16'h0000; // Version date
-  parameter YEAR                = 16'h0000; // Version date
   parameter FPGAID              = 16'h0000; // FPGA Type XCVnnnn
   parameter SEMANTIC_VERSIONING = 1'b1;     // Enable Semantic Versioning for TMB Output
-  parameter VERSION_BRANCH      = 3'h0;     // Version branch
+  parameter VERSION_FORMAT      = 4'h0;     // Version branch
   parameter VERSION_MAJOR       = 4'h0;     // Major version
-  parameter VERSION_MINOR       = 6'h0;     // Minor version
+  parameter VERSION_MINOR       = 5'h0;     // Minor version
   parameter ISE_VERSION         = 16'h1234; // ISE Compiler version
   parameter AUTO_VME            = 1'b1;     // Auto init vme registers
   parameter AUTO_JTAG           = 1'b1;     // Auto init jtag chain
@@ -1160,7 +1159,7 @@
   $display ("vme.MONTHDAY         = %H",MONTHDAY   );
   $display ("vme.YEAR             = %H",YEAR       );
   $display ("vme.FPGAID           = %H",FPGAID     );
-  $display ("vme.VERSION_BRANCH   = %H",VERSION_BRANCH);
+  $display ("vme.VERSION_FORMAT   = %H",VERSION_FORMAT);
   $display ("vme.VERSION_MAJOR    = %H",VERSION_MAJOR);
   $display ("vme.VERSION_MINOR    = %H",VERSION_MINOR);
   $display ("vme.ISE_VERSION      = %H",ISE_VERSION);
@@ -1411,7 +1410,7 @@
 
   parameter ADR_CCB_STAT1             = 10'hFC;  // CCB Status
 
-  parameter ADR_BXN_L1A               = 10'hFE;  // CLCT bxn at L1A
+  parameter ADR_BXN_L1A               = 10'hFE;   // CLCT bxn at L1A
   parameter ADR_L1A_LOOKBACK          = 10'h100;  // L1A look back
   parameter ADR_SEQ_DEBUG             = 10'h102;  // Sequencer debug latches
 
@@ -4235,21 +4234,21 @@
   wire [15:0]  version_slot;
 
   assign revcode_vme[8:0]   = (MONTHDAY[15:12]*10 + MONTHDAY[11:8])*32+ (MONTHDAY[7:4]*10 + MONTHDAY[3:0]);
-  assign revcode_vme[12:9]  = YEAR[3:0]+4'hA;    // Need to reformat this in year 2018
-  assign revcode_vme[15:13] = FPGAID[15:13];    // Virtex 2,4,6 etc
+  assign revcode_vme[12:9]  = YEAR[3:0]+4'hA; // Need to reformat this in year 2018
+  assign revcode_vme[15:13] = FPGAID[15:13];  // Virtex 2,4,6 etc
 
-  assign revcode_vme_new [2:0]   = VERSION_BRANCH;
-  assign revcode_vme_new [6:3]   = VERSION_MAJOR;
-  assign revcode_vme_new [12:7]  = VERSION_MINOR;
-  assign revcode_vme_new [15:13]  = 3'd0;
+  assign revcode_vme_new [04:00] = VERSION_MINOR;
+  assign revcode_vme_new [08:05] = VERSION_MAJOR;
+  assign revcode_vme_new [12:09] = (gem_read_enable) ? 4'd2 : VERSION_FORMAT;
+  assign revcode_vme_new [15:13] = 3'd0;
 
-  assign revcode[14:0] = ? (SEMANTIC_VERSIONING) ? revcode_vme_new[14:0] : revcode_vme[14:0];  // Sequencer format is 15 bits, VME is 16
+  assign revcode[14:0] = (SEMANTIC_VERSIONING) ? revcode_vme_new[14:0] : revcode_vme[14:0];  // Sequencer format is 15 bits, VME is 16
 
 // VME ID Registers, Readonly
-  assign version_slot[ 3: 0]  = FIRMWARE_TYPE[3:0];  // Firmware type, C=Normal TMB, D=Debug loopback
-  assign version_slot[ 7: 4]  = VERSION[3:0];      // Version revision number
-  assign version_slot[11: 8]  = ga[3:0  ];      // Geographic address for this board
-  assign version_slot[15:12]  = {3'b000,ga[4]};    // Geographic address msb
+  assign version_slot[ 3: 0]  = FIRMWARE_TYPE[3:0]; // Firmware type, C=Normal TMB, D=Debug loopback
+  assign version_slot[ 7: 4]  = VERSION[3:0];       // Version revision number
+  assign version_slot[11: 8]  = ga[3:0  ];          // Geographic address for this board
+  assign version_slot[15:12]  = {3'b000,ga[4]};     // Geographic address msb
 
   assign id_reg0_rd = version_slot[15:0];
   assign id_reg1_rd = MONTHDAY[15:0];

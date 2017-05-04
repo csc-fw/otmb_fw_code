@@ -5,8 +5,8 @@
 // Firmware version global definitions
   `define FIRMWARE_TYPE        04'hC    // C=Normal CLCT/TMB, D=Debug PCB loopback version
   `define VERSION              04'hE    // Version revision number, A=TMB2004 and earlier, E=TMB2005E production
-  `define MONTHDAY             16'h1205 // Version date
-  `define YEAR                 16'h2016 // Version year
+  `define MONTHDAY             16'h0504 // Version date
+  `define YEAR                 16'h2017 // Version year
   `define REVISION             04'h01   // Firmware Revision
 
   `define AUTO_VME             01'h1    // Automatically initialize VME registers from PROM data,   0=do not
@@ -22,15 +22,15 @@
 //`define FPGAID               16'h6195 // FPGA Type 6195 XC6VLX195T
   `define FPGAID               16'h6240 // FPGA Type 6240 XC6VLX240T
 
-  `define SEMANTIC_VERSIONING  01'b0
+  `define SEMANTIC_VERSIONING  01'b1
 
-  `define VERSION_BRANCH       03'd0;
-  `define VERSION_MAJOR        04'd0;
-  `define VERSION_MINOR        06'd0;
+  `define VERSION_FORMAT       04'h1;   // 0=TMB standard, 1=OTMB Standard, 2=GEM in DAQ
+  `define VERSION_MAJOR        04'h0;
+  `define VERSION_MINOR        05'h0;
 
 // Conditional compile flags: Enable only one CSC_TYPE
-  `define CSC_TYPE_C  04'hC // Normal   ME1B: ME1B   chambers facing toward IR.    ME1B hs =!reversed, ME1A hs = reversed
 //`define CSC_TYPE_D  04'hD // Reversed ME1B: ME1B   chambers facing away from IR. ME1B hs = reversed, ME1A hs =!reversed
+  `define CSC_TYPE_C  04'hC // Normal   ME1B: ME1B   chambers facing toward IR.    ME1B hs =!reversed, ME1A hs = reversed
 
 // Revision log
 //  02/08/2013  Initial Virtex-6 specific
