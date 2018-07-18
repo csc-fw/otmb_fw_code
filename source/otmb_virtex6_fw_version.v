@@ -4,8 +4,8 @@
 // Firmware version global definitions
   `define FIRMWARE_TYPE 04'hC    // C=Normal CLCT/TMB, D=Debug PCB loopback version
   `define VERSION       04'hE    // Version revision number, A=TMB2004 and earlier, E=TMB2005E production
-  `define MONTHDAY      16'h1212 // Version date
-  `define YEAR          16'h2016 // Version year
+  `define MONTHDAY      16'h1208 // Version date
+  `define YEAR          16'h2017 // Version year
 
   `define AUTO_VME         01'h1 // Automatically initialize VME registers from PROM data,   0=do not
   `define AUTO_JTAG        01'h1 // Automatically initialize JTAG chain from PROM data,      0=do not
@@ -21,8 +21,8 @@
   `define FPGAID       16'h6240 // FPGA Type 6240 XC6VLX240T
 
 // Conditional compile flags: Enable only one CSC_TYPE
-//  `define CSC_TYPE_C  04'hC // Normal   ME1B: ME1B   chambers facing toward IR.    ME1B hs =!reversed, ME1A hs = reversed
-  `define CSC_TYPE_D  04'hD    // Reversed ME1B: ME1B   chambers facing away from IR. ME1B hs = reversed, ME1A hs =!reversed
+  `define CSC_TYPE_C  04'hC // Normal   ME1B: ME1B   chambers facing toward IR.    ME1B hs =!reversed, ME1A hs = reversed
+//  `define CSC_TYPE_D  04'hD    // Reversed ME1B: ME1B   chambers facing away from IR. ME1B hs = reversed, ME1A hs =!reversed
 
 // Revision log
 //  02/08/2013  Initial Virtex-6 specific
@@ -92,6 +92,13 @@
 //      04/12/2015      Activate auto-reset for GTX if they don't lock within 1.638 ms
 //      05/30/2015      Keep bad links from contaminating the triads == hot comps: triads load zeroes if !link_good OR link_bad
 //  	06/09/2015	Fixed bug in posneg logic in top-level file
+//  10/25/2017  focus on fix for Yuri's algo2016_deadzone implementation in sequencer & pattern_finder
+//             -also fixed bugs in cfeb_active logic, cfeb_en application in CLCT an layer_trig logic
+//  10/27/2017  testing if new noflush logic etc cause the rate problems, add "dynamic dead zone" etc to enable
+//             -only changed sequencer file
+//  12/05/2017  found a bug in busy/dead zone logic with layerTrig handling, casued half-rate bug... add layer_trig_en req to fix.
+//  12/08/2017  removed temporary half-rate-debug options, return to normal algo2016 control
+//             -added counters for sequential preClct and almost-sequential preClct
 //---------------------------------------------------------------------------------------------------------------------------------------
 //  End Global Definitions
 //---------------------------------------------------------------------------------------------------------------------------------------

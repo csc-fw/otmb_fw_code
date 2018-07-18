@@ -305,6 +305,7 @@
 //  05/27/2011  Shorten cb_cnt{1:0] to [0:0], replace cb_sm with blocking operators
 //  02/21/2013  Expand to 7 cfebs
 //  03/07/2013  Restore normal scope channels
+//  11/27/2017  Trying to debug new algo2016 half-rate problem observed at b904... use more enable registers
 //
 //------------------------------------------------------------------------------------------------------------------
 //  Readout Format:
@@ -858,6 +859,8 @@
 // Event Counter Ports
   hdr_clear_on_resync,
   pretrig_counter,
+  seq_pretrig_counter,
+  almostseq_pretrig_counter,
   clct_counter,
   alct_counter,
   trig_counter,
@@ -897,6 +900,7 @@
 
 // Algo2016: configuration
   algo2016_use_dead_time_zone,
+// JG: this functionality is being removed, 10/25/2017...
   algo2016_dead_time_zone_size,
   algo2016_use_dynamic_dead_time_zone,
 // Sump
@@ -1551,6 +1555,9 @@
 // Event Counter Ports
   input                   hdr_clear_on_resync; // Clear header counters on ttc_resync
   output  [MXCNTVME-1:0]  pretrig_counter;     // Pre-trigger counter
+// JG for these use pretrig_rqst or preClct and pipeline registers to check for seq trigs
+  output  [MXCNTVME-1:0]  seq_pretrig_counter;       // consecutive Pre-trigger counter (equential, 1 bx apart)
+  output  [MXCNTVME-1:0]  almostseq_pretrig_counter; // Pre-triggers-2bx-apart counter
   output  [MXCNTVME-1:0]  clct_counter;        // CLCT counter
   output  [MXCNTVME-1:0]  alct_counter;        // ALCTs received counter
   output  [MXCNTVME-1:0]  trig_counter;        // TMB trigger counter
@@ -1590,6 +1597,7 @@
 
 // Algo2016: configuration
   input       algo2016_use_dead_time_zone;         // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
+// JG: this functionality is being removed, 10/25/2017...
   input [4:0] algo2016_dead_time_zone_size;        // Constant size of the dead time zone
   input       algo2016_use_dynamic_dead_time_zone; // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
 
@@ -1924,6 +1932,8 @@
 
 // Pre-trigger counter, resets at evcntres or resync
   reg   [MXCNTVME-1:0]  pretrig_counter = 0;
+  reg   [MXCNTVME-1:0]  seq_pretrig_counter = 0;
+  reg   [MXCNTVME-1:0]  almostseq_pretrig_counter = 0;
 
   wire pretrig_cnt_reset = ccb_evcntres || (ttc_resync && hdr_clear_on_resync);
   wire pretrig_cnt_ovf   = (pretrig_counter == {MXCNTVME{1'b1}});
@@ -1941,15 +1951,25 @@
 //  wire preClct_ff;         // delayed CLCT pre-trigger
 //  x_delay_os #( .MXDLY(8) ) upreClct_delay (.d(clct_pretrig),.clock(clock),.delay(l1a_preClct_dly),.q(preClct_ff)); 
   wire preClct_ff = preClct;         // Lets not delay CLCT pre-trigger for now
-  
+  reg [5:0] preClct_reg = 0;         // pipeline to record CLCT pre-trigger
+
   // open CLCT pre-trigger window
   reg  [3:0] preClct_width_cnt = 0;
   wire       preClct_width_bsy = (preClct_width_cnt != 0); 
   //
   always @(posedge clock) begin
-    if      ( ttc_resync        ) preClct_width_cnt = 0;                        // Clear on reset
-    else if ( preClct_ff        ) preClct_width_cnt = l1a_preClct_width - 1'b1; // Load persistence count
-    else if ( preClct_width_bsy ) preClct_width_cnt = preClct_width_cnt - 1'b1; // Decrement count down to 0
+     if      ( ttc_resync        ) preClct_width_cnt = 0;                        // Clear on reset
+     else if ( preClct_ff        ) preClct_width_cnt = l1a_preClct_width - 1'b1; // Load persistence count
+     else if ( preClct_width_bsy ) preClct_width_cnt = preClct_width_cnt - 1'b1; // Decrement count down to 0
+     preClct_reg[5:0] <= {preClct_reg[4:0],preClct};
+     if (vme_cnt_reset) begin           // Clear counters
+        seq_pretrig_counter <= cnt_fatzero;
+        almostseq_pretrig_counter <= cnt_fatzero;
+     end
+     else  begin
+	if (!(&seq_pretrig_counter) & (&preClct_reg[1:0])) seq_pretrig_counter <= seq_pretrig_counter + 1'b1;
+	if (!(&almostseq_pretrig_counter) & (|preClct_reg[4:1]) & preClct_reg[0] ) almostseq_pretrig_counter <= almostseq_pretrig_counter + 1'b1;
+     end
   end
   //
   wire preClct_window = preClct_width_bsy | preClct_ff; // Assert immediately, hold until count done
@@ -2340,6 +2360,9 @@
   reg   [MXFLUSH-1:0] flush_cnt=0;
 
   wire flush_cnt_clr;
+// JG: this algo2016 functionality still needed? Revert to pre-algo2016 code here?    algo2016_clct_to_alct  algo2016_dead_time_zone_size
+// JG, for debug half-rate test...  assign flush_cnt_clr = (algo2016_dead_time_zone_size[0]) ? (clct_sm != flush) : ((clct_sm != flush) || !clct_notbusy);  // Flush timer resets if triad debris remains
+// JG, good code:  
   assign flush_cnt_clr = algo2016_use_dead_time_zone ? (clct_sm != flush) : ((clct_sm != flush) || !clct_notbusy);  // Flush timer resets if triad debris remains
   wire flush_cnt_ena = (clct_sm == flush);
 
@@ -2347,11 +2370,15 @@
     if      (flush_cnt_clr) flush_cnt = clct_flush_delay - 1'b1; // sync load before entering flush state
     else if (flush_cnt_ena) flush_cnt = flush_cnt-1'b1;      // only count during flush
   end
-
+// JG, for debug half-rate test... assign flush_done = (algo2016_dead_time_zone_size[1]) ? ((flush_cnt == 0) || noflush) : (((flush_cnt == 0) || noflush) && clct_notbusy);
+// JG, good code:  
   assign flush_done = algo2016_use_dead_time_zone ? ((flush_cnt == 0) || noflush) : (((flush_cnt == 0) || noflush) && clct_notbusy);
 
+// JG: this algo2016 functionality is added, 10/25/2017, but 11/27/2017 try the "dynamic" req. for half-rate debug test...
   always @(posedge clock) begin
-    noflush  <= (clct_flush_delay == 0);
+// JG, for debug half-rate test...     noflush  <= (algo2016_use_dynamic_dead_time_zone) || (clct_flush_delay == 0);
+// JG, good code:  
+    noflush  <= (algo2016_use_dead_time_zone) || (clct_flush_delay == 0);
   end
 
 // Delay trigger source and cfeb active feb list 1bx for clct_sm to go to pretrig state
@@ -2470,7 +2497,8 @@
   wire              trig_source_ext_xtmb = postdrift_data[15];    // Trigger source was not CLCT pattern
   wire [MXCFEB-1:0] aff_list_xtmb        = postdrift_data[22:16]; // Active feb list
 
-  reg [4:0] algo2016_dead_time_zone_size_1st;
+// JG: this functionality is being removed, 10/25/2017...
+/*  reg [4:0] algo2016_dead_time_zone_size_1st;
   reg [4:0] algo2016_dead_time_zone_size_2nd;
   always @(posedge clock) begin
     if (algo2016_use_dynamic_dead_time_zone) begin // Define dynamic dead zones around CLCTs that depend on pattern ID
@@ -2503,20 +2531,28 @@
       algo2016_dead_time_zone_size_1st <= algo2016_dead_time_zone_size;
       algo2016_dead_time_zone_size_2nd <= algo2016_dead_time_zone_size;
     end
-  end
+  end  */
+
 // After drift, send CLCT words to TMB, persist 1 cycle only, blank invalid CLCTs unless override
   wire clct0_hit_valid = (hs_hit_1st >= hit_thresh_postdrift);    // CLCT is over hit thresh
   wire clct0_pid_valid = (hs_pid_1st >= pid_thresh_postdrift);    // CLCT is over pid thresh
+
+// JG: this functionality is being removed, 10/25/2017...
 // Algo2016: check if new clct0 key half-strip is outside of dead zone around clct0
-  wire clct0_key_valid = (hs_key_1st >= hs_key_1st_algo2016 + algo2016_dead_time_zone_size_1st) || (hs_key_1st <= hs_key_1st_algo2016 - algo2016_dead_time_zone_size_1st);
-  
+//  wire clct0_key_valid = (hs_key_1st >= hs_key_1st_algo2016 + algo2016_dead_time_zone_size_1st) || (hs_key_1st <= hs_key_1st_algo2016 - algo2016_dead_time_zone_size_1st);
+
   wire clct1_hit_valid = (hs_hit_2nd >= hit_thresh_postdrift);    // CLCT is over hit thresh
   wire clct1_pid_valid = (hs_pid_2nd >= pid_thresh_postdrift);    // CLCT is over pid thresh
-// Algo2016: check if new clct1 key half-strip is outside of dead zone around clct1
-  wire clct1_key_valid = (hs_key_2nd >= hs_key_2nd_algo2016 + algo2016_dead_time_zone_size_2nd) || (hs_key_2nd <= hs_key_2nd_algo2016 - algo2016_dead_time_zone_size_2nd);
 
-  wire clct0_really_valid = algo2016_use_dead_time_zone ? (clct0_key_valid && clct0_hit_valid && clct0_pid_valid) : (clct0_hit_valid && clct0_pid_valid); // CLCT is over thresh, not in dead zone and not external
-  wire clct1_really_valid = algo2016_use_dead_time_zone ? (clct1_key_valid && clct1_hit_valid && clct1_pid_valid) : (clct1_hit_valid && clct1_pid_valid);    // CLCT is over thresh, not in dead zone and not external
+// JG: this functionality is being removed, 10/25/2017...
+// Algo2016: check if new clct1 key half-strip is outside of dead zone around clct1
+//  wire clct1_key_valid = (hs_key_2nd >= hs_key_2nd_algo2016 + algo2016_dead_time_zone_size_2nd) || (hs_key_2nd <= hs_key_2nd_algo2016 - algo2016_dead_time_zone_size_2nd);
+
+// JG: this functionality is being removed, return to original pre-algo2016 code, 10/25/2017...
+//  wire clct0_really_valid = algo2016_use_dead_time_zone ? (clct0_key_valid && clct0_hit_valid && clct0_pid_valid) : (clct0_hit_valid && clct0_pid_valid); // CLCT is over thresh, not in dead zone and not external
+//  wire clct1_really_valid = algo2016_use_dead_time_zone ? (clct1_key_valid && clct1_hit_valid && clct1_pid_valid) : (clct1_hit_valid && clct1_pid_valid);    // CLCT is over thresh, not in dead zone and not external
+  wire clct0_really_valid = (clct0_hit_valid && clct0_pid_valid);    // CLCT is over thresh and not external
+  wire clct1_really_valid = (clct1_hit_valid && clct1_pid_valid);    // CLCT is over thresh and not external
 
   wire clct0_valid = clct0_really_valid || trig_source_ext_xtmb || !valid_clct_required;
   wire clct1_valid = clct1_really_valid || trig_source_ext_xtmb || !valid_clct_required;
@@ -2524,8 +2560,9 @@
   assign clct0_vpf = clct0_valid && clct_pop_xtmb;
   assign clct1_vpf = clct1_valid && clct_pop_xtmb;
 
+// JG: this functionality is being removed, 10/25/2017...
 // Algo2016: latch key half-strips for valid clct0 and clct1
-  reg [MXKEYBX-1:0] hs_key_1st_algo2016;
+/*  reg [MXKEYBX-1:0] hs_key_1st_algo2016;
   reg [MXKEYBX-1:0] hs_key_2nd_algo2016;
   always @(posedge clock) begin
     if (clct0_vpf) begin
@@ -2534,7 +2571,7 @@
     if (clct1_vpf) begin
       hs_key_2nd_algo2016 <= hs_key_2nd;
     end
-  end
+  end  */
 
 // Construct CLCTs for sending to TMB matching. These are node names only
   wire [MXCLCT-1:0]  clct0, clct0_xtmb;

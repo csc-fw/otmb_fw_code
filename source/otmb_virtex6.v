@@ -1336,20 +1336,24 @@
   wire  [MXCFEB-1:0]  cfeb_active;      // CFEBs marked for DMB readout
   wire  [MXLY-1:0]    cfeb_layer_or;    // OR of hstrips on each layer
   wire  [MXHITB-1:0]  cfeb_nlayers_hit; // Number of CSC layers hit
-
   wire  [MXHITB-1:0]  hs_hit_1st;
   wire  [MXPIDB-1:0]  hs_pid_1st;
   wire  [MXKEYBX-1:0] hs_key_1st;
-
   wire  [MXHITB-1:0]  hs_hit_2nd;
   wire  [MXPIDB-1:0]  hs_pid_2nd;
   wire  [MXKEYBX-1:0] hs_key_2nd;
   wire                hs_bsy_2nd;
-  
   wire                hs_layer_trig;  // Layer triggered
   wire  [MXHITB-1:0]  hs_nlayers_hit; // Number of layers hit
   wire  [MXLY-1:0]    hs_layer_or;    // Layer ORs
 
+  wire       algo2016_use_dead_time_zone;         // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
+  wire [4:0] algo2016_dead_time_zone_size;        // Constant size of the dead time zone
+  wire       algo2016_use_dynamic_dead_time_zone; // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
+  wire       algo2016_drop_used_clcts;            // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - drop used CLCTs
+  wire       algo2016_cross_bx_algorithm;         // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
+  wire       algo2016_clct_use_corrected_bx;      // NOT YET IMPLEMENTED: Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
+  
   pattern_finder upattern_finder
   (
 // Ports
@@ -1430,6 +1434,10 @@
   .cfeb_layer_trig  (cfeb_layer_trig),              // Out  Layer pretrigger
   .cfeb_layer_or    (cfeb_layer_or[MXLY-1:0]),      // Out  OR of hstrips on each layer
   .cfeb_nlayers_hit (cfeb_nlayers_hit[MXHITB-1:0]), // Out  Number of CSC layers hit
+
+  .drift_delay        (drift_delay[MXDRIFT-1:0]),      // In  CSC Drift delay clocks
+  .algo2016_use_dead_time_zone         (algo2016_use_dead_time_zone), // In Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
+  .algo2016_dead_time_zone_size        (algo2016_dead_time_zone_size[4:0]),   // In Constant size of the dead time zone
 
 // 2nd CLCT separation RAM Ports
   .clct_sep_src       (clct_sep_src),             // In  CLCT separation source 1=vme, 0=ram
@@ -1532,13 +1540,6 @@
   wire [3:0] alct_bx0_delay;        // ALCT bx0 delay to mpc transmitter
   wire [3:0] clct_bx0_delay;        // CLCT bx0 delay to mpc transmitter
   
-  wire       algo2016_use_dead_time_zone;         // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
-  wire [4:0] algo2016_dead_time_zone_size;        // Constant size of the dead time zone
-  wire       algo2016_use_dynamic_dead_time_zone; // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
-  wire       algo2016_drop_used_clcts;            // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - drop used CLCTs
-  wire       algo2016_cross_bx_algorithm;         // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
-  wire       algo2016_clct_use_corrected_bx;      // NOT YET IMPLEMENTED: Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
-  
   wire  [MXMPCDLY-1:0]  mpc_rx_delay;
   wire  [MXMPCDLY-1:0]  mpc_tx_delay;
   wire  [MXFRAME-1:0]  mpc0_frame0_ff;
@@ -1621,6 +1622,8 @@
 
 // Sequencer Header Counters
   wire  [MXCNTVME-1:0] pretrig_counter; // Pre-trigger counter
+  wire  [MXCNTVME-1:0] seq_pretrig_counter;       // consecutive Pre-trigger counter (equential, 1 bx apart)
+  wire  [MXCNTVME-1:0] almostseq_pretrig_counter; // Pre-triggers-2bx-apart counter
   wire  [MXCNTVME-1:0] clct_counter;    // CLCT counter
   wire  [MXCNTVME-1:0] trig_counter;    // TMB trigger counter
   wire  [MXCNTVME-1:0] alct_counter;    // ALCTs received counter
@@ -1787,7 +1790,7 @@
 
   .alct_delay            (alct_delay[3:0]),       // In Delay ALCT for CLCT match window
   .clct_window        (clct_window[3:0]),      // In CLCT match window width (for CLCT-centric "old" algorithm)
-  
+   
   .algo2016_use_dead_time_zone         (algo2016_use_dead_time_zone),         // In Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
   .algo2016_dead_time_zone_size        (algo2016_dead_time_zone_size[4:0]),   // In Constant size of the dead time zone
   .algo2016_use_dynamic_dead_time_zone (algo2016_use_dynamic_dead_time_zone), // In Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
@@ -2150,6 +2153,8 @@
 // Sequencer Header Counters
   .hdr_clear_on_resync (hdr_clear_on_resync),           // In  Clear header counters on ttc_resync
   .pretrig_counter     (pretrig_counter[MXCNTVME-1:0]), // Out  Pre-trigger counter
+  .seq_pretrig_counter (seq_pretrig_counter[MXCNTVME-1:0]), // Out  consecutive Pre-trigger counter (equential, 1 bx apart)
+  .almostseq_pretrig_counter (almostseq_pretrig_counter[MXCNTVME-1:0]), // Out  Pre-triggers-2bx-apart counter
   .clct_counter        (clct_counter[MXCNTVME-1:0]),    // Out  CLCT counter
   .alct_counter        (alct_counter[MXCNTVME-1:0]),    // Out  ALCTs received counter
   .trig_counter        (trig_counter[MXCNTVME-1:0]),    // Out  TMB trigger counter
@@ -3698,9 +3703,12 @@
       .event_counter64    (event_counter64[MXCNTVME-1:0]),  // In
       .event_counter65    (event_counter65[MXCNTVME-1:0]),  // In
 
+
       // Header Counter Ports
       .hdr_clear_on_resync (hdr_clear_on_resync),           // Out  Clear header counters on ttc_resync
       .pretrig_counter     (pretrig_counter[MXCNTVME-1:0]), // In  Pre-trigger counter
+      .seq_pretrig_counter (seq_pretrig_counter[MXCNTVME-1:0]), // In  consecutive Pre-trigger counter (equential, 1 bx apart)
+      .almostseq_pretrig_counter (almostseq_pretrig_counter[MXCNTVME-1:0]), // In  Pre-triggers-2bx-apart counter
       .clct_counter        (clct_counter[MXCNTVME-1:0]),    // In  CLCT counter
       .trig_counter        (trig_counter[MXCNTVME-1:0]),    // In  TMB trigger counter
       .alct_counter        (alct_counter[MXCNTVME-1:0]),    // In  ALCTs received counter
