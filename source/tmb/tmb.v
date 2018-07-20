@@ -926,6 +926,9 @@
   wire       clct_tag_me;   // Tag pulse
   wire [3:0] clct_tag_win;  // SR stage to insert tag
 
+  reg [15:0] clct_match_sr = 0; // record whether CLCT is used, Tao
+
+
   always @(posedge clock) begin
     if (reset_sr) begin             // Sych reset on resync or not power up
       clct_tag_sr  <= dynamic_zero; // Load a dynamic 0 on reset, mollify xst
@@ -939,6 +942,23 @@
       i=i+1;
     end  // close while
   end  // close clock
+
+  
+ //register shift, mark whether CLCT was used for match for not, Tao 
+  always @(posedge clock) begin
+    if (reset_sr) begin             // Sych reset on resync or not power up
+      clct_match_sr  <= dynamic_zero; // Load a dynamic 0 on reset, mollify xst
+    end
+
+    i=0;                  // Loop over 15 window positions 0 to 14 
+    while (i<=14) begin
+      if (clct_match ==1 && clct_tag_win==i && clct_sr_include[i]) clct_match_sr[i+1] <= 1;
+      else                  // Otherwise parallel shift all data left
+        clct_match_sr[i+1] <= clct_match_sr[i];
+      i=i+1;
+    end  // close while
+  end  // close clock
+
 
 // Find highest priority window position that has a non-tagged clct
   wire [15:0] win_ena;        // Table of enabled window positions
@@ -1022,6 +1042,8 @@
   wire clct_last_win    = clct_last_vpf && !clct_last_tag;  // CLCT reached end of window
   wire clct_noalct      = clct_last_win && !alct_pulse;    // No ALCT arrived in window, pushed mpc on last bx
   wire clct_noalct_lost = clct_last_win &&  alct_pulse && clct_win_best!=winclosing;// No ALCT arrived in window, lost to mpc contention
+  //Tao, check whether CLCT was used or not 
+  wire clct_used        = clct_match_sr[winclosing]; //CLCT was used
 
 // ALCT*CLCT match: alct arrived while there were 1 or more un-tagged clcts in the window
   assign clct_tag_me  = (algo2016_drop_used_clcts) ? clct_match : 1'b0;    // Tag the matching clct
@@ -1033,13 +1055,17 @@
   reg  [3:0]        tmb_match_pri = 0;
   wire              alct_only_trig;
 
-  wire clct_keep    = ( clct_match && tmb_allow_match ) || ( clct_noalct && tmb_allow_clct && !clct_noalct_lost );
+  //Tao, add clct_used to CLCT dependent readout control 
+  //wire clct_keep    = ( clct_match && tmb_allow_match ) || ( clct_noalct && tmb_allow_clct && !clct_noalct_lost );
+  wire clct_keep    = ( clct_match && tmb_allow_match ) || ( clct_noalct && tmb_allow_clct && !clct_noalct_lost  && !clct_used );
   wire alct_keep    = ( clct_match && tmb_allow_match ) || ( alct_noclct && tmb_allow_alct );
 
-  wire clct_keep_ro = ( clct_match && tmb_allow_match_ro ) || ( clct_noalct && tmb_allow_clct_ro && !clct_noalct_lost);
+  //wire clct_keep_ro = ( clct_match && tmb_allow_match_ro ) || ( clct_noalct && tmb_allow_clct_ro && !clct_noalct_lost);
+  wire clct_keep_ro = ( clct_match && tmb_allow_match_ro ) || ( clct_noalct && tmb_allow_clct_ro && !clct_noalct_lost && !clct_used);
   wire alct_keep_ro = ( clct_match && tmb_allow_match_ro ) || ( alct_noclct && tmb_allow_alct_ro );
 
-  wire clct_discard = ( clct_match && !tmb_allow_match ) || ( clct_noalct && !tmb_allow_clct ) || clct_noalct_lost;
+  //wire clct_discard = ( clct_match && !tmb_allow_match ) || ( clct_noalct && !tmb_allow_clct ) || clct_noalct_lost; 
+  wire clct_discard = ( clct_match && !tmb_allow_match ) || ( clct_noalct && !tmb_allow_clct ) || clct_noalct_lost || clct_used;
   wire alct_discard =   alct_pulse && !alct_keep;
 
 // Match window mux
@@ -1055,7 +1081,8 @@
   assign clct_srl_ptr   = match_win_2; // Pointer to SRL delayed CLCT signals
 
 //  wire trig_pulse    = clct_match || clct_noalct || clct_noalct_lost || alct_noclct;    // Event pulse
-  wire trig_pulse    = clct_match || clct_noalct || clct_noalct_lost || alct_only_trig;  // Event pulse
+  //wire trig_pulse    = clct_match || clct_noalct || clct_noalct_lost || alct_only_trig;  // Event pulse
+  wire trig_pulse    = clct_match || (clct_noalct && !clct_used) || clct_noalct_lost || alct_only_trig;  // Event pulse
   
   wire trig_keep     = (clct_keep    || alct_keep);    // Keep event for trigger and readout
   wire non_trig_keep = (clct_keep_ro || alct_keep_ro); // Keep non-triggering event for readout only
@@ -1065,11 +1092,11 @@
 
   wire clct_match_tr  = clct_match  && trig_keep; // ALCT and CLCT matched in time, nontriggering event
   wire alct_noclct_tr = alct_noclct && trig_keep; // Only ALCT triggered, nontriggering event
-  wire clct_noalct_tr = clct_noalct && trig_keep; // Only CLCT triggered, nontriggering event
+  wire clct_noalct_tr = (clct_noalct && !clct_used) && trig_keep; // Only CLCT triggered, nontriggering event
 
   wire clct_match_ro  = clct_match  && non_trig_keep; // ALCT and CLCT matched in time, nontriggering event
   wire alct_noclct_ro = alct_noclct && non_trig_keep; // Only ALCT triggered, nontriggering event
-  wire clct_noalct_ro = clct_noalct && non_trig_keep; // Only CLCT triggered, nontriggering event
+  wire clct_noalct_ro = (clct_noalct && !clct_used) && non_trig_keep; // Only CLCT triggered, nontriggering event
 
   assign alct_only_trig = (alct_noclct && tmb_allow_alct) || (alct_noclct_ro && tmb_allow_alct_ro);// ALCT-only triggers are allowed
 
