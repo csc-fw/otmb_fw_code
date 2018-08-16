@@ -896,6 +896,7 @@
     while (i<=15) begin
       if      (ttc_resync              ) clct_win_priority[i] <= 4'hF;
       else if (i >= clct_window || i==0) clct_win_priority[i] <= 0; // i >  lastwin or i=0
+      else if (i == winclosing && algo2016_cross_bx_algorithm ) clct_win_priority[i] <= 1; // alwasy assign it to 1
       else if (i <= clct_win_center    ) clct_win_priority[i] <= clct_window - cross_bx_priority_low_bx - ((clct_win_center - i[3:0]) << 1); // i <= center
       else                               clct_win_priority[i] <= clct_window - cross_bx_priority_high_bx - ((i[3:0] - clct_win_center) << 1); // i >  center
         i=i+1;
