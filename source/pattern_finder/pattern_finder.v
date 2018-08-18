@@ -856,7 +856,7 @@ module pattern_finder (
       end
 // JG: for every HS, apply the dead signal if it's near the key HS; simple OR, but watch for chamber edge limits (me11a)
       if (ihs >= (MXHSXB+dead_span) && ihs <= (MXKEYX-1-dead_span)) assign hs_key_dead[ihs] = |hs_key_busyAB[(ihs+dead_span):(ihs-dead_span)]; // 215:136
-      else if (ihs < (MXHSXB+dead_span)) assign hs_key_dead[ihs] = |hs_key_busyAB[(ihs+dead_span):0]; // 135:128
+      else if (ihs < (MXHSXB+dead_span)) assign hs_key_dead[ihs] = |hs_key_busyAB[(ihs+dead_span):MXHSXB]; // 135:128
       else  assign hs_key_dead[ihs] = |hs_key_busyAB[(MXKEYX-1):(ihs-dead_span)]; // 223:216
     end
   endgenerate
