@@ -942,7 +942,7 @@ module pattern_finder (
   assign cfeb_active[1] = (cfebnm1_dmb[2] || cfeb_dmb[1] || cfebnp1_dmb[0] );
   assign cfeb_active[2] = (cfebnm1_dmb[3] || cfeb_dmb[2] || cfebnp1_dmb[1] );
   assign cfeb_active[3] = (                  cfeb_dmb[3] || cfebnp1_dmb[2] );
-  assign cfeb_active[4] = (cfebnm1_dmb[5] || cfeb_dmb[4] ||                );
+  assign cfeb_active[4] = (cfebnm1_dmb[5] || cfeb_dmb[4]                   );
   assign cfeb_active[5] = (cfebnm1_dmb[6] || cfeb_dmb[5] || cfebnp1_dmb[4] );
   assign cfeb_active[6] = (                  cfeb_dmb[6] || cfebnp1_dmb[5] );
 
