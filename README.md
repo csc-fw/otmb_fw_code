@@ -36,8 +36,8 @@ Default version is ISE 14.5 which allows to bypass the RX Delay Aligner,
 thus saving some power consumption.
 
 
-Starting fro 2016, Yuriy, Jason, Andrew and Tao worked on improving OTMB fw performance and several key new features were added:
- - localized dead time zone in CLCT pretriggering 
+From 2016 to 2018, Yuriy, Jason, Andrew and Tao worked on improving OTMB fw performance and several key new features were added:
+ - localized dead time zone in cathode pretriggering 
  - CLCT reuse in ALCT-CLCT matching
 the branch of this version firmware is renamed to 2018OTMBfw on Tao's github
 
