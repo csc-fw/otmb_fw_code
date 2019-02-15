@@ -35,11 +35,11 @@ parameter "GTX_POWER_SAVE" might be set:
 Default version is ISE 14.5 which allows to bypass the RX Delay Aligner,
 thus saving some power consumption.
 
-
+### Comments on 2019 Jan.
 Starting fro 2016, Yuriy, Jason, Andrew and Tao worked on improving OTMB fw performance and several key new features were added:
  - localized dead time zone in CLCT pretriggering 
  - CLCT reuse in ALCT-CLCT matching
-the branch of this version firmware is renamed to 2018OTMBfw on Tao's github
+the branch of this version firmware is renamed to 2018OTMBfw on Tao's github. the ISE used for compiling is 14.7
 
 ### Simulation
 The folder source/simulation contains a test bench, as well as a
