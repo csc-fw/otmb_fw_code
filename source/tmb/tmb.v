@@ -162,6 +162,7 @@
   tmb_match_pri,
   tmb_alct_discard,
   tmb_clct_discard,
+  //Tao, ME1/1->MEX/1, the following two could be ignored for ME234
   tmb_clct0_discard,
   tmb_clct1_discard,
   tmb_aff_list,
@@ -223,7 +224,7 @@
   algo2016_clct_use_corrected_bx,
 
   csc_id,
-  csc_me1ab,
+  csc_me1ab,// always 0 for ME234
   alct_bx0_delay,
   clct_bx0_delay,
   alct_bx0_enable,
@@ -361,8 +362,9 @@
   ,clct_sync_err
 
 // CLCT is from ME1A
-  ,clct0_cfeb456
-  ,clct1_cfeb456
+// Tao ME1/1-MEX/1
+  //,clct0_cfeb456
+  //,clct1_cfeb456
   ,kill_clct0
   ,kill_clct1
   ,kill_trig
@@ -415,7 +417,7 @@
   parameter MXBADR    = RAM_ADRB;      // Header buffer data address bits
 
 // Constants
-  parameter MXCFEB    =   7;        // Number of CFEBs on CSC
+  parameter MXCFEB    =   5;        // Number of CFEBs on CSC
   parameter MXALCT    =  16;        // Number bits per ALCT word
   parameter MXCLCT    =  16;        // Number bits per CLCT word
   parameter MXCLCTC    =  3;        // Number bits per CLCT common data word
@@ -677,8 +679,9 @@
   output          clct_sync_err;    // Bx0 disagreed with bxn counter
 
 // CLCT is from ME1A
-  output          clct0_cfeb456;    // CLCT0 is on CFEB4,5,6 hence ME1A
-  output          clct1_cfeb456;    // CLCT1 is on CFEB4,5,6 hence ME1A
+  //Tao ME1/1->MEX/1
+  //output          clct0_cfeb456;    // CLCT0 is on CFEB4,5,6 hence ME1A
+  //output          clct1_cfeb456;    // CLCT1 is on CFEB4,5,6 hence ME1A
   output          kill_clct0;      // Delete CLCT0 from ME1A
   output          kill_clct1;      // Delete CLCT1 from ME1A
   output          kill_trig;      // Kill clct-trig, both CLCTs are ME1As, and there is no alct in alct-only mode
@@ -1202,21 +1205,24 @@
   end
 
 // CLCTs from ME1A
-  reg kill_me1a_clcts=0;
+  //Tao ME1/1->MEX/1, following logic could be ignored. Not removed to avoid port change in tmb module
+  //reg kill_me1a_clcts=0;
 
-  always @(posedge clock) begin
-    if (ttc_resync) kill_me1a_clcts <= 1;                           // Foil xst warning for typeA and typeB compiles 
-    else            kill_me1a_clcts <= mpc_me1a_block && csc_me1ab; // Kill CLCTs from ME1A if blocking is on
-  end
+  //always @(posedge clock) begin
+  //  if (ttc_resync) kill_me1a_clcts <= 1;                           // Foil xst warning for typeA and typeB compiles 
+  //  else            kill_me1a_clcts <= mpc_me1a_block && csc_me1ab; // Kill CLCTs from ME1A if blocking is on
+  //end
 
-  wire clct0_exists = clct0_real[0]; // CLCT0 vpf
-  wire clct1_exists = clct1_real[0]; // CLCT1 vpf
+  //wire clct0_exists = clct0_real[0]; // CLCT0 vpf
+  //wire clct1_exists = clct1_real[0]; // CLCT1 vpf
 
-  wire clct0_cfeb456 = clct0_real[15]; // CLCT0 is on CFEB4-6 hence ME1A
-  wire clct1_cfeb456 = clct1_real[15]; // CLCT1 is on CFEB4-6 hence ME1A
+  //wire clct0_cfeb456 = clct0_real[15]; // CLCT0 is on CFEB4-6 hence ME1A
+  //wire clct1_cfeb456 = clct1_real[15]; // CLCT1 is on CFEB4-6 hence ME1A
 
-  wire   kill_clct0 = clct0_cfeb456 && kill_me1a_clcts;  // Delete CLCT0 from ME1A
-  wire   kill_clct1 = clct1_cfeb456 && kill_me1a_clcts;  // Delete CLCT1 from ME1A
+  //wire   kill_clct0 = clct0_cfeb456 && kill_me1a_clcts;  // Delete CLCT0 from ME1A
+  //wire   kill_clct1 = clct1_cfeb456 && kill_me1a_clcts;  // Delete CLCT1 from ME1A
+  wire kill_clct0 = 0;
+  wire kill_clct1 = 0;
   assign kill_trig  =    ((kill_clct0 && clct0_exists) && (kill_clct1 && clct1_exists))  // Kill both clcts
                       || ((kill_clct0 && clct0_exists) && !clct1_exists)
                       || ((kill_clct1 && clct1_exists) && !clct0_exists);

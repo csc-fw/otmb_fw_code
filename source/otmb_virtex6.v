@@ -183,7 +183,7 @@
 //  Array Size Declarations
 //-------------------------------------------------------------------------------------------------------------------
 // CFEB Constants
-  parameter MXCFEB    =   7;        // Number of CFEBs  on CSC
+  parameter MXCFEB    =   5;        // Number of CFEBs  on CSC
   parameter MXCFEBB    =  3;        // Number of CFEB ID bits
   parameter MXLY      =  6;        // Number Layers in CSC
   parameter MXCELL    =  3;        // Pattern cell width in 1/2-strips
@@ -191,11 +191,11 @@
 
   parameter MXMUX      =  24;        // Number of multiplexed CFEB bits
   parameter MXDS      =  8;        // Number of DiStrips   per layer
-  parameter MXDSX      =  MXCFEB*MXDS;  // Number of DiStrips   per layer on 7 CFEBs
+  parameter MXDSX      =  MXCFEB*MXDS;  // Number of DiStrips   per layer on 5 CFEBs
   parameter MXHS      =  32;        // Number of 1/2-Strips per layer
-  parameter MXHSX      =  MXCFEB*MXHS;  // Number of 1/2-Strips per layer on 7 CFEBs
+  parameter MXHSX      =  MXCFEB*MXHS;  // Number of 1/2-Strips per layer on 5 CFEBs
   parameter MXKEY      =  MXHS;      // Number of Key 1/2-strips
-  parameter MXKEYB    =  5;        // Number of key bits
+  parameter MXKEYB    =  5;        // Number of key bits on one CFEB
   parameter MXTR      =  MXMUX*2;    // Number of Triad bits per CFEB
 
 // CFEB Raw hits RAM parameters
@@ -478,6 +478,7 @@
 //-------------------------------------------------------------------------------------------------------------------
 // Phaser VME control/status ports
   //  parameter MXDPS=9;  // JRG: UCLA sets to 9, I prefer 4 to save BUFGs.  2 ALCT + 7 DCFEBs
+  //after JRG comment. ME1/1->MEX/1, in principle, we could reduce MXDPS from 4 to 3 as MEX/1 (only 1) +  2 ALCT
   parameter MXDPS=4;  // JRG: UCLA sets to 9, I prefer 4 to save BUFGs.  2 ALCT + 1 DCFEB(me1/1b)+ 1 DCFEB(me1/1a)
 
   wire [MXDPS-1:0]  dps_fire;
@@ -863,15 +864,17 @@
 
 // Active CFEB(s) counters
   wire  [MXCNTVME-1:0] active_cfebs_event_counter;      // Any CFEB active flag sent to DMB
-  wire  [MXCNTVME-1:0] active_cfebs_me1a_event_counter; // ME1a CFEB active flag sent to DMB
-  wire  [MXCNTVME-1:0] active_cfebs_me1b_event_counter; // ME1b CFEB active flag sent to DMB
+  //Tao, ME1/1->MEX/1
+  //wire  [MXCNTVME-1:0] active_cfebs_me1a_event_counter; // ME1a CFEB active flag sent to DMB
+  //wire  [MXCNTVME-1:0] active_cfebs_me1b_event_counter; // ME1b CFEB active flag sent to DMB
   wire  [MXCNTVME-1:0] active_cfeb0_event_counter;      // CFEB0 active flag sent to DMB
   wire  [MXCNTVME-1:0] active_cfeb1_event_counter;      // CFEB1 active flag sent to DMB
   wire  [MXCNTVME-1:0] active_cfeb2_event_counter;      // CFEB2 active flag sent to DMB
   wire  [MXCNTVME-1:0] active_cfeb3_event_counter;      // CFEB3 active flag sent to DMB
   wire  [MXCNTVME-1:0] active_cfeb4_event_counter;      // CFEB4 active flag sent to DMB
-  wire  [MXCNTVME-1:0] active_cfeb5_event_counter;      // CFEB5 active flag sent to DMB
-  wire  [MXCNTVME-1:0] active_cfeb6_event_counter;      // CFEB6 active flag sent to DMB
+  //Tao, 7DCFEB->5DCFEB
+  //wire  [MXCNTVME-1:0] active_cfeb5_event_counter;      // CFEB5 active flag sent to DMB
+  //wire  [MXCNTVME-1:0] active_cfeb6_event_counter;      // CFEB6 active flag sent to DMB
 
 // CFEB injector RAM map 2D arrays into 1D for ALCT
   wire  [MXCFEB-1:0]  inj_ramout_pulse;
@@ -1058,16 +1061,19 @@
   wire        cfeb2_rxd_posneg;
   wire        cfeb3_rxd_posneg;
   wire        cfeb4_rxd_posneg;
-  wire        cfeb5_rxd_posneg;
-  wire        cfeb6_rxd_posneg;
+  //Tao, 7DCFEB->5DCFEB
+  //wire        cfeb5_rxd_posneg;
+  wire        cfeb6_rxd_posneg;//used for whole MEX/1, Tao
 
   assign cfeb_rxd_posneg[0] = cfeb6_rxd_posneg;  // JGhere: use B-side value "cfeb6"
   assign cfeb_rxd_posneg[1] = cfeb6_rxd_posneg;  //   another B-side
   assign cfeb_rxd_posneg[2] = cfeb6_rxd_posneg;  //   another B-side
   assign cfeb_rxd_posneg[3] = cfeb6_rxd_posneg;  //   another B-side
-  assign cfeb_rxd_posneg[4] = cfeb5_rxd_posneg;  // JGhere: use A-side value "cfeb5"
-  assign cfeb_rxd_posneg[5] = cfeb5_rxd_posneg;  //   another A-side
-  assign cfeb_rxd_posneg[6] = cfeb5_rxd_posneg;  //   another A-side
+  assign cfeb_rxd_posneg[4] = cfeb6_rxd_posneg;  // 
+  //Tao, 7DCFEB->5DCFEB
+  //assign cfeb_rxd_posneg[4] = cfeb5_rxd_posneg;  // JGhere: use A-side value "cfeb5"
+  //assign cfeb_rxd_posneg[5] = cfeb5_rxd_posneg;  //   another A-side
+  //assign cfeb_rxd_posneg[6] = cfeb5_rxd_posneg;  //   another A-side
 
 // Injector Ports
   wire  [MXCFEB-1:0]  mask_all;
@@ -1167,14 +1173,15 @@
   wire  [MXCFEB-1:0]  link_good;                     // link stability monitor: always good, no errors since last resync
   wire  [MXCFEB-1:0]  link_bad;                      // link stability monitor: errors happened over 100 times
   wire  [MXCFEB-1:0]  ready_phaser;                  // phaser dps done and ready status
-  wire 	ready_phaser_a, ready_phaser_b, auto_gtx_reset;
+  //Tao, comment out ready_phaser_a, only use ready_phaser_b for MEX/1
+  wire 	ready_phaser_b, auto_gtx_reset;
    
   reg 	     gtx_wait       = 1'b1;
   reg [15:0] gtx_wait_count = 0;
 
   always @(posedge clock) // things that use lhc_clk wo/Reset
   begin
-    if ( gtx_wait & (ready_phaser_a | ready_phaser_b) ) gtx_wait_count <= gtx_wait_count + 1'b1;
+    if ( gtx_wait & (ready_phaser_b) ) gtx_wait_count <= gtx_wait_count + 1'b1;
     gtx_wait <= !gtx_wait_count[14];  // goes to zero after 409 usec
   end
 
@@ -1182,9 +1189,10 @@
   assign  ready_phaser[1] = !gtx_wait & ready_phaser_b;
   assign  ready_phaser[2] = !gtx_wait & ready_phaser_b;
   assign  ready_phaser[3] = !gtx_wait & ready_phaser_b;
-  assign  ready_phaser[4] = !gtx_wait & ready_phaser_a;
-  assign  ready_phaser[5] = !gtx_wait & ready_phaser_a;
-  assign  ready_phaser[6] = !gtx_wait & ready_phaser_a;
+  assign  ready_phaser[4] = !gtx_wait & ready_phaser_b;
+  //assign  ready_phaser[4] = !gtx_wait & ready_phaser_a;
+  //assign  ready_phaser[5] = !gtx_wait & ready_phaser_a;
+  //assign  ready_phaser[6] = !gtx_wait & ready_phaser_a;
 
 //-------------------------------------------------------------------------------------------------------------------
 // CFEB Instantiation
@@ -1396,21 +1404,23 @@
   .cfeb4_ly4hs  (cfeb_ly4hs[4][MXHS-1:0]),        // In  1/2-strip pulses
   .cfeb4_ly5hs  (cfeb_ly5hs[4][MXHS-1:0]),        // In  1/2-strip pulses
 
-  .cfeb5_ly0hs  (cfeb_ly0hs[5][MXHS-1:0]),        // In  1/2-strip pulses
-  .cfeb5_ly1hs  (cfeb_ly1hs[5][MXHS-1:0]),        // In  1/2-strip pulses
-  .cfeb5_ly2hs  (cfeb_ly2hs[5][MXHS-1:0]),        // In  1/2-strip pulses
-  .cfeb5_ly3hs  (cfeb_ly3hs[5][MXHS-1:0]),        // In  1/2-strip pulses
-  .cfeb5_ly4hs  (cfeb_ly4hs[5][MXHS-1:0]),        // In  1/2-strip pulses
-  .cfeb5_ly5hs  (cfeb_ly5hs[5][MXHS-1:0]),        // In  1/2-strip pulses
+  //Tao, 7DCFEBs->5DCFEBs
+  //.cfeb5_ly0hs  (cfeb_ly0hs[5][MXHS-1:0]),        // In  1/2-strip pulses
+  //.cfeb5_ly1hs  (cfeb_ly1hs[5][MXHS-1:0]),        // In  1/2-strip pulses
+  //.cfeb5_ly2hs  (cfeb_ly2hs[5][MXHS-1:0]),        // In  1/2-strip pulses
+  //.cfeb5_ly3hs  (cfeb_ly3hs[5][MXHS-1:0]),        // In  1/2-strip pulses
+  //.cfeb5_ly4hs  (cfeb_ly4hs[5][MXHS-1:0]),        // In  1/2-strip pulses
+  //.cfeb5_ly5hs  (cfeb_ly5hs[5][MXHS-1:0]),        // In  1/2-strip pulses
 
-  .cfeb6_ly0hs  (cfeb_ly0hs[6][MXHS-1:0]),        // In  1/2-strip pulses
-  .cfeb6_ly1hs  (cfeb_ly1hs[6][MXHS-1:0]),        // In  1/2-strip pulses
-  .cfeb6_ly2hs  (cfeb_ly2hs[6][MXHS-1:0]),        // In  1/2-strip pulses
-  .cfeb6_ly3hs  (cfeb_ly3hs[6][MXHS-1:0]),        // In  1/2-strip pulses
-  .cfeb6_ly4hs  (cfeb_ly4hs[6][MXHS-1:0]),        // In  1/2-strip pulses
-  .cfeb6_ly5hs  (cfeb_ly5hs[6][MXHS-1:0]),        // In  1/2-strip pulses
+  //.cfeb6_ly0hs  (cfeb_ly0hs[6][MXHS-1:0]),        // In  1/2-strip pulses
+  //.cfeb6_ly1hs  (cfeb_ly1hs[6][MXHS-1:0]),        // In  1/2-strip pulses
+  //.cfeb6_ly2hs  (cfeb_ly2hs[6][MXHS-1:0]),        // In  1/2-strip pulses
+  //.cfeb6_ly3hs  (cfeb_ly3hs[6][MXHS-1:0]),        // In  1/2-strip pulses
+  //.cfeb6_ly4hs  (cfeb_ly4hs[6][MXHS-1:0]),        // In  1/2-strip pulses
+  //.cfeb6_ly5hs  (cfeb_ly5hs[6][MXHS-1:0]),        // In  1/2-strip pulses
 
 // CSC Orientation Ports
+// Tao, csc_me1ab,reverse_hs_me1a, reverse_hs_me1b: not used but kept for MEx/1
   .csc_type        (csc_type[3:0]),   // Out  Firmware compile type
   .csc_me1ab       (csc_me1ab),       // Out  1=ME1A or ME1B CSC type
   .stagger_hs_csc  (stagger_hs_csc),  // Out  1=Staggered CSC, 0=non-staggered
@@ -2140,15 +2150,17 @@
   
 // Active CFEB(s) counters
   .active_cfebs_event_counter      (active_cfebs_event_counter[MXCNTVME-1:0]),      // Out
-  .active_cfebs_me1a_event_counter (active_cfebs_me1a_event_counter[MXCNTVME-1:0]), // Out
-  .active_cfebs_me1b_event_counter (active_cfebs_me1b_event_counter[MXCNTVME-1:0]), // Out
+  //Tao, ME1/1->MEX/1
+  //.active_cfebs_me1a_event_counter (active_cfebs_me1a_event_counter[MXCNTVME-1:0]), // Out
+  //.active_cfebs_me1b_event_counter (active_cfebs_me1b_event_counter[MXCNTVME-1:0]), // Out
   .active_cfeb0_event_counter      (active_cfeb0_event_counter[MXCNTVME-1:0]),      // Out
   .active_cfeb1_event_counter      (active_cfeb1_event_counter[MXCNTVME-1:0]),      // Out
   .active_cfeb2_event_counter      (active_cfeb2_event_counter[MXCNTVME-1:0]),      // Out
   .active_cfeb3_event_counter      (active_cfeb3_event_counter[MXCNTVME-1:0]),      // Out
   .active_cfeb4_event_counter      (active_cfeb4_event_counter[MXCNTVME-1:0]),      // Out
-  .active_cfeb5_event_counter      (active_cfeb5_event_counter[MXCNTVME-1:0]),      // Out
-  .active_cfeb6_event_counter      (active_cfeb6_event_counter[MXCNTVME-1:0]),      // Out
+  //Tao, 7DCFEB->5DCFEB
+  //.active_cfeb5_event_counter      (active_cfeb5_event_counter[MXCNTVME-1:0]),      // Out
+  //.active_cfeb6_event_counter      (active_cfeb6_event_counter[MXCNTVME-1:0]),      // Out
   
 // Sequencer Header Counters
   .hdr_clear_on_resync (hdr_clear_on_resync),           // In  Clear header counters on ttc_resync
@@ -2407,8 +2419,9 @@
   .fifo2_rdata_cfeb  (fifo_rdata[2][RAM_WIDTH-1:0]),    // In  FIFO RAM read data
   .fifo3_rdata_cfeb  (fifo_rdata[3][RAM_WIDTH-1:0]),    // In  FIFO RAM read data
   .fifo4_rdata_cfeb  (fifo_rdata[4][RAM_WIDTH-1:0]),    // In  FIFO RAM read data
-  .fifo5_rdata_cfeb  (fifo_rdata[5][RAM_WIDTH-1:0]),    // In  FIFO RAM read data
-  .fifo6_rdata_cfeb  (fifo_rdata[6][RAM_WIDTH-1:0]),    // In  FIFO RAM read data
+  //Tao, 7DCFEB->5DCFEB
+  //.fifo5_rdata_cfeb  (fifo_rdata[5][RAM_WIDTH-1:0]),    // In  FIFO RAM read data
+  //.fifo6_rdata_cfeb  (fifo_rdata[6][RAM_WIDTH-1:0]),    // In  FIFO RAM read data
 
 // CFEB Blockedbits Data Ports
   .cfeb0_blockedbits    (cfeb_blockedbits[0]),      // In  1=CFEB rx bit blocked by hcm or went bad, packed
@@ -2416,8 +2429,9 @@
   .cfeb2_blockedbits    (cfeb_blockedbits[2]),      // In  1=CFEB rx bit blocked by hcm or went bad, packed
   .cfeb3_blockedbits    (cfeb_blockedbits[3]),      // In  1=CFEB rx bit blocked by hcm or went bad, packed
   .cfeb4_blockedbits    (cfeb_blockedbits[4]),      // In  1=CFEB rx bit blocked by hcm or went bad, packed
-  .cfeb5_blockedbits    (cfeb_blockedbits[5]),      // In  1=CFEB rx bit blocked by hcm or went bad, packed
-  .cfeb6_blockedbits    (cfeb_blockedbits[6]),      // In  1=CFEB rx bit blocked by hcm or went bad, packed
+  //Tao, 7DCFEB->5DCFEB
+  //.cfeb5_blockedbits    (cfeb_blockedbits[5]),      // In  1=CFEB rx bit blocked by hcm or went bad, packed
+  //.cfeb6_blockedbits    (cfeb_blockedbits[6]),      // In  1=CFEB rx bit blocked by hcm or went bad, packed
 
 // RPC Raw hits Data Ports
   .fifo0_rdata_rpc  (fifo0_rdata_rpc[RAM_WIDTH-1+4:0]),  // In  FIFO RAM read data, rpc
@@ -2510,8 +2524,8 @@
   .parity_err_cfeb2  (parity_err_cfeb[2][MXLY-1:0]),  // In  CFEB raw hits RAM parity errors
   .parity_err_cfeb3  (parity_err_cfeb[3][MXLY-1:0]),  // In  CFEB raw hits RAM parity errors
   .parity_err_cfeb4  (parity_err_cfeb[4][MXLY-1:0]),  // In  CFEB raw hits RAM parity errors
-  .parity_err_cfeb5  (parity_err_cfeb[5][MXLY-1:0]),  // In  CFEB raw hits RAM parity errors
-  .parity_err_cfeb6  (parity_err_cfeb[6][MXLY-1:0]),  // In  CFEB raw hits RAM parity errors
+  //.parity_err_cfeb5  (parity_err_cfeb[5][MXLY-1:0]),  // In  CFEB raw hits RAM parity errors
+  //.parity_err_cfeb6  (parity_err_cfeb[6][MXLY-1:0]),  // In  CFEB raw hits RAM parity errors
   .parity_err_rpc    (parity_err_rpc[4:0]),      // In  RPC  raw hits RAM parity errors
   .parity_err_mini  (parity_err_mini[1:0]),      // In  Miniscope     RAM parity errors
 
@@ -3308,19 +3322,20 @@
       .cfeb4_ly4_hcm      (cfeb_ly4_hcm[4][MXDS-1:0]),  // Out  1=enable DiStrip
       .cfeb4_ly5_hcm      (cfeb_ly5_hcm[4][MXDS-1:0]),  // Out  1=enable DiStrip
 
-      .cfeb5_ly0_hcm      (cfeb_ly0_hcm[5][MXDS-1:0]),  // Out  1=enable DiStrip
-      .cfeb5_ly1_hcm      (cfeb_ly1_hcm[5][MXDS-1:0]),  // Out  1=enable DiStrip
-      .cfeb5_ly2_hcm      (cfeb_ly2_hcm[5][MXDS-1:0]),  // Out  1=enable DiStrip
-      .cfeb5_ly3_hcm      (cfeb_ly3_hcm[5][MXDS-1:0]),  // Out  1=enable DiStrip
-      .cfeb5_ly4_hcm      (cfeb_ly4_hcm[5][MXDS-1:0]),  // Out  1=enable DiStrip
-      .cfeb5_ly5_hcm      (cfeb_ly5_hcm[5][MXDS-1:0]),  // Out  1=enable DiStrip
+       //Tao, 7DCFEB->5DCFEB
+      //.cfeb5_ly0_hcm      (cfeb_ly0_hcm[5][MXDS-1:0]),  // Out  1=enable DiStrip
+      //.cfeb5_ly1_hcm      (cfeb_ly1_hcm[5][MXDS-1:0]),  // Out  1=enable DiStrip
+      //.cfeb5_ly2_hcm      (cfeb_ly2_hcm[5][MXDS-1:0]),  // Out  1=enable DiStrip
+      //.cfeb5_ly3_hcm      (cfeb_ly3_hcm[5][MXDS-1:0]),  // Out  1=enable DiStrip
+      //.cfeb5_ly4_hcm      (cfeb_ly4_hcm[5][MXDS-1:0]),  // Out  1=enable DiStrip
+      //.cfeb5_ly5_hcm      (cfeb_ly5_hcm[5][MXDS-1:0]),  // Out  1=enable DiStrip
 
-      .cfeb6_ly0_hcm      (cfeb_ly0_hcm[6][MXDS-1:0]),  // Out  1=enable DiStrip
-      .cfeb6_ly1_hcm      (cfeb_ly1_hcm[6][MXDS-1:0]),  // Out  1=enable DiStrip
-      .cfeb6_ly2_hcm      (cfeb_ly2_hcm[6][MXDS-1:0]),  // Out  1=enable DiStrip
-      .cfeb6_ly3_hcm      (cfeb_ly3_hcm[6][MXDS-1:0]),  // Out  1=enable DiStrip
-      .cfeb6_ly4_hcm      (cfeb_ly4_hcm[6][MXDS-1:0]),  // Out  1=enable DiStrip
-      .cfeb6_ly5_hcm      (cfeb_ly5_hcm[6][MXDS-1:0]),  // Out  1=enable DiStrip
+      //.cfeb6_ly0_hcm      (cfeb_ly0_hcm[6][MXDS-1:0]),  // Out  1=enable DiStrip
+      //.cfeb6_ly1_hcm      (cfeb_ly1_hcm[6][MXDS-1:0]),  // Out  1=enable DiStrip
+      //.cfeb6_ly2_hcm      (cfeb_ly2_hcm[6][MXDS-1:0]),  // Out  1=enable DiStrip
+      //.cfeb6_ly3_hcm      (cfeb_ly3_hcm[6][MXDS-1:0]),  // Out  1=enable DiStrip
+      //.cfeb6_ly4_hcm      (cfeb_ly4_hcm[6][MXDS-1:0]),  // Out  1=enable DiStrip
+      //.cfeb6_ly5_hcm      (cfeb_ly5_hcm[6][MXDS-1:0]),  // Out  1=enable DiStrip
 
       // Bad CFEB rx bit detection
       .bcb_read_enable    (bcb_read_enable),          // Out  Enable blocked bits in readout
@@ -3365,19 +3380,20 @@
       .cfeb4_ly4_badbits    (cfeb_ly4_badbits[4][MXDS-1:0]),  // In  1=CFEB rx bit went bad
       .cfeb4_ly5_badbits    (cfeb_ly5_badbits[4][MXDS-1:0]),  // In  1=CFEB rx bit went bad
 
-      .cfeb5_ly0_badbits    (cfeb_ly0_badbits[5][MXDS-1:0]),  // In  1=CFEB rx bit went bad
-      .cfeb5_ly1_badbits    (cfeb_ly1_badbits[5][MXDS-1:0]),  // In  1=CFEB rx bit went bad
-      .cfeb5_ly2_badbits    (cfeb_ly2_badbits[5][MXDS-1:0]),  // In  1=CFEB rx bit went bad
-      .cfeb5_ly3_badbits    (cfeb_ly3_badbits[5][MXDS-1:0]),  // In  1=CFEB rx bit went bad
-      .cfeb5_ly4_badbits    (cfeb_ly4_badbits[5][MXDS-1:0]),  // In  1=CFEB rx bit went bad
-      .cfeb5_ly5_badbits    (cfeb_ly5_badbits[5][MXDS-1:0]),  // In  1=CFEB rx bit went bad
+  //Tao, 7DCFEB->5DCFEB
+      //.cfeb5_ly0_badbits    (cfeb_ly0_badbits[5][MXDS-1:0]),  // In  1=CFEB rx bit went bad
+      //.cfeb5_ly1_badbits    (cfeb_ly1_badbits[5][MXDS-1:0]),  // In  1=CFEB rx bit went bad
+      //.cfeb5_ly2_badbits    (cfeb_ly2_badbits[5][MXDS-1:0]),  // In  1=CFEB rx bit went bad
+      //.cfeb5_ly3_badbits    (cfeb_ly3_badbits[5][MXDS-1:0]),  // In  1=CFEB rx bit went bad
+      //.cfeb5_ly4_badbits    (cfeb_ly4_badbits[5][MXDS-1:0]),  // In  1=CFEB rx bit went bad
+      //.cfeb5_ly5_badbits    (cfeb_ly5_badbits[5][MXDS-1:0]),  // In  1=CFEB rx bit went bad
 
-      .cfeb6_ly0_badbits    (cfeb_ly0_badbits[6][MXDS-1:0]),  // In  1=CFEB rx bit went bad
-      .cfeb6_ly1_badbits    (cfeb_ly1_badbits[6][MXDS-1:0]),  // In  1=CFEB rx bit went bad
-      .cfeb6_ly2_badbits    (cfeb_ly2_badbits[6][MXDS-1:0]),  // In  1=CFEB rx bit went bad
-      .cfeb6_ly3_badbits    (cfeb_ly3_badbits[6][MXDS-1:0]),  // In  1=CFEB rx bit went bad
-      .cfeb6_ly4_badbits    (cfeb_ly4_badbits[6][MXDS-1:0]),  // In  1=CFEB rx bit went bad
-      .cfeb6_ly5_badbits    (cfeb_ly5_badbits[6][MXDS-1:0]),  // In  1=CFEB rx bit went bad
+      //.cfeb6_ly0_badbits    (cfeb_ly0_badbits[6][MXDS-1:0]),  // In  1=CFEB rx bit went bad
+      //.cfeb6_ly1_badbits    (cfeb_ly1_badbits[6][MXDS-1:0]),  // In  1=CFEB rx bit went bad
+      //.cfeb6_ly2_badbits    (cfeb_ly2_badbits[6][MXDS-1:0]),  // In  1=CFEB rx bit went bad
+      //.cfeb6_ly3_badbits    (cfeb_ly3_badbits[6][MXDS-1:0]),  // In  1=CFEB rx bit went bad
+      //.cfeb6_ly4_badbits    (cfeb_ly4_badbits[6][MXDS-1:0]),  // In  1=CFEB rx bit went bad
+      //.cfeb6_ly5_badbits    (cfeb_ly5_badbits[6][MXDS-1:0]),  // In  1=CFEB rx bit went bad
 
       // Sequencer Ports: External Trigger Enables
       .clct_pat_trig_en    (clct_pat_trig_en),          // Out  Allow CLCT Pattern pre-triggers
@@ -3730,15 +3746,17 @@
       
       // Active CFEB(s) counters
       .active_cfebs_event_counter      (active_cfebs_event_counter[MXCNTVME-1:0]),      // In
-      .active_cfebs_me1a_event_counter (active_cfebs_me1a_event_counter[MXCNTVME-1:0]), // In
-      .active_cfebs_me1b_event_counter (active_cfebs_me1b_event_counter[MXCNTVME-1:0]), // In
+    //Tao, ME1/1->MEX/1
+      //.active_cfebs_me1a_event_counter (active_cfebs_me1a_event_counter[MXCNTVME-1:0]), // In
+      //.active_cfebs_me1b_event_counter (active_cfebs_me1b_event_counter[MXCNTVME-1:0]), // In
       .active_cfeb0_event_counter      (active_cfeb0_event_counter[MXCNTVME-1:0]),      // In
       .active_cfeb1_event_counter      (active_cfeb1_event_counter[MXCNTVME-1:0]),      // In
       .active_cfeb2_event_counter      (active_cfeb2_event_counter[MXCNTVME-1:0]),      // In
       .active_cfeb3_event_counter      (active_cfeb3_event_counter[MXCNTVME-1:0]),      // In
       .active_cfeb4_event_counter      (active_cfeb4_event_counter[MXCNTVME-1:0]),      // In
-      .active_cfeb5_event_counter      (active_cfeb5_event_counter[MXCNTVME-1:0]),      // In
-      .active_cfeb6_event_counter      (active_cfeb6_event_counter[MXCNTVME-1:0]),      // In
+  //Tao, 7DCFEB->5DCFEB
+      //.active_cfeb5_event_counter      (active_cfeb5_event_counter[MXCNTVME-1:0]),      // In
+      //.active_cfeb6_event_counter      (active_cfeb6_event_counter[MXCNTVME-1:0]),      // In
       
       // CSC Orientation Ports
       .csc_type        (csc_type[3:0]),   // In  Firmware compile type
@@ -3787,7 +3805,7 @@
       .cfeb2_rxd_posneg    (cfeb2_rxd_posneg),          // Out  CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
       .cfeb3_rxd_posneg    (cfeb3_rxd_posneg),          // Out  CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
       .cfeb4_rxd_posneg    (cfeb4_rxd_posneg),          // Out  CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
-      .cfeb5_rxd_posneg    (cfeb5_rxd_posneg),          // Out  CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
+      //.cfeb5_rxd_posneg    (cfeb5_rxd_posneg),          // Out  CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
       .cfeb6_rxd_posneg    (cfeb6_rxd_posneg),          // Out  CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
 
       // Phaser VME control/status ports
@@ -3879,10 +3897,12 @@
       .gtx_rx_err_count2    (gtx_rx_err_count[2][15:0]),    // In  Error count on this fiber channel
       .gtx_rx_err_count3    (gtx_rx_err_count[3][15:0]),    // In  Error count on this fiber channel
       .gtx_rx_err_count4    (gtx_rx_err_count[4][15:0]),    // In  Error count on this fiber channel
-      .gtx_rx_err_count5    (gtx_rx_err_count[5][15:0]),    // In  Error count on this fiber channel
-      .gtx_rx_err_count6    (gtx_rx_err_count[6][15:0]),    // In  Error count on this fiber channel
+      //Tao, 7DCFEB->5DCFEB
+      //.gtx_rx_err_count5    (gtx_rx_err_count[5][15:0]),    // In  Error count on this fiber channel
+      //.gtx_rx_err_count6    (gtx_rx_err_count[6][15:0]),    // In  Error count on this fiber channel
 
-      .comp_phaser_a_ready (ready_phaser_a),   // Out
+      //Tao, ME1/1->MEX/1
+      //.comp_phaser_a_ready (ready_phaser_a),   // Out
       .comp_phaser_b_ready (ready_phaser_b),  // Out
       .auto_gtx_reset (auto_gtx_reset),   // Out
 

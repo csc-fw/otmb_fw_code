@@ -874,15 +874,17 @@
 
 // Active CFEB(s) counters
   active_cfebs_event_counter,      // Any CFEB active flag sent to DMB
-  active_cfebs_me1a_event_counter, // ME1a CFEB active flag sent to DMB
-  active_cfebs_me1b_event_counter, // ME1b CFEB active flag sent to DMB
+  //Tao, ME1/1->MEX/1
+  //active_cfebs_me1a_event_counter, // ME1a CFEB active flag sent to DMB
+  //active_cfebs_me1b_event_counter, // ME1b CFEB active flag sent to DMB
   active_cfeb0_event_counter,      // CFEB0 active flag sent to DMB
   active_cfeb1_event_counter,      // CFEB1 active flag sent to DMB
   active_cfeb2_event_counter,      // CFEB2 active flag sent to DMB
   active_cfeb3_event_counter,      // CFEB3 active flag sent to DMB
   active_cfeb4_event_counter,      // CFEB4 active flag sent to DMB
-  active_cfeb5_event_counter,      // CFEB5 active flag sent to DMB
-  active_cfeb6_event_counter,      // CFEB6 active flag sent to DMB
+  //Tao, ME1/1->MEX/1
+  //active_cfeb5_event_counter,      // CFEB5 active flag sent to DMB
+  //active_cfeb6_event_counter,      // CFEB6 active flag sent to DMB
 
 // Parity Errors
   perr_pulse,
@@ -986,7 +988,7 @@
 //------------------------------------------------------------------------------------------------------------------
 // Constants:
 //------------------------------------------------------------------------------------------------------------------
-  parameter MXCFEB       = 7;           // Number CFEBs
+  parameter MXCFEB       = 5;           // Number CFEBs
   parameter MXCFEBB      = 3;           // Number CFEB ID bits
   parameter MXLY         = 6;           // Number Layers in CSC
   parameter MXDS         = 8;           // Number of DiStrips per layer
@@ -1571,15 +1573,16 @@
 
 // Active CFEB(s) counters
   output  [MXCNTVME-1:0] active_cfebs_event_counter;      // Any CFEB active flag sent to DMB
-  output  [MXCNTVME-1:0] active_cfebs_me1a_event_counter; // ME1a CFEB active flag sent to DMB
-  output  [MXCNTVME-1:0] active_cfebs_me1b_event_counter; // ME1b CFEB active flag sent to DMB
+  //Tao, ME1/1->MEX/1
+  //output  [MXCNTVME-1:0] active_cfebs_me1a_event_counter; // ME1a CFEB active flag sent to DMB
+  //output  [MXCNTVME-1:0] active_cfebs_me1b_event_counter; // ME1b CFEB active flag sent to DMB
   output  [MXCNTVME-1:0] active_cfeb0_event_counter;      // CFEB0 active flag sent to DMB
   output  [MXCNTVME-1:0] active_cfeb1_event_counter;      // CFEB1 active flag sent to DMB
   output  [MXCNTVME-1:0] active_cfeb2_event_counter;      // CFEB2 active flag sent to DMB
   output  [MXCNTVME-1:0] active_cfeb3_event_counter;      // CFEB3 active flag sent to DMB
   output  [MXCNTVME-1:0] active_cfeb4_event_counter;      // CFEB4 active flag sent to DMB
-  output  [MXCNTVME-1:0] active_cfeb5_event_counter;      // CFEB5 active flag sent to DMB
-  output  [MXCNTVME-1:0] active_cfeb6_event_counter;      // CFEB6 active flag sent to DMB
+  //output  [MXCNTVME-1:0] active_cfeb5_event_counter;      // CFEB5 active flag sent to DMB
+  //output  [MXCNTVME-1:0] active_cfeb6_event_counter;      // CFEB6 active flag sent to DMB
 
 // Parity Errors
   input                perr_pulse;   // Parity error pulse for counting
@@ -2001,58 +2004,65 @@
 
 // Active CFEB(s) counters (YP January 2016)
   reg   [MXCNTVME-1:0]  active_cfebs_event_counter      = 0; // Any CFEB active flag sent to DMB
-  reg   [MXCNTVME-1:0]  active_cfebs_me1a_event_counter = 0; // ME1a CFEB active flag sent to DMB
-  reg   [MXCNTVME-1:0]  active_cfebs_me1b_event_counter = 0; // ME1a CFEB active flag sent to DMB
+  //Tao, ME1/1->MEX/1
+  //reg   [MXCNTVME-1:0]  active_cfebs_me1a_event_counter = 0; // ME1a CFEB active flag sent to DMB
+  //reg   [MXCNTVME-1:0]  active_cfebs_me1b_event_counter = 0; // ME1a CFEB active flag sent to DMB
   reg   [MXCNTVME-1:0]  active_cfeb0_event_counter      = 0; // CFEB0 active flag sent to DMB
   reg   [MXCNTVME-1:0]  active_cfeb1_event_counter      = 0; // CFEB1 active flag sent to DMB
   reg   [MXCNTVME-1:0]  active_cfeb2_event_counter      = 0; // CFEB2 active flag sent to DMB
   reg   [MXCNTVME-1:0]  active_cfeb3_event_counter      = 0; // CFEB3 active flag sent to DMB
   reg   [MXCNTVME-1:0]  active_cfeb4_event_counter      = 0; // CFEB4 active flag sent to DMB
-  reg   [MXCNTVME-1:0]  active_cfeb5_event_counter      = 0; // CFEB5 active flag sent to DMB
-  reg   [MXCNTVME-1:0]  active_cfeb6_event_counter      = 0; // CFEB6 active flag sent to DMB
+  //Tao, ME1/1->MEX/1
+  //reg   [MXCNTVME-1:0]  active_cfeb5_event_counter      = 0; // CFEB5 active flag sent to DMB
+  //reg   [MXCNTVME-1:0]  active_cfeb6_event_counter      = 0; // CFEB6 active flag sent to DMB
 
   wire active_cfebs_event_counter_reset      = vme_cnt_reset;
-  wire active_cfebs_me1a_event_counter_reset = vme_cnt_reset;
-  wire active_cfebs_me1b_event_counter_reset = vme_cnt_reset;
+  //Tao, ME1/1->MEX/1
+  //wire active_cfebs_me1a_event_counter_reset = vme_cnt_reset;
+  //wire active_cfebs_me1b_event_counter_reset = vme_cnt_reset;
   wire active_cfeb0_event_counter_reset      = vme_cnt_reset;
   wire active_cfeb1_event_counter_reset      = vme_cnt_reset;
   wire active_cfeb2_event_counter_reset      = vme_cnt_reset;
   wire active_cfeb3_event_counter_reset      = vme_cnt_reset;
   wire active_cfeb4_event_counter_reset      = vme_cnt_reset;
-  wire active_cfeb5_event_counter_reset      = vme_cnt_reset;
-  wire active_cfeb6_event_counter_reset      = vme_cnt_reset;
+  //Tao, ME1/1->MEX/1
+  //wire active_cfeb5_event_counter_reset      = vme_cnt_reset;
+  //wire active_cfeb6_event_counter_reset      = vme_cnt_reset;
   
   wire active_cfebs_event_counter_ovf      = (active_cfebs_event_counter      == {MXCNTVME{1'b1}});
-  wire active_cfebs_me1a_event_counter_ovf = (active_cfebs_me1a_event_counter == {MXCNTVME{1'b1}});
-  wire active_cfebs_me1b_event_counter_ovf = (active_cfebs_me1b_event_counter == {MXCNTVME{1'b1}});
+  //wire active_cfebs_me1a_event_counter_ovf = (active_cfebs_me1a_event_counter == {MXCNTVME{1'b1}});
+  //wire active_cfebs_me1b_event_counter_ovf = (active_cfebs_me1b_event_counter == {MXCNTVME{1'b1}});
   wire active_cfeb0_event_counter_ovf      = (active_cfeb0_event_counter      == {MXCNTVME{1'b1}});
   wire active_cfeb1_event_counter_ovf      = (active_cfeb1_event_counter      == {MXCNTVME{1'b1}});
   wire active_cfeb2_event_counter_ovf      = (active_cfeb2_event_counter      == {MXCNTVME{1'b1}});
   wire active_cfeb3_event_counter_ovf      = (active_cfeb3_event_counter      == {MXCNTVME{1'b1}});
   wire active_cfeb4_event_counter_ovf      = (active_cfeb4_event_counter      == {MXCNTVME{1'b1}});
-  wire active_cfeb5_event_counter_ovf      = (active_cfeb5_event_counter      == {MXCNTVME{1'b1}});
-  wire active_cfeb6_event_counter_ovf      = (active_cfeb6_event_counter      == {MXCNTVME{1'b1}});
+  //wire active_cfeb5_event_counter_ovf      = (active_cfeb5_event_counter      == {MXCNTVME{1'b1}});
+  //wire active_cfeb6_event_counter_ovf      = (active_cfeb6_event_counter      == {MXCNTVME{1'b1}});
   
   wire active_cfebs_event_counter_en      = (|active_feb_list) && !active_cfebs_event_counter_ovf;
-  wire active_cfebs_me1a_event_counter_en =  (|active_feb_list[6:4]) && !(|active_feb_list[3:0]) && !active_cfebs_me1a_event_counter_ovf; // Only ME1A was active
-  wire active_cfebs_me1b_event_counter_en = !(|active_feb_list[6:4]) &&  (|active_feb_list[3:0]) && !active_cfebs_me1b_event_counter_ovf; // Only ME1B was active
+  //Tao, ME1/1->MEX/1
+  //wire active_cfebs_me1a_event_counter_en =  (|active_feb_list[6:4]) && !(|active_feb_list[3:0]) && !active_cfebs_me1a_event_counter_ovf; // Only ME1A was active
+  //wire active_cfebs_me1b_event_counter_en = !(|active_feb_list[6:4]) &&  (|active_feb_list[3:0]) && !active_cfebs_me1b_event_counter_ovf; // Only ME1B was active
   wire active_cfeb0_event_counter_en      = active_feb_list[0] && !active_cfeb0_event_counter_ovf;
   wire active_cfeb1_event_counter_en      = active_feb_list[1] && !active_cfeb1_event_counter_ovf;
   wire active_cfeb2_event_counter_en      = active_feb_list[2] && !active_cfeb2_event_counter_ovf;
   wire active_cfeb3_event_counter_en      = active_feb_list[3] && !active_cfeb3_event_counter_ovf;
   wire active_cfeb4_event_counter_en      = active_feb_list[4] && !active_cfeb4_event_counter_ovf;
-  wire active_cfeb5_event_counter_en      = active_feb_list[5] && !active_cfeb5_event_counter_ovf;
-  wire active_cfeb6_event_counter_en      = active_feb_list[6] && !active_cfeb6_event_counter_ovf;
+  //Tao, ME1/1->MEX/1
+  //wire active_cfeb5_event_counter_en      = active_feb_list[5] && !active_cfeb5_event_counter_ovf;
+  //wire active_cfeb6_event_counter_en      = active_feb_list[6] && !active_cfeb6_event_counter_ovf;
   
   always @(posedge clock) begin
     if      (active_cfebs_event_counter_reset) active_cfebs_event_counter = cnt_fatzero;
     else if (active_cfebs_event_counter_en   ) active_cfebs_event_counter = active_cfebs_event_counter + 1'b1;
+  //Tao, ME1/1->MEX/1
     //
-    if      (active_cfebs_me1a_event_counter_reset) active_cfebs_me1a_event_counter = cnt_fatzero;
-    else if (active_cfebs_me1a_event_counter_en   ) active_cfebs_me1a_event_counter = active_cfebs_me1a_event_counter + 1'b1;
-    //
-    if      (active_cfebs_me1b_event_counter_reset) active_cfebs_me1b_event_counter = cnt_fatzero;
-    else if (active_cfebs_me1b_event_counter_en   ) active_cfebs_me1b_event_counter = active_cfebs_me1b_event_counter + 1'b1;
+    //if      (active_cfebs_me1a_event_counter_reset) active_cfebs_me1a_event_counter = cnt_fatzero;
+    //else if (active_cfebs_me1a_event_counter_en   ) active_cfebs_me1a_event_counter = active_cfebs_me1a_event_counter + 1'b1;
+    ////
+    //if      (active_cfebs_me1b_event_counter_reset) active_cfebs_me1b_event_counter = cnt_fatzero;
+    //else if (active_cfebs_me1b_event_counter_en   ) active_cfebs_me1b_event_counter = active_cfebs_me1b_event_counter + 1'b1;
     //
     if      (active_cfeb0_event_counter_reset) active_cfeb0_event_counter = cnt_fatzero;
     else if (active_cfeb0_event_counter_en   ) active_cfeb0_event_counter = active_cfeb0_event_counter + 1'b1;
@@ -2069,11 +2079,12 @@
     if      (active_cfeb4_event_counter_reset) active_cfeb4_event_counter = cnt_fatzero;
     else if (active_cfeb4_event_counter_en   ) active_cfeb4_event_counter = active_cfeb4_event_counter + 1'b1;
     //
-    if      (active_cfeb5_event_counter_reset) active_cfeb5_event_counter = cnt_fatzero;
-    else if (active_cfeb5_event_counter_en   ) active_cfeb5_event_counter = active_cfeb5_event_counter + 1'b1;
-    //
-    if      (active_cfeb6_event_counter_reset) active_cfeb6_event_counter = cnt_fatzero;
-    else if (active_cfeb6_event_counter_en   ) active_cfeb6_event_counter = active_cfeb6_event_counter + 1'b1;
+  //Tao, ME1/1->MEX/1
+    //if      (active_cfeb5_event_counter_reset) active_cfeb5_event_counter = cnt_fatzero;
+    //else if (active_cfeb5_event_counter_en   ) active_cfeb5_event_counter = active_cfeb5_event_counter + 1'b1;
+    ////
+    //if      (active_cfeb6_event_counter_reset) active_cfeb6_event_counter = cnt_fatzero;
+    //else if (active_cfeb6_event_counter_en   ) active_cfeb6_event_counter = active_cfeb6_event_counter + 1'b1;
   end
   
 // CLCT counter, presets at evcntres or resync
