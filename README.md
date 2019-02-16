@@ -49,7 +49,10 @@ On 2019 Feb. 14, A new branch called ME21ME31ME41fw_2019 is created on top of 20
   - in pattern finder, add stagger correction
   - in pattern finder, find valid pattern in whole chamber simultaneously with 40MHz
   - to sychronize 5 DCFEBs phase, the old code for ME1b is adopted:  dps3 and corresponding register setting for ME234
+
 Now the ME21ME31ME41fw_2019 branch still used type C for normal CSC and type D for reversed CSC,  and ucf file is not changed yet. 
+
+the ME21ME31ME41 version is expceted to be commissioned for ME21 at begining of Run3 and ME3141 since Run3
 
 
 
