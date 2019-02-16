@@ -35,11 +35,24 @@ parameter "GTX_POWER_SAVE" might be set:
 Default version is ISE 14.5 which allows to bypass the RX Delay Aligner,
 thus saving some power consumption.
 
-
-Starting fro 2016, Yuriy, Jason, Andrew and Tao worked on improving OTMB fw performance and several key new features were added:
- - localized dead time zone in CLCT pretriggering 
+### version control
+Starting from 2016, Yuriy, Jason, Andrew and Tao worked on improving OTMB fw performance and several key new features were added:
+ - localized dead time zone in cathode pretriggering 
  - CLCT reuse in ALCT-CLCT matching
 the branch of this version firmware is renamed to 2018OTMBfw on Tao's github
+
+
+In addition, starting from 2016, ISE 14.7 is used for compiling 
+
+On 2019 Feb. 14, A new branch called ME21ME31ME41fw_2019 is created on top of 2018OTMBfw:
+  - Removed ME1a related thing and changed 7DCEFBs to 5 DCFEBs
+  - in pattern finder, add stagger correction
+  - in pattern finder, find valid pattern in whole chamber simultaneously with 40MHz
+  - to sychronize 5 DCFEBs phase, the old code for ME1b is adopted:  dps3 and corresponding register setting for ME234
+Now the ME21ME31ME41fw_2019 branch still used type C for normal CSC and type D for reversed CSC,  and ucf file is not changed yet. 
+
+
+
 
 ### Simulation
 The folder source/simulation contains a test bench, as well as a
