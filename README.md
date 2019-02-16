@@ -35,6 +35,22 @@ parameter "GTX_POWER_SAVE" might be set:
 Default version is ISE 14.5 which allows to bypass the RX Delay Aligner,
 thus saving some power consumption.
 
+
+### Version control 
+
+master branch code is used for Run2 operation and the compiled date is 2016-03-16. the ISE for compiling could be 14.7
+
+Andrew took over the OTMB fw to add GEM related features and create gem_devel branch.  gem_devel added 4 GEM fibers, add GEM data read out in DAQ path and some codes in tmb.v to use GEM hits in LCT construction 
+
+In parallel, Yuriy, Jason and Tao were working on implementing new OTMB algo which is prepared for high lumi LHC. the branch 2018OTMBfw was created to include all changes:
+   - localized dead time zone in cathode pretriggering
+   - CLCT reuse in ALCT-CLCT matching
+
+
+In 2019, Tao checked out Andrew' gem_devel branch and created a branched GE11_ME11_fw to include new features in 2018OTMBfw. And finally GE11_ME11_fw will also include full GEM+CSC algorithm and be commissioned for GE1/1-ME1/1 integrated local triggering. 
+
+
+
 ### Simulation
 The folder source/simulation contains a test bench, as well as a
 file handler and VME emulator, for the OTMB firmware simulation.
