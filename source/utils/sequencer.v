@@ -2500,7 +2500,7 @@
   assign pretrig_data[12]    = wr_buf_avail;             // Buffer address was valid at pre-trigger
   assign pretrig_data[14:13] = bxn_counter[1:0];         // BXN at pre-trigger, only lsbs are needed for clct
   assign pretrig_data[15]    = trig_source_ext;          // Trigger source was not CLCT pattern
-  assign pretrig_data[22:16] = active_feb_list_pre[6:0]; // Active feb list at pre-trig
+  assign pretrig_data[16+MXCFEB-1:16] = active_feb_list_pre[MXCFEB-1:0]; // Active feb list at pre-trig
 
   assign postdrift_adr = PATTERN_FINDER_LATENCY + drift_delay;
 
@@ -2512,7 +2512,7 @@
   wire              clct_wr_avail_xtmb   = postdrift_data[12];    // Buffer address was valid at pre-trigger
   wire [1:0]        bxn_counter_xtmb     = postdrift_data[14:13]; // BXN at pre-trigger, only lsbs are needed for clct
   wire              trig_source_ext_xtmb = postdrift_data[15];    // Trigger source was not CLCT pattern
-  wire [MXCFEB-1:0] aff_list_xtmb        = postdrift_data[22:16]; // Active feb list
+  wire [MXCFEB-1:0] aff_list_xtmb        = postdrift_data[16+MXCFEB-1:16]; // Active feb list
 
 // JG: this functionality is being removed, 10/25/2017...
 /*  reg [4:0] algo2016_dead_time_zone_size_1st;
@@ -2613,7 +2613,7 @@
   assign clctc[1:0]  = bxn_counter_xtmb[1:0]; // Bunch crossing number
   assign clctc[2]    = sync_err;              // BX0 disagrees with BXN count
 
-  assign clctf[6:0]  = aff_list_xtmb[6:0]; // Active feb list post drift
+  assign clctf[MXCFEB-1:0]  = aff_list_xtmb[MXCFEB-1:0]; // Active feb list post drift
 
 // Blank CLCTs with insufficient hits
   wire clct0_blanking = clct_blanking && !clct0_vpf;
@@ -2867,7 +2867,7 @@
   wire [MXXPRE-1:0] xpre_wdata; // Mapping array
   wire [MXXPRE-1:0] xpre_rdata; // Mapping array
 
-  assign xpre_wdata[6:0]   =  active_feb_list_pre[6:0]; // Active FEB list sent to DAQMB
+  assign xpre_wdata[MXCFEB-1:0]   =  active_feb_list_pre[MXCFEB-1:0]; // Active FEB list sent to DAQMB
   assign xpre_wdata[17:7]  =  trig_source_s0_mod[10:0]; // Trigger source vector
   assign xpre_wdata[29:18] =  bxn_counter[11:0];        // Full Bunch Crossing number at pretrig
   assign xpre_wdata[59:30] =  orbit_counter[29:0];      // Orbit count at pre-trigger
@@ -2953,7 +2953,7 @@
   wire [MXRTMB1-1:0] rtmb1_rdata; // Mapping array
 
   assign rtmb1_wdata[29:0]  = trig_counter[29:0];   // TMB trigger counter
-  assign rtmb1_wdata[36:30] = tmb_aff_list_ff[6:0]; // Active cfeb list at TMB match, saves 1 ram if put here
+  assign rtmb1_wdata[30+MXCFEB-1:30] = tmb_aff_list_ff[MXCFEB-1:0]; // Active cfeb list at TMB match, saves 1 ram if put here
 
 // MPC transmit: store MPC transmit frame data in RAM mapping array
   parameter MXXMPC = 64;        // MPC transmit frame data bits
@@ -3509,18 +3509,18 @@
 // Unpack multi-buffer storage for event header
 //------------------------------------------------------------------------------------------------------------------
 // Unpack Pre-trigger data from RAM mapping array
-  wire [6:0]  r_active_feb       = xpre_rdata[6:0];   // Active FEB list sent to DAQMB
-  wire [10:0] r_trig_source_vec  = xpre_rdata[17:7];  // Trigger source vector
-  wire [11:0] r_bxn_counter      = xpre_rdata[29:18]; // Full Bunch Crossing number at pretrig
-  wire [29:0] r_orbit_counter    = xpre_rdata[59:30]; // Orbit count at pre-trigger
-  wire        r_sync_err         = xpre_rdata[60];    // BXN sync error
-  wire [3:0]  r_alct_preClct_win = xpre_rdata[64:61]; // ALCT active_feb_flag position in pretrig window
+  wire [MXCFEB-1:0]  r_active_feb   = xpre_rdata[MXCFEB-1:0];   // Active FEB list sent to DAQMB
+  wire [10:0] r_trig_source_vec     = xpre_rdata[17:7];  // Trigger source vector
+  wire [11:0] r_bxn_counter         = xpre_rdata[29:18]; // Full Bunch Crossing number at pretrig
+  wire [29:0] r_orbit_counter       = xpre_rdata[59:30]; // Orbit count at pre-trigger
+  wire        r_sync_err            = xpre_rdata[60];    // BXN sync error
+  wire [3:0]  r_alct_preClct_win    = xpre_rdata[64:61]; // ALCT active_feb_flag position in pretrig window
 
-  wire [10:0] r_wr_buf_adr       = xpre_rdata[75:65]; // Address of write buffer at pretrig
-  wire [10:0] r_buf_fence_dist   = xpre_rdata[86:76]; // Distance to 1st fence address at pretrigger
-  wire        r_wr_buf_avail     = xpre_rdata[87];    // Write buffer is ready or bypassed
-  wire        r_wr_buf_ready     = xpre_rdata[88];    // Write buffer is ready
-  wire        r_buf_stalled      = xpre_rdata[89];    // All buffer memory space is in use
+  wire [10:0] r_wr_buf_adr          = xpre_rdata[75:65]; // Address of write buffer at pretrig
+  wire [10:0] r_buf_fence_dist      = xpre_rdata[86:76]; // Distance to 1st fence address at pretrigger
+  wire        r_wr_buf_avail        = xpre_rdata[87];    // Write buffer is ready or bypassed
+  wire        r_wr_buf_ready        = xpre_rdata[88];    // Write buffer is ready
+  wire        r_buf_stalled         = xpre_rdata[89];    // All buffer memory space is in use
 
 // Unpack Pre-trigger +1bx data from RAM mapping array
   wire [29:0] r_pretrig_counter  = xpre1_rdata[29:0];  // Pre-trigger counter
@@ -3587,7 +3587,7 @@
 
 // Unpack TMB match results from RAM mapping array that was delayed 1bx
   wire [29:0]  r_trig_counter    =  rtmb1_rdata[29:0];  // TMB trigger counter
-  wire [6:0]  r_tmb_aff_list    =  rtmb1_rdata[36:30];  // Active cfeb list at TMB match, saves 1 ram
+  wire [MXCFEB-1:0]  r_tmb_aff_list    =  rtmb1_rdata[30+MXCFEB-1:30];  // Active cfeb list at TMB match, saves 1 ram
 
 // Unpack MPC transmit frame data from RAM mapping array
   wire [15:0]  r_mpc0_frame0_ff  =  xmpc_rdata[15: 0];  // MPC muon 0 frame 0
@@ -3660,7 +3660,7 @@
   wire [MXCFEBB-1:0] ncfebs;
 
 //  assign ncfebs =  cfebs_read[0]+cfebs_read[1]+cfebs_read[2]+cfebs_read[3]+cfebs_read[4]+cfebs_read[5]+cfebs_read[6];
-  assign ncfebs =  count1sof7(cfebs_read[6:0]);
+  assign ncfebs =  count1sof7({2'b0, cfebs_read[MXCFEB-1:0]});
 
 // Substitute short-header for non buffer events
   wire [NHBITS-1:0]  r_nheaders;
@@ -4136,15 +4136,16 @@
   assign  header39_[14]    =  reverse_hs_me1b;      // 1=ME1B hstrip order reversed
   assign  header39_[18:15]  =  0;              // DDU+DMB control flags
 
-  assign  header40_[1:0]    =  active_feb_mux[6:5];    // Hdr23 Active CFEB list sent to DMB
-  assign  header40_[3:2]    =  r_cfebs_read[6:5];      // Hdr23 CFEBs read out for this event
-  assign  header40_[5:4]    =  perr_cfeb_ff[6:5];      // Hdr27 CFEB RAM parity error, latched
-  assign  header40_[7:6]    =  cfeb_badbits_found[6:5];  // Hdr30 CFEB[n] has at least 1 bad bit
-  assign  header40_[9:8]    =  cfeb_en[6:5];        // Hdr35 CFEBs enabled for triggering
-  assign  header40_[10]    =  buf_fence_cnt_is_peak;    // Current fence is peak number of fences in RAM
-  assign  header40_[11]    =  (MXCFEB==7);        // TMB has 7 DCFEBs so hdr40_[10:1] are active
-  assign  header40_[12]    =  r_trig_source_vec[9];    // Pre-trigger was ME1A only
+  //Tao, ME1/1->MEX/1, no needed for ME234
+  //assign  header40_[1:0]    =  active_feb_mux[6:5];    // Hdr23 Active CFEB list sent to DMB
+  //assign  header40_[3:2]    =  r_cfebs_read[6:5];      // Hdr23 CFEBs read out for this event
+  //assign  header40_[5:4]    =  perr_cfeb_ff[6:5];      // Hdr27 CFEB RAM parity error, latched
+  //assign  header40_[7:6]    =  cfeb_badbits_found[6:5];  // Hdr30 CFEB[n] has at least 1 bad bit
+  //assign  header40_[9:8]    =  cfeb_en[6:5];        // Hdr35 CFEBs enabled for triggering
+  //assign  header40_[11]    =  (MXCFEB==7);        // TMB has 7 DCFEBs so hdr40_[10:1] are active
+  //assign  header40_[12]    =  r_trig_source_vec[9];    // Pre-trigger was ME1A only, not used for ME234
   assign  header40_[13]    =  r_trig_source_vec[10];    // Pre-trigger was ME1B only
+  assign  header40_[10]    =  buf_fence_cnt_is_peak;    // Current fence is peak number of fences in RAM
   assign  header40_[14]    =  r_tmb_trig_pulse;      // TMB trig pulse coincident with rtmb_push
   assign  header40_[18:15]  =  0;              // DDU+DMB control flags
 
@@ -4603,7 +4604,8 @@
       dmb_tx[41]    <= (bpi_active) ? bpi_ad_out[13]    : alct_dmb[15];         // ALCT ddu_special  **
       dmb_tx[42]    <= (bpi_active) ? bpi_ad_out[5]     : alct_dmb[16];         // ALCT last frame   **
       dmb_tx[43]    <=                                    alct_dmb[17];         // ALCT first frame
-      dmb_tx[45:44] <=                                    active_feb_list[6:5]; // DMB active cfeb list
+      //Tao, ME1/1->MEX/1, ignore active_feb_list[6:5] 
+      //dmb_tx[45:44] <=                                    active_feb_list[6:5]; // DMB active cfeb list
       dmb_tx[46]    <= (bpi_active) ? bpi_ad_out[8]     : dmb_tx_reserved[0];   // Unassigned   **
       dmb_tx[47]    <= (bpi_active) ? bpi_ad_out[9]     : dmb_tx_reserved[1];   // Unassigned   **
       dmb_tx[48]    <=                                    dmb_tx_reserved[2];   // Unassigned
