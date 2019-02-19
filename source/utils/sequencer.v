@@ -5079,7 +5079,7 @@
   tmb_alct_only_dly  |    // Not sure how to implement this 4/28/08
   l1a_allow_alct_only  |    // Not sure how to implement this
   (|seq_dopa[3:0])  |    // Occupy block ram parity to avert dangling outputs warning
-  (|triad_tp[6:0])  |    // Used sometimes for scope
+  (|triad_tp[MXCFEB-1:0])  |    // Used sometimes for scope
   (|cfeb_layer_or[5:0])  |  // we dont use this here, its now in pattern finder section, maybe put in header
   (|hs_nlayers_hit[2:0])  |  // was for header, but is already included in pattern info
   scope_sump    |
