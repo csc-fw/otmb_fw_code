@@ -2884,7 +2884,7 @@
 
   wire      wr_virtex6_snap12_qpll;
   wire      wr_virtex6_gtx_rx_all;
-  wire [6:0]    wr_virtex6_gtx_rx;
+  wire [MXCFEB-1:0]    wr_virtex6_gtx_rx;
   wire      wr_virtex6_sysmon;
   wire      wr_virtex6_extend;
   wire      wr_adr_cap;
@@ -3410,8 +3410,9 @@
   ADR_V6_GTX_RX2:      data_out  <= virtex6_gtx_rx_rd[2];
   ADR_V6_GTX_RX3:      data_out  <= virtex6_gtx_rx_rd[3];
   ADR_V6_GTX_RX4:      data_out  <= virtex6_gtx_rx_rd[4];
-  ADR_V6_GTX_RX5:      data_out  <= virtex6_gtx_rx_rd[5];
-  ADR_V6_GTX_RX6:      data_out  <= virtex6_gtx_rx_rd[6];
+  //Tao, ME1/1->MEX/1, the following two could be ignored for ME234
+  //ADR_V6_GTX_RX5:      data_out  <= virtex6_gtx_rx_rd[5];
+  //ADR_V6_GTX_RX6:      data_out  <= virtex6_gtx_rx_rd[6];
 
   ADR_V6_SYSMON:      data_out  <=  virtex6_sysmon_rd;
 
@@ -3588,8 +3589,9 @@
   assign wr_virtex6_gtx_rx[2]  = (reg_adr==ADR_V6_GTX_RX2    && clk_en);
   assign wr_virtex6_gtx_rx[3]  = (reg_adr==ADR_V6_GTX_RX3    && clk_en);
   assign wr_virtex6_gtx_rx[4]  = (reg_adr==ADR_V6_GTX_RX4    && clk_en);
-  assign wr_virtex6_gtx_rx[5]  = (reg_adr==ADR_V6_GTX_RX5    && clk_en);
-  assign wr_virtex6_gtx_rx[6]  = (reg_adr==ADR_V6_GTX_RX6    && clk_en);
+  //Tao, ME1/1->MEX/1, the following two could be ignored for ME234
+  //assign wr_virtex6_gtx_rx[5]  = (reg_adr==ADR_V6_GTX_RX5    && clk_en);
+  //assign wr_virtex6_gtx_rx[6]  = (reg_adr==ADR_V6_GTX_RX6    && clk_en);
   assign wr_virtex6_sysmon  = (reg_adr==ADR_V6_SYSMON    && clk_en);
 
   assign wr_virtex6_extend  = (reg_adr==ADR_V6_EXTEND    && clk_en);
@@ -4491,6 +4493,7 @@
   assign step_rpc             = step_wr[2];
   assign step_cfeb           = step_wr[3];
   assign step_run             = step_wr[4];
+  //Tao, question, why ME11 do not actively enable clock for DCFEB5&6???
   assign cfeb_clock_en[4:0]    = step_wr[9:5];
   assign alct_clock_en         = step_wr[10];
   assign _hard_reset_alct_fpga = step_wr[11];
@@ -4991,6 +4994,7 @@
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_CFEB_INJ = 0x42    CFEB Injector Control Register
+// extension for DCFEB5&6 :  0x17A 
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
@@ -6833,7 +6837,7 @@
   assign cfeb2_rxd_int_delay[3:0]  = delay0_int_wr[11:8];     // RW  CFEB2 Interstage delay
   assign cfeb3_rxd_int_delay[3:0]  = delay0_int_wr[15:12];    // RW  CFEB3 Interstage delay
 */
-// JGhere, new shared delay values for ME1/1b side:
+// JGhere, new shared delay values for ME1/1b side: later ME234
   assign cfeb0_rxd_int_delay[3:0]  = delay1_int_wr[11:8];     // RW  CFEB0 Interstage delay
   assign cfeb1_rxd_int_delay[3:0]  = delay1_int_wr[11:8];     // RW  CFEB1 Interstage delay
   assign cfeb2_rxd_int_delay[3:0]  = delay1_int_wr[11:8];     // RW  CFEB2 Interstage delay
@@ -6930,7 +6934,8 @@
   assign cfeb_badbits_ctrl_rd[14:10] = cfeb_badbits_found[4:0];    // RO  CFEB[n] has at least 1 bad bit
   assign cfeb_badbits_ctrl_rd[15]    = cfeb_badbits_blocked;      // RO  A CFEB had bad bits that were blocked
 
-// ADR_V6_CFEB_BADBITS_CTRL = 0x15C CFEB  Bad Bits Control/Status
+// ADR_V6_CFEB_BADBITS_CTRL = 0x15C CFEB  Bad Bits Control/Status, 
+//it is used only for DCFEB5&6, ignored for MEX/1 fw
   initial begin
   cfeb_v6_badbits_ctrl_wr[1:0]        = 0;              // RW  Reset bad cfeb bits FFs
   cfeb_v6_badbits_ctrl_wr[3:2]        = 0;              // RW  Allow bad bits to block triads
@@ -6938,13 +6943,14 @@
   cfeb_v6_badbits_ctrl_wr[15:6]       = 0;              // RW  Unused
   end
 
-  assign cfeb_badbits_reset[6:5]      = (cfeb_v6_badbits_ctrl_wr[1:0] | {2{ttc_resync}});  // RW  Reset bad bits FFs for cfeb[n]
-  assign cfeb_badbits_block[6:5]      = cfeb_v6_badbits_ctrl_wr[3:2];  // RW  Block bad bits on cfeb[n]
-  wire   cfeb_v6_badbits_ctrl_sump    =|cfeb_v6_badbits_ctrl_wr[5:4];  // RO
+  //Tao,question, ME1/1->MEX/1, ignored
+  //assign cfeb_badbits_reset[6:5]      = (cfeb_v6_badbits_ctrl_wr[1:0] | {2{ttc_resync}});  // RW  Reset bad bits FFs for cfeb[n]
+  //assign cfeb_badbits_block[6:5]      = cfeb_v6_badbits_ctrl_wr[3:2];  // RW  Block bad bits on cfeb[n]
+  //wire   cfeb_v6_badbits_ctrl_sump    =|cfeb_v6_badbits_ctrl_wr[5:4];  // RO
 
-  assign cfeb_v6_badbits_ctrl_rd[3:0]  = cfeb_v6_badbits_ctrl_wr[3:0];  // RW  Readback
-  assign cfeb_v6_badbits_ctrl_rd[5:4]  = cfeb_badbits_found[6:5];      // RO  CFEB[n] has at least 1 bad bit
-  assign cfeb_v6_badbits_ctrl_rd[15:6] = cfeb_v6_badbits_ctrl_wr[15:6];  // RW  Unused
+  //assign cfeb_v6_badbits_ctrl_rd[3:0]  = cfeb_v6_badbits_ctrl_wr[3:0];  // RW  Readback
+  //assign cfeb_v6_badbits_ctrl_rd[5:4]  = cfeb_badbits_found[6:5];      // RO  CFEB[n] has at least 1 bad bit
+  //assign cfeb_v6_badbits_ctrl_rd[15:6] = cfeb_v6_badbits_ctrl_wr[15:6];  // RW  Unused
 
 // ADR_CFEB_BADBIT_TIMER = 0x124 CFEB  Bad Bit Check Interval for bad bits
   initial begin
@@ -7205,6 +7211,7 @@
 //------------------------------------------------------------------------------------------------------------------
 // ADR_V6_EXTEND = 0x17A  DCFEB 7-bit extensions for Adr 0x42 and 0x68
 //------------------------------------------------------------------------------------------------------------------
+//Tao, ME1/1->MEX/1, ignore for MEX/1 fw with 5DCFEBs in total
 // Power up
   initial begin
   virtex6_extend_wr[1:0]        = 2'b11;          // RW  1=Enable, 0=Turn off all CFEB inputs
@@ -7215,14 +7222,14 @@
   virtex6_extend_wr[15:10]      = 0;            // RW  Unused
   end
 
-  assign mask_all[6:5]        = virtex6_extend_wr[1:0];  // RW  Extend 0x42[4:0]   = mask_all[4:0]           1=Enable, 0=Turn off all CFEB inputs
-  assign inj_febsel[6:5]        = virtex6_extend_wr[3:2];  // RW  Extend 0x42[9:5]   = inj_febsel[4:0]         1=Select CFEBn for RAM read/write
-  assign injector_mask_cfeb[6:5]    = virtex6_extend_wr[5:4];  // RW  Extend 0x42[14:10] = injector_mask_cfeb[4:0] 1=Enable CFEB(n) for injector trigger
-  assign cfeb_en_vme[6:5]        = virtex6_extend_wr[7:6];  // RW  Extend 0x68[14:10] = cfeb_en_vme[4:0]       1=Enable CFEBs for triggering and active feb flag
+  //assign mask_all[6:5]        = virtex6_extend_wr[1:0];  // RW  Extend 0x42[4:0]   = mask_all[4:0]           1=Enable, 0=Turn off all CFEB inputs
+  //assign inj_febsel[6:5]        = virtex6_extend_wr[3:2];  // RW  Extend 0x42[9:5]   = inj_febsel[4:0]         1=Select CFEBn for RAM read/write
+  //assign injector_mask_cfeb[6:5]    = virtex6_extend_wr[5:4];  // RW  Extend 0x42[14:10] = injector_mask_cfeb[4:0] 1=Enable CFEB(n) for injector trigger
+  //assign cfeb_en_vme[6:5]        = virtex6_extend_wr[7:6];  // RW  Extend 0x68[14:10] = cfeb_en_vme[4:0]       1=Enable CFEBs for triggering and active feb flag
   
-  assign virtex6_extend_rd[7:0]    = virtex6_extend_wr[7:0];  // RW  Readback
-  assign virtex6_extend_rd[9:8]    = cfeb_en[6:5];        // RO  Extend 0x68 cfeb_en[4:0] Readback actual cfeb_en state, altered by mask_all
-  assign virtex6_extend_rd[15:10]    = virtex6_extend_wr[15:10];  // RW  Unused
+  //assign virtex6_extend_rd[7:0]    = virtex6_extend_wr[7:0];  // RW  Readback
+  //assign virtex6_extend_rd[9:8]    = cfeb_en[6:5];        // RO  Extend 0x68 cfeb_en[4:0] Readback actual cfeb_en state, altered by mask_all
+  assign virtex6_extend_rd[15:0]    = virtex6_extend_wr[15:0];  // RW  Unused
 
   wire   virtex6_extend_sump      = |virtex6_extend_wr[9:8];  // RO
 
@@ -7408,8 +7415,9 @@
   if (wr_virtex6_gtx_rx[2])   virtex6_gtx_rx_wr[2] <=  d[15:0];
   if (wr_virtex6_gtx_rx[3])   virtex6_gtx_rx_wr[3] <=  d[15:0];
   if (wr_virtex6_gtx_rx[4])   virtex6_gtx_rx_wr[4] <=  d[15:0];
-  if (wr_virtex6_gtx_rx[5])   virtex6_gtx_rx_wr[5] <=  d[15:0];
-  if (wr_virtex6_gtx_rx[6])   virtex6_gtx_rx_wr[6] <=  d[15:0];  
+  //Tao, ME1/1->MEX/1, the following two could be ignored for ME234
+  //if (wr_virtex6_gtx_rx[5])   virtex6_gtx_rx_wr[5] <=  d[15:0];
+  //if (wr_virtex6_gtx_rx[6])   virtex6_gtx_rx_wr[6] <=  d[15:0];  
   if (wr_virtex6_sysmon)      virtex6_sysmon_wr    <=  d[15:0];
   if (wr_virtex6_extend)      virtex6_extend_wr    <=  d[15:0];
   if (wr_mpc_frames_fifo_ctrl) mpc_frames_fifo_ctrl_wr <= d[15:0];
