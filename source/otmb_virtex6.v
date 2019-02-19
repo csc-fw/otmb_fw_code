@@ -537,8 +537,9 @@
   .clock_cfeb2_rxd  (clock_cfeb_rxd[2]),  // Out  40MHz CFEB receive  data clock 1x
   .clock_cfeb3_rxd  (clock_cfeb_rxd[3]),  // Out  40MHz CFEB receive  data clock 1x
   .clock_cfeb4_rxd  (clock_cfeb_rxd[4]),  // Out  40MHz CFEB receive  data clock 1x
-  .clock_cfeb5_rxd  (clock_cfeb_rxd[5]),  // Out  40MHz CFEB receive  data clock 1x
-  .clock_cfeb6_rxd  (clock_cfeb_rxd[6]),  // Out  40MHz CFEB receive  data clock 1x
+  //Tao, ME1/1->MEX/1
+  //.clock_cfeb5_rxd  (clock_cfeb_rxd[5]),  // Out  40MHz CFEB receive  data clock 1x
+  //.clock_cfeb6_rxd  (clock_cfeb_rxd[6]),  // Out  40MHz CFEB receive  data clock 1x
 
 // Global reset
   .mmcm_reset    (1'b0),      // In  PLL reset input for simulation

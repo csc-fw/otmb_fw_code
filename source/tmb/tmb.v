@@ -1213,8 +1213,8 @@
   //  else            kill_me1a_clcts <= mpc_me1a_block && csc_me1ab; // Kill CLCTs from ME1A if blocking is on
   //end
 
-  //wire clct0_exists = clct0_real[0]; // CLCT0 vpf
-  //wire clct1_exists = clct1_real[0]; // CLCT1 vpf
+  wire clct0_exists = clct0_real[0]; // CLCT0 vpf
+  wire clct1_exists = clct1_real[0]; // CLCT1 vpf
 
   //wire clct0_cfeb456 = clct0_real[15]; // CLCT0 is on CFEB4-6 hence ME1A
   //wire clct1_cfeb456 = clct1_real[15]; // CLCT1 is on CFEB4-6 hence ME1A
