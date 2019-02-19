@@ -878,8 +878,9 @@
   cfeb2_rxd_int_delay,
   cfeb3_rxd_int_delay,
   cfeb4_rxd_int_delay,
-  cfeb5_rxd_int_delay,
-  cfeb6_rxd_int_delay,
+  //Tao, ME1/1->MEX/1, the following two could be ignored for ME234
+  //cfeb5_rxd_int_delay,
+  //cfeb6_rxd_int_delay,
 
 // Sync error source enables
   sync_err_reset,
@@ -2187,8 +2188,9 @@
   output  [3:0]      cfeb2_rxd_int_delay;  // Interstage delay
   output  [3:0]      cfeb3_rxd_int_delay;  // Interstage delay
   output  [3:0]      cfeb4_rxd_int_delay;  // Interstage delay
-  output  [3:0]      cfeb5_rxd_int_delay;  // Interstage delay
-  output  [3:0]      cfeb6_rxd_int_delay;  // Interstage delay
+  //Tao, ME1/1->MEX/1, the following two could be ignored for ME234
+  //output  [3:0]      cfeb5_rxd_int_delay;  // Interstage delay
+  //output  [3:0]      cfeb6_rxd_int_delay;  // Interstage delay
 
 // Sync error source enables
   output          sync_err_reset;      // VME sync error reset
@@ -2719,13 +2721,14 @@
   wire  [15:0]  cfeb4_badbits_ly23_rd;
   wire  [15:0]  cfeb4_badbits_ly45_rd;
 
-  wire  [15:0]  cfeb5_badbits_ly01_rd;
-  wire  [15:0]  cfeb5_badbits_ly23_rd;
-  wire  [15:0]  cfeb5_badbits_ly45_rd;
+  //Tao, ME1/1->MEX/1, the following two could be ignored for ME234
+  //wire  [15:0]  cfeb5_badbits_ly01_rd;
+  //wire  [15:0]  cfeb5_badbits_ly23_rd;
+  //wire  [15:0]  cfeb5_badbits_ly45_rd;
 
-  wire  [15:0]  cfeb6_badbits_ly01_rd;
-  wire  [15:0]  cfeb6_badbits_ly23_rd;
-  wire  [15:0]  cfeb6_badbits_ly45_rd;
+  //wire  [15:0]  cfeb6_badbits_ly01_rd;
+  //wire  [15:0]  cfeb6_badbits_ly23_rd;
+  //wire  [15:0]  cfeb6_badbits_ly45_rd;
 
   reg   [15:0]  alct_startup_delay_wr;
   wire  [15:0]  alct_startup_delay_rd;
@@ -3412,14 +3415,15 @@
 
   ADR_V6_SYSMON:      data_out  <=  virtex6_sysmon_rd;
 
-  ADR_V6_CFEB_BADBITS_CTRL:  data_out  <=  cfeb_v6_badbits_ctrl_rd;
-  ADR_V6_CFEB5_BADBITS_LY01:  data_out  <= cfeb5_badbits_ly01_rd;
-  ADR_V6_CFEB5_BADBITS_LY23:  data_out  <= cfeb5_badbits_ly23_rd;
-  ADR_V6_CFEB5_BADBITS_LY45:  data_out  <= cfeb5_badbits_ly45_rd;
+  //Tao, ME1/1->MEX/1, the following two could be ignored for ME234
+  //ADR_V6_CFEB_BADBITS_CTRL:  data_out  <=  cfeb_v6_badbits_ctrl_rd;
+  //ADR_V6_CFEB5_BADBITS_LY01:  data_out  <= cfeb5_badbits_ly01_rd;
+  //ADR_V6_CFEB5_BADBITS_LY23:  data_out  <= cfeb5_badbits_ly23_rd;
+  //ADR_V6_CFEB5_BADBITS_LY45:  data_out  <= cfeb5_badbits_ly45_rd;
 
-  ADR_V6_CFEB6_BADBITS_LY01:  data_out  <= cfeb6_badbits_ly01_rd;
-  ADR_V6_CFEB6_BADBITS_LY23:  data_out  <= cfeb6_badbits_ly23_rd;
-  ADR_V6_CFEB6_BADBITS_LY45:  data_out  <= cfeb6_badbits_ly45_rd;
+  //ADR_V6_CFEB6_BADBITS_LY01:  data_out  <= cfeb6_badbits_ly01_rd;
+  //ADR_V6_CFEB6_BADBITS_LY23:  data_out  <= cfeb6_badbits_ly23_rd;
+  //ADR_V6_CFEB6_BADBITS_LY45:  data_out  <= cfeb6_badbits_ly45_rd;
 
   ADR_V6_PHASER7:      data_out  <= phaser7_rd;
   ADR_V6_PHASER8:      data_out  <= phaser8_rd;
@@ -6834,6 +6838,7 @@
   assign cfeb1_rxd_int_delay[3:0]  = delay1_int_wr[11:8];     // RW  CFEB1 Interstage delay
   assign cfeb2_rxd_int_delay[3:0]  = delay1_int_wr[11:8];     // RW  CFEB2 Interstage delay
   assign cfeb3_rxd_int_delay[3:0]  = delay1_int_wr[11:8];     // RW  CFEB3 Interstage delay
+  assign cfeb4_rxd_int_delay[3:0]  = delay1_int_wr[11:8];     // RW  CFEB4 Interstage delay
 
   assign delay0_int_rd[15:0]    = delay0_int_wr[15:0];      //    Readback
 
@@ -6849,9 +6854,10 @@
 //  assign cfeb5_rxd_int_delay[3:0]  = delay1_int_wr[7:4];      // RW  CFEB5 Interstage delay
 //  assign cfeb6_rxd_int_delay[3:0]  = delay1_int_wr[11:8];     // RW  CFEB6 Interstage delay
 // JGhere, new shared delay values for ME1/1a side:
-  assign cfeb4_rxd_int_delay[3:0] = delay1_int_wr[7:4];      // RW  CFEB4 Interstage delay
-  assign cfeb5_rxd_int_delay[3:0] = delay1_int_wr[7:4];      // RW  CFEB4 Interstage delay
-  assign cfeb6_rxd_int_delay[3:0] = delay1_int_wr[7:4];      // RW  CFEB4 Interstage delay
+  //Tao, ME1/1->MEX/1, the following two could be ignored for ME234
+  //assign cfeb4_rxd_int_delay[3:0] = delay1_int_wr[7:4];      // RW  CFEB4 Interstage delay
+  //assign cfeb5_rxd_int_delay[3:0] = delay1_int_wr[7:4];      // RW  CFEB4 Interstage delay
+  //assign cfeb6_rxd_int_delay[3:0] = delay1_int_wr[7:4];      // RW  CFEB4 Interstage delay
 
   assign delay1_int_rd[15:0]    = delay1_int_wr[15:0];      //    Readback
 

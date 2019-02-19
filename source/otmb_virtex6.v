@@ -889,8 +889,9 @@
   assign inj_ramout_mux[17:12] = inj_ramout[2][5:0];
   assign inj_ramout_mux[23:18] = inj_ramout[3][5:0];
   assign inj_ramout_mux[29:24] = inj_ramout[4][5:0];
-  assign inj_ramout_mux[35:30] = inj_ramout[5][5:0];
-  assign inj_ramout_mux[41:36] = inj_ramout[6][5:0];
+  //Tao, ME1/1->MEX/1, 7DCFEBs->5DCFEBs
+  //assign inj_ramout_mux[35:30] = inj_ramout[5][5:0];
+  //assign inj_ramout_mux[41:36] = inj_ramout[6][5:0];
 
 // ALCT Injectors
   wire   [10:0] alct0_inj_ram = inj_ramout_mux[10:0];  // Injector RAM ALCT0
@@ -1140,14 +1141,15 @@
   reg   [17:0] inj_rdata_mux;
 
   always @(inj_febsel or inj_rdata[0][0]) begin
-  case (inj_febsel[6:0])
-  7'b0000001:  inj_rdata_mux = inj_rdata[0][17:0];
-  7'b0000010:  inj_rdata_mux = inj_rdata[1][17:0];
-  7'b0000100:  inj_rdata_mux = inj_rdata[2][17:0];
-  7'b0001000:  inj_rdata_mux = inj_rdata[3][17:0];
-  7'b0010000:  inj_rdata_mux = inj_rdata[4][17:0];
-  7'b0100000:  inj_rdata_mux = inj_rdata[5][17:0];
-  7'b1000000:  inj_rdata_mux = inj_rdata[6][17:0];
+  case (inj_febsel[MXCFEB-1:0])
+  5'b00001:  inj_rdata_mux = inj_rdata[0][17:0];
+  5'b00010:  inj_rdata_mux = inj_rdata[1][17:0];
+  5'b00100:  inj_rdata_mux = inj_rdata[2][17:0];
+  5'b01000:  inj_rdata_mux = inj_rdata[3][17:0];
+  5'b10000:  inj_rdata_mux = inj_rdata[4][17:0];
+  //Tao, ME1/1->MEX/1, comment out two and 7bits->5bits
+  //7'b0100000:  inj_rdata_mux = inj_rdata[5][17:0];
+  //7'b1000000:  inj_rdata_mux = inj_rdata[6][17:0];
   default    inj_rdata_mux = inj_rdata[0][17:0];
   endcase
   end
@@ -3841,8 +3843,9 @@
       .cfeb2_rxd_int_delay    (cfeb_rxd_int_delay[2][3:0]),  // Out  Interstage delay
       .cfeb3_rxd_int_delay    (cfeb_rxd_int_delay[3][3:0]),  // Out  Interstage delay
       .cfeb4_rxd_int_delay    (cfeb_rxd_int_delay[4][3:0]),  // Out  Interstage delay
-      .cfeb5_rxd_int_delay    (cfeb_rxd_int_delay[5][3:0]),  // Out  Interstage delay
-      .cfeb6_rxd_int_delay    (cfeb_rxd_int_delay[6][3:0]),  // Out  Interstage delay
+      //Tao ME1/1->MEX/1, 
+      //.cfeb5_rxd_int_delay    (cfeb_rxd_int_delay[5][3:0]),  // Out  Interstage delay
+      //.cfeb6_rxd_int_delay    (cfeb_rxd_int_delay[6][3:0]),  // Out  Interstage delay
 
       // Sync error source enables
       .sync_err_reset      (sync_err_reset),        // Out  VME sync error reset
