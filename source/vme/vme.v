@@ -4729,7 +4729,7 @@
   assign global_reset_en    = mod_cfg_wr[12];  // RW  Enable global reset on lock_lost.  JG: used to be ON by default
 
   assign mod_cfg_rd[4:0]    = mod_cfg_wr[4:0];  // RW  Readback
-  assign mod_cfg_rd[11:5]    = cfeb_exists[6:0];  // R  CFEBs instantiated in this firmware
+  assign mod_cfg_rd[5+MXCFEB-1:5]    = cfeb_exists[MXCFEB-1:0];  // R  CFEBs instantiated in this firmware
   assign mod_cfg_rd[12]    = mod_cfg_wr[12];  // RW  Readback
   assign mod_cfg_rd[13]    = power_up;    // R  Power-up FF
   assign mod_cfg_rd[14]    = ddd_autostart;  // R  DDD autostart
@@ -6434,6 +6434,7 @@
   assign parity_rd[7]    = perr_reset_vme;            // RW  Parity error reset
   assign parity_rd[15:8]  = parity_rd_mux[7:0];          // R  Parity data mux
 
+
   always @* begin
   case (perr_adr)
   4'd0:  parity_rd_mux <= {2'h0,  perr_ram_ff[ 5: 0]};      // R  cfeb0 rams
@@ -6441,12 +6442,15 @@
   4'd2:  parity_rd_mux <= {2'h0,  perr_ram_ff[17:12]};      // R  cfeb2 rams
   4'd3:  parity_rd_mux <= {2'h0,  perr_ram_ff[23:18]};      // R  cfeb3 rams
   4'd4:  parity_rd_mux <= {2'h0,  perr_ram_ff[29:24]};      // R  cfeb4 rams
-  4'd5:  parity_rd_mux <= {2'h0,  perr_ram_ff[35:30]};      // R  cfeb5 rams
-  4'd6:  parity_rd_mux <= {2'h0,  perr_ram_ff[41:36]};      // R  cfeb6 rams
+  //Tao  ME1/1->MEX/1, send 0 error
+  //4'd5:  parity_rd_mux <= {2'h0,  perr_ram_ff[35:30]};      // R  cfeb5 rams
+  //4'd6:  parity_rd_mux <= {2'h0,  perr_ram_ff[41:36]};      // R  cfeb6 rams
+  4'd5:  parity_rd_mux <= {8'h00};
+  4'd6:  parity_rd_mux <= {8'h00};
   4'd7:  parity_rd_mux <= {3'h0,  perr_ram_ff[46:42]};      // R  rpc   rams
   4'd8:  parity_rd_mux <= {6'h00, perr_ram_ff[48:47]};      // R  mini  rams
-  4'd9:  parity_rd_mux <= {1'h0,  perr_cfeb[6:0]};        // R  cfeb parity errors
-  4'd10:  parity_rd_mux <= {1'h0,  perr_cfeb_ff[6:0]};      // R  cfeb parity errors,latched
+  4'd9:  parity_rd_mux <= {3'h0,  perr_cfeb[MXCFEB-1:0]};        // R  cfeb parity errors
+  4'd10:  parity_rd_mux <= {3'h0,  perr_cfeb_ff[MXCFEB-1:0]};      // R  cfeb parity errors,latched
   4'd11:  parity_rd_mux <= {6'h00, perr_rpc_ff,perr_rpc};      // R  rpc  parity errors,latched
   4'd12:  parity_rd_mux <= {6'h00, perr_mini_ff, perr_mini};    // R  mini parity errors,latched
   default  parity_rd_mux <=  8'hFF;                // R  sub-addressing error flag
