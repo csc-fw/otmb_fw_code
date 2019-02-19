@@ -5819,11 +5819,11 @@
   assign seq_smstat_rd[15:12]    = 0;
 
 // Sequencer Register: CLCT MSBs
-  assign seq_clctmsb_rd[2:0]   = clctc_vme[2:0];      // R  Common to CLCT0/1 to TMB
-  assign seq_clctmsb_rd[9:3]   = clctf_vme[6:0];      // R  Active cfeb list at TMB match
-  assign seq_clctmsb_rd[13:10] = 0;                   // R  Unassigned
-  assign seq_clctmsb_rd[14]    = clock_lock_lost_err; // R  40MHz main clock lost lock FF
-  assign seq_clctmsb_rd[15]    = clct_bx0_sync_err;   // R  Sync error: BXN counter==0 did not match bx0
+  assign seq_clctmsb_rd[2:0]            = clctc_vme[2:0];      // R  Common to CLCT0/1 to TMB
+  assign seq_clctmsb_rd[3+MXCFEB-1:3]   = clctf_vme[MXCFEB-1:0];      // R  Active cfeb list at TMB match
+  assign seq_clctmsb_rd[13:10]          = 0;                   // R  Unassigned
+  assign seq_clctmsb_rd[14]             = clock_lock_lost_err; // R  40MHz main clock lost lock FF
+  assign seq_clctmsb_rd[15]             = clct_bx0_sync_err;   // R  Sync error: BXN counter==0 did not match bx0
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_TMBTIM = 0xB2  TMB ALCT*CLCT Coincidence Timing Register
