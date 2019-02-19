@@ -596,7 +596,7 @@ module pattern_finder (
 
 	assign ly0hs = {      me234_ly0hs};		// Stagger correction
 	assign ly1hs = {1'b0, me234_ly1hs};
-	assign ly2hs = {      me234_ly2hs};
+	assign ly2hs = {      me234_ly2hs};     //key layer, no change
 	assign ly3hs = {1'b0, me234_ly3hs};
 	assign ly4hs = {      me234_ly4hs};
 	assign ly5hs = {1'b0, me234_ly5hs};
@@ -681,12 +681,12 @@ module pattern_finder (
 
 `ifdef STAGGER_HS_CSC
 // Pad 0s beyond csc edges: whole CSC
-	assign ly0hs_pad = {5'b00000, ly0hs[MXHSX+j:j],              5'b00000};
-	assign ly1hs_pad = {2'b00,    ly1hs[MXHSX+j:j], ly1hs[-1+j], 1'b0};
-	assign ly2hs_pad = {          ly2hs[MXHSX+j:j]};
-	assign ly3hs_pad = {2'b00,    ly3hs[MXHSX+j:j], ly3hs[-1+j], 1'b0};
-	assign ly4hs_pad = {4'b0000,  ly4hs[MXHSX+j:j],              4'b0000};
-	assign ly5hs_pad = {5'b00000, ly5hs[MXHSX+j:j], ly5hs[-1+j], 4'b0000};
+	assign ly0hs_pad = {5'b00000, ly0hs[MXHSX-1+j:j],              5'b00000};
+	assign ly1hs_pad = {2'b00,    ly1hs[MXHSX-1+j:j], ly1hs[-1+j], 1'b0};
+	assign ly2hs_pad = {          ly2hs[MXHSX-1+j:j]};
+	assign ly3hs_pad = {2'b00,    ly3hs[MXHSX-1+j:j], ly3hs[-1+j], 1'b0};
+	assign ly4hs_pad = {4'b0000,  ly4hs[MXHSX-1+j:j],              4'b0000};
+	assign ly5hs_pad = {5'b00000, ly5hs[MXHSX-1+j:j], ly5hs[-1+j], 4'b0000};
 
 `else
 	assign ly0hs_pad = {5'b00000, me234_ly0hs[MXHSX-1:0], 5'b00000};
