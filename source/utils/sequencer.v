@@ -2419,11 +2419,16 @@
 // YP: code below mixed up pre-triggers and active cfebs, so I modified it to have only pre-triggers
 //  wire only_me1a_hit =  (|active_feb_s0[6:4]) && !(|active_feb_s0[3:0]); // Only ME1A was hit
 //  wire only_me1b_hit = !(|active_feb_s0[6:4]) &&  (|active_feb_s0[3:0]); // Only ME1B was hit
-  wire only_me1a_hit =  (|cfeb_hit_s0[6:4]) && !(|cfeb_hit_s0[3:0]); // Only ME1A was hit
-  wire only_me1b_hit = !(|cfeb_hit_s0[6:4]) &&  (|cfeb_hit_s0[3:0]); // Only ME1B was hit
+  //wire only_me1a_hit =  (|cfeb_hit_s0[6:4]) && !(|cfeb_hit_s0[3:0]); // Only ME1A was hit
+  //wire only_me1b_hit = !(|cfeb_hit_s0[6:4]) &&  (|cfeb_hit_s0[3:0]); // Only ME1B was hit
+  //Tao, ME1/1->MEX/1
+  //wire only_me1a_hit  = 0;
+  wire only_me234_hit = |cfeb_hit_at_pretrig;
 
-  wire clct_pretrig_me1a = clct_pretrig && (csc_me1ab || cnt_non_me1ab_en) && only_me1a_hit && clct_pat_trig_en;  // Pretriggered on ME1A only
-  wire clct_pretrig_me1b = clct_pretrig && (csc_me1ab || cnt_non_me1ab_en) && only_me1b_hit && clct_pat_trig_en;  // Pretriggered on ME1B only
+
+  //wire clct_pretrig_me1a = clct_pretrig && (csc_me1ab || cnt_non_me1ab_en) && only_me1a_hit && clct_pat_trig_en;  // Pretriggered on ME1A only
+  //wire clct_pretrig_me1b = clct_pretrig && (csc_me1ab || cnt_non_me1ab_en) && only_me1b_hit && clct_pat_trig_en;  // Pretriggered on ME1B only
+  wire clct_pretrig_me234 = clct_pretrig && only_me234_hit && clct_pat_trig_en; // no requirement on region
 
 // Modify trig_source[2] if there were ALCT coincidence, and add sources 9,10 for ME1A ME1B
   wire [10:0] trig_source_s0_mod;
@@ -2431,8 +2436,9 @@
   assign trig_source_s0_mod[1:0] = trig_source_s0[1:0];      // Copy non-alct trigger source bits
   assign trig_source_s0_mod[2]   = alct_preClct_window && clct_pretrig && alct_match_trig_en;  // ALCT window was open at pretrig
   assign trig_source_s0_mod[8:3] = trig_source_s0[8:3];      // Copy non-alct trigger source bits
-  assign trig_source_s0_mod[9]   = clct_pretrig_me1a;        // CLCT pre-trigger was ME1A only
-  assign trig_source_s0_mod[10]  = clct_pretrig_me1b;        // CLCT pre-trigger was ME1B only
+  //assign trig_source_s0_mod[9]   = clct_pretrig_me1a;        // CLCT pre-trigger was ME1A only
+  assign trig_source_s0_mod[9]   = 0;        // CLCT pre-trigger was ME1A only
+  assign trig_source_s0_mod[10]  = clct_pretrig_me234;        // CLCT pre-trigger was ME1B only
 
 // Retain a copy of latest pretrig for VME
   reg [2:0]        nlayers_hit_vme = 0;
@@ -2697,11 +2703,12 @@
     cnt_en[16]  <= cfeb_hit_at_pretrig[2];       // CLCT pretrigger is on CFEB2
     cnt_en[17]  <= cfeb_hit_at_pretrig[3];       // CLCT pretrigger is on CFEB3
     cnt_en[18]  <= cfeb_hit_at_pretrig[4];       // CLCT pretrigger is on CFEB4
-    cnt_en[19]  <= cfeb_hit_at_pretrig[5];       // CLCT pretrigger is on CFEB5
-    cnt_en[20]  <= cfeb_hit_at_pretrig[6];       // CLCT pretrigger is on CFEB6
+  //Tao, ME1/1->MEX/1
+    //cnt_en[19]  <= cfeb_hit_at_pretrig[5];       // CLCT pretrigger is on CFEB5
+    //cnt_en[20]  <= cfeb_hit_at_pretrig[6];       // CLCT pretrigger is on CFEB6
 
-    cnt_en[21]  <= clct_pretrig_me1a;            // CLCT pretrigger is on ME1A cfeb4-6 only
-    cnt_en[22]  <= clct_pretrig_me1b;            // CLCT pretrigger is on ME1B cfeb0-3 only
+    //cnt_en[21]  <= clct_pretrig_me1a;            // CLCT pretrigger is on ME1A cfeb4-6 only
+    cnt_en[22]  <= clct_pretrig_me234;            // CLCT pretrigger is on ME1B cfeb0-3 only
 
     cnt_en[23]  <= discard_nowrbuf_cnt_en;       // CLCT pretrig discarded, no wrbuf available, buffer stalled
     cnt_en[24]  <= discard_noalct_cnt_en;        // CLCT pretrig discarded, no alct in window
