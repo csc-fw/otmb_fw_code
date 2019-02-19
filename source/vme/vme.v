@@ -7231,7 +7231,7 @@
   //assign virtex6_extend_rd[9:8]    = cfeb_en[6:5];        // RO  Extend 0x68 cfeb_en[4:0] Readback actual cfeb_en state, altered by mask_all
   assign virtex6_extend_rd[15:0]    = virtex6_extend_wr[15:0];  // RW  Unused
 
-  wire   virtex6_extend_sump      = |virtex6_extend_wr[9:8];  // RO
+  //wire   virtex6_extend_sump      = |virtex6_extend_wr[9:8];  // RO
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_TMB_LATENCY_SR = 0x196 TMB Latency Shift Register
@@ -7476,9 +7476,9 @@
   virtex6_snap12_qpll_sump  |
   virtex6_gtx_rx_all_sump    |
   virtex6_sysmon_sump      |
-  adc_sump          |
-  cfeb_v6_badbits_ctrl_sump  |
-  virtex6_extend_sump
+  adc_sump          
+  //cfeb_v6_badbits_ctrl_sump  |
+  //virtex6_extend_sump
   ;
 
 
