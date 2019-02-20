@@ -426,8 +426,8 @@
   input      r12_fok;    // Serial interface status
 
 // SNAP12 receivers
-  input  [6:0]  rxp;      // SNAP12+ fiber comparator inputs for GTX
-  input  [6:0]  rxn;      // SNAP12- fiber comparator inputs for GTX
+  input  [MXCFEB-1:0]  rxp;      // SNAP12+ fiber comparator inputs for GTX
+  input  [MXCFEB-1:0]  rxn;      // SNAP12- fiber comparator inputs for GTX
 
 // Finisar
   input      f_sclk;
