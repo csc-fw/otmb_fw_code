@@ -52,7 +52,7 @@ On 2019 Feb. 14, A new branch called ME21ME31ME41fw_2019 is created on top of 20
 
 Now the ME21ME31ME41fw_2019 branch still used type C for normal CSC and type D for reversed CSC,  and ucf file is not changed yet. 
 
-the ME21ME31ME41 version is expceted to be commissioned for ME21 at begining of Run3 and ME3141 since Run3
+the ME21ME31ME41 version is expceted to be commissioned for ME21 at begining of Run3 and ME3141 since Run3. First compilation on 2019 Feb 19 with error.
 
 
 
