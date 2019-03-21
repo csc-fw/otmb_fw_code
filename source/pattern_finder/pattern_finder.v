@@ -411,12 +411,12 @@ module pattern_finder (
 //-------------------------------------------------------------------------------------------------------------------
 `ifdef CSC_TYPE_A
 
-  wire [MXHS * 4 - 1: 0] me234_ly0hs;
-  wire [MXHS * 4 - 1: 0] me234_ly1hs;
-  wire [MXHS * 4 - 1: 0] me234_ly2hs;
-  wire [MXHS * 4 - 1: 0] me234_ly3hs;
-  wire [MXHS * 4 - 1: 0] me234_ly4hs;
-  wire [MXHS * 4 - 1: 0] me234_ly5hs;
+  wire [MXHS * MXCFEB - 1: 0] me234_ly0hs;
+  wire [MXHS * MXCFEB - 1: 0] me234_ly1hs;
+  wire [MXHS * MXCFEB - 1: 0] me234_ly2hs;
+  wire [MXHS * MXCFEB - 1: 0] me234_ly3hs;
+  wire [MXHS * MXCFEB - 1: 0] me234_ly4hs;
+  wire [MXHS * MXCFEB - 1: 0] me234_ly5hs;
 
   // Orientation flags
   assign csc_type        = 4'hA; // Firmware compile type
@@ -486,12 +486,12 @@ module pattern_finder (
   //wire [MXHS * 3 - 1: 0] me1a_ly4hs;
   //wire [MXHS * 3 - 1: 0] me1a_ly5hs;
 
-  wire [MXHS * 4 - 1: 0] me234_ly0hs;
-  wire [MXHS * 4 - 1: 0] me234_ly1hs;
-  wire [MXHS * 4 - 1: 0] me234_ly2hs;
-  wire [MXHS * 4 - 1: 0] me234_ly3hs;
-  wire [MXHS * 4 - 1: 0] me234_ly4hs;
-  wire [MXHS * 4 - 1: 0] me234_ly5hs;
+  wire [MXHS * MXCFEB - 1: 0] me234_ly0hs;
+  wire [MXHS * MXCFEB - 1: 0] me234_ly1hs;
+  wire [MXHS * MXCFEB - 1: 0] me234_ly2hs;
+  wire [MXHS * MXCFEB - 1: 0] me234_ly3hs;
+  wire [MXHS * MXCFEB - 1: 0] me234_ly4hs;
+  wire [MXHS * MXCFEB - 1: 0] me234_ly5hs;
 
   // Orientation flags
   assign csc_type        = 4'hB; // Firmware compile type
@@ -557,7 +557,7 @@ module pattern_finder (
   //assign me1a_ly4hs = {cfeb6_ly4hs, cfeb5_ly4hs, cfeb4_ly4hs};
   //assign me1a_ly5hs = {cfeb6_ly5hs, cfeb5_ly5hs, cfeb4_ly5hs};
 
-  // Reversed ME1B CFEBs: 0, 1, 2, 3
+  // Reversed ME234/1 CFEBs: 0, 1, 2, 3, 4
   assign me234_ly0hs = {cfeb0_ly0hsr, cfeb1_ly0hsr, cfeb2_ly0hsr, cfeb3_ly0hsr, cfeb4_ly0hsr};
   assign me234_ly1hs = {cfeb0_ly1hsr, cfeb1_ly1hsr, cfeb2_ly1hsr, cfeb3_ly1hsr, cfeb4_ly1hsr};
   assign me234_ly2hs = {cfeb0_ly2hsr, cfeb1_ly2hsr, cfeb2_ly2hsr, cfeb3_ly2hsr, cfeb4_ly2hsr};
@@ -1097,7 +1097,7 @@ module pattern_finder (
     end
   endgenerate
 
-  // Best 1 of 7 HalfStrip patterns
+  // Best 1 of 5 HalfStrip patterns
   wire [MXPATB - 1: 0]  hs_pat_s2;
   wire [MXKEYBX - 1: 0] hs_key_s2;  // full key for 1 of 224
   best_1of5 ubest1of5_1st(
