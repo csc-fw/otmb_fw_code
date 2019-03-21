@@ -368,8 +368,8 @@
 //-------------------------------------------------------------------------------------------------------------------
   initial $display ("ICFEB=%H",ICFEB);
 
-  `ifdef CSC_TYPE_C initial $display ("CSC_TYPE_C=%H",`CSC_TYPE_C); `endif  // Normal  ME1B reversed ME1A
-  `ifdef CSC_TYPE_D initial $display ("CSC_TYPE_D=%H",`CSC_TYPE_D); `endif  // Reversed ME1B normal   ME1A
+  `ifdef CSC_TYPE_A initial $display ("CSC_TYPE_A=%H",`CSC_TYPE_A); `endif  // Normal  ME234/1
+  `ifdef CSC_TYPE_B initial $display ("CSC_TYPE_B=%H",`CSC_TYPE_B); `endif  // Reversed ME234/1
 
   `ifdef  CFEB_INJECT_STAGGER initial $display ("CFEB Pattern injector layer staggering is ON");  `endif
   `ifndef CFEB_INJECT_STAGGER initial $display ("CFEB Pattern injector layer staggering is OFF"); `endif

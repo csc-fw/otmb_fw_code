@@ -470,6 +470,8 @@
   `ifdef ALCT_MUONIC    initial $display ("ALCT_MUONIC   %H", `ALCT_MUONIC  );  `endif
   `ifdef CFEB_MUONIC    initial $display ("CFEB_MUONIC   %H", `CFEB_MUONIC  );  `endif
 
+  `ifdef CSC_TYPE_A     initial $display ("CSC_TYPE_A    %H", `CSC_TYPE_A   );  `endif      
+  `ifdef CSC_TYPE_B     initial $display ("CSC_TYPE_B    %H", `CSC_TYPE_B   );  `endif      
   `ifdef CSC_TYPE_C     initial $display ("CSC_TYPE_C    %H", `CSC_TYPE_C   );  `endif      
   `ifdef CSC_TYPE_D     initial $display ("CSC_TYPE_D    %H", `CSC_TYPE_D   );  `endif      
 

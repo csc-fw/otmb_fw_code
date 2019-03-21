@@ -6,6 +6,8 @@
 //-------------------------------------------------------------------------------------------------------------------
 // Conditional compile flags, normally set by global defines. Override here for standalone debugging
 //-------------------------------------------------------------------------------------------------------------------
+// `define CSC_TYPE_A   04'hA  // Normal ME234/1
+// `define CSC_TYPE_B   04'hB  // Reversed ME234/1
 // `define CSC_TYPE_C   04'hC  // Normal ME1B, reversed ME1A
 // `define CSC_TYPE_D   04'hD  // Reversed ME1B, normal ME1A
 //-------------------------------------------------------------------------------------------------------------------
@@ -253,6 +255,8 @@ module pattern_finder (
 // Load global definitions
 //-------------------------------------------------------------------------------------------------------------------
 `include "../otmb_virtex6_fw_version.v"
+`ifdef CSC_TYPE_A initial $display ("CSC_TYPE_A=%H",`CSC_TYPE_A); `endif // Normal   ME234/1
+`ifdef CSC_TYPE_B initial $display ("CSC_TYPE_B=%H",`CSC_TYPE_B); `endif // Reversed ME234/1
 `ifdef CSC_TYPE_C initial $display ("CSC_TYPE_C=%H",`CSC_TYPE_C); `endif // Normal   ME1B, reversed ME1A
 `ifdef CSC_TYPE_D initial $display ("CSC_TYPE_D=%H",`CSC_TYPE_D); `endif // Reversed ME1B, normal   ME1A
 `define	STAGGER_HS_CSC 01'h1
@@ -402,10 +406,10 @@ module pattern_finder (
 
 
 //-------------------------------------------------------------------------------------------------------------------
-// Stage 4A3: CSC_TYPE_C: Normal ME1B, reversed ME1A
+// Stage 4A3: CSC_TYPE_A: Normal ME234/1
   //Tao, ME1/1->MEX/1, should be normal CSC
 //-------------------------------------------------------------------------------------------------------------------
-`ifdef CSC_TYPE_C
+`ifdef CSC_TYPE_A
 
   wire [MXHS * 4 - 1: 0] me234_ly0hs;
   wire [MXHS * 4 - 1: 0] me234_ly1hs;
@@ -415,12 +419,12 @@ module pattern_finder (
   wire [MXHS * 4 - 1: 0] me234_ly5hs;
 
   // Orientation flags
-  assign csc_type        = 4'hC; // Firmware compile type
+  assign csc_type        = 4'hA; // Firmware compile type
   assign csc_me1ab       = 0;    // 1 = ME1A or ME1B CSC, ignore for MEX/1
   assign reverse_hs_csc  = 0;    // 1 = Reversed  CSC non-ME1
   assign reverse_hs_me1a = 0;    // 1 = Reverse ME1A HalfStrips prior to pattern sorting
   assign reverse_hs_me1b = 0;    // 1 = Reverse ME1B HalfStrips prior to pattern sorting
-  initial $display ("CSC_TYPE_C instantiated");
+  initial $display ("CSC_TYPE_A instantiated");
 
   //Tao, ME1/1->MEX/1, no reversed ME1A anymore
   // Generate hs reversal map for ME1A
@@ -462,18 +466,18 @@ module pattern_finder (
  // assign me1a_ly5hs = {cfeb4_ly5hsr, cfeb5_ly5hsr, cfeb6_ly5hsr};
 
   // Normal ME1B CFEBs: 3, 2, 1, 0
-  assign me234_ly0hs = {cfeb3_ly0hs, cfeb2_ly0hs, cfeb1_ly0hs, cfeb0_ly0hs};
-  assign me234_ly1hs = {cfeb3_ly1hs, cfeb2_ly1hs, cfeb1_ly1hs, cfeb0_ly1hs};
-  assign me234_ly2hs = {cfeb3_ly2hs, cfeb2_ly2hs, cfeb1_ly2hs, cfeb0_ly2hs};
-  assign me234_ly3hs = {cfeb3_ly3hs, cfeb2_ly3hs, cfeb1_ly3hs, cfeb0_ly3hs};
-  assign me234_ly4hs = {cfeb3_ly4hs, cfeb2_ly4hs, cfeb1_ly4hs, cfeb0_ly4hs};
-  assign me234_ly5hs = {cfeb3_ly5hs, cfeb2_ly5hs, cfeb1_ly5hs, cfeb0_ly5hs};
+  assign me234_ly0hs = {cfeb4_ly0hsr, cfeb3_ly0hs, cfeb2_ly0hs, cfeb1_ly0hs, cfeb0_ly0hs};
+  assign me234_ly1hs = {cfeb4_ly1hsr, cfeb3_ly1hs, cfeb2_ly1hs, cfeb1_ly1hs, cfeb0_ly1hs};
+  assign me234_ly2hs = {cfeb4_ly2hsr, cfeb3_ly2hs, cfeb2_ly2hs, cfeb1_ly2hs, cfeb0_ly2hs};
+  assign me234_ly3hs = {cfeb4_ly3hsr, cfeb3_ly3hs, cfeb2_ly3hs, cfeb1_ly3hs, cfeb0_ly3hs};
+  assign me234_ly4hs = {cfeb4_ly4hsr, cfeb3_ly4hs, cfeb2_ly4hs, cfeb1_ly4hs, cfeb0_ly4hs};
+  assign me234_ly5hs = {cfeb4_ly5hsr, cfeb3_ly5hs, cfeb2_ly5hs, cfeb1_ly5hs, cfeb0_ly5hs};
 
 //-------------------------------------------------------------------------------------------------------------------
-// Stage 4A4: CSC_TYPE_D: Normal ME1A, reversed ME1B
+// Stage 4A4: CSC_TYPE_B: Reserved ME234/1
 // Tao, ME1/1->MEX/1, should be reversed CSC
 //-------------------------------------------------------------------------------------------------------------------
-`elsif CSC_TYPE_D
+`elsif CSC_TYPE_B
 // Tao, ME1/1->MEX/1, should be reversed CSC
   //wire [MXHS * 3 - 1: 0] me1a_ly0hs;
   //wire [MXHS * 3 - 1: 0] me1a_ly1hs;
@@ -490,12 +494,12 @@ module pattern_finder (
   wire [MXHS * 4 - 1: 0] me234_ly5hs;
 
   // Orientation flags
-  assign csc_type        = 4'hD; // Firmware compile type
+  assign csc_type        = 4'hB; // Firmware compile type
   assign csc_me1ab       = 0;    // 1 = ME1A or ME1B CSC
   assign reverse_hs_csc  = 1;    // 1 = Reversed  CSC non-ME1
   assign reverse_hs_me1a = 0;    // 1 = Reverse ME1A HalfStrips prior to pattern sorting
   assign reverse_hs_me1b = 0;    // 1 = Reverse ME1B HalfStrips prior to pattern sorting
-  initial $display ("CSC_TYPE_D instantiated");
+  initial $display ("CSC_TYPE_B instantiated");
 
   // Generate hs reversal map for ME1B
   wire [MXHS - 1: 0] cfeb0_ly0hsr, cfeb0_ly1hsr, cfeb0_ly2hsr, cfeb0_ly3hsr, cfeb0_ly4hsr, cfeb0_ly5hsr;
@@ -554,12 +558,12 @@ module pattern_finder (
   //assign me1a_ly5hs = {cfeb6_ly5hs, cfeb5_ly5hs, cfeb4_ly5hs};
 
   // Reversed ME1B CFEBs: 0, 1, 2, 3
-  assign me234_ly0hs = {cfeb0_ly0hsr, cfeb1_ly0hsr, cfeb2_ly0hsr, cfeb3_ly0hsr};
-  assign me234_ly1hs = {cfeb0_ly1hsr, cfeb1_ly1hsr, cfeb2_ly1hsr, cfeb3_ly1hsr};
-  assign me234_ly2hs = {cfeb0_ly2hsr, cfeb1_ly2hsr, cfeb2_ly2hsr, cfeb3_ly2hsr};
-  assign me234_ly3hs = {cfeb0_ly3hsr, cfeb1_ly3hsr, cfeb2_ly3hsr, cfeb3_ly3hsr};
-  assign me234_ly4hs = {cfeb0_ly4hsr, cfeb1_ly4hsr, cfeb2_ly4hsr, cfeb3_ly4hsr};
-  assign me234_ly5hs = {cfeb0_ly5hsr, cfeb1_ly5hsr, cfeb2_ly5hsr, cfeb3_ly5hsr};
+  assign me234_ly0hs = {cfeb0_ly0hsr, cfeb1_ly0hsr, cfeb2_ly0hsr, cfeb3_ly0hsr, cfeb4_ly0hs};
+  assign me234_ly1hs = {cfeb0_ly1hsr, cfeb1_ly1hsr, cfeb2_ly1hsr, cfeb3_ly1hsr, cfeb4_ly1hs};
+  assign me234_ly2hs = {cfeb0_ly2hsr, cfeb1_ly2hsr, cfeb2_ly2hsr, cfeb3_ly2hsr, cfeb4_ly2hs};
+  assign me234_ly3hs = {cfeb0_ly3hsr, cfeb1_ly3hsr, cfeb2_ly3hsr, cfeb3_ly3hsr, cfeb4_ly3hs};
+  assign me234_ly4hs = {cfeb0_ly4hsr, cfeb1_ly4hsr, cfeb2_ly4hsr, cfeb3_ly4hsr, cfeb4_ly4hs};
+  assign me234_ly5hs = {cfeb0_ly5hsr, cfeb1_ly5hsr, cfeb2_ly5hsr, cfeb3_ly5hsr, cfeb4_ly5hs};
 
 //-------------------------------------------------------------------------------------------------------------------
 // Stage 4A5: CSC_TYPE_X Undefined
@@ -797,10 +801,10 @@ module pattern_finder (
 //	end 
 //`endif
 // Tao ME1/1->MEX/1, now type_c: normal; type_d: reversed
-`ifdef CSC_TYPE_C
+`ifdef CSC_TYPE_A
            hs_hit_s0ab[ihs] <= cfeb_en_ff[ihs/MXHS] ? hs_hit[ihs] : 0;
            hs_pid_s0ab[ihs] <= cfeb_en_ff[ihs/MXHS] ? hs_pid[ihs] : 0;
-`elsif CSC_TYPE_D
+`elsif CSC_TYPE_B
            hs_hit_s0ab[ihs] <= cfeb_en_ff[MXCFEB-1-ihs/MXHS] ? hs_hit[ihs] : 0;
            hs_pid_s0ab[ihs] <= cfeb_en_ff[MXCFEB-1-ihs/MXHS] ? hs_pid[ihs] : 0;
 `endif
@@ -844,6 +848,8 @@ module pattern_finder (
   //reg [MXHS - 1: 0] hs_key_hit6, hs_key_pid6, hs_key_dmb6;
 
   // Display CSC_TYPE
+`ifdef CSC_TYPE_A initial $display ("CSC_TYPE_A is defined for pre-trigger look-ahead"); `endif
+`ifdef CSC_TYPE_B initial $display ("CSC_TYPE_B is defined for pre-trigger look-ahead"); `endif
 `ifdef CSC_TYPE_C initial $display ("CSC_TYPE_C is defined for pre-trigger look-ahead"); `endif
 `ifdef CSC_TYPE_D initial $display ("CSC_TYPE_D is defined for pre-trigger look-ahead"); `endif
 
@@ -852,8 +858,8 @@ module pattern_finder (
   generate
     for (ihs = 0; ihs <= MXHS - 1; ihs = ihs + 1) begin: thrg
       always @(posedge clock) begin: thrff
-       `ifdef CSC_TYPE_C 
-        // Reversed ME1A, Normal ME1B
+       `ifdef CSC_TYPE_A
+        // Normal ME234/1
         hs_key_hit0[ihs] = (hs_hit_s0ab[ihs + MXHS*0]   >= hit_thresh_pretrig_ff) && !(algo2016_use_dead_time_zone & hs_key_dead[ihs + MXHS*0]); // Normal 
         hs_key_hit1[ihs] = (hs_hit_s0ab[ihs + MXHS*1]   >= hit_thresh_pretrig_ff) && !(algo2016_use_dead_time_zone & hs_key_dead[ihs + MXHS*1]);
         hs_key_hit2[ihs] = (hs_hit_s0ab[ihs + MXHS*2]   >= hit_thresh_pretrig_ff) && !(algo2016_use_dead_time_zone & hs_key_dead[ihs + MXHS*2]);
@@ -884,8 +890,8 @@ module pattern_finder (
         //hs_key_dmb5[ihs] = (hs_hit_s0ab[MXHS*6 -1 -ihs] >= dmb_thresh_pretrig_ff) && !(algo2016_use_dead_time_zone & hs_key_dead[MXHS*6 -1 -ihs]);
         //hs_key_dmb6[ihs] = (hs_hit_s0ab[MXHS*5 -1 -ihs] >= dmb_thresh_pretrig_ff) && !(algo2016_use_dead_time_zone & hs_key_dead[MXHS*5 -1 -ihs]);
 
-       `elsif CSC_TYPE_D
-         // Normal ME1A, Reversed ME1B
+       `elsif CSC_TYPE_B
+         // Reversed ME234/1
         hs_key_hit0[ihs] = (hs_hit_s0ab[MXHS*5 -1 -ihs] >= hit_thresh_pretrig_ff) && !(algo2016_use_dead_time_zone & hs_key_dead[MXHS*5 -1 -ihs]); // Reversed ME1B
         hs_key_hit1[ihs] = (hs_hit_s0ab[MXHS*4 -1 -ihs] >= hit_thresh_pretrig_ff) && !(algo2016_use_dead_time_zone & hs_key_dead[MXHS*4 -1 -ihs]);
         hs_key_hit2[ihs] = (hs_hit_s0ab[MXHS*3 -1 -ihs] >= hit_thresh_pretrig_ff) && !(algo2016_use_dead_time_zone & hs_key_dead[MXHS*3 -1 -ihs]);
