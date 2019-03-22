@@ -54,6 +54,13 @@ Now the ME21ME31ME41fw_2019 branch still used type C for normal CSC and type D f
 
 the ME21ME31ME41 version is expceted to be commissioned for ME21 at begining of Run3 and ME3141 since Run3. First compilation on 2019 Feb 19 without error.
 
+Update on March 21, 2019: 
+  - fixed a few bugs in code and made it finally work
+  - tested all 5 fiber inputs and all are working fine
+  - later move 5 input fiber positions to 1,2,3,4,5 (nominal operation setting) in otmb_virtex6_pinout_MEX1.ucf and used it as the defaul ucf in project file
+  - change the condition of swapping rxn and rxp (namely gtx_rx_pol_swap) in source/cfeb/cfeb.v 
+  - next: test the new ME234/1 OTMB fw with changed fiber positions
+
 
 
 

@@ -397,7 +397,8 @@
 // Virtex6 DCFEB optical receivers
   wire [47:0] gtx_rx_data;
   wire        gtx_rx_data_bits_or = (|gtx_rx_data); // CFEB data received on optical link
-  wire        gtx_rx_pol_swap     = (ICFEB==4 || ICFEB==5); //swap RX for fiber 10 and 11 only,  be careful when rearranging fibers!!
+  //wire        gtx_rx_pol_swap     = (ICFEB==4 || ICFEB==5); //swap RX for physical fiber 10 and 11 only,  be careful when rearranging fibers!!
+  wire        gtx_rx_pol_swap     = 0; //swap RX for physical fiber 10 and 11 only,  be careful when rearranging fibers!!
 
   gtx_optical_rx ugtx_optical_rx
   (
