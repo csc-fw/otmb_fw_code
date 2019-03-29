@@ -61,6 +61,9 @@ Update on March 21, 2019:
   - change the condition of swapping rxn and rxp (namely gtx_rx_pol_swap) in source/cfeb/cfeb.v 
   - next: test the new ME234/1 OTMB fw with changed fiber positions
 
+Update on March 24, 2019
+  - create otmb_virtex6_pinout_MEX1.ucf file to move input fiber positions to 1,2,3,4,5
+
 
 
 
