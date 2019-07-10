@@ -107,6 +107,13 @@
 //              blinks Blue Mez LED when nonzero GEM data is detected
 //              -- created in gem.v which is basically a hacked copy of cfeb.v
 //              -- later expand this to 4 GEM fibers on physical fibers 5-8
+//  10/25/2017  focus on fix for Yuri's algo2016_deadzone implementation in sequencer & pattern_finder
+//             -also fixed bugs in cfeb_active logic, cfeb_en application in CLCT an layer_trig logic
+//  10/27/2017  testing if new noflush logic etc cause the rate problems, add "dynamic dead zone" etc to enable
+//             -only changed sequencer file
+//  12/05/2017  found a bug in busy/dead zone logic with layerTrig handling, casued half-rate bug... add layer_trig_en req to fix.
+//  12/08/2017  removed temporary half-rate-debug options, return to normal algo2016 control
+
 //---------------------------------------------------------------------------------------------------------------------------------------
 //  End Global Definitions
 //---------------------------------------------------------------------------------------------------------------------------------------

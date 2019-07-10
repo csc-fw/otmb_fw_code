@@ -1850,6 +1850,14 @@
   wire  [MXHITB-1:0]  hs_nlayers_hit; // Number of layers hit
   wire  [MXLY-1:0]    hs_layer_or;    // Layer ORs
 
+  wire       algo2016_use_dead_time_zone;         // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
+  wire [4:0] algo2016_dead_time_zone_size;        // Constant size of the dead time zone
+  wire       algo2016_use_dynamic_dead_time_zone; // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
+  wire       algo2016_drop_used_clcts;            // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - drop used CLCTs
+  wire       algo2016_cross_bx_algorithm;         // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
+  wire       algo2016_clct_use_corrected_bx;      // NOT YET IMPLEMENTED: Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
+  
+
   pattern_finder upattern_finder
   (
 // Ports
@@ -1930,6 +1938,10 @@
   .cfeb_layer_trig  (cfeb_layer_trig),              // Out  Layer pretrigger
   .cfeb_layer_or    (cfeb_layer_or[MXLY-1:0]),      // Out  OR of hstrips on each layer
   .cfeb_nlayers_hit (cfeb_nlayers_hit[MXHITB-1:0]), // Out  Number of CSC layers hit
+//to add dead time feature in 2016Algo  
+  .drift_delay        (drift_delay[MXDRIFT-1:0]),      // In  CSC Drift delay clocks
+  .algo2016_use_dead_time_zone         (algo2016_use_dead_time_zone), // In Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
+  .algo2016_dead_time_zone_size        (algo2016_dead_time_zone_size[4:0]),   // In Constant size of the dead time zone
 
 // 2nd CLCT separation RAM Ports
   .clct_sep_src       (clct_sep_src),             // In  CLCT separation source 1=vme, 0=ram
@@ -2027,6 +2039,8 @@
 
    wire [3:0]             alct_delay;
    wire [3:0]             clct_window;
+   wire [3:0]             algo2016_window;       // CLCT match window width (for ALCT-centric 2016 algorithm)
+   wire                   algo2016_clct_to_alct; // ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
    wire [3:0]             alct_bx0_delay; // ALCT bx0 delay to mpc transmitter
    wire [3:0]             clct_bx0_delay; // CLCT bx0 delay to mpc transmitter
 
@@ -2311,6 +2325,10 @@
 
   .alct_delay  (alct_delay[3:0]),  // In  Delay ALCT for CLCT match window
   .clct_window (clct_window[3:0]), // In  CLCT match window width
+   
+  .algo2016_use_dead_time_zone         (algo2016_use_dead_time_zone),         // In Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
+  .algo2016_dead_time_zone_size        (algo2016_dead_time_zone_size[4:0]),   // In Constant size of the dead time zone
+  .algo2016_use_dynamic_dead_time_zone (algo2016_use_dynamic_dead_time_zone), // In Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
 
   .tmb_allow_alct  (tmb_allow_alct),  // In  Allow ALCT only
   .tmb_allow_clct  (tmb_allow_clct),  // In  Allow CLCT only
@@ -3372,8 +3390,10 @@
   ._mpc_tx (_mpc_tx[MXMPCTX-1:0]), // Out  MPC 80MHz rx data
 
 // VME Configuration
-  .alct_delay  (alct_delay[3:0]),  // In  Delay ALCT for CLCT match window
-  .clct_window (clct_window[3:0]), // In  CLCT match window width
+  .alct_delay            (alct_delay[3:0]),  // In  Delay ALCT for CLCT match window
+  .clct_window_in        (clct_window[3:0]), // In  CLCT match window width
+  .algo2016_window       (algo2016_window[3:0]),  // In CLCT match window width (for ALCT-centric 2016 algorithm)
+  .algo2016_clct_to_alct (algo2016_clct_to_alct), // In ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
 
   .tmb_sync_err_en (tmb_sync_err_en[1:0]), // In  Allow sync_err to MPC for either muon
   .tmb_allow_alct  (tmb_allow_alct),       // In  Allow ALCT only
@@ -3383,6 +3403,10 @@
   .tmb_allow_alct_ro  (tmb_allow_alct_ro),  // In  Allow ALCT only  readout, non-triggering
   .tmb_allow_clct_ro  (tmb_allow_clct_ro),  // In  Allow CLCT only  readout, non-triggering
   .tmb_allow_match_ro (tmb_allow_match_ro), // In  Allow Match only readout, non-triggering
+  
+  .algo2016_drop_used_clcts(algo2016_drop_used_clcts),             // In Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - drop used CLCTs
+  .algo2016_cross_bx_algorithm(algo2016_cross_bx_algorithm),       // In LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
+  .algo2016_clct_use_corrected_bx(algo2016_clct_use_corrected_bx), // In Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits NOT YET IMPLEMENTED:
 
   .csc_id          (csc_id[MXCSC-1:0]),   // In  CSC station number
   .csc_me1ab       (csc_me1ab),           // In  1=ME1A or ME1B CSC type
@@ -4277,6 +4301,8 @@
       // TMB Ports: Configuration
       .alct_delay  (alct_delay[3:0]),  // Out  Delay ALCT for CLCT match window
       .clct_window (clct_window[3:0]), // Out  CLCT match window width
+      .algo2016_window       (algo2016_window[3:0]),  // Out CLCT match window width (for ALCT-centric 2016 algorithm)
+      .algo2016_clct_to_alct (algo2016_clct_to_alct), // Out ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
 
       .tmb_sync_err_en (tmb_sync_err_en[1:0]), // Out  Allow sync_err to MPC for either muon
       .tmb_allow_alct  (tmb_allow_alct),       // Out  Allow ALCT only
@@ -4286,6 +4312,13 @@
       .tmb_allow_alct_ro  (tmb_allow_alct_ro),  // Out  Allow ALCT only  readout, non-triggering
       .tmb_allow_clct_ro  (tmb_allow_clct_ro),  // Out  Allow CLCT only  readout, non-triggering
       .tmb_allow_match_ro (tmb_allow_match_ro), // Out  Allow Match only readout, non-triggering
+      
+      .algo2016_use_dead_time_zone         (algo2016_use_dead_time_zone),         // Out Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
+      .algo2016_dead_time_zone_size        (algo2016_dead_time_zone_size[4:0]),   // Out Constant size of the dead time zone
+      .algo2016_use_dynamic_dead_time_zone (algo2016_use_dynamic_dead_time_zone), // Out Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
+      .algo2016_drop_used_clcts            (algo2016_drop_used_clcts),            // Out Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - drop used CLCTs
+      .algo2016_cross_bx_algorithm         (algo2016_cross_bx_algorithm),         // Out LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
+      .algo2016_clct_use_corrected_bx      (algo2016_clct_use_corrected_bx),      // Out Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits NOT YET IMPLEMENTED:
 
       .alct_bx0_delay  (alct_bx0_delay[3:0]), // Out  ALCT bx0 delay to mpc transmitter
       .clct_bx0_delay  (clct_bx0_delay[3:0]), // Out  CLCT bx0 delay to mpc transmitter

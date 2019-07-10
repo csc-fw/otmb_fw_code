@@ -534,6 +534,8 @@
 
   alct_delay,
   clct_window,
+  algo2016_clct_window,
+  algo2016_clct_to_alct,
 
   tmb_allow_alct,
   tmb_allow_clct,
@@ -1076,6 +1078,12 @@
   deb_buf_push_data,
   deb_buf_pop_data,
 
+// Algo2016: configuration
+  algo2016_use_dead_time_zone,
+// JG: this functionality is being removed, 10/25/2017...
+  algo2016_dead_time_zone_size,
+  algo2016_use_dynamic_dead_time_zone,
+
 // Sump
   sequencer_sump
 
@@ -1406,6 +1414,8 @@
 
   input  [3:0] alct_delay;  // Delay ALCT for CLCT match window
   input  [3:0] clct_window; // CLCT match window width
+  input  [3:0] algo2016_clct_window;  // CLCT match window width (for ALCT-centric 2016 algorithm)
+  input        algo2016_clct_to_alct; // ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
 
   input tmb_allow_alct;  // Allow ALCT only
   input tmb_allow_clct;  // Allow CLCT only
@@ -1947,6 +1957,12 @@
   output  [MXBADR-1:0]  deb_buf_pop_adr;    // Queue pop  address at last pop
   output  [MXBDATA-1:0]  deb_buf_push_data;    // Queue push data at last push
   output  [MXBDATA-1:0]  deb_buf_pop_data;    // Queue pop  data at last pop
+  
+// Algo2016: configuration
+  input       algo2016_use_dead_time_zone;         // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
+// JG: this functionality is being removed, 10/25/2017...
+  input [4:0] algo2016_dead_time_zone_size;        // Constant size of the dead time zone
+  input       algo2016_use_dynamic_dead_time_zone; // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
 
 // Sump
   output          sequencer_sump;      // Unused signals
@@ -2701,7 +2717,10 @@
 // Trigger flush state timer. Wait for 1/2-strip one-shots and raw hits fifo to clear
   reg   [MXFLUSH-1:0] flush_cnt=0;
 
-  wire flush_cnt_clr = (clct_sm != flush) || !clct_notbusy;  // Flush timer resets if triad debris remains
+  //wire flush_cnt_clr = (clct_sm != flush) || !clct_notbusy;  // Flush timer resets if triad debris remains
+  wire flush_cnt_clr;
+  //2016algo: drop clct_notbusy in flush_cnt_clr
+  assign flush_cnt_clr = algo2016_use_dead_time_zone ? (clct_sm != flush) : ((clct_sm != flush) || !clct_notbusy);  // Flush timer resets if triad de     bris remains
   wire flush_cnt_ena = (clct_sm == flush);
 
   always @(posedge clock) begin
@@ -2709,10 +2728,12 @@
     else if (flush_cnt_ena) flush_cnt = flush_cnt-1'b1;      // only count during flush
   end
 
-  assign flush_done = ((flush_cnt == 0) || noflush) && clct_notbusy;
+  //assign flush_done = ((flush_cnt == 0) || noflush) && clct_notbusy;
+  assign flush_done = algo2016_use_dead_time_zone ? ((flush_cnt == 0) || noflush) : (((flush_cnt == 0) || noflush) && clct_notbusy);
 
   always @(posedge clock) begin
-    noflush  <= (clct_flush_delay == 0);
+    //noflush  <= (clct_flush_delay == 0);
+    noflush  <= (algo2016_use_dead_time_zone) || (clct_flush_delay == 0);
   end
 
 // Delay trigger source and cfeb active feb list 1bx for clct_sm to go to pretrig state
@@ -4613,7 +4634,8 @@
   assign  header21_[3:0]    =  triad_persist[3:0];      // CLCT Triad persistence
   assign  header21_[6:4]    =  dmb_thresh_pretrig[2:0]; // DMB pre-trigger threshold for active-feb
   assign  header21_[10:7]   =  alct_delay[3:0];         // Delay ALCT for CLCT match window
-  assign  header21_[14:11]  =  clct_window[3:0];        // CLCT match window width
+//assign  header21_[14:11]  =  clct_window[3:0];        // CLCT match window width
+  assign  header21_[14:11]  = (algo2016_clct_to_alct ? algo2016_clct_window[3:0] : clct_window[3:0] ); // CLCT match window width (if algo2016_clct_to_alct = 1 then set window to ALCT-centric 2016 algorithm else to CLCT-centric "old" algorithm)
   assign  header21_[18:15]  =  0;                       // DDU+DMB control flags
 
 // CLCT Trigger Status
