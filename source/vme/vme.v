@@ -8090,12 +8090,12 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-    // "Old" algorithm switched ON by default:
-    algo2016_ctrl_wr[0]   = 1'b0;  // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
+    // "Old" algorithm switched ON by default:, Tao: test 
+    algo2016_ctrl_wr[0]   = 1'b1;  // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
     algo2016_ctrl_wr[5:1] = 5'd15; // Constant size of the dead time zone
-    algo2016_ctrl_wr[6]   = 1'b0;  // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
+    algo2016_ctrl_wr[6]   = 1'b1;  // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
     algo2016_ctrl_wr[7]   = 1'b0;  // ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
-    algo2016_ctrl_wr[8]   = 1'b0;  // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - similar to "old" behavior of CLCT-centric algorithm when ALCTs are droped from further usage
+    algo2016_ctrl_wr[8]   = 1'b1;  // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - similar to "old" behavior of CLCT-centric algorithm when ALCTs are droped from further usage
     algo2016_ctrl_wr[9]   = 1'b0;  // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
     algo2016_ctrl_wr[10]  = 1'b0;  // Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
     // Algo2016 ON:    
