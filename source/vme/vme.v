@@ -8392,6 +8392,7 @@ always @(posedge clock_vme) begin
   if    (wr_gem_inj_ctrl)          gem_inj_ctrl_wr         <= d[15:0];
   if    (wr_gem_inj_data)          gem_inj_data_wr         <= d[15:0];
   if    (wr_mpc_frames_fifo_ctrl)  mpc_frames_fifo_ctrl_wr <= d[15:0];
+  if    (wr_algo2016_ctrl)         algo2016_ctrl_wr        <= d[15:0];
 end
 
 //------------------------------------------------------------------------------------------------------------------
