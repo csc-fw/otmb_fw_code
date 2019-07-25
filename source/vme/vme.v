@@ -1347,7 +1347,7 @@
   parameter ADR_GTX_SYNC_DONE_TIME    = 10'h192; // Read gtx rx sync done time
 
   parameter ADR_TMB_LATENCY_SR        = 10'h196; // Shift register for "CFEB data received on optical link" latched with MPC frame latch strobe for VME
-  parameter ADR_ALGO2016_CTRL         = 9'h198; // Controls parameters of new trigger algorithm, firstly added 2016 and then verified in 2018, Yuriy,Jason,Tao
+  parameter ADR_ALGO2016_CTRL         = 10'h198; // Controls parameters of new trigger algorithm, firstly added 2016 and then verified in 2018, Yuriy,Jason,Tao
 
   parameter ADR_MPC_INJ               = 10'h90;  // MPC Injector Control
   parameter ADR_MPC_RAM_ADR           = 10'h92;  // MPC Injector RAM address
