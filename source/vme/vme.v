@@ -8365,12 +8365,6 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   genvar icluster;
   generate
   for (icluster=0; icluster<MXCLST; icluster=icluster+1) begin: gen_gem_cluster
-    initial begin
-        gemA_cluster_rd[icluster] = 0;
-        gemB_cluster_rd[icluster] = 0;
-        gem_copad_rd[icluster]    = 0;
-
-    end
     assign gemA_cluster_rd[icluster][CLSTBITS-1:0] = gemA_cluster_vme[icluster][CLSTBITS-1:0]; 
     assign gemB_cluster_rd[icluster][CLSTBITS-1:0] = gemB_cluster_vme[icluster][CLSTBITS-1:0]; 
     assign gem_copad_rd[icluster][CLSTBITS-1:0]    = gem_copad_vme[icluster][CLSTBITS-1:0]; 
