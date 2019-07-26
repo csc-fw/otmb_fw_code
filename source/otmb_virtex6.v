@@ -253,29 +253,34 @@
   parameter MXRAMDATA  =  18; // Number Raw Hits RAM data bits, does not include fifo wren
 
 // TMB Constants
-  parameter MXCLCT    =  16; // Number bits per CLCT word
-  parameter MXCLCTC   =  3;  // Number bits per CLCT common data word
-  parameter MXALCT    =  16; // Number bits per ALCT word
-  parameter MXMPCRX   =  2;  // Number bits from MPC
-  parameter MXMPCTX   =  32; // Number bits sent to MPC
-  parameter MXFRAME   =  16; // Number bits per muon frame
-  parameter NHBITS    =  6;  // Number bits needed for header count
-  parameter MXMPCDLY  =  4;  // MPC delay time bits
+  parameter MXCLCT     =  16; // Number bits per CLCT word
+  parameter MXCLCTC    =  3;  // Number bits per CLCT common data word
+  parameter MXALCT     =  16; // Number bits per ALCT word
+  parameter MXMPCRX    =  2;  // Number bits from MPC
+  parameter MXMPCTX    =  32; // Number bits sent to MPC
+  parameter MXFRAME    =  16; // Number bits per muon frame
+  parameter NHBITS     =  6;  // Number bits needed for header count
+  parameter MXMPCDLY   =  4;  // MPC delay time bits
 
-  parameter MXGEM     =  4;  // Number GEM FIBERS == 2x number of GEM chambers == 4x number of GEM superchambers
-  parameter MXGEMB    =  2;  // Number GEM ID bits. 0=gemAfiber0, 1=gemAfiber1, 2=gemBfiber0, 3=gemBfiber1
+  parameter MXGEM      =  4;  // Number GEM FIBERS == 2x number of GEM chambers == 4x number of GEM superchambers
+  parameter MXGEMB     =  2;  // Number GEM ID bits. 0=gemAfiber0, 1=gemAfiber1, 2=gemBfiber0, 3=gemBfiber1
+  parameter MXCLST     = 4;        // Number of GEM Clusters Per Fiber
+  parameter CLSTBITS   =  14; // Number bits per GEM cluster
+  parameter MXCLUSTER_CHAMBER       = 8; // Num GEM clusters  per Chamber
+  parameter MXCLUSTER_SUPERCHAMBER  = 16; //Num GEM cluster  per superchamber
+  
 
 // RPC Constants
-  parameter MXRPC     =  2;  // Number RPCs
-  parameter MXRPCB    =  1;  // Number RPC ID bits
-  parameter MXRPCPAD  =  16; // Number RPC pads per link board
-  parameter MXRPCDB   =  19; // Number RPC bits per link board
-  parameter MXRPCRX   =  38; // Number RPC bits per phase from RAT module
+  parameter MXRPC      =  2;  // Number RPCs
+  parameter MXRPCB     =  1;  // Number RPC ID bits
+  parameter MXRPCPAD   =  16; // Number RPC pads per link board
+  parameter MXRPCDB    =  19; // Number RPC bits per link board
+  parameter MXRPCRX    =  38; // Number RPC bits per phase from RAT module
 
 // Counters
-  parameter MXCNTVME  =  30; // VME counter width
-  parameter MXORBIT   =  30; // Number orbit counter bits
-  parameter MXL1ARX   =  12; // Number L1As received counter bits
+  parameter MXCNTVME   =  30; // VME counter width
+  parameter MXORBIT    =  30; // Number orbit counter bits
+  parameter MXL1ARX    =  12; // Number L1As received counter bits
 
 //-------------------------------------------------------------------------------------------------------------------
 // I/O Port Declarations
@@ -1528,7 +1533,7 @@
   wire  [0:0]   gem_vpf3 [MXGEM-1:0]; // cluster3 valid flag
 
   // join fibers together into the two GEM chambers
-  wire [13:0] gemA_cluster [7:0] = {
+  wire [CLSTBITS-1:0] gemA_cluster [MXCLUSTER_CHAMBER-1:0] = {
     gem_cluster3[1],
     gem_cluster2[1],
     gem_cluster1[1],
@@ -1539,7 +1544,7 @@
     gem_cluster0[0]
   };
 
-  wire [13:0] gemB_cluster [7:0] = {
+  wire [CLSTBITS-1:0] gemB_cluster [MXCLUSTER_CHAMBER-1:0] = {
     gem_cluster3[3],
     gem_cluster2[3],
     gem_cluster1[3],
@@ -1550,7 +1555,7 @@
     gem_cluster0[2]
   };
 
-  wire [7:0] gemA_vpf = {
+  wire [MXCLUSTER_CHAMBER-1:0] gemA_vpf = {
     gem_vpf3[1],
     gem_vpf2[1],
     gem_vpf1[1],
@@ -1561,7 +1566,7 @@
     gem_vpf0[0]
   };
 
-  wire [7:0] gemB_vpf = {
+  wire [MXCLUSTER_CHAMBER-1:0] gemB_vpf = {
     gem_vpf3[3],
     gem_vpf2[3],
     gem_vpf1[3],
@@ -1573,7 +1578,7 @@
   };
 
   wire gem_any = (|gemA_vpf) | (|gemB_vpf);
-
+   
   wire [3:0] gem_delay;
 
   wire [9:0]   gem_debug_fifo_adr;    // FIFO RAM read tbin address
@@ -1603,6 +1608,7 @@
 
   wire gemA_overflow = |gem_overflow[1:0];
   wire gemB_overflow = |gem_overflow[3:2];
+
 
 // Main GEM Generate Loop
   genvar igem;
@@ -1732,7 +1738,7 @@
   wire [7:0]  gem_match_right;
   wire        gem_any_match;
   wire [23:0] gem_active_feb_list;
-  wire [13:0] gem_copad  [7:0];
+  wire [CLSTBITS -1 :0] gem_copad  [MXCLUSTER_CHAMBER-1:0];
 
   copad u_copad (
 
@@ -1807,6 +1813,48 @@
 
   | (|gem_match_left) 
   | (|gem_match_right);
+
+
+  //Latch GEM clusters into VME register
+  reg [CLSTBITS-1:0] gemA_cluster_vme [MXCLUSTER_CHAMBER-1:0] = 0;
+  reg [CLSTBITS-1:0] gemB_cluster_vme [MXCLUSTER_CHAMBER-1:0] = 0;
+  reg gemA_overflow_vme = 0;
+  reg gemB_overflow_vme = 0;
+  reg gemA_sync_vme     = 0;
+  reg gemB_sync_vme     = 0;
+  reg [CLSTBITS-1 :0] gem_copad_vme  [MXCLUSTER_CHAMBER-1:0] = 0;
+  reg gems_sync_vme     = 0;
+
+  wire clear_gem_vme = event_clear_vme | clct_pretrig;
+
+  always @(posedge clock) begin
+    if (clear_gem_vme) begin    // Clear clcts in case event gets flushed
+      gemA_cluster_vme  <= 0;
+      gemA_overflow_vme <= 0;
+      gemB_cluster_vme  <= 0;
+      gemB_overflow_vme <= 0;
+      gem_copad_vme     <= 0;
+      gemA_sync_vme     <= 0;
+      gemB_sync_vme     <= 0;
+      gems_sync_vme     <= 0;
+    end
+    else begin
+        if (|gemA_vpf) begin
+            gemA_cluster_vme  <= gemA_cluster; 
+            gemA_overflow_vme <= gemA_overflow;
+            gemA_sync_vme     <= gemA_synced;
+        end
+        if (|gemB_vpf) begin
+            gemB_cluster_vme  <= gemB_cluster; 
+            gemB_overflow_vme <= gemB_overflow;
+            gemB_sync_vme     <= gemB_synced;
+        end
+        if ((|gemA_vpf) & (|gemB_vpf)) begin
+            gem_copad_vme     <= gem_copad;
+            gems_sync_vme     <= gems_synced;
+        end
+    end
+  end
 
 //-------------------------------------------------------------------------------------------------------------------
 // Pattern Finder declarations, common to ME1A+ME1B+ME234
@@ -4233,6 +4281,7 @@
       .bxn_alct_vme      (bxn_alct_vme[4:0]),       // In  ALCT BXN at alct valid pattern flag
       .clct_bx0_sync_err (clct_bx0_sync_err),       // In  Sync error: BXN counter==0 did not match bx0
 
+
       // Sequencer Ports: Raw Hits Ram
       .dmb_wr    (dmb_wr),                   // Out  Raw hits RAM VME write enable
       .dmb_reset (dmb_reset),                // Out  Raw hits RAM VME address reset
@@ -4656,6 +4705,16 @@
       .gem_counter125 (gem_counter125),
       .gem_counter126 (gem_counter126),
       .gem_counter127 (gem_counter127),
+
+      //latched GEM clusters by pretrigger
+      .gemA_cluster_vme  (gemA_cluster_vme),
+      .gemA_overflow_vme (gemA_overflow_vme),
+      .gemA_sync_vme     (gemA_sync_vme),
+      .gemB_cluster_vme  (gemB_cluster_vme),
+      .gemB_overflow_vme (gemB_overflow_vme),
+      .gemB_sync_vme     (gemB_sync_vme),
+      .gems_copad_vme    (gems_copad_vme),
+      .gems_sync_vme     (gems_sync_vme),
 
       // CSC Orientation Ports
       .csc_type        (csc_type[3:0]),   // In  Firmware compile type

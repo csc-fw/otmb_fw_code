@@ -951,6 +951,17 @@
   gem_counter126,
   gem_counter127,
 
+
+  //Latch GEM clusters
+  gemA_cluster_vme,
+  gemA_overflow_vme,
+  gemA_sync_vme,
+  gemB_cluster_vme,
+  gemB_overflow_vme,
+  gemB_sync_vme,
+  gem_copad_vme,
+  gems_sync_vme,
+
 // CSC Orientation Ports
   csc_type,
   csc_me1ab,
@@ -1184,6 +1195,9 @@
 //------------------------------------------------------------------------------------------------------------------
 // Bus Parameters
 //------------------------------------------------------------------------------------------------------------------
+  parameter MXCLUSTER_CHAMBER       = 8; // Num GEM clusters  per Chamber
+  parameter MXCLUSTER_SUPERCHAMBER  = 16; //Num GEM cluster  per superchamber
+  parameter CLSTBITS   = 14;
   parameter MXCFEB     = 7;        // Number of CFEBs on CSC
   parameter MXGEM      = 4;        // Number of GEM Fibers
   parameter MXCLST     = 4;        // Number of GEM Clusters Per Fiber
@@ -1506,7 +1520,8 @@
 
   parameter ADR_V6_EXTEND             = 10'h17A;  // DCFEB 7-bit extensions
 
-  // GEM Registers
+  // CSC register ends 10'h198 = 408, for ALGO2016, Tao,2019-07-26
+  // GEM Registers, start from 10'h300 = 768
 
   parameter ADR_GEM_GTX_RX0           = 10'h300;  //rdk 	GEM GTX0 control and status
   parameter ADR_GEM_GTX_RX1           = 10'h302;
@@ -1517,14 +1532,41 @@
   parameter ADR_V6_PHASER10           = 10'h30a; // Phaser 10 GEMB Phaser
 
   parameter ADR_GEM_DEBUG_FIFO_CTRL   = 10'h30c;
-  parameter ADR_GEM_DEBUG_FIFO_DATA   = 10'h30e;
-  parameter ADR_GEM_INJ_CTRL          = 10'h320;
-  parameter ADR_GEM_INJ_DATA          = 10'h322;
+  parameter ADR_GEM_DEBUG_FIFO_DATA   = 10'h30e; // 782
   parameter ADR_GEM_TBINS             = 10'h310;
   parameter ADR_GEM_CFG               = 10'h312;
-  parameter ADR_GEM_TRG               = 10'h318;
   parameter ADR_GEM_CNT_CTRL          = 10'h314;
   parameter ADR_GEM_CNT_RDATA         = 10'h316;
+  parameter ADR_GEM_TRG               = 10'h318;
+  parameter ADR_GEM_INJ_CTRL          = 10'h320; // 800
+  parameter ADR_GEM_INJ_DATA          = 10'h322;
+
+  //latched GEM cluster
+  parameter ADR_GEMA_CLUSTER0         = 10'h340;  // GEMA cluster0 + gemA_sync, gemA_overflow
+  parameter ADR_GEMA_CLUSTER1         = 10'h342;  // GEMA cluster1 
+  parameter ADR_GEMA_CLUSTER2         = 10'h344;  // GEMA cluster2 
+  parameter ADR_GEMA_CLUSTER3         = 10'h346;  // GEMA cluster3 
+  parameter ADR_GEMA_CLUSTER4         = 10'h348;  // GEMA cluster4 
+  parameter ADR_GEMA_CLUSTER5         = 10'h34a;  // GEMA cluster5 
+  parameter ADR_GEMA_CLUSTER6         = 10'h34c;  // GEMA cluster6 
+  parameter ADR_GEMA_CLUSTER7         = 10'h34e;  // GEMA cluster7 
+  parameter ADR_GEMB_CLUSTER0         = 10'h350;  // GEMB cluster0 + gemA_sync, gemA_overflow
+  parameter ADR_GEMB_CLUSTER1         = 10'h352;  // GEMB cluster1 
+  parameter ADR_GEMB_CLUSTER2         = 10'h354;  // GEMB cluster2 
+  parameter ADR_GEMB_CLUSTER3         = 10'h356;  // GEMB cluster3 
+  parameter ADR_GEMB_CLUSTER4         = 10'h358;  // GEMB cluster4 
+  parameter ADR_GEMB_CLUSTER5         = 10'h35a;  // GEMB cluster5 
+  parameter ADR_GEMB_CLUSTER6         = 10'h35c;  // GEMB cluster6 
+  parameter ADR_GEMB_CLUSTER7         = 10'h35e;  // GEMB cluster7 
+  parameter ADR_GEM_COPAD0            = 10'h360;  // GEMcopad, also gems_sync
+  parameter ADR_GEM_COPAD1            = 10'h362;  // GEMcopad 
+  parameter ADR_GEM_COPAD2            = 10'h364;  // GEMcopad 
+  parameter ADR_GEM_COPAD3            = 10'h366;  // GEMcopad 
+  parameter ADR_GEM_COPAD4            = 10'h368;  // GEMcopad 
+  parameter ADR_GEM_COPAD5            = 10'h36a;  // GEMcopad 
+  parameter ADR_GEM_COPAD6            = 10'h36c;  // GEMcopad 
+  parameter ADR_GEM_COPAD7            = 10'h36e;  // GEMcopad 
+
 
   parameter ADR_ODMB                  = 10'h1EE;  // ODMB mode: various addresses are handled inside odmb_device
 
@@ -2442,6 +2484,15 @@
   input  [MXCNTVME-1:0]  gem_counter126;
   input  [MXCNTVME-1:0]  gem_counter127;
 
+  input [CLSTBITS-1:0] gemA_cluster_vme [MXCLUSTER_CHAMBER-1:0];
+  input [CLSTBITS-1:0] gemB_cluster_vme [MXCLUSTER_CHAMBER-1:0];
+  input gemA_overflow_vme;
+  input gemB_overflow_vme;
+  input gemA_sync_vme;
+  input gemB_sync_vme;
+  input [CLSTBITS -1 :0] gem_copad_vme  [MXCLUSTER_CHAMBER-1:0];
+  input gems_sync_vme;
+
 // Header Counters
   output                hdr_clear_on_resync; // Clear header counters on ttc_resync
   input  [MXCNTVME-1:0] pretrig_counter;     // Pre-trigger counter
@@ -3193,6 +3244,10 @@
   wire [15:0] gem_trg_rd;
 
 
+  wire [15:0] gemA_cluster_rd [MXCLUSTER_CHAMBER-1:0];
+  wire [15:0] gemB_cluster_rd [MXCLUSTER_CHAMBER-1:0];
+  wire [15:0] gem_copad_rd    [MXCLUSTER_CHAMBER-1:0];
+
 //------------------------------------------------------------------------------------------------------------------
 // Address Write Decodes
 //------------------------------------------------------------------------------------------------------------------
@@ -3940,6 +3995,32 @@
   ADR_GEM_CFG:               data_out <= gem_cfg_rd;
   ADR_GEM_TRG:               data_out <= gem_trg_rd;
 
+  ADR_GEMA_CLUSTER0:         data_out <= gemA_cluster_rd[0];
+  ADR_GEMA_CLUSTER1:         data_out <= gemA_cluster_rd[1];
+  ADR_GEMA_CLUSTER2:         data_out <= gemA_cluster_rd[2];
+  ADR_GEMA_CLUSTER3:         data_out <= gemA_cluster_rd[3];
+  ADR_GEMA_CLUSTER4:         data_out <= gemA_cluster_rd[4];
+  ADR_GEMA_CLUSTER5:         data_out <= gemA_cluster_rd[5];
+  ADR_GEMA_CLUSTER6:         data_out <= gemA_cluster_rd[6];
+  ADR_GEMA_CLUSTER7:         data_out <= gemA_cluster_rd[7];
+  ADR_GEMB_CLUSTER0:         data_out <= gemB_cluster_rd[0];
+  ADR_GEMB_CLUSTER1:         data_out <= gemB_cluster_rd[1];
+  ADR_GEMB_CLUSTER2:         data_out <= gemB_cluster_rd[2];
+  ADR_GEMB_CLUSTER3:         data_out <= gemB_cluster_rd[3];
+  ADR_GEMB_CLUSTER4:         data_out <= gemB_cluster_rd[4];
+  ADR_GEMB_CLUSTER5:         data_out <= gemB_cluster_rd[5];
+  ADR_GEMB_CLUSTER6:         data_out <= gemB_cluster_rd[6];
+  ADR_GEMB_CLUSTER7:         data_out <= gemB_cluster_rd[7];
+  ADR_GEM_COPAD0:            data_out <= gem_copad_rd[0];
+  ADR_GEM_COPAD1:            data_out <= gem_copad_rd[1];
+  ADR_GEM_COPAD2:            data_out <= gem_copad_rd[2];
+  ADR_GEM_COPAD3:            data_out <= gem_copad_rd[3];
+  ADR_GEM_COPAD4:            data_out <= gem_copad_rd[4];
+  ADR_GEM_COPAD5:            data_out <= gem_copad_rd[5];
+  ADR_GEM_COPAD6:            data_out <= gem_copad_rd[6];
+  ADR_GEM_COPAD7:            data_out <= gem_copad_rd[7];
+
+
   ADR_ODMB:                  data_out <= odmb_data;
 
   default:                   data_out <= 16'hDEAF;
@@ -4112,6 +4193,31 @@
   assign wr_gem_tbins             =  (reg_adr==ADR_GEM_TBINS              && clk_en);
   assign wr_gem_cfg               =  (reg_adr==ADR_GEM_CFG                && clk_en);
   assign wr_gem_trg               =  (reg_adr==ADR_GEM_TRG                && clk_en);
+
+  assign wr_gemA_cluster0         =  (reg_adr==ADR_GEMA_CLUSTER0          && clk_en);
+  assign wr_gemA_cluster1         =  (reg_adr==ADR_GEMA_CLUSTER1          && clk_en);
+  assign wr_gemA_cluster2         =  (reg_adr==ADR_GEMA_CLUSTER2          && clk_en);
+  assign wr_gemA_cluster3         =  (reg_adr==ADR_GEMA_CLUSTER3          && clk_en);
+  assign wr_gemA_cluster4         =  (reg_adr==ADR_GEMA_CLUSTER4          && clk_en);
+  assign wr_gemA_cluster5         =  (reg_adr==ADR_GEMA_CLUSTER5          && clk_en);
+  assign wr_gemA_cluster6         =  (reg_adr==ADR_GEMA_CLUSTER6          && clk_en);
+  assign wr_gemA_cluster7         =  (reg_adr==ADR_GEMA_CLUSTER7          && clk_en);
+  assign wr_gemB_cluster0         =  (reg_adr==ADR_GEMB_CLUSTER0          && clk_en);
+  assign wr_gemB_cluster1         =  (reg_adr==ADR_GEMB_CLUSTER1          && clk_en);
+  assign wr_gemB_cluster2         =  (reg_adr==ADR_GEMB_CLUSTER2          && clk_en);
+  assign wr_gemB_cluster3         =  (reg_adr==ADR_GEMB_CLUSTER3          && clk_en);
+  assign wr_gemB_cluster4         =  (reg_adr==ADR_GEMB_CLUSTER4          && clk_en);
+  assign wr_gemB_cluster5         =  (reg_adr==ADR_GEMB_CLUSTER5          && clk_en);
+  assign wr_gemB_cluster6         =  (reg_adr==ADR_GEMB_CLUSTER6          && clk_en);
+  assign wr_gemB_cluster7         =  (reg_adr==ADR_GEMB_CLUSTER7          && clk_en);
+  assign wr_gem_copad0            =  (reg_adr==ADR_GEM_COPAD0             && clk_en);
+  assign wr_gem_copad1            =  (reg_adr==ADR_GEM_COPAD1             && clk_en);
+  assign wr_gem_copad2            =  (reg_adr==ADR_GEM_COPAD2             && clk_en);
+  assign wr_gem_copad3            =  (reg_adr==ADR_GEM_COPAD3             && clk_en);
+  assign wr_gem_copad4            =  (reg_adr==ADR_GEM_COPAD4             && clk_en);
+  assign wr_gem_copad5            =  (reg_adr==ADR_GEM_COPAD5             && clk_en);
+  assign wr_gem_copad6            =  (reg_adr==ADR_GEM_COPAD6             && clk_en);
+  assign wr_gem_copad7            =  (reg_adr==ADR_GEM_COPAD7             && clk_en);
 
   assign wr_adr_cap               =  (adr_cap);
 
@@ -8250,6 +8356,31 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 
   assign gem_inj_data    = gem_inj_data_wr;
   assign gem_inj_data_rd = gem_inj_data_wr;
+
+
+//------------------------------------------------------------------------------------------------------------------
+// GEM_CLUSTERs and COPADs from 0x340 to 0x36e
+//------------------------------------------------------------------------------------------------------------------
+
+  genvar icluster;
+  generate
+  for (icluster=0; icluster<MXCLST; icluster=icluster+1) begin: gen_gem_cluster
+    initial begin
+        gemA_cluster_rd[icluster] = 0;
+        gemB_cluster_rd[icluster] = 0;
+        gem_copad_rd[icluster]    = 0;
+
+    end
+    assign gemA_cluster_rd[icluster][CLSTBITS-1:0] = gemA_cluster_vme[icluster][CLSTBITS-1:0]; 
+    assign gemB_cluster_rd[icluster][CLSTBITS-1:0] = gemB_cluster_vme[icluster][CLSTBITS-1:0]; 
+    assign gem_copad_rd[icluster][CLSTBITS-1:0]    = gem_copad_vme[icluster][CLSTBITS-1:0]; 
+  end
+  endgenerate
+  assign gemA_cluster_rd[0][14] = gemA_overflow_vme;
+  assign gemA_cluster_rd[0][15] = gemA_sync_vme;
+  assign gemB_cluster_rd[0][14] = gemB_overflow_vme;
+  assign gemB_cluster_rd[0][15] = gemB_sync_vme;
+  assign gem_copad_rd[0][14]    = gems_sync_vme;
 
 //------------------------------------------------------------------------------------------------------------------
 // VME Write-Registers latch data when addressed + latch power-up defaults
