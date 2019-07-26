@@ -953,13 +953,34 @@
 
 
   //Latch GEM clusters
-  gemA_cluster_vme,
+  gemA_cluster0_vme,
+  gemA_cluster1_vme,
+  gemA_cluster2_vme,
+  gemA_cluster3_vme,
+  gemA_cluster4_vme,
+  gemA_cluster5_vme,
+  gemA_cluster6_vme,
+  gemA_cluster7_vme,
   gemA_overflow_vme,
   gemA_sync_vme,
-  gemB_cluster_vme,
+  gemB_cluster0_vme,
+  gemB_cluster1_vme,
+  gemB_cluster2_vme,
+  gemB_cluster3_vme,
+  gemB_cluster4_vme,
+  gemB_cluster5_vme,
+  gemB_cluster6_vme,
+  gemB_cluster7_vme,
   gemB_overflow_vme,
   gemB_sync_vme,
-  gem_copad_vme,
+  gem_copad0_vme,
+  gem_copad1_vme,
+  gem_copad2_vme,
+  gem_copad3_vme,
+  gem_copad4_vme,
+  gem_copad5_vme,
+  gem_copad6_vme,
+  gem_copad7_vme,
   gems_sync_vme,
 
 // CSC Orientation Ports
@@ -3397,6 +3418,31 @@
   wire      wr_gem_cfg;
   wire      wr_gem_trg;
 
+  //wire      wr_gemA_cluster0;
+  //wire      wr_gemA_cluster1;
+  //wire      wr_gemA_cluster2;
+  //wire      wr_gemA_cluster3;
+  //wire      wr_gemA_cluster4;
+  //wire      wr_gemA_cluster5;
+  //wire      wr_gemA_cluster6;
+  //wire      wr_gemA_cluster7;
+  //wire      wr_gemB_cluster0;
+  //wire      wr_gemB_cluster1;
+  //wire      wr_gemB_cluster2;
+  //wire      wr_gemB_cluster3;
+  //wire      wr_gemB_cluster4;
+  //wire      wr_gemB_cluster5;
+  //wire      wr_gemB_cluster6;
+  //wire      wr_gemB_cluster7;
+  //wire      wr_gem_copad0;
+  //wire      wr_gem_copad1;
+  //wire      wr_gem_copad2;
+  //wire      wr_gem_copad3;
+  //wire      wr_gem_copad4;
+  //wire      wr_gem_copad5;
+  //wire      wr_gem_copad6;
+  //wire      wr_gem_copad7;
+
   wire      wr_adr_cap;
 
   // Virtex-6 GTX error counters
@@ -4194,30 +4240,30 @@
   assign wr_gem_cfg               =  (reg_adr==ADR_GEM_CFG                && clk_en);
   assign wr_gem_trg               =  (reg_adr==ADR_GEM_TRG                && clk_en);
 
-  assign wr_gemA_cluster0         =  (reg_adr==ADR_GEMA_CLUSTER0          && clk_en);
-  assign wr_gemA_cluster1         =  (reg_adr==ADR_GEMA_CLUSTER1          && clk_en);
-  assign wr_gemA_cluster2         =  (reg_adr==ADR_GEMA_CLUSTER2          && clk_en);
-  assign wr_gemA_cluster3         =  (reg_adr==ADR_GEMA_CLUSTER3          && clk_en);
-  assign wr_gemA_cluster4         =  (reg_adr==ADR_GEMA_CLUSTER4          && clk_en);
-  assign wr_gemA_cluster5         =  (reg_adr==ADR_GEMA_CLUSTER5          && clk_en);
-  assign wr_gemA_cluster6         =  (reg_adr==ADR_GEMA_CLUSTER6          && clk_en);
-  assign wr_gemA_cluster7         =  (reg_adr==ADR_GEMA_CLUSTER7          && clk_en);
-  assign wr_gemB_cluster0         =  (reg_adr==ADR_GEMB_CLUSTER0          && clk_en);
-  assign wr_gemB_cluster1         =  (reg_adr==ADR_GEMB_CLUSTER1          && clk_en);
-  assign wr_gemB_cluster2         =  (reg_adr==ADR_GEMB_CLUSTER2          && clk_en);
-  assign wr_gemB_cluster3         =  (reg_adr==ADR_GEMB_CLUSTER3          && clk_en);
-  assign wr_gemB_cluster4         =  (reg_adr==ADR_GEMB_CLUSTER4          && clk_en);
-  assign wr_gemB_cluster5         =  (reg_adr==ADR_GEMB_CLUSTER5          && clk_en);
-  assign wr_gemB_cluster6         =  (reg_adr==ADR_GEMB_CLUSTER6          && clk_en);
-  assign wr_gemB_cluster7         =  (reg_adr==ADR_GEMB_CLUSTER7          && clk_en);
-  assign wr_gem_copad0            =  (reg_adr==ADR_GEM_COPAD0             && clk_en);
-  assign wr_gem_copad1            =  (reg_adr==ADR_GEM_COPAD1             && clk_en);
-  assign wr_gem_copad2            =  (reg_adr==ADR_GEM_COPAD2             && clk_en);
-  assign wr_gem_copad3            =  (reg_adr==ADR_GEM_COPAD3             && clk_en);
-  assign wr_gem_copad4            =  (reg_adr==ADR_GEM_COPAD4             && clk_en);
-  assign wr_gem_copad5            =  (reg_adr==ADR_GEM_COPAD5             && clk_en);
-  assign wr_gem_copad6            =  (reg_adr==ADR_GEM_COPAD6             && clk_en);
-  assign wr_gem_copad7            =  (reg_adr==ADR_GEM_COPAD7             && clk_en);
+  //assign wr_gemA_cluster0         =  (reg_adr==ADR_GEMA_CLUSTER0          && clk_en);
+  //assign wr_gemA_cluster1         =  (reg_adr==ADR_GEMA_CLUSTER1          && clk_en);
+  //assign wr_gemA_cluster2         =  (reg_adr==ADR_GEMA_CLUSTER2          && clk_en);
+  //assign wr_gemA_cluster3         =  (reg_adr==ADR_GEMA_CLUSTER3          && clk_en);
+  //assign wr_gemA_cluster4         =  (reg_adr==ADR_GEMA_CLUSTER4          && clk_en);
+  //assign wr_gemA_cluster5         =  (reg_adr==ADR_GEMA_CLUSTER5          && clk_en);
+  //assign wr_gemA_cluster6         =  (reg_adr==ADR_GEMA_CLUSTER6          && clk_en);
+  //assign wr_gemA_cluster7         =  (reg_adr==ADR_GEMA_CLUSTER7          && clk_en);
+  //assign wr_gemB_cluster0         =  (reg_adr==ADR_GEMB_CLUSTER0          && clk_en);
+  //assign wr_gemB_cluster1         =  (reg_adr==ADR_GEMB_CLUSTER1          && clk_en);
+  //assign wr_gemB_cluster2         =  (reg_adr==ADR_GEMB_CLUSTER2          && clk_en);
+  //assign wr_gemB_cluster3         =  (reg_adr==ADR_GEMB_CLUSTER3          && clk_en);
+  //assign wr_gemB_cluster4         =  (reg_adr==ADR_GEMB_CLUSTER4          && clk_en);
+  //assign wr_gemB_cluster5         =  (reg_adr==ADR_GEMB_CLUSTER5          && clk_en);
+  //assign wr_gemB_cluster6         =  (reg_adr==ADR_GEMB_CLUSTER6          && clk_en);
+  //assign wr_gemB_cluster7         =  (reg_adr==ADR_GEMB_CLUSTER7          && clk_en);
+  //assign wr_gem_copad0            =  (reg_adr==ADR_GEM_COPAD0             && clk_en);
+  //assign wr_gem_copad1            =  (reg_adr==ADR_GEM_COPAD1             && clk_en);
+  //assign wr_gem_copad2            =  (reg_adr==ADR_GEM_COPAD2             && clk_en);
+  //assign wr_gem_copad3            =  (reg_adr==ADR_GEM_COPAD3             && clk_en);
+  //assign wr_gem_copad4            =  (reg_adr==ADR_GEM_COPAD4             && clk_en);
+  //assign wr_gem_copad5            =  (reg_adr==ADR_GEM_COPAD5             && clk_en);
+  //assign wr_gem_copad6            =  (reg_adr==ADR_GEM_COPAD6             && clk_en);
+  //assign wr_gem_copad7            =  (reg_adr==ADR_GEM_COPAD7             && clk_en);
 
   assign wr_adr_cap               =  (adr_cap);
 
@@ -8362,19 +8408,35 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 // GEM_CLUSTERs and COPADs from 0x340 to 0x36e
 //------------------------------------------------------------------------------------------------------------------
 
-  genvar icluster;
-  generate
-  for (icluster=0; icluster<MXCLST; icluster=icluster+1) begin: gen_gem_cluster
-    assign gemA_cluster_rd[icluster][CLSTBITS-1:0] = gemA_cluster_vme[icluster][CLSTBITS-1:0]; 
-    assign gemB_cluster_rd[icluster][CLSTBITS-1:0] = gemB_cluster_vme[icluster][CLSTBITS-1:0]; 
-    assign gem_copad_rd[icluster][CLSTBITS-1:0]    = gem_copad_vme[icluster][CLSTBITS-1:0]; 
-  end
-  endgenerate
-  assign gemA_cluster_rd[0][14] = gemA_overflow_vme;
-  assign gemA_cluster_rd[0][15] = gemA_sync_vme;
-  assign gemB_cluster_rd[0][14] = gemB_overflow_vme;
-  assign gemB_cluster_rd[0][15] = gemB_sync_vme;
-  assign gem_copad_rd[0][14]    = gems_sync_vme;
+  assign gemA_cluster_rd[0][CLSTBITS-1:0] = gemA_cluster0_vme[CLSTBITS-1:0]; 
+  assign gemA_cluster_rd[1][CLSTBITS-1:0] = gemA_cluster1_vme[CLSTBITS-1:0]; 
+  assign gemA_cluster_rd[2][CLSTBITS-1:0] = gemA_cluster2_vme[CLSTBITS-1:0]; 
+  assign gemA_cluster_rd[3][CLSTBITS-1:0] = gemA_cluster3_vme[CLSTBITS-1:0]; 
+  assign gemA_cluster_rd[4][CLSTBITS-1:0] = gemA_cluster4_vme[CLSTBITS-1:0]; 
+  assign gemA_cluster_rd[5][CLSTBITS-1:0] = gemA_cluster5_vme[CLSTBITS-1:0]; 
+  assign gemA_cluster_rd[6][CLSTBITS-1:0] = gemA_cluster6_vme[CLSTBITS-1:0]; 
+  assign gemA_cluster_rd[7][CLSTBITS-1:0] = gemA_cluster7_vme[CLSTBITS-1:0]; 
+  assign gemB_cluster_rd[0][CLSTBITS-1:0] = gemB_cluster0_vme[CLSTBITS-1:0]; 
+  assign gemB_cluster_rd[1][CLSTBITS-1:0] = gemB_cluster1_vme[CLSTBITS-1:0]; 
+  assign gemB_cluster_rd[2][CLSTBITS-1:0] = gemB_cluster2_vme[CLSTBITS-1:0]; 
+  assign gemB_cluster_rd[3][CLSTBITS-1:0] = gemB_cluster3_vme[CLSTBITS-1:0]; 
+  assign gemB_cluster_rd[4][CLSTBITS-1:0] = gemB_cluster4_vme[CLSTBITS-1:0]; 
+  assign gemB_cluster_rd[5][CLSTBITS-1:0] = gemB_cluster5_vme[CLSTBITS-1:0]; 
+  assign gemB_cluster_rd[6][CLSTBITS-1:0] = gemB_cluster6_vme[CLSTBITS-1:0]; 
+  assign gemB_cluster_rd[7][CLSTBITS-1:0] = gemB_cluster7_vme[CLSTBITS-1:0]; 
+  assign gem_copad_rd[0][CLSTBITS-1:0]    = gem_copad0_vme[CLSTBITS-1:0]; 
+  assign gem_copad_rd[1][CLSTBITS-1:0]    = gem_copad1_vme[CLSTBITS-1:0]; 
+  assign gem_copad_rd[2][CLSTBITS-1:0]    = gem_copad2_vme[CLSTBITS-1:0]; 
+  assign gem_copad_rd[3][CLSTBITS-1:0]    = gem_copad3_vme[CLSTBITS-1:0]; 
+  assign gem_copad_rd[4][CLSTBITS-1:0]    = gem_copad4_vme[CLSTBITS-1:0]; 
+  assign gem_copad_rd[5][CLSTBITS-1:0]    = gem_copad5_vme[CLSTBITS-1:0]; 
+  assign gem_copad_rd[6][CLSTBITS-1:0]    = gem_copad6_vme[CLSTBITS-1:0]; 
+  assign gem_copad_rd[7][CLSTBITS-1:0]    = gem_copad7_vme[CLSTBITS-1:0]; 
+  assign gemA_cluster_rd[0][14]           = gemA_overflow_vme;
+  assign gemA_cluster_rd[0][15]           = gemA_sync_vme;
+  assign gemB_cluster_rd[0][14]           = gemB_overflow_vme;
+  assign gemB_cluster_rd[0][15]           = gemB_sync_vme;
+  assign gem_copad_rd[0][14]              = gems_sync_vme;
 
 //------------------------------------------------------------------------------------------------------------------
 // VME Write-Registers latch data when addressed + latch power-up defaults
