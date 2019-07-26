@@ -2505,13 +2505,34 @@
   input  [MXCNTVME-1:0]  gem_counter126;
   input  [MXCNTVME-1:0]  gem_counter127;
 
-  input [CLSTBITS-1:0] gemA_cluster_vme [MXCLUSTER_CHAMBER-1:0];
-  input [CLSTBITS-1:0] gemB_cluster_vme [MXCLUSTER_CHAMBER-1:0];
+  input [CLSTBITS-1:0] gemA_cluster0_vme;
+  input [CLSTBITS-1:0] gemA_cluster1_vme;
+  input [CLSTBITS-1:0] gemA_cluster2_vme;
+  input [CLSTBITS-1:0] gemA_cluster3_vme;
+  input [CLSTBITS-1:0] gemA_cluster4_vme;
+  input [CLSTBITS-1:0] gemA_cluster5_vme;
+  input [CLSTBITS-1:0] gemA_cluster6_vme;
+  input [CLSTBITS-1:0] gemA_cluster7_vme;
+  input [CLSTBITS-1:0] gemB_cluster0_vme;
+  input [CLSTBITS-1:0] gemB_cluster1_vme;
+  input [CLSTBITS-1:0] gemB_cluster2_vme;
+  input [CLSTBITS-1:0] gemB_cluster3_vme;
+  input [CLSTBITS-1:0] gemB_cluster4_vme;
+  input [CLSTBITS-1:0] gemB_cluster5_vme;
+  input [CLSTBITS-1:0] gemB_cluster6_vme;
+  input [CLSTBITS-1:0] gemB_cluster7_vme;
+  input [CLSTBITS-1:0] gem_copad0_vme;
+  input [CLSTBITS-1:0] gem_copad1_vme;
+  input [CLSTBITS-1:0] gem_copad2_vme;
+  input [CLSTBITS-1:0] gem_copad3_vme;
+  input [CLSTBITS-1:0] gem_copad4_vme;
+  input [CLSTBITS-1:0] gem_copad5_vme;
+  input [CLSTBITS-1:0] gem_copad6_vme;
+  input [CLSTBITS-1:0] gem_copad7_vme;
   input gemA_overflow_vme;
   input gemB_overflow_vme;
   input gemA_sync_vme;
   input gemB_sync_vme;
-  input [CLSTBITS -1 :0] gem_copad_vme  [MXCLUSTER_CHAMBER-1:0];
   input gems_sync_vme;
 
 // Header Counters
