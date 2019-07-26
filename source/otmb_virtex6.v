@@ -1816,44 +1816,48 @@
 
 
   //Latch GEM clusters into VME register
-  reg [CLSTBITS-1:0] gemA_cluster_vme [MXCLUSTER_CHAMBER-1:0] = 14'b0;
-  reg [CLSTBITS-1:0] gemB_cluster_vme [MXCLUSTER_CHAMBER-1:0] = 14'b0;
+  reg [CLSTBITS-1:0] gemA_cluster_vme [MXCLUSTER_CHAMBER-1:0];
+  reg [CLSTBITS-1:0] gemB_cluster_vme [MXCLUSTER_CHAMBER-1:0];
   reg gemA_overflow_vme = 0;
   reg gemB_overflow_vme = 0;
   reg gemA_sync_vme     = 0;
   reg gemB_sync_vme     = 0;
-  reg [CLSTBITS-1 :0] gem_copad_vme  [MXCLUSTER_CHAMBER-1:0] = 14'b0;
+  reg [CLSTBITS-1 :0] gem_copad_vme  [MXCLUSTER_CHAMBER-1:0];
   reg gems_sync_vme     = 0;
 
   wire clear_gem_vme = event_clear_vme | clct_pretrig;
 
-  always @(posedge clock) begin
-    if (clear_gem_vme) begin    // Clear clcts in case event gets flushed
-      gemA_cluster_vme  <= 14'b0;
-      gemA_overflow_vme <= 0;
-      gemB_cluster_vme  <= 14'b0;
-      gemB_overflow_vme <= 0;
-      gem_copad_vme     <= 14'b0;
-      gemA_sync_vme     <= 0;
-      gemB_sync_vme     <= 0;
-      gems_sync_vme     <= 0;
-    end
-    else begin
-        if (|gemA_vpf) begin
-            gemA_cluster_vme  <= gemA_cluster; 
-            gemA_overflow_vme <= gemA_overflow;
-            gemA_sync_vme     <= gemA_synced;
+  genvar icluster;
+  generate
+  for (icluster=0; icluster<MXCLST; icluster=icluster+1) begin: gen_gem_cluster
+      always @(posedge clock) begin
+        if (clear_gem_vme) begin    // Clear clcts in case event gets flushed
+          gemA_cluster_vme[icluster]  <= 14'b0;
+          gemB_cluster_vme[icluster]  <= 14'b0;
+          gem_copad_vme[icluster]     <= 14'b0;
+          gemA_overflow_vme <= 0;
+          gemB_overflow_vme <= 0;
+          gemA_sync_vme     <= 0;
+          gemB_sync_vme     <= 0;
+          gems_sync_vme     <= 0;
         end
-        if (|gemB_vpf) begin
-            gemB_cluster_vme  <= gemB_cluster; 
-            gemB_overflow_vme <= gemB_overflow;
-            gemB_sync_vme     <= gemB_synced;
+        else begin
+            if (|gemA_vpf) begin
+                gemA_cluster_vme[icluster]  <= gemA_cluster[icluster]; 
+                gemA_overflow_vme           <= gemA_overflow;
+                gemA_sync_vme               <= gemA_synced;
+            end
+            if (|gemB_vpf) begin
+                gemB_cluster_vme[icluster]  <= gemB_cluster[icluster]; 
+                gemB_overflow_vme           <= gemB_overflow;
+                gemB_sync_vme               <= gemB_synced;
+            end
+            if ((|gemA_vpf) & (|gemB_vpf)) begin
+                gem_copad_vme[icluster]     <= gem_copad[icluster];
+                gems_sync_vme               <= gems_synced;
+            end
         end
-        if ((|gemA_vpf) & (|gemB_vpf)) begin
-            gem_copad_vme     <= gem_copad;
-            gems_sync_vme     <= gems_synced;
-        end
-    end
+      end
   end
 
 //-------------------------------------------------------------------------------------------------------------------
