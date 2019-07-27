@@ -1825,7 +1825,8 @@
   reg [CLSTBITS-1 :0] gem_copad_vme  [MXCLUSTER_CHAMBER-1:0];
   reg gems_sync_vme     = 0;
 
-  wire clear_gem_vme = event_clear_vme | clct_pretrig;
+  //wire clear_gem_vme = event_clear_vme | clct_pretrig;
+  wire clear_gem_vme = event_clear_vme;
 
   genvar icluster;
   generate
@@ -1852,7 +1853,7 @@
                 gemB_overflow_vme           <= gemB_overflow;
                 gemB_sync_vme               <= gemB_synced;
             end
-            if ((|gemA_vpf) & (|gemB_vpf)) begin
+            if ((|gemA_vpf) && (|gemB_vpf)) begin
                 gem_copad_vme[icluster]     <= gem_copad[icluster];
                 gems_sync_vme               <= gems_synced;
             end
