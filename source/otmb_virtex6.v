@@ -264,7 +264,7 @@
 
   parameter MXGEM      =  4;  // Number GEM FIBERS == 2x number of GEM chambers == 4x number of GEM superchambers
   parameter MXGEMB     =  2;  // Number GEM ID bits. 0=gemAfiber0, 1=gemAfiber1, 2=gemBfiber0, 3=gemBfiber1
-  parameter MXCLST     = 4;        // Number of GEM Clusters Per Fiber
+  parameter MXCLST     =  4;        // Number of GEM Clusters Per Fiber
   parameter CLSTBITS   =  14; // Number bits per GEM cluster
   parameter MXCLUSTER_CHAMBER       = 8; // Num GEM clusters  per Chamber
   parameter MXCLUSTER_SUPERCHAMBER  = 16; //Num GEM cluster  per superchamber
@@ -1830,7 +1830,7 @@
 
   genvar icluster;
   generate
-  for (icluster=0; icluster<MXCLST; icluster=icluster+1) begin: gen_gem_cluster
+  for (icluster=0; icluster<MXCLUSTER_CHAMBER; icluster=icluster+1) begin: gen_gem_cluster
       always @(posedge clock) begin
         if (clear_gem_vme) begin    // Clear clcts in case event gets flushed
           gemA_cluster_vme[icluster]  <= 14'b11000000000;//invalid GEM cluster
