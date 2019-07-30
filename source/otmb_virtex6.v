@@ -1833,9 +1833,9 @@
   for (icluster=0; icluster<MXCLST; icluster=icluster+1) begin: gen_gem_cluster
       always @(posedge clock) begin
         if (clear_gem_vme) begin    // Clear clcts in case event gets flushed
-          gemA_cluster_vme[icluster]  <= 14'b0;
-          gemB_cluster_vme[icluster]  <= 14'b0;
-          gem_copad_vme[icluster]     <= 14'b0;
+          gemA_cluster_vme[icluster]  <= 14'b11000000000;//invalid GEM cluster
+          gemB_cluster_vme[icluster]  <= 14'b11000000000;
+          gem_copad_vme[icluster]     <= 14'b11000000000;
           gemA_overflow_vme <= 0;
           gemB_overflow_vme <= 0;
           gemA_sync_vme     <= 0;
