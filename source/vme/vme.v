@@ -4285,6 +4285,9 @@
   //assign wr_gem_copad5            =  (reg_adr==ADR_GEM_COPAD5             && clk_en);
   //assign wr_gem_copad6            =  (reg_adr==ADR_GEM_COPAD6             && clk_en);
   //assign wr_gem_copad7            =  (reg_adr==ADR_GEM_COPAD7             && clk_en);
+  //reg gemA_cluster0_wr[15:0];
+  //reg gemB_cluster0_wr[15:0];
+  //reg gem_copad0_wr[15:0];
 
   assign wr_adr_cap               =  (adr_cap);
 
@@ -8428,6 +8431,12 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 //------------------------------------------------------------------------------------------------------------------
 // GEM_CLUSTERs and COPADs from 0x340 to 0x36e
 //------------------------------------------------------------------------------------------------------------------
+  //dump code
+  //initial begin 
+  //    gemA_cluster0_wr[15:0] <= 0;
+  //    gemB_cluster0_wr[15:0] <= 0;
+  //    gem_copad0_wr[15:0]    <= 0;
+  //end
 
   assign gemA_cluster_rd[0][CLSTBITS-1:0] = gemA_cluster0_vme[CLSTBITS-1:0]; 
   assign gemA_cluster_rd[1][CLSTBITS-1:0] = gemA_cluster1_vme[CLSTBITS-1:0]; 
@@ -8601,6 +8610,9 @@ always @(posedge clock_vme) begin
   if    (wr_gem_inj_data)          gem_inj_data_wr         <= d[15:0];
   if    (wr_mpc_frames_fifo_ctrl)  mpc_frames_fifo_ctrl_wr <= d[15:0];
   if    (wr_algo2016_ctrl)         algo2016_ctrl_wr        <= d[15:0];
+  //if    (wr_gemA_cluster0)         gemA_cluster0_wr        <= d[15:0];
+  //if    (wr_gemB_cluster0)         gemB_cluster0_wr        <= d[15:0];
+  //if    (wr_gem_copad0)            gem_copad0_wr           <= d[15:0];
 end
 
 //------------------------------------------------------------------------------------------------------------------

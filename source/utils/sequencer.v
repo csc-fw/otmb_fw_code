@@ -412,7 +412,9 @@
   gemA_vpf,
   gemB_vpf,
 
-  gem_active_feb_list,
+  gemA_active_feb_list,
+  gemB_active_feb_list,
+  gemcopad_active_feb_list,
 
 // External Triggers
   alct_adb_pulse_sync,
@@ -1292,7 +1294,9 @@
   input [7:0]    gemA_vpf; // GEM 8-bit VPF flag
   input [7:0]    gemB_vpf; // GEM 8-bit VPF flag
 
-  input [23:0]   gem_active_feb_list;  // 24 bit list of active GEMs
+  input [23:0]   gemA_active_feb_list;  // 24 bit list of active GEMs, GEMA
+  input [23:0]   gemB_active_feb_list;  // 24 bit list of active GEMs, GEMB
+  input [23:0]   gemcopad_active_feb_list;  // 24 bit list of active GEMs, from Copad
 
 // External Triggers
   input          alct_adb_pulse_sync; // ADB Test pulse trigger
@@ -3195,30 +3199,30 @@
     gem_cnt_en[28] <= gem_match[6];
     gem_cnt_en[29] <= gem_match[7];
 
-    gem_cnt_en[30] <= gem_active_feb_list[0];
-    gem_cnt_en[31] <= gem_active_feb_list[1];
-    gem_cnt_en[32] <= gem_active_feb_list[2];
-    gem_cnt_en[33] <= gem_active_feb_list[3];
-    gem_cnt_en[34] <= gem_active_feb_list[4];
-    gem_cnt_en[35] <= gem_active_feb_list[5];
-    gem_cnt_en[36] <= gem_active_feb_list[6];
-    gem_cnt_en[37] <= gem_active_feb_list[7];
-    gem_cnt_en[38] <= gem_active_feb_list[8];
-    gem_cnt_en[39] <= gem_active_feb_list[9];
-    gem_cnt_en[40] <= gem_active_feb_list[10];
-    gem_cnt_en[41] <= gem_active_feb_list[11];
-    gem_cnt_en[42] <= gem_active_feb_list[12];
-    gem_cnt_en[43] <= gem_active_feb_list[13];
-    gem_cnt_en[44] <= gem_active_feb_list[14];
-    gem_cnt_en[45] <= gem_active_feb_list[15];
-    gem_cnt_en[46] <= gem_active_feb_list[16];
-    gem_cnt_en[47] <= gem_active_feb_list[17];
-    gem_cnt_en[48] <= gem_active_feb_list[18];
-    gem_cnt_en[49] <= gem_active_feb_list[19];
-    gem_cnt_en[50] <= gem_active_feb_list[20];
-    gem_cnt_en[51] <= gem_active_feb_list[21];
-    gem_cnt_en[52] <= gem_active_feb_list[22];
-    gem_cnt_en[53] <= gem_active_feb_list[23];
+    gem_cnt_en[30] <= gemcopad_active_feb_list[0];
+    gem_cnt_en[31] <= gemcopad_active_feb_list[1];
+    gem_cnt_en[32] <= gemcopad_active_feb_list[2];
+    gem_cnt_en[33] <= gemcopad_active_feb_list[3];
+    gem_cnt_en[34] <= gemcopad_active_feb_list[4];
+    gem_cnt_en[35] <= gemcopad_active_feb_list[5];
+    gem_cnt_en[36] <= gemcopad_active_feb_list[6];
+    gem_cnt_en[37] <= gemcopad_active_feb_list[7];
+    gem_cnt_en[38] <= gemcopad_active_feb_list[8];
+    gem_cnt_en[39] <= gemcopad_active_feb_list[9];
+    gem_cnt_en[40] <= gemcopad_active_feb_list[10];
+    gem_cnt_en[41] <= gemcopad_active_feb_list[11];
+    gem_cnt_en[42] <= gemcopad_active_feb_list[12];
+    gem_cnt_en[43] <= gemcopad_active_feb_list[13];
+    gem_cnt_en[44] <= gemcopad_active_feb_list[14];
+    gem_cnt_en[45] <= gemcopad_active_feb_list[15];
+    gem_cnt_en[46] <= gemcopad_active_feb_list[16];
+    gem_cnt_en[47] <= gemcopad_active_feb_list[17];
+    gem_cnt_en[48] <= gemcopad_active_feb_list[18];
+    gem_cnt_en[49] <= gemcopad_active_feb_list[19];
+    gem_cnt_en[50] <= gemcopad_active_feb_list[20];
+    gem_cnt_en[51] <= gemcopad_active_feb_list[21];
+    gem_cnt_en[52] <= gemcopad_active_feb_list[22];
+    gem_cnt_en[53] <= gemcopad_active_feb_list[23];
 
     gem_cnt_en[54] <= alct_gem;
     gem_cnt_en[55] <= clct_gem;

@@ -83,15 +83,40 @@ module gem (
     output overflow,
 
     // GEM Outputs
+    //output [MXPAD-1:0] gemhit_roll0;
+    //output [MXPAD-1:0] gemhit_roll1;
+    //output [MXPAD-1:0] gemhit_roll2;
+    //output [MXPAD-1:0] gemhit_roll3;
+    //output [MXPAD-1:0] gemhit_roll4;
+    //output [MXPAD-1:0] gemhit_roll5;
+    //output [MXPAD-1:0] gemhit_roll6;
+    //output [MXPAD-1:0] gemhit_roll7;
     output [13:0] cluster0, // cluster0 in GEM coordinates (0-1535)
     output [13:0] cluster1, // cluster1 in GEM coordinates (0-1535)
     output [13:0] cluster2, // cluster2 in GEM coordinates (0-1535)
     output [13:0] cluster3, // cluster3 in GEM coordinates (0-1535)
 
+    output [ 4:0] cluster0_feb;
+    output [ 4:0] cluster1_feb;
+    output [ 4:0] cluster2_feb;
+    output [ 4:0] cluster3_feb;
+
+    output [ 2:0] cluster0_roll;// eta partition number 
+    output [ 2:0] cluster1_roll;
+    output [ 2:0] cluster2_roll;
+    output [ 2:0] cluster3_roll;
+
+    output [ 7:0] cluster0_pad; // pad number in one roll, no VFAT boundary
+    output [ 7:0] cluster1_pad;
+    output [ 7:0] cluster2_pad;
+    output [ 7:0] cluster3_pad;
+
     output vpf0, // cluster0 valid flag
     output vpf1, // cluster1 valid flag
     output vpf2, // cluster2 valid flag
-    output vpf3  // cluster3 valid flag
+    output vpf3,  // cluster3 valid flag
+    output reg [MXFEB-1:0] active_feb_list  // 24 bit register of active FEBs. Can be used e.g. in GEM only self-trigger
+
 );
 
 // Raw hits RAM parameters
@@ -103,7 +128,9 @@ parameter RAM_WIDTH = 14;   // Data width
 parameter IGEM     = 0;
 parameter MXCLST   = 4;
 parameter CLSTBITS = 14;
-
+parameter MXPAD    = 192;
+parameter MXROLL   = 8;
+parameter MXFEB    = 24;
 
 //-------------------------------------------------------------------------------------------------------------------
 // State machine power-up reset + global reset
@@ -177,13 +204,28 @@ parameter CLSTBITS = 14;
 // Decompose packed GEM data format
 //------------------------------------------------------------------------------------------------------------------
 
-  wire [13:0] cluster     [3:0];
-  wire [13:0] cluster_raw [3:0];
-  wire [15:0] gem_inj     [3:0];
-  wire [13:0] cluster_inj [3:0];
-  wire [11:0] adr         [3:0];
-  wire [ 2:0] cnt         [3:0];
-  wire [ 0:0] vpf         [3:0];
+  wire [13:0] cluster     [1:0];
+  wire [13:0] cluster_raw [1:0];
+  wire [15:0] gem_inj     [1:0];
+  wire [13:0] cluster_inj [1:0];
+  wire [11:0] adr         [1:0];
+  wire [ 2:0] cnt         [1:0];
+  wire [ 0:0] vpf         [1:0];
+  //add vfat, roll,pad in a roll
+  wire [ 4:0] cluster_feb [1:0];       
+  wire [ 2:0] cluster_roll[1:0];       
+  wire [ 7:0] cluster_pad [1:0];       
+
+  //wire [MXPAD-1:0] gemhit_roll0 = 0;
+  //wire [MXPAD-1:0] gemhit_roll1 = 0;
+  //wire [MXPAD-1:0] gemhit_roll2 = 0;
+  //wire [MXPAD-1:0] gemhit_roll3 = 0;
+  //wire [MXPAD-1:0] gemhit_roll4 = 0;
+  //wire [MXPAD-1:0] gemhit_roll5 = 0;
+  //wire [MXPAD-1:0] gemhit_roll6 = 0;
+  //wire [MXPAD-1:0] gemhit_roll7 = 0;
+  //wire [MXPAD*MXROLL-1:0] hits = 0;
+  //wire [MXPAD*MXROLL-1:0] hits_cluster [3:0];
 
   reg pass_ff=1; // pass raw data or use injector ?
 
@@ -196,10 +238,58 @@ parameter CLSTBITS = 14;
     assign adr         [iclst] = cluster[iclst][10:0];
     assign cnt         [iclst] = cluster[iclst][13:11];
     assign vpf         [iclst] = ~(adr[iclst][10:9]==2'b11);
+    //assign hits_cluster[iclst] = (vpf[iclst] ? {(1536-cnt[iclst]-1-adr[iclst])*{0},(cnt[iclst]+1)*{1}, adr[iclst]*{0}} : 0);
+
+   always @(*) begin
+   case (adr[iclst][10:6]) // adr[10:6] is the "natural" vfatid
+     5'd0:    begin assign cluster_feb[iclst] = 5'd0 ;  assign cluster_roll[iclst] = 3'd0; assign cluster_pad[iclst] = {2'b00,adr[iclst][5:0]}; end
+     5'd1:    begin assign cluster_feb[iclst] = 5'd8 ;  assign cluster_roll[iclst] = 3'd0; assign cluster_pad[iclst] = {2'b01,adr[iclst][5:0]}; end
+     5'd2:    begin assign cluster_feb[iclst] = 5'd16;  assign cluster_roll[iclst] = 3'd0; assign cluster_pad[iclst] = {2'b10,adr[iclst][5:0]}; end
+     5'd3:    begin assign cluster_feb[iclst] = 5'd1 ;  assign cluster_roll[iclst] = 3'd1; assign cluster_pad[iclst] = {2'b00,adr[iclst][5:0]}; end
+     5'd4:    begin assign cluster_feb[iclst] = 5'd9 ;  assign cluster_roll[iclst] = 3'd1; assign cluster_pad[iclst] = {2'b01,adr[iclst][5:0]}; end
+     5'd5:    begin assign cluster_feb[iclst] = 5'd17;  assign cluster_roll[iclst] = 3'd1; assign cluster_pad[iclst] = {2'b10,adr[iclst][5:0]}; end
+     5'd6:    begin assign cluster_feb[iclst] = 5'd2 ;  assign cluster_roll[iclst] = 3'd2; assign cluster_pad[iclst] = {2'b00,adr[iclst][5:0]}; end
+     5'd7:    begin assign cluster_feb[iclst] = 5'd10;  assign cluster_roll[iclst] = 3'd2; assign cluster_pad[iclst] = {2'b01,adr[iclst][5:0]}; end
+     5'd8:    begin assign cluster_feb[iclst] = 5'd18;  assign cluster_roll[iclst] = 3'd2; assign cluster_pad[iclst] = {2'b10,adr[iclst][5:0]}; end
+     5'd9:    begin assign cluster_feb[iclst] = 5'd3 ;  assign cluster_roll[iclst] = 3'd3; assign cluster_pad[iclst] = {2'b00,adr[iclst][5:0]}; end
+     5'd10:   begin assign cluster_feb[iclst] = 5'd11;  assign cluster_roll[iclst] = 3'd3; assign cluster_pad[iclst] = {2'b01,adr[iclst][5:0]}; end
+     5'd11:   begin assign cluster_feb[iclst] = 5'd19;  assign cluster_roll[iclst] = 3'd3; assign cluster_pad[iclst] = {2'b10,adr[iclst][5:0]}; end
+     5'd12:   begin assign cluster_feb[iclst] = 5'd4 ;  assign cluster_roll[iclst] = 3'd4; assign cluster_pad[iclst] = {2'b00,adr[iclst][5:0]}; end
+     5'd13:   begin assign cluster_feb[iclst] = 5'd12;  assign cluster_roll[iclst] = 3'd4; assign cluster_pad[iclst] = {2'b01,adr[iclst][5:0]}; end
+     5'd14:   begin assign cluster_feb[iclst] = 5'd20;  assign cluster_roll[iclst] = 3'd4; assign cluster_pad[iclst] = {2'b10,adr[iclst][5:0]}; end
+     5'd15:   begin assign cluster_feb[iclst] = 5'd5 ;  assign cluster_roll[iclst] = 3'd5; assign cluster_pad[iclst] = {2'b00,adr[iclst][5:0]}; end
+     5'd16:   begin assign cluster_feb[iclst] = 5'd13;  assign cluster_roll[iclst] = 3'd5; assign cluster_pad[iclst] = {2'b01,adr[iclst][5:0]}; end
+     5'd17:   begin assign cluster_feb[iclst] = 5'd21;  assign cluster_roll[iclst] = 3'd5; assign cluster_pad[iclst] = {2'b10,adr[iclst][5:0]}; end
+     5'd18:   begin assign cluster_feb[iclst] = 5'd6 ;  assign cluster_roll[iclst] = 3'd6; assign cluster_pad[iclst] = {2'b00,adr[iclst][5:0]}; end
+     5'd19:   begin assign cluster_feb[iclst] = 5'd14;  assign cluster_roll[iclst] = 3'd6; assign cluster_pad[iclst] = {2'b01,adr[iclst][5:0]}; end
+     5'd20:   begin assign cluster_feb[iclst] = 5'd22;  assign cluster_roll[iclst] = 3'd6; assign cluster_pad[iclst] = {2'b10,adr[iclst][5:0]}; end
+     5'd21:   begin assign cluster_feb[iclst] = 5'd7 ;  assign cluster_roll[iclst] = 3'd7; assign cluster_pad[iclst] = {2'b00,adr[iclst][5:0]}; end
+     5'd22:   begin assign cluster_feb[iclst] = 5'd15;  assign cluster_roll[iclst] = 3'd7; assign cluster_pad[iclst] = {2'b01,adr[iclst][5:0]}; end
+     5'd23:   begin assign cluster_feb[iclst] = 5'd23;  assign cluster_roll[iclst] = 3'd7; assign cluster_pad[iclst] = {2'b10,adr[iclst][5:0]}; end
+     default: begin assign cluster_feb[iclst] = 5'd24;  assign cluster_roll[iclst] = 3'd0; assign cluster_pad[iclst] =                   8'd192; end  //invalid case
+   endcase
+   end
+
   end
   endgenerate
 
+
+
   wire gem_has_data = (vpf[0]|vpf[1]|vpf[2]|vpf[3]);
+
+
+  // form a 24 bit list of active febs, based on presence of cluster in gemA
+  genvar ifeb;
+  generate
+  for (ifeb=0; ifeb<MXFEB; ifeb=ifeb+1)     begin:   active_feb_loop
+    always @(posedge clock) begin
+    active_feb_list [ifeb] <= (cluster_feb[0]==ifeb && vpf[0]) |
+                              (cluster_feb[1]==ifeb && vpf[1]) |
+                              (cluster_feb[2]==ifeb && vpf[2]) |
+                              (cluster_feb[3]==ifeb && vpf[3]);
+    end
+  end
+  endgenerate
 
 //----------------------------------------------------------------------------------------------------------------------
 // outputs
@@ -565,10 +655,22 @@ assign vpf3 = vpf[3];
 //
 //----------------------------------------------------------------------------------------------------------------------
 
-  assign  cluster0 = cluster [0];
-  assign  cluster1 = cluster [1];
-  assign  cluster2 = cluster [2];
-  assign  cluster3 = cluster [3];
+  assign  cluster0      = cluster [0];
+  assign  cluster1      = cluster [1];
+  assign  cluster2      = cluster [2];
+  assign  cluster3      = cluster [3];
+  assign  cluster0_feb  = cluster_feb[0];
+  assign  cluster1_feb  = cluster_feb[1];
+  assign  cluster2_feb  = cluster_feb[2];
+  assign  cluster3_feb  = cluster_feb[3];
+  assign  cluster0_roll = cluster_roll[0];
+  assign  cluster1_roll = cluster_roll[1];
+  assign  cluster2_roll = cluster_roll[2];
+  assign  cluster3_roll = cluster_roll[3];
+  assign  cluster0_pad  = cluster_pad[0];
+  assign  cluster1_pad  = cluster_pad[1];
+  assign  cluster2_pad  = cluster_pad[2];
+  assign  cluster3_pad  = cluster_pad[3];
 
 //-------------------------------------------------------------------------------------------------------------------
 endmodule

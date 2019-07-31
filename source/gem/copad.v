@@ -13,54 +13,143 @@
 // n.b. PLEASE realize that this module WILL NOT WORK with VFAT-3 data. This is designed completely around expecting
 // that every cluster has size=7, and clusters will only occur in partitions 0, 8, 16
 //
+// copad matching with VFAT2 data is in copad_vfat2.v
+//
+// 2019-07-30: start to work with VFAT3 data [size=3bits, position=11bits], position is from 0-1535
+// coincidence pad matching: delta pad = 1, detal roll = 1 by default and should be configurable!
+//
 //----------------------------------------------------------------------------------------------------------------------
 
 module copad (
 
     input clock, // 40MHz fabric clock
 
-    input match_neighbors, // set high for the copad finder to match on neighboring (+/- one) pads
+    input match_neighborRoll,
+    input match_neighborPad, // set high for the copad finder to match on neighboring (+/- one) pads
+    input [3:0] match_deltaPad, //0-15
+
 
     // 8 clusters from gemA
-    input [13:0] gemA_cluster0,
-    input [13:0] gemA_cluster1,
-    input [13:0] gemA_cluster2,
-    input [13:0] gemA_cluster3,
-    input [13:0] gemA_cluster4,
-    input [13:0] gemA_cluster5,
-    input [13:0] gemA_cluster6,
-    input [13:0] gemA_cluster7,
+    input gemA_cluster0_vpf;
+    input gemA_cluster1_vpf;
+    input gemA_cluster2_vpf;
+    input gemA_cluster3_vpf;
+    input gemA_cluster4_vpf;
+    input gemA_cluster5_vpf;
+    input gemA_cluster6_vpf;
+    input gemA_cluster7_vpf;
+
+    input [2:0] gemA_cluster0_roll,
+    input [2:0] gemA_cluster1_roll,
+    input [2:0] gemA_cluster2_roll,
+    input [2:0] gemA_cluster3_roll,
+    input [2:0] gemA_cluster4_roll,
+    input [2:0] gemA_cluster5_roll,
+    input [2:0] gemA_cluster6_roll,
+    input [2:0] gemA_cluster7_roll,
+
+    input [7:0] gemA_cluster0_pad,
+    input [7:0] gemA_cluster1_pad,
+    input [7:0] gemA_cluster2_pad,
+    input [7:0] gemA_cluster3_pad,
+    input [7:0] gemA_cluster4_pad,
+    input [7:0] gemA_cluster5_pad,
+    input [7:0] gemA_cluster6_pad,
+    input [7:0] gemA_cluster7_pad,
+
+    input [2:0] gemA_cluster0_cnt,
+    input [2:0] gemA_cluster1_cnt,
+    input [2:0] gemA_cluster2_cnt,
+    input [2:0] gemA_cluster3_cnt,
+    input [2:0] gemA_cluster4_cnt,
+    input [2:0] gemA_cluster5_cnt,
+    input [2:0] gemA_cluster6_cnt,
+    input [2:0] gemA_cluster7_cnt,
+    
 
     // 8 clusters from gemB
-    input [13:0] gemB_cluster0,
-    input [13:0] gemB_cluster1,
-    input [13:0] gemB_cluster2,
-    input [13:0] gemB_cluster3,
-    input [13:0] gemB_cluster4,
-    input [13:0] gemB_cluster5,
-    input [13:0] gemB_cluster6,
-    input [13:0] gemB_cluster7,
+    input gemB_cluster0_vpf;
+    input gemB_cluster1_vpf;
+    input gemB_cluster2_vpf;
+    input gemB_cluster3_vpf;
+    input gemB_cluster4_vpf;
+    input gemB_cluster5_vpf;
+    input gemB_cluster6_vpf;
+    input gemB_cluster7_vpf;
+
+    input [2:0] gemB_cluster0_roll,
+    input [2:0] gemB_cluster1_roll,
+    input [2:0] gemB_cluster2_roll,
+    input [2:0] gemB_cluster3_roll,
+    input [2:0] gemB_cluster4_roll,
+    input [2:0] gemB_cluster5_roll,
+    input [2:0] gemB_cluster6_roll,
+    input [2:0] gemB_cluster7_roll,
+
+    input [7:0] gemB_cluster0_pad,
+    input [7:0] gemB_cluster1_pad,
+    input [7:0] gemB_cluster2_pad,
+    input [7:0] gemB_cluster3_pad,
+    input [7:0] gemB_cluster4_pad,
+    input [7:0] gemB_cluster5_pad,
+    input [7:0] gemB_cluster6_pad,
+    input [7:0] gemB_cluster7_pad,
+
+    input [2:0] gemB_cluster0_cnt,
+    input [2:0] gemB_cluster1_cnt,
+    input [2:0] gemB_cluster2_cnt,
+    input [2:0] gemB_cluster3_cnt,
+    input [2:0] gemB_cluster4_cnt,
+    input [2:0] gemB_cluster5_cnt,
+    input [2:0] gemB_cluster6_cnt,
+    input [2:0] gemB_cluster7_cnt,
 
 
     // ff'd copies (1bx delay) of the gemA inputs
-    output reg [MXCLSTB-1:0] cluster0,
-    output reg [MXCLSTB-1:0] cluster1,
-    output reg [MXCLSTB-1:0] cluster2,
-    output reg [MXCLSTB-1:0] cluster3,
-    output reg [MXCLSTB-1:0] cluster4,
-    output reg [MXCLSTB-1:0] cluster5,
-    output reg [MXCLSTB-1:0] cluster6,
-    output reg [MXCLSTB-1:0] cluster7,
+    output reg vpf0;
+    output reg vpf1;
+    output reg vpf2;
+    output reg vpf3;
+    output reg vpf4;
+    output reg vpf5;
+    output reg vpf6;
+    output reg vpf7;
+
+    output reg [2:0] cluster0_roll,
+    output reg [2:0] cluster1_roll,
+    output reg [2:0] cluster2_roll,
+    output reg [2:0] cluster3_roll,
+    output reg [2:0] cluster4_roll,
+    output reg [2:0] cluster5_roll,
+    output reg [2:0] cluster6_roll,
+    output reg [2:0] cluster7_roll,
+
+    output reg [7:0] cluster0_pad,
+    output reg [7:0] cluster1_pad,
+    output reg [7:0] cluster2_pad,
+    output reg [7:0] cluster3_pad,
+    output reg [7:0] cluster4_pad,
+    output reg [7:0] cluster5_pad,
+    output reg [7:0] cluster6_pad,
+    output reg [7:0] cluster7_pad,
+
+    output reg [2:0] cluster0_cnt,
+    output reg [2:0] cluster1_cnt,
+    output reg [2:0] cluster2_cnt,
+    output reg [2:0] cluster3_cnt,
+    output reg [2:0] cluster4_cnt,
+    output reg [2:0] cluster5_cnt,
+    output reg [2:0] cluster6_cnt,
+    output reg [2:0] cluster7_cnt,
 
     // 8 bit ff'd register of matches found, with respect to the address in gemA
     output reg [MXCLUSTERS-1:0] match,
-
-    output reg [MXCLUSTERS-1:0] match_right, // 8 bit flag that the match was found on the rhs of gemA adr
-    output reg [MXCLUSTERS-1:0] match_left,  // 8 bit flag that the match was found on the lhs of gemA adr
+    output reg [MXCLUSTERS-1:0] match_upper,
+    output reg [MXCLUSTERS-1:0] match_lower,
 
     output reg any_match, // Output: 1 bit, any match was found
 
-    output reg [MXFEB-1:0] active_feb_list,  // 24 bit register of active FEBs. Can be used e.g. in GEM only self-trigger
+    output reg [MXFEB-1:0] active_feb_list_copad,  // 24 bit register of active FEBs. Can be used e.g. in GEM only self-trigger
 
     output sump
 );
@@ -78,47 +167,170 @@ parameter MXCLSTB    = 14;
 
  // insert ff for correct simulation standalone synthesis timing
  `ifdef debug_copad
-    reg [MXCLSTB-1:0] gem_cluster [1:0][7:0];
+    reg [2:0] gemA_cluster_roll [7:0];// 8-elements array 
+    reg [7:0] gemA_cluster_pad  [7:0];// 8-elements array 
+    reg [2:0] gemA_cluster_cnt  [7:0];// 8-elements array 
+    reg [2:0] gemB_cluster_roll [7:0];// 8-elements array 
+    reg [7:0] gemB_cluster_pad  [7:0];// 8-elements array 
+    reg [2:0] gemB_cluster_cnt  [7:0];// 8-elements array 
+    reg gemA_vpf[7:0];
+    reg gemB_vpf[7:0];
 
     always @(posedge clock) begin
-      gem_cluster[0][0] <= gemA_cluster0;
-      gem_cluster[0][1] <= gemA_cluster1;
-      gem_cluster[0][2] <= gemA_cluster2;
-      gem_cluster[0][3] <= gemA_cluster3;
-      gem_cluster[0][4] <= gemA_cluster4;
-      gem_cluster[0][5] <= gemA_cluster5;
-      gem_cluster[0][6] <= gemA_cluster6;
-      gem_cluster[0][7] <= gemA_cluster7;
+      gemA_vpf[0]          <= gemA_vpf0;
+      gemA_vpf[1]          <= gemA_vpf1;
+      gemA_vpf[2]          <= gemA_vpf2;
+      gemA_vpf[3]          <= gemA_vpf3;
+      gemA_vpf[4]          <= gemA_vpf4;
+      gemA_vpf[5]          <= gemA_vpf5;
+      gemA_vpf[6]          <= gemA_vpf6;
+      gemA_vpf[7]          <= gemA_vpf7;
 
-      gem_cluster[1][0] <= gemB_cluster0;
-      gem_cluster[1][1] <= gemB_cluster1;
-      gem_cluster[1][2] <= gemB_cluster2;
-      gem_cluster[1][3] <= gemB_cluster3;
-      gem_cluster[1][4] <= gemB_cluster4;
-      gem_cluster[1][5] <= gemB_cluster5;
-      gem_cluster[1][6] <= gemB_cluster6;
-      gem_cluster[1][7] <= gemB_cluster7;
+      gemA_cluster_roll[0] <= gemA_cluster0_roll;
+      gemA_cluster_roll[1] <= gemA_cluster1_roll;
+      gemA_cluster_roll[2] <= gemA_cluster2_roll;
+      gemA_cluster_roll[3] <= gemA_cluster3_roll;
+      gemA_cluster_roll[4] <= gemA_cluster4_roll;
+      gemA_cluster_roll[5] <= gemA_cluster5_roll;
+      gemA_cluster_roll[6] <= gemA_cluster6_roll;
+      gemA_cluster_roll[7] <= gemA_cluster7_roll;
+
+      gemA_cluster_pad[0]  <= gemA_cluster0_pad;
+      gemA_cluster_pad[1]  <= gemA_cluster1_pad;
+      gemA_cluster_pad[2]  <= gemA_cluster2_pad;
+      gemA_cluster_pad[3]  <= gemA_cluster3_pad;
+      gemA_cluster_pad[4]  <= gemA_cluster4_pad;
+      gemA_cluster_pad[5]  <= gemA_cluster5_pad;
+      gemA_cluster_pad[6]  <= gemA_cluster6_pad;
+      gemA_cluster_pad[7]  <= gemA_cluster7_pad;
+
+      gemA_cluster_cnt[0]  <= gemA_cluster0_cnt;
+      gemA_cluster_cnt[1]  <= gemA_cluster1_cnt;
+      gemA_cluster_cnt[2]  <= gemA_cluster2_cnt;
+      gemA_cluster_cnt[3]  <= gemA_cluster3_cnt;
+      gemA_cluster_cnt[4]  <= gemA_cluster4_cnt;
+      gemA_cluster_cnt[5]  <= gemA_cluster5_cnt;
+      gemA_cluster_cnt[6]  <= gemA_cluster6_cnt;
+      gemA_cluster_cnt[7]  <= gemA_cluster7_cnt;
+
+      gemB_vpf[0]          <= gemB_vpf0;
+      gemB_vpf[1]          <= gemB_vpf1;
+      gemB_vpf[2]          <= gemB_vpf2;
+      gemB_vpf[3]          <= gemB_vpf3;
+      gemB_vpf[4]          <= gemB_vpf4;
+      gemB_vpf[5]          <= gemB_vpf5;
+      gemB_vpf[6]          <= gemB_vpf6;
+      gemB_vpf[7]          <= gemB_vpf7;
+
+      gemB_cluster_roll[0] <= gemB_cluster0_roll;
+      gemB_cluster_roll[1] <= gemB_cluster1_roll;
+      gemB_cluster_roll[2] <= gemB_cluster2_roll;
+      gemB_cluster_roll[3] <= gemB_cluster3_roll;
+      gemB_cluster_roll[4] <= gemB_cluster4_roll;
+      gemB_cluster_roll[5] <= gemB_cluster5_roll;
+      gemB_cluster_roll[6] <= gemB_cluster6_roll;
+      gemB_cluster_roll[7] <= gemB_cluster7_roll;
+
+      gemB_cluster_pad[0]  <= gemB_cluster0_pad;
+      gemB_cluster_pad[1]  <= gemB_cluster1_pad;
+      gemB_cluster_pad[2]  <= gemB_cluster2_pad;
+      gemB_cluster_pad[3]  <= gemB_cluster3_pad;
+      gemB_cluster_pad[4]  <= gemB_cluster4_pad;
+      gemB_cluster_pad[5]  <= gemB_cluster5_pad;
+      gemB_cluster_pad[6]  <= gemB_cluster6_pad;
+      gemB_cluster_pad[7]  <= gemB_cluster7_pad;
+
+      gemB_cluster_cnt[0]  <= gemB_cluster0_cnt;
+      gemB_cluster_cnt[1]  <= gemB_cluster1_cnt;
+      gemB_cluster_cnt[2]  <= gemB_cluster2_cnt;
+      gemB_cluster_cnt[3]  <= gemB_cluster3_cnt;
+      gemB_cluster_cnt[4]  <= gemB_cluster4_cnt;
+      gemB_cluster_cnt[5]  <= gemB_cluster5_cnt;
+      gemB_cluster_cnt[6]  <= gemB_cluster6_cnt;
+      gemB_cluster_cnt[7]  <= gemB_cluster7_cnt;
+
     end
  `else
-    wire [MXCLSTB-1:0] gem_cluster [1:0][7:0];
+    wire gemA_vpf[7:0];
+    wire gemB_vpf[7:0];
+    wire [2:0] gemA_cluster_roll [7:0];// 8-elements array , each element is a 3 bits wire
+    wire [7:0] gemA_cluster_pad  [7:0];// 8-elements array 
+    wire [2:0] gemA_cluster_cnt  [7:0];// 8-elements array 
+    wire [2:0] gemB_cluster_roll [7:0];// 8-elements array 
+    wire [7:0] gemB_cluster_pad  [7:0];// 8-elements array 
+    wire [2:0] gemB_cluster_cnt  [7:0];// 8-elements array 
 
-    assign gem_cluster[0][0] = gemA_cluster0;
-    assign gem_cluster[0][1] = gemA_cluster1;
-    assign gem_cluster[0][2] = gemA_cluster2;
-    assign gem_cluster[0][3] = gemA_cluster3;
-    assign gem_cluster[0][4] = gemA_cluster4;
-    assign gem_cluster[0][5] = gemA_cluster5;
-    assign gem_cluster[0][6] = gemA_cluster6;
-    assign gem_cluster[0][7] = gemA_cluster7;
+    assign  gemA_vpf[0]          = gemA_vpf0;
+    assign  gemA_vpf[1]          = gemA_vpf1;
+    assign  gemA_vpf[2]          = gemA_vpf2;
+    assign  gemA_vpf[3]          = gemA_vpf3;
+    assign  gemA_vpf[4]          = gemA_vpf4;
+    assign  gemA_vpf[5]          = gemA_vpf5;
+    assign  gemA_vpf[6]          = gemA_vpf6;
+    assign  gemA_vpf[7]          = gemA_vpf7;
 
-    assign gem_cluster[1][0] = gemB_cluster0;
-    assign gem_cluster[1][1] = gemB_cluster1;
-    assign gem_cluster[1][2] = gemB_cluster2;
-    assign gem_cluster[1][3] = gemB_cluster3;
-    assign gem_cluster[1][4] = gemB_cluster4;
-    assign gem_cluster[1][5] = gemB_cluster5;
-    assign gem_cluster[1][6] = gemB_cluster6;
-    assign gem_cluster[1][7] = gemB_cluster7;
+    assign  gemA_cluster_roll[0] = gemA_cluster0_roll;
+    assign  gemA_cluster_roll[1] = gemA_cluster1_roll;
+    assign  gemA_cluster_roll[2] = gemA_cluster2_roll;
+    assign  gemA_cluster_roll[3] = gemA_cluster3_roll;
+    assign  gemA_cluster_roll[4] = gemA_cluster4_roll;
+    assign  gemA_cluster_roll[5] = gemA_cluster5_roll;
+    assign  gemA_cluster_roll[6] = gemA_cluster6_roll;
+    assign  gemA_cluster_roll[7] = gemA_cluster7_roll;
+
+    assign  gemA_cluster_pad[0]  = gemA_cluster0_pad;
+    assign  gemA_cluster_pad[1]  = gemA_cluster1_pad;
+    assign  gemA_cluster_pad[2]  = gemA_cluster2_pad;
+    assign  gemA_cluster_pad[3]  = gemA_cluster3_pad;
+    assign  gemA_cluster_pad[4]  = gemA_cluster4_pad;
+    assign  gemA_cluster_pad[5]  = gemA_cluster5_pad;
+    assign  gemA_cluster_pad[6]  = gemA_cluster6_pad;
+    assign  gemA_cluster_pad[7]  = gemA_cluster7_pad;
+
+    assign  gemA_cluster_cnt[0]  = gemA_cluster0_cnt;
+    assign  gemA_cluster_cnt[1]  = gemA_cluster1_cnt;
+    assign  gemA_cluster_cnt[2]  = gemA_cluster2_cnt;
+    assign  gemA_cluster_cnt[3]  = gemA_cluster3_cnt;
+    assign  gemA_cluster_cnt[4]  = gemA_cluster4_cnt;
+    assign  gemA_cluster_cnt[5]  = gemA_cluster5_cnt;
+    assign  gemA_cluster_cnt[6]  = gemA_cluster6_cnt;
+    assign  gemA_cluster_cnt[7]  = gemA_cluster7_cnt;
+
+    assign  gemB_vpf[0]          = gemB_vpf0;
+    assign  gemB_vpf[1]          = gemB_vpf1;
+    assign  gemB_vpf[2]          = gemB_vpf2;
+    assign  gemB_vpf[3]          = gemB_vpf3;
+    assign  gemB_vpf[4]          = gemB_vpf4;
+    assign  gemB_vpf[5]          = gemB_vpf5;
+    assign  gemB_vpf[6]          = gemB_vpf6;
+    assign  gemB_vpf[7]          = gemB_vpf7;
+
+    assign  gemB_cluster_roll[0] = gemB_cluster0_roll;
+    assign  gemB_cluster_roll[1] = gemB_cluster1_roll;
+    assign  gemB_cluster_roll[2] = gemB_cluster2_roll;
+    assign  gemB_cluster_roll[3] = gemB_cluster3_roll;
+    assign  gemB_cluster_roll[4] = gemB_cluster4_roll;
+    assign  gemB_cluster_roll[5] = gemB_cluster5_roll;
+    assign  gemB_cluster_roll[6] = gemB_cluster6_roll;
+    assign  gemB_cluster_roll[7] = gemB_cluster7_roll;
+
+    assign  gemB_cluster_pad[0]  = gemB_cluster0_pad;
+    assign  gemB_cluster_pad[1]  = gemB_cluster1_pad;
+    assign  gemB_cluster_pad[2]  = gemB_cluster2_pad;
+    assign  gemB_cluster_pad[3]  = gemB_cluster3_pad;
+    assign  gemB_cluster_pad[4]  = gemB_cluster4_pad;
+    assign  gemB_cluster_pad[5]  = gemB_cluster5_pad;
+    assign  gemB_cluster_pad[6]  = gemB_cluster6_pad;
+    assign  gemB_cluster_pad[7]  = gemB_cluster7_pad;
+
+    assign  gemB_cluster_cnt[0]  = gemB_cluster0_cnt;
+    assign  gemB_cluster_cnt[1]  = gemB_cluster1_cnt;
+    assign  gemB_cluster_cnt[2]  = gemB_cluster2_cnt;
+    assign  gemB_cluster_cnt[3]  = gemB_cluster3_cnt;
+    assign  gemB_cluster_cnt[4]  = gemB_cluster4_cnt;
+    assign  gemB_cluster_cnt[5]  = gemB_cluster5_cnt;
+    assign  gemB_cluster_cnt[6]  = gemB_cluster6_cnt;
+    assign  gemB_cluster_cnt[7]  = gemB_cluster7_cnt;
 
  `endif
 
@@ -128,259 +340,99 @@ parameter MXCLSTB    = 14;
   *   hit[13:11] = n additional pads hit  up to 7
   */
 
-  wire [MXADRB-1:0] adr    [1:0][MXCLUSTERS-1:0];
-  wire [MXADRB-1:0] adr0_p      [MXCLUSTERS-1:0]; // adr+1
-  wire [MXADRB-1:0] adr0_m      [MXCLUSTERS-1:0]; // adr-1
-
-  wire [MXCNTB-1:0] cnt    [1:0][MXCLUSTERS-1:0];
-  wire              vpf    [1:0][MXCLUSTERS-1:0];
-
-  // unpack the cnts and adrs here; cnts are used, but save them for later (probably useful with vfat3)
-
-  assign {cnt[0][0], adr[0][0]} = gem_cluster[0][0];
-  assign {cnt[0][1], adr[0][1]} = gem_cluster[0][1];
-  assign {cnt[0][2], adr[0][2]} = gem_cluster[0][2];
-  assign {cnt[0][3], adr[0][3]} = gem_cluster[0][3];
-  assign {cnt[0][4], adr[0][4]} = gem_cluster[0][4];
-  assign {cnt[0][5], adr[0][5]} = gem_cluster[0][5];
-  assign {cnt[0][6], adr[0][6]} = gem_cluster[0][6];
-  assign {cnt[0][7], adr[0][7]} = gem_cluster[0][7];
-
-  assign {cnt[1][0], adr[1][0]} = gem_cluster[1][0];
-  assign {cnt[1][1], adr[1][1]} = gem_cluster[1][1];
-  assign {cnt[1][2], adr[1][2]} = gem_cluster[1][2];
-  assign {cnt[1][3], adr[1][3]} = gem_cluster[1][3];
-  assign {cnt[1][4], adr[1][4]} = gem_cluster[1][4];
-  assign {cnt[1][5], adr[1][5]} = gem_cluster[1][5];
-  assign {cnt[1][6], adr[1][6]} = gem_cluster[1][6];
-  assign {cnt[1][7], adr[1][7]} = gem_cluster[1][7];
-
-  // make a copy of the span of address + 8
-  assign adr0_p [0] = adr[0][0] + 4'd8;
-  assign adr0_p [1] = adr[0][1] + 4'd8;
-  assign adr0_p [2] = adr[0][2] + 4'd8;
-  assign adr0_p [3] = adr[0][3] + 4'd8;
-  assign adr0_p [4] = adr[0][4] + 4'd8;
-  assign adr0_p [5] = adr[0][5] + 4'd8;
-  assign adr0_p [6] = adr[0][6] + 4'd8;
-  assign adr0_p [7] = adr[0][7] + 4'd8;
-
-  // make a copy of the span of address - 8
-  assign adr0_m [0] = adr[0][0] - 4'd8;
-  assign adr0_m [1] = adr[0][1] - 4'd8;
-  assign adr0_m [2] = adr[0][2] - 4'd8;
-  assign adr0_m [3] = adr[0][3] - 4'd8;
-  assign adr0_m [4] = adr[0][4] - 4'd8;
-  assign adr0_m [5] = adr[0][5] - 4'd8;
-  assign adr0_m [6] = adr[0][6] - 4'd8;
-  assign adr0_m [7] = adr[0][7] - 4'd8;
-
-  // extract valid cluster flags
-  genvar i;
-  genvar j;
-  generate
-  for (i=0; i<2; i=i+1) begin: i_loop
-  for (j=0; j<8; j=j+1) begin: j_loop
-    // if bits 10 and 9 are both 1, then we are in address space > 1535 signifying a blank cluster
-    assign vpf[i][j] = ~(&adr[i][j][10:9]);
-  end
-  end
-  endgenerate
 
 //----------------------------------------------------------------------------------------------------------------------
-//
+//GEM geometry:
+//roll0: pad0, pad1, pad2 ..... pad190, pad191
+//roll1: pad0, pad1, pad2 ..... pad190, pad191
+//roll2: pad0, pad1, pad2 ..... pad190, pad191
+//roll3: pad0, pad1, pad2 ..... pad190, pad191
+//roll4: pad0, pad1, pad2 ..... pad190, pad191
+//roll5: pad0, pad1, pad2 ..... pad190, pad191
+//roll6: pad0, pad1, pad2 ..... pad190, pad191
+//roll7: pad0, pad1, pad2 ..... pad190, pad191
 //----------------------------------------------------------------------------------------------------------------------
+
+wire [7:0] match_AB_c [MXCLUSTERS-1:0]; // same roll
+wire [7:0] match_AB_u [MXCLUSTERS-1:0]; //upper roll, 
+wire [7:0] match_AB_l [MXCLUSTERS-1:0]; //lower roll
 
 wire [7:0] match_c;
-wire [7:0] match_r;
+wire [7:0] match_u;
 wire [7:0] match_l;
 
-wire [0:0] adr_at_left_edge  [MXCLUSTERS-1:0];
-wire [0:0] adr_at_right_edge [MXCLUSTERS-1:0];
+
+wire [0:0] gemApad_at_left_edge  [MXCLUSTERS-1:0];
+wire [0:0] gemApad_at_right_edge [MXCLUSTERS-1:0];
+wire [7:0] minpad_match      [MXCLUSTERS-1:0];
+wire [7:0] maxpad_match      [MXCLUSTERS-1:0];
+
+wire [7:0] match_deltapad_8bits = match_neighborPad ? {4'b0, match_deltaPad} : 8'b0;
+
+wire padmatch_Acluster_Bcluster [MXCLUSTERS-1:0][MXCLUSTERS-1:0];
 
 genvar iclst;
 generate
 for (iclst=0; iclst<MXCLUSTERS; iclst=iclst+1) begin: clust_match_loop
 
-  // we don't want to form left matches at the left edge of the chamber
-  assign adr_at_left_edge [iclst] = (adr[0][iclst] == 0    )|
-                                    (adr[0][iclst] == 192  )|
-                                    (adr[0][iclst] == 384  )|
-                                    (adr[0][iclst] == 576  )|
-                                    (adr[0][iclst] == 768  )|
-                                    (adr[0][iclst] == 960  )|
-                                    (adr[0][iclst] == 1152 )|
-                                    (adr[0][iclst] == 1344 );
+  assign gemApad_at_left_edge  [iclst] = gemA_vpf[iclst] & (gemA_cluster_pad[iclst] < match_deltapad_8bits)
+  assign gemApad_at_right_edge [iclst] = gemA_vpf[iclst] & ((gemA_cluster_pad[iclst] + match_deltapad_8bits + gemA_cluster_cnt[iclst]) > 8'd191)
 
-  // we don't want to form right matches at the right edge of the chamber
-  assign adr_at_right_edge [iclst] = (adr[0][iclst] == 191  - 7) |
-                                     (adr[0][iclst] == 383  - 7) |
-                                     (adr[0][iclst] == 575  - 7) |
-                                     (adr[0][iclst] == 767  - 7) |
-                                     (adr[0][iclst] == 959  - 7) |
-                                     (adr[0][iclst] == 1151 - 7) |
-                                     (adr[0][iclst] == 1535 - 7);
+  assign minpad_match [iclst] = gemApad_at_left_edge[iclst]  ? (8'd0)   : (gemA_cluster_pad[iclst] - match_deltapad_8bits);
+  assign maxpad_match [iclst] = gemApad_at_right_edge[iclst] ? (8'd191) : (gemA_cluster_pad[iclst] + gemA_cluster_cnt[iclst] + match_deltapad_8bits);
 
-  // match is in the center of gemA cluster (full match)
-  assign match_c  [iclst] =  vpf[0][iclst] &            // gemA cluster is valid
-                           ( adr[0][iclst] == adr[1][0] // full match to gemB cluster0
-                           | adr[0][iclst] == adr[1][1] // full match to gemB cluster1
-                           | adr[0][iclst] == adr[1][2] // full match to gemB cluster2
-                           | adr[0][iclst] == adr[1][3] // full match to gemB cluster3
-                           | adr[0][iclst] == adr[1][4] // full match to gemB cluster4
-                           | adr[0][iclst] == adr[1][5] // full match to gemB cluster5
-                           | adr[0][iclst] == adr[1][6] // full match to gemB cluster6
-                           | adr[0][iclst] == adr[1][7] // full match to gemB cluster7
-                          );                            // gemB cluster automatically valid if there is a match
 
-  // match is on the left side of gemA cluster
-  assign match_l [iclst] = !adr_at_left_edge[iclst] & // don't form matches at right edge
-                            vpf[0][iclst] &           // gemA cluster is valid
-                          ( adr0_m[iclst]==adr[1][0]  // left side match to gemB cluster0
-                          | adr0_m[iclst]==adr[1][1]  // left side match to gemB cluster1
-                          | adr0_m[iclst]==adr[1][2]  // left side match to gemB cluster2
-                          | adr0_m[iclst]==adr[1][3]  // left side match to gemB cluster3
-                          | adr0_m[iclst]==adr[1][4]  // left side match to gemB cluster4
-                          | adr0_m[iclst]==adr[1][5]  // left side match to gemB cluster5
-                          | adr0_m[iclst]==adr[1][6]  // left side match to gemB cluster6
-                          | adr0_m[iclst]==adr[1][7]  // left side match to gemB cluster7
-                          );                          // gemB cluster automatically valid if there is a match
+  genvar iclstB;
+  generate 
+  for (iclstB=0; iclstB<MXCLUSTERS; iclstB+1) begin: clust_match_looop2
+      //check whether pad in gemB cluster is within the match range derived from gemA cluster
+      assign padmatch_Acluster_Bcluster[iclst][iclstB]  = (gemB_cluster_pad[iclstB] >= minpad_match[iclst] & gemB_cluster_pad[iclstB] <= maxpad_match[iclst]) | (gemB_cluster_pad[iclstB] + gemB_cluster_cnt[iclstB] >= minpad_match[iclst] & gemB_cluster_pad[iclstB] + gemB_cluster_cnt[iclstB] <= maxpad_match[iclst]);
 
-  // match is on the right side of gemA cluster
-  assign match_r [iclst] = !adr_at_right_edge[iclst] & // don't form matches at right edge
-                            vpf[0][iclst] &            // gemA cluster is valid
-                          ( adr0_p[iclst]==adr[1][0]   // right side match to gemB cluster0
-                          | adr0_p[iclst]==adr[1][1]   // right side match to gemB cluster1
-                          | adr0_p[iclst]==adr[1][2]   // right side match to gemB cluster2
-                          | adr0_p[iclst]==adr[1][3]   // right side match to gemB cluster3
-                          | adr0_p[iclst]==adr[1][4]   // right side match to gemB cluster4
-                          | adr0_p[iclst]==adr[1][5]   // right side match to gemB cluster5
-                          | adr0_p[iclst]==adr[1][6]   // right side match to gemB cluster6
-                          | adr0_p[iclst]==adr[1][7]   // right side match to gemB cluster7
-                          );                           // gemB cluster automatically valid if there is a match
+      assign match_AB_c [iclst][iclstB] =  gemA_vpf[iclst] & gemB_vpf[iclstB] &  gemA_cluster_roll[iclst] == gemB_cluster_roll[iclstB] & padmatch_Acluster_Bcluster[iclst][iclstB];
+      assign match_AB_u [iclst][iclstB]  = (gemA_cluster_roll[iclst] == 0) ? 1'b0 : (gemA_vpf[iclst] & gemB_vpf[iclstB] &  gemA_cluster_roll[iclst]-3'd1 == gemB_cluster_roll[iclstB] & padmatch_Acluster_Bcluster[iclst][iclstB]) : 1'b0
+      assign match_AB_l [iclst][iclstB]  = (gemA_cluster_roll[iclst] == 7) ? 1'b0 : (gemA_vpf[iclst] & gemB_vpf[iclstB] &  gemA_cluster_roll[iclst]+3'd1 == gemB_cluster_roll[iclstB] & padmatch_Acluster_Bcluster[iclst][iclstB]);
+      
+  end 
+  endgenerate
+
+  assign match_c[iclst] = | match_AB_c[iclst];
+  assign match_u[iclst] = | match_AB_u[iclst];
+  assign match_l[iclst] = | match_AB_l[iclst];
 end
 endgenerate
 
-wire [7:0] match_fast  =   match_c   // full cluster match
-                          | ({8{match_neighbors}} & match_r )
-                          | ({8{match_neighbors}} & match_l );
+wire [7:0] match_full  =   match_c   // full cluster match
+                          | ({8{match_neighroll}} & match_u )
+                          | ({8{match_neighroll}} & match_l );
 
-wire any_match_fast = (|match_fast);
+wire any_match_full = (|match_full);
 
 always @ (posedge clock) begin
-  any_match           <= any_match_fast;
-  match         [7:0] <= match_fast;
-  match_left    [7:0] <= match_l;
-  match_right   [7:0] <= match_r;
-
-  // ff copy the clusters from gemA to delay 1bx to lineup with output
-  cluster0 <= gem_cluster[0][0];
-  cluster1 <= gem_cluster[0][1];
-  cluster2 <= gem_cluster[0][2];
-  cluster3 <= gem_cluster[0][3];
-  cluster4 <= gem_cluster[0][4];
-  cluster5 <= gem_cluster[0][5];
-  cluster6 <= gem_cluster[0][6];
-  cluster7 <= gem_cluster[0][7];
-end
-
-
-
-// form a list of 8 Active FEBs with clusters in gemA
-//wire [4:0] cluster_feb [MXCLUSTERS-1:0];
-reg [4:0] cluster_feb [MXCLUSTERS-1:0];
-generate
-for (iclst=0; iclst<MXCLUSTERS; iclst=iclst+1) begin: feb_assign_loop
-  // assign cluster_feb[iclst] = adr[0][iclst] >> 6;  // shr6 is a floored div64, which gives us the 5 bit VFAT-ID of the cluster
-
-  // chamber looks like this  (for dumb reasons that can't be helped)
-  //  0  8  16
-  //  1  9  17
-  //  2  10 18
-  //  3  11 19
-  //  4  12 20
-  //  5  13 21
-  //  6  14 22
-  //  7  15 23
-  //
-  // the upper 5 bits of the address need to be mapped to VFAT-IDs..
-  // but naturally the upper 5-bits produce a map like
-  //  0   1    2
-  //  3   4    5
-  //  6   7    8
-  //  9   10   11
-  //  12  13   14
-  //  15  16   17
-  //  18  19   20
-  //  21  22   23
-
-  always @(*) begin
-  case (adr[0][iclst][10:6]) // adr[10:6] is the "natural" vfatid
-    5'd0:    cluster_feb[iclst] = 5'd0;
-    5'd1:    cluster_feb[iclst] = 5'd8;
-    5'd2:    cluster_feb[iclst] = 5'd16;
-    5'd3:    cluster_feb[iclst] = 5'd1;
-    5'd4:    cluster_feb[iclst] = 5'd9;
-    5'd5:    cluster_feb[iclst] = 5'd17;
-    5'd6:    cluster_feb[iclst] = 5'd2;
-    5'd7:    cluster_feb[iclst] = 5'd10;
-    5'd8:    cluster_feb[iclst] = 5'd18;
-    5'd9:    cluster_feb[iclst] = 5'd3;
-    5'd10:   cluster_feb[iclst] = 5'd11;
-    5'd11:   cluster_feb[iclst] = 5'd19;
-    5'd12:   cluster_feb[iclst] = 5'd4;
-    5'd13:   cluster_feb[iclst] = 5'd12;
-    5'd14:   cluster_feb[iclst] = 5'd20;
-    5'd15:   cluster_feb[iclst] = 5'd5;
-    5'd16:   cluster_feb[iclst] = 5'd13;
-    5'd17:   cluster_feb[iclst] = 5'd21;
-    5'd18:   cluster_feb[iclst] = 5'd6;
-    5'd19:   cluster_feb[iclst] = 5'd14;
-    5'd20:   cluster_feb[iclst] = 5'd22;
-    5'd21:   cluster_feb[iclst] = 5'd7;
-    5'd22:   cluster_feb[iclst] = 5'd15;
-    5'd23:   cluster_feb[iclst] = 5'd23;
-    default: cluster_feb[iclst] = 5'd24;
-  endcase
-  end
+  any_match            <= any_match_full;
+  match         [7:0]  <= match_full;
+  match_upper   [7:0]  <= match_u;
+  match_lower   [7:0]  <= match_l;
 
 end
-endgenerate
 
-// form a 24 bit list of active febs, based on presence of cluster in gemA
-genvar ifeb;
-generate
-for (ifeb=0; ifeb<MXFEB; ifeb=ifeb+1)     begin:   feb_match_loop
-  always @(posedge clock) begin
-  active_feb_list [ifeb] <= (cluster_feb[0]==ifeb && match_fast[0]) |
-                            (cluster_feb[1]==ifeb && match_fast[1]) |
-                            (cluster_feb[2]==ifeb && match_fast[2]) |
-                            (cluster_feb[3]==ifeb && match_fast[3]) |
-                            (cluster_feb[4]==ifeb && match_fast[4]) |
-                            (cluster_feb[5]==ifeb && match_fast[5]) |
-                            (cluster_feb[6]==ifeb && match_fast[6]) |
-                            (cluster_feb[7]==ifeb && match_fast[7]);
-  end
-end
-endgenerate
 
 assign sump =
-              (|cnt[0][0])
-            | (|cnt[0][1])
-            | (|cnt[0][2])
-            | (|cnt[0][3])
-            | (|cnt[0][4])
-            | (|cnt[0][5])
-            | (|cnt[0][6])
-            | (|cnt[0][7])
-            | (|cnt[1][0])
-            | (|cnt[1][1])
-            | (|cnt[1][2])
-            | (|cnt[1][3])
-            | (|cnt[1][4])
-            | (|cnt[1][5])
-            | (|cnt[1][6])
-            | (|cnt[1][7]);
+              (|gemA_cluster_cnt[0])
+            | (|gemA_cluster_cnt[1])
+            | (|gemA_cluster_cnt[2])
+            | (|gemA_cluster_cnt[3])
+            | (|gemA_cluster_cnt[4])
+            | (|gemA_cluster_cnt[5])
+            | (|gemA_cluster_cnt[6])
+            | (|gemA_cluster_cnt[7])
+            | (|gemB_cluster_cnt[0])
+            | (|gemB_cluster_cnt[1])
+            | (|gemB_cluster_cnt[2])
+            | (|gemB_cluster_cnt[3])
+            | (|gemB_cluster_cnt[4])
+            | (|gemB_cluster_cnt[5])
+            | (|gemB_cluster_cnt[6])
+            | (|gemB_cluster_cnt[7]);
 
 //----------------------------------------------------------------------------------------------------------------------
 endmodule
