@@ -1822,7 +1822,8 @@
   wire [7:0]  gem_match_lower;
   wire        gem_any_match;
   wire [23:0] gemcopad_active_feb_list;
-  wire [CLSTBITS -1 :0] gem_copad  [MXCLUSTER_CHAMBER-1:0];
+  reg  [CLSTBITS -1 :0] gem_copad_reg  [MXCLUSTER_CHAMBER-1:0];
+  wire [CLSTBITS -1 :0] gem_copad      [MXCLUSTER_CHAMBER-1:0];
 
   copad u_copad (
 
@@ -1917,6 +1918,7 @@
 
     // 1 bit any match found
     .any_match(gem_any_match),
+    
 
     // 24 bit active feb list
     .active_feb_list_copad(gemcopad_active_feb_list[23:0]),
@@ -1928,16 +1930,25 @@
 
 always @ (posedge clock) begin
 
-  // ff copy the clusters from gemA to delay 1bx to lineup with output
-  gem_copad[0] <= gem_match[0] ? gemA_cluster[0] : {3'b0, 11'd1536};
-  gem_copad[1] <= gem_match[1] ? gemA_cluster[1] : {3'b0, 11'd1536};
-  gem_copad[2] <= gem_match[2] ? gemA_cluster[2] : {3'b0, 11'd1536};
-  gem_copad[3] <= gem_match[3] ? gemA_cluster[3] : {3'b0, 11'd1536};
-  gem_copad[4] <= gem_match[4] ? gemA_cluster[4] : {3'b0, 11'd1536};
-  gem_copad[5] <= gem_match[5] ? gemA_cluster[5] : {3'b0, 11'd1536};
-  gem_copad[6] <= gem_match[6] ? gemA_cluster[6] : {3'b0, 11'd1536};
-  gem_copad[7] <= gem_match[7] ? gemA_cluster[7] : {3'b0, 11'd1536};
+  // ff copy the clusters from gemA to delay 1bx to lineup with copad output
+  gem_copad_reg[0] <= gem_match[0] ? gemA_cluster[0] : {3'b0, 11'd1536};
+  gem_copad_reg[1] <= gem_match[1] ? gemA_cluster[1] : {3'b0, 11'd1536};
+  gem_copad_reg[2] <= gem_match[2] ? gemA_cluster[2] : {3'b0, 11'd1536};
+  gem_copad_reg[3] <= gem_match[3] ? gemA_cluster[3] : {3'b0, 11'd1536};
+  gem_copad_reg[4] <= gem_match[4] ? gemA_cluster[4] : {3'b0, 11'd1536};
+  gem_copad_reg[5] <= gem_match[5] ? gemA_cluster[5] : {3'b0, 11'd1536};
+  gem_copad_reg[6] <= gem_match[6] ? gemA_cluster[6] : {3'b0, 11'd1536};
+  gem_copad_reg[7] <= gem_match[7] ? gemA_cluster[7] : {3'b0, 11'd1536};
 end
+
+  assign gem_copad[0] = gem_copad_reg[0];
+  assign gem_copad[1] = gem_copad_reg[1];
+  assign gem_copad[2] = gem_copad_reg[2];
+  assign gem_copad[3] = gem_copad_reg[3];
+  assign gem_copad[4] = gem_copad_reg[4];
+  assign gem_copad[5] = gem_copad_reg[5];
+  assign gem_copad[6] = gem_copad_reg[6];
+  assign gem_copad[7] = gem_copad_reg[7];
 
 
   wire copad_sump =
@@ -1998,7 +2009,7 @@ end
                 gemB_overflow_vme           <= gemB_overflow;
                 gemB_sync_vme               <= gemB_synced;
             end
-            if ((|gemA_vpf) && (|gemB_vpf)) begin
+            if ((|gemA_vpf) & (|gemB_vpf)) begin
                 gem_copad_vme[icluster]     <= gem_copad[icluster];
                 gems_sync_vme               <= gems_synced;
             end

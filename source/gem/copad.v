@@ -375,8 +375,8 @@ genvar iclst;
 generate
 for (iclst=0; iclst<MXCLUSTERS; iclst=iclst+1) begin: clust_match_loop
 
-  assign gemApad_at_left_edge  [iclst] = gemA_vpf[iclst] & (gemA_cluster_pad[iclst] < match_deltapad_8bits)
-  assign gemApad_at_right_edge [iclst] = gemA_vpf[iclst] & ((gemA_cluster_pad[iclst] + match_deltapad_8bits + gemA_cluster_cnt[iclst]) > 8'd191)
+  assign gemApad_at_left_edge  [iclst] = gemA_vpf[iclst] & (gemA_cluster_pad[iclst] < match_deltapad_8bits);
+  assign gemApad_at_right_edge [iclst] = gemA_vpf[iclst] & ((gemA_cluster_pad[iclst] + match_deltapad_8bits + gemA_cluster_cnt[iclst]) > 8'd191);
 
   assign minpad_match [iclst] = gemApad_at_left_edge[iclst]  ? (8'd0)   : (gemA_cluster_pad[iclst] - match_deltapad_8bits);
   assign maxpad_match [iclst] = gemApad_at_right_edge[iclst] ? (8'd191) : (gemA_cluster_pad[iclst] + gemA_cluster_cnt[iclst] + match_deltapad_8bits);
@@ -384,12 +384,12 @@ for (iclst=0; iclst<MXCLUSTERS; iclst=iclst+1) begin: clust_match_loop
 
   genvar iclstB;
   generate 
-  for (iclstB=0; iclstB<MXCLUSTERS; iclstB+1) begin: clust_match_looop2
+  for (iclstB=0; iclstB<MXCLUSTERS; iclstB=iclstB+1) begin: clust_match_looop2
       //check whether pad in gemB cluster is within the match range derived from gemA cluster
-      assign padmatch_Acluster_Bcluster[iclst][iclstB]  = (gemB_cluster_pad[iclstB] >= minpad_match[iclst] & gemB_cluster_pad[iclstB] <= maxpad_match[iclst]) | (gemB_cluster_pad[iclstB] + gemB_cluster_cnt[iclstB] >= minpad_match[iclst] & gemB_cluster_pad[iclstB] + gemB_cluster_cnt[iclstB] <= maxpad_match[iclst]);
+      assign padmatch_Acluster_Bcluster[iclst][iclstB]  = (gemB_cluster_pad[iclstB] >= minpad_match[iclst] & gemB_cluster_pad[iclstB] <= maxpad_match[iclst]) | ((gemB_cluster_pad[iclstB] + gemB_cluster_cnt[iclstB]) >= minpad_match[iclst] & (gemB_cluster_pad[iclstB] + gemB_cluster_cnt[iclstB]) <= maxpad_match[iclst]);
 
       assign match_AB_c [iclst][iclstB] =  gemA_vpf[iclst] & gemB_vpf[iclstB] &  gemA_cluster_roll[iclst] == gemB_cluster_roll[iclstB] & padmatch_Acluster_Bcluster[iclst][iclstB];
-      assign match_AB_u [iclst][iclstB]  = (gemA_cluster_roll[iclst] == 0) ? 1'b0 : (gemA_vpf[iclst] & gemB_vpf[iclstB] &  gemA_cluster_roll[iclst]-3'd1 == gemB_cluster_roll[iclstB] & padmatch_Acluster_Bcluster[iclst][iclstB]) : 1'b0
+      assign match_AB_u [iclst][iclstB]  = (gemA_cluster_roll[iclst] == 0) ? 1'b0 : (gemA_vpf[iclst] & gemB_vpf[iclstB] &  gemA_cluster_roll[iclst]-3'd1 == gemB_cluster_roll[iclstB] & padmatch_Acluster_Bcluster[iclst][iclstB]);
       assign match_AB_l [iclst][iclstB]  = (gemA_cluster_roll[iclst] == 7) ? 1'b0 : (gemA_vpf[iclst] & gemB_vpf[iclstB] &  gemA_cluster_roll[iclst]+3'd1 == gemB_cluster_roll[iclstB] & padmatch_Acluster_Bcluster[iclst][iclstB]);
       
   end 
@@ -402,8 +402,8 @@ end
 endgenerate
 
 wire [7:0] match_full  =   match_c   // full cluster match
-                          | ({8{match_neighroll}} & match_u )
-                          | ({8{match_neighroll}} & match_l );
+                          | ({8{match_neighborRoll}} & match_u )
+                          | ({8{match_neighborRoll}} & match_l );
 
 wire any_match_full = (|match_full);
 
