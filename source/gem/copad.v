@@ -260,14 +260,14 @@ parameter MXCLSTB    = 14;
     wire [7:0] gemB_cluster_pad  [7:0];// 8-elements array 
     wire [2:0] gemB_cluster_cnt  [7:0];// 8-elements array 
 
-    assign  gemA_vpf[0]          = gemA_vpf0;
-    assign  gemA_vpf[1]          = gemA_vpf1;
-    assign  gemA_vpf[2]          = gemA_vpf2;
-    assign  gemA_vpf[3]          = gemA_vpf3;
-    assign  gemA_vpf[4]          = gemA_vpf4;
-    assign  gemA_vpf[5]          = gemA_vpf5;
-    assign  gemA_vpf[6]          = gemA_vpf6;
-    assign  gemA_vpf[7]          = gemA_vpf7;
+    assign  gemA_vpf[0]          = gemA_cluster0_vpf;
+    assign  gemA_vpf[1]          = gemA_cluster1_vpf;
+    assign  gemA_vpf[2]          = gemA_cluster2_vpf;
+    assign  gemA_vpf[3]          = gemA_cluster3_vpf;
+    assign  gemA_vpf[4]          = gemA_cluster4_vpf;
+    assign  gemA_vpf[5]          = gemA_cluster5_vpf;
+    assign  gemA_vpf[6]          = gemA_cluster6_vpf;
+    assign  gemA_vpf[7]          = gemA_cluster7_vpf;
 
     assign  gemA_cluster_roll[0] = gemA_cluster0_roll;
     assign  gemA_cluster_roll[1] = gemA_cluster1_roll;
@@ -296,14 +296,14 @@ parameter MXCLSTB    = 14;
     assign  gemA_cluster_cnt[6]  = gemA_cluster6_cnt;
     assign  gemA_cluster_cnt[7]  = gemA_cluster7_cnt;
 
-    assign  gemB_vpf[0]          = gemB_vpf0;
-    assign  gemB_vpf[1]          = gemB_vpf1;
-    assign  gemB_vpf[2]          = gemB_vpf2;
-    assign  gemB_vpf[3]          = gemB_vpf3;
-    assign  gemB_vpf[4]          = gemB_vpf4;
-    assign  gemB_vpf[5]          = gemB_vpf5;
-    assign  gemB_vpf[6]          = gemB_vpf6;
-    assign  gemB_vpf[7]          = gemB_vpf7;
+    assign  gemB_vpf[0]          = gemB_cluster0_vpf;
+    assign  gemB_vpf[1]          = gemB_cluster1_vpf;
+    assign  gemB_vpf[2]          = gemB_cluster2_vpf;
+    assign  gemB_vpf[3]          = gemB_cluster3_vpf;
+    assign  gemB_vpf[4]          = gemB_cluster4_vpf;
+    assign  gemB_vpf[5]          = gemB_cluster5_vpf;
+    assign  gemB_vpf[6]          = gemB_cluster6_vpf;
+    assign  gemB_vpf[7]          = gemB_cluster7_vpf;
 
     assign  gemB_cluster_roll[0] = gemB_cluster0_roll;
     assign  gemB_cluster_roll[1] = gemB_cluster1_roll;
