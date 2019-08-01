@@ -1999,17 +1999,17 @@ end
           gems_sync_vme     <= 0;
         end
         else begin
-            if (|gemA_vpf) begin
+            if (gem_any) begin
                 gemA_cluster_vme[icluster]  <= gemA_cluster[icluster]; 
                 gemA_overflow_vme           <= gemA_overflow;
                 gemA_sync_vme               <= gemA_synced;
             end
-            if (|gemB_vpf) begin
+            if (gem_any) begin
                 gemB_cluster_vme[icluster]  <= gemB_cluster[icluster]; 
                 gemB_overflow_vme           <= gemB_overflow;
                 gemB_sync_vme               <= gemB_synced;
             end
-            if (gem_any_match) begin
+            if (gem_any) begin
                 gem_copad_vme[icluster]     <= gem_copad[icluster];
                 gems_sync_vme               <= gems_synced;
             end
