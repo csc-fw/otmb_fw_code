@@ -1753,20 +1753,20 @@
   .cluster2 (gem_cluster2[igem]), // Out GEM Cluster
   .cluster3 (gem_cluster3[igem]), // Out GEM Cluster
   //VFAT number
-  .cluster0_feb (gem_cluster0_feb[igem]);
-  .cluster1_feb (gem_cluster1_feb[igem]);
-  .cluster2_feb (gem_cluster2_feb[igem]);
-  .cluster3_feb (gem_cluster3_feb[igem]);
+  .cluster0_feb (gem_cluster0_feb[igem]),
+  .cluster1_feb (gem_cluster1_feb[igem]),
+  .cluster2_feb (gem_cluster2_feb[igem]),
+  .cluster3_feb (gem_cluster3_feb[igem]),
 
-  .cluster0_roll (gem_cluster0_roll[igem]);// eta partition number 
-  .cluster1_roll (gem_cluster0_roll[igem]);
-  .cluster2_roll (gem_cluster0_roll[igem]);
-  .cluster3_roll (gem_cluster0_roll[igem]);
+  .cluster0_roll (gem_cluster0_roll[igem]),// eta partition number 
+  .cluster1_roll (gem_cluster0_roll[igem]),
+  .cluster2_roll (gem_cluster0_roll[igem]),
+  .cluster3_roll (gem_cluster0_roll[igem]),
 
-  .cluster0_pad (gem_cluster0_pad[igem]); // pad number in one roll, no VFAT boundary
-  .cluster1_pad (gem_cluster0_pad[igem]);
-  .cluster2_pad (gem_cluster0_pad[igem]);
-  .cluster3_pad (gem_cluster0_pad[igem]);
+  .cluster0_pad (gem_cluster0_pad[igem]), // pad number in one roll, no VFAT boundary
+  .cluster1_pad (gem_cluster0_pad[igem]),
+  .cluster2_pad (gem_cluster0_pad[igem]),
+  .cluster3_pad (gem_cluster0_pad[igem]),
 
   // GEM Valid Data Output Flags
   .vpf0 (gem_vpf0[igem]), // Out GEM valid data

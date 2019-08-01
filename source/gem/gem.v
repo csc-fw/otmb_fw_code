@@ -96,20 +96,20 @@ module gem (
     output [13:0] cluster2, // cluster2 in GEM coordinates (0-1535)
     output [13:0] cluster3, // cluster3 in GEM coordinates (0-1535)
 
-    output [ 4:0] cluster0_feb;
-    output [ 4:0] cluster1_feb;
-    output [ 4:0] cluster2_feb;
-    output [ 4:0] cluster3_feb;
+    output [ 4:0] cluster0_feb,
+    output [ 4:0] cluster1_feb,
+    output [ 4:0] cluster2_feb,
+    output [ 4:0] cluster3_feb,
 
-    output [ 2:0] cluster0_roll;// eta partition number 
-    output [ 2:0] cluster1_roll;
-    output [ 2:0] cluster2_roll;
-    output [ 2:0] cluster3_roll;
+    output [ 2:0] cluster0_roll,// eta partition number 
+    output [ 2:0] cluster1_roll,
+    output [ 2:0] cluster2_roll,
+    output [ 2:0] cluster3_roll,
 
-    output [ 7:0] cluster0_pad; // pad number in one roll, no VFAT boundary
-    output [ 7:0] cluster1_pad;
-    output [ 7:0] cluster2_pad;
-    output [ 7:0] cluster3_pad;
+    output [ 7:0] cluster0_pad, // pad number in one roll, no VFAT boundary
+    output [ 7:0] cluster1_pad,
+    output [ 7:0] cluster2_pad,
+    output [ 7:0] cluster3_pad,
 
     output vpf0, // cluster0 valid flag
     output vpf1, // cluster1 valid flag

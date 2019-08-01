@@ -30,14 +30,14 @@ module copad (
 
 
     // 8 clusters from gemA
-    input gemA_cluster0_vpf;
-    input gemA_cluster1_vpf;
-    input gemA_cluster2_vpf;
-    input gemA_cluster3_vpf;
-    input gemA_cluster4_vpf;
-    input gemA_cluster5_vpf;
-    input gemA_cluster6_vpf;
-    input gemA_cluster7_vpf;
+    input gemA_cluster0_vpf,
+    input gemA_cluster1_vpf,
+    input gemA_cluster2_vpf,
+    input gemA_cluster3_vpf,
+    input gemA_cluster4_vpf,
+    input gemA_cluster5_vpf,
+    input gemA_cluster6_vpf,
+    input gemA_cluster7_vpf,
 
     input [2:0] gemA_cluster0_roll,
     input [2:0] gemA_cluster1_roll,
@@ -68,14 +68,14 @@ module copad (
     
 
     // 8 clusters from gemB
-    input gemB_cluster0_vpf;
-    input gemB_cluster1_vpf;
-    input gemB_cluster2_vpf;
-    input gemB_cluster3_vpf;
-    input gemB_cluster4_vpf;
-    input gemB_cluster5_vpf;
-    input gemB_cluster6_vpf;
-    input gemB_cluster7_vpf;
+    input gemB_cluster0_vpf,
+    input gemB_cluster1_vpf,
+    input gemB_cluster2_vpf,
+    input gemB_cluster3_vpf,
+    input gemB_cluster4_vpf,
+    input gemB_cluster5_vpf,
+    input gemB_cluster6_vpf,
+    input gemB_cluster7_vpf,
 
     input [2:0] gemB_cluster0_roll,
     input [2:0] gemB_cluster1_roll,
@@ -106,14 +106,14 @@ module copad (
 
 
     // ff'd copies (1bx delay) of the gemA inputs
-    output reg vpf0;
-    output reg vpf1;
-    output reg vpf2;
-    output reg vpf3;
-    output reg vpf4;
-    output reg vpf5;
-    output reg vpf6;
-    output reg vpf7;
+    output reg vpf0,
+    output reg vpf1,
+    output reg vpf2,
+    output reg vpf3,
+    output reg vpf4,
+    output reg vpf5,
+    output reg vpf6,
+    output reg vpf7,
 
     output reg [2:0] cluster0_roll,
     output reg [2:0] cluster1_roll,
