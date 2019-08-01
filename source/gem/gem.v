@@ -204,17 +204,17 @@ parameter MXFEB    = 24;
 // Decompose packed GEM data format
 //------------------------------------------------------------------------------------------------------------------
 
-  wire [13:0] cluster     [1:0];
-  wire [13:0] cluster_raw [1:0];
-  wire [15:0] gem_inj     [1:0];
-  wire [13:0] cluster_inj [1:0];
-  wire [11:0] adr         [1:0];
-  wire [ 2:0] cnt         [1:0];
-  wire [ 0:0] vpf         [1:0];
+  wire [13:0] cluster     [3:0];
+  wire [13:0] cluster_raw [3:0];
+  wire [15:0] gem_inj     [3:0];
+  wire [13:0] cluster_inj [3:0];
+  wire [11:0] adr         [3:0];
+  wire [ 2:0] cnt         [3:0];
+  wire [ 0:0] vpf         [3:0];
   //add vfat, roll,pad in a roll
-  wire [ 4:0] cluster_feb [1:0];       
-  wire [ 2:0] cluster_roll[1:0];       
-  wire [ 7:0] cluster_pad [1:0];       
+  wire [ 4:0] cluster_feb [3:0];       
+  wire [ 2:0] cluster_roll[3:0];       
+  wire [ 7:0] cluster_pad [3:0];       
 
   //wire [MXPAD-1:0] gemhit_roll0 = 0;
   //wire [MXPAD-1:0] gemhit_roll1 = 0;
@@ -242,31 +242,31 @@ parameter MXFEB    = 24;
 
    always @(*) begin
    case (adr[iclst][10:6]) // adr[10:6] is the "natural" vfatid
-     5'd0:    begin assign cluster_feb[iclst] = 5'd0 ;  assign cluster_roll[iclst] = 3'd0; assign cluster_pad[iclst] = {2'b00,adr[iclst][5:0]}; end
-     5'd1:    begin assign cluster_feb[iclst] = 5'd8 ;  assign cluster_roll[iclst] = 3'd0; assign cluster_pad[iclst] = {2'b01,adr[iclst][5:0]}; end
-     5'd2:    begin assign cluster_feb[iclst] = 5'd16;  assign cluster_roll[iclst] = 3'd0; assign cluster_pad[iclst] = {2'b10,adr[iclst][5:0]}; end
-     5'd3:    begin assign cluster_feb[iclst] = 5'd1 ;  assign cluster_roll[iclst] = 3'd1; assign cluster_pad[iclst] = {2'b00,adr[iclst][5:0]}; end
-     5'd4:    begin assign cluster_feb[iclst] = 5'd9 ;  assign cluster_roll[iclst] = 3'd1; assign cluster_pad[iclst] = {2'b01,adr[iclst][5:0]}; end
-     5'd5:    begin assign cluster_feb[iclst] = 5'd17;  assign cluster_roll[iclst] = 3'd1; assign cluster_pad[iclst] = {2'b10,adr[iclst][5:0]}; end
-     5'd6:    begin assign cluster_feb[iclst] = 5'd2 ;  assign cluster_roll[iclst] = 3'd2; assign cluster_pad[iclst] = {2'b00,adr[iclst][5:0]}; end
-     5'd7:    begin assign cluster_feb[iclst] = 5'd10;  assign cluster_roll[iclst] = 3'd2; assign cluster_pad[iclst] = {2'b01,adr[iclst][5:0]}; end
-     5'd8:    begin assign cluster_feb[iclst] = 5'd18;  assign cluster_roll[iclst] = 3'd2; assign cluster_pad[iclst] = {2'b10,adr[iclst][5:0]}; end
-     5'd9:    begin assign cluster_feb[iclst] = 5'd3 ;  assign cluster_roll[iclst] = 3'd3; assign cluster_pad[iclst] = {2'b00,adr[iclst][5:0]}; end
-     5'd10:   begin assign cluster_feb[iclst] = 5'd11;  assign cluster_roll[iclst] = 3'd3; assign cluster_pad[iclst] = {2'b01,adr[iclst][5:0]}; end
-     5'd11:   begin assign cluster_feb[iclst] = 5'd19;  assign cluster_roll[iclst] = 3'd3; assign cluster_pad[iclst] = {2'b10,adr[iclst][5:0]}; end
-     5'd12:   begin assign cluster_feb[iclst] = 5'd4 ;  assign cluster_roll[iclst] = 3'd4; assign cluster_pad[iclst] = {2'b00,adr[iclst][5:0]}; end
-     5'd13:   begin assign cluster_feb[iclst] = 5'd12;  assign cluster_roll[iclst] = 3'd4; assign cluster_pad[iclst] = {2'b01,adr[iclst][5:0]}; end
-     5'd14:   begin assign cluster_feb[iclst] = 5'd20;  assign cluster_roll[iclst] = 3'd4; assign cluster_pad[iclst] = {2'b10,adr[iclst][5:0]}; end
-     5'd15:   begin assign cluster_feb[iclst] = 5'd5 ;  assign cluster_roll[iclst] = 3'd5; assign cluster_pad[iclst] = {2'b00,adr[iclst][5:0]}; end
-     5'd16:   begin assign cluster_feb[iclst] = 5'd13;  assign cluster_roll[iclst] = 3'd5; assign cluster_pad[iclst] = {2'b01,adr[iclst][5:0]}; end
-     5'd17:   begin assign cluster_feb[iclst] = 5'd21;  assign cluster_roll[iclst] = 3'd5; assign cluster_pad[iclst] = {2'b10,adr[iclst][5:0]}; end
-     5'd18:   begin assign cluster_feb[iclst] = 5'd6 ;  assign cluster_roll[iclst] = 3'd6; assign cluster_pad[iclst] = {2'b00,adr[iclst][5:0]}; end
-     5'd19:   begin assign cluster_feb[iclst] = 5'd14;  assign cluster_roll[iclst] = 3'd6; assign cluster_pad[iclst] = {2'b01,adr[iclst][5:0]}; end
-     5'd20:   begin assign cluster_feb[iclst] = 5'd22;  assign cluster_roll[iclst] = 3'd6; assign cluster_pad[iclst] = {2'b10,adr[iclst][5:0]}; end
-     5'd21:   begin assign cluster_feb[iclst] = 5'd7 ;  assign cluster_roll[iclst] = 3'd7; assign cluster_pad[iclst] = {2'b00,adr[iclst][5:0]}; end
-     5'd22:   begin assign cluster_feb[iclst] = 5'd15;  assign cluster_roll[iclst] = 3'd7; assign cluster_pad[iclst] = {2'b01,adr[iclst][5:0]}; end
-     5'd23:   begin assign cluster_feb[iclst] = 5'd23;  assign cluster_roll[iclst] = 3'd7; assign cluster_pad[iclst] = {2'b10,adr[iclst][5:0]}; end
-     default: begin assign cluster_feb[iclst] = 5'd24;  assign cluster_roll[iclst] = 3'd0; assign cluster_pad[iclst] =                   8'd192; end  //invalid case
+     5'd0:    begin  cluster_feb[iclst] = 5'd0 ;  cluster_roll[iclst] = 3'd0; cluster_pad[iclst] = {2'b00,adr[iclst][5:0]}; end
+     5'd1:    begin  cluster_feb[iclst] = 5'd8 ;  cluster_roll[iclst] = 3'd0; cluster_pad[iclst] = {2'b01,adr[iclst][5:0]}; end
+     5'd2:    begin  cluster_feb[iclst] = 5'd16;  cluster_roll[iclst] = 3'd0; cluster_pad[iclst] = {2'b10,adr[iclst][5:0]}; end
+     5'd3:    begin  cluster_feb[iclst] = 5'd1 ;  cluster_roll[iclst] = 3'd1; cluster_pad[iclst] = {2'b00,adr[iclst][5:0]}; end
+     5'd4:    begin  cluster_feb[iclst] = 5'd9 ;  cluster_roll[iclst] = 3'd1; cluster_pad[iclst] = {2'b01,adr[iclst][5:0]}; end
+     5'd5:    begin  cluster_feb[iclst] = 5'd17;  cluster_roll[iclst] = 3'd1; cluster_pad[iclst] = {2'b10,adr[iclst][5:0]}; end
+     5'd6:    begin  cluster_feb[iclst] = 5'd2 ;  cluster_roll[iclst] = 3'd2; cluster_pad[iclst] = {2'b00,adr[iclst][5:0]}; end
+     5'd7:    begin  cluster_feb[iclst] = 5'd10;  cluster_roll[iclst] = 3'd2; cluster_pad[iclst] = {2'b01,adr[iclst][5:0]}; end
+     5'd8:    begin  cluster_feb[iclst] = 5'd18;  cluster_roll[iclst] = 3'd2; cluster_pad[iclst] = {2'b10,adr[iclst][5:0]}; end
+     5'd9:    begin  cluster_feb[iclst] = 5'd3 ;  cluster_roll[iclst] = 3'd3; cluster_pad[iclst] = {2'b00,adr[iclst][5:0]}; end
+     5'd10:   begin  cluster_feb[iclst] = 5'd11;  cluster_roll[iclst] = 3'd3; cluster_pad[iclst] = {2'b01,adr[iclst][5:0]}; end
+     5'd11:   begin  cluster_feb[iclst] = 5'd19;  cluster_roll[iclst] = 3'd3; cluster_pad[iclst] = {2'b10,adr[iclst][5:0]}; end
+     5'd12:   begin  cluster_feb[iclst] = 5'd4 ;  cluster_roll[iclst] = 3'd4; cluster_pad[iclst] = {2'b00,adr[iclst][5:0]}; end
+     5'd13:   begin  cluster_feb[iclst] = 5'd12;  cluster_roll[iclst] = 3'd4; cluster_pad[iclst] = {2'b01,adr[iclst][5:0]}; end
+     5'd14:   begin  cluster_feb[iclst] = 5'd20;  cluster_roll[iclst] = 3'd4; cluster_pad[iclst] = {2'b10,adr[iclst][5:0]}; end
+     5'd15:   begin  cluster_feb[iclst] = 5'd5 ;  cluster_roll[iclst] = 3'd5; cluster_pad[iclst] = {2'b00,adr[iclst][5:0]}; end
+     5'd16:   begin  cluster_feb[iclst] = 5'd13;  cluster_roll[iclst] = 3'd5; cluster_pad[iclst] = {2'b01,adr[iclst][5:0]}; end
+     5'd17:   begin  cluster_feb[iclst] = 5'd21;  cluster_roll[iclst] = 3'd5; cluster_pad[iclst] = {2'b10,adr[iclst][5:0]}; end
+     5'd18:   begin  cluster_feb[iclst] = 5'd6 ;  cluster_roll[iclst] = 3'd6; cluster_pad[iclst] = {2'b00,adr[iclst][5:0]}; end
+     5'd19:   begin  cluster_feb[iclst] = 5'd14;  cluster_roll[iclst] = 3'd6; cluster_pad[iclst] = {2'b01,adr[iclst][5:0]}; end
+     5'd20:   begin  cluster_feb[iclst] = 5'd22;  cluster_roll[iclst] = 3'd6; cluster_pad[iclst] = {2'b10,adr[iclst][5:0]}; end
+     5'd21:   begin  cluster_feb[iclst] = 5'd7 ;  cluster_roll[iclst] = 3'd7; cluster_pad[iclst] = {2'b00,adr[iclst][5:0]}; end
+     5'd22:   begin  cluster_feb[iclst] = 5'd15;  cluster_roll[iclst] = 3'd7; cluster_pad[iclst] = {2'b01,adr[iclst][5:0]}; end
+     5'd23:   begin  cluster_feb[iclst] = 5'd23;  cluster_roll[iclst] = 3'd7; cluster_pad[iclst] = {2'b10,adr[iclst][5:0]}; end
+     default: begin  cluster_feb[iclst] = 5'd24;  cluster_roll[iclst] = 3'd0; cluster_pad[iclst] =                   8'd192; end  //invalid case
    endcase
    end
 
