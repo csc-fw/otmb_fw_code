@@ -8449,9 +8449,9 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 // GEM_COPAD_CTRL = 0x324 GEM Copad matching control
 //------------------------------------------------------------------------------------------------------------------
   initial begin
-      gem_copad_ctrl_wr[0]      = 1'b0;  //match copad within neighborRoll or not
-      gem_copad_ctrl_wr[ 2:1]   = 2'b1;  // delta roll, NOT used now
-      gem_copad_ctrl_wr[3]      = 1'b0;  // do delta pad match
+      gem_copad_ctrl_wr[0]      = 1'b1;  //match copad within neighborRoll or not
+      gem_copad_ctrl_wr[ 2:1]   = 2'b0;  // delta roll, NOT used now
+      gem_copad_ctrl_wr[3]      = 1'b1;  // do delta pad match
       gem_copad_ctrl_wr[ 7:4]   = 4'b10; // delta pad, default value = 2 
       gem_copad_ctrl_wr[15:8]   = 8'b0;  // not used
   end
