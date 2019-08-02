@@ -2137,6 +2137,11 @@
 
   output [15:0] gem_inj_data; // Injector RAM VME write data
 
+// GEM copad match control
+  output        gem_match_neighborRoll;
+  output        gem_match_neighborPad ;
+  output [3:0]  gem_match_deltaPad; 
+
 // Sequencer Ports: Buffer Status
   input                   wr_buf_ready;       // Write buffer is ready
   input  [MXBADR-1:0]     wr_buf_adr;         // Current address of header write buffer
