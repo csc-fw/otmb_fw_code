@@ -545,6 +545,11 @@
   gem_inj_igem,
   gem_inj_data,
 
+// GEM copad control  
+  gem_match_neighborRoll,
+  gem_match_neighborPad, 
+  gem_match_deltaPad,
+
 // Sequencer Ports: Buffer Status
   wr_buf_ready,
   wr_buf_adr,
@@ -1561,6 +1566,7 @@
   parameter ADR_GEM_TRG               = 10'h318;
   parameter ADR_GEM_INJ_CTRL          = 10'h320; // 800
   parameter ADR_GEM_INJ_DATA          = 10'h322;
+  parameter ADR_GEM_COPAD_CTRL        = 10'h324; // copad matching 
 
   //latched GEM cluster
   parameter ADR_GEMA_CLUSTER0         = 10'h340;  // GEMA cluster0 + gemA_sync, gemA_overflow
@@ -3285,6 +3291,8 @@
   reg  [15:0] gem_trg_wr;
   wire [15:0] gem_trg_rd;
 
+  reg  [15:0] gem_copad_ctrl_wr;
+  wire [15:0] gem_copad_ctrl_rd;
 
   wire [15:0] gemA_cluster_rd [MXCLUSTER_CHAMBER-1:0];
   wire [15:0] gemB_cluster_rd [MXCLUSTER_CHAMBER-1:0];
@@ -3438,6 +3446,8 @@
   wire      wr_gem_tbins;
   wire      wr_gem_cfg;
   wire      wr_gem_trg;
+
+  wire      wr_gem_copad_ctrl;
 
   //wire      wr_gemA_cluster0;
   //wire      wr_gemA_cluster1;
@@ -4061,6 +4071,7 @@
   ADR_GEM_TBINS:             data_out <= gem_tbins_rd;
   ADR_GEM_CFG:               data_out <= gem_cfg_rd;
   ADR_GEM_TRG:               data_out <= gem_trg_rd;
+  ADR_GEM_COPAD_CTRL:        data_out <= gem_copad_ctrl_rd;
 
   ADR_GEMA_CLUSTER0:         data_out <= gemA_cluster_rd[0];
   ADR_GEMA_CLUSTER1:         data_out <= gemA_cluster_rd[1];
@@ -4260,6 +4271,8 @@
   assign wr_gem_tbins             =  (reg_adr==ADR_GEM_TBINS              && clk_en);
   assign wr_gem_cfg               =  (reg_adr==ADR_GEM_CFG                && clk_en);
   assign wr_gem_trg               =  (reg_adr==ADR_GEM_TRG                && clk_en);
+  assign wr_gem_copad_ctrl        =  (reg_adr==ADR_GEM_COPAD_CTRL         && clk_en);
+
 
   //assign wr_gemA_cluster0         =  (reg_adr==ADR_GEMA_CLUSTER0          && clk_en);
   //assign wr_gemA_cluster1         =  (reg_adr==ADR_GEMA_CLUSTER1          && clk_en);
@@ -8398,7 +8411,7 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign gem_trg_rd [15:0] = gem_trg_wr [15:0]; // Readback
 
 //------------------------------------------------------------------------------------------------------------------
-// GEM_INJ_CTRL = 0x30C  GEM Raw Hits Readout RAM Simple Controller
+// GEM_INJ_CTRL = 0x320  GEM Raw Hits Readout RAM Simple Controller
 //------------------------------------------------------------------------------------------------------------------
 
   initial begin
@@ -8409,11 +8422,11 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   gem_inj_ctrl_wr[15]   = 1'b0;  // RW inject enable
   end
 
-  assign gem_inj_wen   = gem_inj_ctrl_wr[0];
-  assign gem_inj_sel   = gem_inj_ctrl_wr[2:1];
-  assign gem_inj_igem  = gem_inj_ctrl_wr[4:3];
-  assign gem_inj_adr   = gem_inj_ctrl_wr[14:5];
-  wire   gem_inj_mask  = gem_inj_ctrl_wr[15];
+  assign gem_inj_wen       = gem_inj_ctrl_wr[0];
+  assign gem_inj_sel       = gem_inj_ctrl_wr[2:1];
+  assign gem_inj_igem      = gem_inj_ctrl_wr[4:3];
+  assign gem_inj_adr       = gem_inj_ctrl_wr[14:5];
+  wire   gem_inj_mask      = gem_inj_ctrl_wr[15];
 
   assign injector_mask_gem = gem_inj_mask;
 
@@ -8421,12 +8434,28 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign gem_inj_ctrl_rd = gem_inj_ctrl_wr;
 
 //------------------------------------------------------------------------------------------------------------------
-// GEM_INJ_DATA = 0x30E  GEM Raw Hits Data
+// GEM_INJ_DATA = 0x322  GEM Raw Hits Data
 //------------------------------------------------------------------------------------------------------------------
 
   assign gem_inj_data    = gem_inj_data_wr;
   assign gem_inj_data_rd = gem_inj_data_wr;
 
+//------------------------------------------------------------------------------------------------------------------
+// GEM_COPAD_CTRL = 0x324 GEM Copad matching control
+//------------------------------------------------------------------------------------------------------------------
+  initial begin
+      gem_copad_ctrl_wr[0]      = 1'b0;  //match copad within neighborRoll or not
+      gem_copad_ctrl_wr[ 2:1]   = 2'b1;  // delta roll, NOT used now
+      gem_copad_ctrl_wr[3]      = 1'b0;  // do delta pad match
+      gem_copad_ctrl_wr[ 7:4]   = 4'b10; // delta pad, default value = 2 
+      gem_copad_ctrl_wr[15:8]   = 8'b0;  // not used
+  end
+
+  assign gem_match_neighborRoll      =   gem_copad_ctrl_wr[0];
+  assign gem_match_neighborPad       =   gem_copad_ctrl_wr[3];
+  assign gem_match_deltaPad          =   gem_copad_ctrl_wr[7:4];
+
+  assign gem_copad_ctrl_rd           =   gem_copad_ctrl_wr;
 
 //------------------------------------------------------------------------------------------------------------------
 // GEM_CLUSTERs and COPADs from 0x340 to 0x36e
@@ -8608,6 +8637,7 @@ always @(posedge clock_vme) begin
   if    (wr_gem_debug_fifo_ctrl)   gem_debug_fifo_ctrl_wr  <= d[15:0];
   if    (wr_gem_inj_ctrl)          gem_inj_ctrl_wr         <= d[15:0];
   if    (wr_gem_inj_data)          gem_inj_data_wr         <= d[15:0];
+  if    (wr_gem_copad_ctrl)        gem_copad_ctrl_wr       <= d[15:0];
   if    (wr_mpc_frames_fifo_ctrl)  mpc_frames_fifo_ctrl_wr <= d[15:0];
   if    (wr_algo2016_ctrl)         algo2016_ctrl_wr        <= d[15:0];
   //if    (wr_gemA_cluster0)         gemA_cluster0_wr        <= d[15:0];

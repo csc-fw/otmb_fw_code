@@ -1814,9 +1814,10 @@
   // GEM Co-pad Matching
   //--------------------------------------------------------------------------------------------------------------------
   //add one register for copad matching 
-  wire        gem_match_neighborRoll = 1'b1;
-  wire        gem_match_neighborPad  = 1'b1;
-  wire [3:0]  gem_match_deltaPad  = 4'd2; 
+  //defin from VME register 
+  //wire        gem_match_neighborRoll = 1'b1;
+  //wire        gem_match_neighborPad  = 1'b1;
+  //wire [3:0]  gem_match_deltaPad  = 4'd2; 
   wire [7:0]  gem_match;
   wire [7:0]  gem_match_upper;
   wire [7:0]  gem_match_lower;
@@ -4469,6 +4470,10 @@ end
       .gem_inj_igem  (gem_inj_igem),     // Out Select GEM Fiber 0-3
       .gem_inj_data  (gem_inj_data_vme), // Out GEM injector RAM data
 
+      // GEM Ports: GEM copad control
+      .gem_match_neighborRoll  (gem_match_neighborRoll),  // Out copad matching with neighboring roll enable
+      .gem_match_neighborPad   (gem_match_neighborPad),   // out copad matching with neighboring pad enable
+      .gem_match_deltaPad      (gem_match_deltaPad),      // Out max pad difference between two GEM chamber in copad matching
 
       // Sequencer Ports: Buffer Status
       .wr_buf_ready     (wr_buf_ready),                      // In  Write buffer is ready
