@@ -134,6 +134,7 @@
   gemB_vpf,
 
   gem_delay,
+  gem_fiber_enable,
 
 // TMB-Sequencer Pipelines
   wr_adr_xtmb,
@@ -457,6 +458,8 @@
   input  [7:0]         gemB_vpf;
 
   input  [3:0]         gem_delay;
+  input  [3:0]         gem_fiber_enable;
+
 
 // TMB-Sequencer Pipelines
   input  [MXBADR-1:0]  wr_adr_xtmb; // Buffer write address after drift time
