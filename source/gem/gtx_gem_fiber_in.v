@@ -285,15 +285,27 @@ module gtx_gem_fiber_in
             w0_reg <= gem_rx_data;
             NONZERO_WORD[0] <= |gem_rx_data[15:8];
 
-            mon_in[0] <= (!gem_rx_lossofsync[1]) && (gem_rx_isk==2'b01) && (gem_rx_notintable[1:0]==2'b00) && ({gem_rx_data[7],gem_rx_data[5:4]}==3'h7); 
+            mon_in[0] <= (!gem_rx_lossofsync[1]) && (gem_rx_isk==2'b01) && (gem_rx_notintable[1:0]==2'b00) && (
+                gem_rx_data[7:0] == 8'hBC || 
+                gem_rx_data[7:0] == 8'hF7 || 
+                gem_rx_data[7:0] == 8'hFB || 
+                gem_rx_data[7:0] == 8'hFD || 
+                gem_rx_data[7:0] == 8'hFC || 
+                gem_rx_data[7:0] == 8'h1C || 
+                gem_rx_data[7:0] == 8'h3C 
+                ); 
 
             // GEM should be sending a cycle of 4 frames: bc, f7, fb, fd
             // in the case of overflow, it should send fc
+            // in the case of BC0 marker, it should send 1c, 20190822
+            // in the case of resync marker, it should send 3c, 20190822
             // 0xbc = 10110111
             // 0xf7 = 11110111
             // 0xfb = 11111011
             // 0xfd = 11111101
             // 0xfc = 11111100
+            // 0x1c = 00011100, added by Tao,2019-08-22
+            // 0x3c = 00111100, added by Tao, 2019-08-22
 
             // allows 8 possible EOF markers:
             // 1C,3C,5C,7C,9C,BC,DC,FD are valid K-words available to represent 3 extra bits in the data stream. --Skip F7, FB, FC and FE.

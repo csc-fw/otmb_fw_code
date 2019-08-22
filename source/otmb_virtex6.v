@@ -1667,9 +1667,17 @@
   wire  [7:0] gem_kchar [MXGEM-1:0];
 
   wire  [3:0] gem_overflow;
+  wire  [3:0] gem_bc0marker;
+  wire  [3:0] gem_resyncmarker;
 
   wire gemA_overflow = |gem_overflow[1:0];
   wire gemB_overflow = |gem_overflow[3:2];
+
+  wire gemA_bc0marker = |gem_bc0marker[1:0];
+  wire gemB_bc0marker = |gem_bc0marker[3:2];
+
+  wire gemA_resyncmarker = |gem_resyncmarker[1:0];
+  wire gemB_resyncmarker = |gem_resyncmarker[3:2];
 
   assign gemA_active_feb_list = (gem_active_feb_list[0] | gem_active_feb_list[1]);
   assign gemB_active_feb_list = (gem_active_feb_list[2] | gem_active_feb_list[3]);
@@ -1721,7 +1729,9 @@
 
   .k_char               (gem_kchar            [igem]                  ), // Out latched copy of last Received K-Char
 
-  .overflow (gem_overflow[igem]), // GEM received cluster overflow
+  .overflow     (gem_overflow    [igem]), // GEM received cluster overflow
+  .bc0marker    (gem_bc0marker   [igem]), // GEM received cluster BC0 marker
+  .resyncmarker (gem_resyncmarker[igem]), // GEM received cluster resync marker
 
   // Debug Dummy FIFO Control Ports
   .debug_fifo_radr  (gem_debug_fifo_adr),         // In  FIFO RAM read tbin address
@@ -1793,6 +1803,12 @@
     .gemA_overflow (gemA_overflow),
     .gemB_overflow (gemB_overflow),
 
+    .gemA_bc0marker (gemA_bc0marker),
+    .gemB_bc0marker (gemB_bc0marker),
+
+    .gemA_resyncmarker (gemA_resyncmarker),
+    .gemB_resyncmarker (gemB_resyncmarker),
+
     .link_good (gem_link_good[3:0]),
 
     .gem0_kchar(gem_kchar[0]), // In  Copy of GEM0 k-char
@@ -1813,11 +1829,6 @@
 
   // GEM Co-pad Matching
   //--------------------------------------------------------------------------------------------------------------------
-  //add one register for copad matching 
-  //defin from VME register 
-  //wire        gem_match_neighborRoll = 1'b1;
-  //wire        gem_match_neighborPad  = 1'b1;
-  //wire [3:0]  gem_match_deltaPad  = 4'd2; 
   wire [7:0]  gem_match;
   wire [7:0]  gem_match_upper;
   wire [7:0]  gem_match_lower;

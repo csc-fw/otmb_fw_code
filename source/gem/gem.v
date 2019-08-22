@@ -81,6 +81,8 @@ module gem (
     output [MXCLST-1:0]    parity_err_gem,
 
     output overflow,
+    output bc0marker, // BC0 marker, 1C
+    output resyncmarker,// resync marker, 3C
 
     // GEM Outputs
     //output [MXPAD-1:0] gemhit_roll0;
@@ -194,6 +196,8 @@ parameter MXFEB    = 24;
         .k_char               (k_char),  // latched copy of the last k-char received
 
         .overflow             (overflow),
+        .bc0marker            (bc0marker),
+        .resyncmaerk          (resyncmarker),
 
         .gtx_rx_sump          (gtx_rx_sump)             // Unused signals
     );
