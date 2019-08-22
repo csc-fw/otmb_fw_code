@@ -197,7 +197,7 @@ parameter MXFEB    = 24;
 
         .overflow             (overflow),
         .bc0marker            (bc0marker),
-        .resyncmaerk          (resyncmarker),
+        .resyncmarker          (resyncmarker),
 
         .gtx_rx_sump          (gtx_rx_sump)             // Unused signals
     );
