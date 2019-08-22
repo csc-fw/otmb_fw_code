@@ -1642,6 +1642,7 @@
   wire gem_any = (|gemA_vpf) | (|gemB_vpf);
    
   wire [3:0] gem_delay;
+  wire [3:0] gem_fiber_enable;
 
   wire [9:0]   gem_debug_fifo_adr;    // FIFO RAM read tbin address
   wire [1:0]   gem_debug_fifo_sel;    // FIFO RAM read layer clusters 0-3
@@ -1809,6 +1810,7 @@
     .gemA_resyncmarker (gemA_resyncmarker),
     .gemB_resyncmarker (gemB_resyncmarker),
 
+    .gem_fiber_enable (gem_fiber_enable[3:0]),
     .link_good (gem_link_good[3:0]),
 
     .gem0_kchar(gem_kchar[0]), // In  Copy of GEM0 k-char
@@ -3529,9 +3531,10 @@ end
   .alct_ecc_err (alct_ecc_err[1:0]),     // In  ALCT ecc syndrome code
 
 // GEM
-  .gemA_vpf     (gemA_vpf[7:0]),
-  .gemB_vpf     (gemB_vpf[7:0]),
-  .gem_delay    (gem_delay[3:0]),
+  .gemA_vpf          (gemA_vpf[7:0]),
+  .gemB_vpf          (gemB_vpf[7:0]),
+  .gem_delay         (gem_delay[3:0]),
+  .gem_fiber_enable  (gem_fiber_enable[3:0]),
 
 // TMB-Sequencer Pipelines
   .wr_adr_xtmb (wr_adr_xtmb[MXBADR-1:0]), // In  Buffer write address after drift time
@@ -4602,6 +4605,7 @@ end
       .fifo_tbins_gem    (fifo_tbins_gem[MXTBIN-1:0]),   // Out  Number GEM FIFO time bins to read out
       .fifo_pretrig_gem  (fifo_pretrig_gem[MXTBIN-1:0]), // Out  Number GEM FIFO time bins before pretrigger
       .gem_delay         (gem_delay[3:0]),               // Out  GEM Trigger Delay
+      .gem_fiber_enable  (gem_fiber_enable[3:0]),               // Out  GEM fibers enabled for triggering
       // RPC Ports: RAT Control
       .rpc_sync     (rpc_sync),     // Out  Sync mode
       .rpc_posneg   (rpc_posneg),   // Out  Clock phase

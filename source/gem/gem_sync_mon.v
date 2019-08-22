@@ -12,6 +12,7 @@ module gem_sync_mon (
   input [7:0] gem2_kchar,
   input [7:0] gem3_kchar,
 
+  input [3:0] gem_fiber_enable,
   input [3:0] link_good, 
 
   input gemA_overflow,
@@ -114,8 +115,9 @@ wire [1:0] gem_sync;
 wire       gems_sync;
 wire [1:0] skip_sync_check;
 
-assign skip_sync_check [0] = gemA_overflow;
-assign skip_sync_check [1] = gemB_overflow;
+//ignore the sync check when links are not good, gem fibers are not enabled, overflow, bc0marker, resyncmarker
+assign skip_sync_check [0] = gemA_overflow || gemA_bc0marker || gemA_resyncmarker || (~&link_good[1:0]) || (~&gem_fiber_enable[1:0]);
+assign skip_sync_check [1] = gemB_overflow || gemB_bc0marker || gemB_resyncmarker || (~&link_good[3:2]) || (~&gem_fiber_enable[3:2]);
 
 assign gem_sync [0] = skip_sync_check[0] || (~|frame_sep_err[1:0] && gem0_kchar==gem1_kchar); // two fibers from gem chamber 1 are synced to eachother
 assign gem_sync [1] = skip_sync_check[1] || (~|frame_sep_err[3:2] && gem2_kchar==gem3_kchar); // two fibers from gem chamber 2 are synced to eachother

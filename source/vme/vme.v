@@ -651,6 +651,7 @@
   fifo_tbins_gem,
   fifo_pretrig_gem,
   gem_delay,
+  gem_fiber_enable, //fibers enabled for triggering
 
 // GEM Configuration Ports
   gemA_rxd_posneg,
@@ -2251,6 +2252,7 @@
   output [MXTBIN-1:0] fifo_tbins_gem;    // Out  Number GEM FIFO time bins to read out
   output [MXTBIN-1:0] fifo_pretrig_gem;  // Out  Number GEM FIFO time bins before pretrigger
   output [3:0]        gem_delay;         // Out  GEM Trigger Delay
+  output [3:0]        gem_fiber_enable;  // Out  GEM fiber enable for triggering
 
   output gemA_rxd_posneg;  // Out gem chamber 0 (fiber0,1) rxd posneg value
   output gemB_rxd_posneg;  // Out gem chamber 1 (fiber2,3) rxd posneg value
@@ -8409,9 +8411,11 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 
   initial begin
   gem_trg_wr[3:0]   = 4'd0; // RW GEM Trigger Delay
+  gem_trg_wr[7:3]   = 4'b1111;// enable GEM fiber for triggering , initial with all GEM fiber enabled
   end
 
-  assign gem_delay [3:0] = gem_trg_wr[3:0];
+  assign gem_delay [3:0]       = gem_trg_wr[3:0];
+  assign gem_fiber_enable[3:0] = gem_trg_wr[7:4];
 
   assign gem_trg_rd [15:0] = gem_trg_wr [15:0]; // Readback
 
