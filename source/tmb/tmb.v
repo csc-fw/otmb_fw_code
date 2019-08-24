@@ -243,6 +243,15 @@
   bx0_vpf_test,
   bx0_match,
 
+  gemA_bx0_rx,
+  gemA_bx0_delay,
+  gemA_bx0_enable,
+  gemA_bx0_match,//match with CLCT_BX0
+  gemB_bx0_rx,
+  gemB_bx0_delay,
+  gemB_bx0_enable,
+  gemB_bx0_match,//match with CLCT_BX0
+
   mpc_rx_delay,
   mpc_tx_delay,
   mpc_idle_blank,
@@ -460,7 +469,15 @@
   input  [3:0]         gem_delay;
   input  [3:0]         gem_fiber_enable;
 
+  input                gemA_bx0_rx;
+  input  [3:0]         gemA_bx0_delay;
+  input                gemA_bx0_enable;
+  output               gemA_bx0_match;
 
+  input                gemB_bx0_rx;
+  input  [3:0]         gemB_bx0_delay;
+  input                gemB_bx0_enable;
+  output               gemB_bx0_match;
 // TMB-Sequencer Pipelines
   input  [MXBADR-1:0]  wr_adr_xtmb; // Buffer write address after drift time
   output [MXBADR-1:0]  wr_adr_rtmb; // Buffer write address at TMB matching time
@@ -1412,6 +1429,8 @@
 //------------------------------------------------------------------------------------------------------------------
   wire [3:0] alct_bx0_adr = alct_bx0_delay-1;
   wire [3:0] clct_bx0_adr = clct_bx0_delay-1;
+  wire [3:0] gemA_bx0_adr = gemA_bx0_delay-1;
+  wire [3:0] gemB_bx0_adr = gemB_bx0_delay-1;
 
   x_oneshot uinjalctbx0 (.d(mpc_inj_alct_bx0),.clock(clock),.q(inj_alct_bx0_pulse));  // VME bx0 injector
   x_oneshot uinjclctbx0 (.d(mpc_inj_clct_bx0),.clock(clock),.q(inj_clct_bx0_pulse));
@@ -1421,20 +1440,39 @@
 
   wire alct_bx0_src = alct_bx0_mux || inj_alct_bx0_pulse;
   wire clct_bx0_src = clct_bx0_mux || inj_clct_bx0_pulse;
+  wire gemA_bx0_src = (gemA_bx0_enable) ? gemA_bx0_rx : clct_bx0_mux;
+  wire gemB_bx0_src = (gemB_bx0_enable) ? gemB_bx0_rx : clct_bx0_mux;
 
   srl16e_bbl #(1) ualctbx0 (.clock(clock),.ce(1'b1),.adr(alct_bx0_adr),.d(alct_bx0_src),.q(alct_bx0_srl));
   srl16e_bbl #(1) uclctbx0 (.clock(clock),.ce(1'b1),.adr(clct_bx0_adr),.d(clct_bx0_src),.q(clct_bx0_srl));
+  srl16e_bbl #(1) ugemAbx0 (.clock(clock),.ce(1'b1),.adr(gemA_bx0_adr),.d(gemA_bx0_src),.q(gemA_bx0_srl));
+  srl16e_bbl #(1) ugemBbx0 (.clock(clock),.ce(1'b1),.adr(gemB_bx0_adr),.d(gemB_bx0_src),.q(gemB_bx0_srl));
+
 
   wire alct_bxdly_is_0 = (alct_bx0_delay == 0);          // Use direct input if SRL address is 0 because
   wire clct_bxdly_is_0 = (clct_bx0_delay == 0);          // 1st SRL output has 1bx overhead
+  wire gemA_bxdly_is_0 = (gemA_bx0_delay == 0)
+  wire gemB_bxdly_is_0 = (gemB_bx0_delay == 0)
 
   wire alct_bx0 = (alct_bxdly_is_0) ? alct_bx0_src : alct_bx0_srl;
   wire clct_bx0 = (clct_bxdly_is_0) ? clct_bx0_src : clct_bx0_srl;
+  wire gemA_bx0 = (gemA_bxdly_is_0) ? gemA_bx0_src : gemA_bx0_srl;
+  wire gemB_bx0 = (gemB_bxdly_is_0) ? gemB_bx0_src : gemB_bx0_srl;
 
-  reg bx0_match=0;
+  reg bx0_match=0; //output reg
+  reg gemA_bx0_match=0;
+  reg gemB_bx0_match=0;
   always @(posedge clock) begin
-  if      (ttc_resync) bx0_match <= 0;
-  else if (clct_bx0  ) bx0_match <= alct_bx0;            // alct_bx0 and clct_bx0 match in time
+      if      (ttc_resync) begin
+          bx0_match <= 0;
+          gemA_bx0_match <= 0;
+          gemB_bx0_match <= 0;
+      end
+      else if (clct_bx0  ) begin
+          bx0_match <= alct_bx0;            // alct_bx0 and clct_bx0 match in time
+          gemA_bx0_match <= gemA_bx0;       // gemA_bx0 and clct_bx0 match in time
+          gemB_bx0_match <= gemB_bx0;
+      end
   end
 
 //------------------------------------------------------------------------------------------------------------------

@@ -611,6 +611,13 @@
   bx0_vpf_test,
   bx0_match,
 
+  gemA_bx0_delay,
+  gemA_bx0_enable,
+  gemA_bx0_match,
+  gemB_bx0_delay,
+  gemB_bx0_enable,
+  gemB_bx0_match,
+
   mpc_rx_delay,
   mpc_tx_delay,
   mpc_sel_ttc_bx0,
@@ -1568,6 +1575,7 @@
   parameter ADR_GEM_INJ_CTRL          = 10'h320; // 800
   parameter ADR_GEM_INJ_DATA          = 10'h322;
   parameter ADR_GEM_COPAD_CTRL        = 10'h324; // copad matching 
+  parameter ADR_GEM_BX0_DELAY         = 10'h326;
 
   //latched GEM cluster
   parameter ADR_GEMA_CLUSTER0         = 10'h340;  // GEMA cluster0 + gemA_sync, gemA_overflow
@@ -2204,6 +2212,13 @@
   output          alct_bx0_enable; // Enable using alct bx0, else copy clct bx0
   output          bx0_vpf_test;    // Sets clct_bx0=lct0_vpf for bx0 alignment tests
   input           bx0_match;       // ALCT bx0 and CLCT bx0 match in time
+
+  output [3:0]    gemA_bx0_delay; // GEMA bx0 delay
+  output          gemA_bx0_enable; // enable using GEMA bx0, else copy clct bx0
+  input           gemA_bx0_match;  //GEMA+CLCT bx0 match
+  output [3:0]    gemB_bx0_delay; // GEMA bx0 delay
+  output          gemB_bx0_enable; // enable using GEMA bx0, else copy clct bx0
+  input           gemB_bx0_match;  //GEMA+CLCT bx0 match
 
   output  [MXMPCDLY-1:0]  mpc_rx_delay;    // MPC response delay
   output  [MXMPCDLY-1:0]  mpc_tx_delay;    // MPC transmit delay
@@ -3301,6 +3316,9 @@
   reg  [15:0] gem_copad_ctrl_wr;
   wire [15:0] gem_copad_ctrl_rd;
 
+  reg  [15:0] gem_bx0_delay_wr;
+  wire [15:0] gem_bx0_delay_rd;
+
   wire [15:0] gemA_cluster_rd [MXCLUSTER_CHAMBER-1:0];
   wire [15:0] gemB_cluster_rd [MXCLUSTER_CHAMBER-1:0];
   wire [15:0] gem_copad_rd    [MXCLUSTER_CHAMBER-1:0];
@@ -3455,6 +3473,7 @@
   wire      wr_gem_trg;
 
   wire      wr_gem_copad_ctrl;
+  wire      wr_gem_bx0_delay;
 
   //wire      wr_gemA_cluster0;
   //wire      wr_gemA_cluster1;
@@ -4079,6 +4098,7 @@
   ADR_GEM_CFG:               data_out <= gem_cfg_rd;
   ADR_GEM_TRG:               data_out <= gem_trg_rd;
   ADR_GEM_COPAD_CTRL:        data_out <= gem_copad_ctrl_rd;
+  ADR_GEM_BX0_DELAY:         data_out <= gem_bx0_delay_rd;
 
   ADR_GEMA_CLUSTER0:         data_out <= gemA_cluster_rd[0];
   ADR_GEMA_CLUSTER1:         data_out <= gemA_cluster_rd[1];
@@ -4279,6 +4299,7 @@
   assign wr_gem_cfg               =  (reg_adr==ADR_GEM_CFG                && clk_en);
   assign wr_gem_trg               =  (reg_adr==ADR_GEM_TRG                && clk_en);
   assign wr_gem_copad_ctrl        =  (reg_adr==ADR_GEM_COPAD_CTRL         && clk_en);
+  assign wr_gem_bx0_delay         =  (reg_adr==ADR_GEM_BX0_DELAY          && clk_en);
 
 
   //assign wr_gemA_cluster0         =  (reg_adr==ADR_GEMA_CLUSTER0          && clk_en);
@@ -8467,6 +8488,31 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign gem_copad_ctrl_rd           =   gem_copad_ctrl_wr;
 
 //------------------------------------------------------------------------------------------------------------------
+// GEM_BX0_DELAY = 0x326 GEM BX0 DELAY 
+//------------------------------------------------------------------------------------------------------------------
+  initial begin
+      gem_bx0_delay_wr[3:0]    = 4'b0;  // gemA bx0 delay
+      gem_bx0_delay_wr[4]      = 1'b1;  // gemA bx0 enable
+      gem_bx0_delay_wr[5]      = 1'b0;  // gemA bx0 match with clct bx0
+      gem_bx0_delay_wr[9:6]    = 4'b0;  // gemB bx0 delay 
+      gem_bx0_delay_wr[10]     = 1'b1;  // gemB bx0 enable
+      gem_bx0_delay_wr[11]     = 1'b0;  // gemB bx0 match
+      gem_bx0_delay_wr[15:12]  = 4'b0;  // not used
+  end
+
+  assign gemA_bx0_delay              =  gem_bx0_delay_wr[3:0];
+  assign gemA_bx0_enable             =  gem_bx0_delay_wr[4];
+  assign gemB_bx0_delay              =  gem_bx0_delay_wr[9:6];
+  assign gemB_bx0_enable             =  gem_bx0_delay_wr[10];
+
+  assign gem_bx0_delay_rd[3:0]      =  gemA_bx0_delay[3:0];
+  assign gem_bx0_delay_rd[  4]      =  gemA_bx0_enable;
+  assign gem_bx0_delay_rd[  5]      =  gemA_bx0_match;
+  assign gem_bx0_delay_rd[9:6]      =  gemB_bx0_delay[3:0];
+  assign gem_bx0_delay_rd[ 10]      =  gemB_bx0_enable;
+  assign gem_bx0_delay_rd[ 11]      =  gemB_bx0_match;
+  assign gem_bx0_delay_rd[15:12]    =  gem_bx0_delay_wr[15:12];
+//------------------------------------------------------------------------------------------------------------------
 // GEM_CLUSTERs and COPADs from 0x340 to 0x36e
 //------------------------------------------------------------------------------------------------------------------
   //dump code
@@ -8647,6 +8693,7 @@ always @(posedge clock_vme) begin
   if    (wr_gem_inj_ctrl)          gem_inj_ctrl_wr         <= d[15:0];
   if    (wr_gem_inj_data)          gem_inj_data_wr         <= d[15:0];
   if    (wr_gem_copad_ctrl)        gem_copad_ctrl_wr       <= d[15:0];
+  if    (wr_gem_bx0_delay)         gem_bx0_delay_wr        <= d[15:0];
   if    (wr_mpc_frames_fifo_ctrl)  mpc_frames_fifo_ctrl_wr <= d[15:0];
   if    (wr_algo2016_ctrl)         algo2016_ctrl_wr        <= d[15:0];
   //if    (wr_gemA_cluster0)         gemA_cluster0_wr        <= d[15:0];

@@ -1677,6 +1677,9 @@
   wire gemA_bc0marker = |gem_bc0marker[1:0];
   wire gemB_bc0marker = |gem_bc0marker[3:2];
 
+  wire gemA_bx0_rx    = &gem_bc0marker[1:0]; // both two GEMA fibers sending BC0 marker
+  wire gemB_bx0_rx    = &gem_bc0marker[3:2]; // both two GEMA fibers sending BC0 marker
+
   wire gemA_resyncmarker = |gem_resyncmarker[1:0];
   wire gemB_resyncmarker = |gem_resyncmarker[3:2];
 
@@ -3643,6 +3646,15 @@ end
   .bx0_vpf_test    (bx0_vpf_test),        // In  Sets clct_bx0=lct0_vpf for bx0 alignment tests
   .bx0_match       (bx0_match),           // Out  ALCT bx0 and CLCT bx0 match in time
 
+  .gemA_bx0_rx     (gemA_bx0_rx),         // In GEMA BX0 received
+  .gemA_bx0_delay  (gemA_bx0_delay[3:0]), // In GEMA BX0 delay value
+  .gemA_bx0_enable (gemA_bx0_enable),     // IN enable GEMA BX0 delay
+  .gemA_bx0_match  (gemA_bx0_match),      // out match with CLCT_BX0
+  .gemB_bx0_rx     (gemB_bx0_rx),         // IN GEMB BX0 received
+  .gemB_bx0_delay  (gemB_bx0_delay[3:0]), // IN GEMB BX0 delay
+  .gemB_bx0_enable (gemB_bx0_enable),     // IN enable GEMB BX0 delay
+  .gemB_bx0_match  (gemB_bx0_match),      // out match with CLCT_BX0
+
   .mpc_rx_delay        (mpc_rx_delay[MXMPCDLY-1:0]), // In  MPC response delay
   .mpc_tx_delay        (mpc_tx_delay[MXMPCDLY-1:0]), // In  MPC transmit delay
   .mpc_idle_blank      (mpc_idle_blank),             // In  Blank mpc output except on trigger, block bx0 too
@@ -4557,6 +4569,13 @@ end
       .alct_bx0_enable (alct_bx0_enable),     // Out  Enable using alct bx0, else copy clct bx0
       .bx0_vpf_test    (bx0_vpf_test),        // Out  Sets clct_bx0=lct0_vpf for bx0 alignment tests
       .bx0_match       (bx0_match),           // In  ALCT bx0 and CLCT bx0 match in time
+
+      .gemA_bx0_delay  (gemA_bx0_delay[3:0]), // Out GEMA bx0 delay
+      .gemA_bx0_enable (gemA_bx0_enable),     // Out GEMA bx0 enable. 1: use gemA_bx0_delay for GEMA, 0: use clct bx0
+      .gemA_bx0_match  (gemA_bx0_match),      // In GEMA+CLCT BX0 match
+      .gemB_bx0_delay  (gemB_bx0_delay[3:0]), // Out GEMA bx0 delay
+      .gemB_bx0_enable (gemB_bx0_enable),     // Out GEMA bx0 enable. 1: use gemA_bx0_delay for GEMA, 0: use clct bx0
+      .gemB_bx0_match  (gemB_bx0_match),      // In GEMA+CLCT BX0 match
 
       .mpc_rx_delay    (mpc_rx_delay[MXMPCDLY-1:0]), // Out  MPC response delay
       .mpc_tx_delay    (mpc_tx_delay[MXMPCDLY-1:0]), // Out  MPC transmit delay
