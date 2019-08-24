@@ -2271,6 +2271,9 @@ end
    wire [3:0]             alct_bx0_delay; // ALCT bx0 delay to mpc transmitter
    wire [3:0]             clct_bx0_delay; // CLCT bx0 delay to mpc transmitter
 
+   wire [3:0]             gemA_bx0_delay;
+   wire [3:0]             gemB_bx0_delay;
+
    wire [MXMPCDLY-1:0]    mpc_rx_delay;
    wire [MXMPCDLY-1:0]    mpc_tx_delay;
    wire [MXFRAME-1:0]     mpc0_frame0_ff;
