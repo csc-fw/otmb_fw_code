@@ -1451,8 +1451,8 @@
 
   wire alct_bxdly_is_0 = (alct_bx0_delay == 0);          // Use direct input if SRL address is 0 because
   wire clct_bxdly_is_0 = (clct_bx0_delay == 0);          // 1st SRL output has 1bx overhead
-  wire gemA_bxdly_is_0 = (gemA_bx0_delay == 0)
-  wire gemB_bxdly_is_0 = (gemB_bx0_delay == 0)
+  wire gemA_bxdly_is_0 = (gemA_bx0_delay == 0);
+  wire gemB_bxdly_is_0 = (gemB_bx0_delay == 0);
 
   wire alct_bx0 = (alct_bxdly_is_0) ? alct_bx0_src : alct_bx0_srl;
   wire clct_bx0 = (clct_bxdly_is_0) ? clct_bx0_src : clct_bx0_srl;
