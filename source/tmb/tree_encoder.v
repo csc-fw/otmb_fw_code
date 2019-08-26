@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
 
-module  tree_encoder{
+module  tree_encoder(
   input [3:0] win_pri_0 ,
   input [3:0] win_pri_1 ,
   input [3:0] win_pri_2 ,
@@ -22,7 +22,7 @@ module  tree_encoder{
   output [3:0] clct_win_best,
   output [3:0] clct_pri_best,
 
-  };
+  );
 
 
   wire [0:0] win_s0  [7:0];        // Tree encoder Finds best 4 of 16 window positions
