@@ -4601,7 +4601,7 @@ end
       .match_gemA_clct_window (match_gemA_clct_window[3:0]), //Out gemA-clct match window
       .gemA_alct_match        (gemA_alct_match),             //In gemA+ALCT match
       .gemA_clct_match        (gemA_clct_match),             //In gemA+CLCT match
-      .gemA_fiber_enable      (gemA_fiber_enablep[1:0]),     //Out gemA two fibers enabled or not
+      .gemA_fiber_enable      (gemA_fiber_enable[1:0]),     //Out gemA two fibers enabled or not
 
       //GEMB trigger match control
       .match_gemB_alct_delay  (match_gemB_alct_delay[3:0]),    //Out gemB delay for gemB-ALCT match
@@ -4609,7 +4609,7 @@ end
       .match_gemB_clct_window (match_gemB_clct_window[3:0]),  //Out gem-clct match window
       .gemB_alct_match        (gemB_alct_match),       // In gemB+ALCT match or not
       .gemB_clct_match        (gemB_clct_match),      // In gemB+CLCT match or not
-      .gemB_fiber_enable      (gemB_fiber_enable),    // Out gemB two fibers enabled or not
+      .gemB_fiber_enable      (gemB_fiber_enable[1:0]),    // Out gemB two fibers enabled or not
 
       .mpc_rx_delay    (mpc_rx_delay[MXMPCDLY-1:0]), // Out  MPC response delay
       .mpc_tx_delay    (mpc_tx_delay[MXMPCDLY-1:0]), // Out  MPC transmit delay
