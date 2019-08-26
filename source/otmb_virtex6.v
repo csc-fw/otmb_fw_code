@@ -4604,7 +4604,7 @@ end
       .gemA_fiber_enable      (gemA_fiber_enablep[1:0]),     //Out gemA two fibers enabled or not
 
       //GEMB trigger match control
-      .match_gemB_alct_delay  (match_gemB_alct_delay[3:0),    //Out gemB delay for gemB-ALCT match
+      .match_gemB_alct_delay  (match_gemB_alct_delay[3:0]),    //Out gemB delay for gemB-ALCT match
       .match_gemB_alct_window (match_gemB_alct_window[3:0]),  //Out gemB-alct match window
       .match_gemB_clct_window (match_gemB_clct_window[3:0]),  //Out gem-clct match window
       .gemB_alct_match        (gemB_alct_match),       // In gemB+ALCT match or not
