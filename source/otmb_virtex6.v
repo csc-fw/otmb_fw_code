@@ -2079,11 +2079,11 @@ end
   wire [7:0] gemB_csc_cluster_pad       [MXCLUSTER_CHAMBER-1:0];
   wire [2:0] gemA_csc_cluster_size      [MXCLUSTER_CHAMBER-1:0];
   wire [2:0] gemB_csc_cluster_size      [MXCLUSTER_CHAMBER-1:0];
-  wire       gemA_csc_cluster_vpf       [MXCLUSTER_CHAMBER-1:0];
-  wire       gemB_csc_cluster_vpf       [MXCLUSTER_CHAMBER-1:0];
+  wire [MXCLUSTER_CHAMBER-1:0]      gemA_csc_cluster_vpf;
+  wire [MXCLUSTER_CHAMBER-1:0]      gemB_csc_cluster_vpf;
 
-  wire       gemA_csc_cluster_me1a      [MXCLUSTER_CHAMBER-1:0];
-  wire       gemB_csc_cluster_me1a      [MXCLUSTER_CHAMBER-1:0];
+  wire [MXCLUSTER_CHAMBER-1:0]      gemA_csc_cluster_me1a;
+  wire [MXCLUSTER_CHAMBER-1:0]      gemB_csc_cluster_me1a;
   wire [5:0] gemA_csc_cluster_cscwire_lo[MXCLUSTER_CHAMBER-1:0];
   wire [5:0] gemB_csc_cluster_cscwire_lo[MXCLUSTER_CHAMBER-1:0];
   wire [5:0] gemA_csc_cluster_cscwire_hi[MXCLUSTER_CHAMBER-1:0];

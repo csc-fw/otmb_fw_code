@@ -142,7 +142,7 @@ assign csc_cluster0_roll  = reg_cluster0_roll; // 0-7
 assign csc_cluster0_pad   = reg_cluster0_pad; // from 0-191
 assign csc_cluster0_size  = reg_cluster0_size; // from 0-7, 0 means 1 gem pad
 
-assign csc_cluster0_me1a  = (csc_cluster0_roll == 3'd7); // only roll7 is matchd to ME1a, 1 for ME1a, 0 for ME1b
+assign csc_cluster0_me1a  = (reg_cluster0_roll == 3'd7); // only roll7 is matchd to ME1a, 1 for ME1a, 0 for ME1b
 
 
 endmodule
