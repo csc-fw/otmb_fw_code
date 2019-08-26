@@ -20,7 +20,7 @@ module  tree_encoder(
   input [3:0] win_pri_15,
 
   output [3:0] clct_win_best,
-  output [3:0] clct_pri_best,
+  output [3:0] clct_pri_best
 
   );
 
