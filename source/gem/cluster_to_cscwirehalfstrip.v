@@ -7,8 +7,6 @@
 // 1.gem roll+pad to wiregroup
 // 2.gem pad to key HS in ME1A
 // 3.gem pad to key HS in ME1B
-`include "gem_pad_to_csc_hs_lut.v"
-`include "gem_roll_to_csc_wg_lut.v"
 
 
 module cluster_to_cscwirehalfstrip (
@@ -88,6 +86,8 @@ reg [7:0]     reg_cluster0_pad; // from 0-191
 reg [2:0]     reg_cluster0_size; // from 0-7, 0 means 1 gem pad
 
 
+`include "gem_pad_to_csc_hs_lut.v"
+`include "gem_roll_to_csc_wg_lut.v"
 
 
 always @(posedge logic_clock) begin
