@@ -1662,6 +1662,7 @@
   wire        gemA_alct_match; 
   wire        gemA_clct_match;
   wire [1:0]  gemA_fiber_enable;
+
 //GEMB trigger match control
   wire [3:0]  match_gemB_alct_delay;
   wire [3:0]  match_gemB_alct_window;
@@ -1670,6 +1671,7 @@
   wire        gemB_clct_match;
   wire [1:0]  gemB_fiber_enable;
 
+  wire [3:0] gem_fiber_enable = {gemB_fiber_enable, gemA_fiber_enable};
 
   wire [4:0] gem_clct_deltahs;
   wire [2:0] gem_alct_deltawire;

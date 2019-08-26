@@ -657,10 +657,6 @@
   gem_zero_suppress,
   fifo_tbins_gem,
   fifo_pretrig_gem,
-  gem_clct_deltahs,
-  gem_alct_deltawire,
-  gem_clct_enable, //gem clct match enable
-  gem_alct_enable,
 
   //GEM-CSC match window, deltahs, deltawire
   gem_clct_deltahs,               // Out  GEM GEM-CSC match window, deltahs, the final window is deltahs*2+1
@@ -2307,8 +2303,6 @@
   output              gem_zero_suppress; // Out  1 Enable GEM Readout Zero-suppression
   output [MXTBIN-1:0] fifo_tbins_gem;    // Out  Number GEM FIFO time bins to read out
   output [MXTBIN-1:0] fifo_pretrig_gem;  // Out  Number GEM FIFO time bins before pretrigger
-  output [3:0]        gem_delay;         // Out  GEM Trigger Delay
-  output [3:0]        gem_fiber_enable;  // Out  GEM fiber enable for triggering
 
   output gemA_rxd_posneg;  // Out gem chamber 0 (fiber0,1) rxd posneg value
   output gemB_rxd_posneg;  // Out gem chamber 1 (fiber2,3) rxd posneg value
@@ -2333,7 +2327,7 @@
   output [1:0] gemB_fiber_enable;
 
   output [4:0] gem_clct_deltahs;
-  output [2:0] gem_clct_deltawire;
+  output [2:0] gem_alct_deltawire;
   output       gem_clct_enable;
   output       gem_alct_enable;
 
