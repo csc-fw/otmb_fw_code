@@ -657,8 +657,30 @@
   gem_zero_suppress,
   fifo_tbins_gem,
   fifo_pretrig_gem,
-  gem_delay,
-  gem_fiber_enable, //fibers enabled for triggering
+  gem_clct_deltahs,
+  gem_alct_deltawire,
+  gem_clct_enable, //gem clct match enable
+  gem_alct_enable,
+
+  //GEM-CSC match window, deltahs, deltawire
+  gem_clct_deltahs,               // Out  GEM GEM-CSC match window, deltahs, the final window is deltahs*2+1
+  gem_alct_deltawire ,               // Out GEM-CSC match window, deltawire, final window is deltawire*2+1
+  gem_clct_enable,               //Out gem-clct match is enabled or not
+  gem_alct_enable,              //Out gem-alct match is enabled or not
+
+  //GEM-CSC match control
+  gem_me1a_match_enable,       //Out gem-csc match in me1a
+  gem_me1b_match_enable,       //Out gem-csc match in me1b
+  gem_me1a_match_nogem,       //Out gem-csc match without gem is allowed in ME1b
+  gem_me1b_match_nogem,       //Out gem-csc match without gem is allowed in ME1a
+  gem_me1a_match_noalct,       //Out gem-csc match without alct is allowed in ME1b
+  gem_me1b_match_noalct,       //Out gem-csc match without alct is allowed in ME1a
+  gem_me1a_match_noclct,       //Out gem-csc match without clct is allowed in ME1b
+  gem_me1b_match_noclct,       //Out gem-csc match without clct is allowed in ME1a
+  gem_me1a_match_promotequal,     //Out promote quality or not for match in ME1a region, 
+  gem_me1b_match_promotequal,     //Out promote quality or not for match in ME1b region 
+  gem_me1a_match_promotepat,     //Out promote pattern or not for match in ME1a region, 
+  gem_me1b_match_promotepat,     //Out promote pattern or not for match in ME1b region, 
 
 // GEM Configuration Ports
   gemA_rxd_posneg,
@@ -1587,13 +1609,14 @@
   parameter ADR_GEM_CFG               = 10'h312;
   parameter ADR_GEM_CNT_CTRL          = 10'h314;
   parameter ADR_GEM_CNT_RDATA         = 10'h316;
-  parameter ADR_GEM_TRG               = 10'h318;
+  parameter ADR_GEM_CSC_MATCH_WINDOW  = 10'h318;
   parameter ADR_GEM_INJ_CTRL          = 10'h320; // 800
   parameter ADR_GEM_INJ_DATA          = 10'h322;
   parameter ADR_GEM_COPAD_CTRL        = 10'h324; // copad matching 
   parameter ADR_GEM_BX0_DELAY         = 10'h326;
   parameter ADR_GEMA_TRG_CTRL         = 10'h328;
   parameter ADR_GEMB_TRG_CTRL         = 10'h32a;
+  parameter ADR_GEM_CSC_MATCH_CTRL    = 10'h32c;
 
   //latched GEM cluster
   parameter ADR_GEMA_CLUSTER0         = 10'h340;  // GEMA cluster0 + gemA_sync, gemA_overflow
@@ -2308,6 +2331,24 @@
   input        gemB_alct_match;
   input        gemB_clct_match;
   output [1:0] gemB_fiber_enable;
+
+  output [4:0] gem_clct_deltahs;
+  output [2:0] gem_clct_deltawire;
+  output       gem_clct_enable;
+  output       gem_alct_enable;
+
+  output       gem_me1a_match_enable;
+  output       gem_me1b_match_enable;
+  output       gem_me1a_match_noclct;// no clct is fine for GEM-CSC match
+  output       gem_me1a_match_nogem;// no gem is fine for GEM-CSC match
+  output       gem_me1a_match_noalct;// no alct is fine for GEM-CSC match
+  output       gem_me1b_match_noclct;// no clct is fine for GEM-CSC match
+  output       gem_me1b_match_nogem;// no gem is fine for GEM-CSC match
+  output       gem_me1b_match_noalct;// no alct is fine for GEM-CSC match
+  output       gem_me1a_match_promotequal;
+  output       gem_me1b_match_promotequal;
+  output       gem_me1a_match_promotepat;
+  output       gem_me1b_match_promotepat;
 
 // RPC Ports: RAT Control
   output          rpc_sync;     // Sync mode
@@ -3344,8 +3385,8 @@
   reg  [15:0] gem_cfg_wr;
   wire [15:0] gem_cfg_rd;
 
-  reg  [15:0] gem_trg_wr;
-  wire [15:0] gem_trg_rd;
+  reg  [15:0] gem_csc_window_wr;
+  wire [15:0] gem_csc_window_rd;
 
   reg  [15:0] gem_copad_ctrl_wr;
   wire [15:0] gem_copad_ctrl_rd;
@@ -3358,6 +3399,9 @@
 
   reg  [15:0] gemB_trg_ctrl_wr;
   wire [15:0] gemB_trg_ctrl_rd;
+
+  reg  [15:0] gem_csc_match_ctrl_wr;
+  wire [15:0] gem_csc_match_ctrl_rd;
 
   wire [15:0] gemA_cluster_rd [MXCLUSTER_CHAMBER-1:0];
   wire [15:0] gemB_cluster_rd [MXCLUSTER_CHAMBER-1:0];
@@ -3510,7 +3554,8 @@
   wire      wr_gem_inj_data;
   wire      wr_gem_tbins;
   wire      wr_gem_cfg;
-  wire      wr_gem_trg;
+  wire      wr_gem_csc_window;
+  wire      wr_gem_csc_match_ctrl;
 
   wire      wr_gem_copad_ctrl;
   wire      wr_gem_bx0_delay;
@@ -4139,11 +4184,12 @@
 
   ADR_GEM_TBINS:             data_out <= gem_tbins_rd;
   ADR_GEM_CFG:               data_out <= gem_cfg_rd;
-  ADR_GEM_TRG:               data_out <= gem_trg_rd;
+  ADR_GEM_CSC_MATCH_WINDOW:  data_out <= gem_csc_window_rd;
   ADR_GEM_COPAD_CTRL:        data_out <= gem_copad_ctrl_rd;
   ADR_GEMA_TRG_CTRL:         data_out <= gemA_trg_ctrl_rd;
   ADR_GEMB_TRG_CTRL:         data_out <= gemB_trg_ctrl_rd;
   ADR_GEM_BX0_DELAY:         data_out <= gem_bx0_delay_rd;
+  ADR_GEM_CSC_MATCH_CTRL:    data_out <= gem_csc_match_ctrl_rd;
 
   ADR_GEMA_CLUSTER0:         data_out <= gemA_cluster_rd[0];
   ADR_GEMA_CLUSTER1:         data_out <= gemA_cluster_rd[1];
@@ -4342,11 +4388,12 @@
   assign wr_gem_inj_data          =  (reg_adr==ADR_GEM_INJ_DATA           && clk_en);
   assign wr_gem_tbins             =  (reg_adr==ADR_GEM_TBINS              && clk_en);
   assign wr_gem_cfg               =  (reg_adr==ADR_GEM_CFG                && clk_en);
-  assign wr_gem_trg               =  (reg_adr==ADR_GEM_TRG                && clk_en);
+  assign wr_gem_csc_window        =  (reg_adr==ADR_GEM_CSC_MATCH_WINDOW   && clk_en);
   assign wr_gem_copad_ctrl        =  (reg_adr==ADR_GEM_COPAD_CTRL         && clk_en);
   assign wr_gem_bx0_delay         =  (reg_adr==ADR_GEM_BX0_DELAY          && clk_en);
   assign wr_gemA_trg_ctrl         =  (reg_adr==ADR_GEMA_TRG_CTRL          && clk_en);
   assign wr_gemB_trg_ctrl         =  (reg_adr==ADR_GEMB_TRG_CTRL          && clk_en);
+  assign wr_gem_csc_match_ctrl    =  (reg_adr==ADR_GEM_CSC_MATCH_CTRL     && clk_en);
 
   
 
@@ -8476,19 +8523,23 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign gem_cfg_rd [15:0] = gem_cfg_wr [15:0]; // Readback
 
 //------------------------------------------------------------------------------------------------------------------
-// ADR_GEM_TRG=0x318    GEM Configuration
+// ADR_GEM_CSC_CTRL_WINDOW=0x318    GEM-CSC match window in term of deltaHS and deltawire
 //------------------------------------------------------------------------------------------------------------------
 
-// not really used, Tao, 20190825
   initial begin
-  gem_trg_wr[3:0]   = 4'd0; // RW GEM Trigger Delay
-  gem_trg_wr[7:3]   = 4'b1111;// enable GEM fiber for triggering , initial with all GEM fiber enabled
+  gem_csc_window_wr[4:0]   = 5'd8; // RW GEM CSC match window in strip direction
+  gem_csc_window_wr[7:5]   = 3'd1;// RW GEM CSC match window in wire direction
+  gem_csc_window_wr[  8]   = 1'b1; //RW enable GEM-CLCT match
+  gem_csc_window_wr[  9]   = 1'b1; //RW enable GEM-ALCT match
+
   end
 
-  assign gem_delay [3:0]       = gem_trg_wr[3:0];
-  assign gem_fiber_enable[3:0] = gem_trg_wr[7:4];
+  assign gem_clct_deltahs  [4:0]       = gem_csc_window_wr[4:0];//
+  assign gem_alct_deltawire[2:0]       = gem_csc_window_wr[7:5];//8bits
+  assign gem_clct_enable               = gem_csc_window_wr[8];
+  assign gem_alct_enable               = gem_csc_window_wr[9];
 
-  assign gem_trg_rd [15:0] = gem_trg_wr [15:0]; // Readback
+  assign gem_csc_window_rd [15:0] = gem_csc_window_wr [15:0]; // Readback
 
 //------------------------------------------------------------------------------------------------------------------
 // GEM_INJ_CTRL = 0x320  GEM Raw Hits Readout RAM Simple Controller
@@ -8613,6 +8664,40 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign gemB_trg_ctrl_rd[13]             = gemB_clct_match;
   assign gemB_trg_ctrl_rd[15:14]          = gemB_fiber_enable[1:0];
 
+//------------------------------------------------------------------------------------------------------------------
+// ADR_GEM_CSC_MATCH_CTRL=0x32c    GEM-CSC match control
+//------------------------------------------------------------------------------------------------------------------
+
+  initial begin
+  gem_csc_match_ctrl_wr[ 0]   = 1'b1; // RW GEMCSC match, enabled in ME1a or not
+  gem_csc_match_ctrl_wr[ 1]   = 1'b1; // RW GEMCSC match, enabled in ME1b or not
+  gem_csc_match_ctrl_wr[ 2]   = 1'b1; // RW GEMCSC match, match without gem is allowed in me1a
+  gem_csc_match_ctrl_wr[ 3]   = 1'b0; // RW GEMCSC match, match without gem is allowed in me1b
+  gem_csc_match_ctrl_wr[ 4]   = 1'b0; // RW GEMCSC match, match without alct is allowed in me1a
+  gem_csc_match_ctrl_wr[ 5]   = 1'b0; // RW GEMCSC match, match without alct is allowed in me1b
+  gem_csc_match_ctrl_wr[ 6]   = 1'b0; // RW GEMCSC match, match without clct is allowed in me1a
+  gem_csc_match_ctrl_wr[ 7]   = 1'b0; // RW GEMCSC match, match without clct is allowed in me1b
+  gem_csc_match_ctrl_wr[ 8]   = 1'b1; // RW GEMCSC match, promote quality in me1a with good match
+  gem_csc_match_ctrl_wr[ 9]   = 1'b1; // RW GEMCSC match, promote quality in me1b with good match
+  gem_csc_match_ctrl_wr[10]   = 1'b0; // RW GEMCSC match, promote pattern in me1a with good match
+  gem_csc_match_ctrl_wr[11]   = 1'b0; // RW GEMCSC match, promote pattern in me1b with good match
+  gem_csc_match_ctrl_wr[15:12] = 4'b0; // not used
+  end
+
+  assign gem_me1a_match_enable        = gem_csc_match_ctrl_wr[ 0];
+  assign gem_me1b_match_enable        = gem_csc_match_ctrl_wr[ 1];
+  assign gem_me1a_match_nogem         = gem_csc_match_ctrl_wr[ 2];
+  assign gem_me1b_match_nogem         = gem_csc_match_ctrl_wr[ 3];
+  assign gem_me1a_match_noalct        = gem_csc_match_ctrl_wr[ 4];
+  assign gem_me1b_match_noalct        = gem_csc_match_ctrl_wr[ 5];
+  assign gem_me1a_match_noclct        = gem_csc_match_ctrl_wr[ 6];
+  assign gem_me1b_match_noclct        = gem_csc_match_ctrl_wr[ 7];
+  assign gem_me1a_match_promotequal   = gem_csc_match_ctrl_wr[ 8];
+  assign gem_me1b_match_promotequal   = gem_csc_match_ctrl_wr[ 9];
+  assign gem_me1a_match_promotepat    = gem_csc_match_ctrl_wr[10];
+  assign gem_me1b_match_promotepat    = gem_csc_match_ctrl_wr[11];
+
+  assign gem_csc_match_ctrl_rd        = gem_csc_match_ctrl_wr[15:0];
 
 //------------------------------------------------------------------------------------------------------------------
 // GEM_CLUSTERs and COPADs from 0x340 to 0x36e
@@ -8768,7 +8853,8 @@ always @(posedge clock_vme) begin
   if    (wr_phaser10)              phaser10_wr             <= d[15:0];
   if    (wr_gem_tbins)             gem_tbins_wr            <= d[15:0];
   if    (wr_gem_cfg)               gem_cfg_wr              <= d[15:0];
-  if    (wr_gem_trg)               gem_trg_wr              <= d[15:0];
+  if    (wr_gem_csc_window)        gem_csc_window_wr       <= d[15:0];
+  if    (wr_gem_csc_match_ctrl)    gem_csc_match_ctrl_wr   <= d[15:0];
   if    (wr_delay0_int)            delay0_int_wr           <= d[15:0];
   if    (wr_delay1_int)            delay1_int_wr           <= d[15:0];
   if    (wr_sync_err_ctrl)         sync_err_ctrl_wr        <= d[15:0];

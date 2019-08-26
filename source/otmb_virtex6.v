@@ -226,7 +226,7 @@
   parameter INJ_MXTBIN    =  5;  // Injector time bin counter width
   parameter INJ_LASTTBIN  =  31; // Injector last time bin
   parameter MXBDID        =  5;  // Number TMB Board ID bits
-  parameter MXCSC         =  4;  // Number CSC Chamber ID bits
+  parameter MXCSC         =  4;  // Number CSC Chamber ID bits, CSC chamber id in one sector
   parameter MXRID         =  4;  // Number Run ID bits
   parameter MXDMB         =  49; // Number DAQMB output bits, not including hardware dmb clock
   parameter MXDRIFT       =  2;  // Number drift delay bits
@@ -1641,9 +1641,6 @@
 
   wire gem_any = (|gemA_vpf) | (|gemB_vpf);
    
-  wire [3:0] gem_delay;
-  wire [3:0] gem_fiber_enable;
-
   wire [9:0]   gem_debug_fifo_adr;    // FIFO RAM read tbin address
   wire [1:0]   gem_debug_fifo_sel;    // FIFO RAM read layer clusters 0-3
   wire [1:0]   gem_debug_fifo_igem;   // FIFO RAM read chamber 0-3
@@ -1665,13 +1662,33 @@
   wire        gemA_alct_match; 
   wire        gemA_clct_match;
   wire [1:0]  gemA_fiber_enable;
-//GEMA trigger match control
+//GEMB trigger match control
   wire [3:0]  match_gemB_alct_delay;
   wire [3:0]  match_gemB_alct_window;
   wire [3:0]  match_gemB_clct_window;
   wire        gemB_alct_match; 
   wire        gemB_clct_match;
   wire [1:0]  gemB_fiber_enable;
+
+
+  wire [4:0] gem_clct_deltahs;
+  wire [2:0] gem_alct_deltawire;
+  wire       gem_clct_enable;
+  wire       gem_alct_enable;
+  
+
+  wire       gem_me1a_match_enable;
+  wire       gem_me1b_match_enable;
+  wire       gem_me1a_match_nogem;// no gem is fine for GEM-CSC match
+  wire       gem_me1a_match_noalct;// no alct is fine for GEM-CSC match
+  wire       gem_me1a_match_noclct;// no clct is fine for GEM-CSC match
+  wire       gem_me1b_match_nogem;// no gem is fine for GEM-CSC match
+  wire       gem_me1b_match_noalct;// no alct is fine for GEM-CSC match
+  wire       gem_me1b_match_noclct;// no clct is fine for GEM-CSC match
+  wire       gem_me1a_match_promotequal;
+  wire       gem_me1b_match_promotequal;
+  wire       gem_me1a_match_promotepat;
+  wire       gem_me1b_match_promotepat;
 
 // Raw Hits FIFO RAM Ports
   wire  [RAM_ADRB-1:0]      fifo_radr_gem;              // FIFO RAM read tbin address
@@ -2047,6 +2064,93 @@ end
             end
         end
       end
+  end
+  endgenerate
+
+
+  //GEM clusters for GEM-CSC mathcing 
+  wire [CLSTBITS-1:0] gemA_csc_cluster  [MXCLUSTER_CHAMBER-1:0];
+  wire [CLSTBITS-1:0] gemB_csc_cluster  [MXCLUSTER_CHAMBER-1:0];
+  wire [2:0] gemA_csc_cluster_roll      [MXCLUSTER_CHAMBER-1:0];
+  wire [2:0] gemB_csc_cluster_roll      [MXCLUSTER_CHAMBER-1:0];
+  wire [7:0] gemA_csc_cluster_pad       [MXCLUSTER_CHAMBER-1:0];
+  wire [7:0] gemB_csc_cluster_pad       [MXCLUSTER_CHAMBER-1:0];
+  wire [2:0] gemA_csc_cluster_size      [MXCLUSTER_CHAMBER-1:0];
+  wire [2:0] gemB_csc_cluster_size      [MXCLUSTER_CHAMBER-1:0];
+  wire       gemA_csc_cluster_vpf       [MXCLUSTER_CHAMBER-1:0];
+  wire       gemB_csc_cluster_vpf       [MXCLUSTER_CHAMBER-1:0];
+
+  wire       gemA_csc_cluster_me1a      [MXCLUSTER_CHAMBER-1:0];
+  wire       gemB_csc_cluster_me1a      [MXCLUSTER_CHAMBER-1:0];
+  wire [5:0] gemA_csc_cluster_cscwire_lo[MXCLUSTER_CHAMBER-1:0];
+  wire [5:0] gemB_csc_cluster_cscwire_hi[MXCLUSTER_CHAMBER-1:0];
+  wire [7:0] gemA_csc_cluster_me1bhs_lo [MXCLUSTER_CHAMBER-1:0]; // from 0-127
+  wire [7:0] gemB_csc_cluster_me1bhs_hi [MXCLUSTER_CHAMBER-1:0]; // from 0-127
+  wire [7:0] gemA_csc_cluster_me1ahs_lo [MXCLUSTER_CHAMBER-1:0]; // from 128-223
+  wire [7:0] gemB_csc_cluster_me1ahs_hi [MXCLUSTER_CHAMBER-1:0]; // from 128-223
+
+
+  genvar iclst_csc;
+  generate
+  for (iclst_csc=0; iclst_csc<MXCLUSTER_CHAMBER; iclst_csc=iclst_csc+1) begin: gen_gem_csc_cluster
+      cluster_to_cscwirehalfstrip #(.ICLST(iclst_csc)) ucluster_to_cscwirehalfstripA (
+	clock (clock),
+
+        evenchamber (evenchamber),   // even pair or not
+        gem_clct_deltahs  (gem_clct_deltahs), // matching window in halfstrip direction
+        gem_alct_deltawire(gem_alct_deltawire), // matching window in wiregroup direction
+
+        cluster0      (gemA_cluster[iclst_csc]),
+        cluster0_vpf  (gemA_cluster_vpf[iclst_csc]),// valid or not
+        cluster0_roll (gemA_cluster_roll[iclst_csc]), // 0-7 
+        cluster0_pad  (gemA_cluster_pad[iclst_csc]), // from 0-191
+        cluster0_size (gemA_cluster_size[iclst_csc]), // from 0-7, 0 means 1 gem pad
+
+        cluster0_cscwire_lo (gemA_csc_cluster_cscwire_lo[iclst_csc]),
+        cluster0_cscwire_hi (gemA_csc_cluster_cscwire_hi[iclst_csc]),
+        cluster0_me1bhs_lo  (gemA_csc_cluster_me1bhs_lo[iclst_csc]), // from 0-127
+        cluster0_me1bhs_hi  (gemA_csc_cluster_me1bhs_hi[iclst_csc]), // from 0-127
+        cluster0_me1ahs_lo  (gemA_csc_cluster_me1ahs_lo[iclst_csc]), // from 128-223
+        cluster0_me1ahs_hi  (gemA_csc_cluster_me1ahs_hi[iclst_csc]), // from 128-223
+        csc_cluster0_me1a   (gemA_csc_cluster_me1a),
+
+        csc_cluster0      (gemA_csc_cluster[iclst_csc]),  
+        csc_cluster0_vpf  (gemA_csc_cluster_vpf[iclst_csc]),// valid or not
+        csc_cluster0_roll (gemA_csc_cluster_roll[iclst_csc]), // 0-7 
+        csc_cluster0_pad  (gemA_csc_cluster_pad[iclst_csc]), // from 0-191
+        csc_cluster0_size (gemA_csc_cluster_size[iclst_csc]) // from 0-7, 0 means 1 gem pad
+
+      );
+
+      cluster_to_cscwirehalfstrip #(.ICLST(iclst_csc)) ucluster_to_cscwirehalfstripB (
+	clock (clock),
+
+        evenchamber (evenchamber),   // even pair or not
+        gem_clct_deltahs  (gem_clct_deltahs), // matching window in halfstrip direction
+        gem_alct_deltawire(gem_alct_deltawire), // matching window in wiregroup direction
+
+        cluster0      (gemB_cluster[iclst_csc]),
+        cluster0_vpf  (gemB_cluster_vpf[iclst_csc]),// valid or not
+        cluster0_roll (gemB_cluster_roll[iclst_csc]), // 0-7 
+        cluster0_pad  (gemB_cluster_pad[iclst_csc]), // from 0-191
+        cluster0_size (gemB_cluster_size[iclst_csc]), // from 0-7, 0 means 1 gem pad
+
+        cluster0_cscwire_lo (gemB_csc_cluster_cscwire_lo[iclst_csc]),
+        cluster0_cscwire_hi (gemB_csc_cluster_cscwire_hi[iclst_csc]),
+        cluster0_me1bhs_lo  (gemB_csc_cluster_me1bhs_lo[iclst_csc]), // from 0-127
+        cluster0_me1bhs_hi  (gemB_csc_cluster_me1bhs_hi[iclst_csc]), // from 0-127
+        cluster0_me1ahs_lo  (gemB_csc_cluster_me1ahs_lo[iclst_csc]), // from 128-223
+        cluster0_me1ahs_hi  (gemB_csc_cluster_me1ahs_hi[iclst_csc]), // from 128-223
+        csc_cluster0_me1a   (gemB_csc_cluster_me1a),
+
+        csc_cluster0      (gemB_csc_cluster[iclst_csc]),  
+        csc_cluster0_vpf  (gemB_csc_cluster_vpf[iclst_csc]),// valid or not
+        csc_cluster0_roll (gemB_csc_cluster_roll[iclst_csc]), // 0-7 
+        csc_cluster0_pad  (gemB_csc_cluster_pad[iclst_csc]), // from 0-191
+        csc_cluster0_size (gemB_csc_cluster_size[iclst_csc]) // from 0-7, 0 means 1 gem pad
+
+      );
+
   end
   endgenerate
 
@@ -3552,10 +3656,25 @@ end
   .alct_ecc_err (alct_ecc_err[1:0]),     // In  ALCT ecc syndrome code
 
 // GEM
-  .gemA_vpf          (gemA_vpf[7:0]),
-  .gemB_vpf          (gemB_vpf[7:0]),
-  .gem_delay         (gem_delay[3:0]),
-  .gem_fiber_enable  (gem_fiber_enable[3:0]),
+  //.gemA_vpf          (gemA_vpf[7:0]),
+  //.gemB_vpf          (gemB_vpf[7:0]),
+  .gemA_vpf          (gemA_csc_vpf[7:0]), //In gem cluster vpf
+  //GEMA trigger match control
+  .match_gemA_alct_delay  (match_gemA_alct_delay[3:0]),  //In gemA delay for gemA-ALCT match
+  .match_gemA_alct_window (match_gemA_alct_window[3:0]), //In gemA-alct match window
+  .match_gemA_clct_window (match_gemA_clct_window[3:0]), //In gemA-clct match window
+  .gemA_alct_match        (gemA_alct_match),             //Out gemA+ALCT match
+  .gemA_clct_match        (gemA_clct_match),             //Out gemA+CLCT match
+  .gemA_fiber_enable      (gemA_fiber_enable[1:0]),     //In gemA two fibers enabled or not
+
+  //GEMB trigger match control
+  .gemB_vpf          (gemB_csc_vpf[7:0]),
+  .match_gemB_alct_delay  (match_gemB_alct_delay[3:0]),    //In gemB delay for gemB-ALCT match
+  .match_gemB_alct_window (match_gemB_alct_window[3:0]),  //In gemB-alct match window
+  .match_gemB_clct_window (match_gemB_clct_window[3:0]),  //In gem-clct match window
+  .gemB_alct_match        (gemB_alct_match),       // Out gemB+ALCT match or not
+  .gemB_clct_match        (gemB_clct_match),      // Out gemB+CLCT match or not
+  .gemB_fiber_enable      (gemB_fiber_enable[1:0]),    //In gemB two fibers enabled or not
 
 // TMB-Sequencer Pipelines
   .wr_adr_xtmb (wr_adr_xtmb[MXBADR-1:0]), // In  Buffer write address after drift time
@@ -4651,15 +4770,34 @@ end
       .fifo_pretrig_rpc (fifo_pretrig_rpc[MXTBIN-1:0]), // Out  Number RPC FIFO time bins before pretrigger
 
       // GEM VME Configuration Ports
-      .gem_read_enable   (gem_read_enable),              // Out  1 = Enable GEM Readout
-      .gem_exists        (gem_exists[MXGEM-1:0]),        // In   GEM existence flags
-      .gem_enable        (gem_enable[MXGEM-1:0]),        // Out  GEM enable flags
-      .gem_zero_suppress (gem_zero_suppress),            // Out  1 = Enable GEM Readout Zero-suppression
-      .fifo_tbins_gem    (fifo_tbins_gem[MXTBIN-1:0]),   // Out  Number GEM FIFO time bins to read out
-      .fifo_pretrig_gem  (fifo_pretrig_gem[MXTBIN-1:0]), // Out  Number GEM FIFO time bins before pretrigger
-      .gem_delay         (gem_delay[3:0]),               // Out  GEM Trigger Delay
-      .gem_fiber_enable  (gem_fiber_enable[3:0]),               // Out  GEM fibers enabled for triggering
-      // RPC Ports: RAT Control
+      .gem_read_enable     (gem_read_enable),              // Out  1 = Enable GEM Readout
+      .gem_exists          (gem_exists[MXGEM-1:0]),        // In   GEM existence flags
+      .gem_enable          (gem_enable[MXGEM-1:0]),        // Out  GEM enable flags
+      .gem_zero_suppress   (gem_zero_suppress),            // Out  1 = Enable GEM Readout Zero-suppression
+      .fifo_tbins_gem      (fifo_tbins_gem[MXTBIN-1:0]),   // Out  Number GEM FIFO time bins to read out
+      .fifo_pretrig_gem    (fifo_pretrig_gem[MXTBIN-1:0]), // Out  Number GEM FIFO time bins before pretrigger
+
+      //GEM-CSC match window, deltahs, deltawire
+      .gem_clct_deltahs          (gem_clct_deltahs[4:0]),               // Out  GEM GEM-CSC match window, deltahs, the final window is deltahs*2+1
+      .gem_alct_deltawire        (gem_alct_deltawire[2:0]),               // Out GEM-CSC match window, deltawire, final window is deltawire*2+1
+      .gem_clct_enable           (gem_clct_enable),              //Out gem-clct match is enabled or not
+      .gem_alct_enable           (gem_alct_enable),             //Out gem-alct match is enabled or not
+
+      //GEM-CSC match control
+      .gem_me1a_match_enable     (gem_me1a_match_enable),       //Out gem-csc match in me1a
+      .gem_me1b_match_enable     (gem_me1b_match_enable),       //Out gem-csc match in me1b
+      .gem_me1a_match_nogem        (gem_me1a_match_nogem),       //Out gem-csc match without gem is allowed in ME1b
+      .gem_me1b_match_nogem        (gem_me1b_match_nogem),       //Out gem-csc match without gem is allowed in ME1a
+      .gem_me1a_match_noalct       (gem_me1a_match_noalct),       //Out gem-csc match without alct is allowed in ME1b
+      .gem_me1b_match_noalct       (gem_me1b_match_noalct),       //Out gem-csc match without alct is allowed in ME1a
+      .gem_me1a_match_noclct       (gem_me1a_match_noclct),       //Out gem-csc match without clct is allowed in ME1b
+      .gem_me1b_match_noclct       (gem_me1b_match_noclct),       //Out gem-csc match without clct is allowed in ME1a
+      .gem_me1a_match_promotequal  (gem_me1a_match_promotequal),     //Out promote quality or not for match in ME1a region, 
+      .gem_me1b_match_promotequal  (gem_me1b_match_promotequal),     //Out promote quality or not for match in ME1b region 
+      .gem_me1a_match_promotepat   (gem_me1a_match_promotepat),     //Out promote pattern or not for match in ME1a region, 
+      .gem_me1b_match_promotepat   (gem_me1b_match_promotepat),     //Out promote pattern or not for match in ME1b region 
+
+      // RPC Ports: RAT Control                                                                                      
       .rpc_sync     (rpc_sync),     // Out  Sync mode
       .rpc_posneg   (rpc_posneg),   // Out  Clock phase
       .rpc_free_tx0 (rpc_free_tx0), // Out  Unassigned

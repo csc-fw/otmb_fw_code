@@ -130,13 +130,9 @@
   alct_ecc_err,
 
 // GEM
-  gemA_vpf,
-  gemB_vpf,
-
-  gem_delay,
-  gem_fiber_enable,
 
 //GEMA trigger match control
+  gemA_vpf,
   match_gemA_alct_delay,
   match_gemA_alct_window,
   match_gemA_clct_window,
@@ -145,6 +141,7 @@
   gemA_fiber_enable,
 
 //GEMB trigger match control
+  gemB_vpf,
   match_gemB_alct_delay,
   match_gemB_alct_window,
   match_gemB_clct_window,
@@ -482,19 +479,6 @@
   input  [7:0]         gemA_vpf;
   input  [7:0]         gemB_vpf;
 
-  input  [3:0]         gem_delay;
-  input  [3:0]         gem_fiber_enable;
-
-  input                gemA_bx0_rx;
-  input  [3:0]         gemA_bx0_delay;
-  input                gemA_bx0_enable;
-  output               gemA_bx0_match;
-
-  input                gemB_bx0_rx;
-  input  [3:0]         gemB_bx0_delay;
-  input                gemB_bx0_enable;
-  output               gemB_bx0_match;
-
   //GEMA trigger match control
   input  [3:0]        match_gemA_alct_delay;
   input  [3:0]        match_gemA_alct_window;
@@ -511,6 +495,15 @@
   output              gemB_clct_match;
   input [1:0]         gemB_fiber_enable;
 
+  input                gemA_bx0_rx;
+  input  [3:0]         gemA_bx0_delay;
+  input                gemA_bx0_enable;
+  output               gemA_bx0_match;
+
+  input                gemB_bx0_rx;
+  input  [3:0]         gemB_bx0_delay;
+  input                gemB_bx0_enable;
+  output               gemB_bx0_match;
 
 // TMB-Sequencer Pipelines
   input  [MXBADR-1:0]  wr_adr_xtmb; // Buffer write address after drift time
@@ -1216,6 +1209,8 @@
   assign alct_clct_gem   = clct_match                   && (gem_pulse);
   assign clct_gem_noalct = clct_noalct                  && (gem_pulse_winclose);
   assign alct_gem_noclct = alct_discard                 && (gem_pulse_winclose);
+
+
 
 // Latch clct match results for TMB and MPC pathways
   reg tmb_trig_pulse       = 0;
