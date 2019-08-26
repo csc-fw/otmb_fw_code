@@ -372,18 +372,19 @@
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="163"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="71"/>
     </file>
-    <file xil_pn:name="source/gem/alct_gem_match.v" xil_pn:type="FILE_VERILOG">
+    <file xil_pn:name="source/gem/cluster_to_cscwirehalfstrip.v" xil_pn:type="FILE_VERILOG">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="230"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
     </file>
-    <file xil_pn:name="source/gem/alct2gem.v" xil_pn:type="FILE_VERILOG">
+    <file xil_pn:name="source/gem/gem_pad_to_csc_hs_lut.v" xil_pn:type="FILE_VERILOG">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="246"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
     </file>
-    <file xil_pn:name="source/gem/alct_gem_match_unit.v" xil_pn:type="FILE_VERILOG">
+    <file xil_pn:name="source/gem/gem_roll_to_csc_wg_lut.v" xil_pn:type="FILE_VERILOG">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="248"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
     </file>
+    <!---
     <file xil_pn:name="source/gem/cluster_to_gemstrip.v" xil_pn:type="FILE_VERILOG">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="168"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
@@ -396,6 +397,7 @@
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="175"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
     </file>
+    --->
   </files>
 
   <properties>
