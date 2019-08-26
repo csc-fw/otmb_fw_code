@@ -1658,6 +1658,21 @@
   wire         gem_inj_wen;      // GEM Injector Write Enable
   wire         injector_go_gem;  // Start GEM injector
 
+//GEMA trigger match control
+  wire [3:0]  match_gemA_alct_delay;
+  wire [3:0]  match_gemA_alct_window;
+  wire [3:0]  match_gemA_clct_window;
+  wire        gemA_alct_match; 
+  wire        gemA_clct_match;
+  wire [1:0]  gemA_fiber_enable;
+//GEMA trigger match control
+  wire [3:0]  match_gemB_alct_delay;
+  wire [3:0]  match_gemB_alct_window;
+  wire [3:0]  match_gemB_clct_window;
+  wire        gemB_alct_match; 
+  wire        gemB_clct_match;
+  wire [1:0]  gemB_fiber_enable;
+
 // Raw Hits FIFO RAM Ports
   wire  [RAM_ADRB-1:0]      fifo_radr_gem;              // FIFO RAM read tbin address
   wire  [1:0]               fifo_sel_gem;               // FIFO RAM read cluster 0-3 from this fiber
@@ -4579,6 +4594,22 @@ end
       .gemB_bx0_delay  (gemB_bx0_delay[3:0]), // Out GEMA bx0 delay
       .gemB_bx0_enable (gemB_bx0_enable),     // Out GEMA bx0 enable. 1: use gemA_bx0_delay for GEMA, 0: use clct bx0
       .gemB_bx0_match  (gemB_bx0_match),      // In GEMA+CLCT BX0 match
+
+      //GEMA trigger match control
+      .match_gemA_alct_delay  (match_gemA_alct_delay[3:0]),  //Out gemA delay for gemA-ALCT match
+      .match_gemA_alct_window (match_gemA_alct_window[3:0]), //Out gemA-alct match window
+      .match_gemA_clct_window (match_gemA_clct_window[3:0]), //Out gemA-clct match window
+      .gemA_alct_match        (gemA_alct_match),             //In gemA+ALCT match
+      .gemA_clct_match        (gemA_clct_match),             //In gemA+CLCT match
+      .gemA_fiber_enable      (gemA_fiber_enablep[1:0]),     //Out gemA two fibers enabled or not
+
+      //GEMB trigger match control
+      .match_gemB_alct_delay  (match_gemB_alct_delay[3:0),    //Out gemB delay for gemB-ALCT match
+      .match_gemB_alct_window (match_gemB_alct_window[3:0]),  //Out gemB-alct match window
+      .match_gemB_clct_window (match_gemB_clct_window[3:0]),  //Out gem-clct match window
+      .gemB_alct_match        (gemB_alct_match),       // In gemB+ALCT match or not
+      .gemB_clct_match        (gemB_clct_match),      // In gemB+CLCT match or not
+      .gemB_fiber_enable      (gemB_fiber_enable),    // Out gemB two fibers enabled or not
 
       .mpc_rx_delay    (mpc_rx_delay[MXMPCDLY-1:0]), // Out  MPC response delay
       .mpc_tx_delay    (mpc_tx_delay[MXMPCDLY-1:0]), // Out  MPC transmit delay

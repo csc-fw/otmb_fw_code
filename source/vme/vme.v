@@ -666,6 +666,22 @@
   gemA_rxd_int_delay,
   gemB_rxd_int_delay,
 
+//GEMA trigger match control
+  match_gemA_alct_delay,
+  match_gemA_alct_window,
+  match_gemA_clct_window,
+  gemA_alct_match, 
+  gemA_clct_match,
+  gemA_fiber_enable,
+
+//GEMB trigger match control
+  match_gemB_alct_delay,
+  match_gemB_alct_window,
+  match_gemB_clct_window,
+  gemB_alct_match,
+  gemB_clct_match,
+  gemB_fiber_enable,
+
 // RPC VME Configuration Ports
   rpc_done,
   rpc_exists,
@@ -1576,6 +1592,8 @@
   parameter ADR_GEM_INJ_DATA          = 10'h322;
   parameter ADR_GEM_COPAD_CTRL        = 10'h324; // copad matching 
   parameter ADR_GEM_BX0_DELAY         = 10'h326;
+  parameter ADR_GEMA_TRG_CTRL         = 10'h328;
+  parameter ADR_GEMB_TRG_CTRL         = 10'h32a;
 
   //latched GEM cluster
   parameter ADR_GEMA_CLUSTER0         = 10'h340;  // GEMA cluster0 + gemA_sync, gemA_overflow
@@ -2274,6 +2292,22 @@
 
   output [3:0] gemA_rxd_int_delay; // Out gem chamber 0 (fiber0,1) bxn delay
   output [3:0] gemB_rxd_int_delay; // Out gem chamber 1 (fiber2,3) bxn delay
+
+  //GEMA trigger match control
+  output [3:0] match_gemA_alct_delay;
+  output [3:0] match_gemA_alct_window;
+  output [3:0] match_gemA_clct_window;
+  input        gemA_alct_match;
+  input        gemA_clct_match;
+  output [1:0] gemA_fiber_enable;
+
+  //GEMB trigger match control
+  output [3:0] match_gemB_alct_delay;
+  output [3:0] match_gemB_alct_window;
+  output [3:0] match_gemB_clct_window;
+  input        gemB_alct_match;
+  input        gemB_clct_match;
+  output [1:0] gemB_fiber_enable;
 
 // RPC Ports: RAT Control
   output          rpc_sync;     // Sync mode
@@ -3319,6 +3353,12 @@
   reg  [15:0] gem_bx0_delay_wr;
   wire [15:0] gem_bx0_delay_rd;
 
+  reg  [15:0] gemA_trg_ctrl_wr;
+  wire [15:0] gemA_trg_ctrl_rd;
+
+  reg  [15:0] gemB_trg_ctrl_wr;
+  wire [15:0] gemB_trg_ctrl_rd;
+
   wire [15:0] gemA_cluster_rd [MXCLUSTER_CHAMBER-1:0];
   wire [15:0] gemB_cluster_rd [MXCLUSTER_CHAMBER-1:0];
   wire [15:0] gem_copad_rd    [MXCLUSTER_CHAMBER-1:0];
@@ -3474,6 +3514,9 @@
 
   wire      wr_gem_copad_ctrl;
   wire      wr_gem_bx0_delay;
+
+  wire      wr_gemA_trg_ctrl;
+  wire      wr_gemB_trg_ctrl;
 
   //wire      wr_gemA_cluster0;
   //wire      wr_gemA_cluster1;
@@ -4098,6 +4141,8 @@
   ADR_GEM_CFG:               data_out <= gem_cfg_rd;
   ADR_GEM_TRG:               data_out <= gem_trg_rd;
   ADR_GEM_COPAD_CTRL:        data_out <= gem_copad_ctrl_rd;
+  ADR_GEMA_TRG_CTRL:         data_out <= gemA_trg_ctrl_rd;
+  ADR_GEMB_TRG_CTRL:         data_out <= gemB_trg_ctrl_rd;
   ADR_GEM_BX0_DELAY:         data_out <= gem_bx0_delay_rd;
 
   ADR_GEMA_CLUSTER0:         data_out <= gemA_cluster_rd[0];
@@ -4300,6 +4345,10 @@
   assign wr_gem_trg               =  (reg_adr==ADR_GEM_TRG                && clk_en);
   assign wr_gem_copad_ctrl        =  (reg_adr==ADR_GEM_COPAD_CTRL         && clk_en);
   assign wr_gem_bx0_delay         =  (reg_adr==ADR_GEM_BX0_DELAY          && clk_en);
+  assign wr_gemA_trg_ctrl         =  (reg_adr==ADR_GEMA_TRG_CTRL          && clk_en);
+  assign wr_gemB_trg_ctrl         =  (reg_adr==ADR_GEMB_TRG_CTRL          && clk_en);
+
+  
 
 
   //assign wr_gemA_cluster0         =  (reg_adr==ADR_GEMA_CLUSTER0          && clk_en);
@@ -8430,6 +8479,7 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 // ADR_GEM_TRG=0x318    GEM Configuration
 //------------------------------------------------------------------------------------------------------------------
 
+// not really used, Tao, 20190825
   initial begin
   gem_trg_wr[3:0]   = 4'd0; // RW GEM Trigger Delay
   gem_trg_wr[7:3]   = 4'b1111;// enable GEM fiber for triggering , initial with all GEM fiber enabled
@@ -8512,6 +8562,58 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign gem_bx0_delay_rd[ 10]      =  gemB_bx0_enable;
   assign gem_bx0_delay_rd[ 11]      =  gemB_bx0_match;
   assign gem_bx0_delay_rd[15:12]    =  gem_bx0_delay_wr[15:12];
+
+
+//------------------------------------------------------------------------------------------------------------------
+// GEMA_TRG_CTRL = 0x328 GEMA trigger match control control
+//------------------------------------------------------------------------------------------------------------------
+  initial begin
+      gemA_trg_ctrl_wr[ 3: 0]      = 4'b0;  //gemA and ALCT match trigger delay
+      gemA_trg_ctrl_wr[ 7: 4]      = 4'b0;  //gemA and ALCT match window
+      gemA_trg_ctrl_wr[11: 8]      = 4'b0;  //gemA and CLCT match window
+      gemA_trg_ctrl_wr[   12]      = 1'b0;  //gemA and ALCT match
+      gemA_trg_ctrl_wr[   13]      = 1'b0;  //gemA and CLCT match 
+      gemA_trg_ctrl_wr[15:14]      = 2'b11;  //gemA two fibers enabled or not
+  end
+
+  assign match_gemA_alct_delay            = gemA_trg_ctrl_wr[3:0];
+  assign match_gemA_alct_window           = gemA_trg_ctrl_wr[7:4];
+  assign match_gemA_clct_window           = gemA_trg_ctrl_wr[11:8];
+  assign gemA_fiber_enable                = gemA_trg_ctrl_wr[15:14];
+
+  assign gemA_trg_ctrl_rd[3:0]            = match_gemA_alct_delay;
+  assign gemA_trg_ctrl_rd[7:4]            = match_gemA_alct_window;
+  assign gemA_trg_ctrl_rd[11:8]           = match_gemA_clct_window;
+  assign gemA_trg_ctrl_rd[12]             = gemA_alct_match;
+  assign gemA_trg_ctrl_rd[13]             = gemA_clct_match;
+  assign gemA_trg_ctrl_rd[15:14]          = gemA_fiber_enable[1:0];
+
+
+//------------------------------------------------------------------------------------------------------------------
+// GEMA_TRG_CTRL = 0x32a GEMA trigger match control control
+//------------------------------------------------------------------------------------------------------------------
+  initial begin
+      gemB_trg_ctrl_wr[ 3: 0]      = 4'b0;  //gemB and ALCT match trigger delay
+      gemB_trg_ctrl_wr[ 7: 4]      = 4'b0;  //gemB and ALCT match window
+      gemB_trg_ctrl_wr[11: 8]      = 4'b0;  //gemB and CLCT match window
+      gemB_trg_ctrl_wr[   12]      = 1'b0;  //gemB and ALCT match
+      gemB_trg_ctrl_wr[   13]      = 1'b0;  //gemB and CLCT match 
+      gemB_trg_ctrl_wr[15:14]      = 2'b11; //gemB two fibers enabled or not
+  end
+
+  assign match_gemB_alct_delay            = gemB_trg_ctrl_wr[3:0];
+  assign match_gemB_alct_window           = gemB_trg_ctrl_wr[7:4];
+  assign match_gemB_clct_window           = gemB_trg_ctrl_wr[11:8];
+  assign gemB_fiber_enable                = gemB_trg_ctrl_wr[15:14];
+
+  assign gemB_trg_ctrl_rd[3:0]            = match_gemB_alct_delay;
+  assign gemB_trg_ctrl_rd[7:4]            = match_gemB_alct_window;
+  assign gemB_trg_ctrl_rd[11:8]           = match_gemB_clct_window;
+  assign gemB_trg_ctrl_rd[12]             = gemB_alct_match;
+  assign gemB_trg_ctrl_rd[13]             = gemB_clct_match;
+  assign gemB_trg_ctrl_rd[15:14]          = gemB_fiber_enable[1:0];
+
+
 //------------------------------------------------------------------------------------------------------------------
 // GEM_CLUSTERs and COPADs from 0x340 to 0x36e
 //------------------------------------------------------------------------------------------------------------------
@@ -8694,6 +8796,8 @@ always @(posedge clock_vme) begin
   if    (wr_gem_inj_data)          gem_inj_data_wr         <= d[15:0];
   if    (wr_gem_copad_ctrl)        gem_copad_ctrl_wr       <= d[15:0];
   if    (wr_gem_bx0_delay)         gem_bx0_delay_wr        <= d[15:0];
+  if    (wr_gemA_trg_ctrl)         gemA_trg_ctrl_wr        <= d[15:0];
+  if    (wr_gemB_trg_ctrl)         gemB_trg_ctrl_wr        <= d[15:0];
   if    (wr_mpc_frames_fifo_ctrl)  mpc_frames_fifo_ctrl_wr <= d[15:0];
   if    (wr_algo2016_ctrl)         algo2016_ctrl_wr        <= d[15:0];
   //if    (wr_gemA_cluster0)         gemA_cluster0_wr        <= d[15:0];

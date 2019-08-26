@@ -136,6 +136,22 @@
   gem_delay,
   gem_fiber_enable,
 
+//GEMA trigger match control
+  match_gemA_alct_delay,
+  match_gemA_alct_window,
+  match_gemA_clct_window,
+  gemA_alct_match, 
+  gemA_clct_match,
+  gemA_fiber_enable,
+
+//GEMB trigger match control
+  match_gemB_alct_delay,
+  match_gemB_alct_window,
+  match_gemB_clct_window,
+  gemB_alct_match,
+  gemB_clct_match,
+  gemB_fiber_enable,
+
 // TMB-Sequencer Pipelines
   wr_adr_xtmb,
   wr_adr_rtmb,
@@ -478,6 +494,24 @@
   input  [3:0]         gemB_bx0_delay;
   input                gemB_bx0_enable;
   output               gemB_bx0_match;
+
+  //GEMA trigger match control
+  input  [3:0]        match_gemA_alct_delay;
+  input  [3:0]        match_gemA_alct_window;
+  input  [3:0]        match_gemA_clct_window;
+  output              gemA_alct_match;
+  output              gemA_clct_match;
+  input  [1:0]        gemA_fiber_enable;
+
+  //GEMB trigger match control
+  input [3:0]         match_gemB_alct_delay;
+  input [3:0]         match_gemB_alct_window;
+  input [3:0]         match_gemB_clct_window;
+  output              gemB_alct_match;
+  output              gemB_clct_match;
+  input [1:0]         gemB_fiber_enable;
+
+
 // TMB-Sequencer Pipelines
   input  [MXBADR-1:0]  wr_adr_xtmb; // Buffer write address after drift time
   output [MXBADR-1:0]  wr_adr_rtmb; // Buffer write address at TMB matching time
@@ -1153,19 +1187,22 @@
   wire [7:0]  gemA_pipe,     gemA_srl;
   wire [7:0]  gemB_pipe,     gemB_srl;
 
-  reg  [3:0] gem_srl_adr = 0;
+  reg  [3:0] gemA_srl_adr = 0;
+  reg  [3:0] gemB_srl_adr = 0;
 
   always @(posedge clock) begin
-  gem_srl_adr <= gem_delay-1'b1;
+  gemA_srl_adr <= match_gemA_alct_delay-1'b1;
+  gemB_srl_adr <= match_gemB_alct_delay-1'b1;
   end
 
-  srl16e_bbl #(8) ugemA (.clock(clock),.ce(1'b1),.adr(gem_srl_adr),.d(gemA_vpf[7:0]),.q(gemA_srl[7:0]));
-  srl16e_bbl #(8) ugemB (.clock(clock),.ce(1'b1),.adr(gem_srl_adr),.d(gemB_vpf[7:0]),.q(gemB_srl[7:0]));
+  srl16e_bbl #(8) ugemA (.clock(clock),.ce(1'b1),.adr(gemA_srl_adr),.d(gemA_vpf[7:0]),.q(gemA_srl[7:0]));
+  srl16e_bbl #(8) ugemB (.clock(clock),.ce(1'b1),.adr(gemB_srl_adr),.d(gemB_vpf[7:0]),.q(gemB_srl[7:0]));
 
-  wire gem_ptr_is_0 = (gem_delay == 0);               // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
+  wire gemA_ptr_is_0 = (match_gemA_alct_delay == 0);               // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
+  wire gemB_ptr_is_0 = (match_gemB_alct_delay == 0);               // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
 
-  assign gemA_pipe = (gem_ptr_is_0) ? gemA_vpf : gemA_srl;  // First  GEM after pipe delay
-  assign gemB_pipe = (gem_ptr_is_0) ? gemB_vpf : gemB_srl;  // Second GEM after pipe delay
+  assign gemA_pipe = (gemA_ptr_is_0) ? gemA_vpf : gemA_srl;  // First  GEM after pipe delay
+  assign gemB_pipe = (gemB_ptr_is_0) ? gemB_vpf : gemB_srl;  // Second GEM after pipe delay
 
   wire gem_pulse = (|gemA_pipe || |gemB_pipe);
 
