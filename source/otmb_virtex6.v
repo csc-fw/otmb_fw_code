@@ -2091,65 +2091,66 @@ end
   wire [7:0] gemA_csc_cluster_me1ahs_lo [MXCLUSTER_CHAMBER-1:0]; // from 128-223
   wire [7:0] gemB_csc_cluster_me1ahs_hi [MXCLUSTER_CHAMBER-1:0]; // from 128-223
 
+  wire evenchamber = ~csc_id[0];//double check it counts from 0 or 1 in term of even and odd?????
 
   genvar iclst_csc;
   generate
   for (iclst_csc=0; iclst_csc<MXCLUSTER_CHAMBER; iclst_csc=iclst_csc+1) begin: gen_gem_csc_cluster
       cluster_to_cscwirehalfstrip #(.ICLST(iclst_csc)) ucluster_to_cscwirehalfstripA (
-	clock (clock),
+	.clock (clock),
 
-        evenchamber (evenchamber),   // even pair or not
-        gem_clct_deltahs  (gem_clct_deltahs), // matching window in halfstrip direction
-        gem_alct_deltawire(gem_alct_deltawire), // matching window in wiregroup direction
+        .evenchamber (evenchamber),   // even pair or not
+        .gem_clct_deltahs  (gem_clct_deltahs), // matching window in halfstrip direction
+        .gem_alct_deltawire(gem_alct_deltawire), // matching window in wiregroup direction
 
-        cluster0      (gemA_cluster[iclst_csc]),
-        cluster0_vpf  (gemA_cluster_vpf[iclst_csc]),// valid or not
-        cluster0_roll (gemA_cluster_roll[iclst_csc]), // 0-7 
-        cluster0_pad  (gemA_cluster_pad[iclst_csc]), // from 0-191
-        cluster0_size (gemA_cluster_size[iclst_csc]), // from 0-7, 0 means 1 gem pad
+        .cluster0      (gemA_cluster[iclst_csc]),
+        .cluster0_vpf  (gemA_cluster_vpf[iclst_csc]),// valid or not
+        .cluster0_roll (gemA_cluster_roll[iclst_csc]), // 0-7 
+        .cluster0_pad  (gemA_cluster_pad[iclst_csc]), // from 0-191
+        .cluster0_size (gemA_cluster_size[iclst_csc]), // from 0-7, 0 means 1 gem pad
 
-        cluster0_cscwire_lo (gemA_csc_cluster_cscwire_lo[iclst_csc]),
-        cluster0_cscwire_hi (gemA_csc_cluster_cscwire_hi[iclst_csc]),
-        cluster0_me1bhs_lo  (gemA_csc_cluster_me1bhs_lo[iclst_csc]), // from 0-127
-        cluster0_me1bhs_hi  (gemA_csc_cluster_me1bhs_hi[iclst_csc]), // from 0-127
-        cluster0_me1ahs_lo  (gemA_csc_cluster_me1ahs_lo[iclst_csc]), // from 128-223
-        cluster0_me1ahs_hi  (gemA_csc_cluster_me1ahs_hi[iclst_csc]), // from 128-223
-        csc_cluster0_me1a   (gemA_csc_cluster_me1a),
+        .cluster0_cscwire_lo (gemA_csc_cluster_cscwire_lo[iclst_csc]),
+        .cluster0_cscwire_hi (gemA_csc_cluster_cscwire_hi[iclst_csc]),
+        .cluster0_me1bhs_lo  (gemA_csc_cluster_me1bhs_lo[iclst_csc]), // from 0-127
+        .cluster0_me1bhs_hi  (gemA_csc_cluster_me1bhs_hi[iclst_csc]), // from 0-127
+        .cluster0_me1ahs_lo  (gemA_csc_cluster_me1ahs_lo[iclst_csc]), // from 128-223
+        .cluster0_me1ahs_hi  (gemA_csc_cluster_me1ahs_hi[iclst_csc]), // from 128-223
+        .csc_cluster0_me1a   (gemA_csc_cluster_me1a),
 
-        csc_cluster0      (gemA_csc_cluster[iclst_csc]),  
-        csc_cluster0_vpf  (gemA_csc_cluster_vpf[iclst_csc]),// valid or not
-        csc_cluster0_roll (gemA_csc_cluster_roll[iclst_csc]), // 0-7 
-        csc_cluster0_pad  (gemA_csc_cluster_pad[iclst_csc]), // from 0-191
-        csc_cluster0_size (gemA_csc_cluster_size[iclst_csc]) // from 0-7, 0 means 1 gem pad
+        .csc_cluster0      (gemA_csc_cluster[iclst_csc]),  
+        .csc_cluster0_vpf  (gemA_csc_cluster_vpf[iclst_csc]),// valid or not
+        .csc_cluster0_roll (gemA_csc_cluster_roll[iclst_csc]), // 0-7 
+        .csc_cluster0_pad  (gemA_csc_cluster_pad[iclst_csc]), // from 0-191
+        .csc_cluster0_size (gemA_csc_cluster_size[iclst_csc]) // from 0-7, 0 means 1 gem pad
 
       );
 
       cluster_to_cscwirehalfstrip #(.ICLST(iclst_csc)) ucluster_to_cscwirehalfstripB (
-	clock (clock),
+	.clock (clock),
 
-        evenchamber (evenchamber),   // even pair or not
-        gem_clct_deltahs  (gem_clct_deltahs), // matching window in halfstrip direction
-        gem_alct_deltawire(gem_alct_deltawire), // matching window in wiregroup direction
+        .evenchamber (evenchamber),   // even pair or not
+        .gem_clct_deltahs  (gem_clct_deltahs), // matching window in halfstrip direction
+        .gem_alct_deltawire(gem_alct_deltawire), // matching window in wiregroup direction
 
-        cluster0      (gemB_cluster[iclst_csc]),
-        cluster0_vpf  (gemB_cluster_vpf[iclst_csc]),// valid or not
-        cluster0_roll (gemB_cluster_roll[iclst_csc]), // 0-7 
-        cluster0_pad  (gemB_cluster_pad[iclst_csc]), // from 0-191
-        cluster0_size (gemB_cluster_size[iclst_csc]), // from 0-7, 0 means 1 gem pad
+        .cluster0      (gemB_cluster[iclst_csc]),
+        .cluster0_vpf  (gemB_cluster_vpf[iclst_csc]),// valid or not
+        .cluster0_roll (gemB_cluster_roll[iclst_csc]), // 0-7 
+        .cluster0_pad  (gemB_cluster_pad[iclst_csc]), // from 0-191
+        .cluster0_size (gemB_cluster_size[iclst_csc]), // from 0-7, 0 means 1 gem pad
 
-        cluster0_cscwire_lo (gemB_csc_cluster_cscwire_lo[iclst_csc]),
-        cluster0_cscwire_hi (gemB_csc_cluster_cscwire_hi[iclst_csc]),
-        cluster0_me1bhs_lo  (gemB_csc_cluster_me1bhs_lo[iclst_csc]), // from 0-127
-        cluster0_me1bhs_hi  (gemB_csc_cluster_me1bhs_hi[iclst_csc]), // from 0-127
-        cluster0_me1ahs_lo  (gemB_csc_cluster_me1ahs_lo[iclst_csc]), // from 128-223
-        cluster0_me1ahs_hi  (gemB_csc_cluster_me1ahs_hi[iclst_csc]), // from 128-223
-        csc_cluster0_me1a   (gemB_csc_cluster_me1a),
+        .cluster0_cscwire_lo (gemB_csc_cluster_cscwire_lo[iclst_csc]),
+        .cluster0_cscwire_hi (gemB_csc_cluster_cscwire_hi[iclst_csc]),
+        .cluster0_me1bhs_lo  (gemB_csc_cluster_me1bhs_lo[iclst_csc]), // from 0-127
+        .cluster0_me1bhs_hi  (gemB_csc_cluster_me1bhs_hi[iclst_csc]), // from 0-127
+        .cluster0_me1ahs_lo  (gemB_csc_cluster_me1ahs_lo[iclst_csc]), // from 128-223
+        .cluster0_me1ahs_hi  (gemB_csc_cluster_me1ahs_hi[iclst_csc]), // from 128-223
+        .csc_cluster0_me1a   (gemB_csc_cluster_me1a),
 
-        csc_cluster0      (gemB_csc_cluster[iclst_csc]),  
-        csc_cluster0_vpf  (gemB_csc_cluster_vpf[iclst_csc]),// valid or not
-        csc_cluster0_roll (gemB_csc_cluster_roll[iclst_csc]), // 0-7 
-        csc_cluster0_pad  (gemB_csc_cluster_pad[iclst_csc]), // from 0-191
-        csc_cluster0_size (gemB_csc_cluster_size[iclst_csc]) // from 0-7, 0 means 1 gem pad
+        .csc_cluster0      (gemB_csc_cluster[iclst_csc]),  
+        .csc_cluster0_vpf  (gemB_csc_cluster_vpf[iclst_csc]),// valid or not
+        .csc_cluster0_roll (gemB_csc_cluster_roll[iclst_csc]), // 0-7 
+        .csc_cluster0_pad  (gemB_csc_cluster_pad[iclst_csc]), // from 0-191
+        .csc_cluster0_size (gemB_csc_cluster_size[iclst_csc]) // from 0-7, 0 means 1 gem pad
 
       );
 
