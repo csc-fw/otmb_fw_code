@@ -1048,7 +1048,7 @@
   end
   endgenerate
 
-  function tree_encoder [7:0] pri_win_best;
+  function [7:0] pri_win_best;
   input [3:0] win_pri [15:0];
   wire [0:0] win_s0  [7:0];        // Tree encoder Finds best 4 of 16 window positions
   wire [1:0] win_s1  [3:0];
@@ -1104,7 +1104,7 @@
   pri_win_best = {pri_s2[0], win_s2[0]};
   endfunction
   
-  wire clct_pri_win_best = tree_encoder(win_pri);
+  wire clct_pri_win_best = pri_win_best(win_pri);
   wire [3:0] clct_win_best = clct_pri_win_best[3:0];
   wire [3:0] clct_pri_best = clct_pri_win_best[7:4];
   //wire [3:0] clct_win_best = win_s2[0];
