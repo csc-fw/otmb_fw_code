@@ -96,8 +96,10 @@ always @(posedge logic_clock) begin
         gem_pad_to_csc_hs_me1a_even[0]  <= din;  // dummy write to help Xilinx infer a dual port block RAM 
         gem_pad_to_csc_hs_me1b_odd[0]   <= din;  // dummy write to help Xilinx infer a dual port block RAM 
         gem_pad_to_csc_hs_me1b_even[0]  <= din;  // dummy write to help Xilinx infer a dual port block RAM 
-        gem_roll_to_csc_wg_odd[0]       <= din2;
-        gem_roll_to_csc_wg_even[0]      <= din2;
+        gem_roll_to_csc_wg_odd_low  [0]       <= din2;
+        gem_roll_to_csc_wg_odd_high [0]       <= din2;
+        gem_roll_to_csc_wg_even_low [0]       <= din2;
+        gem_roll_to_csc_wg_even_high[0]       <= din2;
     end
     me1a_hs_lo   <=  (evenchamber ? gem_pad_to_csc_hs_me1a_even[cluster0_pad_lo] : gem_pad_to_csc_hs_me1a_odd[cluster0_pad_lo]);
     me1a_hs_hi   <=  (evenchamber ? gem_pad_to_csc_hs_me1a_even[cluster0_pad_hi] : gem_pad_to_csc_hs_me1a_odd[cluster0_pad_hi]);
