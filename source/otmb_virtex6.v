@@ -3661,7 +3661,7 @@ end
 // GEM
   //.gemA_vpf          (gemA_vpf[7:0]),
   //.gemB_vpf          (gemB_vpf[7:0]),
-  .gemA_vpf          (gemA_csc_vpf[7:0]), //In gem cluster vpf
+  .gemA_vpf          (gemA_csc_cluster_vpf[7:0]), //In gem cluster vpf
   //GEMA trigger match control
   .match_gemA_alct_delay  (match_gemA_alct_delay[3:0]),  //In gemA delay for gemA-ALCT match
   .match_gemA_alct_window (match_gemA_alct_window[3:0]), //In gemA-alct match window
@@ -3671,7 +3671,7 @@ end
   .gemA_fiber_enable      (gemA_fiber_enable[1:0]),     //In gemA two fibers enabled or not
 
   //GEMB trigger match control
-  .gemB_vpf          (gemB_csc_vpf[7:0]),
+  .gemB_vpf          (gemB_csc_cluster_vpf[7:0]),
   .match_gemB_alct_delay  (match_gemB_alct_delay[3:0]),    //In gemB delay for gemB-ALCT match
   .match_gemB_alct_window (match_gemB_alct_window[3:0]),  //In gemB-alct match window
   .match_gemB_clct_window (match_gemB_clct_window[3:0]),  //In gem-clct match window
