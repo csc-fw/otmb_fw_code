@@ -2085,11 +2085,17 @@ end
   wire       gemA_csc_cluster_me1a      [MXCLUSTER_CHAMBER-1:0];
   wire       gemB_csc_cluster_me1a      [MXCLUSTER_CHAMBER-1:0];
   wire [5:0] gemA_csc_cluster_cscwire_lo[MXCLUSTER_CHAMBER-1:0];
+  wire [5:0] gemB_csc_cluster_cscwire_lo[MXCLUSTER_CHAMBER-1:0];
+  wire [5:0] gemA_csc_cluster_cscwire_hi[MXCLUSTER_CHAMBER-1:0];
   wire [5:0] gemB_csc_cluster_cscwire_hi[MXCLUSTER_CHAMBER-1:0];
-  wire [7:0] gemA_csc_cluster_me1bhs_lo [MXCLUSTER_CHAMBER-1:0]; // from 0-127
-  wire [7:0] gemB_csc_cluster_me1bhs_hi [MXCLUSTER_CHAMBER-1:0]; // from 0-127
-  wire [7:0] gemA_csc_cluster_me1ahs_lo [MXCLUSTER_CHAMBER-1:0]; // from 128-223
-  wire [7:0] gemB_csc_cluster_me1ahs_hi [MXCLUSTER_CHAMBER-1:0]; // from 128-223
+  wire [7:0] gemA_csc_cluster_me1bhs_lo [MXCLUSTER_CHAMBER-1:0]; // ME1b keyHS from 0-127
+  wire [7:0] gemB_csc_cluster_me1bhs_lo [MXCLUSTER_CHAMBER-1:0]; // ME1a keyHS from 128-223
+  wire [7:0] gemA_csc_cluster_me1bhs_hi [MXCLUSTER_CHAMBER-1:0]; // 
+  wire [7:0] gemB_csc_cluster_me1bhs_hi [MXCLUSTER_CHAMBER-1:0]; // 
+  wire [7:0] gemA_csc_cluster_me1ahs_lo [MXCLUSTER_CHAMBER-1:0]; // 
+  wire [7:0] gemB_csc_cluster_me1ahs_lo [MXCLUSTER_CHAMBER-1:0]; // 
+  wire [7:0] gemA_csc_cluster_me1ahs_hi [MXCLUSTER_CHAMBER-1:0]; // 
+  wire [7:0] gemB_csc_cluster_me1ahs_hi [MXCLUSTER_CHAMBER-1:0]; // 
 
   wire evenchamber = ~csc_id[0];//double check it counts from 0 or 1 in term of even and odd?????
 
@@ -2104,10 +2110,10 @@ end
         .gem_alct_deltawire(gem_alct_deltawire), // matching window in wiregroup direction
 
         .cluster0      (gemA_cluster[iclst_csc]),
-        .cluster0_vpf  (gemA_cluster_vpf[iclst_csc]),// valid or not
+        .cluster0_vpf  (gemA_vpf[iclst_csc]),// valid or not
         .cluster0_roll (gemA_cluster_roll[iclst_csc]), // 0-7 
         .cluster0_pad  (gemA_cluster_pad[iclst_csc]), // from 0-191
-        .cluster0_size (gemA_cluster_size[iclst_csc]), // from 0-7, 0 means 1 gem pad
+        .cluster0_size (gemA_cluster[iclst_csc][13:11]), // from 0-7, 0 means 1 gem pad
 
         .cluster0_cscwire_lo (gemA_csc_cluster_cscwire_lo[iclst_csc]),
         .cluster0_cscwire_hi (gemA_csc_cluster_cscwire_hi[iclst_csc]),
@@ -2133,10 +2139,10 @@ end
         .gem_alct_deltawire(gem_alct_deltawire), // matching window in wiregroup direction
 
         .cluster0      (gemB_cluster[iclst_csc]),
-        .cluster0_vpf  (gemB_cluster_vpf[iclst_csc]),// valid or not
+        .cluster0_vpf  (gemB_vpf[iclst_csc]),// valid or not
         .cluster0_roll (gemB_cluster_roll[iclst_csc]), // 0-7 
         .cluster0_pad  (gemB_cluster_pad[iclst_csc]), // from 0-191
-        .cluster0_size (gemB_cluster_size[iclst_csc]), // from 0-7, 0 means 1 gem pad
+        .cluster0_size (gemB_cluster[iclst_csc][13:11]), // from 0-7, 0 means 1 gem pad
 
         .cluster0_cscwire_lo (gemB_csc_cluster_cscwire_lo[iclst_csc]),
         .cluster0_cscwire_hi (gemB_csc_cluster_cscwire_hi[iclst_csc]),
