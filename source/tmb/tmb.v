@@ -1121,6 +1121,7 @@
       .win_pri_13   (win_pri[13]),
       .win_pri_14   (win_pri[14]),
       .win_pri_15   (win_pri[15]),
+
       .clct_win_best(clct_win_best),
       .clct_pri_best(clct_pri_best)
         );

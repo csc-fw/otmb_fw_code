@@ -24,16 +24,21 @@ module cluster_to_cscwirehalfstrip (
 
         output     [5:0]          cluster0_cscwire_lo,
         output     [5:0]          cluster0_cscwire_hi,
+        output     [5:0]          cluster0_cscwire_mi,//middle
         output     [7:0]          cluster0_me1bhs_lo, // from 0-127
         output     [7:0]          cluster0_me1bhs_hi, // from 0-127
+        output     [7:0]          cluster0_me1bhs_mi, // from 128-223, middle
         output     [7:0]          cluster0_me1ahs_lo, // from 128-223
         output     [7:0]          cluster0_me1ahs_hi, // from 128-223
+        output     [7:0]          cluster0_me1ahs_mi, // from 128-223, middle
         output                    csc_cluster0_me1a,
         output     [13:0]         csc_cluster0,  
         output                    csc_cluster0_vpf,// valid or not
         output      [2:0]         csc_cluster0_roll, // 0-7 
         output      [7:0]         csc_cluster0_pad, // from 0-191
         output      [2:0]         csc_cluster0_size // from 0-7, 0 means 1 gem pad
+
+        output reg  [MXCFEB-1:0]  gem_csc_active_cfeb_list;
 
 	//input      [13:0]         cluster0,  // save block ram resources by doing 2 lookups from each RAM in parallel
 	//input      [13:0]         cluster1, 
@@ -44,6 +49,8 @@ module cluster_to_cscwirehalfstrip (
 );
 
 parameter FALLING_EDGE = 0;
+
+parameter MXCFEB       = 7;
 
 parameter STRIPBITS    = 8;  // strip 
 parameter WIREBITS     = 7; //wiregroup
@@ -137,6 +144,10 @@ assign cluster0_me1bhs_hi   = (csc_cluster0_me1a) ? 8'd224 : ((me1b_hs_real_hi+g
 
 assign cluster0_me1ahs_lo   = (csc_cluster0_me1a) ? ((me1a_hs_real_lo > MINKEYHSME1A+gem_clct_deltahs) ? me1a_hs_real_lo-gem_clct_deltahs : MINKEYHSME1A) : 8'd224; //if not in Me1a region, give it an invalid value
 assign cluster0_me1ahs_hi   = (csc_cluster0_me1a) ? ((me1a_hs_real_hi+gem_clct_deltahs > MAXKEYHSME1A) ? MAXKEYHSME1A : me1a_hs_real_hi+gem_clct_deltahs) : 8'd224;
+
+assign cluster0_cscwire_mi = cluster0_cscwire_lo/2 + cluster0_cscwire_hi/2 + (cluster0_cscwire_lo[0] | cluster0_cscwire_hi[0]);
+assign cluster0_me1ahs_mi  = cluster0_me1ahs_lo/2 + cluster0_me1ahs_hi/2 + (cluster0_me1ahs_lo[0] | cluster0_me1ahs_hi[1]);
+assign cluster0_me1bhs_mi  = cluster0_me1bhs_lo/2 + cluster0_me1bhs_hi/2 + (cluster0_me1bhs_lo[0] | cluster0_me1bhs_hi[1]);
 
 assign csc_cluster0       = reg_cluster0;
 assign csc_cluster0_vpf   = reg_cluster0_vpf;// valid or not

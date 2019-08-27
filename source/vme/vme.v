@@ -8517,7 +8517,7 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign gem_cfg_rd [15:0] = gem_cfg_wr [15:0]; // Readback
 
 //------------------------------------------------------------------------------------------------------------------
-// ADR_GEM_CSC_CTRL_WINDOW=0x318    GEM-CSC match window in term of deltaHS and deltawire
+// ADR_GEM_CSC_MATCH_WINDOW=0x318    GEM-CSC match window in term of deltaHS and deltawire
 //------------------------------------------------------------------------------------------------------------------
 
   initial begin
@@ -8614,8 +8614,8 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 //------------------------------------------------------------------------------------------------------------------
   initial begin
       gemA_trg_ctrl_wr[ 3: 0]      = 4'b0;  //gemA and ALCT match trigger delay
-      gemA_trg_ctrl_wr[ 7: 4]      = 4'b0;  //gemA and ALCT match window
-      gemA_trg_ctrl_wr[11: 8]      = 4'b0;  //gemA and CLCT match window
+      gemA_trg_ctrl_wr[ 7: 4]      = 4'd3;  //gemA and ALCT match window
+      gemA_trg_ctrl_wr[11: 8]      = 4'd5;  //gemA and CLCT match window
       gemA_trg_ctrl_wr[   12]      = 1'b0;  //gemA and ALCT match
       gemA_trg_ctrl_wr[   13]      = 1'b0;  //gemA and CLCT match 
       gemA_trg_ctrl_wr[15:14]      = 2'b11;  //gemA two fibers enabled or not
@@ -8635,12 +8635,12 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 
 
 //------------------------------------------------------------------------------------------------------------------
-// GEMA_TRG_CTRL = 0x32a GEMA trigger match control control
+// GEMA_TRG_CTRL = 0x32a GEMB trigger match control control
 //------------------------------------------------------------------------------------------------------------------
   initial begin
       gemB_trg_ctrl_wr[ 3: 0]      = 4'b0;  //gemB and ALCT match trigger delay
-      gemB_trg_ctrl_wr[ 7: 4]      = 4'b0;  //gemB and ALCT match window
-      gemB_trg_ctrl_wr[11: 8]      = 4'b0;  //gemB and CLCT match window
+      gemB_trg_ctrl_wr[ 7: 4]      = 4'd3;  //gemB and ALCT match window
+      gemB_trg_ctrl_wr[11: 8]      = 4'd5;  //gemB and CLCT match window
       gemB_trg_ctrl_wr[   12]      = 1'b0;  //gemB and ALCT match
       gemB_trg_ctrl_wr[   13]      = 1'b0;  //gemB and CLCT match 
       gemB_trg_ctrl_wr[15:14]      = 2'b11; //gemB two fibers enabled or not

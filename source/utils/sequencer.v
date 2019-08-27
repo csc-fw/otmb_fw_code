@@ -409,6 +409,12 @@
   gemA_overflow,
   gemB_overflow,
 
+  gemA_bc0marker,
+  gemB_bc0marker,
+
+  gemA_resyncmarker,
+  gemB_resyncmarker,
+
   gemA_vpf,
   gemB_vpf,
 
@@ -416,6 +422,15 @@
   gemB_active_feb_list,
   gemcopad_active_feb_list,
 
+  gemA_anycluster_me1a,
+  gemB_anycluster_me1a,
+  gemA_anycluster_me1b,
+  gemB_anycluster_me1b,
+
+  gemA_csc_cluster_active_cfeb_list,
+  gemB_csc_cluster_active_cfeb_list,
+  gemcopad_csc_cluster_active_cfeb_list,
+  
 // External Triggers
   alct_adb_pulse_sync,
   dmb_ext_trig,
@@ -1250,6 +1265,7 @@
   parameter MXRPCB       = 1;         // Number RPC ID bits
 
 // GEM Constants
+  parameter MXVFAT       = 24;
   parameter MXGEM        = 4;         // Number of GEM fibers
   parameter MXGEMB       = 2;         // Number GEM ID bits
 
@@ -1290,6 +1306,11 @@
 
   input          gemA_overflow; // GEM A had cluster overflow
   input          gemB_overflow; // GEM B had cluster overflow
+  input          gemA_bc0marker; // GEM A bc0marker 
+  input          gemB_bc0marker; // GEM B bc0marker 
+  input          gemA_resyncmarker; // GEM A resyncmarker 
+  input          gemB_resyncmarker; // GEM B resyncmarker 
+
 
   input [7:0]    gemA_vpf; // GEM 8-bit VPF flag
   input [7:0]    gemB_vpf; // GEM 8-bit VPF flag
@@ -1298,6 +1319,14 @@
   input [23:0]   gemB_active_feb_list;  // 24 bit list of active GEMs, GEMB
   input [23:0]   gemcopad_active_feb_list;  // 24 bit list of active GEMs, from Copad
 
+  input              gemA_anycluster_me1a;
+  input              gemA_anycluster_me1b;
+  input              gemB_anycluster_me1a;
+  input              gemB_anycluster_me1b;
+
+  input [MXCFEB-1:0] gemA_csc_cluster_active_cfeb_list;
+  input [MXCFEB-1:0] gemB_csc_cluster_active_cfeb_list;
+  input [MXCFEB-1:0] gemcopad_csc_cluster_active_cfeb_list;
 // External Triggers
   input          alct_adb_pulse_sync; // ADB Test pulse trigger
   input          dmb_ext_trig;        // DMB Calibration trigger
@@ -3159,6 +3188,15 @@
 
   reg [MXCNTVME-1:0] gem_cnt [MXCNTGEM:MNCNTGEM]; //
   reg [MXCNTGEM:MNCNTGEM]  gem_cnt_en = 0;        // Counter increment enables
+//------------------------------------------------------------------------------------------------------------------
+// 0-12
+// 12 to 12+24*3
+//------------------------------------------------------------------------------------------------------------------
+  parameter ACTVFAT_CNT_START       = 12;
+  parameter GEMCSCMAP_CNT_START     = 84; // 12+24*3
+  parameter GEMCSCMATCH_CNT_START   = 109; // 84+4+7*3
+  parameter GEM_UNUSED_START        = 114; //+5
+  
 
 // Counter enable strobes
   always @(posedge clock) begin
@@ -3170,138 +3208,60 @@
     gem_cnt_en[3]  <= gemA_overflow;
     gem_cnt_en[4]  <= gemB_overflow;
 
-    gem_cnt_en[5]  <= gemA_vpf[0];
-    gem_cnt_en[6]  <= gemA_vpf[1];
-    gem_cnt_en[7]  <= gemA_vpf[2];
-    gem_cnt_en[8]  <= gemA_vpf[3];
-    gem_cnt_en[9]  <= gemA_vpf[4];
-    gem_cnt_en[10] <= gemA_vpf[5];
-    gem_cnt_en[11] <= gemA_vpf[6];
-    gem_cnt_en[12] <= gemA_vpf[7];
+    gem_cnt_en[5]  <= gemA_bc0marker;
+    gem_cnt_en[6]  <= gemB_bc0marker;
+    gem_cnt_en[7]  <= gemA_resyncmarker;
+    gem_cnt_en[8]  <= gemB_resyncmarker;
 
-    gem_cnt_en[13] <= gemB_vpf[0];
-    gem_cnt_en[14] <= gemB_vpf[1];
-    gem_cnt_en[15] <= gemB_vpf[2];
-    gem_cnt_en[16] <= gemB_vpf[3];
-    gem_cnt_en[17] <= gemB_vpf[4];
-    gem_cnt_en[18] <= gemB_vpf[5];
-    gem_cnt_en[19] <= gemB_vpf[6];
-    gem_cnt_en[20] <= gemB_vpf[7];
+    gem_cnt_en[9]  <= |gemA_vpf ;
+    gem_cnt_en[10] <= |gemB_vpf ;
+    gem_cnt_en[11] <= gem_any_match;
 
-    gem_cnt_en[21] <= gem_any_match;
 
-    gem_cnt_en[22] <= gem_match[0];
-    gem_cnt_en[23] <= gem_match[1];
-    gem_cnt_en[24] <= gem_match[2];
-    gem_cnt_en[25] <= gem_match[3];
-    gem_cnt_en[26] <= gem_match[4];
-    gem_cnt_en[27] <= gem_match[5];
-    gem_cnt_en[28] <= gem_match[6];
-    gem_cnt_en[29] <= gem_match[7];
+    gem_cnt_en[GEMCSCMAP_CNT_START   ]    <= gemA_anycluster_me1a;
+    gem_cnt_en[GEMCSCMAP_CNT_START+1 ]    <= gemB_anycluster_me1a;
+    gem_cnt_en[GEMCSCMAP_CNT_START+2 ]    <= gemA_anycluster_me1b;
+    gem_cnt_en[GEMCSCMAP_CNT_START+3 ]    <= gemB_anycluster_me1b;
 
-    gem_cnt_en[30] <= gemcopad_active_feb_list[0];
-    gem_cnt_en[31] <= gemcopad_active_feb_list[1];
-    gem_cnt_en[32] <= gemcopad_active_feb_list[2];
-    gem_cnt_en[33] <= gemcopad_active_feb_list[3];
-    gem_cnt_en[34] <= gemcopad_active_feb_list[4];
-    gem_cnt_en[35] <= gemcopad_active_feb_list[5];
-    gem_cnt_en[36] <= gemcopad_active_feb_list[6];
-    gem_cnt_en[37] <= gemcopad_active_feb_list[7];
-    gem_cnt_en[38] <= gemcopad_active_feb_list[8];
-    gem_cnt_en[39] <= gemcopad_active_feb_list[9];
-    gem_cnt_en[40] <= gemcopad_active_feb_list[10];
-    gem_cnt_en[41] <= gemcopad_active_feb_list[11];
-    gem_cnt_en[42] <= gemcopad_active_feb_list[12];
-    gem_cnt_en[43] <= gemcopad_active_feb_list[13];
-    gem_cnt_en[44] <= gemcopad_active_feb_list[14];
-    gem_cnt_en[45] <= gemcopad_active_feb_list[15];
-    gem_cnt_en[46] <= gemcopad_active_feb_list[16];
-    gem_cnt_en[47] <= gemcopad_active_feb_list[17];
-    gem_cnt_en[48] <= gemcopad_active_feb_list[18];
-    gem_cnt_en[49] <= gemcopad_active_feb_list[19];
-    gem_cnt_en[50] <= gemcopad_active_feb_list[20];
-    gem_cnt_en[51] <= gemcopad_active_feb_list[21];
-    gem_cnt_en[52] <= gemcopad_active_feb_list[22];
-    gem_cnt_en[53] <= gemcopad_active_feb_list[23];
+    gem_cnt_en[GEMCSCMATCH_CNT_START   ]    <= alct_gem;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+1 ]    <= clct_gem;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+2 ]    <= alct_clct_gem;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+3 ]    <= clct_gem_noalct;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+4 ]    <= alct_gem_noclct;
 
-    gem_cnt_en[54] <= alct_gem;
-    gem_cnt_en[55] <= clct_gem;
-    gem_cnt_en[56] <= alct_clct_gem;
-    gem_cnt_en[57] <= clct_gem_noalct;
-    gem_cnt_en[58] <= alct_gem_noclct;
-
-    // connect the unused outputs to turn the counters ON
-    gem_cnt_en[59]  <= 1'b1;
-    gem_cnt_en[60]  <= 1'b1;
-    gem_cnt_en[61]  <= 1'b1;
-    gem_cnt_en[62]  <= 1'b1;
-    gem_cnt_en[63]  <= 1'b1;
-    gem_cnt_en[64]  <= 1'b1;
-    gem_cnt_en[65]  <= 1'b1;
-    gem_cnt_en[66]  <= 1'b1;
-    gem_cnt_en[67]  <= 1'b1;
-    gem_cnt_en[68]  <= 1'b1;
-    gem_cnt_en[69]  <= 1'b1;
-    gem_cnt_en[70]  <= 1'b1;
-    gem_cnt_en[71]  <= 1'b1;
-    gem_cnt_en[72]  <= 1'b1;
-    gem_cnt_en[73]  <= 1'b1;
-    gem_cnt_en[74]  <= 1'b1;
-    gem_cnt_en[75]  <= 1'b1;
-    gem_cnt_en[76]  <= 1'b1;
-    gem_cnt_en[77]  <= 1'b1;
-    gem_cnt_en[78]  <= 1'b1;
-    gem_cnt_en[79]  <= 1'b1;
-    gem_cnt_en[80]  <= 1'b1;
-    gem_cnt_en[81]  <= 1'b1;
-    gem_cnt_en[82]  <= 1'b1;
-    gem_cnt_en[83]  <= 1'b1;
-    gem_cnt_en[84]  <= 1'b1;
-    gem_cnt_en[85]  <= 1'b1;
-    gem_cnt_en[86]  <= 1'b1;
-    gem_cnt_en[87]  <= 1'b1;
-    gem_cnt_en[88]  <= 1'b1;
-    gem_cnt_en[89]  <= 1'b1;
-    gem_cnt_en[90]  <= 1'b1;
-    gem_cnt_en[91]  <= 1'b1;
-    gem_cnt_en[92]  <= 1'b1;
-    gem_cnt_en[93]  <= 1'b1;
-    gem_cnt_en[94]  <= 1'b1;
-    gem_cnt_en[95]  <= 1'b1;
-    gem_cnt_en[96]  <= 1'b1;
-    gem_cnt_en[97]  <= 1'b1;
-    gem_cnt_en[98]  <= 1'b1;
-    gem_cnt_en[99]  <= 1'b1;
-    gem_cnt_en[100] <= 1'b1;
-    gem_cnt_en[101] <= 1'b1;
-    gem_cnt_en[102] <= 1'b1;
-    gem_cnt_en[103] <= 1'b1;
-    gem_cnt_en[104] <= 1'b1;
-    gem_cnt_en[105] <= 1'b1;
-    gem_cnt_en[106] <= 1'b1;
-    gem_cnt_en[107] <= 1'b1;
-    gem_cnt_en[108] <= 1'b1;
-    gem_cnt_en[109] <= 1'b1;
-    gem_cnt_en[110] <= 1'b1;
-    gem_cnt_en[111] <= 1'b1;
-    gem_cnt_en[112] <= 1'b1;
-    gem_cnt_en[113] <= 1'b1;
-    gem_cnt_en[114] <= 1'b1;
-    gem_cnt_en[115] <= 1'b1;
-    gem_cnt_en[116] <= 1'b1;
-    gem_cnt_en[117] <= 1'b1;
-    gem_cnt_en[118] <= 1'b1;
-    gem_cnt_en[119] <= 1'b1;
-    gem_cnt_en[120] <= 1'b1;
-    gem_cnt_en[121] <= 1'b1;
-    gem_cnt_en[122] <= 1'b1;
-    gem_cnt_en[123] <= 1'b1;
-    gem_cnt_en[124] <= 1'b1;
-    gem_cnt_en[125] <= 1'b1;
-    gem_cnt_en[126] <= 1'b1;
-    gem_cnt_en[127] <= 1'b1;
 
   end
+
+  genvar k;
+  generate
+    for (k=0; k<24; k=k+1) begin: vfatcnt
+       always @(posedge clock) begin
+            gem_cnt_en[ACTVFAT_CNT_START + k     ] <= gemA_active_feb_list[k];
+            gem_cnt_en[ACTVFAT_CNT_START + k + 24] <= gemB_active_feb_list[k];
+            gem_cnt_en[ACTVFAT_CNT_START + k + 48] <= gemcopad_active_feb_list[k];
+        end
+    end
+  endgenerate
+
+  genvar k;
+  generate
+    for (k=0; k<MXCFEB; k=k+1) begin: gemcscmapcnt
+       always @(posedge clock) begin
+            gem_cnt_en[GEMCSCMAP_CNT_START+ 4 + k           ] <= gemA_csc_cluster_active_cfeb_list[k];
+            gem_cnt_en[GEMCSCMAP_CNT_START+ 4 + k + MXCFEB  ] <= gemB_csc_cluster_active_cfeb_list[k];
+            gem_cnt_en[GEMCSCMAP_CNT_START+ 4 + k + 2*MXCFEB] <= gemcopad_csc_cluster_active_cfeb_list[k];
+        end
+    end
+  endgenerate
+
+  genvar k;
+  generate
+    for (k=GEM_UNUSED_START; k<MXCNTGEM; k=k+1) begin: gem_unused_cnt
+       always @(posedge clock) begin
+            gem_cnt_en[k] <= 1'b1;
+        end
+    end
+  endgenerate
 
 // Counter overflow disable
   wire [MXCNTGEM:MNCNTGEM]  gem_cnt_nof;

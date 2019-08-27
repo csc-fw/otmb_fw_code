@@ -2084,20 +2084,77 @@ end
 
   wire [MXCLUSTER_CHAMBER-1:0]      gemA_csc_cluster_me1a;
   wire [MXCLUSTER_CHAMBER-1:0]      gemB_csc_cluster_me1a;
+
+  wire gemA_anycluster_me1a = |(gemA_csc_cluster_me1a & gemA_csc_cluster_vpf);
+  wire gemB_anycluster_me1a = |(gemB_csc_cluster_me1a & gemB_csc_cluster_vpf);
+  wire gemA_anycluster_me1b = |(~gemA_csc_cluster_me1a & gemA_csc_cluster_vpf);
+  wire gemB_anycluster_me1b = |(~gemB_csc_cluster_me1a & gemB_csc_cluster_vpf);
+
   wire [5:0] gemA_csc_cluster_cscwire_lo[MXCLUSTER_CHAMBER-1:0];
   wire [5:0] gemB_csc_cluster_cscwire_lo[MXCLUSTER_CHAMBER-1:0];
   wire [5:0] gemA_csc_cluster_cscwire_hi[MXCLUSTER_CHAMBER-1:0];
   wire [5:0] gemB_csc_cluster_cscwire_hi[MXCLUSTER_CHAMBER-1:0];
+  wire [5:0] gemA_csc_cluster_cscwire_mi[MXCLUSTER_CHAMBER-1:0];
+  wire [5:0] gemB_csc_cluster_cscwire_mi[MXCLUSTER_CHAMBER-1:0];
   wire [7:0] gemA_csc_cluster_me1bhs_lo [MXCLUSTER_CHAMBER-1:0]; // ME1b keyHS from 0-127
   wire [7:0] gemB_csc_cluster_me1bhs_lo [MXCLUSTER_CHAMBER-1:0]; // ME1a keyHS from 128-223
   wire [7:0] gemA_csc_cluster_me1bhs_hi [MXCLUSTER_CHAMBER-1:0]; // 
   wire [7:0] gemB_csc_cluster_me1bhs_hi [MXCLUSTER_CHAMBER-1:0]; // 
+  wire [7:0] gemA_csc_cluster_me1bhs_mi [MXCLUSTER_CHAMBER-1:0]; // 
+  wire [7:0] gemB_csc_cluster_me1bhs_mi [MXCLUSTER_CHAMBER-1:0]; // 
   wire [7:0] gemA_csc_cluster_me1ahs_lo [MXCLUSTER_CHAMBER-1:0]; // 
   wire [7:0] gemB_csc_cluster_me1ahs_lo [MXCLUSTER_CHAMBER-1:0]; // 
   wire [7:0] gemA_csc_cluster_me1ahs_hi [MXCLUSTER_CHAMBER-1:0]; // 
   wire [7:0] gemB_csc_cluster_me1ahs_hi [MXCLUSTER_CHAMBER-1:0]; // 
+  wire [7:0] gemA_csc_cluster_me1ahs_mi [MXCLUSTER_CHAMBER-1:0]; // 
+  wire [7:0] gemB_csc_cluster_me1ahs_mi [MXCLUSTER_CHAMBER-1:0]; // 
 
   wire evenchamber = ~csc_id[0];//double check it counts from 0 or 1 in term of even and odd?????
+
+  wire [MXCFEB-1:0] gemA_csc_cluster_active_cfeb_list;
+  wire [MXCFEB-1:0] gemB_csc_cluster_active_cfeb_list;
+  wire [MXCFEB-1:0] gemcopad_csc_cluster_active_cfeb_list;
+  assign gemcopad_csc_cluster_active_cfeb_list = (gemA_csc_cluster_active_cfeb_list & gemB_csc_cluster_active_cfeb_list);
+
+  genvar ifeb;
+  generate
+  for (ifeb=0; ifeb<MXCFEB; ifeb=ifeb+1)     begin:   gemcsc_active_cfeb_loop
+    assign gemA_csc_cluster_active_cfeb_list[ifeb] = ( 
+          (gemA_csc_cluster_me1bhs_mi[0][7:5] == ifeb && gemA_csc_cluster_vpf[0] && gemA_csc_cluster_me1a[0] == 0) |
+          (gemA_csc_cluster_me1ahs_mi[0][7:5] == ifeb && gemA_csc_cluster_vpf[0] && gemA_csc_cluster_me1a[0] == 1) |
+          (gemA_csc_cluster_me1bhs_mi[1][7:5] == ifeb && gemA_csc_cluster_vpf[1] && gemA_csc_cluster_me1a[1] == 0) |
+          (gemA_csc_cluster_me1ahs_mi[1][7:5] == ifeb && gemA_csc_cluster_vpf[1] && gemA_csc_cluster_me1a[1] == 1) |
+          (gemA_csc_cluster_me1bhs_mi[2][7:5] == ifeb && gemA_csc_cluster_vpf[2] && gemA_csc_cluster_me1a[2] == 0) |
+          (gemA_csc_cluster_me1ahs_mi[2][7:5] == ifeb && gemA_csc_cluster_vpf[2] && gemA_csc_cluster_me1a[2] == 1) |
+          (gemA_csc_cluster_me1bhs_mi[3][7:5] == ifeb && gemA_csc_cluster_vpf[3] && gemA_csc_cluster_me1a[3] == 0) |
+          (gemA_csc_cluster_me1ahs_mi[3][7:5] == ifeb && gemA_csc_cluster_vpf[3] && gemA_csc_cluster_me1a[3] == 1) |
+          (gemA_csc_cluster_me1bhs_mi[4][7:5] == ifeb && gemA_csc_cluster_vpf[4] && gemA_csc_cluster_me1a[4] == 0) |
+          (gemA_csc_cluster_me1ahs_mi[4][7:5] == ifeb && gemA_csc_cluster_vpf[4] && gemA_csc_cluster_me1a[4] == 1) |
+          (gemA_csc_cluster_me1bhs_mi[5][7:5] == ifeb && gemA_csc_cluster_vpf[5] && gemA_csc_cluster_me1a[5] == 0) |
+          (gemA_csc_cluster_me1ahs_mi[5][7:5] == ifeb && gemA_csc_cluster_vpf[5] && gemA_csc_cluster_me1a[5] == 1) |
+          (gemA_csc_cluster_me1bhs_mi[6][7:5] == ifeb && gemA_csc_cluster_vpf[6] && gemA_csc_cluster_me1a[6] == 0) |
+          (gemA_csc_cluster_me1ahs_mi[6][7:5] == ifeb && gemA_csc_cluster_vpf[6] && gemA_csc_cluster_me1a[6] == 1) |
+          (gemA_csc_cluster_me1bhs_mi[7][7:5] == ifeb && gemA_csc_cluster_vpf[7] && gemA_csc_cluster_me1a[7] == 0) |
+          (gemA_csc_cluster_me1ahs_mi[7][7:5] == ifeb && gemA_csc_cluster_vpf[7] && gemA_csc_cluster_me1a[7] == 1) );
+    assign gemB_csc_cluster_active_cfeb_list[ifeb] = ( 
+          (gemB_csc_cluster_me1bhs_mi[0][7:5] == ifeb && gemB_csc_cluster_vpf[0] && gemB_csc_cluster_me1a[0] == 0) |
+          (gemB_csc_cluster_me1ahs_mi[0][7:5] == ifeb && gemB_csc_cluster_vpf[0] && gemB_csc_cluster_me1a[0] == 1) |
+          (gemB_csc_cluster_me1bhs_mi[1][7:5] == ifeb && gemB_csc_cluster_vpf[1] && gemB_csc_cluster_me1a[1] == 0) |
+          (gemB_csc_cluster_me1ahs_mi[1][7:5] == ifeb && gemB_csc_cluster_vpf[1] && gemB_csc_cluster_me1a[1] == 1) |
+          (gemB_csc_cluster_me1bhs_mi[2][7:5] == ifeb && gemB_csc_cluster_vpf[2] && gemB_csc_cluster_me1a[2] == 0) |
+          (gemB_csc_cluster_me1ahs_mi[2][7:5] == ifeb && gemB_csc_cluster_vpf[2] && gemB_csc_cluster_me1a[2] == 1) |
+          (gemB_csc_cluster_me1bhs_mi[3][7:5] == ifeb && gemB_csc_cluster_vpf[3] && gemB_csc_cluster_me1a[3] == 0) |
+          (gemB_csc_cluster_me1ahs_mi[3][7:5] == ifeb && gemB_csc_cluster_vpf[3] && gemB_csc_cluster_me1a[3] == 1) |
+          (gemB_csc_cluster_me1bhs_mi[4][7:5] == ifeb && gemB_csc_cluster_vpf[4] && gemB_csc_cluster_me1a[4] == 0) |
+          (gemB_csc_cluster_me1ahs_mi[4][7:5] == ifeb && gemB_csc_cluster_vpf[4] && gemB_csc_cluster_me1a[4] == 1) |
+          (gemB_csc_cluster_me1bhs_mi[5][7:5] == ifeb && gemB_csc_cluster_vpf[5] && gemB_csc_cluster_me1a[5] == 0) |
+          (gemB_csc_cluster_me1ahs_mi[5][7:5] == ifeb && gemB_csc_cluster_vpf[5] && gemB_csc_cluster_me1a[5] == 1) |
+          (gemB_csc_cluster_me1bhs_mi[6][7:5] == ifeb && gemB_csc_cluster_vpf[6] && gemB_csc_cluster_me1a[6] == 0) |
+          (gemB_csc_cluster_me1ahs_mi[6][7:5] == ifeb && gemB_csc_cluster_vpf[6] && gemB_csc_cluster_me1a[6] == 1) |
+          (gemB_csc_cluster_me1bhs_mi[7][7:5] == ifeb && gemB_csc_cluster_vpf[7] && gemB_csc_cluster_me1a[7] == 0) |
+          (gemB_csc_cluster_me1ahs_mi[7][7:5] == ifeb && gemB_csc_cluster_vpf[7] && gemB_csc_cluster_me1a[7] == 1) );
+  end
+  endgenerate
 
   genvar iclst_csc;
   generate
@@ -2117,10 +2174,13 @@ end
 
         .cluster0_cscwire_lo (gemA_csc_cluster_cscwire_lo[iclst_csc]),
         .cluster0_cscwire_hi (gemA_csc_cluster_cscwire_hi[iclst_csc]),
+        .cluster0_cscwire_mi (gemA_csc_cluster_cscwire_mi[iclst_csc]),
         .cluster0_me1bhs_lo  (gemA_csc_cluster_me1bhs_lo[iclst_csc]), // from 0-127
         .cluster0_me1bhs_hi  (gemA_csc_cluster_me1bhs_hi[iclst_csc]), // from 0-127
+        .cluster0_me1bhs_mi  (gemA_csc_cluster_me1bhs_mi[iclst_csc]), // from 0-127
         .cluster0_me1ahs_lo  (gemA_csc_cluster_me1ahs_lo[iclst_csc]), // from 128-223
         .cluster0_me1ahs_hi  (gemA_csc_cluster_me1ahs_hi[iclst_csc]), // from 128-223
+        .cluster0_me1ahs_mi  (gemA_csc_cluster_me1ahs_mi[iclst_csc]), // from 128-223
         .csc_cluster0_me1a   (gemA_csc_cluster_me1a),
 
         .csc_cluster0      (gemA_csc_cluster[iclst_csc]),  
@@ -2556,12 +2616,27 @@ end
   .gemA_overflow     (gemA_overflow), // In  GEM A received overflow flag
   .gemB_overflow     (gemB_overflow), // In  GEM B received overflow flag
 
+  .gemA_bc0marker (gemA_bc0marker),   // In GEMA bc0 marker
+  .gemB_bc0marker (gemB_bc0marker),   // In GEMB bc0 marker
+ 
+  .gemA_resyncmarker (gemA_resyncmarker), //In GEMA resync
+  .gemB_resyncmarker (gemB_resyncmarker), //In GEMB resync
+
   .gemA_vpf          (gemA_vpf),      // In  8-bit mask of valid cluster received
   .gemB_vpf          (gemB_vpf),      // In  8-bit mask of valid cluster received
 
-  .gemA_active_feb_list     (gemA_active_feb_list),
-  .gemB_active_feb_list     (gemB_active_feb_list),
-  .gemcopad_active_feb_list (gemcopad_active_feb_list),
+  .gemA_active_feb_list     (gemA_active_feb_list), //In active vfat in gemA
+  .gemB_active_feb_list     (gemB_active_feb_list), //In active vfat in gemB
+  .gemcopad_active_feb_list (gemcopad_active_feb_list), // active vfat with copad 
+
+  .gemA_anycluster_me1a    (gemA_anycluster_me1a), //In any ME1a region or not by converting gemA clusters into key HS
+  .gemB_anycluster_me1a    (gemB_anycluster_me1a), //In any ME1a region or not by converting gemA clusters into key HS
+  .gemA_anycluster_me1b    (gemA_anycluster_me1b), //In any ME1a region or not by converting gemA clusters into key HS
+  .gemB_anycluster_me1b    (gemB_anycluster_me1b), //In any ME1a region or not by converting gemA clusters into key HS
+
+  .gemA_csc_cluster_active_cfeb_list     (gemA_csc_cluster_active_cfeb_list),// In active CFEB by converting gemA clusters into CSC keyhs
+  .gemB_csc_cluster_active_cfeb_list     (gemB_csc_cluster_active_cfeb_list),// In active CFEB by converting gemA clusters into CSC keyhs
+  .gemcopad_csc_cluster_active_cfeb_list (gemcopad_csc_cluster_active_cfeb_list),// In active CFEB by converting gemA clusters into CSC keyhs
 
 // Sequencer External Triggers
   .alct_adb_pulse_sync (alct_adb_pulse_sync), // In  ADB Test pulse trigger
