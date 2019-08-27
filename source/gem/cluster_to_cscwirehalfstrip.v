@@ -38,7 +38,6 @@ module cluster_to_cscwirehalfstrip (
         output      [7:0]         csc_cluster0_pad, // from 0-191
         output      [2:0]         csc_cluster0_size // from 0-7, 0 means 1 gem pad
 
-        output reg  [MXCFEB-1:0]  gem_csc_active_cfeb_list;
 
 	//input      [13:0]         cluster0,  // save block ram resources by doing 2 lookups from each RAM in parallel
 	//input      [13:0]         cluster1, 
