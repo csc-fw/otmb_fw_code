@@ -1801,17 +1801,17 @@
   .cluster2 (gem_cluster2[igem]), // Out GEM Cluster
   .cluster3 (gem_cluster3[igem]), // Out GEM Cluster
   //VFAT number
-  .cluster0_feb (gem_cluster0_feb[igem]),
-  .cluster1_feb (gem_cluster1_feb[igem]),
+  .cluster0_feb (gem_cluster0_feb[igem]),//Out GEM vfat
+  .cluster1_feb (gem_cluster1_feb[igem]),//Out GEM vfat
   .cluster2_feb (gem_cluster2_feb[igem]),
   .cluster3_feb (gem_cluster3_feb[igem]),
 
-  .cluster0_roll (gem_cluster0_roll[igem]),// eta partition number 
+  .cluster0_roll (gem_cluster0_roll[igem]),//Out eta partition number 
   .cluster1_roll (gem_cluster1_roll[igem]),
   .cluster2_roll (gem_cluster2_roll[igem]),
   .cluster3_roll (gem_cluster3_roll[igem]),
 
-  .cluster0_pad (gem_cluster0_pad[igem]), // pad number in one roll, no VFAT boundary
+  .cluster0_pad (gem_cluster0_pad[igem]), //Out pad number in one roll, no VFAT boundary
   .cluster1_pad (gem_cluster1_pad[igem]),
   .cluster2_pad (gem_cluster2_pad[igem]),
   .cluster3_pad (gem_cluster3_pad[igem]),
@@ -2160,34 +2160,34 @@ end
   generate
   for (iclst_csc=0; iclst_csc<MXCLUSTER_CHAMBER; iclst_csc=iclst_csc+1) begin: gen_gem_csc_cluster
       cluster_to_cscwirehalfstrip #(.ICLST(iclst_csc)) ucluster_to_cscwirehalfstripA (
-	.clock (clock),
+	.clock (clock),    //in clock
 
-        .evenchamber (evenchamber),   // even pair or not
-        .gem_clct_deltahs  (gem_clct_deltahs), // matching window in halfstrip direction
-        .gem_alct_deltawire(gem_alct_deltawire), // matching window in wiregroup direction
+        .evenchamber (evenchamber),   //in,  even pair or not
+        .gem_clct_deltahs  (gem_clct_deltahs), // In matching window in halfstrip direction
+        .gem_alct_deltawire(gem_alct_deltawire), //In  matching window in wiregroup direction
 
-        .cluster0      (gemA_cluster[iclst_csc]),
-        .cluster0_vpf  (gemA_vpf[iclst_csc]),// valid or not
-        .cluster0_roll (gemA_cluster_roll[iclst_csc]), // 0-7 
-        .cluster0_pad  (gemA_cluster_pad[iclst_csc]), // from 0-191
-        .cluster0_size (gemA_cluster[iclst_csc][13:11]), // from 0-7, 0 means 1 gem pad
+        .cluster0      (gemA_cluster[iclst_csc]),//In gem cluster
+        .cluster0_vpf  (gemA_vpf[iclst_csc]),// In, cluster valid or not
+        .cluster0_roll (gemA_cluster_roll[iclst_csc]), //In clsuter roll,  0-7 
+        .cluster0_pad  (gemA_cluster_pad[iclst_csc]), // In pad in a roll, from 0-191
+        .cluster0_size (gemA_cluster[iclst_csc][13:11]), //In gem cluster size  from 0-7, 0 means 1 gem pad
 
-        .cluster0_cscwire_lo (gemA_csc_cluster_cscwire_lo[iclst_csc]),
-        .cluster0_cscwire_hi (gemA_csc_cluster_cscwire_hi[iclst_csc]),
-        .cluster0_cscwire_mi (gemA_csc_cluster_cscwire_mi[iclst_csc]),
-        .cluster0_me1bhs_lo  (gemA_csc_cluster_me1bhs_lo[iclst_csc]), // from 0-127
-        .cluster0_me1bhs_hi  (gemA_csc_cluster_me1bhs_hi[iclst_csc]), // from 0-127
-        .cluster0_me1bhs_mi  (gemA_csc_cluster_me1bhs_mi[iclst_csc]), // from 0-127
-        .cluster0_me1ahs_lo  (gemA_csc_cluster_me1ahs_lo[iclst_csc]), // from 128-223
-        .cluster0_me1ahs_hi  (gemA_csc_cluster_me1ahs_hi[iclst_csc]), // from 128-223
-        .cluster0_me1ahs_mi  (gemA_csc_cluster_me1ahs_mi[iclst_csc]), // from 128-223
-        .csc_cluster0_me1a   (gemA_csc_cluster_me1a),
+        .cluster0_cscwire_lo (gemA_csc_cluster_cscwire_lo[iclst_csc]), //Out gem roll into wire, low
+        .cluster0_cscwire_hi (gemA_csc_cluster_cscwire_hi[iclst_csc]), //Out gem roll into wire, high
+        .cluster0_cscwire_mi (gemA_csc_cluster_cscwire_mi[iclst_csc]), // Out gem roll into wire, mean
+        .cluster0_me1bhs_lo  (gemA_csc_cluster_me1bhs_lo[iclst_csc]), // Out, gem pad into me1b hs, from 0-127
+        .cluster0_me1bhs_hi  (gemA_csc_cluster_me1bhs_hi[iclst_csc]), // Out, gem pad into me1b hs from 0-127
+        .cluster0_me1bhs_mi  (gemA_csc_cluster_me1bhs_mi[iclst_csc]), // Out, gem pad into me1b hs from 0-127
+        .cluster0_me1ahs_lo  (gemA_csc_cluster_me1ahs_lo[iclst_csc]), // Out, gem pad into me1a hs from 128-223
+        .cluster0_me1ahs_hi  (gemA_csc_cluster_me1ahs_hi[iclst_csc]), // Out, gem pad into me1a hs from 128-223
+        .cluster0_me1ahs_mi  (gemA_csc_cluster_me1ahs_mi[iclst_csc]), // Out, gem pad into me1a hs from 128-223
+        .csc_cluster0_me1a   (gemA_csc_cluster_me1a[iclst_csc]),  //Out gem cluster in me1a or not
 
-        .csc_cluster0      (gemA_csc_cluster[iclst_csc]),  
-        .csc_cluster0_vpf  (gemA_csc_cluster_vpf[iclst_csc]),// valid or not
-        .csc_cluster0_roll (gemA_csc_cluster_roll[iclst_csc]), // 0-7 
-        .csc_cluster0_pad  (gemA_csc_cluster_pad[iclst_csc]), // from 0-191
-        .csc_cluster0_size (gemA_csc_cluster_size[iclst_csc]) // from 0-7, 0 means 1 gem pad
+        .csc_cluster0      (gemA_csc_cluster[iclst_csc]),  // Out, aligned gem cluster 
+        .csc_cluster0_vpf  (gemA_csc_cluster_vpf[iclst_csc]),// Out, valid or not
+        .csc_cluster0_roll (gemA_csc_cluster_roll[iclst_csc]), // Out, 0-7 
+        .csc_cluster0_pad  (gemA_csc_cluster_pad[iclst_csc]), // Out from 0-191
+        .csc_cluster0_size (gemA_csc_cluster_size[iclst_csc]) // Out from 0-7, 0 means 1 gem pad
 
       );
 
@@ -2210,7 +2210,7 @@ end
         .cluster0_me1bhs_hi  (gemB_csc_cluster_me1bhs_hi[iclst_csc]), // from 0-127
         .cluster0_me1ahs_lo  (gemB_csc_cluster_me1ahs_lo[iclst_csc]), // from 128-223
         .cluster0_me1ahs_hi  (gemB_csc_cluster_me1ahs_hi[iclst_csc]), // from 128-223
-        .csc_cluster0_me1a   (gemB_csc_cluster_me1a),
+        .csc_cluster0_me1a   (gemB_csc_cluster_me1a[iclst_csc]),
 
         .csc_cluster0      (gemB_csc_cluster[iclst_csc]),  
         .csc_cluster0_vpf  (gemB_csc_cluster_vpf[iclst_csc]),// valid or not
