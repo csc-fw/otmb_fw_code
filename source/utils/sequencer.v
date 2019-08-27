@@ -3243,7 +3243,7 @@
     end
   endgenerate
 
-  genvar k;
+  //genvar k;
   generate
     for (k=0; k<MXCFEB; k=k+1) begin: gemcscmapcnt
        always @(posedge clock) begin
@@ -3254,7 +3254,7 @@
     end
   endgenerate
 
-  genvar k;
+  //genvar k;
   generate
     for (k=GEM_UNUSED_START; k<MXCNTGEM; k=k+1) begin: gem_unused_cnt
        always @(posedge clock) begin
