@@ -268,6 +268,8 @@
   parameter CLSTBITS   =  14; // Number bits per GEM cluster
   parameter MXCLUSTER_CHAMBER       = 8; // Num GEM clusters  per Chamber
   parameter MXCLUSTER_SUPERCHAMBER  = 16; //Num GEM cluster  per superchamber
+  parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
+  parameter MXVFAT     = 24;  // VFAT number
   
 
 // RPC Constants
@@ -1500,6 +1502,10 @@
   wire  [MXGEM-1:0]     gem_link_good;                 // link stability monitor: always good, no errors since last resync
   wire  [MXGEM-1:0]     gem_link_bad;                  // link stability monitor: errors happened over 100 times
 
+
+  wire  [MXGEMHCM-1:0]    gemA_vfat_hcm[MXVFAT-1:0];
+  wire  [MXGEMHCM-1:0]    gemB_vfat_hcm[MXVFAT-1:0];
+
   wire gemA_rxd_posneg;
   wire gemB_rxd_posneg;
 
@@ -1794,6 +1800,55 @@
   .fifo_rdata (fifo_rdata_gem[igem][RAM_WIDTH_GEM-1:0]), // Out FIFO RAM read data
 
   .parity_err_gem (parity_err_gem[igem]),  // RAW hits RAM parity error
+
+  .gemA_vfat0_hcm    (gemA_vfat_hcm[ 0]), // In GEM Hot channel mask 
+  .gemA_vfat1_hcm    (gemA_vfat_hcm[ 1]), // In GEM Hot channel mask
+  .gemA_vfat2_hcm    (gemA_vfat_hcm[ 2]), // In GEM Hot channel mask
+  .gemA_vfat3_hcm    (gemA_vfat_hcm[ 3]), // In GEM Hot channel mask
+  .gemA_vfat4_hcm    (gemA_vfat_hcm[ 4]), // In GEM Hot channel mask
+  .gemA_vfat5_hcm    (gemA_vfat_hcm[ 5]), // In GEM Hot channel mask
+  .gemA_vfat6_hcm    (gemA_vfat_hcm[ 6]), // In GEM Hot channel mask
+  .gemA_vfat7_hcm    (gemA_vfat_hcm[ 7]), // In GEM Hot channel mask
+  .gemA_vfat8_hcm    (gemA_vfat_hcm[ 8]), // In GEM Hot channel mask
+  .gemA_vfat9_hcm    (gemA_vfat_hcm[ 9]), // In GEM Hot channel mask
+  .gemA_vfat10_hcm   (gemA_vfat_hcm[10]), // In GEM Hot channel mask
+  .gemA_vfat11_hcm   (gemA_vfat_hcm[11]), // In GEM Hot channel mask
+  .gemA_vfat12_hcm   (gemA_vfat_hcm[12]), // In GEM Hot channel mask
+  .gemA_vfat13_hcm   (gemA_vfat_hcm[13]), // In GEM Hot channel mask
+  .gemA_vfat14_hcm   (gemA_vfat_hcm[14]), // In GEM Hot channel mask
+  .gemA_vfat15_hcm   (gemA_vfat_hcm[15]), // In GEM Hot channel mask
+  .gemA_vfat16_hcm   (gemA_vfat_hcm[16]), // In GEM Hot channel mask
+  .gemA_vfat17_hcm   (gemA_vfat_hcm[17]), // In GEM Hot channel mask
+  .gemA_vfat18_hcm   (gemA_vfat_hcm[18]), // In GEM Hot channel mask
+  .gemA_vfat19_hcm   (gemA_vfat_hcm[19]), // In GEM Hot channel mask
+  .gemA_vfat20_hcm   (gemA_vfat_hcm[20]), // In GEM Hot channel mask
+  .gemA_vfat21_hcm   (gemA_vfat_hcm[21]), // In GEM Hot channel mask
+  .gemA_vfat22_hcm   (gemA_vfat_hcm[22]), // In GEM Hot channel mask
+  .gemA_vfat23_hcm   (gemA_vfat_hcm[23]), // In GEM Hot channel mask
+  .gemB_vfat0_hcm    (gemB_vfat_hcm[ 0]), // In GEM Hot channel mask
+  .gemB_vfat1_hcm    (gemB_vfat_hcm[ 1]), // In GEM Hot channel mask
+  .gemB_vfat2_hcm    (gemB_vfat_hcm[ 2]), // In GEM Hot channel mask
+  .gemB_vfat3_hcm    (gemB_vfat_hcm[ 3]), // In GEM Hot channel mask
+  .gemB_vfat4_hcm    (gemB_vfat_hcm[ 4]), // In GEM Hot channel mask
+  .gemB_vfat5_hcm    (gemB_vfat_hcm[ 5]), // In GEM Hot channel mask
+  .gemB_vfat6_hcm    (gemB_vfat_hcm[ 6]), // In GEM Hot channel mask
+  .gemB_vfat7_hcm    (gemB_vfat_hcm[ 7]), // In GEM Hot channel mask
+  .gemB_vfat8_hcm    (gemB_vfat_hcm[ 8]), // In GEM Hot channel mask
+  .gemB_vfat9_hcm    (gemB_vfat_hcm[ 9]), // In GEM Hot channel mask
+  .gemB_vfat10_hcm   (gemB_vfat_hcm[10]), // In GEM Hot channel mask
+  .gemB_vfat11_hcm   (gemB_vfat_hcm[11]), // In GEM Hot channel mask
+  .gemB_vfat12_hcm   (gemB_vfat_hcm[12]), // In GEM Hot channel mask
+  .gemB_vfat13_hcm   (gemB_vfat_hcm[13]), // In GEM Hot channel mask
+  .gemB_vfat14_hcm   (gemB_vfat_hcm[14]), // In GEM Hot channel mask
+  .gemB_vfat15_hcm   (gemB_vfat_hcm[15]), // In GEM Hot channel mask
+  .gemB_vfat16_hcm   (gemB_vfat_hcm[16]), // In GEM Hot channel mask
+  .gemB_vfat17_hcm   (gemB_vfat_hcm[17]), // In GEM Hot channel mask
+  .gemB_vfat18_hcm   (gemB_vfat_hcm[18]), // In GEM Hot channel mask
+  .gemB_vfat19_hcm   (gemB_vfat_hcm[19]), // In GEM Hot channel mask
+  .gemB_vfat20_hcm   (gemB_vfat_hcm[20]), // In GEM Hot channel mask
+  .gemB_vfat21_hcm   (gemB_vfat_hcm[21]), // In GEM Hot channel mask
+  .gemB_vfat22_hcm   (gemB_vfat_hcm[22]), // In GEM Hot channel mask
+  .gemB_vfat23_hcm   (gemB_vfat_hcm[23]), // In GEM Hot channel mask
 
   // GEM Cluster Outputs
   .cluster0 (gem_cluster0[igem]), // Out GEM Cluster
@@ -4813,6 +4868,57 @@ end
       .gemB_alct_match        (gemB_alct_match),       // In gemB+ALCT match or not
       .gemB_clct_match        (gemB_clct_match),      // In gemB+CLCT match or not
       .gemB_fiber_enable      (gemB_fiber_enable[1:0]),    // Out gemB two fibers enabled or not
+
+
+//GEM Hot channel mask
+      .gemA_vfat0_hcm    (gemA_vfat_hcm[ 0]), // Out GEM Hot channel mask 
+      .gemA_vfat1_hcm    (gemA_vfat_hcm[ 1]), // Out GEM Hot channel mask
+      .gemA_vfat2_hcm    (gemA_vfat_hcm[ 2]), // Out GEM Hot channel mask
+      .gemA_vfat3_hcm    (gemA_vfat_hcm[ 3]), // Out GEM Hot channel mask
+      .gemA_vfat4_hcm    (gemA_vfat_hcm[ 4]), // Out GEM Hot channel mask
+      .gemA_vfat5_hcm    (gemA_vfat_hcm[ 5]), // Out GEM Hot channel mask
+      .gemA_vfat6_hcm    (gemA_vfat_hcm[ 6]), // Out GEM Hot channel mask
+      .gemA_vfat7_hcm    (gemA_vfat_hcm[ 7]), // Out GEM Hot channel mask
+      .gemA_vfat8_hcm    (gemA_vfat_hcm[ 8]), // Out GEM Hot channel mask
+      .gemA_vfat9_hcm    (gemA_vfat_hcm[ 9]), // Out GEM Hot channel mask
+      .gemA_vfat10_hcm   (gemA_vfat_hcm[10]), // Out GEM Hot channel mask
+      .gemA_vfat11_hcm   (gemA_vfat_hcm[11]), // Out GEM Hot channel mask
+      .gemA_vfat12_hcm   (gemA_vfat_hcm[12]), // Out GEM Hot channel mask
+      .gemA_vfat13_hcm   (gemA_vfat_hcm[13]), // Out GEM Hot channel mask
+      .gemA_vfat14_hcm   (gemA_vfat_hcm[14]), // Out GEM Hot channel mask
+      .gemA_vfat15_hcm   (gemA_vfat_hcm[15]), // Out GEM Hot channel mask
+      .gemA_vfat16_hcm   (gemA_vfat_hcm[16]), // Out GEM Hot channel mask
+      .gemA_vfat17_hcm   (gemA_vfat_hcm[17]), // Out GEM Hot channel mask
+      .gemA_vfat18_hcm   (gemA_vfat_hcm[18]), // Out GEM Hot channel mask
+      .gemA_vfat19_hcm   (gemA_vfat_hcm[19]), // Out GEM Hot channel mask
+      .gemA_vfat20_hcm   (gemA_vfat_hcm[20]), // Out GEM Hot channel mask
+      .gemA_vfat21_hcm   (gemA_vfat_hcm[21]), // Out GEM Hot channel mask
+      .gemA_vfat22_hcm   (gemA_vfat_hcm[22]), // Out GEM Hot channel mask
+      .gemA_vfat23_hcm   (gemA_vfat_hcm[23]), // Out GEM Hot channel mask
+      .gemB_vfat0_hcm    (gemB_vfat_hcm[ 0]), // Out GEM Hot channel mask
+      .gemB_vfat1_hcm    (gemB_vfat_hcm[ 1]), // Out GEM Hot channel mask
+      .gemB_vfat2_hcm    (gemB_vfat_hcm[ 2]), // Out GEM Hot channel mask
+      .gemB_vfat3_hcm    (gemB_vfat_hcm[ 3]), // Out GEM Hot channel mask
+      .gemB_vfat4_hcm    (gemB_vfat_hcm[ 4]), // Out GEM Hot channel mask
+      .gemB_vfat5_hcm    (gemB_vfat_hcm[ 5]), // Out GEM Hot channel mask
+      .gemB_vfat6_hcm    (gemB_vfat_hcm[ 6]), // Out GEM Hot channel mask
+      .gemB_vfat7_hcm    (gemB_vfat_hcm[ 7]), // Out GEM Hot channel mask
+      .gemB_vfat8_hcm    (gemB_vfat_hcm[ 8]), // Out GEM Hot channel mask
+      .gemB_vfat9_hcm    (gemB_vfat_hcm[ 9]), // Out GEM Hot channel mask
+      .gemB_vfat10_hcm   (gemB_vfat_hcm[10]), // Out GEM Hot channel mask
+      .gemB_vfat11_hcm   (gemB_vfat_hcm[11]), // Out GEM Hot channel mask
+      .gemB_vfat12_hcm   (gemB_vfat_hcm[12]), // Out GEM Hot channel mask
+      .gemB_vfat13_hcm   (gemB_vfat_hcm[13]), // Out GEM Hot channel mask
+      .gemB_vfat14_hcm   (gemB_vfat_hcm[14]), // Out GEM Hot channel mask
+      .gemB_vfat15_hcm   (gemB_vfat_hcm[15]), // Out GEM Hot channel mask
+      .gemB_vfat16_hcm   (gemB_vfat_hcm[16]), // Out GEM Hot channel mask
+      .gemB_vfat17_hcm   (gemB_vfat_hcm[17]), // Out GEM Hot channel mask
+      .gemB_vfat18_hcm   (gemB_vfat_hcm[18]), // Out GEM Hot channel mask
+      .gemB_vfat19_hcm   (gemB_vfat_hcm[19]), // Out GEM Hot channel mask
+      .gemB_vfat20_hcm   (gemB_vfat_hcm[20]), // Out GEM Hot channel mask
+      .gemB_vfat21_hcm   (gemB_vfat_hcm[21]), // Out GEM Hot channel mask
+      .gemB_vfat22_hcm   (gemB_vfat_hcm[22]), // Out GEM Hot channel mask
+      .gemB_vfat23_hcm   (gemB_vfat_hcm[23]), // Out GEM Hot channel mask
 
       .mpc_rx_delay    (mpc_rx_delay[MXMPCDLY-1:0]), // Out  MPC response delay
       .mpc_tx_delay    (mpc_tx_delay[MXMPCDLY-1:0]), // Out  MPC transmit delay

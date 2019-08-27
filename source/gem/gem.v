@@ -77,6 +77,55 @@ module gem (
     input  [RAM_ADRB-1:0]  fifo_radr,  // FIFO RAM read tbin address
     input  [1:0]           fifo_sel,   // FIFO RAM read cluster address 0-7
     output [RAM_WIDTH-1:0] fifo_rdata, // FIFO RAM read data
+//GEM Hot channel mask
+    input  [15:0]        gemA_vfat0_hcm,
+    input  [15:0]        gemA_vfat1_hcm,
+    input  [15:0]        gemA_vfat2_hcm,
+    input  [15:0]        gemA_vfat3_hcm,
+    input  [15:0]        gemA_vfat4_hcm,
+    input  [15:0]        gemA_vfat5_hcm,
+    input  [15:0]        gemA_vfat6_hcm,
+    input  [15:0]        gemA_vfat7_hcm,
+    input  [15:0]        gemA_vfat8_hcm,
+    input  [15:0]        gemA_vfat9_hcm,
+    input  [15:0]        gemA_vfat10_hcm,
+    input  [15:0]        gemA_vfat11_hcm,
+    input  [15:0]        gemA_vfat12_hcm,
+    input  [15:0]        gemA_vfat13_hcm,
+    input  [15:0]        gemA_vfat14_hcm,
+    input  [15:0]        gemA_vfat15_hcm,
+    input  [15:0]        gemA_vfat16_hcm,
+    input  [15:0]        gemA_vfat17_hcm,
+    input  [15:0]        gemA_vfat18_hcm,
+    input  [15:0]        gemA_vfat19_hcm,
+    input  [15:0]        gemA_vfat20_hcm,
+    input  [15:0]        gemA_vfat21_hcm,
+    input  [15:0]        gemA_vfat22_hcm,
+    input  [15:0]        gemA_vfat23_hcm,
+    input  [15:0]        gemB_vfat0_hcm,
+    input  [15:0]        gemB_vfat1_hcm,
+    input  [15:0]        gemB_vfat2_hcm,
+    input  [15:0]        gemB_vfat3_hcm,
+    input  [15:0]        gemB_vfat4_hcm,
+    input  [15:0]        gemB_vfat5_hcm,
+    input  [15:0]        gemB_vfat6_hcm,
+    input  [15:0]        gemB_vfat7_hcm,
+    input  [15:0]        gemB_vfat8_hcm,
+    input  [15:0]        gemB_vfat9_hcm,
+    input  [15:0]        gemB_vfat10_hcm,
+    input  [15:0]        gemB_vfat11_hcm,
+    input  [15:0]        gemB_vfat12_hcm,
+    input  [15:0]        gemB_vfat13_hcm,
+    input  [15:0]        gemB_vfat14_hcm,
+    input  [15:0]        gemB_vfat15_hcm,
+    input  [15:0]        gemB_vfat16_hcm,
+    input  [15:0]        gemB_vfat17_hcm,
+    input  [15:0]        gemB_vfat18_hcm,
+    input  [15:0]        gemB_vfat19_hcm,
+    input  [15:0]        gemB_vfat20_hcm,
+    input  [15:0]        gemB_vfat21_hcm,
+    input  [15:0]        gemB_vfat22_hcm,
+    input  [15:0]        gemB_vfat23_hcm,
 
     output [MXCLST-1:0]    parity_err_gem,
 
@@ -134,6 +183,9 @@ parameter MXPAD    = 192;
 parameter MXROLL   = 8;
 parameter MXFEB    = 24;
 
+parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
+
+  
 //-------------------------------------------------------------------------------------------------------------------
 // State machine power-up reset + global reset
 //-------------------------------------------------------------------------------------------------------------------
@@ -207,6 +259,34 @@ parameter MXFEB    = 24;
 //------------------------------------------------------------------------------------------------------------------
 // Decompose packed GEM data format
 //------------------------------------------------------------------------------------------------------------------
+
+  wire is_gemA = (IGEM==1 || IGEM==0); 
+  wire [MXGEMHCM-1:0]    gem_vfat_hcm [MXFEB-1:0];
+
+  assign  gem_vfat_hcm[ 0] = (is_gemA) ? gemA_vfat0_hcm [15:0] : gemB_vfat0_hcm [15:0];
+  assign  gem_vfat_hcm[ 1] = (is_gemA) ? gemA_vfat1_hcm [15:0] : gemB_vfat1_hcm [15:0];
+  assign  gem_vfat_hcm[ 2] = (is_gemA) ? gemA_vfat2_hcm [15:0] : gemB_vfat2_hcm [15:0];
+  assign  gem_vfat_hcm[ 3] = (is_gemA) ? gemA_vfat3_hcm [15:0] : gemB_vfat3_hcm [15:0];
+  assign  gem_vfat_hcm[ 4] = (is_gemA) ? gemA_vfat4_hcm [15:0] : gemB_vfat4_hcm [15:0];
+  assign  gem_vfat_hcm[ 5] = (is_gemA) ? gemA_vfat5_hcm [15:0] : gemB_vfat5_hcm [15:0];
+  assign  gem_vfat_hcm[ 6] = (is_gemA) ? gemA_vfat6_hcm [15:0] : gemB_vfat6_hcm [15:0];
+  assign  gem_vfat_hcm[ 7] = (is_gemA) ? gemA_vfat7_hcm [15:0] : gemB_vfat7_hcm [15:0];
+  assign  gem_vfat_hcm[ 8] = (is_gemA) ? gemA_vfat8_hcm [15:0] : gemB_vfat8_hcm [15:0];
+  assign  gem_vfat_hcm[ 9] = (is_gemA) ? gemA_vfat9_hcm [15:0] : gemB_vfat9_hcm [15:0];
+  assign  gem_vfat_hcm[10] = (is_gemA) ? gemA_vfat10_hcm[15:0] : gemB_vfat10_hcm[15:0];
+  assign  gem_vfat_hcm[11] = (is_gemA) ? gemA_vfat11_hcm[15:0] : gemB_vfat11_hcm[15:0];
+  assign  gem_vfat_hcm[12] = (is_gemA) ? gemA_vfat12_hcm[15:0] : gemB_vfat12_hcm[15:0];
+  assign  gem_vfat_hcm[13] = (is_gemA) ? gemA_vfat13_hcm[15:0] : gemB_vfat13_hcm[15:0];
+  assign  gem_vfat_hcm[14] = (is_gemA) ? gemA_vfat14_hcm[15:0] : gemB_vfat14_hcm[15:0];
+  assign  gem_vfat_hcm[15] = (is_gemA) ? gemA_vfat15_hcm[15:0] : gemB_vfat15_hcm[15:0];
+  assign  gem_vfat_hcm[16] = (is_gemA) ? gemA_vfat16_hcm[15:0] : gemB_vfat16_hcm[15:0];
+  assign  gem_vfat_hcm[17] = (is_gemA) ? gemA_vfat17_hcm[15:0] : gemB_vfat17_hcm[15:0];
+  assign  gem_vfat_hcm[18] = (is_gemA) ? gemA_vfat18_hcm[15:0] : gemB_vfat18_hcm[15:0];
+  assign  gem_vfat_hcm[19] = (is_gemA) ? gemA_vfat19_hcm[15:0] : gemB_vfat19_hcm[15:0];
+  assign  gem_vfat_hcm[20] = (is_gemA) ? gemA_vfat20_hcm[15:0] : gemB_vfat20_hcm[15:0];
+  assign  gem_vfat_hcm[21] = (is_gemA) ? gemA_vfat21_hcm[15:0] : gemB_vfat21_hcm[15:0];
+  assign  gem_vfat_hcm[22] = (is_gemA) ? gemA_vfat22_hcm[15:0] : gemB_vfat22_hcm[15:0];
+  assign  gem_vfat_hcm[23] = (is_gemA) ? gemA_vfat23_hcm[15:0] : gemB_vfat23_hcm[15:0];
 
   wire [13:0] cluster     [3:0];
   wire [13:0] cluster_raw [3:0];

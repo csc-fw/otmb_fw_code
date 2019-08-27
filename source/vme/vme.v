@@ -700,6 +700,57 @@
   gemB_clct_match,
   gemB_fiber_enable,
 
+//GEM Hot channel mask
+  gemA_vfat0_hcm,
+  gemA_vfat1_hcm,
+  gemA_vfat2_hcm,
+  gemA_vfat3_hcm,
+  gemA_vfat4_hcm,
+  gemA_vfat5_hcm,
+  gemA_vfat6_hcm,
+  gemA_vfat7_hcm,
+  gemA_vfat8_hcm,
+  gemA_vfat9_hcm,
+  gemA_vfat10_hcm,
+  gemA_vfat11_hcm,
+  gemA_vfat12_hcm,
+  gemA_vfat13_hcm,
+  gemA_vfat14_hcm,
+  gemA_vfat15_hcm,
+  gemA_vfat16_hcm,
+  gemA_vfat17_hcm,
+  gemA_vfat18_hcm,
+  gemA_vfat19_hcm,
+  gemA_vfat20_hcm,
+  gemA_vfat21_hcm,
+  gemA_vfat22_hcm,
+  gemA_vfat23_hcm,
+  gemB_vfat0_hcm,
+  gemB_vfat1_hcm,
+  gemB_vfat2_hcm,
+  gemB_vfat3_hcm,
+  gemB_vfat4_hcm,
+  gemB_vfat5_hcm,
+  gemB_vfat6_hcm,
+  gemB_vfat7_hcm,
+  gemB_vfat8_hcm,
+  gemB_vfat9_hcm,
+  gemB_vfat10_hcm,
+  gemB_vfat11_hcm,
+  gemB_vfat12_hcm,
+  gemB_vfat13_hcm,
+  gemB_vfat14_hcm,
+  gemB_vfat15_hcm,
+  gemB_vfat16_hcm,
+  gemB_vfat17_hcm,
+  gemB_vfat18_hcm,
+  gemB_vfat19_hcm,
+  gemB_vfat20_hcm,
+  gemB_vfat21_hcm,
+  gemB_vfat22_hcm,
+  gemB_vfat23_hcm,
+
+
 // RPC VME Configuration Ports
   rpc_done,
   rpc_exists,
@@ -1306,6 +1357,9 @@
   parameter MXPIDB     = 4;        // Pattern ID bits
   parameter MXHITB     = 3;        // Hits on pattern bits
   parameter MXPATB     = 3+4;      // Pattern bits
+   
+  parameter MXGEMHCM   = 16;
+  parameter MXVFAT     = 24;
 
 // Raw hits RAM parameters
   parameter RAM_DEPTH  = 2048;     // Storage bx depth
@@ -1639,6 +1693,55 @@
   parameter ADR_GEM_COPAD5            = 10'h36a;  // GEMcopad 
   parameter ADR_GEM_COPAD6            = 10'h36c;  // GEMcopad 
   parameter ADR_GEM_COPAD7            = 10'h36e;  // GEMcopad 
+
+  parameter ADR_GEMA_VFAT0_HCM        = 10'h370;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMA_VFAT1_HCM        = 10'h372;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMA_VFAT2_HCM        = 10'h374;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMA_VFAT3_HCM        = 10'h376;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMA_VFAT4_HCM        = 10'h378;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMA_VFAT5_HCM        = 10'h37a;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMA_VFAT6_HCM        = 10'h37c;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMA_VFAT7_HCM        = 10'h37e;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMA_VFAT8_HCM        = 10'h380;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMA_VFAT9_HCM        = 10'h382;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMA_VFAT10_HCM       = 10'h384;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMA_VFAT11_HCM       = 10'h386;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMA_VFAT12_HCM       = 10'h388;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMA_VFAT13_HCM       = 10'h38a;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMA_VFAT14_HCM       = 10'h38c;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMA_VFAT15_HCM       = 10'h38e;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMA_VFAT16_HCM       = 10'h390;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMA_VFAT17_HCM       = 10'h392;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMA_VFAT18_HCM       = 10'h394;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMA_VFAT19_HCM       = 10'h396;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMA_VFAT20_HCM       = 10'h398;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMA_VFAT21_HCM       = 10'h39a;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMA_VFAT22_HCM       = 10'h39c;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMA_VFAT23_HCM       = 10'h39e;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMB_VFAT0_HCM        = 10'h3a0;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMB_VFAT1_HCM        = 10'h3a2;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMB_VFAT2_HCM        = 10'h3a4;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMB_VFAT3_HCM        = 10'h3a6;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMB_VFAT4_HCM        = 10'h3a8;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMB_VFAT5_HCM        = 10'h3aa;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMB_VFAT6_HCM        = 10'h3ac;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMB_VFAT7_HCM        = 10'h3ae;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMB_VFAT8_HCM        = 10'h3b0;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMB_VFAT9_HCM        = 10'h3b2;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMB_VFAT10_HCM       = 10'h3b4;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMB_VFAT11_HCM       = 10'h3b6;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMB_VFAT12_HCM       = 10'h3b8;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMB_VFAT13_HCM       = 10'h3ba;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMB_VFAT14_HCM       = 10'h3bc;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMB_VFAT15_HCM       = 10'h3be;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMB_VFAT16_HCM       = 10'h3c0;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMB_VFAT17_HCM       = 10'h3c2;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMB_VFAT18_HCM       = 10'h3c4;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMB_VFAT19_HCM       = 10'h3c6;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMB_VFAT20_HCM       = 10'h3c8;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMB_VFAT21_HCM       = 10'h3ca;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMB_VFAT22_HCM       = 10'h3cc;  // GEM VFAT hot channel mask, 16bits per VFAT
+  parameter ADR_GEMB_VFAT23_HCM       = 10'h3ce;  // GEM VFAT hot channel mask, 16bits per VFAT
 
 
   parameter ADR_ODMB                  = 10'h1EE;  // ODMB mode: various addresses are handled inside odmb_device
@@ -2188,6 +2291,7 @@
   output        gem_match_neighborPad ;
   output [3:0]  gem_match_deltaPad; 
 
+
 // Sequencer Ports: Buffer Status
   input                   wr_buf_ready;       // Write buffer is ready
   input  [MXBADR-1:0]     wr_buf_adr;         // Current address of header write buffer
@@ -2343,6 +2447,57 @@
   output       gem_me1b_match_promotequal;
   output       gem_me1a_match_promotepat;
   output       gem_me1b_match_promotepat;
+
+//GEM HOT channel mask 
+  output [MXGEMHCM-1:0]  gemA_vfat0_hcm;
+  output [MXGEMHCM-1:0]  gemA_vfat1_hcm;
+  output [MXGEMHCM-1:0]  gemA_vfat2_hcm;
+  output [MXGEMHCM-1:0]  gemA_vfat3_hcm;
+  output [MXGEMHCM-1:0]  gemA_vfat4_hcm;
+  output [MXGEMHCM-1:0]  gemA_vfat5_hcm;
+  output [MXGEMHCM-1:0]  gemA_vfat6_hcm;
+  output [MXGEMHCM-1:0]  gemA_vfat7_hcm;
+  output [MXGEMHCM-1:0]  gemA_vfat8_hcm;
+  output [MXGEMHCM-1:0]  gemA_vfat9_hcm;
+  output [MXGEMHCM-1:0]  gemA_vfat10_hcm;
+  output [MXGEMHCM-1:0]  gemA_vfat11_hcm;
+  output [MXGEMHCM-1:0]  gemA_vfat12_hcm;
+  output [MXGEMHCM-1:0]  gemA_vfat13_hcm;
+  output [MXGEMHCM-1:0]  gemA_vfat14_hcm;
+  output [MXGEMHCM-1:0]  gemA_vfat15_hcm;
+  output [MXGEMHCM-1:0]  gemA_vfat16_hcm;
+  output [MXGEMHCM-1:0]  gemA_vfat17_hcm;
+  output [MXGEMHCM-1:0]  gemA_vfat18_hcm;
+  output [MXGEMHCM-1:0]  gemA_vfat19_hcm;
+  output [MXGEMHCM-1:0]  gemA_vfat20_hcm;
+  output [MXGEMHCM-1:0]  gemA_vfat21_hcm;
+  output [MXGEMHCM-1:0]  gemA_vfat22_hcm;
+  output [MXGEMHCM-1:0]  gemA_vfat23_hcm;
+  output [MXGEMHCM-1:0]  gemB_vfat0_hcm;
+  output [MXGEMHCM-1:0]  gemB_vfat1_hcm;
+  output [MXGEMHCM-1:0]  gemB_vfat2_hcm;
+  output [MXGEMHCM-1:0]  gemB_vfat3_hcm;
+  output [MXGEMHCM-1:0]  gemB_vfat4_hcm;
+  output [MXGEMHCM-1:0]  gemB_vfat5_hcm;
+  output [MXGEMHCM-1:0]  gemB_vfat6_hcm;
+  output [MXGEMHCM-1:0]  gemB_vfat7_hcm;
+  output [MXGEMHCM-1:0]  gemB_vfat8_hcm;
+  output [MXGEMHCM-1:0]  gemB_vfat9_hcm;
+  output [MXGEMHCM-1:0]  gemB_vfat10_hcm;
+  output [MXGEMHCM-1:0]  gemB_vfat11_hcm;
+  output [MXGEMHCM-1:0]  gemB_vfat12_hcm;
+  output [MXGEMHCM-1:0]  gemB_vfat13_hcm;
+  output [MXGEMHCM-1:0]  gemB_vfat14_hcm;
+  output [MXGEMHCM-1:0]  gemB_vfat15_hcm;
+  output [MXGEMHCM-1:0]  gemB_vfat16_hcm;
+  output [MXGEMHCM-1:0]  gemB_vfat17_hcm;
+  output [MXGEMHCM-1:0]  gemB_vfat18_hcm;
+  output [MXGEMHCM-1:0]  gemB_vfat19_hcm;
+  output [MXGEMHCM-1:0]  gemB_vfat20_hcm;
+  output [MXGEMHCM-1:0]  gemB_vfat21_hcm;
+  output [MXGEMHCM-1:0]  gemB_vfat22_hcm;
+  output [MXGEMHCM-1:0]  gemB_vfat23_hcm;
+
 
 // RPC Ports: RAT Control
   output          rpc_sync;     // Sync mode
@@ -3401,6 +3556,10 @@
   wire [15:0] gemB_cluster_rd [MXCLUSTER_CHAMBER-1:0];
   wire [15:0] gem_copad_rd    [MXCLUSTER_CHAMBER-1:0];
 
+
+  reg  [15:0]  gemA_vfat_hcm_wr [MXVFAT-1:0];
+  wire [15:0]  gemA_vfat_hcm_rd [MXVFAT-1:0];
+
 //------------------------------------------------------------------------------------------------------------------
 // Address Write Decodes
 //------------------------------------------------------------------------------------------------------------------
@@ -3581,6 +3740,53 @@
   //wire      wr_gem_copad5;
   //wire      wr_gem_copad6;
   //wire      wr_gem_copad7;
+
+  wire wr_gemA_vfat0_hcm ;
+  wire wr_gemA_vfat1_hcm ;
+  wire wr_gemA_vfat2_hcm ;
+  wire wr_gemA_vfat3_hcm ;
+  wire wr_gemA_vfat4_hcm ;
+  wire wr_gemA_vfat5_hcm ;
+  wire wr_gemA_vfat6_hcm ;
+  wire wr_gemA_vfat7_hcm ;
+  wire wr_gemA_vfat8_hcm ;
+  wire wr_gemA_vfat9_hcm ;
+  wire wr_gemA_vfat10_hcm;
+  wire wr_gemA_vfat11_hcm;
+  wire wr_gemA_vfat12_hcm;
+  wire wr_gemA_vfat13_hcm;
+  wire wr_gemA_vfat14_hcm;
+  wire wr_gemA_vfat15_hcm;
+  wire wr_gemA_vfat16_hcm;
+  wire wr_gemA_vfat18_hcm;
+  wire wr_gemA_vfat19_hcm;
+  wire wr_gemA_vfat20_hcm;
+  wire wr_gemA_vfat21_hcm;
+  wire wr_gemA_vfat22_hcm;
+  wire wr_gemA_vfat23_hcm;
+  wire wr_gemB_vfat0_hcm ;
+  wire wr_gemB_vfat1_hcm ;
+  wire wr_gemB_vfat2_hcm ;
+  wire wr_gemB_vfat3_hcm ;
+  wire wr_gemB_vfat4_hcm ;
+  wire wr_gemB_vfat5_hcm ;
+  wire wr_gemB_vfat6_hcm ;
+  wire wr_gemB_vfat7_hcm ;
+  wire wr_gemB_vfat8_hcm ;
+  wire wr_gemB_vfat9_hcm ;
+  wire wr_gemB_vfat10_hcm;
+  wire wr_gemB_vfat11_hcm;
+  wire wr_gemB_vfat12_hcm;
+  wire wr_gemB_vfat13_hcm;
+  wire wr_gemB_vfat14_hcm;
+  wire wr_gemB_vfat15_hcm;
+  wire wr_gemB_vfat16_hcm;
+  wire wr_gemB_vfat18_hcm;
+  wire wr_gemB_vfat19_hcm;
+  wire wr_gemB_vfat20_hcm;
+  wire wr_gemB_vfat21_hcm;
+  wire wr_gemB_vfat22_hcm;
+  wire wr_gemB_vfat23_hcm;
 
   wire      wr_adr_cap;
 
@@ -4210,6 +4416,54 @@
   ADR_GEM_COPAD6:            data_out <= gem_copad_rd[6];
   ADR_GEM_COPAD7:            data_out <= gem_copad_rd[7];
 
+  ADR_GEMA_VFAT0_HCM:         data_out <= gemA_vfat_hcm_rd[0];
+  ADR_GEMA_VFAT1_HCM:         data_out <= gemA_vfat_hcm_rd[1];
+  ADR_GEMA_VFAT2_HCM:         data_out <= gemA_vfat_hcm_rd[2];
+  ADR_GEMA_VFAT3_HCM:         data_out <= gemA_vfat_hcm_rd[3];
+  ADR_GEMA_VFAT4_HCM:         data_out <= gemA_vfat_hcm_rd[4];
+  ADR_GEMA_VFAT5_HCM:         data_out <= gemA_vfat_hcm_rd[5];
+  ADR_GEMA_VFAT6_HCM:         data_out <= gemA_vfat_hcm_rd[6];
+  ADR_GEMA_VFAT7_HCM:         data_out <= gemA_vfat_hcm_rd[7];
+  ADR_GEMA_VFAT8_HCM:         data_out <= gemA_vfat_hcm_rd[8];
+  ADR_GEMA_VFAT9_HCM:         data_out <= gemA_vfat_hcm_rd[9];
+  ADR_GEMA_VFAT10_HCM:        data_out <= gemA_vfat_hcm_rd[10];
+  ADR_GEMA_VFAT11_HCM:        data_out <= gemA_vfat_hcm_rd[11];
+  ADR_GEMA_VFAT12_HCM:        data_out <= gemA_vfat_hcm_rd[12];
+  ADR_GEMA_VFAT13_HCM:        data_out <= gemA_vfat_hcm_rd[13];
+  ADR_GEMA_VFAT14_HCM:        data_out <= gemA_vfat_hcm_rd[14];
+  ADR_GEMA_VFAT15_HCM:        data_out <= gemA_vfat_hcm_rd[15];
+  ADR_GEMA_VFAT16_HCM:        data_out <= gemA_vfat_hcm_rd[16];
+  ADR_GEMA_VFAT17_HCM:        data_out <= gemA_vfat_hcm_rd[17];
+  ADR_GEMA_VFAT18_HCM:        data_out <= gemA_vfat_hcm_rd[18];
+  ADR_GEMA_VFAT19_HCM:        data_out <= gemA_vfat_hcm_rd[19];
+  ADR_GEMA_VFAT20_HCM:        data_out <= gemA_vfat_hcm_rd[20];
+  ADR_GEMA_VFAT21_HCM:        data_out <= gemA_vfat_hcm_rd[21];
+  ADR_GEMA_VFAT22_HCM:        data_out <= gemA_vfat_hcm_rd[22];
+  ADR_GEMA_VFAT23_HCM:        data_out <= gemA_vfat_hcm_rd[23];
+  ADR_GEMB_VFAT0_HCM:         data_out <= gemB_vfat_hcm_rd[0];
+  ADR_GEMB_VFAT1_HCM:         data_out <= gemB_vfat_hcm_rd[1];
+  ADR_GEMB_VFAT2_HCM:         data_out <= gemB_vfat_hcm_rd[2];
+  ADR_GEMB_VFAT3_HCM:         data_out <= gemB_vfat_hcm_rd[3];
+  ADR_GEMB_VFAT4_HCM:         data_out <= gemB_vfat_hcm_rd[4];
+  ADR_GEMB_VFAT5_HCM:         data_out <= gemB_vfat_hcm_rd[5];
+  ADR_GEMB_VFAT6_HCM:         data_out <= gemB_vfat_hcm_rd[6];
+  ADR_GEMB_VFAT7_HCM:         data_out <= gemB_vfat_hcm_rd[7];
+  ADR_GEMB_VFAT8_HCM:         data_out <= gemB_vfat_hcm_rd[8];
+  ADR_GEMB_VFAT9_HCM:         data_out <= gemB_vfat_hcm_rd[9];
+  ADR_GEMB_VFAT10_HCM:        data_out <= gemB_vfat_hcm_rd[10];
+  ADR_GEMB_VFAT11_HCM:        data_out <= gemB_vfat_hcm_rd[11];
+  ADR_GEMB_VFAT12_HCM:        data_out <= gemB_vfat_hcm_rd[12];
+  ADR_GEMB_VFAT13_HCM:        data_out <= gemB_vfat_hcm_rd[13];
+  ADR_GEMB_VFAT14_HCM:        data_out <= gemB_vfat_hcm_rd[14];
+  ADR_GEMB_VFAT15_HCM:        data_out <= gemB_vfat_hcm_rd[15];
+  ADR_GEMB_VFAT16_HCM:        data_out <= gemB_vfat_hcm_rd[16];
+  ADR_GEMB_VFAT17_HCM:        data_out <= gemB_vfat_hcm_rd[17];
+  ADR_GEMB_VFAT18_HCM:        data_out <= gemB_vfat_hcm_rd[18];
+  ADR_GEMB_VFAT19_HCM:        data_out <= gemB_vfat_hcm_rd[19];
+  ADR_GEMB_VFAT20_HCM:        data_out <= gemB_vfat_hcm_rd[20];
+  ADR_GEMB_VFAT21_HCM:        data_out <= gemB_vfat_hcm_rd[21];
+  ADR_GEMB_VFAT22_HCM:        data_out <= gemB_vfat_hcm_rd[22];
+  ADR_GEMB_VFAT23_HCM:        data_out <= gemB_vfat_hcm_rd[23];
 
   ADR_ODMB:                  data_out <= odmb_data;
 
@@ -4390,6 +4644,54 @@
   assign wr_gem_csc_match_ctrl    =  (reg_adr==ADR_GEM_CSC_MATCH_CTRL     && clk_en);
 
   
+  assign wr_gemA_vfat0_hcm        =  (reg_adr==ADR_GEMA_VFAT0_HCM          && clk_en);
+  assign wr_gemA_vfat1_hcm        =  (reg_adr==ADR_GEMA_VFAT1_HCM          && clk_en);
+  assign wr_gemA_vfat2_hcm        =  (reg_adr==ADR_GEMA_VFAT2_HCM          && clk_en);
+  assign wr_gemA_vfat3_hcm        =  (reg_adr==ADR_GEMA_VFAT3_HCM          && clk_en);
+  assign wr_gemA_vfat4_hcm        =  (reg_adr==ADR_GEMA_VFAT4_HCM          && clk_en);
+  assign wr_gemA_vfat5_hcm        =  (reg_adr==ADR_GEMA_VFAT5_HCM          && clk_en);
+  assign wr_gemA_vfat6_hcm        =  (reg_adr==ADR_GEMA_VFAT6_HCM          && clk_en);
+  assign wr_gemA_vfat7_hcm        =  (reg_adr==ADR_GEMA_VFAT7_HCM          && clk_en);
+  assign wr_gemA_vfat8_hcm        =  (reg_adr==ADR_GEMA_VFAT8_HCM          && clk_en);
+  assign wr_gemA_vfat9_hcm        =  (reg_adr==ADR_GEMA_VFAT9_HCM          && clk_en);
+  assign wr_gemA_vfat10_hcm       =  (reg_adr==ADR_GEMA_VFAT10_HCM         && clk_en);
+  assign wr_gemA_vfat11_hcm       =  (reg_adr==ADR_GEMA_VFAT11_HCM         && clk_en);
+  assign wr_gemA_vfat12_hcm       =  (reg_adr==ADR_GEMA_VFAT12_HCM         && clk_en);
+  assign wr_gemA_vfat13_hcm       =  (reg_adr==ADR_GEMA_VFAT13_HCM         && clk_en);
+  assign wr_gemA_vfat14_hcm       =  (reg_adr==ADR_GEMA_VFAT14_HCM         && clk_en);
+  assign wr_gemA_vfat15_hcm       =  (reg_adr==ADR_GEMA_VFAT15_HCM         && clk_en);
+  assign wr_gemA_vfat16_hcm       =  (reg_adr==ADR_GEMA_VFAT16_HCM         && clk_en);
+  assign wr_gemA_vfat17_hcm       =  (reg_adr==ADR_GEMA_VFAT17_HCM         && clk_en);
+  assign wr_gemA_vfat18_hcm       =  (reg_adr==ADR_GEMA_VFAT18_HCM         && clk_en);
+  assign wr_gemA_vfat19_hcm       =  (reg_adr==ADR_GEMA_VFAT19_HCM         && clk_en);
+  assign wr_gemA_vfat20_hcm       =  (reg_adr==ADR_GEMA_VFAT20_HCM         && clk_en);
+  assign wr_gemA_vfat21_hcm       =  (reg_adr==ADR_GEMA_VFAT21_HCM         && clk_en);
+  assign wr_gemA_vfat22_hcm       =  (reg_adr==ADR_GEMA_VFAT22_HCM         && clk_en);
+  assign wr_gemA_vfat23_hcm       =  (reg_adr==ADR_GEMA_VFAT23_HCM         && clk_en);
+  assign wr_gemB_vfat0_hcm        =  (reg_adr==ADR_GEMB_VFAT0_HCM          && clk_en);
+  assign wr_gemB_vfat1_hcm        =  (reg_adr==ADR_GEMB_VFAT1_HCM          && clk_en);
+  assign wr_gemB_vfat2_hcm        =  (reg_adr==ADR_GEMB_VFAT2_HCM          && clk_en);
+  assign wr_gemB_vfat3_hcm        =  (reg_adr==ADR_GEMB_VFAT3_HCM          && clk_en);
+  assign wr_gemB_vfat4_hcm        =  (reg_adr==ADR_GEMB_VFAT4_HCM          && clk_en);
+  assign wr_gemB_vfat5_hcm        =  (reg_adr==ADR_GEMB_VFAT5_HCM          && clk_en);
+  assign wr_gemB_vfat6_hcm        =  (reg_adr==ADR_GEMB_VFAT6_HCM          && clk_en);
+  assign wr_gemB_vfat7_hcm        =  (reg_adr==ADR_GEMB_VFAT7_HCM          && clk_en);
+  assign wr_gemB_vfat8_hcm        =  (reg_adr==ADR_GEMB_VFAT8_HCM          && clk_en);
+  assign wr_gemB_vfat9_hcm        =  (reg_adr==ADR_GEMB_VFAT9_HCM          && clk_en);
+  assign wr_gemB_vfat10_hcm       =  (reg_adr==ADR_GEMB_VFAT10_HCM         && clk_en);
+  assign wr_gemB_vfat11_hcm       =  (reg_adr==ADR_GEMB_VFAT11_HCM         && clk_en);
+  assign wr_gemB_vfat12_hcm       =  (reg_adr==ADR_GEMB_VFAT12_HCM         && clk_en);
+  assign wr_gemB_vfat13_hcm       =  (reg_adr==ADR_GEMB_VFAT13_HCM         && clk_en);
+  assign wr_gemB_vfat14_hcm       =  (reg_adr==ADR_GEMB_VFAT14_HCM         && clk_en);
+  assign wr_gemB_vfat15_hcm       =  (reg_adr==ADR_GEMB_VFAT15_HCM         && clk_en);
+  assign wr_gemB_vfat16_hcm       =  (reg_adr==ADR_GEMB_VFAT16_HCM         && clk_en);
+  assign wr_gemB_vfat17_hcm       =  (reg_adr==ADR_GEMB_VFAT17_HCM         && clk_en);
+  assign wr_gemB_vfat18_hcm       =  (reg_adr==ADR_GEMB_VFAT18_HCM         && clk_en);
+  assign wr_gemB_vfat19_hcm       =  (reg_adr==ADR_GEMB_VFAT19_HCM         && clk_en);
+  assign wr_gemB_vfat20_hcm       =  (reg_adr==ADR_GEMB_VFAT20_HCM         && clk_en);
+  assign wr_gemB_vfat21_hcm       =  (reg_adr==ADR_GEMB_VFAT21_HCM         && clk_en);
+  assign wr_gemB_vfat22_hcm       =  (reg_adr==ADR_GEMB_VFAT22_HCM         && clk_en);
+  assign wr_gemB_vfat23_hcm       =  (reg_adr==ADR_GEMB_VFAT23_HCM         && clk_en);
 
 
   //assign wr_gemA_cluster0         =  (reg_adr==ADR_GEMA_CLUSTER0          && clk_en);
@@ -8733,6 +9035,70 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign gemB_cluster_rd[0][15]           = gemB_sync_vme;
   assign gem_copad_rd[0][14]              = gems_sync_vme;
 
+
+  genvar k;
+  generate
+    for (k=0; k<MXVFAT; k=k+1) begin: gem_vfat_hcm
+        initial begin
+            gemA_vfat_hcm_wr[k] = 16'hFFFF; //enable all channels by default
+            gemB_vfat_hcm_wr[k] = 16'hFFFF; //enable all channels by default
+        end
+        assign gemA_vfat_hcm_rd[k] = gemA_vfat_hcm_wr[k][15:0];
+        assign gemB_vfat_hcm_rd[k] = gemB_vfat_hcm_wr[k][15:0];
+    end
+  endgenerate
+
+
+  assign gemA_vfat0_hcm  =  gemA_vfat_hcm_wr[ 0][15:0];
+  assign gemA_vfat1_hcm  =  gemA_vfat_hcm_wr[ 1][15:0];
+  assign gemA_vfat2_hcm  =  gemA_vfat_hcm_wr[ 2][15:0];
+  assign gemA_vfat3_hcm  =  gemA_vfat_hcm_wr[ 3][15:0];
+  assign gemA_vfat4_hcm  =  gemA_vfat_hcm_wr[ 4][15:0];
+  assign gemA_vfat5_hcm  =  gemA_vfat_hcm_wr[ 5][15:0];
+  assign gemA_vfat6_hcm  =  gemA_vfat_hcm_wr[ 6][15:0];
+  assign gemA_vfat7_hcm  =  gemA_vfat_hcm_wr[ 7][15:0];
+  assign gemA_vfat8_hcm  =  gemA_vfat_hcm_wr[ 8][15:0];
+  assign gemA_vfat9_hcm  =  gemA_vfat_hcm_wr[ 9][15:0];
+  assign gemA_vfat10_hcm =  gemA_vfat_hcm_wr[10][15:0];
+  assign gemA_vfat11_hcm =  gemA_vfat_hcm_wr[11][15:0];
+  assign gemA_vfat12_hcm =  gemA_vfat_hcm_wr[12][15:0];
+  assign gemA_vfat13_hcm =  gemA_vfat_hcm_wr[13][15:0];
+  assign gemA_vfat14_hcm =  gemA_vfat_hcm_wr[14][15:0];
+  assign gemA_vfat15_hcm =  gemA_vfat_hcm_wr[15][15:0];
+  assign gemA_vfat16_hcm =  gemA_vfat_hcm_wr[16][15:0];
+  assign gemA_vfat17_hcm =  gemA_vfat_hcm_wr[17][15:0];
+  assign gemA_vfat18_hcm =  gemA_vfat_hcm_wr[18][15:0];
+  assign gemA_vfat19_hcm =  gemA_vfat_hcm_wr[19][15:0];
+  assign gemA_vfat20_hcm =  gemA_vfat_hcm_wr[20][15:0];
+  assign gemA_vfat21_hcm =  gemA_vfat_hcm_wr[21][15:0];
+  assign gemA_vfat22_hcm =  gemA_vfat_hcm_wr[22][15:0];
+  assign gemA_vfat23_hcm =  gemA_vfat_hcm_wr[23][15:0];
+  assign gemB_vfat0_hcm  =  gemB_vfat_hcm_wr[ 0][15:0];
+  assign gemB_vfat1_hcm  =  gemB_vfat_hcm_wr[ 1][15:0];
+  assign gemB_vfat2_hcm  =  gemB_vfat_hcm_wr[ 2][15:0];
+  assign gemB_vfat3_hcm  =  gemB_vfat_hcm_wr[ 3][15:0];
+  assign gemB_vfat4_hcm  =  gemB_vfat_hcm_wr[ 4][15:0];
+  assign gemB_vfat5_hcm  =  gemB_vfat_hcm_wr[ 5][15:0];
+  assign gemB_vfat6_hcm  =  gemB_vfat_hcm_wr[ 6][15:0];
+  assign gemB_vfat7_hcm  =  gemB_vfat_hcm_wr[ 7][15:0];
+  assign gemB_vfat8_hcm  =  gemB_vfat_hcm_wr[ 8][15:0];
+  assign gemB_vfat9_hcm  =  gemB_vfat_hcm_wr[ 9][15:0];
+  assign gemB_vfat10_hcm =  gemB_vfat_hcm_wr[10][15:0];
+  assign gemB_vfat11_hcm =  gemB_vfat_hcm_wr[11][15:0];
+  assign gemB_vfat12_hcm =  gemB_vfat_hcm_wr[12][15:0];
+  assign gemB_vfat13_hcm =  gemB_vfat_hcm_wr[13][15:0];
+  assign gemB_vfat14_hcm =  gemB_vfat_hcm_wr[14][15:0];
+  assign gemB_vfat15_hcm =  gemB_vfat_hcm_wr[15][15:0];
+  assign gemB_vfat16_hcm =  gemB_vfat_hcm_wr[16][15:0];
+  assign gemB_vfat17_hcm =  gemB_vfat_hcm_wr[17][15:0];
+  assign gemB_vfat18_hcm =  gemB_vfat_hcm_wr[18][15:0];
+  assign gemB_vfat19_hcm =  gemB_vfat_hcm_wr[19][15:0];
+  assign gemB_vfat20_hcm =  gemB_vfat_hcm_wr[20][15:0];
+  assign gemB_vfat21_hcm =  gemB_vfat_hcm_wr[21][15:0];
+  assign gemB_vfat22_hcm =  gemB_vfat_hcm_wr[22][15:0];
+  assign gemB_vfat23_hcm =  gemB_vfat_hcm_wr[23][15:0];
+
+  wire      wr_adr_cap;
 //------------------------------------------------------------------------------------------------------------------
 // VME Write-Registers latch data when addressed + latch power-up defaults
 //------------------------------------------------------------------------------------------------------------------
@@ -8878,6 +9244,55 @@ always @(posedge clock_vme) begin
   if    (wr_gem_bx0_delay)         gem_bx0_delay_wr        <= d[15:0];
   if    (wr_gemA_trg_ctrl)         gemA_trg_ctrl_wr        <= d[15:0];
   if    (wr_gemB_trg_ctrl)         gemB_trg_ctrl_wr        <= d[15:0];
+  if    (gemA_vfat0_hcm  )         gemA_vfat_hcm_wr[ 0]    <= d[15:0];
+  if    (gemA_vfat1_hcm  )         gemA_vfat_hcm_wr[ 1]    <= d[15:0];
+  if    (gemA_vfat2_hcm  )         gemA_vfat_hcm_wr[ 2]    <= d[15:0];
+  if    (gemA_vfat3_hcm  )         gemA_vfat_hcm_wr[ 3]    <= d[15:0];
+  if    (gemA_vfat4_hcm  )         gemA_vfat_hcm_wr[ 4]    <= d[15:0];
+  if    (gemA_vfat5_hcm  )         gemA_vfat_hcm_wr[ 5]    <= d[15:0];
+  if    (gemA_vfat6_hcm  )         gemA_vfat_hcm_wr[ 6]    <= d[15:0];
+  if    (gemA_vfat7_hcm  )         gemA_vfat_hcm_wr[ 7]    <= d[15:0];
+  if    (gemA_vfat8_hcm  )         gemA_vfat_hcm_wr[ 8]    <= d[15:0];
+  if    (gemA_vfat9_hcm  )         gemA_vfat_hcm_wr[ 9]    <= d[15:0];
+  if    (gemA_vfat10_hcm )         gemA_vfat_hcm_wr[10]    <= d[15:0];
+  if    (gemA_vfat11_hcm )         gemA_vfat_hcm_wr[11]    <= d[15:0];
+  if    (gemA_vfat12_hcm )         gemA_vfat_hcm_wr[12]    <= d[15:0];
+  if    (gemA_vfat13_hcm )         gemA_vfat_hcm_wr[13]    <= d[15:0];
+  if    (gemA_vfat14_hcm )         gemA_vfat_hcm_wr[14]    <= d[15:0];
+  if    (gemA_vfat15_hcm )         gemA_vfat_hcm_wr[15]    <= d[15:0];
+  if    (gemA_vfat16_hcm )         gemA_vfat_hcm_wr[16]    <= d[15:0];
+  if    (gemA_vfat17_hcm )         gemA_vfat_hcm_wr[17]    <= d[15:0];
+  if    (gemA_vfat18_hcm )         gemA_vfat_hcm_wr[18]    <= d[15:0];
+  if    (gemA_vfat19_hcm )         gemA_vfat_hcm_wr[19]    <= d[15:0];
+  if    (gemA_vfat20_hcm )         gemA_vfat_hcm_wr[20]    <= d[15:0];
+  if    (gemA_vfat21_hcm )         gemA_vfat_hcm_wr[21]    <= d[15:0];
+  if    (gemA_vfat22_hcm )         gemA_vfat_hcm_wr[22]    <= d[15:0];
+  if    (gemA_vfat23_hcm )         gemA_vfat_hcm_wr[23]    <= d[15:0];
+  if    (gemB_vfat0_hcm  )         gemB_vfat_hcm_wr[ 0]    <= d[15:0];
+  if    (gemB_vfat1_hcm  )         gemB_vfat_hcm_wr[ 1]    <= d[15:0];
+  if    (gemB_vfat2_hcm  )         gemB_vfat_hcm_wr[ 2]    <= d[15:0];
+  if    (gemB_vfat3_hcm  )         gemB_vfat_hcm_wr[ 3]    <= d[15:0];
+  if    (gemB_vfat4_hcm  )         gemB_vfat_hcm_wr[ 4]    <= d[15:0];
+  if    (gemB_vfat5_hcm  )         gemB_vfat_hcm_wr[ 5]    <= d[15:0];
+  if    (gemB_vfat6_hcm  )         gemB_vfat_hcm_wr[ 6]    <= d[15:0];
+  if    (gemB_vfat7_hcm  )         gemB_vfat_hcm_wr[ 7]    <= d[15:0];
+  if    (gemB_vfat8_hcm  )         gemB_vfat_hcm_wr[ 8]    <= d[15:0];
+  if    (gemB_vfat9_hcm  )         gemB_vfat_hcm_wr[ 9]    <= d[15:0];
+  if    (gemB_vfat10_hcm )         gemB_vfat_hcm_wr[10]    <= d[15:0];
+  if    (gemB_vfat11_hcm )         gemB_vfat_hcm_wr[11]    <= d[15:0];
+  if    (gemB_vfat12_hcm )         gemB_vfat_hcm_wr[12]    <= d[15:0];
+  if    (gemB_vfat13_hcm )         gemB_vfat_hcm_wr[13]    <= d[15:0];
+  if    (gemB_vfat14_hcm )         gemB_vfat_hcm_wr[14]    <= d[15:0];
+  if    (gemB_vfat15_hcm )         gemB_vfat_hcm_wr[15]    <= d[15:0];
+  if    (gemB_vfat16_hcm )         gemB_vfat_hcm_wr[16]    <= d[15:0];
+  if    (gemB_vfat17_hcm )         gemB_vfat_hcm_wr[17]    <= d[15:0];
+  if    (gemB_vfat18_hcm )         gemB_vfat_hcm_wr[18]    <= d[15:0];
+  if    (gemB_vfat19_hcm )         gemB_vfat_hcm_wr[19]    <= d[15:0];
+  if    (gemB_vfat20_hcm )         gemB_vfat_hcm_wr[20]    <= d[15:0];
+  if    (gemB_vfat21_hcm )         gemB_vfat_hcm_wr[21]    <= d[15:0];
+  if    (gemB_vfat22_hcm )         gemB_vfat_hcm_wr[22]    <= d[15:0];
+  if    (gemB_vfat23_hcm )         gemB_vfat_hcm_wr[23]    <= d[15:0];
+
   if    (wr_mpc_frames_fifo_ctrl)  mpc_frames_fifo_ctrl_wr <= d[15:0];
   if    (wr_algo2016_ctrl)         algo2016_ctrl_wr        <= d[15:0];
   //if    (wr_gemA_cluster0)         gemA_cluster0_wr        <= d[15:0];
