@@ -4745,9 +4745,6 @@
   //assign wr_gem_copad5            =  (reg_adr==ADR_GEM_COPAD5             && clk_en);
   //assign wr_gem_copad6            =  (reg_adr==ADR_GEM_COPAD6             && clk_en);
   //assign wr_gem_copad7            =  (reg_adr==ADR_GEM_COPAD7             && clk_en);
-  //reg gemA_cluster0_wr[15:0];
-  //reg gemB_cluster0_wr[15:0];
-  //reg gem_copad0_wr[15:0];
 
   assign wr_adr_cap               =  (adr_cap);
 
@@ -9137,7 +9134,6 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   //assign gemB_vfat22_hcm =  gemB_vfat_hcm_wr[22][15:0];
   //assign gemB_vfat23_hcm =  gemB_vfat_hcm_wr[23][15:0];
 
-  wire      wr_adr_cap;
 //------------------------------------------------------------------------------------------------------------------
 // VME Write-Registers latch data when addressed + latch power-up defaults
 //------------------------------------------------------------------------------------------------------------------
