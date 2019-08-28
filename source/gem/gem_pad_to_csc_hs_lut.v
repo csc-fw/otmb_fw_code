@@ -1,4 +1,63 @@
+
+module gem_pad_to_csc_hs_lut(
+
+   input          clock,
+   input          wen, // write enable
+   input  [7:0]   w_adr, // write address
+   input  [7:0]   w_data, // write data
+
+   input          renodd,
+   input          reneven,
+
+   input  [7:0]   me1a_r_adr1, 
+   output [7:0]   me1a_r_data1, 
+   input  [7:0]   me1a_r_adr2, 
+   output [7:0]   me1a_r_data2, 
+   input  [7:0]   me1b_r_adr1, 
+   output [7:0]   me1b_r_data1, 
+   input  [7:0]   me1b_r_adr2, 
+   output [7:0]   me1b_r_data2 
+
+
+)
+
+
+reg [7:0] me1a_r_data1_reg, me1a_r_data2_reg, me1b_r_data1_reg, me1b_r_data2_reg;
+
+always @(posedge clock) begin
+    if (wen)   begin
+        gem_pad_to_csc_hs_me1a_odd [w_adr] <= w_data; //dump write rom
+        gem_pad_to_csc_hs_me1a_even[w_adr] <= w_data;
+        gem_pad_to_csc_hs_me1b_odd [w_adr] <= w_data;
+        gem_pad_to_csc_hs_me1b_even[w_adr] <= w_data;
+    end
+
+    if (renodd)   begin
+        me1a_r_data1_reg <= gem_pad_to_csc_hs_me1a_odd[me1a_r_adr1];
+        me1a_r_data2_reg <= gem_pad_to_csc_hs_me1a_odd[me1a_r_adr2];
+        me1b_r_data1_reg <= gem_pad_to_csc_hs_me1b_odd[me1b_r_adr1];
+        me1b_r_data2_reg <= gem_pad_to_csc_hs_me1b_odd[me1b_r_adr2];
+    end
+    else if (reneven)  begin
+        me1a_r_data1_reg <= gem_pad_to_csc_hs_me1a_even[me1a_r_adr1];
+        me1a_r_data2_reg <= gem_pad_to_csc_hs_me1a_even[me1a_r_adr2];
+        me1b_r_data1_reg <= gem_pad_to_csc_hs_me1b_even[me1b_r_adr1];
+        me1b_r_data2_reg <= gem_pad_to_csc_hs_me1b_even[me1b_r_adr2];
+    end
+end
+
+assign me1a_r_data1 = me1a_r_data1_reg;
+assign me1a_r_data2 = me1a_r_data2_reg;
+assign me1b_r_data1 = me1b_r_data1_reg;
+assign me1b_r_data2 = me1b_r_data2_reg;
+
+
 reg [ 7:0] gem_pad_to_csc_hs_me1b_odd [191:0];
+reg [ 7:0] gem_pad_to_csc_hs_me1b_even [191:0];
+reg [ 7:0] gem_pad_to_csc_hs_me1a_odd [191:0];
+reg [ 7:0] gem_pad_to_csc_hs_me1a_even [191:0];
+
+
 
   initial begin
 	gem_pad_to_csc_hs_me1b_odd[  0]     =   8'd123;
@@ -195,7 +254,6 @@ reg [ 7:0] gem_pad_to_csc_hs_me1b_odd [191:0];
 	gem_pad_to_csc_hs_me1b_odd[191]     =   8'd4;
   end
 
-reg [ 7:0] gem_pad_to_csc_hs_me1b_even [191:0];
 
   initial begin
 	gem_pad_to_csc_hs_me1b_even[  0]     =   8'd4;
@@ -392,7 +450,6 @@ reg [ 7:0] gem_pad_to_csc_hs_me1b_even [191:0];
 	gem_pad_to_csc_hs_me1b_even[191]     =   8'd123;
   end
 
-reg [ 7:0] gem_pad_to_csc_hs_me1a_odd [191:0];
 
   initial begin
 	gem_pad_to_csc_hs_me1a_odd[  0]     =   8'd221;
@@ -786,3 +843,4 @@ reg [ 7:0] gem_pad_to_csc_hs_me1a_even [191:0];
 	gem_pad_to_csc_hs_me1a_even[191]     =   8'd221;
   end
 
+endmodule

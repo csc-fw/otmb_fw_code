@@ -63,12 +63,16 @@ parameter MAXKEYHSME1A = 8'd223;
 parameter ICLST        = 0;
 
 //reg [DATABITS-1:0] rom [ROMLENGTH-1:0];
-reg [STRIPBITS-1:0] me1a_hs_lo, me1a_hs_hi, me1b_hs_lo, me1b_hs_hi; 
-reg [WIREBITS-1:0]  wire_lo, wire_hi;
+//reg [STRIPBITS-1:0] me1a_hs_lo, me1a_hs_hi, me1b_hs_lo, me1b_hs_hi; 
+//reg [WIREBITS-1:0]  wire_lo, wire_hi;
 
+wire [STRIPBITS-1:0] me1a_hs_lo, me1a_hs_hi, me1b_hs_lo, me1b_hs_hi; 
+wire [WIREBITS-1:0]  wire_lo, wire_hi;
 
 wire we = 0;
-wire [STRIPBITS-1:0] din = 0;
+wire [7:0] w_adr1;
+wire [2:0] w_adr2;
+wire [STRIPBITS-1:0] din1 = 0;
 wire [WIREBITS-1:0] din2 = 0;
 
 wire logic_clock;
@@ -85,6 +89,46 @@ wire [7:0] cluster0_pad_hi;
 assign cluster0_pad_lo    = cluster0_vpf ? cluster0_pad : 8'b0;
 assign cluster0_pad_hi    = cluster0_vpf ? (cluster0_pad + cluster0_size) : 8'b0;
  
+//GEM-CSC map, gempad to CSC keyhs
+
+gem_pad_to_csc_hs_lut upad_to_hs(
+
+   .clock(logic_clock),
+   .wen(we), // write enable
+   .w_adr(w_adr1), // write address
+   .w_data(din1), // write data
+
+   .renodd (~evenchamber),
+   .reneven(evenchamber),
+
+   .me1a_r_adr1  (cluster0_pad_lo), 
+   .me1a_r_data1 (me1a_hs_lo), 
+   .me1a_r_adr2  (cluster0_pad_hi), 
+   .me1a_r_data2 (me1a_hs_hi), 
+   .me1b_r_adr1  (cluster0_pad_lo), 
+   .me1b_r_data1 (me1b_hs_lo), 
+   .me1b_r_adr2  (cluster0_pad_hi), 
+   .me1b_r_data2 (me1b_hs_hi) 
+   );
+
+// GEM-CSC map, gem roll to CSC wire
+  
+gem_roll_to_csc_wg_lut uroll_to_wire(
+    .clock  (logic_clock),
+    .wen    (we),
+    .w_adr  (w_adr2),
+    .w_data (din2),
+    .renodd (~evenchamber),
+    .reneven(evenchamber),
+    .r_adr1 (cluster0_roll),
+    .r_data1(wire_lo),
+    .r_adr2 (cluster0_roll),
+    .r_data2(wire_hi)
+  );
+
+
+
+
 reg [13:0]    reg_cluster0;
 reg           reg_cluster0_vpf;// valid or not
 reg [2:0]     reg_cluster0_roll; // 0-7 
@@ -92,28 +136,28 @@ reg [7:0]     reg_cluster0_pad; // from 0-191
 reg [2:0]     reg_cluster0_size; // from 0-7, 0 means 1 gem pad
 
 
-`include "gem_pad_to_csc_hs_lut.v"
-`include "gem_roll_to_csc_wg_lut.v"
+//`include "gem_pad_to_csc_hs_lut.v"
+//`include "gem_roll_to_csc_wg_lut.v"
 
 
 always @(posedge logic_clock) begin
-    if (we)   begin
-        gem_pad_to_csc_hs_me1a_odd[0]   <= din;  // dummy write to help Xilinx infer a dual port block RAM 
-        gem_pad_to_csc_hs_me1a_even[0]  <= din;  // dummy write to help Xilinx infer a dual port block RAM 
-        gem_pad_to_csc_hs_me1b_odd[0]   <= din;  // dummy write to help Xilinx infer a dual port block RAM 
-        gem_pad_to_csc_hs_me1b_even[0]  <= din;  // dummy write to help Xilinx infer a dual port block RAM 
-        gem_roll_to_csc_wg_odd_low  [0]       <= din2;
-        gem_roll_to_csc_wg_odd_high [0]       <= din2;
-        gem_roll_to_csc_wg_even_low [0]       <= din2;
-        gem_roll_to_csc_wg_even_high[0]       <= din2;
-    end
-    me1a_hs_lo   <=  (evenchamber ? gem_pad_to_csc_hs_me1a_even[cluster0_pad_lo] : gem_pad_to_csc_hs_me1a_odd[cluster0_pad_lo]);
-    me1a_hs_hi   <=  (evenchamber ? gem_pad_to_csc_hs_me1a_even[cluster0_pad_hi] : gem_pad_to_csc_hs_me1a_odd[cluster0_pad_hi]);
-    me1b_hs_lo   <=  (evenchamber ? gem_pad_to_csc_hs_me1b_even[cluster0_pad_lo] : gem_pad_to_csc_hs_me1b_odd[cluster0_pad_lo]);
-    me1b_hs_hi   <=  (evenchamber ? gem_pad_to_csc_hs_me1b_even[cluster0_pad_hi] : gem_pad_to_csc_hs_me1b_odd[cluster0_pad_hi]);
+    //if (we)   begin
+    //    gem_pad_to_csc_hs_me1a_odd[0]   <= din;  // dummy write to help Xilinx infer a dual port block RAM 
+    //    gem_pad_to_csc_hs_me1a_even[0]  <= din;  // dummy write to help Xilinx infer a dual port block RAM 
+    //    gem_pad_to_csc_hs_me1b_odd[0]   <= din;  // dummy write to help Xilinx infer a dual port block RAM 
+    //    gem_pad_to_csc_hs_me1b_even[0]  <= din;  // dummy write to help Xilinx infer a dual port block RAM 
+    //    gem_roll_to_csc_wg_odd_low  [0]       <= din2;
+    //    gem_roll_to_csc_wg_odd_high [0]       <= din2;
+    //    gem_roll_to_csc_wg_even_low [0]       <= din2;
+    //    gem_roll_to_csc_wg_even_high[0]       <= din2;
+    //end
+    //me1a_hs_lo   <=  (evenchamber ? gem_pad_to_csc_hs_me1a_even[cluster0_pad_lo] : gem_pad_to_csc_hs_me1a_odd[cluster0_pad_lo]);
+    //me1a_hs_hi   <=  (evenchamber ? gem_pad_to_csc_hs_me1a_even[cluster0_pad_hi] : gem_pad_to_csc_hs_me1a_odd[cluster0_pad_hi]);
+    //me1b_hs_lo   <=  (evenchamber ? gem_pad_to_csc_hs_me1b_even[cluster0_pad_lo] : gem_pad_to_csc_hs_me1b_odd[cluster0_pad_lo]);
+    //me1b_hs_hi   <=  (evenchamber ? gem_pad_to_csc_hs_me1b_even[cluster0_pad_hi] : gem_pad_to_csc_hs_me1b_odd[cluster0_pad_hi]);
 
-    wire_lo      <=  (evenchamber ? gem_roll_to_csc_wg_even_low [cluster0_roll] : gem_roll_to_csc_wg_odd_low [cluster0_roll]);
-    wire_hi      <=  (evenchamber ? gem_roll_to_csc_wg_even_high[cluster0_roll] : gem_roll_to_csc_wg_odd_high[cluster0_roll]);
+    //wire_lo      <=  (evenchamber ? gem_roll_to_csc_wg_even_low [cluster0_roll] : gem_roll_to_csc_wg_odd_low [cluster0_roll]);
+    //wire_hi      <=  (evenchamber ? gem_roll_to_csc_wg_even_high[cluster0_roll] : gem_roll_to_csc_wg_odd_high[cluster0_roll]);
 
     //also add cluster_pad, roll, vpf here to align them in timing!!!
     reg_cluster0           <= cluster0;
@@ -144,9 +188,9 @@ assign cluster0_me1bhs_hi   = (csc_cluster0_me1a) ? 8'd224 : ((me1b_hs_real_hi+g
 assign cluster0_me1ahs_lo   = (csc_cluster0_me1a) ? ((me1a_hs_real_lo > MINKEYHSME1A+gem_clct_deltahs) ? me1a_hs_real_lo-gem_clct_deltahs : MINKEYHSME1A) : 8'd224; //if not in Me1a region, give it an invalid value
 assign cluster0_me1ahs_hi   = (csc_cluster0_me1a) ? ((me1a_hs_real_hi+gem_clct_deltahs > MAXKEYHSME1A) ? MAXKEYHSME1A : me1a_hs_real_hi+gem_clct_deltahs) : 8'd224;
 
-assign cluster0_cscwire_mi = cluster0_cscwire_lo/2 + cluster0_cscwire_hi/2 + (cluster0_cscwire_lo[0] | cluster0_cscwire_hi[0]);
-assign cluster0_me1ahs_mi  = cluster0_me1ahs_lo/2 + cluster0_me1ahs_hi/2 + (cluster0_me1ahs_lo[0] | cluster0_me1ahs_hi[1]);
-assign cluster0_me1bhs_mi  = cluster0_me1bhs_lo/2 + cluster0_me1bhs_hi/2 + (cluster0_me1bhs_lo[0] | cluster0_me1bhs_hi[1]);
+assign cluster0_cscwire_mi = cluster0_cscwire_lo[WIREBITS-1:1] + cluster0_cscwire_hi[WIREBITS-1:1] + (cluster0_cscwire_lo[0] | cluster0_cscwire_hi[0]);
+assign cluster0_me1ahs_mi  = cluster0_me1ahs_lo[STRIPBITS-1:1] + cluster0_me1ahs_hi[STRIPBITS-1:1] + (cluster0_me1ahs_lo[0] | cluster0_me1ahs_hi[0]);
+assign cluster0_me1bhs_mi  = cluster0_me1bhs_lo[STRIPBITS-1:1] + cluster0_me1bhs_hi[STRIPBITS-1:1] + (cluster0_me1bhs_lo[0] | cluster0_me1bhs_hi[0]);
 
 assign csc_cluster0       = reg_cluster0;
 assign csc_cluster0_vpf   = reg_cluster0_vpf;// valid or not
