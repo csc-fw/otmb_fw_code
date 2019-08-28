@@ -268,6 +268,7 @@ parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
   wire [MXFEB:0]     gem_vfat_hcm;
   assign gem_vfat_hcm[MXFEB-1:0] = (is_gemA) ? gemA_vfat_hcm[MXFEB-1:0] : gemB_vfat_hcm[MXFEB-1:0];
   assign gem_vfat_hcm[MXFEB] = 1'b0; // invalid cluster is assigned with feb = 24
+
   //wire [MXGEMHCM-1:0]    gem_vfat_hcm [MXFEB-1:0];
   //assign  gem_vfat_hcm[ 0] = (is_gemA) ? gemA_vfat0_hcm [15:0] : gemB_vfat0_hcm [15:0];
   //assign  gem_vfat_hcm[ 1] = (is_gemA) ? gemA_vfat1_hcm [15:0] : gemB_vfat1_hcm [15:0];
@@ -738,14 +739,10 @@ parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
 //----------------------------------------------------------------------------------------------------------------------
 
   wire  cluster_maskout    [3:0];// cluster is maksed or partial masked
-  //generate
-  //for (ifeb=0; ifeb<MXFEB; ifeb=ifeb+1)     begin:   hot_vfat_mask
-      assign cluster_maskout[0] = ~gem_vfat_hot[cluster_feb[0]];
-      assign cluster_maskout[1] = ~gem_vfat_hot[cluster_feb[1]];
-      assign cluster_maskout[2] = ~gem_vfat_hot[cluster_feb[2]];
-      assign cluster_maskout[3] = ~gem_vfat_hot[cluster_feb[3]];
-  //end
-  //endgenerate
+  assign cluster_maskout[0] = ~gem_vfat_hcm[cluster_feb[0]];
+  assign cluster_maskout[1] = ~gem_vfat_hcm[cluster_feb[1]];
+  assign cluster_maskout[2] = ~gem_vfat_hcm[cluster_feb[2]];
+  assign cluster_maskout[3] = ~gem_vfat_hcm[cluster_feb[3]];
 
 //----------------------------------------------------------------------------------------------------------------------
 // outputs
