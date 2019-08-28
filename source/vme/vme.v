@@ -9283,9 +9283,9 @@ always @(posedge clock_vme) begin
   if    (wr_gem_bx0_delay)         gem_bx0_delay_wr        <= d[15:0];
   if    (wr_gemA_trg_ctrl)         gemA_trg_ctrl_wr        <= d[15:0];
   if    (wr_gemB_trg_ctrl)         gemB_trg_ctrl_wr        <= d[15:0];
-  if    (gem_vfat_hcm0 )           gem_vfat_hcm0_wr        <= d[15:0];
-  if    (gem_vfat_hcm1 )           gem_vfat_hcm1_wr        <= d[15:0];
-  if    (gem_vfat_hcm2 )           gem_vfat_hcm2_wr        <= d[15:0];
+  if    (wr_gem_vfat_hcm0 )        gem_vfat_hcm0_wr        <= d[15:0];
+  if    (wr_gem_vfat_hcm1 )        gem_vfat_hcm1_wr        <= d[15:0];
+  if    (wr_gem_vfat_hcm2 )        gem_vfat_hcm2_wr        <= d[15:0];
   //if    (gemA_vfat0_hcm  )         gemA_vfat_hcm_wr[ 0]    <= d[15:0];
   //if    (gemA_vfat1_hcm  )         gemA_vfat_hcm_wr[ 1]    <= d[15:0];
   //if    (gemA_vfat2_hcm  )         gemA_vfat_hcm_wr[ 2]    <= d[15:0];
