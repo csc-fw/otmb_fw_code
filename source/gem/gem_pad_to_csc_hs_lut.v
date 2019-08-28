@@ -19,7 +19,7 @@ module gem_pad_to_csc_hs_lut(
    output [7:0]   me1b_r_data2 
 
 
-)
+);
 
 
 reg [7:0] me1a_r_data1_reg, me1a_r_data2_reg, me1b_r_data1_reg, me1b_r_data2_reg;

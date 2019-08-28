@@ -14,7 +14,7 @@ module gem_roll_to_csc_wg_lut(
    output [6:0]   r_data2, 
 
 
-)
+);
 
 reg [6:0] r_data1_reg, r_data2_reg;
 
