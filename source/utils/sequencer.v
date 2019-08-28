@@ -3234,22 +3234,22 @@
 
   genvar k;
   generate
-    for (k=ACTVFAT_CNT_START; k<ACTVFAT_CNT_START+24; k=k+1) begin: vfatcnt
+    for (k=0; k<24; k=k+1) begin: vfatcnt
        always @(posedge clock) begin
-            gem_cnt_en[k     ] <= gemA_active_feb_list[k];
-            gem_cnt_en[k + 24] <= gemB_active_feb_list[k];
-            gem_cnt_en[k + 48] <= gemcopad_active_feb_list[k];
+            gem_cnt_en[ACTVFAT_CNT_START + k     ] <= gemA_active_feb_list[k];
+            gem_cnt_en[ACTVFAT_CNT_START + k + 24] <= gemB_active_feb_list[k];
+            gem_cnt_en[ACTVFAT_CNT_START + k + 48] <= gemcopad_active_feb_list[k];
         end
     end
   endgenerate
 
   //genvar k;
   generate
-    for (k=GEMCSCMAP_CNT_START+ 4; k<GEMCSCMAP_CNT_START+ 4 + MXCFEB; k=k+1) begin: gemcscmapcnt
+    for (k=0; k< MXCFEB; k=k+1) begin: gemcscmapcnt
        always @(posedge clock) begin
-            gem_cnt_en[k           ] <= gemA_csc_cluster_active_cfeb_list[k];
-            gem_cnt_en[k + MXCFEB  ] <= gemB_csc_cluster_active_cfeb_list[k];
-            gem_cnt_en[k + 2*MXCFEB] <= gemcopad_csc_cluster_active_cfeb_list[k];
+            gem_cnt_en[GEMCSCMAP_CNT_START+ 4 +k           ] <= gemA_csc_cluster_active_cfeb_list[k];
+            gem_cnt_en[GEMCSCMAP_CNT_START+ 4 +k + MXCFEB  ] <= gemB_csc_cluster_active_cfeb_list[k];
+            gem_cnt_en[GEMCSCMAP_CNT_START+ 4 +k + 2*MXCFEB] <= gemcopad_csc_cluster_active_cfeb_list[k];
         end
     end
   endgenerate
