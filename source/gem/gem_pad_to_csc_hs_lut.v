@@ -646,7 +646,6 @@ reg [ 7:0] gem_pad_to_csc_hs_me1a_even [191:0];
 	gem_pad_to_csc_hs_me1a_odd[191]     =   8'd130;
   end
 
-reg [ 7:0] gem_pad_to_csc_hs_me1a_even [191:0];
 
   initial begin
 	gem_pad_to_csc_hs_me1a_even[  0]     =   8'd130;
