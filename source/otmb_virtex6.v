@@ -2032,11 +2032,13 @@
     
 
     // 24 bit active feb list
-    .active_feb_list_copad(gemcopad_active_feb_list[23:0]),
+    //.active_feb_list_copad(gemcopad_active_feb_list[23:0]),
 
     .sump(copad_module_sump)
   );
 
+  //simple way to find copad vfat
+  assign gemcopad_active_feb_list = (gemA_active_feb_list & gemB_active_feb_list);
 
 
 always @ (posedge clock) begin
@@ -2150,12 +2152,12 @@ end
   wire gemA_anycluster_me1b = |(~gemA_csc_cluster_me1a & gemA_csc_cluster_vpf);
   wire gemB_anycluster_me1b = |(~gemB_csc_cluster_me1a & gemB_csc_cluster_vpf);
 
-  wire [5:0] gemA_csc_cluster_cscwire_lo[MXCLUSTER_CHAMBER-1:0];
-  wire [5:0] gemB_csc_cluster_cscwire_lo[MXCLUSTER_CHAMBER-1:0];
-  wire [5:0] gemA_csc_cluster_cscwire_hi[MXCLUSTER_CHAMBER-1:0];
-  wire [5:0] gemB_csc_cluster_cscwire_hi[MXCLUSTER_CHAMBER-1:0];
-  wire [5:0] gemA_csc_cluster_cscwire_mi[MXCLUSTER_CHAMBER-1:0];
-  wire [5:0] gemB_csc_cluster_cscwire_mi[MXCLUSTER_CHAMBER-1:0];
+  wire [6:0] gemA_csc_cluster_cscwire_lo[MXCLUSTER_CHAMBER-1:0];
+  wire [6:0] gemB_csc_cluster_cscwire_lo[MXCLUSTER_CHAMBER-1:0];
+  wire [6:0] gemA_csc_cluster_cscwire_hi[MXCLUSTER_CHAMBER-1:0];
+  wire [6:0] gemB_csc_cluster_cscwire_hi[MXCLUSTER_CHAMBER-1:0];
+  wire [6:0] gemA_csc_cluster_cscwire_mi[MXCLUSTER_CHAMBER-1:0];
+  wire [6:0] gemB_csc_cluster_cscwire_mi[MXCLUSTER_CHAMBER-1:0];
   wire [7:0] gemA_csc_cluster_me1bhs_lo [MXCLUSTER_CHAMBER-1:0]; // ME1b keyHS from 0-127
   wire [7:0] gemB_csc_cluster_me1bhs_lo [MXCLUSTER_CHAMBER-1:0]; // ME1a keyHS from 128-223
   wire [7:0] gemA_csc_cluster_me1bhs_hi [MXCLUSTER_CHAMBER-1:0]; // 
@@ -2266,10 +2268,13 @@ end
 
         .cluster0_cscwire_lo (gemB_csc_cluster_cscwire_lo[iclst_csc]),
         .cluster0_cscwire_hi (gemB_csc_cluster_cscwire_hi[iclst_csc]),
+        .cluster0_cscwire_mi (gemB_csc_cluster_cscwire_mi[iclst_csc]),
         .cluster0_me1bhs_lo  (gemB_csc_cluster_me1bhs_lo[iclst_csc]), // from 0-127
         .cluster0_me1bhs_hi  (gemB_csc_cluster_me1bhs_hi[iclst_csc]), // from 0-127
+        .cluster0_me1bhs_mi  (gemB_csc_cluster_me1bhs_mi[iclst_csc]), // from 0-127
         .cluster0_me1ahs_lo  (gemB_csc_cluster_me1ahs_lo[iclst_csc]), // from 128-223
         .cluster0_me1ahs_hi  (gemB_csc_cluster_me1ahs_hi[iclst_csc]), // from 128-223
+        .cluster0_me1ahs_mi  (gemB_csc_cluster_me1ahs_mi[iclst_csc]), // from 128-223
         .csc_cluster0_me1a   (gemB_csc_cluster_me1a[iclst_csc]),
 
         .csc_cluster0      (gemB_csc_cluster[iclst_csc]),  

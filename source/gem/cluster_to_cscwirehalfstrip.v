@@ -22,15 +22,15 @@ module cluster_to_cscwirehalfstrip (
         input      [7:0]          cluster0_pad, // from 0-191
         input      [2:0]          cluster0_size, // from 0-7, 0 means 1 gem pad
 
-        output     [5:0]          cluster0_cscwire_lo,
-        output     [5:0]          cluster0_cscwire_hi,
-        output     [5:0]          cluster0_cscwire_mi,//middle
-        output     [7:0]          cluster0_me1bhs_lo, // from 0-127
-        output     [7:0]          cluster0_me1bhs_hi, // from 0-127
-        output     [7:0]          cluster0_me1bhs_mi, // from 128-223, middle
-        output     [7:0]          cluster0_me1ahs_lo, // from 128-223
-        output     [7:0]          cluster0_me1ahs_hi, // from 128-223
-        output     [7:0]          cluster0_me1ahs_mi, // from 128-223, middle
+        output     [WIREBITS-1:0]          cluster0_cscwire_lo,
+        output     [WIREBITS-1:0]          cluster0_cscwire_hi,
+        output     [WIREBITS-1:0]          cluster0_cscwire_mi,//middle
+        output     [STRIPBITS-1:0]         cluster0_me1bhs_lo, // from 0-127
+        output     [STRIPBITS-1:0]         cluster0_me1bhs_hi, // from 0-127
+        output     [STRIPBITS-1:0]         cluster0_me1bhs_mi, // from 128-223, middle
+        output     [STRIPBITS-1:0]         cluster0_me1ahs_lo, // from 128-223
+        output     [STRIPBITS-1:0]         cluster0_me1ahs_hi, // from 128-223
+        output     [STRIPBITS-1:0]         cluster0_me1ahs_mi, // from 128-223, middle
         output                    csc_cluster0_me1a,
         output     [13:0]         csc_cluster0,  
         output                    csc_cluster0_vpf,// valid or not

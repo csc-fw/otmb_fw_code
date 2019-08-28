@@ -8895,10 +8895,10 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 // GEM_COPAD_CTRL = 0x324 GEM Copad matching control
 //------------------------------------------------------------------------------------------------------------------
   initial begin
-      gem_copad_ctrl_wr[0]      = 1'b1;  //match copad within neighborRoll or not
-      gem_copad_ctrl_wr[ 2:1]   = 2'b0;  // delta roll, NOT used now
-      gem_copad_ctrl_wr[3]      = 1'b1;  // do delta pad match
-      gem_copad_ctrl_wr[ 7:4]   = 4'b10; // delta pad, default value = 2 
+      gem_copad_ctrl_wr[0]      = 1'b1;  //RW,match copad within neighborRoll or not
+      gem_copad_ctrl_wr[ 2:1]   = 2'b0;  //RW, delta roll, NOT used now
+      gem_copad_ctrl_wr[3]      = 1'b1;  //RW, do delta pad match
+      gem_copad_ctrl_wr[ 7:4]   = 4'b10; //RW, delta pad, default value = 2 
       gem_copad_ctrl_wr[15:8]   = 8'b0;  // not used
   end
 
@@ -8912,12 +8912,12 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 // GEM_BX0_DELAY = 0x326 GEM BX0 DELAY 
 //------------------------------------------------------------------------------------------------------------------
   initial begin
-      gem_bx0_delay_wr[3:0]    = 4'b0;  // gemA bx0 delay
-      gem_bx0_delay_wr[4]      = 1'b1;  // gemA bx0 enable
-      gem_bx0_delay_wr[5]      = 1'b0;  // gemA bx0 match with clct bx0
-      gem_bx0_delay_wr[9:6]    = 4'b0;  // gemB bx0 delay 
-      gem_bx0_delay_wr[10]     = 1'b1;  // gemB bx0 enable
-      gem_bx0_delay_wr[11]     = 1'b0;  // gemB bx0 match
+      gem_bx0_delay_wr[3:0]    = 4'b0;  //RW, gemA bx0 delay
+      gem_bx0_delay_wr[4]      = 1'b1;  //RW, gemA bx0 enable
+      gem_bx0_delay_wr[5]      = 1'b0;  //R gemA bx0 match with clct bx0
+      gem_bx0_delay_wr[9:6]    = 4'b0;  //RW, gemB bx0 delay 
+      gem_bx0_delay_wr[10]     = 1'b1;  //RW, gemB bx0 enable
+      gem_bx0_delay_wr[11]     = 1'b0;  //R gemB bx0 match
       gem_bx0_delay_wr[15:12]  = 4'b0;  // not used
   end
 
@@ -8939,12 +8939,12 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 // GEMA_TRG_CTRL = 0x328 GEMA trigger match control control
 //------------------------------------------------------------------------------------------------------------------
   initial begin
-      gemA_trg_ctrl_wr[ 3: 0]      = 4'b0;  //gemA and ALCT match trigger delay
-      gemA_trg_ctrl_wr[ 7: 4]      = 4'd3;  //gemA and ALCT match window
-      gemA_trg_ctrl_wr[11: 8]      = 4'd5;  //gemA and CLCT match window
-      gemA_trg_ctrl_wr[   12]      = 1'b0;  //gemA and ALCT match
-      gemA_trg_ctrl_wr[   13]      = 1'b0;  //gemA and CLCT match 
-      gemA_trg_ctrl_wr[15:14]      = 2'b11;  //gemA two fibers enabled or not
+      gemA_trg_ctrl_wr[ 3: 0]      = 4'b0;  //RW, gemA and ALCT match trigger delay
+      gemA_trg_ctrl_wr[ 7: 4]      = 4'd3;  //RW, gemA and ALCT match window
+      gemA_trg_ctrl_wr[11: 8]      = 4'd5;  //RW, gemA and CLCT match window
+      gemA_trg_ctrl_wr[   12]      = 1'b0;  //Ronly, gemA and ALCT match
+      gemA_trg_ctrl_wr[   13]      = 1'b0;  //R only, gemA and CLCT match 
+      gemA_trg_ctrl_wr[15:14]      = 2'b11;  //RW, gemA two fibers enabled or not
   end
 
   assign match_gemA_alct_delay            = gemA_trg_ctrl_wr[3:0];
@@ -8964,12 +8964,12 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 // GEMA_TRG_CTRL = 0x32a GEMB trigger match control control
 //------------------------------------------------------------------------------------------------------------------
   initial begin
-      gemB_trg_ctrl_wr[ 3: 0]      = 4'b0;  //gemB and ALCT match trigger delay
-      gemB_trg_ctrl_wr[ 7: 4]      = 4'd3;  //gemB and ALCT match window
-      gemB_trg_ctrl_wr[11: 8]      = 4'd5;  //gemB and CLCT match window
-      gemB_trg_ctrl_wr[   12]      = 1'b0;  //gemB and ALCT match
-      gemB_trg_ctrl_wr[   13]      = 1'b0;  //gemB and CLCT match 
-      gemB_trg_ctrl_wr[15:14]      = 2'b11; //gemB two fibers enabled or not
+      gemB_trg_ctrl_wr[ 3: 0]      = 4'b0;  //RW,gemB and ALCT match trigger delay
+      gemB_trg_ctrl_wr[ 7: 4]      = 4'd3;  //RW,gemB and ALCT match window
+      gemB_trg_ctrl_wr[11: 8]      = 4'd5;  //RW,gemB and CLCT match window
+      gemB_trg_ctrl_wr[   12]      = 1'b0;  //R,gemB and ALCT match
+      gemB_trg_ctrl_wr[   13]      = 1'b0;  //R, gemB and CLCT match 
+      gemB_trg_ctrl_wr[15:14]      = 2'b11; //RW, gemB two fibers enabled or not
   end
 
   assign match_gemB_alct_delay            = gemB_trg_ctrl_wr[3:0];
