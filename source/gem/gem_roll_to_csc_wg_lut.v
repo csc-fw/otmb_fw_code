@@ -11,7 +11,7 @@ module gem_roll_to_csc_wg_lut(
    input  [2:0]   r_adr1, 
    output [6:0]   r_data1, 
    input  [2:0]   r_adr2, 
-   output [6:0]   r_data2, 
+   output [6:0]   r_data2
 
 
 );
