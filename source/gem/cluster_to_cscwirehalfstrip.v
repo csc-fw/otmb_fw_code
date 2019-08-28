@@ -82,8 +82,8 @@ endgenerate
 //ME1a and ME1b seperation is at Eta2.1
 wire [7:0] cluster0_pad_lo;
 wire [7:0] cluster0_pad_hi;
-assign cluster0_pad_lo    = cluster0_pad;
-assign cluster0_pad_hi    = cluster0_pad + cluster0_size;
+assign cluster0_pad_lo    = cluster0_vpf ? cluster0_pad : 8'b0;
+assign cluster0_pad_hi    = cluster0_vpf ? (cluster0_pad + cluster0_size) : 8'b0;
  
 reg [13:0]    reg_cluster0;
 reg           reg_cluster0_vpf;// valid or not

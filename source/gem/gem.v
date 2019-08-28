@@ -77,55 +77,59 @@ module gem (
     input  [RAM_ADRB-1:0]  fifo_radr,  // FIFO RAM read tbin address
     input  [1:0]           fifo_sel,   // FIFO RAM read cluster address 0-7
     output [RAM_WIDTH-1:0] fifo_rdata, // FIFO RAM read data
+
+    //GEM hot vfat mask
+    input  [MXFEB-1:0]    gemA_vfat_hcm,
+    input  [MXFEB-1:0]    gemB_vfat_hcm,
 //GEM Hot channel mask
-    input  [15:0]        gemA_vfat0_hcm,
-    input  [15:0]        gemA_vfat1_hcm,
-    input  [15:0]        gemA_vfat2_hcm,
-    input  [15:0]        gemA_vfat3_hcm,
-    input  [15:0]        gemA_vfat4_hcm,
-    input  [15:0]        gemA_vfat5_hcm,
-    input  [15:0]        gemA_vfat6_hcm,
-    input  [15:0]        gemA_vfat7_hcm,
-    input  [15:0]        gemA_vfat8_hcm,
-    input  [15:0]        gemA_vfat9_hcm,
-    input  [15:0]        gemA_vfat10_hcm,
-    input  [15:0]        gemA_vfat11_hcm,
-    input  [15:0]        gemA_vfat12_hcm,
-    input  [15:0]        gemA_vfat13_hcm,
-    input  [15:0]        gemA_vfat14_hcm,
-    input  [15:0]        gemA_vfat15_hcm,
-    input  [15:0]        gemA_vfat16_hcm,
-    input  [15:0]        gemA_vfat17_hcm,
-    input  [15:0]        gemA_vfat18_hcm,
-    input  [15:0]        gemA_vfat19_hcm,
-    input  [15:0]        gemA_vfat20_hcm,
-    input  [15:0]        gemA_vfat21_hcm,
-    input  [15:0]        gemA_vfat22_hcm,
-    input  [15:0]        gemA_vfat23_hcm,
-    input  [15:0]        gemB_vfat0_hcm,
-    input  [15:0]        gemB_vfat1_hcm,
-    input  [15:0]        gemB_vfat2_hcm,
-    input  [15:0]        gemB_vfat3_hcm,
-    input  [15:0]        gemB_vfat4_hcm,
-    input  [15:0]        gemB_vfat5_hcm,
-    input  [15:0]        gemB_vfat6_hcm,
-    input  [15:0]        gemB_vfat7_hcm,
-    input  [15:0]        gemB_vfat8_hcm,
-    input  [15:0]        gemB_vfat9_hcm,
-    input  [15:0]        gemB_vfat10_hcm,
-    input  [15:0]        gemB_vfat11_hcm,
-    input  [15:0]        gemB_vfat12_hcm,
-    input  [15:0]        gemB_vfat13_hcm,
-    input  [15:0]        gemB_vfat14_hcm,
-    input  [15:0]        gemB_vfat15_hcm,
-    input  [15:0]        gemB_vfat16_hcm,
-    input  [15:0]        gemB_vfat17_hcm,
-    input  [15:0]        gemB_vfat18_hcm,
-    input  [15:0]        gemB_vfat19_hcm,
-    input  [15:0]        gemB_vfat20_hcm,
-    input  [15:0]        gemB_vfat21_hcm,
-    input  [15:0]        gemB_vfat22_hcm,
-    input  [15:0]        gemB_vfat23_hcm,
+    //input  [15:0]        gemA_vfat0_hcm,
+    //input  [15:0]        gemA_vfat1_hcm,
+    //input  [15:0]        gemA_vfat2_hcm,
+    //input  [15:0]        gemA_vfat3_hcm,
+    //input  [15:0]        gemA_vfat4_hcm,
+    //input  [15:0]        gemA_vfat5_hcm,
+    //input  [15:0]        gemA_vfat6_hcm,
+    //input  [15:0]        gemA_vfat7_hcm,
+    //input  [15:0]        gemA_vfat8_hcm,
+    //input  [15:0]        gemA_vfat9_hcm,
+    //input  [15:0]        gemA_vfat10_hcm,
+    //input  [15:0]        gemA_vfat11_hcm,
+    //input  [15:0]        gemA_vfat12_hcm,
+    //input  [15:0]        gemA_vfat13_hcm,
+    //input  [15:0]        gemA_vfat14_hcm,
+    //input  [15:0]        gemA_vfat15_hcm,
+    //input  [15:0]        gemA_vfat16_hcm,
+    //input  [15:0]        gemA_vfat17_hcm,
+    //input  [15:0]        gemA_vfat18_hcm,
+    //input  [15:0]        gemA_vfat19_hcm,
+    //input  [15:0]        gemA_vfat20_hcm,
+    //input  [15:0]        gemA_vfat21_hcm,
+    //input  [15:0]        gemA_vfat22_hcm,
+    //input  [15:0]        gemA_vfat23_hcm,
+    //input  [15:0]        gemB_vfat0_hcm,
+    //input  [15:0]        gemB_vfat1_hcm,
+    //input  [15:0]        gemB_vfat2_hcm,
+    //input  [15:0]        gemB_vfat3_hcm,
+    //input  [15:0]        gemB_vfat4_hcm,
+    //input  [15:0]        gemB_vfat5_hcm,
+    //input  [15:0]        gemB_vfat6_hcm,
+    //input  [15:0]        gemB_vfat7_hcm,
+    //input  [15:0]        gemB_vfat8_hcm,
+    //input  [15:0]        gemB_vfat9_hcm,
+    //input  [15:0]        gemB_vfat10_hcm,
+    //input  [15:0]        gemB_vfat11_hcm,
+    //input  [15:0]        gemB_vfat12_hcm,
+    //input  [15:0]        gemB_vfat13_hcm,
+    //input  [15:0]        gemB_vfat14_hcm,
+    //input  [15:0]        gemB_vfat15_hcm,
+    //input  [15:0]        gemB_vfat16_hcm,
+    //input  [15:0]        gemB_vfat17_hcm,
+    //input  [15:0]        gemB_vfat18_hcm,
+    //input  [15:0]        gemB_vfat19_hcm,
+    //input  [15:0]        gemB_vfat20_hcm,
+    //input  [15:0]        gemB_vfat21_hcm,
+    //input  [15:0]        gemB_vfat22_hcm,
+    //input  [15:0]        gemB_vfat23_hcm,
 
     output [MXCLST-1:0]    parity_err_gem,
 
@@ -249,7 +253,7 @@ parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
 
         .overflow             (overflow),
         .bc0marker            (bc0marker),
-        .resyncmarker          (resyncmarker),
+        .resyncmarker         (resyncmarker),
 
         .gtx_rx_sump          (gtx_rx_sump)             // Unused signals
     );
@@ -261,32 +265,34 @@ parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
 //------------------------------------------------------------------------------------------------------------------
 
   wire is_gemA = (IGEM==1 || IGEM==0); 
-  wire [MXGEMHCM-1:0]    gem_vfat_hcm [MXFEB-1:0];
-
-  assign  gem_vfat_hcm[ 0] = (is_gemA) ? gemA_vfat0_hcm [15:0] : gemB_vfat0_hcm [15:0];
-  assign  gem_vfat_hcm[ 1] = (is_gemA) ? gemA_vfat1_hcm [15:0] : gemB_vfat1_hcm [15:0];
-  assign  gem_vfat_hcm[ 2] = (is_gemA) ? gemA_vfat2_hcm [15:0] : gemB_vfat2_hcm [15:0];
-  assign  gem_vfat_hcm[ 3] = (is_gemA) ? gemA_vfat3_hcm [15:0] : gemB_vfat3_hcm [15:0];
-  assign  gem_vfat_hcm[ 4] = (is_gemA) ? gemA_vfat4_hcm [15:0] : gemB_vfat4_hcm [15:0];
-  assign  gem_vfat_hcm[ 5] = (is_gemA) ? gemA_vfat5_hcm [15:0] : gemB_vfat5_hcm [15:0];
-  assign  gem_vfat_hcm[ 6] = (is_gemA) ? gemA_vfat6_hcm [15:0] : gemB_vfat6_hcm [15:0];
-  assign  gem_vfat_hcm[ 7] = (is_gemA) ? gemA_vfat7_hcm [15:0] : gemB_vfat7_hcm [15:0];
-  assign  gem_vfat_hcm[ 8] = (is_gemA) ? gemA_vfat8_hcm [15:0] : gemB_vfat8_hcm [15:0];
-  assign  gem_vfat_hcm[ 9] = (is_gemA) ? gemA_vfat9_hcm [15:0] : gemB_vfat9_hcm [15:0];
-  assign  gem_vfat_hcm[10] = (is_gemA) ? gemA_vfat10_hcm[15:0] : gemB_vfat10_hcm[15:0];
-  assign  gem_vfat_hcm[11] = (is_gemA) ? gemA_vfat11_hcm[15:0] : gemB_vfat11_hcm[15:0];
-  assign  gem_vfat_hcm[12] = (is_gemA) ? gemA_vfat12_hcm[15:0] : gemB_vfat12_hcm[15:0];
-  assign  gem_vfat_hcm[13] = (is_gemA) ? gemA_vfat13_hcm[15:0] : gemB_vfat13_hcm[15:0];
-  assign  gem_vfat_hcm[14] = (is_gemA) ? gemA_vfat14_hcm[15:0] : gemB_vfat14_hcm[15:0];
-  assign  gem_vfat_hcm[15] = (is_gemA) ? gemA_vfat15_hcm[15:0] : gemB_vfat15_hcm[15:0];
-  assign  gem_vfat_hcm[16] = (is_gemA) ? gemA_vfat16_hcm[15:0] : gemB_vfat16_hcm[15:0];
-  assign  gem_vfat_hcm[17] = (is_gemA) ? gemA_vfat17_hcm[15:0] : gemB_vfat17_hcm[15:0];
-  assign  gem_vfat_hcm[18] = (is_gemA) ? gemA_vfat18_hcm[15:0] : gemB_vfat18_hcm[15:0];
-  assign  gem_vfat_hcm[19] = (is_gemA) ? gemA_vfat19_hcm[15:0] : gemB_vfat19_hcm[15:0];
-  assign  gem_vfat_hcm[20] = (is_gemA) ? gemA_vfat20_hcm[15:0] : gemB_vfat20_hcm[15:0];
-  assign  gem_vfat_hcm[21] = (is_gemA) ? gemA_vfat21_hcm[15:0] : gemB_vfat21_hcm[15:0];
-  assign  gem_vfat_hcm[22] = (is_gemA) ? gemA_vfat22_hcm[15:0] : gemB_vfat22_hcm[15:0];
-  assign  gem_vfat_hcm[23] = (is_gemA) ? gemA_vfat23_hcm[15:0] : gemB_vfat23_hcm[15:0];
+  wire [MXFEB:0]     gem_vfat_hcm;
+  assign gem_vfat_hcm[MXFEB-1:0] = (is_gemA) ? gemA_vfat_hcm[MXFEB-1:0] : gemB_vfat_hcm[MXFEB-1:0];
+  assign gem_vfat_hcm[MXFEB] = 1'b0; // invalid cluster is assigned with feb = 24
+  //wire [MXGEMHCM-1:0]    gem_vfat_hcm [MXFEB-1:0];
+  //assign  gem_vfat_hcm[ 0] = (is_gemA) ? gemA_vfat0_hcm [15:0] : gemB_vfat0_hcm [15:0];
+  //assign  gem_vfat_hcm[ 1] = (is_gemA) ? gemA_vfat1_hcm [15:0] : gemB_vfat1_hcm [15:0];
+  //assign  gem_vfat_hcm[ 2] = (is_gemA) ? gemA_vfat2_hcm [15:0] : gemB_vfat2_hcm [15:0];
+  //assign  gem_vfat_hcm[ 3] = (is_gemA) ? gemA_vfat3_hcm [15:0] : gemB_vfat3_hcm [15:0];
+  //assign  gem_vfat_hcm[ 4] = (is_gemA) ? gemA_vfat4_hcm [15:0] : gemB_vfat4_hcm [15:0];
+  //assign  gem_vfat_hcm[ 5] = (is_gemA) ? gemA_vfat5_hcm [15:0] : gemB_vfat5_hcm [15:0];
+  //assign  gem_vfat_hcm[ 6] = (is_gemA) ? gemA_vfat6_hcm [15:0] : gemB_vfat6_hcm [15:0];
+  //assign  gem_vfat_hcm[ 7] = (is_gemA) ? gemA_vfat7_hcm [15:0] : gemB_vfat7_hcm [15:0];
+  //assign  gem_vfat_hcm[ 8] = (is_gemA) ? gemA_vfat8_hcm [15:0] : gemB_vfat8_hcm [15:0];
+  //assign  gem_vfat_hcm[ 9] = (is_gemA) ? gemA_vfat9_hcm [15:0] : gemB_vfat9_hcm [15:0];
+  //assign  gem_vfat_hcm[10] = (is_gemA) ? gemA_vfat10_hcm[15:0] : gemB_vfat10_hcm[15:0];
+  //assign  gem_vfat_hcm[11] = (is_gemA) ? gemA_vfat11_hcm[15:0] : gemB_vfat11_hcm[15:0];
+  //assign  gem_vfat_hcm[12] = (is_gemA) ? gemA_vfat12_hcm[15:0] : gemB_vfat12_hcm[15:0];
+  //assign  gem_vfat_hcm[13] = (is_gemA) ? gemA_vfat13_hcm[15:0] : gemB_vfat13_hcm[15:0];
+  //assign  gem_vfat_hcm[14] = (is_gemA) ? gemA_vfat14_hcm[15:0] : gemB_vfat14_hcm[15:0];
+  //assign  gem_vfat_hcm[15] = (is_gemA) ? gemA_vfat15_hcm[15:0] : gemB_vfat15_hcm[15:0];
+  //assign  gem_vfat_hcm[16] = (is_gemA) ? gemA_vfat16_hcm[15:0] : gemB_vfat16_hcm[15:0];
+  //assign  gem_vfat_hcm[17] = (is_gemA) ? gemA_vfat17_hcm[15:0] : gemB_vfat17_hcm[15:0];
+  //assign  gem_vfat_hcm[18] = (is_gemA) ? gemA_vfat18_hcm[15:0] : gemB_vfat18_hcm[15:0];
+  //assign  gem_vfat_hcm[19] = (is_gemA) ? gemA_vfat19_hcm[15:0] : gemB_vfat19_hcm[15:0];
+  //assign  gem_vfat_hcm[20] = (is_gemA) ? gemA_vfat20_hcm[15:0] : gemB_vfat20_hcm[15:0];
+  //assign  gem_vfat_hcm[21] = (is_gemA) ? gemA_vfat21_hcm[15:0] : gemB_vfat21_hcm[15:0];
+  //assign  gem_vfat_hcm[22] = (is_gemA) ? gemA_vfat22_hcm[15:0] : gemB_vfat22_hcm[15:0];
+  //assign  gem_vfat_hcm[23] = (is_gemA) ? gemA_vfat23_hcm[15:0] : gemB_vfat23_hcm[15:0];
 
   wire [13:0] cluster     [3:0];
   wire [13:0] cluster_raw [3:0];
@@ -295,10 +301,10 @@ parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
   wire [11:0] adr         [3:0];
   wire [ 2:0] cnt         [3:0];
   wire [ 0:0] vpf         [3:0];
-  //add vfat, roll,pad in a roll
   reg [ 4:0] cluster_feb [3:0];       
   reg [ 2:0] cluster_roll[3:0];       
   reg [ 7:0] cluster_pad [3:0];       
+
 
   //wire [MXPAD-1:0] gemhit_roll0 = 0;
   //wire [MXPAD-1:0] gemhit_roll1 = 0;
@@ -322,6 +328,7 @@ parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
     assign adr         [iclst] = cluster[iclst][10:0];
     assign cnt         [iclst] = cluster[iclst][13:11];
     assign vpf         [iclst] = ~(adr[iclst][10:9]==2'b11);
+    
     //assign hits_cluster[iclst] = (vpf[iclst] ? {(1536-cnt[iclst]-1-adr[iclst])*{0},(cnt[iclst]+1)*{1}, adr[iclst]*{0}} : 0);
 
    always @(*) begin
@@ -374,15 +381,6 @@ parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
     end
   end
   endgenerate
-
-//----------------------------------------------------------------------------------------------------------------------
-// outputs
-//----------------------------------------------------------------------------------------------------------------------
-
-assign vpf0 = vpf[0];
-assign vpf1 = vpf[1];
-assign vpf2 = vpf[2];
-assign vpf3 = vpf[3];
 
 //----------------------------------------------------------------------------------------------------------------------
 // GEM Raw Hits Dummy RAM
@@ -736,8 +734,27 @@ assign vpf3 = vpf[3];
   endgenerate
 
 //----------------------------------------------------------------------------------------------------------------------
-//
+//  Hot vfat mask
 //----------------------------------------------------------------------------------------------------------------------
+
+  wire  cluster_maskout    [3:0];// cluster is maksed or partial masked
+  //generate
+  //for (ifeb=0; ifeb<MXFEB; ifeb=ifeb+1)     begin:   hot_vfat_mask
+      assign cluster_maskout[0] = ~gem_vfat_hot[cluster_feb[0]];
+      assign cluster_maskout[1] = ~gem_vfat_hot[cluster_feb[1]];
+      assign cluster_maskout[2] = ~gem_vfat_hot[cluster_feb[2]];
+      assign cluster_maskout[3] = ~gem_vfat_hot[cluster_feb[3]];
+  //end
+  //endgenerate
+
+//----------------------------------------------------------------------------------------------------------------------
+// outputs
+//----------------------------------------------------------------------------------------------------------------------
+
+  assign vpf0 = vpf[0] & ~cluster_maskout[0];
+  assign vpf1 = vpf[1] & ~cluster_maskout[1];
+  assign vpf2 = vpf[2] & ~cluster_maskout[2];
+  assign vpf3 = vpf[3] & ~cluster_maskout[3];
 
   assign  cluster0      = cluster [0];
   assign  cluster1      = cluster [1];
