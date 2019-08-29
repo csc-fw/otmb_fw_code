@@ -384,10 +384,10 @@ parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
   generate
   for (ifeb=0; ifeb<MXFEB; ifeb=ifeb+1)     begin:   active_feb_loop
     always @(posedge clock) begin
-    active_feb_list [ifeb] <= (cluster_feb[0]==ifeb && vpf[0]) |
-                              (cluster_feb[1]==ifeb && vpf[1]) |
-                              (cluster_feb[2]==ifeb && vpf[2]) |
-                              (cluster_feb[3]==ifeb && vpf[3]);
+    active_feb_list [ifeb] <= (cluster_feb[0]==ifeb && vpf0) |
+                              (cluster_feb[1]==ifeb && vpf1) |
+                              (cluster_feb[2]==ifeb && vpf2) |
+                              (cluster_feb[3]==ifeb && vpf3);
     end
   end
   endgenerate

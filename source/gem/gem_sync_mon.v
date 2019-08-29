@@ -122,7 +122,7 @@ assign skip_sync_check [1] = gemB_overflow || gemB_bc0marker || gemB_resyncmarke
 assign gem_sync [0] = skip_sync_check[0] || (~|frame_sep_err[1:0] && gem0_kchar==gem1_kchar); // two fibers from gem chamber 1 are synced to eachother
 assign gem_sync [1] = skip_sync_check[1] || (~|frame_sep_err[3:2] && gem2_kchar==gem3_kchar); // two fibers from gem chamber 2 are synced to eachother
 
-assign gems_sync    = ((gem0_kchar==gem2_kchar) && (&gem_sync[1:0])) || gemA_overflow || gemB_overflow || gemA_bc0marker || gemB_bc0marker || gemA_resyncmarker || gemB_resyncmarker; // gem super chamber is synced
+assign gems_sync    = ((gem0_kchar==gem2_kchar) && (&gem_sync[1:0])) || (|skip_sync_check) || gemA_overflow || gemB_overflow || gemA_bc0marker || gemB_bc0marker || gemA_resyncmarker || gemB_resyncmarker; // gem super chamber is synced
 
 initial gemA_synced = 1'b1;
 initial gemB_synced = 1'b1;

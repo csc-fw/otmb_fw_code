@@ -9070,8 +9070,8 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
       gem_vfat_hcm2_wr    =  16'hFFFF;  // gem hot vfat mask 0
   end
 
-  assign gemA_vfat_hcm    = {gem_vfat_hcm1_wr[7:0], gem_vfat_hcm0_wr}; // total 24 Vfats
-  assign gemB_vfat_hcm    = {gem_vfat_hcm2_wr,gem_vfat_hcm1_wr[15:8]}; // total 24 Vfats
+  assign gemA_vfat_hcm    = {gem_vfat_hcm1_wr[ 7:0], gem_vfat_hcm0_wr[15:0]}; // total 24 Vfats
+  assign gemB_vfat_hcm    = {gem_vfat_hcm2_wr[15:0], gem_vfat_hcm1_wr[15:8]}; // total 24 Vfats
 
   assign gem_vfat_hcm0_rd                 =  gem_vfat_hcm0_wr[15:0];
   assign gem_vfat_hcm1_rd                 =  gem_vfat_hcm1_wr[15:0];
