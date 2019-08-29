@@ -4410,9 +4410,9 @@
   ADR_GEM_BX0_DELAY:         data_out <= gem_bx0_delay_rd;
   ADR_GEM_CSC_MATCH_CTRL:    data_out <= gem_csc_match_ctrl_rd;
 
-  ADR_GEM_VFAT_HCM0:         data_out <= gem_vfat_hcm0_rd[0];
-  ADR_GEM_VFAT_HCM1:         data_out <= gem_vfat_hcm1_rd[0];
-  ADR_GEM_VFAT_HCM2:         data_out <= gem_vfat_hcm2_rd[0];
+  ADR_GEM_VFAT_HCM0:         data_out <= gem_vfat_hcm0_rd;
+  ADR_GEM_VFAT_HCM1:         data_out <= gem_vfat_hcm1_rd;
+  ADR_GEM_VFAT_HCM2:         data_out <= gem_vfat_hcm2_rd;
 
 
   ADR_GEMA_CLUSTER0:         data_out <= gemA_cluster_rd[0];
@@ -9060,6 +9060,10 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign gem_copad_rd[0][14]              = gems_sync_vme;
 
 
+
+//------------------------------------------------------------------------------------------------------------------
+// GEM_hot vfat mask from 0x33A to 33E
+//------------------------------------------------------------------------------------------------------------------
   initial begin
       gem_vfat_hcm0_wr    =  16'hFFFF;  // gem hot vfat mask 0
       gem_vfat_hcm1_wr    =  16'hFFFF;  // gem hot vfat mask 0
@@ -9249,7 +9253,6 @@ always @(posedge clock_vme) begin
   if    (wr_gem_tbins)             gem_tbins_wr            <= d[15:0];
   if    (wr_gem_cfg)               gem_cfg_wr              <= d[15:0];
   if    (wr_gem_csc_window)        gem_csc_window_wr       <= d[15:0];
-  if    (wr_gem_csc_match_ctrl)    gem_csc_match_ctrl_wr   <= d[15:0];
   if    (wr_delay0_int)            delay0_int_wr           <= d[15:0];
   if    (wr_delay1_int)            delay1_int_wr           <= d[15:0];
   if    (wr_sync_err_ctrl)         sync_err_ctrl_wr        <= d[15:0];
@@ -9279,6 +9282,7 @@ always @(posedge clock_vme) begin
   if    (wr_gem_bx0_delay)         gem_bx0_delay_wr        <= d[15:0];
   if    (wr_gemA_trg_ctrl)         gemA_trg_ctrl_wr        <= d[15:0];
   if    (wr_gemB_trg_ctrl)         gemB_trg_ctrl_wr        <= d[15:0];
+  if    (wr_gem_csc_match_ctrl)    gem_csc_match_ctrl_wr   <= d[15:0];
   if    (wr_gem_vfat_hcm0 )        gem_vfat_hcm0_wr        <= d[15:0];
   if    (wr_gem_vfat_hcm1 )        gem_vfat_hcm1_wr        <= d[15:0];
   if    (wr_gem_vfat_hcm2 )        gem_vfat_hcm2_wr        <= d[15:0];
