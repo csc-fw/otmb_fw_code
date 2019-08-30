@@ -2113,12 +2113,12 @@ end
         end
         else begin
             if (gem_any) begin
-                gemA_cluster_vme[icluster]  <= gemA_cluster[icluster]; 
+                gemA_cluster_vme[icluster]  <= gemA_vpf[icluster] ? gemA_cluster[icluster] : {3'b0, 11'd1536}; 
                 gemA_overflow_vme           <= gemA_overflow;
                 gemA_sync_vme               <= gemA_synced;
             end
             if (gem_any) begin
-                gemB_cluster_vme[icluster]  <= gemB_cluster[icluster]; 
+                gemB_cluster_vme[icluster]  <= gemB_vpf[icluster] ? gemB_cluster[icluster] : {3'b0, 11'd1536}; 
                 gemB_overflow_vme           <= gemB_overflow;
                 gemB_sync_vme               <= gemB_synced;
             end
