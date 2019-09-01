@@ -8952,9 +8952,9 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign match_gem_clct_window            = gemA_trg_ctrl_wr[11:8];
   assign gemA_fiber_enable                = gemA_trg_ctrl_wr[15:14];
 
-  assign gemA_trg_ctrl_rd[3:0]            = match_gem_alct_delay;
+  assign gemA_trg_ctrl_rd[3:0]            = match_gemA_alct_delay;
   assign gemA_trg_ctrl_rd[7:4]            = match_gem_alct_window;
-  assign gemA_trg_ctrl_rd[11:8]           = match_gemA_clct_window;
+  assign gemA_trg_ctrl_rd[11:8]           = match_gem_clct_window;
   assign gemA_trg_ctrl_rd[12]             = gemA_alct_match;
   assign gemA_trg_ctrl_rd[13]             = gemA_clct_match;
   assign gemA_trg_ctrl_rd[15:14]          = gemA_fiber_enable[1:0];
