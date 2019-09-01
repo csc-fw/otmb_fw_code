@@ -488,8 +488,8 @@
   input  [1:0]         alct_ecc_err; // ALCT ecc syndrome code
 
 // GEM
-  input  [7:0]         gemA_vpf;
-  input  [7:0]         gemB_vpf;
+  input  [7:0]        gemA_vpf;
+  input  [7:0]        gemB_vpf;
 
   //GEMA trigger match control
   input  [3:0]        match_gemA_alct_delay;
@@ -505,15 +505,28 @@
   output              gemB_clct_match;
   input [1:0]         gemB_fiber_enable;
 
-  input                gemA_bx0_rx;
-  input  [3:0]         gemA_bx0_delay;
-  input                gemA_bx0_enable;
-  output               gemA_bx0_match;
+  input               gem_me1a_match_enable;
+  input               gem_me1b_match_enable;
+  input               gem_me1a_match_noclct;// no clct is fine for GEM-CSC match
+  input               gem_me1a_match_nogem;// no gem is fine for GEM-CSC match
+  input               gem_me1a_match_noalct;// no alct is fine for GEM-CSC match
+  input               gem_me1b_match_noclct;// no clct is fine for GEM-CSC match
+  input               gem_me1b_match_nogem;// no gem is fine for GEM-CSC match
+  input               gem_me1b_match_noalct;// no alct is fine for GEM-CSC match
+  input               gem_me1a_match_promotequal;
+  input               gem_me1b_match_promotequal;
+  input               gem_me1a_match_promotepat;
+  input               gem_me1b_match_promotepat;
 
-  input                gemB_bx0_rx;
-  input  [3:0]         gemB_bx0_delay;
-  input                gemB_bx0_enable;
-  output               gemB_bx0_match;
+  input               gemA_bx0_rx;
+  input  [3:0]        gemA_bx0_delay;
+  input               gemA_bx0_enable;
+  output              gemA_bx0_match;
+
+  input               gemB_bx0_rx;
+  input  [3:0]        gemB_bx0_delay;
+  input               gemB_bx0_enable;
+  output              gemB_bx0_match;
 
 // TMB-Sequencer Pipelines
   input  [MXBADR-1:0]  wr_adr_xtmb; // Buffer write address after drift time
@@ -1199,8 +1212,8 @@
 // Push GEM data into a 1bx to 16bx pipeline delay to do GEM-ALCT match
 //------------------------------------------------------------------------------------------------------------------
   //first delay GEM signal by match_gemA_alct_delay/match_gemB_alct_delay to do GEM-ALCT match
-  wire [7:0]  gemA_pipe_foralct,     gemA_foralct_srl;
-  wire [7:0]  gemB_pipe_foralct,     gemB_foralct_srl;
+  wire [7:0]  gemA_pipe_foralct, gemA_foralct_srl;
+  wire [7:0]  gemB_pipe_foralct, gemB_foralct_srl;
 
   reg  [3:0] gemA_srl_adr = 0;
   reg  [3:0] gemB_srl_adr = 0;
@@ -1216,8 +1229,8 @@
   wire gemA_ptr_is_0 = (match_gemA_alct_delay == 0);               // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
   wire gemB_ptr_is_0 = (match_gemB_alct_delay == 0);               // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
 
-  assign gemA_pipe_foralct = (gemA_ptr_is_0) ? gemA_foralct_vpf : gemA_foralct_srl;  // First  GEM after pipe delay
-  assign gemB_pipe_foralct = (gemB_ptr_is_0) ? gemB_foralct_vpf : gemB_foralct_srl;  // Second GEM after pipe delay
+  assign gemA_pipe_foralct = (gemA_ptr_is_0) ? gemA_vpf : gemA_foralct_srl;  // First  GEM after pipe delay
+  assign gemB_pipe_foralct = (gemB_ptr_is_0) ? gemB_vpf : gemB_foralct_srl;  // Second GEM after pipe delay
   
 
   wire gemA_pulse_foralct = (|gemA_pipe_foralct);
