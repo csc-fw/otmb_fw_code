@@ -19,8 +19,8 @@ module  tree_encoder(
   input [3:0] win_pri_14,
   input [3:0] win_pri_15,
 
-  output [3:0] clct_win_best,
-  output [3:0] clct_pri_best
+  output [3:0] win_best,
+  output [3:0] pri_best
 
   );
 
@@ -76,8 +76,8 @@ module  tree_encoder(
       end
   end
 
-  assign clct_win_best = win_s2[0];
-  assign clct_pri_best = pri_s2[0];
+  assign win_best = win_s2[0];
+  assign pri_best = pri_s2[0];
 
 
 //-------------------------------------------------------------------------------------------------------------------

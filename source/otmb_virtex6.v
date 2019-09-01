@@ -1663,18 +1663,18 @@
   wire         gem_inj_wen;      // GEM Injector Write Enable
   wire         injector_go_gem;  // Start GEM injector
 
-//GEMA trigger match control
+  //GEMA trigger match control
   wire [3:0]  match_gemA_alct_delay;
-  wire [3:0]  match_gemA_alct_window;
-  wire [3:0]  match_gemA_clct_window;
+  wire [3:0]  match_gem_alct_window;
+  wire [3:0]  match_gem_clct_window;
   wire        gemA_alct_match; 
   wire        gemA_clct_match;
   wire [1:0]  gemA_fiber_enable;
 
-//GEMB trigger match control
+  //GEMB trigger match control
   wire [3:0]  match_gemB_alct_delay;
-  wire [3:0]  match_gemB_alct_window;
-  wire [3:0]  match_gemB_clct_window;
+  //wire [3:0]  match_gemB_alct_window;
+  //wire [3:0]  match_gemB_clct_window;
   wire        gemB_alct_match; 
   wire        gemB_clct_match;
   wire [1:0]  gemB_fiber_enable;
@@ -1700,7 +1700,7 @@
   wire       gem_me1a_match_promotepat;
   wire       gem_me1b_match_promotepat;
 
-// Raw Hits FIFO RAM Ports
+  // Raw Hits FIFO RAM Ports
   wire  [RAM_ADRB-1:0]      fifo_radr_gem;              // FIFO RAM read tbin address
   wire  [1:0]               fifo_sel_gem;               // FIFO RAM read cluster 0-3 from this fiber
   wire  [RAM_WIDTH_GEM-1:0] fifo_rdata_gem [MXGEM-1:0]; // FIFO RAM read data
@@ -1887,6 +1887,7 @@
   end
   endgenerate // end GEM
 
+  //--------------------------------------------------------------------------------------------------------------------
   // GEM Fiber Synchronization Monitoring
   //--------------------------------------------------------------------------------------------------------------------
 
@@ -1926,6 +1927,7 @@
     .gems_lostsync(gems_lostsync)  // Out
   );
 
+  //--------------------------------------------------------------------------------------------------------------------
   // GEM Co-pad Matching
   //--------------------------------------------------------------------------------------------------------------------
   wire [7:0]  gem_match;
@@ -3810,8 +3812,8 @@ end
   .gemA_vpf          (gemA_csc_cluster_vpf[7:0]), //In gem cluster vpf
   //GEMA trigger match control
   .match_gemA_alct_delay  (match_gemA_alct_delay[3:0]),  //In gemA delay for gemA-ALCT match
-  .match_gemA_alct_window (match_gemA_alct_window[3:0]), //In gemA-alct match window
-  .match_gemA_clct_window (match_gemA_clct_window[3:0]), //In gemA-clct match window
+  .match_gem_alct_window  (match_gem_alct_window[3:0]), //In gemA-alct match window
+  .match_gem_clct_window  (match_gem_clct_window[3:0]), //In gemA-clct match window
   .gemA_alct_match        (gemA_alct_match),             //Out gemA+ALCT match
   .gemA_clct_match        (gemA_clct_match),             //Out gemA+CLCT match
   .gemA_fiber_enable      (gemA_fiber_enable[1:0]),     //In gemA two fibers enabled or not
@@ -3819,11 +3821,25 @@ end
   //GEMB trigger match control
   .gemB_vpf          (gemB_csc_cluster_vpf[7:0]),
   .match_gemB_alct_delay  (match_gemB_alct_delay[3:0]),    //In gemB delay for gemB-ALCT match
-  .match_gemB_alct_window (match_gemB_alct_window[3:0]),  //In gemB-alct match window
-  .match_gemB_clct_window (match_gemB_clct_window[3:0]),  //In gem-clct match window
+  //.match_gemB_alct_window (match_gemB_alct_window[3:0]),  //In gemB-alct match window
+  //.match_gemB_clct_window (match_gemB_clct_window[3:0]),  //In gem-clct match window
   .gemB_alct_match        (gemB_alct_match),       // Out gemB+ALCT match or not
   .gemB_clct_match        (gemB_clct_match),      // Out gemB+CLCT match or not
   .gemB_fiber_enable      (gemB_fiber_enable[1:0]),    //In gemB two fibers enabled or not
+
+  //GEM-CSC match control
+  .gem_me1a_match_enable     (gem_me1a_match_enable),       //Out gem-csc match in me1a
+  .gem_me1b_match_enable     (gem_me1b_match_enable),       //Out gem-csc match in me1b
+  .gem_me1a_match_nogem        (gem_me1a_match_nogem),       //Out gem-csc match without gem is allowed in ME1b
+  .gem_me1b_match_nogem        (gem_me1b_match_nogem),       //Out gem-csc match without gem is allowed in ME1a
+  .gem_me1a_match_noalct       (gem_me1a_match_noalct),       //Out gem-csc match without alct is allowed in ME1b
+  .gem_me1b_match_noalct       (gem_me1b_match_noalct),       //Out gem-csc match without alct is allowed in ME1a
+  .gem_me1a_match_noclct       (gem_me1a_match_noclct),       //Out gem-csc match without clct is allowed in ME1b
+  .gem_me1b_match_noclct       (gem_me1b_match_noclct),       //Out gem-csc match without clct is allowed in ME1a
+  .gem_me1a_match_promotequal  (gem_me1a_match_promotequal),     //Out promote quality or not for match in ME1a region, 
+  .gem_me1b_match_promotequal  (gem_me1b_match_promotequal),     //Out promote quality or not for match in ME1b region 
+  .gem_me1a_match_promotepat   (gem_me1a_match_promotepat),     //Out promote pattern or not for match in ME1a region, 
+  .gem_me1b_match_promotepat   (gem_me1b_match_promotepat),     //Out promote pattern or not for match in ME1b region, 
 
 // TMB-Sequencer Pipelines
   .wr_adr_xtmb (wr_adr_xtmb[MXBADR-1:0]), // In  Buffer write address after drift time
@@ -4865,16 +4881,16 @@ end
 
       //GEMA trigger match control
       .match_gemA_alct_delay  (match_gemA_alct_delay[3:0]),  //Out gemA delay for gemA-ALCT match
-      .match_gemA_alct_window (match_gemA_alct_window[3:0]), //Out gemA-alct match window
-      .match_gemA_clct_window (match_gemA_clct_window[3:0]), //Out gemA-clct match window
+      .match_gem_alct_window  (match_gem_alct_window[3:0]), //Out gemA-alct match window
+      .match_gem_clct_window  (match_gem_clct_window[3:0]), //Out gemA-clct match window
       .gemA_alct_match        (gemA_alct_match),             //In gemA+ALCT match
       .gemA_clct_match        (gemA_clct_match),             //In gemA+CLCT match
       .gemA_fiber_enable      (gemA_fiber_enable[1:0]),     //Out gemA two fibers enabled or not
 
       //GEMB trigger match control
       .match_gemB_alct_delay  (match_gemB_alct_delay[3:0]),    //Out gemB delay for gemB-ALCT match
-      .match_gemB_alct_window (match_gemB_alct_window[3:0]),  //Out gemB-alct match window
-      .match_gemB_clct_window (match_gemB_clct_window[3:0]),  //Out gem-clct match window
+      //.match_gemB_alct_window (match_gemB_alct_window[3:0]),  //Out gemB-alct match window
+      //.match_gemB_clct_window (match_gemB_clct_window[3:0]),  //Out gem-clct match window
       .gemB_alct_match        (gemB_alct_match),       // In gemB+ALCT match or not
       .gemB_clct_match        (gemB_clct_match),      // In gemB+CLCT match or not
       .gemB_fiber_enable      (gemB_fiber_enable[1:0]),    // Out gemB two fibers enabled or not

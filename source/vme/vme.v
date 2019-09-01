@@ -667,11 +667,11 @@
   //GEM-CSC match control
   gem_me1a_match_enable,       //Out gem-csc match in me1a
   gem_me1b_match_enable,       //Out gem-csc match in me1b
-  gem_me1a_match_nogem,       //Out gem-csc match without gem is allowed in ME1b
+  gem_me1a_match_nogem,       //Out gem-csc match without gem is allowed in ME1b, => allow lowQ ALCT-CLCT match
   gem_me1b_match_nogem,       //Out gem-csc match without gem is allowed in ME1a
-  gem_me1a_match_noalct,       //Out gem-csc match without alct is allowed in ME1b
-  gem_me1b_match_noalct,       //Out gem-csc match without alct is allowed in ME1a
-  gem_me1a_match_noclct,       //Out gem-csc match without clct is allowed in ME1b
+  gem_me1a_match_noalct,       //Out gem-csc match without alct is allowed in ME1b=> allow GEM-CLCT match to build LCT
+  gem_me1b_match_noalct,       //Out gem-csc match without alct is allowed in ME1a 
+  gem_me1a_match_noclct,       //Out gem-csc match without clct is allowed in ME1b => allow GEM-ALCT match to build LCT
   gem_me1b_match_noclct,       //Out gem-csc match without clct is allowed in ME1a
   gem_me1a_match_promotequal,     //Out promote quality or not for match in ME1a region, 
   gem_me1b_match_promotequal,     //Out promote quality or not for match in ME1b region 
@@ -686,16 +686,16 @@
 
 //GEMA trigger match control
   match_gemA_alct_delay,
-  match_gemA_alct_window,
-  match_gemA_clct_window,
+  match_gem_alct_window,
+  match_gem_clct_window,
   gemA_alct_match, 
   gemA_clct_match,
   gemA_fiber_enable,
 
 //GEMB trigger match control
   match_gemB_alct_delay,
-  match_gemB_alct_window,
-  match_gemB_clct_window,
+  //match_gemB_alct_window,
+  //match_gemB_clct_window,
   gemB_alct_match,
   gemB_clct_match,
   gemB_fiber_enable,
@@ -2422,16 +2422,16 @@
 
   //GEMA trigger match control
   output [3:0] match_gemA_alct_delay;
-  output [3:0] match_gemA_alct_window;
-  output [3:0] match_gemA_clct_window;
+  output [3:0] match_gem_alct_window;
+  output [3:0] match_gem_clct_window;
   input        gemA_alct_match;
   input        gemA_clct_match;
   output [1:0] gemA_fiber_enable;
 
   //GEMB trigger match control
   output [3:0] match_gemB_alct_delay;
-  output [3:0] match_gemB_alct_window;
-  output [3:0] match_gemB_clct_window;
+  //output [3:0] match_gemB_alct_window;
+  //output [3:0] match_gemB_clct_window;
   input        gemB_alct_match;
   input        gemB_clct_match;
   output [1:0] gemB_fiber_enable;
@@ -8948,12 +8948,12 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   end
 
   assign match_gemA_alct_delay            = gemA_trg_ctrl_wr[3:0];
-  assign match_gemA_alct_window           = gemA_trg_ctrl_wr[7:4];
-  assign match_gemA_clct_window           = gemA_trg_ctrl_wr[11:8];
+  assign match_gem_alct_window            = gemA_trg_ctrl_wr[7:4];
+  assign match_gem_clct_window            = gemA_trg_ctrl_wr[11:8];
   assign gemA_fiber_enable                = gemA_trg_ctrl_wr[15:14];
 
-  assign gemA_trg_ctrl_rd[3:0]            = match_gemA_alct_delay;
-  assign gemA_trg_ctrl_rd[7:4]            = match_gemA_alct_window;
+  assign gemA_trg_ctrl_rd[3:0]            = match_gem_alct_delay;
+  assign gemA_trg_ctrl_rd[7:4]            = match_gem_alct_window;
   assign gemA_trg_ctrl_rd[11:8]           = match_gemA_clct_window;
   assign gemA_trg_ctrl_rd[12]             = gemA_alct_match;
   assign gemA_trg_ctrl_rd[13]             = gemA_clct_match;
@@ -8973,13 +8973,14 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   end
 
   assign match_gemB_alct_delay            = gemB_trg_ctrl_wr[3:0];
-  assign match_gemB_alct_window           = gemB_trg_ctrl_wr[7:4];
-  assign match_gemB_clct_window           = gemB_trg_ctrl_wr[11:8];
+  //assign match_gemB_alct_window           = gemB_trg_ctrl_wr[7:4];
+  //assign match_gemB_clct_window           = gemB_trg_ctrl_wr[11:8];
   assign gemB_fiber_enable                = gemB_trg_ctrl_wr[15:14];
 
   assign gemB_trg_ctrl_rd[3:0]            = match_gemB_alct_delay;
-  assign gemB_trg_ctrl_rd[7:4]            = match_gemB_alct_window;
-  assign gemB_trg_ctrl_rd[11:8]           = match_gemB_clct_window;
+  //assign gemB_trg_ctrl_rd[7:4]            = match_gemB_alct_window;
+  //assign gemB_trg_ctrl_rd[11:8]           = match_gemB_clct_window;
+  assign gemB_trg_ctrl_rd[11:4]          = gemB_trg_ctrl_wr [11:4];
   assign gemB_trg_ctrl_rd[12]             = gemB_alct_match;
   assign gemB_trg_ctrl_rd[13]             = gemB_clct_match;
   assign gemB_trg_ctrl_rd[15:14]          = gemB_fiber_enable[1:0];

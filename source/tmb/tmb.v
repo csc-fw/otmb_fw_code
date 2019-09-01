@@ -132,10 +132,10 @@
 // GEM
 
 //GEMA trigger match control
+  match_gem_alct_window,
+  match_gem_clct_window,
   gemA_vpf,
   match_gemA_alct_delay,
-  match_gemA_alct_window,
-  match_gemA_clct_window,
   gemA_alct_match, 
   gemA_clct_match,
   gemA_fiber_enable,
@@ -143,11 +143,23 @@
 //GEMB trigger match control
   gemB_vpf,
   match_gemB_alct_delay,
-  match_gemB_alct_window,
-  match_gemB_clct_window,
   gemB_alct_match,
   gemB_clct_match,
   gemB_fiber_enable,
+
+  //GEM-CSC match control
+  gem_me1a_match_enable,       //Out gem-csc match in me1a
+  gem_me1b_match_enable,       //Out gem-csc match in me1b
+  gem_me1a_match_nogem,       //Out gem-csc match without gem is allowed in ME1b, => allow lowQ ALCT-CLCT match
+  gem_me1b_match_nogem,       //Out gem-csc match without gem is allowed in ME1a
+  gem_me1a_match_noalct,       //Out gem-csc match without alct is allowed in ME1b=> allow GEM-CLCT match to build LCT
+  gem_me1b_match_noalct,       //Out gem-csc match without alct is allowed in ME1a 
+  gem_me1a_match_noclct,       //Out gem-csc match without clct is allowed in ME1b => allow GEM-ALCT match to build LCT
+  gem_me1b_match_noclct,       //Out gem-csc match without clct is allowed in ME1a
+  gem_me1a_match_promotequal,     //Out promote quality or not for match in ME1a region, 
+  gem_me1b_match_promotequal,     //Out promote quality or not for match in ME1b region 
+  gem_me1a_match_promotepat,     //Out promote pattern or not for match in ME1a region, 
+  gem_me1b_match_promotepat,     //Out promote pattern or not for match in ME1b region, 
 
 // TMB-Sequencer Pipelines
   wr_adr_xtmb,
@@ -481,16 +493,14 @@
 
   //GEMA trigger match control
   input  [3:0]        match_gemA_alct_delay;
-  input  [3:0]        match_gemA_alct_window;
-  input  [3:0]        match_gemA_clct_window;
+  input  [3:0]        match_gem_alct_window;
+  input  [3:0]        match_gem_clct_window;
   output              gemA_alct_match;
   output              gemA_clct_match;
   input  [1:0]        gemA_fiber_enable;
 
   //GEMB trigger match control
   input [3:0]         match_gemB_alct_delay;
-  input [3:0]         match_gemB_alct_window;
-  input [3:0]         match_gemB_clct_window;
   output              gemB_alct_match;
   output              gemB_clct_match;
   input [1:0]         gemB_fiber_enable;
@@ -876,12 +886,45 @@
 
   wire alct_ptr_is_0 = (alct_delay == 0);               // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
 
-  assign alct0_pipe = (alct_ptr_is_0) ? alct0_tmb : alct0_srl;  // First  CLCT after clct pipe delay
-  assign alct1_pipe = (alct_ptr_is_0) ? alct1_tmb : alct1_srl;  // Second CLCT after clct pipe delay
-  assign alcte_pipe = (alct_ptr_is_0) ? alcte_tmb : alcte_srl;  // Second CLCT after clct pipe delay 
+  assign alct0_pipe = (alct_ptr_is_0) ? alct0_tmb : alct0_srl;  // First  ALCT after alct pipe delay
+  assign alct1_pipe = (alct_ptr_is_0) ? alct1_tmb : alct1_srl;  // Second ALCT after alct pipe delay
+  assign alcte_pipe = (alct_ptr_is_0) ? alcte_tmb : alcte_srl;  // Second ALCT after alct pipe delay 
 
   wire   alct0_pipe_vpf = alct0_pipe[0];
   wire   alct1_pipe_vpf = alct1_pipe[0];
+
+//------------------------------------------------------------------------------------------------------------------
+// Push ALCT data into a 1bx to 16bx pipeline delay for GEM-ALCT match
+//------------------------------------------------------------------------------------------------------------------
+// strategy of GEM related match
+//1. delay ALCT by alct_delay_forgem to do GEM-ALCT match
+//2. delay GEM by total gem_extra_delay_forclct+ gem_best_win+match_gem_alct_delay to align GEM with ALCT
+//3. to do GEM-CLCT match, since GEM-CLCT match should use same window as ALCT-CLCT match, simply match GEM and CLCT as match ALCT with CLCT
+//------------------------------------------------------------------------------------------------------------------
+
+  wire [MXALCT-1:0] alct0_gem_pipe, alct0_gem_srl;
+  wire [MXALCT-1:0] alct1_gem_pipe, alct1_gem_srl;
+  wire [1:0]        alcte_gem_pipe, alcte_gem_srl, alcte_gem_tmb;
+  reg [3:0] alct_gem_srl_adr = 0;
+
+  wire [3:0] gem_alct_win_center = {1'b0, match_gem_alct_window[3:1]}; // namely window/2
+  wire alct_delay_forgem = (alct_delay > gem_alct_win_center)? (alct_delay - gem_alct_win_center) : 0;//
+
+  always @(posedge clock) begin
+    alct_gem_srl_adr <= alct_delay_forgem-1'b1;
+  end
+
+  //maybe here we only need alct vpf???
+  srl16e_bbl #(MXALCT) ualct0gem (.clock(clock),.ce(1'b1),.adr(alct_gem_srl_adr),.d(alct0_tmb),.q(alct0_gem_srl));
+  srl16e_bbl #(MXALCT) ualct1gem (.clock(clock),.ce(1'b1),.adr(alct_gem_srl_adr),.d(alct1_tmb),.q(alct1_gem_srl));
+
+  wire alct_gem_ptr_is_0 = (alct_delay_forgem == 0);               // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
+
+  assign alct0_gem_pipe = (alct_gem_ptr_is_0) ? alct0_tmb : alct0_gem_srl;  // First  ALCT after alct pipe delay
+  assign alct1_gem_pipe = (alct_gem_ptr_is_0) ? alct1_tmb : alct1_gem_srl;  // Second ALCT after alct pipe delay
+
+  wire   alct0_gem_pipe_vpf = alct0_gem_pipe[0];
+  wire   alct1_gem_pipe_vpf = alct1_gem_pipe[0];
 
 //------------------------------------------------------------------------------------------------------------------
 // Push CLCT data into a 1bx to 16bx pipeline delay to wait for an alct match
@@ -934,25 +977,26 @@
   integer i;
 
   always @(posedge clock) begin
-  if (powerup_n) begin            // Sych reset on resync or not power up
-  clct_sr_include  <= {16{dynamic_zero}};    // Power up bit 15 to mollify xst compiler warning about [15] constant 0
-  end
+      if (powerup_n) begin            // Sych reset on resync or not power up
+          clct_sr_include  <= {16{dynamic_zero}};    // Power up bit 15 to mollify xst compiler warning about [15] constant 0
+      end
 
-  else begin
-  i=0;
-  while (i<=15) begin
-  if (clct_window!=0)
-  clct_sr_include[i] <= (i<=clct_window-1);  // clct_window=3, enables sr stages 0,1,2
-  else
-  clct_sr_include[i] <= 0;          // clct_window=0, disables all sr stages
-  i=i+1;
-  end
-  end
+      else begin
+          i=0;
+          while (i<=15) begin
+            if (clct_window!=0)
+              clct_sr_include[i] <= (i<=clct_window-1);  // clct_window=3, enables sr stages 0,1,2
+            else
+              clct_sr_include[i] <= 0;          // clct_window=0, disables all sr stages
+              i=i+1;
+          end
+      end
   end
 
 // Calculate dynamic clct window center and positional priorities
   reg  [3:0] clct_win_priority [15:0];
   wire [3:0] clct_win_center = clct_window/2;  // Gives priority to higher winbx for even widths
+  // wire [3:0] clct_win_center = {1'b0, clct_window[3:1]};
 
   //old code before 2016Algo
   //always @(posedge clock) begin
@@ -1122,8 +1166,8 @@
       .win_pri_14   (win_pri[14]),
       .win_pri_15   (win_pri[15]),
 
-      .clct_win_best(clct_win_best),
-      .clct_pri_best(clct_pri_best)
+      .win_best     (clct_win_best),
+      .pri_best     (clct_pri_best)
         );
 
 // CLCT window width is generated by a pulse propagating down the enabled clct_sr stages  
@@ -1135,7 +1179,7 @@
   wire   clct_last_tag = clct_tag_sr[winclosing];        // Push this event into MPC queue as it reaches last window bx
 
 // CLCT matched or alct-only
-  wire alct_pulse  = alct0_pipe_vpf;              // ALCT vpf
+  wire alct_pulse  = alct0_pipe_vpf || alct1_pipe_vpf;              // ALCT vpf
   wire alct_noclct = alct_pulse   && !clct_window_haslcts;  // ALCT arrived, but there was no CLCT window open
   wire clct_match  = alct_pulse   &&  clct_window_haslcts;  // ALCT matches CLCT window, push to mpc on current bx
 
@@ -1150,6 +1194,416 @@
   assign clct_tag_me  = (algo2016_drop_used_clcts) ? clct_match : 1'b0;    // Tag the matching clct
   assign clct_tag_win = clct_win_best;   // But get the one with highest priority
 
+
+//------------------------------------------------------------------------------------------------------------------
+// Push GEM data into a 1bx to 16bx pipeline delay to do GEM-ALCT match
+//------------------------------------------------------------------------------------------------------------------
+  //first delay GEM signal by match_gemA_alct_delay/match_gemB_alct_delay to do GEM-ALCT match
+  wire [7:0]  gemA_pipe_foralct,     gemA_foralct_srl;
+  wire [7:0]  gemB_pipe_foralct,     gemB_foralct_srl;
+
+  reg  [3:0] gemA_srl_adr = 0;
+  reg  [3:0] gemB_srl_adr = 0;
+
+  always @(posedge clock) begin
+  gemA_srl_adr <= match_gemA_alct_delay-1'b1;
+  gemB_srl_adr <= match_gemB_alct_delay-1'b1;
+  end
+
+  srl16e_bbl #(8) ugemA (.clock(clock),.ce(1'b1),.adr(gemA_srl_adr),.d(gemA_vpf[7:0]),.q(gemA_foralct_srl[7:0])); 
+  srl16e_bbl #(8) ugemB (.clock(clock),.ce(1'b1),.adr(gemB_srl_adr),.d(gemB_vpf[7:0]),.q(gemB_foralct_srl[7:0]));
+
+  wire gemA_ptr_is_0 = (match_gemA_alct_delay == 0);               // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
+  wire gemB_ptr_is_0 = (match_gemB_alct_delay == 0);               // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
+
+  assign gemA_pipe_foralct = (gemA_ptr_is_0) ? gemA_foralct_vpf : gemA_foralct_srl;  // First  GEM after pipe delay
+  assign gemB_pipe_foralct = (gemB_ptr_is_0) ? gemB_foralct_vpf : gemB_foralct_srl;  // Second GEM after pipe delay
+  
+
+  wire gemA_pulse_foralct = (|gemA_pipe_foralct);
+  wire gemB_pulse_foralct = (|gemB_pipe_foralct);
+  //wire gem_pulse = (|gemA_pipe_foralct || |gemB_pipe_foralct);
+  wire gem_pulse_foralct = (|gemA_pipe_foralct || |gemB_pipe_foralct);
+
+  //---------------------------------------------------------------------
+  // pre-calculate GEM-ALCT matching window 
+  //---------------------------------------------------------------------
+  reg [3:0] gem_alct_winclosing = 0;
+
+  always @(posedge clock)begin
+      gem_alct_winclosing <= match_gem_alct_window - 1;
+  end
+
+  reg [15:0] gem_sr_include = 0;
+  always @(posedge clock) begin
+      if (powerup_n) begin
+          gem_sr_include <= {16{dynamic_zero}}; 
+      end
+      else begin
+          i = 0;
+          while (i<=15) begin
+              if (match_gem_alct_window != 0) 
+                  gem_sr_include[i] <= (i<=match_gem_alct_window-1);//if match_gem_alct_window=3, enable sr in bit0,1,2, sr_include = 15'h7
+              else
+                  gem_sr_include[i] <= 0;
+              i = i+1;
+          end
+      end
+  end 
+
+  reg  [3:0] gem_alct_win_priority [15:0];
+
+  //find priority in matching window, namely which one to match ALCT if multiple GEMs appear
+  always @(posedge clock) begin
+      i=0;
+      while (i<=15) begin
+        if      (ttc_resync              ) gem_alct_win_priority[i] <= 4'hF;
+        else if (i >= match_gem_alct_window || i==0) gem_alct_win_priority[i] <= 0; // i >  lastwin or i=0
+        else if (i <= gem_alct_win_center )          gem_alct_win_priority[i] <= match_gem_alct_window -4'd1-((gem_alct_win_center-i[3:0]) << 1);
+        else                                         gem_alct_win_priority[i] <= match_gem_alct_window -4'd0-((i[3:0] - gem_alct_win_center)<< 1); // i >  center
+        i=i+1;
+      end
+  end
+
+  //Similar to CLCT-ALCT match, push GEM vpf into a 16-stage FF register for GEM-ALCT matching
+  //reg   [15:1] gem_vpf_sre = 0;
+  //wire  [15:0] gem_vpf_sr;
+  reg   [15:1] gemA_vpf_sre = 0;
+  wire  [15:0] gemA_vpf_sr;
+  reg   [15:1] gemB_vpf_sre = 0;
+  wire  [15:0] gemB_vpf_sr;
+
+  //assign gem_vpf_sr[0]     = gem_pulse_foralct;
+  //assign gem_vpf_sr[15:1]  = gem_vpf_sre[15:1];
+  assign gemA_vpf_sr[0]    = gemA_pulse_foralct;
+  assign gemA_vpf_sr[15:1] = gemA_vpf_sre[15:1];
+  assign gemB_vpf_sr[0]    = gemB_pulse_foralct;
+  assign gemB_vpf_sr[15:1] = gemB_vpf_sre[15:1];
+
+  always @(posedge clock ) begin 
+      //gem_vpf_sre[1]  <= gem_vpf_sr[0];
+      gemA_vpf_sre[1] <= gemA_vpf_sr[0];
+      gemB_vpf_sre[1] <= gemB_vpf_sr[0];
+      i=1;
+      while (i <= 14) begin
+          //gem_vpf_sre[i+1]  <= gem_vpf_sre[i]; //Paralle shift register to left, if vpf=1, then it propagates to next BX
+          gemA_vpf_sre[i+1] <= gemA_vpf_sre[i]; //Paralle shift register to left, if vpf=1, then it propagates to next BX
+          gemB_vpf_sre[i+1] <= gemB_vpf_sre[i]; //Paralle shift register to left, if vpf=1, then it propagates to next BX
+          i = i+1;
+      end// close while
+  end //close always
+
+  //tag matched GEM
+  reg [15:0] gemA_alct_tag_sr = 0;
+  wire       gemA_alct_tag_me;
+  wire [3:0] gemA_alct_tag_win;
+  reg [15:0] gemA_alct_match_sr = 0;// record whether gem is used
+
+  always @(posedge clock) begin
+    if (reset_sr) begin            // Sych reset on resync or not power up
+        gemA_alct_tag_sr  <= dynamic_zero;      // Load a dynamic 0 on reset, mollify xst
+    end
+
+    i=0;                  // Loop over 15 window positions 0 to 14 
+    while (i<=14) begin
+      if (gemA_alct_tag_me==1 && gemA_alct_tag_win==i && gem_sr_include[i]) gemA_alct_tag_sr[i+1] <= 1;
+      else                  // Otherwise parallel shift all data left
+          gemA_alct_tag_sr[i+1] <= gemA_alct_tag_sr[i];
+
+      i=i+1;
+      end  // close while
+  end  // close clock
+  
+ //register shift, mark whether GEM was used for match for not, Tao 
+  always @(posedge clock) begin
+    if (reset_sr) begin             // Sych reset on resync or not power up
+      gemA_alct_match_sr  <= dynamic_zero; // Load a dynamic 0 on reset, mollify xst
+    end
+
+    i=0;                  // Loop over 15 window positions 0 to 14 
+    while (i<=14) begin
+      if (gemA_alct_match ==1 && gemA_alct_tag_win==i && gem_sr_include[i]) gemA_alct_match_sr[i+1] <= 1;
+      else                  // Otherwise parallel shift all data left
+        gemA_alct_match_sr[i+1] <= gemA_alct_match_sr[i];
+      i=i+1;
+    end  // close while
+  end  // close clock
+
+
+  //tag matched GEM
+  reg [15:0] gemB_alct_tag_sr = 0;
+  wire       gemB_alct_tag_me;
+  wire [3:0] gemB_alct_tag_win;
+  reg [15:0] gemB_alct_match_sr = 0;// record whether gem is used
+
+  always @(posedge clock) begin
+    if (reset_sr) begin            // Sych reset on resync or not power up
+        gemB_alct_tag_sr  <= dynamic_zero;      // Load a dynamic 0 on reset, mollify xst
+    end
+
+    i=0;                  // Loop over 15 window positions 0 to 14 
+    while (i<=14) begin
+      if (gemB_alct_tag_me==1 && gemB_alct_tag_win==i && gem_sr_include[i]) gemB_alct_tag_sr[i+1] <= 1;
+      else                  // Otherwise parallel shift all data left
+          gemB_alct_tag_sr[i+1] <= gemB_alct_tag_sr[i];
+
+      i=i+1;
+      end  // close while
+  end  // close clock
+  
+ //register shift, mark whether GEM was used for match for not, Tao 
+  always @(posedge clock) begin
+    if (reset_sr) begin             // Sych reset on resync or not power up
+      gemB_alct_match_sr  <= dynamic_zero; // Load a dynamic 0 on reset, mollify xst
+    end
+
+    i=0;                  // Loop over 15 window positions 0 to 14 
+    while (i<=14) begin
+      if (gemB_alct_match ==1 && gemB_alct_tag_win==i && gem_sr_include[i]) gemB_alct_match_sr[i+1] <= 1;
+      else                  // Otherwise parallel shift all data left
+        gemB_alct_match_sr[i+1] <= gemB_alct_match_sr[i];
+      i=i+1;
+    end  // close while
+  end  // close clock
+
+
+// Find highest priority window position that has a non-tagged gem
+  wire [15:0] gemA_alct_win_ena;          // Table of enabled window positions
+  wire [3:0]  gemA_alct_win_pri [15:0];        // Table of window position priorities that are enabled
+
+  //genvar j;                // Table window priorities multipled by windwo position enables
+  generate
+  for (j=0; j<=15; j=j+1) begin: gengemApri
+      assign gemA_alct_win_ena[j] = (gem_sr_include[j]==1 && gemA_vpf_sr[j]==1 && gemA_alct_tag_sr[j]==0);
+      assign gemA_alct_win_pri[j] = (gem_alct_win_priority[j] * gemA_alct_win_ena[j]);
+  end
+  endgenerate
+
+
+  wire [3:0] gemA_alct_win_best;
+  wire [3:0] gemA_alct_pri_best;
+
+  tree_encoder utree_encoder_gemAalct(
+      .win_pri_0    (gemA_alct_win_pri[ 0]),
+      .win_pri_1    (gemA_alct_win_pri[ 1]),
+      .win_pri_2    (gemA_alct_win_pri[ 2]),
+      .win_pri_3    (gemA_alct_win_pri[ 3]),
+      .win_pri_4    (gemA_alct_win_pri[ 4]),
+      .win_pri_5    (gemA_alct_win_pri[ 5]),
+      .win_pri_6    (gemA_alct_win_pri[ 6]),
+      .win_pri_7    (gemA_alct_win_pri[ 7]),
+      .win_pri_8    (gemA_alct_win_pri[ 8]),
+      .win_pri_9    (gemA_alct_win_pri[ 9]),
+      .win_pri_10   (gemA_alct_win_pri[10]),
+      .win_pri_11   (gemA_alct_win_pri[11]),
+      .win_pri_12   (gemA_alct_win_pri[12]),
+      .win_pri_13   (gemA_alct_win_pri[13]),
+      .win_pri_14   (gemA_alct_win_pri[14]),
+      .win_pri_15   (gemA_alct_win_pri[15]),
+
+      .win_best     (gemA_alct_win_best),
+      .pri_best     (gemA_alct_pri_best)
+        );
+
+  wire [15:0] gemB_alct_win_ena;          // Table of enabled window positions
+  wire [3:0]  gemB_alct_win_pri [15:0];        // Table of window position priorities that are enabled
+
+  //genvar j;                // Table window priorities multipled by windwo position enables
+  generate
+  for (j=0; j<=15; j=j+1) begin: gengemBpri
+      assign gemB_alct_win_ena[j] = (gem_sr_include[j]==1 && gemB_vpf_sr[j]==1 && gemB_alct_tag_sr[j]==0);
+      assign gemB_alct_win_pri[j] = (gem_alct_win_priority[j] * gemB_alct_win_ena[j]);
+  end
+  endgenerate
+
+
+  wire [3:0] gemB_alct_win_best;
+  wire [3:0] gemB_alct_pri_best;
+
+  tree_encoder utree_encoder_gemBalct(
+      .win_pri_0    (gemB_alct_win_pri[ 0]),
+      .win_pri_1    (gemB_alct_win_pri[ 1]),
+      .win_pri_2    (gemB_alct_win_pri[ 2]),
+      .win_pri_3    (gemB_alct_win_pri[ 3]),
+      .win_pri_4    (gemB_alct_win_pri[ 4]),
+      .win_pri_5    (gemB_alct_win_pri[ 5]),
+      .win_pri_6    (gemB_alct_win_pri[ 6]),
+      .win_pri_7    (gemB_alct_win_pri[ 7]),
+      .win_pri_8    (gemB_alct_win_pri[ 8]),
+      .win_pri_9    (gemB_alct_win_pri[ 9]),
+      .win_pri_10   (gemB_alct_win_pri[10]),
+      .win_pri_11   (gemB_alct_win_pri[11]),
+      .win_pri_12   (gemB_alct_win_pri[12]),
+      .win_pri_13   (gemB_alct_win_pri[13]),
+      .win_pri_14   (gemB_alct_win_pri[14]),
+      .win_pri_15   (gemB_alct_win_pri[15]),
+
+      .win_best     (gemB_alct_win_best),
+      .pri_best     (gemB_alct_pri_best)
+        );
+
+
+  wire gemA_alct_window_open    = |(gemA_vpf_sr & gem_sr_include);
+  wire gemA_alct_window_hasgem  = |(gemA_vpf_sr & gem_sr_include & ~gemA_alct_tag_sr);
+
+  wire gemB_alct_window_open    = |(gemB_vpf_sr & gem_sr_include);
+  wire gemB_alct_window_hasgem  = |(gemB_vpf_sr & gem_sr_include & ~gemB_alct_tag_sr);
+
+// GEM window closes on next bx, check for un-tagged gem in last bx
+  wire   gemA_alct_last_vpf = gemA_vpf_sr[gem_alct_winclosing];        // GEM token reaches last window position 1bx before tag
+  wire   gemA_alct_last_tag = gemA_alct_tag_sr[gem_alct_winclosing];    // push it to GEM-CLCT matching sequence anyway    
+  wire   gemB_alct_last_vpf = gemB_vpf_sr[gem_alct_winclosing];        // GEM token reaches last window position 1bx before tag
+  wire   gemB_alct_last_tag = gemB_alct_tag_sr[gem_alct_winclosing];    // push it to GEM-CLCT matching sequence anyway    
+
+// GEM matched or alct-only
+  wire    alct_gem_pulse        = alct0_gem_pipe_vpf | alct1_gem_pipe_vpf;              // ALCT vpf
+  assign  gemA_alct_match       = alct_gem_pulse   &&  gemA_alct_window_hasgem;  // ALCT matches GEM window, push to CLCT match
+  assign  gemB_alct_match       = alct_gem_pulse   &&  gemB_alct_window_hasgem;  // ALCT matches GEM window, push to CLCT match
+
+  wire alct_gemA_nogem       = alct_gem_pulse   && !gemA_alct_window_hasgem;  // ALCT arrived, but there was no GEM window open
+  wire gemA_alct_last_win    = gemA_alct_last_vpf && !gemA_alct_last_tag;  // CLCT reached end of window
+  wire gemA_alct_noalct      = gemA_alct_last_win && !alct_gem_pulse;    // No ALCT arrived in window, pushed mpc on last bx
+  wire gemA_alct_used        = gemA_alct_match_sr[gem_alct_winclosing]; //gem was used, Tao
+
+  wire alct_gemB_nogem       = alct_gem_pulse   && !gemB_alct_window_hasgem;  // ALCT arrived, but there was no GEM window open
+  wire gemB_alct_last_win    = gemB_alct_last_vpf && !gemB_alct_last_tag;  // CLCT reached end of window
+  wire gemB_alct_noalct      = gemB_alct_last_win && !alct_gem_pulse;    // No ALCT arrived in window, pushed mpc on last bx
+  wire gemB_alct_used        = gemB_alct_match_sr[gem_alct_winclosing]; //gem was used, Tao
+// ALCT*CLCT match: alct arrived while there were 1 or more un-tagged gems in the window
+//Algo2016, no tag clct if clct_reuse is enabled
+ // Tao, maybe later add a configuration for drop_used_gem ???
+  assign gemA_alct_tag_me  = (algo2016_drop_used_clcts) ? gemA_alct_match : 1'b0;    // Tag the matching clct
+  assign gemA_alct_tag_win = gemA_alct_win_best;   // But get the one with highest priority
+
+  assign gemB_alct_tag_me  = (algo2016_drop_used_clcts) ? gemB_alct_match : 1'b0;    // Tag the matching clct
+  assign gemB_alct_tag_win = gemB_alct_win_best;   // But get the one with highest priority
+
+  wire [3:0] gemA_alct_match_win_mux; //alct position in gem-tagged window. 
+  assign gemA_alct_match_win_mux = (gemA_alct_noalct) ? gem_alct_winclosing    : gemA_alct_tag_win;    // if GEM only and no alct, disregard priority and take last window position // Pointer to SRL delayed GEM signals to align with ALCT signal after alct_delay_forgem
+  
+
+  wire [3:0] gemB_alct_match_win_mux; //alct position in gem-tagged window. 
+  assign gemB_alct_match_win_mux = (gemB_alct_noalct) ? gem_alct_winclosing    : gemB_alct_tag_win;    // if GEM only and no alct, disregard priority and take last window position // Pointer to SRL delayed GEM signals to align with ALCT signal after alct_delay_forgem
+
+
+  //coincident pads in timing
+  wire [3:0] gemAB_win_diff = (gemA_alct_match_win_mux > gemB_alct_match_win_mux) ? gemA_alct_match_win_mux -gemB_alct_match_win_mux : gemB_alct_match_win_mux - gemA_alct_match_win_mux;
+  wire [3:0] match_gemcopad_window = 4'd2;// configuration parameter !!!
+  //how about no ALCT case? should we just require both two gem in same BX ?
+  wire gemAB_copad_timing = (gemA_alct_match && gemB_alct_match && gemAB_win_diff <= match_gemcopad_window) || (gemA_alct_noalct && gemB_alct_noalct); 
+
+
+  // after GEM-ALCT match, delay GEM to expected ALCT position for GEM-CLCT match, 
+  //if no ALCT in GEM tagged window, 
+  // how no GEM case? does it bother ?
+  wire [3:0] gemA_extra_delay_forclct = (alct_pulse) ?  gem_alct_win_center : 0;//address to find gem-alct match best win
+  wire [3:0] gemB_extra_delay_forclct = (alct_pulse) ?  gem_alct_win_center : 0;
+  
+
+  wire [3:0] gemA_forclct_adr = gemA_extra_delay_forclct-4'b1;
+  wire [3:0] gemB_forclct_adr = gemB_extra_delay_forclct-4'b1;
+  wire gemA_extra_delay_forclct_is_0 = gemA_extra_delay_forclct == 0;
+  wire gemB_extra_delay_forclct_is_0 = gemB_extra_delay_forclct == 0;
+
+  wire [3:0] gemA_alct_match_win_mux_srl;
+  wire [3:0] gemB_alct_match_win_mux_srl;
+  srl16e_bbl #(4) ugemAmatchwin (.clock(clock),.ce(1'b1),.adr(gemA_forclct_adr),.d(gemA_alct_match_win_mux),.q(gemA_alct_match_win_mux_srl));
+  srl16e_bbl #(4) ugemBmatchwin (.clock(clock),.ce(1'b1),.adr(gemB_forclct_adr),.d(gemB_alct_match_win_mux),.q(gemB_alct_match_win_mux_srl));
+  
+  wire [3:0] gemA_alct_match_win_mux_pipe = gemA_extra_delay_forclct_is_0 ? gemA_alct_match_win_mux : gemA_alct_match_win_mux_srl;
+  wire [3:0] gemB_alct_match_win_mux_pipe = gemB_extra_delay_forclct_is_0 ? gemB_alct_match_win_mux : gemB_alct_match_win_mux_srl;
+
+  //another way to get gemA_alct_match_win_mux_pipe by using register, when alct_pulse_gem is valid in gem-alct matching
+  // reg [3:0] gemA_alct_match_win_mux_reg = 0;
+  // always @(clock)
+  //   if (alct_pulse_forgem) gemA_alct_match_win_mux_reg = gemA_alct_match_win_mux;
+  //
+  // then gemA_alct_match_win_mux_pipe = gemA_alct_match_win_mux_reg
+
+
+
+//------------------------------------------------------------------------------------------------------------------
+// Push GEM data into a 1bx to 16bx pipeline delay to do GEM-CLCT match
+//------------------------------------------------------------------------------------------------------------------
+  //find out GEM vpf for CLCT-GEM matching 
+  wire [7:0] gemA_forclct, gemA_forclct_srl;
+  wire [7:0] gemB_forclct, gemB_forclct_srl;
+  //srl16e_bbl #(8) ugemApulse_gemclct (.clock(clock),.ce(1'b1),.adr(gemA_alct_match_win_mux_pipe),.d(gemA_pipe_foralct),.q(gemA_forclct_srl));
+  //srl16e_bbl #(8) ugemBpulse_gemclct (.clock(clock),.ce(1'b1),.adr(gemB_alct_match_win_mux_pipe),.d(gemB_pipe_foralct),.q(gemB_forclct_srl));
+  //wire gemA_alct_match_win_mux_pipe_is_0 = gemA_alct_match_win_mux_pipe == 0;
+  //wire gemB_alct_match_win_mux_pipe_is_0 = gemB_alct_match_win_mux_pipe == 0;
+  //wire [7:0] gemA_forclct_pipe = gemA_alct_match_win_mux_pipe_is_0 ? gemA_pipe_foralct : gemA_forclct_srl;
+  //wire [7:0] gemB_forclct_pipe = gemB_alct_match_win_mux_pipe_is_0 ? gemB_pipe_foralct : gemB_forclct_srl;
+  //or 
+  //wire [3:0] gemA_final_delay = gemA_alct_match_win_mux_pipe + match_gemA_alct_delay + gemA_extra_delay_forclct;//
+  //wire [3:0] gemB_final_delay = gemB_alct_match_win_mux_pipe + match_gemB_alct_delay + gemB_extra_delay_forclct;//
+  wire [3:0] gemA_final_delay_withalct = gemA_alct_match_win_mux_pipe + match_gemA_alct_delay + gem_alct_win_center;
+  wire [3:0] gemB_final_delay_withalct = gemB_alct_match_win_mux_pipe + match_gemB_alct_delay + gem_alct_win_center;
+  wire [3:0] gemA_final_delay_noalct = match_gemA_alct_delay + gem_alct_winclosing;
+  wire [3:0] gemB_final_delay_noalct = match_gemB_alct_delay + gem_alct_winclosing;
+  wire [3:0] gemA_final_delay = alct_pulse ? gemA_final_delay_withalct : gemA_final_delay_noalct;
+  wire [3:0] gemB_final_delay = alct_pulse ? gemB_final_delay_withalct : gemB_final_delay_noalct;
+
+
+  wire [3:0] gemA_final_adr   = gemA_final_delay - 4'b1;
+  wire [3:0] gemB_final_adr   = gemB_final_delay - 4'b1;
+  srl16e_bbl #(8) ugemApulse_gemclct (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemA_vpf),.q(gemA_forclct_srl));
+  srl16e_bbl #(8) ugemBpulse_gemclct (.clock(clock),.ce(1'b1),.adr(gemB_final_adr),.d(gemB_vpf),.q(gemB_forclct_srl));
+  
+  wire [7:0] gemA_forclct_pipe =  (gemA_final_delay == 0) ? gemA_vpf : gemA_forclct_srl;
+  wire [7:0] gemB_forclct_pipe =  (gemB_final_delay == 0) ? gemB_vpf : gemB_forclct_srl;
+
+  wire gemA_pulse_forclct = |gemA_forclct_pipe;
+  wire gemB_pulse_forclct = |gemB_forclct_pipe;
+
+  assign gemA_clct_match  = gemA_pulse_forclct  &&  clct_window_haslcts;  // gem matches CLCT window, push to mpc on current bx
+  assign gemB_clct_match  = gemB_pulse_forclct  &&  clct_window_haslcts;  // gem matches CLCT window, push to mpc on current bx
+
+  wire clct_gemA_noclct = gemA_pulse_forclct  && !clct_window_haslcts;  // gem arrived, but there was no CLCT window open
+  wire gemA_clct_nogem  = clct_last_win && !gemA_pulse_forclct;    // No ALCT arrived in window, pushed mpc on last bx
+  //wire gemA_clct_used        = clct_match_sr[winclosing]; //CLCT was used
+  wire clct_gemB_noclct = gemB_pulse_forclct  && !clct_window_haslcts;  // gem arrived, but there was no CLCT window open
+  wire gemB_clct_nogem  = clct_last_win && !gemB_pulse_forclct;    // No ALCT arrived in window, pushed mpc on last bx
+  //wire gemA_clct_used        = clct_match_sr[winclosing]; //CLCT was used
+  //wire gemA_clct_nogem_lost = clct_last_win &&  gemA_pulse_forclct && clct_win_best!=winclosing;// No ALCT arrived in window, lost to mpc contention
+
+  //probably change it into copad match ??
+  assign gem_pulse         = gemA_pulse_forclct || gemB_pulse_forclct;
+  assign alct_gem          = alct_pulse && gem_pulse;
+  assign clct_gem          = gemB_clct_match || gemA_clct_match; 
+  assign alct_clct_gem     = clct_match && gem_pulse;
+  assign clct_gem_noalct   = clct_gem && gemA_alct_noalct && gemB_alct_noalct;
+  assign alct_gem_noclct   = alct_gem && alct_noclct;
+  //all cases to send to data to MPC:
+  // ALCT-CLCT, both 4 layers
+  // ALCT-CLCT, at least one of them is low, and then match with GEM
+  // ALCT-Copad
+  // CLCT-Copad
+
+  //alct_clct_nogem
+  //alct_gem_noclct
+  //clct_gem_noalct
+   
+ // from the alct position in gem-tagged window, we should know where is the gem pulse
+  // delay the GEM pulse to re-do matching as it is leaving the window (to match to clct_noalct and alct_noclct)
+  //srl16e_bbl #(1) ugempulse (.clock(clock),.ce(1'b1),.adr(winclosing-clct_win_center),.d(gem_pulse),.q(gem_pulse_winclose)); //andrew
+
+
+  // gem matching
+  //assign alct_gem        = alct_pulse                   && (gem_pulse);//andrew
+  //assign clct_gem        = clct_vpf_sr[clct_win_center] && (gem_pulse);//andrew
+  //assign alct_clct_gem   = clct_match                   && (gem_pulse);//andrew
+  //assign clct_gem_noalct = clct_noalct                  && (gem_pulse_winclose);//andrew
+  //assign alct_gem_noclct = alct_discard                 && (gem_pulse_winclose);//andrew
+
+
+
+
+
+//------------------------------------------------------------------------------------------------------------------
+// ALCT-CLCT match results 
+// Following logic would change if GEM is enabled 
+//------------------------------------------------------------------------------------------------------------------
 // Event trigger disposition
   reg  [MXCFEB-1:0] tmb_aff_list  = 0;
   reg  [3:0]        tmb_match_win = 0;
@@ -1166,12 +1620,12 @@
   wire clct_discard  = (clct_match && !tmb_allow_match  ) || (clct_noalct && !tmb_allow_clct) || clct_noalct_lost || clct_used;
   wire alct_discard  =  alct_pulse && !alct_keep;
 
-// Match window mux
-  wire [3:0] match_win;
-  wire [3:0] match_win_mux;
 
   wire clct_kept = (clct_keep || clct_keep_ro);
 
+// Match window mux
+  wire [3:0] match_win;
+  wire [3:0] match_win_mux;
   assign match_win_mux = (clct_noalct) ? winclosing    : clct_tag_win;    // if clct only, disregard priority and take last window position // Pointer to SRL delayed CLCT signals
   assign match_win     = (clct_kept  ) ? match_win_mux : clct_win_center; // Default window position for alct-only events
 
@@ -1198,45 +1652,10 @@
   assign alct_only_trig = (alct_noclct && tmb_allow_alct) || (alct_noclct_ro && tmb_allow_alct_ro);// ALCT-only triggers are allowed
 
 
-//------------------------------------------------------------------------------------------------------------------
-// Push GEM data into a 1bx to 16bx pipeline delay to compensate for CLCT processing time
-//------------------------------------------------------------------------------------------------------------------
-  wire [7:0]  gemA_pipe,     gemA_srl;
-  wire [7:0]  gemB_pipe,     gemB_srl;
-
-  reg  [3:0] gemA_srl_adr = 0;
-  reg  [3:0] gemB_srl_adr = 0;
-
-  always @(posedge clock) begin
-  gemA_srl_adr <= match_gemA_alct_delay-1'b1;
-  gemB_srl_adr <= match_gemB_alct_delay-1'b1;
-  end
-
-  srl16e_bbl #(8) ugemA (.clock(clock),.ce(1'b1),.adr(gemA_srl_adr),.d(gemA_vpf[7:0]),.q(gemA_srl[7:0]));
-  srl16e_bbl #(8) ugemB (.clock(clock),.ce(1'b1),.adr(gemB_srl_adr),.d(gemB_vpf[7:0]),.q(gemB_srl[7:0]));
-
-  wire gemA_ptr_is_0 = (match_gemA_alct_delay == 0);               // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
-  wire gemB_ptr_is_0 = (match_gemB_alct_delay == 0);               // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
-
-  assign gemA_pipe = (gemA_ptr_is_0) ? gemA_vpf : gemA_srl;  // First  GEM after pipe delay
-  assign gemB_pipe = (gemB_ptr_is_0) ? gemB_vpf : gemB_srl;  // Second GEM after pipe delay
-
-  wire gem_pulse = (|gemA_pipe || |gemB_pipe);
-
-
-  // delay the GEM pulse to re-do matching as it is leaving the window (to match to clct_noalct and alct_noclct)
-  srl16e_bbl #(1) ugempulsewinclose (.clock(clock),.ce(1'b1),.adr(winclosing-clct_win_center),.d(gem_pulse),.q(gem_pulse_winclose));
-
-  // gem matching
-  assign alct_gem        = alct_pulse                   && (gem_pulse);
-  assign clct_gem        = clct_vpf_sr[clct_win_center] && (gem_pulse);
-  assign alct_clct_gem   = clct_match                   && (gem_pulse);
-  assign clct_gem_noalct = clct_noalct                  && (gem_pulse_winclose);
-  assign alct_gem_noclct = alct_discard                 && (gem_pulse_winclose);
-
-
-
+//--------------------------------------------------------------
 // Latch clct match results for TMB and MPC pathways
+//--------------------------------------------------------------
+
   reg tmb_trig_pulse       = 0;
   reg tmb_trig_keep_ff     = 0;
   reg tmb_non_trig_keep_ff = 0;
