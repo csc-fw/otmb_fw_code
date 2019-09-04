@@ -1532,6 +1532,24 @@
   //   if (alct_pulse_forgem) gemA_alct_match_win_mux_reg = gemA_alct_match_win_mux;
   //
   // then gemA_alct_match_win_mux_pipe = gemA_alct_match_win_mux_reg
+  // or use 16-stage FF register, reg [3:0] gemA_match_win_ff[15:0];
+  //always @(clock) begin 
+  //  if (reset_sr) begin 
+  //    i = 0;
+  //    while ( i <= 15 ) begin
+  //        gemA_match_win_ff[i] <= 4'b0;
+  //        i = i+1;
+  //    end
+  //  end
+  //  if (gemA_alct_match) gemA_match_win_ff[0] <= gemA_alct_match_win_mux;
+  //  else 
+  //      gemA_match_win_ff[0] = 4'b0;
+  //  i = 1;
+  //  while (i <= 14 ) begin
+  //    gemA_match_win_ff[i+1] <= gemA_match_win_ff[i];
+  //      i = i+1
+  //  end
+  //end //close always
 
 
 

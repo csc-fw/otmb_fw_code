@@ -892,6 +892,8 @@
 // Header Counters
   hdr_clear_on_resync,
   pretrig_counter,
+  seq_pretrig_counter,
+  almostseq_pretrig_counter,
   clct_counter,
   trig_counter,
   alct_counter,
@@ -922,6 +924,8 @@
   active_cfeb4_event_counter,      // CFEB4 active flag sent to DMB
   active_cfeb5_event_counter,      // CFEB5 active flag sent to DMB
   active_cfeb6_event_counter,      // CFEB6 active flag sent to DMB
+
+  bx0_match_counter, // ALCT-CLCT BX0 match counter
 
   gem_counter0,
   gem_counter1,
@@ -2798,6 +2802,8 @@
 // Header Counters
   output                hdr_clear_on_resync; // Clear header counters on ttc_resync
   input  [MXCNTVME-1:0] pretrig_counter;     // Pre-trigger counter
+  input  [MXCNTVME-1:0] seq_pretrig_counter;       // consecutive Pre-trigger counter (equential, 1 bx apart)
+  input  [MXCNTVME-1:0] almostseq_pretrig_counter; // Pre-triggers-2bx-apart counter
   input  [MXCNTVME-1:0] clct_counter;        // CLCT counter
   input  [MXCNTVME-1:0] trig_counter;        // TMB trigger counter
   input  [MXCNTVME-1:0] alct_counter;        // ALCTs received counter
@@ -2828,6 +2834,8 @@
   input  [MXCNTVME-1:0] active_cfeb4_event_counter;      // CFEB4 active flag sent to DMB
   input  [MXCNTVME-1:0] active_cfeb5_event_counter;      // CFEB5 active flag sent to DMB
   input  [MXCNTVME-1:0] active_cfeb6_event_counter;      // CFEB6 active flag sent to DMB
+
+  input  [MXCNTVME-1:0] bx0_match_counter;
 
 // CSC Orientation Ports
   input  [3:0] csc_type;        // Firmware compile type
@@ -7278,7 +7286,7 @@
 // ADR_CNT_RDATA=0xD2  Trigger/Readout Counter Data Register
 //------------------------------------------------------------------------------------------------------------------
 // Remap 1D counters to 2D, because XST does not support 2D ports
-  parameter MXCNT = 93;                     // Number of counters, last counter id is mxcnt-1
+  parameter MXCNT = 96;                     // Number of counters, last counter id is mxcnt-1
   reg  [MXCNTVME-1:0] cnt_snap [MXCNT-1:0]; // Event counter snapshot 2D
   wire [MXCNTVME-1:0] cnt      [MXCNT-1:0]; // Event counter 2D map
 
@@ -7396,7 +7404,9 @@
   assign cnt[90]  = active_cfebs_me1a_event_counter; // ME1a CFEB active flag sent to DMB
   assign cnt[91]  = active_cfebs_me1b_event_counter; // ME1b CFEB active flag sent to DMB
   assign cnt[92]  = active_cfebs_event_counter;      // Any CFEB active flag sent to DMB
-
+  assign cnt[93]  = seq_pretrig_counter;       // consecutive Pre-trigger counter (equential, 1 bx apart)
+  assign cnt[94]  = almostseq_pretrig_counter; // Pre-triggers-2bx-apart counter
+  assign cnt[95]  = bx0_match_counter;    // ALCT-CLCT bx0 match
 
 // Virtex-6 GTX Optical Receiver Error Counters
 //  assign cnt[81]  = gtx_rx_err_count0;  // Error count on this fiber channel

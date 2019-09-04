@@ -759,6 +759,8 @@
   clctf_xtmb,
   bx0_xmpc,
   bx0_match,
+  gemA_bx0_match,
+  gemB_bx0_match,
 
   tmb_trig_pulse,
   tmb_trig_keep,
@@ -923,6 +925,8 @@
 // Event Counter Ports
   hdr_clear_on_resync,
   pretrig_counter,
+  seq_pretrig_counter,      // consecutive Pre-trigger counter (equential, 1 bx apart)
+  almostseq_pretrig_counter, // Pre-triggers-2bx-apart counter
   clct_counter,
   alct_counter,
   trig_counter,
@@ -945,6 +949,8 @@
   active_cfeb4_event_counter,      // CFEB4 active flag sent to DMB
   active_cfeb5_event_counter,      // CFEB5 active flag sent to DMB
   active_cfeb6_event_counter,      // CFEB6 active flag sent to DMB
+
+  bx0_match_counter, 
 
 // GEM Trigger/Readout Counter Ports
   gem_cnt_all_reset,
@@ -1656,6 +1662,8 @@
 
   output   bx0_xmpc;  // bx0 to mpc
   input    bx0_match; // ALCT bx0 and CLCT bx0 match in time
+  input    gemA_bx0_match; // gemA bx0 and CLCT bx0 match in time
+  input    gemB_bx0_match; // gemB bx0 and CLCT bx0 match in time
 
   input          tmb_trig_pulse;    // TMB Triggered on ALCT or CLCT or both
   input          tmb_trig_keep;    // ALCT or CLCT or both triggered, and trigger is allowed
@@ -1819,6 +1827,8 @@
 // Event Counter Ports
   input                   hdr_clear_on_resync; // Clear header counters on ttc_resync
   output  [MXCNTVME-1:0]  pretrig_counter;     // Pre-trigger counter
+  output  [MXCNTVME-1:0]  seq_pretrig_counter;       // consecutive Pre-trigger counter (equential, 1 bx apart)
+  output  [MXCNTVME-1:0]  almostseq_pretrig_counter; // Pre-triggers-2bx-apart counter
   output  [MXCNTVME-1:0]  clct_counter;        // CLCT counter
   output  [MXCNTVME-1:0]  alct_counter;        // ALCTs received counter
   output  [MXCNTVME-1:0]  trig_counter;        // TMB trigger counter
@@ -1841,6 +1851,8 @@
   output  [MXCNTVME-1:0] active_cfeb4_event_counter;      // CFEB4 active flag sent to DMB
   output  [MXCNTVME-1:0] active_cfeb5_event_counter;      // CFEB5 active flag sent to DMB
   output  [MXCNTVME-1:0] active_cfeb6_event_counter;      // CFEB6 active flag sent to DMB
+
+  output  [MXCNTVME-1:0] bx0_match_counter; // ALCT-CLCT BX0 match counter
 
 // Trigger/Readout Counter Ports
   input  gem_cnt_all_reset;    // Trigger/Readout counter reset
@@ -2334,6 +2346,8 @@
 
 // Pre-trigger counter, resets at evcntres or resync
   reg   [MXCNTVME-1:0]  pretrig_counter = 0;
+  reg   [MXCNTVME-1:0]  seq_pretrig_counter = 0;
+  reg   [MXCNTVME-1:0]  almostseq_pretrig_counter = 0;
 
   wire pretrig_cnt_reset = ccb_evcntres || (ttc_resync && hdr_clear_on_resync);
   wire pretrig_cnt_ovf   = (pretrig_counter == {MXCNTVME{1'b1}});
@@ -2352,6 +2366,7 @@
 //  x_delay_os #( .MXDLY(8) ) upreClct_delay (.d(clct_pretrig),.clock(clock),.delay(l1a_preClct_dly),.q(preClct_ff));
   wire preClct_ff = preClct;         // Lets not delay CLCT pre-trigger for now
 
+  reg [5:0]  preClct_reg = 0;  // pipeline to record CLCT pre-trigger
   // open CLCT pre-trigger window
   reg  [3:0] preClct_width_cnt = 0;
   wire       preClct_width_bsy = (preClct_width_cnt != 0);
@@ -2360,6 +2375,16 @@
     if      ( ttc_resync        ) preClct_width_cnt = 0;                        // Clear on reset
     else if ( preClct_ff        ) preClct_width_cnt = l1a_preClct_width - 1'b1; // Load persistence count
     else if ( preClct_width_bsy ) preClct_width_cnt = preClct_width_cnt - 1'b1; // Decrement count down to 0
+
+    preClct_reg[5:0] <= {preClct_reg[4:0],preClct};
+    if (vme_cnt_reset) begin           // Clear counters
+       seq_pretrig_counter <= cnt_fatzero;
+       almostseq_pretrig_counter <= cnt_fatzero;
+    end
+    else  begin
+       if (!(&seq_pretrig_counter) & (&preClct_reg[1:0])) seq_pretrig_counter <= seq_pretrig_counter + 1'b1;
+       if (!(&almostseq_pretrig_counter) & (|preClct_reg[4:1]) & preClct_reg[0] ) almostseq_pretrig_counter <= almostseq_pretrig_counter + 1'b1;
+    end
   end
   //
   wire preClct_window = preClct_width_bsy | preClct_ff; // Assert immediately, hold until count done
@@ -2527,6 +2552,14 @@
   always @(posedge clock) begin
     if      (l1a_cnt_reset) readout_counter = 0;
     else if (rocnt_en     ) readout_counter = readout_counter+1'b1;
+  end
+
+  wire bx0_match_cnt_reset = ccb_evcntres || (ttc_resync && hdr_clear_on_resync);
+  wire bx0_match_cnt_en = bx0_match;
+
+  always @(posedge clock) begin
+    if (bx0_match_cnt_reset)  bx0_match_counter = 0;
+    else if (bx0_match_cnt_en)  bx0_match_counter = bx0_match_counter + 1'b1;
   end
 
 //------------------------------------------------------------------------------------------------------------------
@@ -3195,7 +3228,7 @@
   parameter ACTVFAT_CNT_START       = 12;
   parameter GEMCSCMAP_CNT_START     = 84; // 12+24*3
   parameter GEMCSCMATCH_CNT_START   = 109; // 84+4+7*3
-  parameter GEM_UNUSED_START        = 114; //+5
+  parameter GEM_UNUSED_START        = 116; //+7
   
 
 // Counter enable strobes
@@ -3223,11 +3256,13 @@
     gem_cnt_en[GEMCSCMAP_CNT_START+2 ]    <= gemA_anycluster_me1b;
     gem_cnt_en[GEMCSCMAP_CNT_START+3 ]    <= gemB_anycluster_me1b;
 
-    gem_cnt_en[GEMCSCMATCH_CNT_START   ]    <= alct_gem;
-    gem_cnt_en[GEMCSCMATCH_CNT_START+1 ]    <= clct_gem;
-    gem_cnt_en[GEMCSCMATCH_CNT_START+2 ]    <= alct_clct_gem;
-    gem_cnt_en[GEMCSCMATCH_CNT_START+3 ]    <= clct_gem_noalct;
-    gem_cnt_en[GEMCSCMATCH_CNT_START+4 ]    <= alct_gem_noclct;
+    gem_cnt_en[GEMCSCMATCH_CNT_START   ]    <= gemA_bx0_match;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+1 ]    <= gemB_bx0_match;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+2 ]    <= alct_gem;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+3 ]    <= clct_gem;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+4 ]    <= alct_clct_gem;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+5 ]    <= clct_gem_noalct;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+6 ]    <= alct_gem_noclct;
 
 
   end

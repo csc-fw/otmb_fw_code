@@ -910,6 +910,8 @@
   wire  [MXCNTVME-1:0] active_cfeb5_event_counter;       // CFEB5 active flag sent to DMB
   wire  [MXCNTVME-1:0] active_cfeb6_event_counter;       // CFEB6 active flag sent to DMB
 
+  wire  [MXCNTVME-1:0] bx0_match_counter; // Out ALCT-CLCT BX0 match
+
 // GEM Counters
   wire  [MXCNTVME-1:0]  gem_counter0;
   wire  [MXCNTVME-1:0]  gem_counter1;
@@ -2622,6 +2624,8 @@ end
 
 // Sequencer Header Counters
    wire [MXCNTVME-1:0]    pretrig_counter; // Pre-trigger counter
+   wire [MXCNTVME-1:0]    seq_pretrig_counter;       // consecutive Pre-trigger counter (equential, 1 bx apart)
+   wire [MXCNTVME-1:0]    almostseq_pretrig_counter; // Pre-triggers-2bx-apart counter
    wire [MXCNTVME-1:0]    clct_counter;    // CLCT counter
    wire [MXCNTVME-1:0]    trig_counter;    // TMB trigger counter
    wire [MXCNTVME-1:0]    alct_counter;    // ALCTs received counter
@@ -3038,6 +3042,8 @@ end
   .clctf_xtmb (clctf_xtmb[MXCFEB-1:0]),  // Out  Active cfeb list to TMB
   .bx0_xmpc   (bx0_xmpc),                // Out  bx0 to tmb aligned with clct0/1
   .bx0_match  (bx0_match),               // In  ALCT bx0 and CLCT bx0 match in time
+  .gemA_bx0_match  (gemA_bx0_match),      // In GEMA+CLCT BX0 match
+  .gemB_bx0_match  (gemB_bx0_match),      // In GEMA+CLCT BX0 match
 
   .tmb_trig_pulse    (tmb_trig_pulse),           // In  ALCT or CLCT or both triggered
   .tmb_trig_keep     (tmb_trig_keep),            // In  ALCT or CLCT or both triggered, and trigger is allowed
@@ -3211,9 +3217,13 @@ end
   .active_cfeb5_event_counter      (active_cfeb5_event_counter[MXCNTVME-1:0]),      // Out
   .active_cfeb6_event_counter      (active_cfeb6_event_counter[MXCNTVME-1:0]),      // Out
 
+  .bx0_match_counter (bx0_match_counter), // Out ALCT-CLCT BX0 match
+
 // Sequencer Header Counters
   .hdr_clear_on_resync (hdr_clear_on_resync),           // In  Clear header counters on ttc_resync
   .pretrig_counter     (pretrig_counter[MXCNTVME-1:0]), // Out  Pre-trigger counter
+  .seq_pretrig_counter (seq_pretrig_counter[MXCNTVME-1:0]), // Out  consecutive Pre-trigger counter (equential, 1 bx apart)
+  .almostseq_pretrig_counter (almostseq_pretrig_counter[MXCNTVME-1:0]), // Out  Pre-triggers-2bx-apart counter
   .clct_counter        (clct_counter[MXCNTVME-1:0]),    // Out  CLCT counter
   .alct_counter        (alct_counter[MXCNTVME-1:0]),    // Out  ALCTs received counter
   .trig_counter        (trig_counter[MXCNTVME-1:0]),    // Out  TMB trigger counter
@@ -5134,6 +5144,8 @@ end
       // Header Counter Ports
       .hdr_clear_on_resync (hdr_clear_on_resync),           // Out  Clear header counters on ttc_resync
       .pretrig_counter     (pretrig_counter[MXCNTVME-1:0]), // In  Pre-trigger counter
+      .seq_pretrig_counter (seq_pretrig_counter[MXCNTVME-1:0]), // Out  consecutive Pre-trigger counter (equential, 1 bx apart)
+      .almostseq_pretrig_counter (almostseq_pretrig_counter[MXCNTVME-1:0]), // Out  Pre-triggers-2bx-apart counter
       .clct_counter        (clct_counter[MXCNTVME-1:0]),    // In  CLCT counter
       .trig_counter        (trig_counter[MXCNTVME-1:0]),    // In  TMB trigger counter
       .alct_counter        (alct_counter[MXCNTVME-1:0]),    // In  ALCTs received counter
@@ -5165,6 +5177,8 @@ end
       .active_cfeb5_event_counter      (active_cfeb5_event_counter[MXCNTVME-1:0]),      // In
       .active_cfeb6_event_counter      (active_cfeb6_event_counter[MXCNTVME-1:0]),      // In
 
+      .bx0_match_counter (bx0_match_counter), // Out ALCT-CLCT BX0 match
+      
       // GEM Trigger/Readout Counter Ports
       .gem_cnt_all_reset    (gem_cnt_all_reset),     // Out  Trigger/Readout counter reset
       .gem_cnt_stop_on_ovf  (gem_cnt_stop_on_ovf),   // Out  Stop all counters if any overflows
