@@ -2554,6 +2554,7 @@
     else if (rocnt_en     ) readout_counter = readout_counter+1'b1;
   end
 
+  reg  [MXCNTVME-1:0] bx0_match_counter = 0; 
   wire bx0_match_cnt_reset = ccb_evcntres || (ttc_resync && hdr_clear_on_resync);
   wire bx0_match_cnt_en = bx0_match;
 
