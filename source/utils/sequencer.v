@@ -759,8 +759,11 @@
   clctf_xtmb,
   bx0_xmpc,
   bx0_match,
+  bx0_match2,
   gemA_bx0_match,
+  gemA_bx0_match2,
   gemB_bx0_match,
+  gemB_bx0_match2,
 
   tmb_trig_pulse,
   tmb_trig_keep,
@@ -1662,8 +1665,11 @@
 
   output   bx0_xmpc;  // bx0 to mpc
   input    bx0_match; // ALCT bx0 and CLCT bx0 match in time
+  input    bx0_match2; // ALCT bx0 and CLCT bx0 match in time
   input    gemA_bx0_match; // gemA bx0 and CLCT bx0 match in time
+  input    gemA_bx0_match2; // gemA bx0 and CLCT bx0 match in time
   input    gemB_bx0_match; // gemB bx0 and CLCT bx0 match in time
+  input    gemB_bx0_match2; // gemB bx0 and CLCT bx0 match in time
 
   input          tmb_trig_pulse;    // TMB Triggered on ALCT or CLCT or both
   input          tmb_trig_keep;    // ALCT or CLCT or both triggered, and trigger is allowed
@@ -2556,7 +2562,7 @@
 
   reg  [MXCNTVME-1:0] bx0_match_counter = 0; 
   wire bx0_match_cnt_reset = ccb_evcntres || (ttc_resync && hdr_clear_on_resync);
-  wire bx0_match_cnt_en = bx0_match;
+  wire bx0_match_cnt_en = bx0_match2;
 
   always @(posedge clock) begin
     if (bx0_match_cnt_reset)  bx0_match_counter = 0;
@@ -3257,8 +3263,8 @@
     gem_cnt_en[GEMCSCMAP_CNT_START+2 ]    <= gemA_anycluster_me1b;
     gem_cnt_en[GEMCSCMAP_CNT_START+3 ]    <= gemB_anycluster_me1b;
 
-    gem_cnt_en[GEMCSCMATCH_CNT_START   ]    <= gemA_bx0_match;
-    gem_cnt_en[GEMCSCMATCH_CNT_START+1 ]    <= gemB_bx0_match;
+    gem_cnt_en[GEMCSCMATCH_CNT_START   ]    <= gemA_bx0_match2;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+1 ]    <= gemB_bx0_match2;
     gem_cnt_en[GEMCSCMATCH_CNT_START+2 ]    <= alct_gem;
     gem_cnt_en[GEMCSCMATCH_CNT_START+3 ]    <= clct_gem;
     gem_cnt_en[GEMCSCMATCH_CNT_START+4 ]    <= alct_clct_gem;

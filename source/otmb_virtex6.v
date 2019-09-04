@@ -3041,9 +3041,12 @@ end
   .clctc_xtmb (clctc_xtmb[MXCLCTC-1:0]), // Out  Common to CLCT0/1 to TMB
   .clctf_xtmb (clctf_xtmb[MXCFEB-1:0]),  // Out  Active cfeb list to TMB
   .bx0_xmpc   (bx0_xmpc),                // Out  bx0 to tmb aligned with clct0/1
-  .bx0_match  (bx0_match),               // In  ALCT bx0 and CLCT bx0 match in time
-  .gemA_bx0_match  (gemA_bx0_match),      // In GEMA+CLCT BX0 match
-  .gemB_bx0_match  (gemB_bx0_match),      // In GEMA+CLCT BX0 match
+  .bx0_match   (bx0_match),               // In  ALCT bx0 and CLCT bx0 match in time
+  .bx0_match2       (bx0_match2),               // In  ALCT bx0 and CLCT bx0 match in time
+  .gemA_bx0_match   (gemA_bx0_match),      // In GEMA+CLCT BX0 match
+  .gemA_bx0_match2  (gemA_bx0_match2),      // In GEMA+CLCT BX0 match
+  .gemB_bx0_match   (gemB_bx0_match),      // In GEMA+CLCT BX0 match
+  .gemB_bx0_match2  (gemB_bx0_match2),      // In GEMA+CLCT BX0 match
 
   .tmb_trig_pulse    (tmb_trig_pulse),           // In  ALCT or CLCT or both triggered
   .tmb_trig_keep     (tmb_trig_keep),            // In  ALCT or CLCT or both triggered, and trigger is allowed
@@ -3957,15 +3960,18 @@ end
   .alct_bx0_enable (alct_bx0_enable),     // In  Enable using alct bx0, else copy clct bx0
   .bx0_vpf_test    (bx0_vpf_test),        // In  Sets clct_bx0=lct0_vpf for bx0 alignment tests
   .bx0_match       (bx0_match),           // Out  ALCT bx0 and CLCT bx0 match in time
+  .bx0_match2      (bx0_match2),           // Out  ALCT bx0 and CLCT bx0 match in time
 
   .gemA_bx0_rx     (gemA_bx0_rx),         // In GEMA BX0 received
   .gemA_bx0_delay  (gemA_bx0_delay[3:0]), // In GEMA BX0 delay value
   .gemA_bx0_enable (gemA_bx0_enable),     // IN enable GEMA BX0 delay
   .gemA_bx0_match  (gemA_bx0_match),      // out match with CLCT_BX0
+  .gemA_bx0_match2 (gemA_bx0_match2),      // out match with CLCT_BX0
   .gemB_bx0_rx     (gemB_bx0_rx),         // IN GEMB BX0 received
   .gemB_bx0_delay  (gemB_bx0_delay[3:0]), // IN GEMB BX0 delay
   .gemB_bx0_enable (gemB_bx0_enable),     // IN enable GEMB BX0 delay
   .gemB_bx0_match  (gemB_bx0_match),      // out match with CLCT_BX0
+  .gemB_bx0_match2 (gemB_bx0_match2),      // out match with CLCT_BX0
 
   .mpc_rx_delay        (mpc_rx_delay[MXMPCDLY-1:0]), // In  MPC response delay
   .mpc_tx_delay        (mpc_tx_delay[MXMPCDLY-1:0]), // In  MPC transmit delay
@@ -4881,13 +4887,16 @@ end
       .alct_bx0_enable (alct_bx0_enable),     // Out  Enable using alct bx0, else copy clct bx0
       .bx0_vpf_test    (bx0_vpf_test),        // Out  Sets clct_bx0=lct0_vpf for bx0 alignment tests
       .bx0_match       (bx0_match),           // In  ALCT bx0 and CLCT bx0 match in time
+      .bx0_match2       (bx0_match2),           // In  ALCT bx0 and CLCT bx0 match in time
 
       .gemA_bx0_delay  (gemA_bx0_delay[3:0]), // Out GEMA bx0 delay
       .gemA_bx0_enable (gemA_bx0_enable),     // Out GEMA bx0 enable. 1: use gemA_bx0_delay for GEMA, 0: use clct bx0
       .gemA_bx0_match  (gemA_bx0_match),      // In GEMA+CLCT BX0 match
+      .gemA_bx0_match2 (gemA_bx0_match2),      // In GEMA+CLCT BX0 match
       .gemB_bx0_delay  (gemB_bx0_delay[3:0]), // Out GEMA bx0 delay
       .gemB_bx0_enable (gemB_bx0_enable),     // Out GEMA bx0 enable. 1: use gemA_bx0_delay for GEMA, 0: use clct bx0
       .gemB_bx0_match  (gemB_bx0_match),      // In GEMA+CLCT BX0 match
+      .gemB_bx0_match2 (gemB_bx0_match2),      // In GEMA+CLCT BX0 match
 
       //GEMA trigger match control
       .match_gemA_alct_delay  (match_gemA_alct_delay[3:0]),  //Out gemA delay for gemA-ALCT match

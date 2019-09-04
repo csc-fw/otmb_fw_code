@@ -267,15 +267,18 @@
   alct_bx0_enable,
   bx0_vpf_test,
   bx0_match,
+  bx0_match2,
 
   gemA_bx0_rx,
   gemA_bx0_delay,
   gemA_bx0_enable,
   gemA_bx0_match,//match with CLCT_BX0
+  gemA_bx0_match2,
   gemB_bx0_rx,
   gemB_bx0_delay,
   gemB_bx0_enable,
   gemB_bx0_match,//match with CLCT_BX0
+  gemB_bx0_match2,//match with CLCT_BX0
 
   mpc_rx_delay,
   mpc_tx_delay,
@@ -522,11 +525,13 @@
   input  [3:0]        gemA_bx0_delay;
   input               gemA_bx0_enable;
   output              gemA_bx0_match;
+  output              gemA_bx0_match2;
 
   input               gemB_bx0_rx;
   input  [3:0]        gemB_bx0_delay;
   input               gemB_bx0_enable;
   output              gemB_bx0_match;
+  output              gemB_bx0_match2;
 
 // TMB-Sequencer Pipelines
   input  [MXBADR-1:0]  wr_adr_xtmb; // Buffer write address after drift time
@@ -635,6 +640,7 @@
   input          alct_bx0_enable; // Enable using alct bx0, else copy clct bx0
   input          bx0_vpf_test;    // Sets clct_bx0=lct0_vpf for bx0 alignment tests
   output         bx0_match;       // ALCT bx0 and CLCT bx0 match in time
+  output         bx0_match2;
 
   input  [MXMPCDLY-1:0]  mpc_rx_delay;        // Wait for MPC accept
   input  [MXMPCDLY-1:0]  mpc_tx_delay;        // Delay LCT to MPC
@@ -1968,6 +1974,10 @@
   reg bx0_match=0; //output reg
   reg gemA_bx0_match=0;
   reg gemB_bx0_match=0;
+  //match status per BX
+  assign bx0_match2      = alct_bx0 & clct_bx0;
+  assign gemA_bx0_match2 = gemA_bx0 & clct_bx0;
+  assign gemB_bx0_match2 = gemB_bx0 & clct_bx0;
   always @(posedge clock) begin
       if      (ttc_resync) begin
           bx0_match <= 0;
