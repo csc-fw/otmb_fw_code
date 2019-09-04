@@ -4892,11 +4892,9 @@ end
       .gemA_bx0_delay  (gemA_bx0_delay[3:0]), // Out GEMA bx0 delay
       .gemA_bx0_enable (gemA_bx0_enable),     // Out GEMA bx0 enable. 1: use gemA_bx0_delay for GEMA, 0: use clct bx0
       .gemA_bx0_match  (gemA_bx0_match),      // In GEMA+CLCT BX0 match
-      .gemA_bx0_match2 (gemA_bx0_match2),      // In GEMA+CLCT BX0 match
       .gemB_bx0_delay  (gemB_bx0_delay[3:0]), // Out GEMA bx0 delay
       .gemB_bx0_enable (gemB_bx0_enable),     // Out GEMA bx0 enable. 1: use gemA_bx0_delay for GEMA, 0: use clct bx0
       .gemB_bx0_match  (gemB_bx0_match),      // In GEMA+CLCT BX0 match
-      .gemB_bx0_match2 (gemB_bx0_match2),      // In GEMA+CLCT BX0 match
 
       //GEMA trigger match control
       .match_gemA_alct_delay  (match_gemA_alct_delay[3:0]),  //Out gemA delay for gemA-ALCT match
