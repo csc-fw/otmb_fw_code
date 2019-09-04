@@ -4887,7 +4887,6 @@ end
       .alct_bx0_enable (alct_bx0_enable),     // Out  Enable using alct bx0, else copy clct bx0
       .bx0_vpf_test    (bx0_vpf_test),        // Out  Sets clct_bx0=lct0_vpf for bx0 alignment tests
       .bx0_match       (bx0_match),           // In  ALCT bx0 and CLCT bx0 match in time
-      .bx0_match2       (bx0_match2),           // In  ALCT bx0 and CLCT bx0 match in time
 
       .gemA_bx0_delay  (gemA_bx0_delay[3:0]), // Out GEMA bx0 delay
       .gemA_bx0_enable (gemA_bx0_enable),     // Out GEMA bx0 enable. 1: use gemA_bx0_delay for GEMA, 0: use clct bx0
