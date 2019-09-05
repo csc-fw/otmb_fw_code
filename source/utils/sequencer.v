@@ -798,11 +798,19 @@
   tmb_alctb,
   tmb_alcte,
 
+  gemA_alct_match,
+  gemB_alct_match,
+  gemA_clct_match,
+  gemB_clct_match,
+  gemA_alct_clct_match,
+  gemB_alct_clct_match,
   alct_gem,
   clct_gem,
   alct_clct_gem,
   clct_gem_noalct,
   alct_gem_noclct,
+  alct_copad_noclct,
+  clct_copad_noalct,
 
 // MPC Status
   mpc_frame_ff,
@@ -1704,11 +1712,19 @@
   input  [4:0]      tmb_alctb;      // ALCT bxn latched at trigger
   input  [1:0]      tmb_alcte;      // ALCT ecc error syndrome latched at trigger
 
+  input  gemA_alct_match; 
+  input  gemB_alct_match;
+  input  gemA_clct_match;
+  input  gemB_clct_match;
+  input  gemA_alct_clct_match;
+  input  gemB_alct_clct_match;
   input  alct_gem;        // GEM matched (in time) to ALCT
   input  clct_gem;        // GEM in CLCT open window
   input  alct_clct_gem;   // CLCT*(ALCT*GEM) match
   input  clct_gem_noalct; // CLCT lost (no alct), but with GEM
   input  alct_gem_noclct; // ALCT lost (no clct), but with GEM
+  input  alct_copad_noclct;
+  input  clct_copad_noalct;
 
 // MPC Status
   input          mpc_frame_ff;    // MPC frame latch strobe
@@ -2561,7 +2577,7 @@
   end
 
   reg  [MXCNTVME-1:0] bx0_match_counter = 0; 
-  wire bx0_match_cnt_reset = ccb_evcntres || (ttc_resync && hdr_clear_on_resync);
+  wire bx0_match_cnt_reset = vme_cnt_reset;
   wire bx0_match_cnt_en = bx0_match2;
 
   always @(posedge clock) begin
@@ -3235,7 +3251,7 @@
   parameter ACTVFAT_CNT_START       = 12;
   parameter GEMCSCMAP_CNT_START     = 84; // 12+24*3
   parameter GEMCSCMATCH_CNT_START   = 109; // 84+4+7*3
-  parameter GEM_UNUSED_START        = 116; //+7
+  parameter GEM_UNUSED_START        = 118; //+9
   
 
 // Counter enable strobes
@@ -3265,11 +3281,14 @@
 
     gem_cnt_en[GEMCSCMATCH_CNT_START   ]    <= gemA_bx0_match2;
     gem_cnt_en[GEMCSCMATCH_CNT_START+1 ]    <= gemB_bx0_match2;
-    gem_cnt_en[GEMCSCMATCH_CNT_START+2 ]    <= alct_gem;
-    gem_cnt_en[GEMCSCMATCH_CNT_START+3 ]    <= clct_gem;
-    gem_cnt_en[GEMCSCMATCH_CNT_START+4 ]    <= alct_clct_gem;
-    gem_cnt_en[GEMCSCMATCH_CNT_START+5 ]    <= clct_gem_noalct;
-    gem_cnt_en[GEMCSCMATCH_CNT_START+6 ]    <= alct_gem_noclct;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+2 ]    <= gemA_alct_match;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+3 ]    <= gemB_alct_match;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+4 ]    <= gemA_clct_match;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+5 ]    <= gemB_clct_match;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+6 ]    <= gemA_alct_clct_match;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+7 ]    <= gemB_alct_clct_match;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+8 ]    <= clct_copad_noalct;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+9 ]    <= alct_copad_noclct;
 
 
   end

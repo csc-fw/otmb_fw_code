@@ -217,11 +217,15 @@
   tmb_alctb,
   tmb_alcte,
 
+  gemA_alct_clct_match,
+  gemB_alct_clct_match,
   alct_gem,
   clct_gem,
   alct_clct_gem,
   clct_gem_noalct,
   alct_gem_noclct,
+  clct_copad_noalct,
+  alct_copad_noclct,
 
 // MPC Status
   mpc_frame_ff,
@@ -589,6 +593,10 @@
   output  [4:0]      tmb_alctb; // ALCT bxn latched at trigger
   output  [1:0]      tmb_alcte; // ALCT ecc error syndrome latched at trigger
 
+  output  gemA_alct_clct_match;
+  output  gemB_alct_clct_match;
+  output  alct_copad_noclct;
+  output  clct_copad_noalct;
   output  alct_gem;        // GEM matched (in time) to ALCT
   output  clct_gem;        // GEM in CLCT open window
   output  alct_clct_gem;   // CLCT*(ALCT*GEM) match
@@ -1605,12 +1613,17 @@
   //wire gemA_clct_nogem_lost = clct_last_win &&  gemA_pulse_forclct && clct_win_best!=winclosing;// No ALCT arrived in window, lost to mpc contention
 
   //probably change it into copad match ??
-  assign gem_pulse         = gemA_pulse_forclct || gemB_pulse_forclct;
-  assign alct_gem          = alct_pulse && gem_pulse;
-  assign clct_gem          = gemB_clct_match || gemA_clct_match; 
-  assign alct_clct_gem     = clct_match && gem_pulse;
-  assign clct_gem_noalct   = clct_gem && gemA_alct_noalct && gemB_alct_noalct;
-  assign alct_gem_noclct   = alct_gem && alct_noclct;
+  assign gem_pulse             = gemA_pulse_forclct || gemB_pulse_forclct;
+  assign alct_gem              = alct_pulse && gem_pulse;
+  assign clct_gem              = gemB_clct_match || gemA_clct_match; 
+  assign alct_clct_gem         = clct_match && gem_pulse;
+  assign clct_gem_noalct       = clct_gem && gemA_alct_noalct && gemB_alct_noalct;
+  assign alct_gem_noclct       = alct_gem && alct_noclct;
+
+  assign alct_copad_noclct     = alct_pulse && gemA_pulse_forclct && gemB_pulse_forclct && alct_noclct;
+  assign clct_copad_noalct     = gemA_clct_match && gemB_clct_match && gemA_alct_noalct && gemB_alct_noalct;
+  assign gemA_alct_clct_match  = gemA_pulse_forclct && clct_match;
+  assign gemB_alct_clct_match  = gemB_pulse_forclct && clct_match;
   //all cases to send to data to MPC:
   // ALCT-CLCT, both 4 layers
   // ALCT-CLCT, at least one of them is low, and then match with GEM

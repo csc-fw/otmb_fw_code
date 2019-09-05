@@ -3081,11 +3081,19 @@ end
   .tmb_alctb (tmb_alctb[4:0]),  // In  ALCT bxn latched at trigger
   .tmb_alcte (tmb_alcte[1:0]),  // In  ALCT ecc error syndrome latched at trigger
 
-  .alct_gem         (alct_gem),        // In GEM matched (in time) to ALCT
-  .clct_gem         (clct_gem),        // In GEM in CLCT open window
-  .alct_clct_gem    (alct_clct_gem),   // In CLCT*(ALCT*GEM) match
-  .clct_gem_noalct  (clct_gem_noalct), // In CLCT lost (no alct), but with GEM
-  .alct_gem_noclct  (alct_gem_noclct), // In ALCT lost (no clct), but with GEM
+  .gemA_alct_match      (gemA_alct_match), // In Gem alct/clct match 
+  .gemB_alct_match      (gemB_alct_match), // In Gem alct/clct matc/
+  .gemA_clct_match      (gemA_clct_match), // In Gem alct/clct matc/
+  .gemB_clct_match      (gemB_clct_match), // In Gem alct/clct matc/
+  .gemA_alct_clct_match (gemA_alct_clct_match),// In  Gem alct/clct match 
+  .gemB_alct_clct_match (gemB_alct_clct_match),// In  Gem alct/clct match 
+  .alct_gem             (alct_gem),        // In GEM matched (in time) to ALCT
+  .clct_gem             (clct_gem),        // In GEM in CLCT open window
+  .alct_clct_gem        (alct_clct_gem),   // In CLCT*(ALCT*GEM) match
+  .clct_gem_noalct      (clct_gem_noalct), // In CLCT lost (no alct), but with GEM
+  .alct_gem_noclct      (alct_gem_noclct), // In ALCT lost (no clct), but with GEM
+  .alct_copad_noclct    (alct_copad_noclct), // In alct+copad match and no clct found
+  .clct_copad_noalct    (clct_copad_noalct), // In clct+copad match and no alct found
 
 // Sequencer MPC Status
   .mpc_frame_ff   (mpc_frame_ff),                // In  MPC frame latch strobe
@@ -3910,11 +3918,15 @@ end
   .tmb_alctb (tmb_alctb[4:0]),  // Out  ALCT bxn latched at trigger
   .tmb_alcte (tmb_alcte[1:0]),  // Out  ALCT ecc error syndrome latched at trigger
 
-  .alct_gem         (alct_gem),        // Out GEM matched (in time) to ALCT
-  .clct_gem         (clct_gem),        // Out GEM in CLCT open window
-  .alct_clct_gem    (alct_clct_gem),   // Out CLCT*(ALCT*GEM) match
-  .clct_gem_noalct  (clct_gem_noalct), // Out CLCT lost (no alct), but with GEM
-  .alct_gem_noclct  (alct_gem_noclct), // Out ALCT lost (no clct), but with GEM
+  .gemA_alct_clct_match (gemA_alct_clct_match), // Out gemA alct clct match
+  .gemB_alct_clct_match (gemB_alct_clct_match), // Out GemB alct clct match
+  .alct_gem             (alct_gem),        // Out GEM matched (in time) to ALCT
+  .clct_gem             (clct_gem),        // Out GEM in CLCT open window
+  .alct_clct_gem        (alct_clct_gem),   // Out CLCT*(ALCT*GEM) match
+  .clct_gem_noalct      (clct_gem_noalct), // Out CLCT lost (no alct), but with GEM
+  .alct_gem_noclct      (alct_gem_noclct), // Out ALCT lost (no clct), but with GEM
+  .alct_copad_noclct    (alct_copad_noclct),// Out alct+copad, no clct 
+  .clct_copad_noalct    (clct_copad_noalct), // Out clct+copad, no alct
 
 // MPC Status
   .mpc_frame_ff   (mpc_frame_ff),                // Out  MPC frame latch strobe
