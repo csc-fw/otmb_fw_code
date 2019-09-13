@@ -1721,8 +1721,10 @@
   wire gemA_bc0marker = |gem_bc0marker[1:0];
   wire gemB_bc0marker = |gem_bc0marker[3:2];
 
-  wire gemA_bx0_rx    = &gem_bc0marker[1:0]; // both two GEMA fibers sending BC0 marker
-  wire gemB_bx0_rx    = &gem_bc0marker[3:2]; // both two GEMA fibers sending BC0 marker
+  //wire gemA_bx0_rx    = &gem_bc0marker[1:0]; // both two GEMA fibers sending BC0 marker
+  //wire gemB_bx0_rx    = &gem_bc0marker[3:2]; // both two GEMA fibers sending BC0 marker
+  wire gemA_bx0_rx = gemA_bc0marker;
+  wire gemB_bx0_rx = gemB_bc0marker;
 
   wire gemA_resyncmarker = |gem_resyncmarker[1:0];
   wire gemB_resyncmarker = |gem_resyncmarker[3:2];
