@@ -91,7 +91,7 @@ for (ifiber=0; ifiber<4; ifiber=ifiber+1) begin: linkloop
   initial  frame_sep_err  [ifiber] = 0;
 
   always @(posedge clock) begin
-      frame_sep_err[ifiber] <= (reset) ? 1'b0 : (~frame_sep_in_table[ifiber] || frame_sep[ifiber]!=frame_sep_next[ifiber]);
+      frame_sep_err[ifiber] <= (reset) ? 1'b0 : (~frame_sep_in_table[ifiber] || frame_sep[ifiber]!=frame_sep_next[ifiber]);//count err if single frame error happened
   end
 
   always @(posedge clock) begin
