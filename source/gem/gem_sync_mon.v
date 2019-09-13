@@ -79,10 +79,10 @@ assign frame_sep_in_table[3] = gem_kchar[3]==8'hBC || gem_kchar[3]==8'hF7 || gem
 // on overflow/BC0/Resync, just assume it was correct and increment to the next marker (bypass the actual value, and just use the expected)
 // if the marker is not in the table, use the expected value but flag an error
 // we do this to keep the cycle going in the case of an error (so a single frame error doesn't always multiply x4)
-assign frame_sep [0] = (~gemA_overflow || ~gemA_bc0marker || ~gemA_resyncmarker || ~frame_sep_in_table[0]) ? gem_kchar[0] : frame_sep_next[0];
-assign frame_sep [1] = (~gemA_overflow || ~gemA_bc0marker || ~gemA_resyncmarker || ~frame_sep_in_table[1]) ? gem_kchar[1] : frame_sep_next[1];
-assign frame_sep [2] = (~gemB_overflow || ~gemB_bc0marker || ~gemB_resyncmarker || ~frame_sep_in_table[2]) ? gem_kchar[2] : frame_sep_next[2];
-assign frame_sep [3] = (~gemB_overflow || ~gemB_bc0marker || ~gemB_resyncmarker || ~frame_sep_in_table[3]) ? gem_kchar[3] : frame_sep_next[3];
+assign frame_sep [0] = (gemA_overflow || gemA_bc0marker || gemA_resyncmarker || ~frame_sep_in_table[0]) ? frame_sep_next[0] : gem_kchar[0];
+assign frame_sep [1] = (gemA_overflow || gemA_bc0marker || gemA_resyncmarker || ~frame_sep_in_table[1]) ? frame_sep_next[1] : gem_kchar[1];
+assign frame_sep [2] = (gemB_overflow || gemB_bc0marker || gemB_resyncmarker || ~frame_sep_in_table[2]) ? frame_sep_next[2] : gem_kchar[2];
+assign frame_sep [3] = (gemB_overflow || gemB_bc0marker || gemB_resyncmarker || ~frame_sep_in_table[3]) ? frame_sep_next[3] : gem_kchar[3];
 
 genvar ifiber;
 generate
