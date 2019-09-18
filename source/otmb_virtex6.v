@@ -2530,8 +2530,8 @@ end
    wire [3:0]             alct_bx0_delay; // ALCT bx0 delay to mpc transmitter
    wire [3:0]             clct_bx0_delay; // CLCT bx0 delay to mpc transmitter
 
-   wire [3:0]             gemA_bx0_delay;
-   wire [3:0]             gemB_bx0_delay;
+   wire [5:0]             gemA_bx0_delay;
+   wire [5:0]             gemB_bx0_delay;
 
    wire [MXMPCDLY-1:0]    mpc_rx_delay;
    wire [MXMPCDLY-1:0]    mpc_tx_delay;
@@ -3977,12 +3977,12 @@ end
   .bx0_match2      (bx0_match2),           // Out  ALCT bx0 and CLCT bx0 match in time
 
   .gemA_bx0_rx     (gemA_bx0_rx),         // In GEMA BX0 received
-  .gemA_bx0_delay  (gemA_bx0_delay[3:0]), // In GEMA BX0 delay value
+  .gemA_bx0_delay  (gemA_bx0_delay[5:0]), // In GEMA BX0 delay value
   .gemA_bx0_enable (gemA_bx0_enable),     // IN enable GEMA BX0 delay
   .gemA_bx0_match  (gemA_bx0_match),      // out match with CLCT_BX0
   .gemA_bx0_match2 (gemA_bx0_match2),      // out match with CLCT_BX0
   .gemB_bx0_rx     (gemB_bx0_rx),         // IN GEMB BX0 received
-  .gemB_bx0_delay  (gemB_bx0_delay[3:0]), // IN GEMB BX0 delay
+  .gemB_bx0_delay  (gemB_bx0_delay[5:0]), // IN GEMB BX0 delay
   .gemB_bx0_enable (gemB_bx0_enable),     // IN enable GEMB BX0 delay
   .gemB_bx0_match  (gemB_bx0_match),      // out match with CLCT_BX0
   .gemB_bx0_match2 (gemB_bx0_match2),      // out match with CLCT_BX0
@@ -4902,10 +4902,10 @@ end
       .bx0_vpf_test    (bx0_vpf_test),        // Out  Sets clct_bx0=lct0_vpf for bx0 alignment tests
       .bx0_match       (bx0_match),           // In  ALCT bx0 and CLCT bx0 match in time
 
-      .gemA_bx0_delay  (gemA_bx0_delay[3:0]), // Out GEMA bx0 delay
+      .gemA_bx0_delay  (gemA_bx0_delay[5:0]), // Out GEMA bx0 delay
       .gemA_bx0_enable (gemA_bx0_enable),     // Out GEMA bx0 enable. 1: use gemA_bx0_delay for GEMA, 0: use clct bx0
       .gemA_bx0_match  (gemA_bx0_match),      // In GEMA+CLCT BX0 match
-      .gemB_bx0_delay  (gemB_bx0_delay[3:0]), // Out GEMA bx0 delay
+      .gemB_bx0_delay  (gemB_bx0_delay[5:0]), // Out GEMA bx0 delay
       .gemB_bx0_enable (gemB_bx0_enable),     // Out GEMA bx0 enable. 1: use gemA_bx0_delay for GEMA, 0: use clct bx0
       .gemB_bx0_match  (gemB_bx0_match),      // In GEMA+CLCT BX0 match
 

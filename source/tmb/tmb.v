@@ -526,13 +526,13 @@
   input               gem_me1b_match_promotepat;
 
   input               gemA_bx0_rx;
-  input  [3:0]        gemA_bx0_delay;
+  input  [5:0]        gemA_bx0_delay;
   input               gemA_bx0_enable;
   output              gemA_bx0_match;
   output              gemA_bx0_match2;
 
   input               gemB_bx0_rx;
-  input  [3:0]        gemB_bx0_delay;
+  input  [5:0]        gemB_bx0_delay;
   input               gemB_bx0_enable;
   output              gemB_bx0_match;
   output              gemB_bx0_match2;
@@ -1954,8 +1954,8 @@
 //------------------------------------------------------------------------------------------------------------------
   wire [3:0] alct_bx0_adr = alct_bx0_delay-1;
   wire [3:0] clct_bx0_adr = clct_bx0_delay-1;
-  wire [3:0] gemA_bx0_adr = gemA_bx0_delay-1;
-  wire [3:0] gemB_bx0_adr = gemB_bx0_delay-1;
+  wire [5:0] gemA_bx0_adr = gemA_bx0_delay-1;
+  wire [5:0] gemB_bx0_adr = gemB_bx0_delay-1;
 
   x_oneshot uinjalctbx0 (.d(mpc_inj_alct_bx0),.clock(clock),.q(inj_alct_bx0_pulse));  // VME bx0 injector
   x_oneshot uinjclctbx0 (.d(mpc_inj_clct_bx0),.clock(clock),.q(inj_clct_bx0_pulse));
@@ -1970,8 +1970,10 @@
 
   srl16e_bbl #(1) ualctbx0 (.clock(clock),.ce(1'b1),.adr(alct_bx0_adr),.d(alct_bx0_src),.q(alct_bx0_srl));
   srl16e_bbl #(1) uclctbx0 (.clock(clock),.ce(1'b1),.adr(clct_bx0_adr),.d(clct_bx0_src),.q(clct_bx0_srl));
-  srl16e_bbl #(1) ugemAbx0 (.clock(clock),.ce(1'b1),.adr(gemA_bx0_adr),.d(gemA_bx0_src),.q(gemA_bx0_srl));
-  srl16e_bbl #(1) ugemBbx0 (.clock(clock),.ce(1'b1),.adr(gemB_bx0_adr),.d(gemB_bx0_src),.q(gemB_bx0_srl));
+  //srl16e_bbl #(1) ugemAbx0 (.clock(clock),.ce(1'b1),.adr(gemA_bx0_adr),.d(gemA_bx0_src),.q(gemA_bx0_srl));
+  //srl16e_bbl #(1) ugemBbx0 (.clock(clock),.ce(1'b1),.adr(gemB_bx0_adr),.d(gemB_bx0_src),.q(gemB_bx0_srl));
+  srl16e_bit #(6,64) ugemAbx0 (.clock(clock),.adr(gemA_bx0_adr),.d(gemA_bx0_src),.q(gemA_bx0_srl));
+  srl16e_bit #(6,64) ugemBbx0 (.clock(clock),.adr(gemB_bx0_adr),.d(gemB_bx0_src),.q(gemB_bx0_srl));
 
 
   wire alct_bxdly_is_0 = (alct_bx0_delay == 0);          // Use direct input if SRL address is 0 because

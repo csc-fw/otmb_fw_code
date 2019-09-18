@@ -2364,10 +2364,10 @@
   output          bx0_vpf_test;    // Sets clct_bx0=lct0_vpf for bx0 alignment tests
   input           bx0_match;       // ALCT bx0 and CLCT bx0 match in time
 
-  output [3:0]    gemA_bx0_delay; // GEMA bx0 delay
+  output [5:0]    gemA_bx0_delay; // GEMA bx0 delay
   output          gemA_bx0_enable; // enable using GEMA bx0, else copy clct bx0
   input           gemA_bx0_match;  //GEMA+CLCT bx0 match
-  output [3:0]    gemB_bx0_delay; // GEMA bx0 delay
+  output [5:0]    gemB_bx0_delay; // GEMA bx0 delay
   output          gemB_bx0_enable; // enable using GEMA bx0, else copy clct bx0
   input           gemB_bx0_match;  //GEMA+CLCT bx0 match
 
@@ -8922,27 +8922,27 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 // GEM_BX0_DELAY = 0x326 GEM BX0 DELAY 
 //------------------------------------------------------------------------------------------------------------------
   initial begin
-      gem_bx0_delay_wr[3:0]    = 4'b0;  //RW, gemA bx0 delay
-      gem_bx0_delay_wr[4]      = 1'b1;  //RW, gemA bx0 enable
-      gem_bx0_delay_wr[5]      = 1'b0;  //R gemA bx0 match with clct bx0
-      gem_bx0_delay_wr[9:6]    = 4'b0;  //RW, gemB bx0 delay 
-      gem_bx0_delay_wr[10]     = 1'b1;  //RW, gemB bx0 enable
-      gem_bx0_delay_wr[11]     = 1'b0;  //R gemB bx0 match
-      gem_bx0_delay_wr[15:12]  = 4'b0;  // not used
+      gem_bx0_delay_wr[5:0]    = 4'b0;  //RW, gemA bx0 delay
+      gem_bx0_delay_wr[6]      = 1'b1;  //RW, gemA bx0 enable
+      gem_bx0_delay_wr[7]      = 1'b0;  //R gemA bx0 match with clct bx0
+      gem_bx0_delay_wr[13:8]    = 4'b0;  //RW, gemB bx0 delay 
+      gem_bx0_delay_wr[14]     = 1'b1;  //RW, gemB bx0 enable
+      gem_bx0_delay_wr[15]     = 1'b0;  //R gemB bx0 match
+      //gem_bx0_delay_wr[15:12]  = 4'b0;  // not used
   end
 
-  assign gemA_bx0_delay              =  gem_bx0_delay_wr[3:0];
-  assign gemA_bx0_enable             =  gem_bx0_delay_wr[4];
-  assign gemB_bx0_delay              =  gem_bx0_delay_wr[9:6];
-  assign gemB_bx0_enable             =  gem_bx0_delay_wr[10];
+  assign gemA_bx0_delay              =  gem_bx0_delay_wr[5:0];
+  assign gemA_bx0_enable             =  gem_bx0_delay_wr[6];
+  assign gemB_bx0_delay              =  gem_bx0_delay_wr[13:8];
+  assign gemB_bx0_enable             =  gem_bx0_delay_wr[14];
 
-  assign gem_bx0_delay_rd[3:0]      =  gemA_bx0_delay[3:0];
-  assign gem_bx0_delay_rd[  4]      =  gemA_bx0_enable;
-  assign gem_bx0_delay_rd[  5]      =  gemA_bx0_match;
-  assign gem_bx0_delay_rd[9:6]      =  gemB_bx0_delay[3:0];
-  assign gem_bx0_delay_rd[ 10]      =  gemB_bx0_enable;
-  assign gem_bx0_delay_rd[ 11]      =  gemB_bx0_match;
-  assign gem_bx0_delay_rd[15:12]    =  gem_bx0_delay_wr[15:12];
+  assign gem_bx0_delay_rd[5:0]      =  gemA_bx0_delay[5:0];
+  assign gem_bx0_delay_rd[  6]      =  gemA_bx0_enable;
+  assign gem_bx0_delay_rd[  7]      =  gemA_bx0_match;
+  assign gem_bx0_delay_rd[13:8]     =  gemB_bx0_delay[5:0];
+  assign gem_bx0_delay_rd[ 14]      =  gemB_bx0_enable;
+  assign gem_bx0_delay_rd[ 15]      =  gemB_bx0_match;
+  //assign gem_bx0_delay_rd[15:12]    =  gem_bx0_delay_wr[15:12];
 
 
 //------------------------------------------------------------------------------------------------------------------
