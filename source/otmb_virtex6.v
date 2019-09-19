@@ -1721,13 +1721,16 @@
   wire gemA_bc0marker = &gem_bc0marker[1:0];
   wire gemB_bc0marker = &gem_bc0marker[3:2];
 
-  wire gemA_bx0_rx    = |gem_bc0marker[1:0]; // both two GEMA fibers sending BC0 marker
-  wire gemB_bx0_rx    = |gem_bc0marker[3:2]; // both two GEMA fibers sending BC0 marker
-  //wire gemA_bx0_rx = gemA_bc0marker;
-  //wire gemB_bx0_rx = gemB_bc0marker;
+  //wire gemA_bx0_rx    = |gem_bc0marker[1:0]; // both two GEMA fibers sending BC0 marker
+  //wire gemB_bx0_rx    = |gem_bc0marker[3:2]; // both two GEMA fibers sending BC0 marker
+  wire gemA_bx0_rx = gemA_bc0marker;
+  wire gemB_bx0_rx = gemB_bc0marker;
 
   wire gemA_resyncmarker = &gem_resyncmarker[1:0];
   wire gemB_resyncmarker = &gem_resyncmarker[3:2];
+
+  wire gemA_sync_done   = &gem_rx_sync_done[1:0];
+  wire gemB_sync_done   = &gem_rx_sync_done[3:2];
 
   assign gemA_active_feb_list = (gem_active_feb_list[0] | gem_active_feb_list[1]);
   assign gemB_active_feb_list = (gem_active_feb_list[2] | gem_active_feb_list[3]);
@@ -1912,8 +1915,14 @@
     .gemA_resyncmarker (gemA_resyncmarker),
     .gemB_resyncmarker (gemB_resyncmarker),
 
-    .gem_fiber_enable (gem_fiber_enable[3:0]),
-    .link_good (gem_link_good[3:0]),
+    .gemA_sync_done (gemA_sync_done),
+    .gemB_sync_done (gemB_sync_done),
+
+    .gemA_rxd_int_delay (gemA_rxd_int_delay[3:0]), // in  Interstage delay
+    .gemB_rxd_int_delay (gemB_rxd_int_delay[3:0]), // in  Interstage delay
+
+    .gem_fiber_enable (gem_fiber_enable [MXGEM-1:0]),
+    .link_good        (gem_link_good    [MXGEM-1:0]),
 
     .gem0_kchar(gem_kchar[0]), // In  Copy of GEM0 k-char
     .gem1_kchar(gem_kchar[1]), // In  Copy of GEM1 k-char
@@ -3397,6 +3406,8 @@ end
   .deb_buf_push_data (deb_buf_push_data[MXBDATA-1:0]), // Out  Queue push data at last push
   .deb_buf_pop_data  (deb_buf_pop_data[MXBDATA-1:0]),  // Out  Queue pop  data at last pop
 
+  .gemA_bxn_counter (gemA_bxn_counter),
+  .gemB_bxn_counter (gemB_bxn_counter),
 // Sequencer Sump
   .sequencer_sump    (sequencer_sump)      // Out  Unused signals
   );
@@ -4928,6 +4939,8 @@ end
       .gemA_vfat_hcm       (gemA_vfat_hcm),   //Out GEMA hot vfat mask
       .gemB_vfat_hcm       (gemB_vfat_hcm),   //Out GEMA hot vfat mask
 
+      .gemA_bxn_counter (gemA_bxn_counter),
+      .gemB_bxn_counter (gemB_bxn_counter),
 //GEM Hot channel mask
       //.gemA_vfat0_hcm    (gemA_vfat_hcm[ 0]), // Out GEM Hot channel mask 
       //.gemA_vfat1_hcm    (gemA_vfat_hcm[ 1]), // Out GEM Hot channel mask

@@ -1118,6 +1118,9 @@
   algo2016_dead_time_zone_size,
   algo2016_use_dynamic_dead_time_zone,
 
+  //to test GEM BC0 
+  gemA_bxn_counter,
+  gemB_bxn_counter,
 // Sump
   sequencer_sump
 
@@ -2031,6 +2034,10 @@
   input [4:0] algo2016_dead_time_zone_size;        // Constant size of the dead time zone
   input       algo2016_use_dynamic_dead_time_zone; // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
 
+  //to test GEM BC0 
+  output reg [15:0] gemA_bxn_counter = 0;
+  output reg [15:0] gemB_bxn_counter = 0;
+
 // Sump
   output          sequencer_sump;      // Unused signals
 
@@ -2329,7 +2336,20 @@
     if      (bxn_preset)  bxn_sync_err <= 0;            // Sync err latch if count isnt at offset on ttc_bx0
     else if (ttc_bx0   )  bxn_sync_err <= !bxn_sync || bxn_sync_err;
     else if (bxn_sync  )  bxn_sync_err <= !ttc_bx0  || bxn_sync_err;
+
+    if      (gemA_bc0marker)  begin
+        gemA_bxn_counter[15] <= gemA_bxn_counter[MXBXN-1:0] == bxn_counter;
+        gemA_bxn_counter[MXBXN-1:0]  <= bxn_counter;
+    end
+    if      (gemB_bc0marker)  begin
+        gemB_bxn_counter[15] <= gemB_bxn_counter[MXBXN-1:0] == bxn_counter;
+        gemB_bxn_counter[MXBXN-1:0]  <= bxn_counter;
+    end
+
+
   end
+
+
 
   assign clct_bx0_sync_err = bxn_sync_err || bxn_preset;      // latches on sync error, clears on resync
 
@@ -5080,7 +5100,7 @@
   assign rpc_frame[18:14]  =  0;                    // DDU special + DMB control flags
 
   assign gem_frame[13:0]   =  gem_rawhits[13:0];    // GEM raw hits data
-  assign gem_frame[14]     =  gem_id[0:0];          // GEM Chamber ID (0,1)
+  assign gem_frame[14]     =  gem_id[0:0];          // GEM Chamber ID (0,1), layer 0/1
   assign gem_frame[18:15]  =  0;                    // DDU special + DMB control flags
 
   assign e04_frame[11:0]   =  e04_frame_mux;        // End of GEM/RPC block

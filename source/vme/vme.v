@@ -753,6 +753,8 @@
   gemA_vfat_hcm,
   gemB_vfat_hcm,
 
+  gemA_bxn_counter,
+  gemB_bxn_counter,
 
 // RPC VME Configuration Ports
   rpc_done,
@@ -1674,6 +1676,9 @@
   parameter ADR_GEMA_TRG_CTRL         = 10'h328;
   parameter ADR_GEMB_TRG_CTRL         = 10'h32a;
   parameter ADR_GEM_CSC_MATCH_CTRL    = 10'h32c;
+
+  parameter ADR_GEMA_BXN_COUNTER      = 10'h336;
+  parameter ADR_GEMB_BXN_COUNTER      = 10'h338;
 
   parameter ADR_GEM_VFAT_HCM0         = 10'h33a;
   parameter ADR_GEM_VFAT_HCM1         = 10'h33c;
@@ -4417,6 +4422,9 @@
   ADR_GEMB_TRG_CTRL:         data_out <= gemB_trg_ctrl_rd;
   ADR_GEM_BX0_DELAY:         data_out <= gem_bx0_delay_rd;
   ADR_GEM_CSC_MATCH_CTRL:    data_out <= gem_csc_match_ctrl_rd;
+
+  ADR_GEMA_BXN_COUNTER:      data_out <= gemA_bxn_counter_rd[0];
+  ADR_GEMB_BXN_COUNTER:      data_out <= gemB_bxn_counter_rd[0];
 
   ADR_GEM_VFAT_HCM0:         data_out <= gem_vfat_hcm0_rd;
   ADR_GEM_VFAT_HCM1:         data_out <= gem_vfat_hcm1_rd;
@@ -9039,6 +9047,10 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   //    gemB_cluster0_wr[15:0] <= 0;
   //    gem_copad0_wr[15:0]    <= 0;
   //end
+  wire [15:0]  gemA_bxn_counter_rd;
+  wire [15:0]  gemB_bxn_counter_rd;
+  assign gemA_bxn_counter_rd[15:0]    = gemA_bxn_counter[15:0];
+  assign gemB_bxn_counter_rd[15:0]    = gemB_bxn_counter[15:0];
 
   assign gemA_cluster_rd[0][CLSTBITS-1:0] = gemA_cluster0_vme[CLSTBITS-1:0]; 
   assign gemA_cluster_rd[1][CLSTBITS-1:0] = gemA_cluster1_vme[CLSTBITS-1:0]; 
