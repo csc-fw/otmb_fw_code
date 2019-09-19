@@ -24,6 +24,12 @@ module gem_sync_mon (
   input gemA_resyncmarker,
   input gemB_resyncmarker,
 
+  input gemA_sync_done, // ttc resync is done
+  input gemB_sync_done,
+
+  input gemA_rxd_int_delay,
+  input gemB_rxd_int_delay,
+
   output reg gemA_synced,  // fibers from same OH are desynced
   output reg gemB_synced,  // fibers from same OH are desynced
   output reg gems_synced,  // fibers from both GEM chambers are synched
@@ -41,7 +47,15 @@ module gem_sync_mon (
   wire [3:0] pdly   = 1;    // Power-up reset delay
   reg        ready  = 0;
 
+  wire [3:0] gemAdly = gemA_rxd_int_delay +1;
+  wire [3:0] gemBdly = gemB_rxd_int_delay +1;
+
+  wire gemA_sync_done_srl;
+  wire gemB_sync_done_srl;
+
   SRL16E upup (.CLK(clock),.CE(!power_up & clk_lock),.D(1'b1),.A0(pdly[0]),.A1(pdly[1]),.A2(pdly[2]),.A3(pdly[3]),.Q(power_up));
+  SRL16E gemAsyncdone (.CLK(clock),.CE(1),.D(gemA_sync_done),.A0(gemAdly[0]),.A1(gemAdly[1]),.A2(gemAdly[2]),.A3(gemAdly[3]),.Q(gemA_sync_done_srl));
+  SRL16E gemBsyncdone (.CLK(clock),.CE(1),.D(gemB_sync_done),.A0(gemBdly[0]),.A1(gemBdly[1]),.A2(gemBdly[2]),.A3(gemBdly[3]),.Q(gemB_sync_done_srl));
 
   always @(posedge clock) begin
       ready  <= power_up && !(global_reset || ttc_resync);
@@ -118,13 +132,14 @@ wire       gems_sync;
 wire [1:0] skip_sync_check;
 
 //ignore the sync check when links are not good, gem fibers are not enabled, overflow, bc0marker, resyncmarker
-assign skip_sync_check [0] = gemA_overflow || gemA_bc0marker || gemA_resyncmarker || (~&link_good[1:0]) || (~&gem_fiber_enable[1:0]);
-assign skip_sync_check [1] = gemB_overflow || gemB_bc0marker || gemB_resyncmarker || (~&link_good[3:2]) || (~&gem_fiber_enable[3:2]);
+assign skip_sync_check [0] =  gemA_overflow || gemA_bc0marker || gemA_resyncmarker || (~&link_good[1:0]) || (~&gem_fiber_enable[1:0]);
+assign skip_sync_check [1] =  gemB_overflow || gemB_bc0marker || gemB_resyncmarker || (~&link_good[3:2]) || (~&gem_fiber_enable[3:2]);
 
 assign gem_sync [0] = skip_sync_check[0] || (~|frame_sep_err[1:0] && gem0_kchar==gem1_kchar); // two fibers from gem chamber 1 are synced to eachother
 assign gem_sync [1] = skip_sync_check[1] || (~|frame_sep_err[3:2] && gem2_kchar==gem3_kchar); // two fibers from gem chamber 2 are synced to eachother
 
-assign gems_sync    = ((gem0_kchar==gem2_kchar) && (&gem_sync[1:0])) || (|skip_sync_check) || gemA_overflow || gemB_overflow || gemA_bc0marker || gemB_bc0marker || gemA_resyncmarker || gemB_resyncmarker; // gem super chamber is synced
+//assign gems_sync    = ((gem0_kchar==gem2_kchar) && (&gem_sync[1:0])) || (|skip_sync_check) || gemA_overflow || gemB_overflow || gemA_bc0marker || gemB_bc0marker || gemA_resyncmarker || gemB_resyncmarker; // gem super chamber is synced
+assign gems_sync    = ((gem0_kchar==gem2_kchar) && (&gem_sync[1:0])) || (|skip_sync_check); // gem super chamber is synced
 
 initial gemA_synced = 1'b1;
 initial gemB_synced = 1'b1;
@@ -135,13 +150,13 @@ initial gemB_lostsync = 1'b0;
 initial gems_lostsync = 1'b0;
 
 always @(posedge clock) begin
-    gemA_synced   <= (reset) ? 1'b1 : gem_sync [0];
-    gemB_synced   <= (reset) ? 1'b1 : gem_sync [1];
-    gems_synced   <= (reset) ? 1'b1 : gems_sync;
+    gemA_synced   <= (reset || !gemA_sync_done_srl                       ) ? 1'b1 : gem_sync [0];
+    gemB_synced   <= (reset || !gemB_sync_done_srl                       ) ? 1'b1 : gem_sync [1];
+    gems_synced   <= (reset || !gemA_sync_done_srl || !gemB_sync_done_srl) ? 1'b1 : gems_sync;
 
-    gemA_lostsync <= (reset) ? 1'b0 : gemA_lostsync | ~gem_sync[0];
-    gemB_lostsync <= (reset) ? 1'b0 : gemB_lostsync | ~gem_sync[1];
-    gems_lostsync <= (reset) ? 1'b0 : gems_lostsync | ~gems_synced;
+    gemA_lostsync <= (reset || !gemA_sync_done_srl                       ) ? 1'b0 : gemA_lostsync | ~gem_sync[0];
+    gemB_lostsync <= (reset || !gemB_sync_done_srl                       ) ? 1'b0 : gemB_lostsync | ~gem_sync[1];
+    gems_lostsync <= (reset || !gemA_sync_done_srl || !gemB_sync_done_srl) ? 1'b0 : gems_lostsync | ~gems_synced;
 end
 
 
