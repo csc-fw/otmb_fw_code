@@ -2516,6 +2516,8 @@
   output [MXVFAT-1:0] gemB_vfat_hcm;
 
 
+  input [15:0] gemA_bxn_counter;
+  input [15:0] gemB_bxn_counter;
 // RPC Ports: RAT Control
   output          rpc_sync;     // Sync mode
   output          rpc_posneg;   // Clock phase

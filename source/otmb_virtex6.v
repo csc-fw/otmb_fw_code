@@ -3411,6 +3411,9 @@ end
 // Sequencer Sump
   .sequencer_sump    (sequencer_sump)      // Out  Unused signals
   );
+
+  wire [15:0] gemA_bxn_counter;
+  wire [15:0] gemB_bxn_counter;
 // -----------------------------------------------------------------------------
 // End: Sequencer Module
 // -----------------------------------------------------------------------------
