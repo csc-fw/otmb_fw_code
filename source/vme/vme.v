@@ -4425,8 +4425,8 @@
   ADR_GEM_BX0_DELAY:         data_out <= gem_bx0_delay_rd;
   ADR_GEM_CSC_MATCH_CTRL:    data_out <= gem_csc_match_ctrl_rd;
 
-  ADR_GEMA_BXN_COUNTER:      data_out <= gemA_bxn_counter_rd[0];
-  ADR_GEMB_BXN_COUNTER:      data_out <= gemB_bxn_counter_rd[0];
+  ADR_GEMA_BXN_COUNTER:      data_out <= gemA_bxn_counter_rd;
+  ADR_GEMB_BXN_COUNTER:      data_out <= gemB_bxn_counter_rd;
 
   ADR_GEM_VFAT_HCM0:         data_out <= gem_vfat_hcm0_rd;
   ADR_GEM_VFAT_HCM1:         data_out <= gem_vfat_hcm1_rd;

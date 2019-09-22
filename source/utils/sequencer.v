@@ -2035,9 +2035,13 @@
   input       algo2016_use_dynamic_dead_time_zone; // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
 
   //to test GEM BC0 
-  output reg [15:0] gemA_bxn_counter = 0;
-  output reg [15:0] gemB_bxn_counter = 0;
+  output reg [15:0] gemA_bxn_counter;
+  output reg [15:0] gemB_bxn_counter;
 
+  initial begin 
+      gemA_bxn_counter <= 0;
+      gemB_bxn_counter <= 0;
+  end 
 // Sump
   output          sequencer_sump;      // Unused signals
 
@@ -2338,11 +2342,11 @@
     else if (bxn_sync  )  bxn_sync_err <= !ttc_bx0  || bxn_sync_err;
 
     if      (gemA_bc0marker)  begin
-        gemA_bxn_counter[15] <= gemA_bxn_counter[MXBXN-1:0] == bxn_counter;
+        gemA_bxn_counter[15]         <= gemA_bxn_counter[MXBXN-1:0] == bxn_counter;
         gemA_bxn_counter[MXBXN-1:0]  <= bxn_counter;
     end
     if      (gemB_bc0marker)  begin
-        gemB_bxn_counter[15] <= gemB_bxn_counter[MXBXN-1:0] == bxn_counter;
+        gemB_bxn_counter[15]         <= gemB_bxn_counter[MXBXN-1:0] == bxn_counter;
         gemB_bxn_counter[MXBXN-1:0]  <= bxn_counter;
     end
 
