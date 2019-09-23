@@ -3406,8 +3406,8 @@ end
   .deb_buf_push_data (deb_buf_push_data[MXBDATA-1:0]), // Out  Queue push data at last push
   .deb_buf_pop_data  (deb_buf_pop_data[MXBDATA-1:0]),  // Out  Queue pop  data at last pop
 
-  .gemA_bxn_counter (gemA_bxn_counter),
-  .gemB_bxn_counter (gemB_bxn_counter),
+  .gemA_bxn_counter (gemA_bxn_counter[15:0]),      // out GEMA Bc0 bxn counter
+  .gemB_bxn_counter (gemB_bxn_counter[15:0]),     // out GEMB BC0 bxn counter
 // Sequencer Sump
   .sequencer_sump    (sequencer_sump)      // Out  Unused signals
   );
@@ -4940,8 +4940,8 @@ end
       .gemA_vfat_hcm       (gemA_vfat_hcm),   //Out GEMA hot vfat mask
       .gemB_vfat_hcm       (gemB_vfat_hcm),   //Out GEMA hot vfat mask
 
-      .gemA_bxn_counter (gemA_bxn_counter),
-      .gemB_bxn_counter (gemB_bxn_counter),
+      .gemA_bxn_counter (gemA_bxn_counter[15:0]),  // In GEMA BC0 BXN counter
+      .gemB_bxn_counter (gemB_bxn_counter[15:0]),   //In GEMB BC0 bxn counter
 //GEM Hot channel mask
       //.gemA_vfat0_hcm    (gemA_vfat_hcm[ 0]), // Out GEM Hot channel mask 
       //.gemA_vfat1_hcm    (gemA_vfat_hcm[ 1]), // Out GEM Hot channel mask

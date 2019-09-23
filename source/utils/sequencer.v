@@ -2039,8 +2039,8 @@
   output reg [15:0] gemB_bxn_counter;
 
   initial begin 
-      gemA_bxn_counter <= 0;
-      gemB_bxn_counter <= 0;
+      gemA_bxn_counter[15:0] <= 0;
+      gemB_bxn_counter[15:0] <= 0;
   end 
 // Sump
   output          sequencer_sump;      // Unused signals
@@ -2340,17 +2340,18 @@
     if      (bxn_preset)  bxn_sync_err <= 0;            // Sync err latch if count isnt at offset on ttc_bx0
     else if (ttc_bx0   )  bxn_sync_err <= !bxn_sync || bxn_sync_err;
     else if (bxn_sync  )  bxn_sync_err <= !ttc_bx0  || bxn_sync_err;
+ end
 
+
+ always @(posedge gemA_bc0marker or posedge gemB_bc0marker) begin
     if      (gemA_bc0marker)  begin
         gemA_bxn_counter[15]         <= gemA_bxn_counter[MXBXN-1:0] == bxn_counter;
-        gemA_bxn_counter[MXBXN-1:0]  <= bxn_counter;
+        gemA_bxn_counter[MXBXN-1:0]  <= bxn_counter[MXBXN-1:0];
     end
     if      (gemB_bc0marker)  begin
         gemB_bxn_counter[15]         <= gemB_bxn_counter[MXBXN-1:0] == bxn_counter;
-        gemB_bxn_counter[MXBXN-1:0]  <= bxn_counter;
+        gemB_bxn_counter[MXBXN-1:0]  <= bxn_counter[MXBXN-1:0];
     end
-
-
   end
 
 
