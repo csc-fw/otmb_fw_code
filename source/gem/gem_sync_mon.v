@@ -55,8 +55,8 @@ module gem_sync_mon (
 
   SRL16E upup (.CLK(clock),.CE(!power_up & clk_lock),.D(1'b1),.A0(pdly[0]),.A1(pdly[1]),.A2(pdly[2]),.A3(pdly[3]),.Q(power_up));
   
-  srl16e_bbl #(1)  ugemASyncdelay (.clock(~clock), .ce(1'b1), .adr(gemAdly), .d(  gemA_sync_done), .q( gemA_sync_done_srl); // JRG: comp data leaves module on FALLING LHC_CLOCK edge (~clock)
-  srl16e_bbl #(1)  ugemBSyncdelay (.clock(~clock), .ce(1'b1), .adr(gemBdly), .d(  gemB_sync_done), .q( gemB_sync_done_srl); // JRG: comp data leaves module on FALLING LHC_CLOCK edge (~clock)
+  srl16e_bbl #(1)  ugemASyncdelay (.clock(~clock), .ce(1'b1), .adr(gemAdly), .d(  gemA_sync_done), .q( gemA_sync_done_srl)); // JRG: comp data leaves module on FALLING LHC_CLOCK edge (~clock)
+  srl16e_bbl #(1)  ugemBSyncdelay (.clock(~clock), .ce(1'b1), .adr(gemBdly), .d(  gemB_sync_done), .q( gemB_sync_done_srl)); // JRG: comp data leaves module on FALLING LHC_CLOCK edge (~clock)
   //SRL16E gemAsyncdone (.CLK(clock),.CE(1),.D(gemA_sync_done),.A0(gemAdly[0]),.A1(gemAdly[1]),.A2(gemAdly[2]),.A3(gemAdly[3]),.Q(gemA_sync_done_srl));
   //SRL16E gemBsyncdone (.CLK(clock),.CE(1),.D(gemB_sync_done),.A0(gemBdly[0]),.A1(gemBdly[1]),.A2(gemBdly[2]),.A3(gemBdly[3]),.Q(gemB_sync_done_srl));
 

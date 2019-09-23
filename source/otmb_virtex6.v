@@ -3412,6 +3412,9 @@ end
   .sequencer_sump    (sequencer_sump)      // Out  Unused signals
   );
 
+//gemA/B bc0 bxn counter, for test
+wire [15:0] gemA_bxn_counter;
+wire [15:0] gemB_bxn_counter;
 // -----------------------------------------------------------------------------
 // End: Sequencer Module
 // -----------------------------------------------------------------------------
