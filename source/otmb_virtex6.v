@@ -2137,7 +2137,8 @@ end
                 gemB_overflow_vme           <= gemB_overflow;
                 gemB_sync_vme               <= gemB_synced;
             end
-            if (gem_any) begin
+            //if (gem_any) begin
+            if (gem_any_match) begin
                 gem_copad_vme[icluster]     <= gem_copad[icluster];
                 gems_sync_vme               <= gems_synced;
             end
