@@ -2342,6 +2342,7 @@ end
   wire [MXQLTB - 1   : 0] hs_qlt_1st; // new quality
   wire [MXBNDB - 1   : 0] hs_bnd_1st; // new bending 
   wire [MXSUBKEYBX-1 : 0] hs_xky_1st; // new position with 1/8 precision
+  wire [MXPATC-1     : 0] hs_carry_1st; // CC code 
 
   wire  [MXHITB-1:0]  hs_hit_2nd;
   wire  [MXPIDB-1:0]  hs_pid_2nd;
@@ -2352,6 +2353,7 @@ end
   wire [MXQLTB - 1   : 0] hs_qlt_2nd; // new quality
   wire [MXBNDB - 1   : 0] hs_bnd_2nd; // new bending 
   wire [MXSUBKEYBX-1 : 0] hs_xky_2nd; // new position with 1/8 precision
+  wire [MXPATC-1     : 0] hs_carry_2nd; // CC code 
 
   wire                hs_layer_trig;  // Layer triggered
   wire  [MXHITB-1:0]  hs_nlayers_hit; // Number of layers hit
@@ -2459,23 +2461,25 @@ end
   .clct_sep_ram_wdata (clct_sep_ram_wdata[15:0]), // In  CLCT separation RAM write data VME
   .clct_sep_ram_rdata (clct_sep_ram_rdata[15:0]), // Out  CLCT separation RAM read  data VME
 
-// CLCT Pattern-finder results
+// CLCT Pattern-finder results, with ccLUT
   .hs_hit_1st (hs_hit_1st[MXHITB-1:0]),  // Out  1st CLCT pattern hits
   .hs_pid_1st (hs_pid_1st[MXPIDB-1:0]),  // Out  1st CLCT pattern ID
   .hs_key_1st (hs_key_1st[MXKEYBX-1:0]), // Out  1st CLCT key 1/2-strip
 
-  .hs_qlt_1st (hs_qlt_1st),
-  .hs_bnd_1st (hs_bnd_1st),
-  .hs_xky_1st (hs_xky_1st),
+  .hs_qlt_1st (hs_qlt_1st[MXQLTB - 1   : 0]),
+  .hs_bnd_1st (hs_bnd_1st[MXBNDB - 1   : 0]),
+  .hs_xky_1st (hs_xky_1st[MXSUBKEYBX-1 : 0]),
+  .hs_carry_1st (hs_carry_1st[MXPATC-1:0]),
 
   .hs_hit_2nd (hs_hit_2nd[MXHITB-1:0]),  // Out  2nd CLCT pattern hits
   .hs_pid_2nd (hs_pid_2nd[MXPIDB-1:0]),  // Out  2nd CLCT pattern ID
   .hs_key_2nd (hs_key_2nd[MXKEYBX-1:0]), // Out  2nd CLCT key 1/2-strip
   .hs_bsy_2nd (hs_bsy_2nd),              // Out  2nd CLCT busy, logic error indicator
 
-  .hs_qlt_2nd (hs_qlt_2nd),
-  .hs_bnd_2nd (hs_bnd_2nd),
-  .hs_xky_2nd (hs_xky_2nd),
+  .hs_qlt_2nd (hs_qlt_2nd[MXQLTB - 1   : 0]),
+  .hs_bnd_2nd (hs_bnd_2nd[MXBNDB - 1   : 0]),
+  .hs_xky_2nd (hs_xky_2nd[MXSUBKEYBX-1 : 0]),
+  .hs_carry_2nd (hs_carry_2nd[MXPATC-1:0]),
 
   .hs_layer_trig  (hs_layer_trig),              // Out  Layer triggered
   .hs_nlayers_hit (hs_nlayers_hit[MXHITB-1:0]), // Out  Number of layers hit
@@ -2576,7 +2580,7 @@ end
   .clct_sep_ram_wdata (clct_sep_ram_wdata[15:0]), // In  CLCT separation RAM write data VME
   .clct_sep_ram_rdata (clct_sep_ram_rdata[15:0]), // Out  CLCT separation RAM read  data VME
 
-// CLCT Pattern-finder results
+// CLCT Pattern-finder results, traditional
   .hs_hit_1st (hs_hit_1st[MXHITB-1:0]),  // Out  1st CLCT pattern hits
   .hs_pid_1st (hs_pid_1st[MXPIDB-1:0]),  // Out  1st CLCT pattern ID
   .hs_key_1st (hs_key_1st[MXKEYBX-1:0]), // Out  1st CLCT key 1/2-strip
@@ -2603,6 +2607,15 @@ end
    wire [MXCLCT-1:0]      clct1_xtmb;
    wire [MXCLCTC-1:0]     clctc_xtmb; // Common to CLCT0/1 to TMB
    wire [MXCFEB-1:0]      clctf_xtmb; // Active cfeb list to TMB
+
+   wire [MXQLTB - 1   : 0] clct0_qlt_xtmb; // new quality
+   wire [MXBNDB - 1   : 0] clct0_bnd_xtmb; // new bending 
+   wire [MXSUBKEYBX-1 : 0] clct0_xky_xtmb; // new position with 1/8 precision
+   wire [MXPATC-1     : 0] clct0_carry_xtmb; // CC code 
+   wire [MXQLTB - 1   : 0] clct1_qlt_xtmb; // new quality
+   wire [MXBNDB - 1   : 0] clct1_bnd_xtmb; // new bending 
+   wire [MXSUBKEYBX-1 : 0] clct1_xky_xtmb; // new position with 1/8 precision
+   wire [MXPATC-1     : 0] clct1_carry_xtmb; // CC code 
 
    wire [MXBADR-1:0]      wr_adr_xtmb; // Buffer write address to TMB
    wire [MXBADR-1:0]      wr_adr_rtmb; // Buffer write address at TMB matching time
@@ -2656,6 +2669,15 @@ end
    wire [MXCLCT-1:0]      clct1_vme;
    wire [MXCLCTC-1:0]     clctc_vme;
    wire [MXCFEB-1:0]      clctf_vme;
+
+   wire [MXQLTB - 1   : 0] clct0_vme_qlt; // new quality
+   wire [MXBNDB - 1   : 0] clct0_vme_bnd; // new bending 
+   wire [MXSUBKEYBX-1 : 0] clct0_vme_xky; // new position with 1/8 precision
+   wire [MXPATC-1:0]       clct0_vme_carry;
+   wire [MXQLTB - 1   : 0] clct1_vme_qlt; // new quality
+   wire [MXBNDB - 1   : 0] clct1_vme_bnd; // new bending 
+   wire [MXSUBKEYBX-1 : 0] clct1_vme_xky; // new position with 1/8 precision
+   wire [MXPATC-1:0]       clct1_vme_carry;
 
    wire [MXRAMADR-1:0]    dmb_adr;
    wire [MXRAMDATA-1:0]   dmb_wdata;
@@ -2924,10 +2946,20 @@ end
   .hs_pid_1st (hs_pid_1st[MXPIDB-1:0]),  // In  1st CLCT pattern ID
   .hs_key_1st (hs_key_1st[MXKEYBX-1:0]), // In  1st CLCT key 1/2-strip
 
+  .hs_qlt_1st (hs_qlt_1st[MXQLTB - 1   : 0]),
+  .hs_bnd_1st (hs_bnd_1st[MXBNDB - 1   : 0]),
+  .hs_xky_1st (hs_xky_1st[MXSUBKEYBX-1 : 0]),
+  .hs_carry_1st (hs_carry_1st[MXPATC-1:0]),
+
   .hs_hit_2nd (hs_hit_2nd[MXHITB-1:0]),  // In  2nd CLCT pattern hits
   .hs_pid_2nd (hs_pid_2nd[MXPIDB-1:0]),  // In  2nd CLCT pattern ID
   .hs_key_2nd (hs_key_2nd[MXKEYBX-1:0]), // In  2nd CLCT key 1/2-strip
   .hs_bsy_2nd (hs_bsy_2nd),              // In  2nd CLCT busy, logic error indicator
+
+  .hs_qlt_2nd (hs_qlt_2nd[MXQLTB - 1   : 0]),
+  .hs_bnd_2nd (hs_bnd_2nd[MXBNDB - 1   : 0]),
+  .hs_xky_2nd (hs_xky_2nd[MXSUBKEYBX-1 : 0]),
+  .hs_carry_2nd (hs_carry_2nd[MXPATC-1:0]),
 
   .hs_layer_trig  (hs_layer_trig),              // In  Layer triggered
   .hs_nlayers_hit (hs_nlayers_hit[MXHITB-1:0]), // In  Number of layers hit
@@ -3026,6 +3058,14 @@ end
   .bxn_clct_vme    (bxn_clct_vme[MXBXN-1:0]), // Out  CLCT BXN at pre-trigger
   .bxn_l1a_vme     (bxn_l1a_vme[MXBXN-1:0]),  // Out  CLCT BXN at L1A
 
+  .clct0_vme_qlt   (clct0_vme_qlt[MXQLTB - 1   : 0]),
+  .clct0_vme_bnd   (clct0_vme_bnd[MXBNDB - 1   : 0]),
+  .clct0_vme_xky   (clct0_vme_xky[MXSUBKEYBX-1 : 0]),
+  .clct0_vme_carry (clct0_vme_carry[MXPATC-1   : 0]),
+  .clct1_vme_qlt   (clct1_vme_qlt[MXQLTB - 1   : 0]),
+  .clct1_vme_bnd   (clct1_vme_bnd[MXBNDB - 1   : 0]),
+  .clct1_vme_xky   (clct1_vme_xky[MXSUBKEYBX-1 : 0]),
+  .clct1_vme_carry (clct1_vme_carry[MXPATC-1   : 0]),
 // Sequencer RPC VME Configuration Ports
   .rpc_exists       (rpc_exists[MXRPC-1:0]),        // In  RPC Readout list
   .rpc_read_enable  (rpc_read_enable),              // In  1 Enable RPC Readout
@@ -3181,8 +3221,16 @@ end
   .clct1_xtmb (clct1_xtmb[MXCLCT-1:0]),  // Out  Second CLCT
   .clctc_xtmb (clctc_xtmb[MXCLCTC-1:0]), // Out  Common to CLCT0/1 to TMB
   .clctf_xtmb (clctf_xtmb[MXCFEB-1:0]),  // Out  Active cfeb list to TMB
-  .bx0_xmpc   (bx0_xmpc),                // Out  bx0 to tmb aligned with clct0/1
-  .bx0_match   (bx0_match),               // In  ALCT bx0 and CLCT bx0 match in time
+  .clct0_qlt_xtmb   (clct0_qlt_xtmb[MXQLTB - 1   : 0]),
+  .clct0_bnd_xtmb   (clct0_bnd_xtmb[MXBNDB - 1   : 0]),
+  .clct0_xky_xtmb   (clct0_xky_xtmb[MXSUBKEYBX-1 : 0]),
+  .clct0_carry_xtmb (clct0_carry_xtmb[MXPATC-1:0]),  // Out  First  CLCT
+  .clct1_qlt_xtmb   (clct1_qlt_xtmb[MXQLTB - 1   : 0]),
+  .clct1_bnd_xtmb   (clct1_bnd_xtmb[MXBNDB - 1   : 0]),
+  .clct1_xky_xtmb   (clct1_xky_xtmb[MXSUBKEYBX-1 : 0]),
+  .clct1_carry_xtmb (clct1_carry_xtmb[MXPATC-1:0]),  // Out  Second CLCT
+  .bx0_xmpc         (bx0_xmpc),                // Out  bx0 to tmb aligned with clct0/1
+  .bx0_match        (bx0_match),               // In  ALCT bx0 and CLCT bx0 match in time
   .bx0_match2       (bx0_match2),               // In  ALCT bx0 and CLCT bx0 match in time
   .gemA_bx0_match   (gemA_bx0_match),      // In GEMA+CLCT BX0 match
   .gemA_bx0_match2  (gemA_bx0_match2),      // In GEMA+CLCT BX0 match
@@ -4030,6 +4078,14 @@ wire [15:0] gemB_bxn_counter;
   .clct1_xtmb (clct1_xtmb[MXCLCT-1:0]),  // In  Second CLCT
   .clctc_xtmb (clctc_xtmb[MXCLCTC-1:0]), // In  Common to CLCT0/1 to TMB
   .clctf_xtmb (clctf_xtmb[MXCFEB-1:0]),  // In  Active cfeb list to TMB
+  .clct0_qlt_xtmb   (clct0_qlt_xtmb[MXQLTB - 1   : 0]),
+  .clct0_bnd_xtmb   (clct0_bnd_xtmb[MXBNDB - 1   : 0]),
+  .clct0_xky_xtmb   (clct0_xky_xtmb[MXSUBKEYBX-1 : 0]),
+  .clct0_carry_xtmb (clct0_carry_xtmb[MXPATC-1:0]),  // Out  First  CLCT
+  .clct1_qlt_xtmb   (clct1_qlt_xtmb[MXQLTB - 1   : 0]),
+  .clct1_bnd_xtmb   (clct1_bnd_xtmb[MXBNDB - 1   : 0]),
+  .clct1_xky_xtmb   (clct1_xky_xtmb[MXSUBKEYBX-1 : 0]),
+  .clct1_carry_xtmb (clct1_carry_xtmb[MXPATC-1:0]),  // Out  Second CLCT
   .bx0_xmpc   (bx0_xmpc),                // In  bx0 to mpc
 
   .tmb_trig_pulse    (tmb_trig_pulse),           // Out  ALCT or CLCT or both triggered
@@ -4948,6 +5004,9 @@ wire [15:0] gemB_bxn_counter;
       .bxn_l1a_vme       (bxn_l1a_vme[MXBXN-1:0]),  // In  CLCT BXN at L1A
       .bxn_alct_vme      (bxn_alct_vme[4:0]),       // In  ALCT BXN at alct valid pattern flag
       .clct_bx0_sync_err (clct_bx0_sync_err),       // In  Sync error: BXN counter==0 did not match bx0
+
+      .clct0_vme_carry (clct0_vme_carry[MXPATC-1:0]),
+      .clct1_vme_carry (clct1_vme_carry[MXPATC-1:0]),
 
 
       // Sequencer Ports: Raw Hits Ram

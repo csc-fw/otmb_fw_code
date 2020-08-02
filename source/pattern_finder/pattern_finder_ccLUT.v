@@ -85,13 +85,21 @@ module pattern_finder_ccLUT (
   hs_hit_1st,
   hs_pid_1st,
   hs_key_1st,
-  hs_xkey_1st,
+
+  hs_qlt_1st,
+  hs_bnd_1st,
+  hs_xky_1st,
+  hs_carry_1st,
 
   hs_hit_2nd,
   hs_pid_2nd,
   hs_key_2nd,
-  hs_xkey_2nd,
   hs_bsy_2nd,
+
+  hs_qlt_2nd,
+  hs_bnd_2nd,
+  hs_xky_2nd,
+  hs_carry_2nd,
 
   hs_layer_trig,
   hs_nlayers_hit,
@@ -215,9 +223,9 @@ module pattern_finder_ccLUT (
   output [MXHITB - 1: 0]  hs_hit_1st; // 1st CLCT pattern hits
   output [MXPIDB - 1: 0]  hs_pid_1st; // 1st CLCT pattern ID
   output [MXKEYBX - 1: 0] hs_key_1st; // 1st CLCT key 1/2-strip
-  output [MXXKYB - 1 : 0] hs_xky_1st; // 1st CLCT key 1/8-strip
 
 //Tao CCLUT pattern
+  output [MXXKYB     - 1 : 0] hs_xky_1st; // 1st CLCT key 1/8-strip
   output [MXQLTB     - 1 : 0] hs_qlt_1st; // 1st CLCT pattern lookup quality
   output [MXBNDB     - 1 : 0] hs_bnd_1st; // 1st CLCT pattern lookup bend angle
   output [MXPATC     - 1 : 0] hs_car_1st; // 1st CLCT pattern lookup comparator-code
@@ -225,10 +233,10 @@ module pattern_finder_ccLUT (
   output [MXHITB - 1: 0]  hs_hit_2nd; // 2nd CLCT pattern hits
   output [MXPIDB - 1: 0]  hs_pid_2nd; // 2nd CLCT pattern ID
   output [MXKEYBX - 1: 0] hs_key_2nd; // 2nd CLCT key 1/2-strip
-  output [MXXKYB - 1 : 0] hs_xky_2nd; // 1st CLCT key 1/8-strip     
   output                  hs_bsy_2nd; // 2nd CLCT busy, logic error indicator
 
 //Tao CCLUT pattern
+  output [MXXKYB     - 1 : 0] hs_xky_2nd; // 1st CLCT key 1/8-strip     
   output [MXQLTB     - 1 : 0] hs_qlt_2nd; // 1st CLCT pattern lookup quality
   output [MXBNDB     - 1 : 0] hs_bnd_2nd; // 1st CLCT pattern lookup bend angle
   output [MXPATC     - 1 : 0] hs_car_2nd; // 1st CLCT pattern lookup comparator-code

@@ -16,6 +16,7 @@ parameter MXPATB  = MXHITB + MXPIDB;   // Pattern bits
 
 parameter MXPATC  = 12;                // Pattern Carry Bits
 
+parameter MXSUBKEYBX = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
 parameter MXOFFSB = 4;                 // Quarter-strip bits
 parameter MXQLTB  = 9;                 // Fit quality bits
 parameter MXBNDB  = 4;                 // Bend bits

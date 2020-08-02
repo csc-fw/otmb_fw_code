@@ -522,6 +522,15 @@
   nlayers_hit_vme,
   clct_bx0_sync_err,
 
+  clct0_vme_qlt,
+  clct0_vme_bnd,
+  clct0_vme_xky,
+  clct0_vme_carry,
+  clct1_vme_qlt,
+  clct1_vme_bnd,
+  clct1_vme_xky,
+  clct1_vme_carry,
+
 // Sequencer Ports: Raw Hits Ram
   dmb_wr,
   dmb_reset,
@@ -1381,6 +1390,12 @@
   parameter MXL1ARX    = 12;       // Number L1As received counter bits
   parameter MXORBIT    = 30;       // Number orbit counter bits
 
+  // ccLUT
+  parameter MXPATC  = 12;                // Pattern Carry Bits
+  parameter MXOFFSB = 4;                 // Quarter-strip bits
+  parameter MXQLTB  = 9;                 // Fit quality bits
+  parameter MXBNDB  = 4;                 // Bend bits
+  parameter MXSUBKEYBX = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
 //------------------------------------------------------------------------------------------------------------------
 // VME Addresses
 //------------------------------------------------------------------------------------------------------------------
@@ -1652,6 +1667,17 @@
   parameter ADR_V6_EXTEND             = 10'h17A;  // DCFEB 7-bit extensions
 
   // CSC register ends 10'h198 = 408, for ALGO2016, Tao,2019-07-26
+
+  // CCLUT register starts from 10'h19A = 410
+  parameter ADR_CLCT0_CC              = 10'h19A;  // Comparator code, for 1st CLCT, readonly
+  parameter ADR_CLCT1_CC              = 10'h19C;  // Comparator code, for 2nd CLCT, readonly
+  parameter ADR_CLCT0_QLT             = 10'h19E;  // new Quality
+  parameter ADR_CLCT1_QLT             = 10'h1A0; 
+  parameter ADR_CLCT0_BND             = 10'h1A2;  // new bending
+  parameter ADR_CLCT1_BND             = 10'h1A4; 
+  parameter ADR_CLCT0_XKY             = 10'h1A6; // new position with 1/8 strip precision
+  parameter ADR_CLCT1_XKY             = 10'h1A8; 
+
   // GEM Registers, start from 10'h300 = 768
 
   parameter ADR_GEM_GTX_RX0           = 10'h300;  //rdk 	GEM GTX0 control and status
@@ -2275,6 +2301,14 @@
   input  [10:0]         trig_source_vme;   // Trigger source readback
   input  [2:0]          nlayers_hit_vme;   // Number layers hit on layer trigger
   input                 clct_bx0_sync_err; // Sync error: BXN counter==0 did not match bx0
+  input  [MXQLTB - 1   : 0] clct0_vme_qlt; // new quality
+  input  [MXBNDB - 1   : 0] clct0_vme_bnd; // new bending 
+  input  [MXSUBKEYBX-1 : 0] clct0_vme_xky; // new position with 1/8 precision
+  input  [MXQLTB - 1   : 0] clct1_vme_qlt; // new quality
+  input  [MXBNDB - 1   : 0] clct1_vme_bnd; // new bending 
+  input  [MXSUBKEYBX-1 : 0] clct1_vme_xky; // new position with 1/8 precision
+  input  [MXPATC-1     : 0] clct0_vme_carry;         // First  CLCT
+  input  [MXPATC-1     : 0] clct1_vme_carry;         // Second CLCT
 
 // Sequencer Ports: Raw Hits Ram
   output                    dmb_wr;    // Raw hits RAM VME write enable
@@ -3540,6 +3574,10 @@
   reg  [15:0] virtex6_extend_wr;
   wire [15:0] virtex6_extend_rd;
 
+
+  wire [15:0] clct0_cc_rd;
+  wire [15:0] clct1_cc_rd;
+
   wire [15:0] gem_debug_fifo_data_rd; // read only
 
   reg  [15:0] gem_debug_fifo_ctrl_wr;
@@ -4409,6 +4447,16 @@
   ADR_V6_HCM645:             data_out <= hcm645_rd;
 
   ADR_V6_EXTEND:             data_out <= virtex6_extend_rd;
+
+  //CCLUT, Tao
+  ADR_CLCT0_CC:              data_out <= clct0_cc_rd;
+  ADR_CLCT1_CC:              data_out <= clct1_cc_rd;
+  ADR_CLCT0_QLT:             data_out <= clct0_qlt_rd;  // new Quality
+  ADR_CLCT1_QLT:             data_out <= clct1_qlt_rd; 
+  ADR_CLCT0_BND:             data_out <= clct0_bnd_rd;  // new bending
+  ADR_CLCT1_BND:             data_out <= clct1_bnd_rd; 
+  ADR_CLCT0_XKY:             data_out <= clct0_xky_rd; // new position with 1/8 strip precision
+  ADR_CLCT1_XKY:             data_out <= clct1_xky_rd; 
 
   ADR_GEM_DEBUG_FIFO_CTRL:   data_out <= gem_debug_fifo_ctrl_rd;
   ADR_GEM_DEBUG_FIFO_DATA:   data_out <= gem_debug_fifo_data_rd;
@@ -8771,6 +8819,28 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 
   assign algo2016_ctrl_rd[15:0] = algo2016_ctrl_wr[15:0];
 
+//------------------------------------------------------------------------------------------------------------------
+// ADR_CLCT0_CC= 0x19A    1st CLCT Comparator Code
+// ADR_CLCT1_CC= 0x19C    2nd CLCT Comparator Code
+// ADR_CLCT0_QLT= 0x19E    1st CLCT new quality
+// ADR_CLCT1_QLT= 0x1A0    2nd CLCT new quality
+// ADR_CLCT0_BND= 0x1A2    1st CLCT new bnd
+// ADR_CLCT1_BND= 0x1A4    2nd CLCT new bnd
+// ADR_CLCT0_XKY= 0x1A6    1st CLCT new position
+// ADR_CLCT1_XKY= 0x1A8    2nd CLCT new position
+//------------------------------------------------------------------------------------------------------------------
+  assign clct0_cc_rd[MXPATC-1:0] = clct0_vme_carry[MXPATC-1:0]; 
+  assign clct1_cc_rd[MXPATC-1:0] = clct1_vme_carry[MXPATC-1:0]; 
+  assign clct0_qlt_rd[MXQLTB - 1    : 0] = clct0_vme_qlt[MXQLTB - 1   : 0];
+  assign clct0_bnd_rd[MXQLTB - 1    : 0] = clct0_vme_bnd[MXBNDB - 1   : 0];
+  assign clct0_xky_rd[MXSUBKEYBX - 1: 0] = clct0_vme_xky[MXSUBKEYBX - 1   : 0];
+  assign clct1_qlt_rd[MXQLTB - 1    : 0] = clct1_vme_qlt[MXQLTB - 1   : 0];
+  assign clct1_bnd_rd[MXQLTB - 1    : 0] = clct1_vme_bnd[MXBNDB - 1   : 0];
+  assign clct1_xky_rd[MXSUBKEYBX - 1: 0] = clct1_vme_xky[MXSUBKEYBX - 1   : 0];
+
+
+  //assign clct0_cc_rd[15:MXPATC] = 0;
+  //assign clct1_cc_rd[15:MXPATC] = 0;
 
 //------------------------------------------------------------------------------------------------------------------
 // GEM_DEBUG_FIFO_CTRL = 0x30C  GEM Raw Hits Readout RAM Simple Controller
