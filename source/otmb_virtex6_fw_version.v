@@ -28,6 +28,9 @@
   `define VERSION_MAJOR        04'h0;
   `define VERSION_MINOR        05'h0;
 
+  `define CCLUT                01'h1;  // 1=turn on CCLUT
+
+
 // Conditional compile flags: Enable only one CSC_TYPE
 //`define CSC_TYPE_D  04'hD // Reversed ME1B: ME1B   chambers facing away from IR. ME1B hs = reversed, ME1A hs =!reversed
   `define CSC_TYPE_C  04'hC // Normal   ME1B: ME1B   chambers facing toward IR.    ME1B hs =!reversed, ME1A hs = reversed

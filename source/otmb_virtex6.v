@@ -1,6 +1,7 @@
 `timescale 1ns / 1ps
 
 `include "otmb_virtex6_fw_version.v"
+`include "pattern_finder/pattern_params.v"
 
 //`define DEBUG_OTMB_VIRTEX6 1
 //-------------------------------------------------------------------------------------------------------------------
@@ -2337,10 +2338,20 @@ end
   wire  [MXPIDB-1:0]  hs_pid_1st;
   wire  [MXKEYBX-1:0] hs_key_1st;
 
+  // 1st pattern lookup results, ccLUT,Tao
+  wire [MXQLTB - 1   : 0] hs_qlt_1st; // new quality
+  wire [MXBNDB - 1   : 0] hs_bnd_1st; // new bending 
+  wire [MXSUBKEYBX-1 : 0] hs_xky_1st; // new position with 1/8 precision
+
   wire  [MXHITB-1:0]  hs_hit_2nd;
   wire  [MXPIDB-1:0]  hs_pid_2nd;
   wire  [MXKEYBX-1:0] hs_key_2nd;
   wire                hs_bsy_2nd;
+
+  // 2nd pattern lookup results, ccLUT,Tao
+  wire [MXQLTB - 1   : 0] hs_qlt_2nd; // new quality
+  wire [MXBNDB - 1   : 0] hs_bnd_2nd; // new bending 
+  wire [MXSUBKEYBX-1 : 0] hs_xky_2nd; // new position with 1/8 precision
 
   wire                hs_layer_trig;  // Layer triggered
   wire  [MXHITB-1:0]  hs_nlayers_hit; // Number of layers hit
@@ -2353,7 +2364,125 @@ end
   wire       algo2016_cross_bx_algorithm;         // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
   wire       algo2016_clct_use_corrected_bx;      // NOT YET IMPLEMENTED: Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
   
+// CCLUT, Tao
+`ifdef CCLUT
+  pattern_finder_ccLUT upattern_finder
+  (
+// Ports
+  .clock      (clock),                // In  40MHz TMB main clock
+  .global_reset  (global_reset),              // In  1=Reset everything
 
+// CFEB Ports
+  .cfeb0_ly0hs (cfeb_ly0hs[0][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb0_ly1hs (cfeb_ly1hs[0][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb0_ly2hs (cfeb_ly2hs[0][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb0_ly3hs (cfeb_ly3hs[0][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb0_ly4hs (cfeb_ly4hs[0][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb0_ly5hs (cfeb_ly5hs[0][MXHS-1:0]), // In  1/2-strip pulses
+
+  .cfeb1_ly0hs (cfeb_ly0hs[1][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb1_ly1hs (cfeb_ly1hs[1][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb1_ly2hs (cfeb_ly2hs[1][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb1_ly3hs (cfeb_ly3hs[1][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb1_ly4hs (cfeb_ly4hs[1][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb1_ly5hs (cfeb_ly5hs[1][MXHS-1:0]), // In  1/2-strip pulses
+
+  .cfeb2_ly0hs (cfeb_ly0hs[2][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb2_ly1hs (cfeb_ly1hs[2][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb2_ly2hs (cfeb_ly2hs[2][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb2_ly3hs (cfeb_ly3hs[2][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb2_ly4hs (cfeb_ly4hs[2][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb2_ly5hs (cfeb_ly5hs[2][MXHS-1:0]), // In  1/2-strip pulses
+
+  .cfeb3_ly0hs (cfeb_ly0hs[3][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb3_ly1hs (cfeb_ly1hs[3][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb3_ly2hs (cfeb_ly2hs[3][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb3_ly3hs (cfeb_ly3hs[3][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb3_ly4hs (cfeb_ly4hs[3][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb3_ly5hs (cfeb_ly5hs[3][MXHS-1:0]), // In  1/2-strip pulses
+
+  .cfeb4_ly0hs (cfeb_ly0hs[4][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb4_ly1hs (cfeb_ly1hs[4][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb4_ly2hs (cfeb_ly2hs[4][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb4_ly3hs (cfeb_ly3hs[4][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb4_ly4hs (cfeb_ly4hs[4][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb4_ly5hs (cfeb_ly5hs[4][MXHS-1:0]), // In  1/2-strip pulses
+
+  .cfeb5_ly0hs (cfeb_ly0hs[5][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb5_ly1hs (cfeb_ly1hs[5][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb5_ly2hs (cfeb_ly2hs[5][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb5_ly3hs (cfeb_ly3hs[5][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb5_ly4hs (cfeb_ly4hs[5][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb5_ly5hs (cfeb_ly5hs[5][MXHS-1:0]), // In  1/2-strip pulses
+
+  .cfeb6_ly0hs (cfeb_ly0hs[6][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb6_ly1hs (cfeb_ly1hs[6][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb6_ly2hs (cfeb_ly2hs[6][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb6_ly3hs (cfeb_ly3hs[6][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb6_ly4hs (cfeb_ly4hs[6][MXHS-1:0]), // In  1/2-strip pulses
+  .cfeb6_ly5hs (cfeb_ly5hs[6][MXHS-1:0]), // In  1/2-strip pulses
+
+// CSC Orientation Ports
+  .csc_type        (csc_type[3:0]),   // Out  Firmware compile type
+  .csc_me1ab       (csc_me1ab),       // Out  1=ME1A or ME1B CSC type
+  .stagger_hs_csc  (stagger_hs_csc),  // Out  1=Staggered CSC, 0=non-staggered
+  .reverse_hs_csc  (reverse_hs_csc),  // Out  1=Reverse staggered CSC, non-me1
+  .reverse_hs_me1a (reverse_hs_me1a), // Out  1=reverse me1a hstrips prior to pattern sorting
+  .reverse_hs_me1b (reverse_hs_me1b), // Out  1=reverse me1b hstrips prior to pattern sorting
+
+// PreTrigger Ports
+  .layer_trig_en      (layer_trig_en),                  // In  1=Enable layer trigger mode
+  .lyr_thresh_pretrig (lyr_thresh_pretrig[MXHITB-1:0]), // In  Layers hit pre-trigger threshold
+  .hit_thresh_pretrig (hit_thresh_pretrig[MXHITB-1:0]), // In  Hits on pattern template pre-trigger threshold
+  .pid_thresh_pretrig (pid_thresh_pretrig[MXPIDB-1:0]), // In  Pattern shape ID pre-trigger threshold
+  .dmb_thresh_pretrig (dmb_thresh_pretrig[MXHITB-1:0]), // In  Hits on pattern template DMB active-feb threshold
+  .cfeb_en            (cfeb_en[MXCFEB-1:0]),            // In  1=Enable cfeb for pre-triggering
+  .adjcfeb_dist       (adjcfeb_dist[MXKEYB-1+1:0]),     // In  Distance from key to cfeb boundary for marking adjacent cfeb as hit
+  .clct_blanking      (clct_blanking),                  // In  clct_blanking=1 clears clcts with 0 hits
+
+  .cfeb_hit    (cfeb_hit[MXCFEB-1:0]),    // Out  This CFEB has a pattern over pre-trigger threshold
+  .cfeb_active (cfeb_active[MXCFEB-1:0]), // Out  CFEBs marked active for DMB readout
+
+  .cfeb_layer_trig  (cfeb_layer_trig),              // Out  Layer pretrigger
+  .cfeb_layer_or    (cfeb_layer_or[MXLY-1:0]),      // Out  OR of hstrips on each layer
+  .cfeb_nlayers_hit (cfeb_nlayers_hit[MXHITB-1:0]), // Out  Number of CSC layers hit
+//to add dead time feature in 2016Algo  
+  .drift_delay        (drift_delay[MXDRIFT-1:0]),      // In  CSC Drift delay clocks
+  .algo2016_use_dead_time_zone         (algo2016_use_dead_time_zone), // In Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
+  .algo2016_dead_time_zone_size        (algo2016_dead_time_zone_size[4:0]),   // In Constant size of the dead time zone
+
+// 2nd CLCT separation RAM Ports
+  .clct_sep_src       (clct_sep_src),             // In  CLCT separation source 1=vme, 0=ram
+  .clct_sep_vme       (clct_sep_vme[7:0]),        // In  CLCT separation from vme
+  .clct_sep_ram_we    (clct_sep_ram_we),          // In  CLCT separation RAM write enable
+  .clct_sep_ram_adr   (clct_sep_ram_adr[3:0]),    // In  CLCT separation RAM rw address VME
+  .clct_sep_ram_wdata (clct_sep_ram_wdata[15:0]), // In  CLCT separation RAM write data VME
+  .clct_sep_ram_rdata (clct_sep_ram_rdata[15:0]), // Out  CLCT separation RAM read  data VME
+
+// CLCT Pattern-finder results
+  .hs_hit_1st (hs_hit_1st[MXHITB-1:0]),  // Out  1st CLCT pattern hits
+  .hs_pid_1st (hs_pid_1st[MXPIDB-1:0]),  // Out  1st CLCT pattern ID
+  .hs_key_1st (hs_key_1st[MXKEYBX-1:0]), // Out  1st CLCT key 1/2-strip
+
+  .hs_qlt_1st (hs_qlt_1st),
+  .hs_bnd_1st (hs_bnd_1st),
+  .hs_xky_1st (hs_xky_1st),
+
+  .hs_hit_2nd (hs_hit_2nd[MXHITB-1:0]),  // Out  2nd CLCT pattern hits
+  .hs_pid_2nd (hs_pid_2nd[MXPIDB-1:0]),  // Out  2nd CLCT pattern ID
+  .hs_key_2nd (hs_key_2nd[MXKEYBX-1:0]), // Out  2nd CLCT key 1/2-strip
+  .hs_bsy_2nd (hs_bsy_2nd),              // Out  2nd CLCT busy, logic error indicator
+
+  .hs_qlt_2nd (hs_qlt_2nd),
+  .hs_bnd_2nd (hs_bnd_2nd),
+  .hs_xky_2nd (hs_xky_2nd),
+
+  .hs_layer_trig  (hs_layer_trig),              // Out  Layer triggered
+  .hs_nlayers_hit (hs_nlayers_hit[MXHITB-1:0]), // Out  Number of layers hit
+  .hs_layer_or    (hs_layer_or[MXLY-1:0])       // Out  Layer ORs
+  );
+
+`else  // normal OTMB firmware with traditional pattern finding
   pattern_finder upattern_finder
   (
 // Ports
@@ -5594,9 +5723,11 @@ wire [15:0] gemB_bxn_counter;
             |       bpi_re
     ;
 
+   wire lut_sump = (|hs_qlt_1st) | (|hs_bnd_1st) | (|hs_xky_1st) | (|hs_qlt_2nd) | (|hs_bnd_2nd) | (|hs_xky_2nd);
    // Sump
    assign sump =
      ccb_sump
+   | lut_sump
    | copad_sump
    | alct_sump
    | rpc_sump

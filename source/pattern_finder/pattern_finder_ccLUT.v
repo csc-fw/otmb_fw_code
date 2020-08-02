@@ -778,9 +778,9 @@ module pattern_finder_ccLUT (
 
 
   // Store Pattern Unit results
-  reg [MXHITB - 1: 0] hs_hit_s0ab [MXHSX - 1: 0];
-  reg [MXPIDB - 1: 0] hs_pid_s0ab [MXHSX - 1: 0];
-  reg [MXPATC - 1:0] hs_carry_s0ab [MXHSX - 1:0];//CCLUT, Tao
+  reg [MXHITB - 1: 0] hs_hit_s0ab   [MXHSX - 1: 0];
+  reg [MXPIDB - 1: 0] hs_pid_s0ab   [MXHSX - 1: 0];
+  reg [MXPATC - 1: 0] hs_carry_s0ab [MXHSX - 1: 0];//CCLUT, Tao
   generate
     for (ihs = 0; ihs <= MXHSX - 1; ihs = ihs + 1) begin: store_ab
       always @(posedge clock) begin
@@ -1184,7 +1184,7 @@ module pattern_finder_ccLUT (
   //  .best_pat(hs_pat_s2),
   //  .best_key(hs_key_s2)
   //);
-  best_1of7 #(.PATLUT(PATLUT))
+  best_1of7_ccLUT #(.PATLUT(PATLUT))
   ubest1of7_1st (
   // pattern inputs
     .pat0(hs_pat_s1[0]),
@@ -1636,7 +1636,7 @@ module pattern_finder_ccLUT (
   //);
 
   // CCLUT, Tao, best_1of7_busy_ccLUT
-  best_1of7_busy #(.PATLUT(PATLUT))
+  best_1of7_busy_ccLUT #(.PATLUT(PATLUT))
   ubest1of7_2nd (
   // pattern inputs
     .pat0(hs_pat_s4[0]),
