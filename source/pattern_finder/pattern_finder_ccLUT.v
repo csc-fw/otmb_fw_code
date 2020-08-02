@@ -17,7 +17,7 @@
 // 04/03/2013 Fix cfeb_hit logic
 // 12/05/2017 need to consider layerTrig in busy/dead zone logic... (layer_trig_en_ff & layer_trig_s0); // JG: Is this OK? Here?
 //-------------------------------------------------------------------------------------------------------------------
-module pattern_finder (
+module pattern_finder_ccLUT (
   // Clock Ports
   clock,
   global_reset,
@@ -85,10 +85,12 @@ module pattern_finder (
   hs_hit_1st,
   hs_pid_1st,
   hs_key_1st,
+  hs_xkey_1st,
 
   hs_hit_2nd,
   hs_pid_2nd,
   hs_key_2nd,
+  hs_xkey_2nd,
   hs_bsy_2nd,
 
   hs_layer_trig,
@@ -213,11 +215,23 @@ module pattern_finder (
   output [MXHITB - 1: 0]  hs_hit_1st; // 1st CLCT pattern hits
   output [MXPIDB - 1: 0]  hs_pid_1st; // 1st CLCT pattern ID
   output [MXKEYBX - 1: 0] hs_key_1st; // 1st CLCT key 1/2-strip
+  output [MXXKYB - 1 : 0] hs_xky_1st; // 1st CLCT key 1/8-strip
+
+//Tao CCLUT pattern
+  output [MXQLTB     - 1 : 0] hs_qlt_1st; // 1st CLCT pattern lookup quality
+  output [MXBNDB     - 1 : 0] hs_bnd_1st; // 1st CLCT pattern lookup bend angle
+  output [MXPATC     - 1 : 0] hs_car_1st; // 1st CLCT pattern lookup comparator-code
 
   output [MXHITB - 1: 0]  hs_hit_2nd; // 2nd CLCT pattern hits
   output [MXPIDB - 1: 0]  hs_pid_2nd; // 2nd CLCT pattern ID
   output [MXKEYBX - 1: 0] hs_key_2nd; // 2nd CLCT key 1/2-strip
+  output [MXXKYB - 1 : 0] hs_xky_2nd; // 1st CLCT key 1/8-strip     
   output                  hs_bsy_2nd; // 2nd CLCT busy, logic error indicator
+
+//Tao CCLUT pattern
+  output [MXQLTB     - 1 : 0] hs_qlt_2nd; // 1st CLCT pattern lookup quality
+  output [MXBNDB     - 1 : 0] hs_bnd_2nd; // 1st CLCT pattern lookup bend angle
+  output [MXPATC     - 1 : 0] hs_car_2nd; // 1st CLCT pattern lookup comparator-code
 
   output                  hs_layer_trig;  // Layer triggered
   output [MXHITB - 1: 0]  hs_nlayers_hit; // Number of layers hit
@@ -643,75 +657,130 @@ module pattern_finder (
 // ly5[10:0] 00000|aaaaaaaa......bbbbbbbb|00000
 //
 //-------------------------------------------------------------------------------------------------------------------
+//        hs 0123456789A
+// ly0[10:0]  xxxxxkxxxxx    5+1+5 =11
+// ly1[ 7:3]    xxxkxxx      3+1+3 = 7
+// ly2[ 5:5]       k         0+1+0 = 1
+// ly3[ 7:3]     xxkxx       3+1+3 = 5
+// ly4[ 9:1]   xxxxkxxxx     4+1+4 = 9
+// ly5[10:0]  xxxxxkxxxxx    5+1+5 =11
+//
+//       hs  654321 01234567      67890123 456789
+// ly0[10:0]  00000|aaaaaaaa......bbbbbbbb|00000
+// ly1[ 7:3]    000|aaaaaaaa......bbbbbbbb|000
+// ly2[ 5:5]       |aaaaaaaa......bbbbbbbb|
+// ly3[ 7:3]    000|aaaaaaaa......bbbbbbbb|000
+// ly4[ 9:1]  00000|aaaaaaaa......bbbbbbbb|00000
+// ly5[10:0] 000000|aaaaaaaa......bbbbbbbb|000000
+
+
+
   // Create HalfStrip arrays with 0s padded at left and right csc edges
   parameter k      = 5;  // Shift negative array indexes positive
   parameter MXHSXA = 224;  // Last hs +1 on ME1A
   parameter MXHSXB = 128;  // Last hs +1 on ME1B
 
   wire [MXHSXA - 1 + 5 + k: MXHSXB - 5 + k] ly0hs_pad_me1a; // JG, better to use MXKEYX here rather than MXHSXA
-  wire [MXHSXA - 1 + 2 + k: MXHSXB - 2 + k] ly1hs_pad_me1a;
+  wire [MXHSXA - 1 + 3 + k: MXHSXB - 3 + k] ly1hs_pad_me1a;
   wire [MXHSXA - 1 + 0 + k: MXHSXB - 0 + k] ly2hs_pad_me1a; // 228:133
   wire [MXHSXA - 1 + 2 + k: MXHSXB - 2 + k] ly3hs_pad_me1a;
   wire [MXHSXA - 1 + 4 + k: MXHSXB - 4 + k] ly4hs_pad_me1a;
   wire [MXHSXA - 1 + 5 + k: MXHSXB - 5 + k] ly5hs_pad_me1a;
 
   wire [MXHSXB - 1 + 5 + k: 0 - 5 + k] ly0hs_pad_me1b;
-  wire [MXHSXB - 1 + 2 + k: 0 - 2 + k] ly1hs_pad_me1b;
+  wire [MXHSXB - 1 + 3 + k: 0 - 3 + k] ly1hs_pad_me1b;
   wire [MXHSXB - 1 + 0 + k: 0 - 0 + k] ly2hs_pad_me1b; // 132:5
   wire [MXHSXB - 1 + 2 + k: 0 - 2 + k] ly3hs_pad_me1b;
   wire [MXHSXB - 1 + 4 + k: 0 - 4 + k] ly4hs_pad_me1b;
   wire [MXHSXB - 1 + 5 + k: 0 - 5 + k] ly5hs_pad_me1b;
 
   // Pad 0s beyond CSC edges ME1A hs128-223, isolate it from ME1B
-  assign ly0hs_pad_me1a = {5'b00000, ly0hs[223: 128], 5'b00000}; // JG, later use MXKEYX-1:MXHSXB here.
-  assign ly1hs_pad_me1a = {   2'b00, ly1hs[223: 128], 2'b00   }; // JG, MXHSXB=128 here... for non-ME1/1 upgrades use MXHSXB=0
-  assign ly2hs_pad_me1a = {          ly2hs[223: 128]          }; // MXKEYX is based on nCFEB, so that auto-corrects for upgrades
-  assign ly3hs_pad_me1a = {   2'b00, ly3hs[223: 128], 2'b00   };
-  assign ly4hs_pad_me1a = { 4'b0000, ly4hs[223: 128], 4'b0000 };
-  assign ly5hs_pad_me1a = {5'b00000, ly5hs[223: 128], 5'b00000};
+  assign ly0hs_pad_me1a = { 5'b00000, ly0hs[223: 128], 5'b00000 }; // JG, later use MXKEYX-1:MXHSXB here.
+  assign ly1hs_pad_me1a = {   3'b000, ly1hs[223: 128], 3'b000   }; // JG, MXHSXB=128 here... for non-ME1/1 upgrades use MXHSXB=0
+  assign ly2hs_pad_me1a = {           ly2hs[223: 128]           }; // MXKEYX is based on nCFEB, so that auto-corrects for upgrades
+  assign ly3hs_pad_me1a = {    2'b00, ly3hs[223: 128], 2'b00    };
+  assign ly4hs_pad_me1a = {  4'b0000, ly4hs[223: 128], 4'b0000  };
+  assign ly5hs_pad_me1a = { 5'b00000, ly5hs[223: 128], 5'b00000 };
 
   // Pad 0s beyond CSC edges ME1B hs0-127, isolate it from ME1A
-  assign ly0hs_pad_me1b = {5'b00000, ly0hs[127: 0], 5'b00000};
-  assign ly1hs_pad_me1b = {   2'b00, ly1hs[127: 0], 2'b00   };
-  assign ly2hs_pad_me1b = {          ly2hs[127: 0]          };
-  assign ly3hs_pad_me1b = {   2'b00, ly3hs[127: 0], 2'b00   };
-  assign ly4hs_pad_me1b = { 4'b0000, ly4hs[127: 0], 4'b0000 };
-  assign ly5hs_pad_me1b = {5'b00000, ly5hs[127: 0], 5'b00000};
+  assign ly0hs_pad_me1b = { 5'b00000, ly0hs[127: 0], 5'b00000 };
+  assign ly1hs_pad_me1b = {   3'b000, ly1hs[127: 0], 3'b000   };
+  assign ly2hs_pad_me1b = {           ly2hs[127: 0]           };
+  assign ly3hs_pad_me1b = {    2'b00, ly3hs[127: 0], 2'b00    };
+  assign ly4hs_pad_me1b = {  4'b0000, ly4hs[127: 0], 4'b0000  };
+  assign ly5hs_pad_me1b = { 5'b00000, ly5hs[127: 0], 5'b00000 };
 
   // Find pattern hits for each HalfStrip key
   wire [MXHITB - 1: 0] hs_hit [MXHSX - 1: 0];
   wire [MXPIDB - 1: 0] hs_pid [MXHSX - 1: 0];
-  generate
+  wire [MXPATC - 1: 0] hs_carry [MXHSX - 1: 0]; //Tao CCLUT, carry->comparator code 
+  //old pattern finding for k=5
+  //generate  
+  //  for (ihs = 128; ihs <= 223; ihs = ihs + 1) begin: patgen_me1a  // JG, later use MXHSXB, MXKEYX-1 here.
+  //    pattern_unit upat_me1a (
+  //      .ly0 (ly0hs_pad_me1a[ihs + 5 + k: ihs - 5 + k]),
+  //      .ly1 (ly1hs_pad_me1a[ihs + 2 + k: ihs - 2 + k]),
+  //      .ly2 (ly2hs_pad_me1a[ihs + 0 + k: ihs - 0 + k]),  //key on ly2
+  //      .ly3 (ly3hs_pad_me1a[ihs + 2 + k: ihs - 2 + k]),
+  //      .ly4 (ly4hs_pad_me1a[ihs + 4 + k: ihs - 4 + k]),
+  //      .ly5 (ly5hs_pad_me1a[ihs + 5 + k: ihs - 5 + k]),
+  //      .pat_nhits (hs_hit[ihs]),
+  //      .pat_id (hs_pid[ihs]));
+  //  end
+  //endgenerate
+
+  //generate
+  //  for (ihs = 0; ihs <= 127; ihs = ihs + 1) begin: patgen_me1b
+  //    pattern_unit upat_me1b (
+  //      .ly0 (ly0hs_pad_me1b[ihs + 5 + k: ihs - 5 + k]),
+  //      .ly1 (ly1hs_pad_me1b[ihs + 2 + k: ihs - 2 + k]),
+  //      .ly2 (ly2hs_pad_me1b[ihs + 0 + k: ihs - 0 + k]),  //key on ly2
+  //      .ly3 (ly3hs_pad_me1b[ihs + 2 + k: ihs - 2 + k]),
+  //      .ly4 (ly4hs_pad_me1b[ihs + 4 + k: ihs - 4 + k]),
+  //      .ly5 (ly5hs_pad_me1b[ihs + 5 + k: ihs - 5 + k]),
+  //      .pat_nhits (hs_hit[ihs]),
+  //      .pat_id (hs_pid[ihs]));
+  //  end
+  //endgenerate
+
+  //new pattern finding for k=6, CCLUT, Tao
+  generate  
     for (ihs = 128; ihs <= 223; ihs = ihs + 1) begin: patgen_me1a  // JG, later use MXHSXB, MXKEYX-1 here.
-      pattern_unit upat_me1a (
+      pattern_unit_ccLUT upat_me1a (
         .ly0 (ly0hs_pad_me1a[ihs + 5 + k: ihs - 5 + k]),
-        .ly1 (ly1hs_pad_me1a[ihs + 2 + k: ihs - 2 + k]),
+        .ly1 (ly1hs_pad_me1a[ihs + 3 + k: ihs - 3 + k]),
         .ly2 (ly2hs_pad_me1a[ihs + 0 + k: ihs - 0 + k]),  //key on ly2
         .ly3 (ly3hs_pad_me1a[ihs + 2 + k: ihs - 2 + k]),
         .ly4 (ly4hs_pad_me1a[ihs + 4 + k: ihs - 4 + k]),
         .ly5 (ly5hs_pad_me1a[ihs + 5 + k: ihs - 5 + k]),
         .pat_nhits (hs_hit[ihs]),
-        .pat_id (hs_pid[ihs]));
+        .pat_id (hs_pid[ihs]),
+        .pat_carry (hs_carry[ihs])
+    );
     end
   endgenerate
 
   generate
     for (ihs = 0; ihs <= 127; ihs = ihs + 1) begin: patgen_me1b
-      pattern_unit upat_me1b (
+      pattern_unit_ccLUT upat_me1b (
         .ly0 (ly0hs_pad_me1b[ihs + 5 + k: ihs - 5 + k]),
-        .ly1 (ly1hs_pad_me1b[ihs + 2 + k: ihs - 2 + k]),
+        .ly1 (ly1hs_pad_me1b[ihs + 3 + k: ihs - 3 + k]),
         .ly2 (ly2hs_pad_me1b[ihs + 0 + k: ihs - 0 + k]),  //key on ly2
         .ly3 (ly3hs_pad_me1b[ihs + 2 + k: ihs - 2 + k]),
         .ly4 (ly4hs_pad_me1b[ihs + 4 + k: ihs - 4 + k]),
         .ly5 (ly5hs_pad_me1b[ihs + 5 + k: ihs - 5 + k]),
         .pat_nhits (hs_hit[ihs]),
-        .pat_id (hs_pid[ihs]));
+        .pat_id (hs_pid[ihs]),
+        .pat_carry (hs_carry[ihs])
+    );
     end
   endgenerate
+
 
   // Store Pattern Unit results
   reg [MXHITB - 1: 0] hs_hit_s0ab [MXHSX - 1: 0];
   reg [MXPIDB - 1: 0] hs_pid_s0ab [MXHSX - 1: 0];
+  reg [MXPATC - 1:0] hs_carry_s0ab [MXHSX - 1:0];//CCLUT, Tao
   generate
     for (ihs = 0; ihs <= MXHSX - 1; ihs = ihs + 1) begin: store_ab
       always @(posedge clock) begin
@@ -720,19 +789,23 @@ module pattern_finder (
 	if ((ihs/MXHS) > 3) begin // Reverse ME1/1a
            hs_hit_s0ab[ihs] <= cfeb_en_ff[10-(ihs/MXHS)] ? hs_hit[ihs] : 0;
            hs_pid_s0ab[ihs] <= cfeb_en_ff[10-(ihs/MXHS)] ? hs_pid[ihs] : 0;
+           hs_carry_s0ab[ihs] <= cfeb_en_ff[10-(ihs/MXHS)] ? hs_carry[ihs] : 0;
 	end
 	else begin
           hs_hit_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_hit[ihs] : 0;
           hs_pid_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_pid[ihs] : 0;
+          hs_carry_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_carry[ihs] : 0;
 	end 
 `elsif CSC_TYPE_D
 	if ((ihs/MXHS) > 3) begin
            hs_hit_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_hit[ihs] : 0;
            hs_pid_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_pid[ihs] : 0;
+           hs_carry_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_carry[ihs] : 0;
 	end
 	else begin    // Reverse ME1/1b
           hs_hit_s0ab[ihs] <= cfeb_en_ff[3-(ihs/MXHS)] ? hs_hit[ihs] : 0;
           hs_pid_s0ab[ihs] <= cfeb_en_ff[3-(ihs/MXHS)] ? hs_pid[ihs] : 0;
+          hs_carry_s0ab[ihs] <= cfeb_en_ff[3-(ihs/MXHS)] ? hs_carry[ihs] : 0;
 	end 
 `endif
       end
@@ -742,11 +815,13 @@ module pattern_finder (
   // S0 latch: realign with main clock, legacy to maintain sequencer timing
   reg [MXHITB - 1: 0] hs_hit_s0 [MXHSX - 1: 0];
   reg [MXPIDB - 1: 0] hs_pid_s0 [MXHSX - 1: 0];
+  reg [MXPATC - 1: 0] hs_carry_s0 [MXHSX - 1: 0];//CCLUT, Tao
   generate
     for (ihs = 0; ihs <= MXHSX - 1; ihs = ihs + 1) begin: store_s0
       always @(posedge clock) begin
-        hs_hit_s0[ihs] <= (algo2016_use_dead_time_zone & hs_dead_drift[ihs]) ? 0 : hs_hit_s0ab[ihs];
-        hs_pid_s0[ihs] <= (algo2016_use_dead_time_zone & hs_dead_drift[ihs]) ? 0 : hs_pid_s0ab[ihs];
+        hs_hit_s0[ihs]   <= (algo2016_use_dead_time_zone & hs_dead_drift[ihs]) ? 0 : hs_hit_s0ab[ihs];
+        hs_pid_s0[ihs]   <= (algo2016_use_dead_time_zone & hs_dead_drift[ihs]) ? 0 : hs_pid_s0ab[ihs];
+        hs_carry_s0[ihs] <= (algo2016_use_dead_time_zone & hs_dead_drift[ihs]) ? 0 : hs_carry_s0ab[ihs];
       end
     end
   endgenerate
@@ -952,12 +1027,60 @@ module pattern_finder (
 //     Select the 1st best pattern from 224 Key 1/2-Strips
 //-------------------------------------------------------------------------------------------------------------------
   // Best 7 of 224 1/2-strip patterns
-  wire [MXPATB - 1: 0] hs_pat_s1 [6: 0];
-  wire [MXKEYB - 1: 0] hs_key_s1 [6: 0]; // partial key for 1 of 32
+  wire [MXPATB - 1: 0] hs_pat_s1   [6:0];
+  wire [MXKEYB - 1: 0] hs_key_s1   [6:0]; // partial key for 1 of 32
+  wire [MXPATC-1:0]    hs_carry_s1 [6:0]; //CCLUT, Tao, comparator code
+  wire [MXOFFSB -1:0]  hs_offs_s1  [6:0]; //keyhs offset, CCLUT
+  wire [MXBNDB-1:0]    hs_bend_s1  [6:0]; // bending , CCLUT
+  wire [MXQLTB-1:0]    hs_qlt_s1   [6:0]; // quality, CCLUT
+
+  //genvar i;
+  //generate
+  //  for (i = 0; i <= 6; i = i + 1) begin: hs_gen
+  //    best_1of32 ubest1of32_1st (
+  //      .clock(clock),
+  //      .pat00(hs_pat_s0[i * 32 +  0]),
+  //      .pat01(hs_pat_s0[i * 32 +  1]),
+  //      .pat02(hs_pat_s0[i * 32 +  2]),
+  //      .pat03(hs_pat_s0[i * 32 +  3]),
+  //      .pat04(hs_pat_s0[i * 32 +  4]),
+  //      .pat05(hs_pat_s0[i * 32 +  5]),
+  //      .pat06(hs_pat_s0[i * 32 +  6]),
+  //      .pat07(hs_pat_s0[i * 32 +  7]),
+  //      .pat08(hs_pat_s0[i * 32 +  8]),
+  //      .pat09(hs_pat_s0[i * 32 +  9]),
+  //      .pat10(hs_pat_s0[i * 32 + 10]),
+  //      .pat11(hs_pat_s0[i * 32 + 11]),
+  //      .pat12(hs_pat_s0[i * 32 + 12]),
+  //      .pat13(hs_pat_s0[i * 32 + 13]),
+  //      .pat14(hs_pat_s0[i * 32 + 14]),
+  //      .pat15(hs_pat_s0[i * 32 + 15]),
+  //      .pat16(hs_pat_s0[i * 32 + 16]),
+  //      .pat17(hs_pat_s0[i * 32 + 17]),
+  //      .pat18(hs_pat_s0[i * 32 + 18]),
+  //      .pat19(hs_pat_s0[i * 32 + 19]),
+  //      .pat20(hs_pat_s0[i * 32 + 20]),
+  //      .pat21(hs_pat_s0[i * 32 + 21]),
+  //      .pat22(hs_pat_s0[i * 32 + 22]),
+  //      .pat23(hs_pat_s0[i * 32 + 23]),
+  //      .pat24(hs_pat_s0[i * 32 + 24]),
+  //      .pat25(hs_pat_s0[i * 32 + 25]),
+  //      .pat26(hs_pat_s0[i * 32 + 26]),
+  //      .pat27(hs_pat_s0[i * 32 + 27]),
+  //      .pat28(hs_pat_s0[i * 32 + 28]),
+  //      .pat29(hs_pat_s0[i * 32 + 29]),
+  //      .pat30(hs_pat_s0[i * 32 + 30]),
+  //      .pat31(hs_pat_s0[i * 32 + 31]),
+  //      .best_pat(hs_pat_s1[i]),
+  //      .best_key(hs_key_s1[i])
+  //    );
+  //  end
+  //endgenerate
+  //CCLUT, Tao, new 1/32 sorter with comparator code
   genvar i;
   generate
     for (i = 0; i <= 6; i = i + 1) begin: hs_gen
-      best_1of32 ubest1of32_1st (
+      best_1of32_ccLUT ubest1of32_1st (
         .clock(clock),
         .pat00(hs_pat_s0[i * 32 +  0]),
         .pat01(hs_pat_s0[i * 32 +  1]),
@@ -991,16 +1114,79 @@ module pattern_finder (
         .pat29(hs_pat_s0[i * 32 + 29]),
         .pat30(hs_pat_s0[i * 32 + 30]),
         .pat31(hs_pat_s0[i * 32 + 31]),
-        .best_pat(hs_pat_s1[i]),
-        .best_key(hs_key_s1[i])
+        // Hit Carry
+        .carry00(hs_carry_s0[i * 32 +  0]),
+        .carry01(hs_carry_s0[i * 32 +  1]),
+        .carry02(hs_carry_s0[i * 32 +  2]),
+        .carry03(hs_carry_s0[i * 32 +  3]),
+        .carry04(hs_carry_s0[i * 32 +  4]),
+        .carry05(hs_carry_s0[i * 32 +  5]),
+        .carry06(hs_carry_s0[i * 32 +  6]),
+        .carry07(hs_carry_s0[i * 32 +  7]),
+        .carry08(hs_carry_s0[i * 32 +  8]),
+        .carry09(hs_carry_s0[i * 32 +  9]),
+        .carry10(hs_carry_s0[i * 32 + 10]),
+        .carry11(hs_carry_s0[i * 32 + 11]),
+        .carry12(hs_carry_s0[i * 32 + 12]),
+        .carry13(hs_carry_s0[i * 32 + 13]),
+        .carry14(hs_carry_s0[i * 32 + 14]),
+        .carry15(hs_carry_s0[i * 32 + 15]),
+        .carry16(hs_carry_s0[i * 32 + 16]),
+        .carry17(hs_carry_s0[i * 32 + 17]),
+        .carry18(hs_carry_s0[i * 32 + 18]),
+        .carry19(hs_carry_s0[i * 32 + 19]),
+        .carry20(hs_carry_s0[i * 32 + 20]),
+        .carry21(hs_carry_s0[i * 32 + 21]),
+        .carry22(hs_carry_s0[i * 32 + 22]),
+        .carry23(hs_carry_s0[i * 32 + 23]),
+        .carry24(hs_carry_s0[i * 32 + 24]),
+        .carry25(hs_carry_s0[i * 32 + 25]),
+        .carry26(hs_carry_s0[i * 32 + 26]),
+        .carry27(hs_carry_s0[i * 32 + 27]),
+        .carry28(hs_carry_s0[i * 32 + 28]),
+        .carry29(hs_carry_s0[i * 32 + 29]),
+        .carry30(hs_carry_s0[i * 32 + 30]),
+        .carry31(hs_carry_s0[i * 32 + 31]),
+        // Outputs
+        .best_pat   (hs_pat_s1[i]),
+        .best_key   (hs_key_s1[i]),
+        .best_carry (hs_carry_s1[i])
       );
     end
   endgenerate
 
+
+
   // Best 1 of 7 HalfStrip patterns
   wire [MXPATB - 1: 0]  hs_pat_s2;
   wire [MXKEYBX - 1: 0] hs_key_s2;  // full key for 1 of 224
-  best_1of7 ubest1of7_1st(
+  wire [MXXKYB - 1:0]   hs_xky_s2; // CCLUT, Tao
+  wire [MXQLTB - 1:0]   hs_qlt_s2;
+  wire [MXBNDB - 1:0]   hs_bnd_s2;
+  wire [MXPATC - 1:0]   hs_car_s2; //hit carry, comparator code
+  //best_1of7 ubest1of7_1st(
+  //  .pat0(hs_pat_s1[0]),
+  //  .pat1(hs_pat_s1[1]),
+  //  .pat2(hs_pat_s1[2]),
+  //  .pat3(hs_pat_s1[3]),
+  //  .pat4(hs_pat_s1[4]),
+  //  .pat5(hs_pat_s1[5]),
+  //  .pat6(hs_pat_s1[6]),
+
+  //  .key0(hs_key_s1[0]),
+  //  .key1(hs_key_s1[1]),
+  //  .key2(hs_key_s1[2]),
+  //  .key3(hs_key_s1[3]),
+  //  .key4(hs_key_s1[4]),
+  //  .key5(hs_key_s1[5]),
+  //  .key6(hs_key_s1[6]),
+
+  //  .best_pat(hs_pat_s2),
+  //  .best_key(hs_key_s2)
+  //);
+  best_1of7 #(.PATLUT(PATLUT))
+  ubest1of7_1st (
+  // pattern inputs
     .pat0(hs_pat_s1[0]),
     .pat1(hs_pat_s1[1]),
     .pat2(hs_pat_s1[2]),
@@ -1008,7 +1194,7 @@ module pattern_finder (
     .pat4(hs_pat_s1[4]),
     .pat5(hs_pat_s1[5]),
     .pat6(hs_pat_s1[6]),
-
+  // key hs inputs
     .key0(hs_key_s1[0]),
     .key1(hs_key_s1[1]),
     .key2(hs_key_s1[2]),
@@ -1016,55 +1202,129 @@ module pattern_finder (
     .key4(hs_key_s1[4]),
     .key5(hs_key_s1[5]),
     .key6(hs_key_s1[6]),
-
-    .best_pat(hs_pat_s2),
-    .best_key(hs_key_s2)
+  // carry inputs from fit lut
+    .carry0(hs_carry_s1[0]),
+    .carry1(hs_carry_s1[1]),
+    .carry2(hs_carry_s1[2]),
+    .carry3(hs_carry_s1[3]),
+    .carry4(hs_carry_s1[4]),
+    .carry5(hs_carry_s1[5]),
+    .carry6(hs_carry_s1[6]),
+  // offs inputs from fit lut
+    .offs0(hs_offs_s1[0]),
+    .offs1(hs_offs_s1[1]),
+    .offs2(hs_offs_s1[2]),
+    .offs3(hs_offs_s1[3]),
+    .offs4(hs_offs_s1[4]),
+    .offs5(hs_offs_s1[5]),
+    .offs6(hs_offs_s1[6]),
+  // quality inputs from fit lut
+    .qlt0(hs_qlt_s1[0]),
+    .qlt1(hs_qlt_s1[1]),
+    .qlt2(hs_qlt_s1[2]),
+    .qlt3(hs_qlt_s1[3]),
+    .qlt4(hs_qlt_s1[4]),
+    .qlt5(hs_qlt_s1[5]),
+    .qlt6(hs_qlt_s1[6]),
+  // bend inputs from fit lut
+    .bend0(hs_bend_s1[0]),
+    .bend1(hs_bend_s1[1]),
+    .bend2(hs_bend_s1[2]),
+    .bend3(hs_bend_s1[3]),
+    .bend4(hs_bend_s1[4]),
+    .bend5(hs_bend_s1[5]),
+    .bend6(hs_bend_s1[6]),
+  // best pattern output
+    .best_pat (hs_pat_s2),
+    .best_key (hs_key_s2),
+  // best fit result
+    .best_subkey (hs_xky_s2),
+    .best_qlt    (hs_qlt_s2),
+    .best_carry  (hs_car_s2),
+    .best_bend   (hs_bnd_s2)
   );
 
   // Latch final hs pattern data for 1st CLCT
-  reg [MXPATB - 1: 0]  hs_pat_1st_nodly;
-  reg [MXKEYBX - 1: 0] hs_key_1st_nodly;
+  reg [MXPATB - 1:0] hs_pat_1st_nodly;
+  reg [MXKEYBX- 1:0] hs_key_1st_nodly;
+  reg [MXQLTB - 1:0] hs_qlt_1st_nodly; // CCLUT, Tao
+  reg [MXBNDB - 1:0] hs_bnd_1st_nodly;
+  reg [MXPATC - 1:0] hs_car_1st_nodly;
+  reg [MXXKYB - 1:0] hs_xky_1st_nodly;
+
   always @(posedge clock) begin
     hs_pat_1st_nodly <= hs_pat_s2;
     hs_key_1st_nodly <= hs_key_s2;
+    hs_xky_1st_nodly <= hs_xky_s2;//CCLUT, Tao
+    hs_bnd_1st_nodly <= hs_bnd_s2;
+    hs_car_1st_nodly <= hs_car_s2;
+    hs_qlt_1st_nodly <= hs_qlt_s2;
   end
 
 //-------------------------------------------------------------------------------------------------------------------
 // Stage 6A: Delay 1st CLCT to output at same time as 2nd CLCT
 //-------------------------------------------------------------------------------------------------------------------
-  wire [MXPATB - 1: 0]  hs_pat_1st_dly;
-  wire [MXKEYBX - 1: 0] hs_key_1st_dly;
-  wire [MXHITB - 1: 0]  hs_hit_1st_dly;
+
+  wire [MXPATB -1:0] hs_pat_1st_dly;
+  wire [MXKEYBX-1:0] hs_key_1st_dly;
+  wire [MXHITB -1:0] hs_hit_1st_dly;
+  wire [MXQLTB -1:0] hs_qlt_1st_dly;//CCLUT, Tao
+  wire [MXBNDB -1:0] hs_bnd_1st_dly;
+  wire [MXPATC -1:0] hs_car_1st_dly;
+  wire [MXXKYB -1:0] hs_xky_1st_dly;
 
   parameter cdly = 4'd0;
 
   srl16e_bbl #(MXPATB ) upatbbl (.clock(clock), .ce(1'b1), .adr(cdly), .d(hs_pat_1st_nodly), .q(hs_pat_1st_dly));
   srl16e_bbl #(MXKEYBX) ukeybbl (.clock(clock), .ce(1'b1), .adr(cdly), .d(hs_key_1st_nodly), .q(hs_key_1st_dly));
+  //CCLUT, Tao
+  srl16e_bbl #(MXQLTB) uqltbbl (.clock(clock), .ce(1'b1), .adr(cdly), .d(hs_qlt_1st_nodly), .q(hs_qlt_1st_dly));
+  srl16e_bbl #(MXBNDB) ubndbbl (.clock(clock), .ce(1'b1), .adr(cdly), .d(hs_bnd_1st_nodly), .q(hs_bnd_1st_dly));
+  srl16e_bbl #(MXPATC) ucarbbl (.clock(clock), .ce(1'b1), .adr(cdly), .d(hs_car_1st_nodly), .q(hs_car_1st_dly));
+  srl16e_bbl #(MXXKYB) uxkybbl (.clock(clock), .ce(1'b1), .adr(cdly), .d(hs_xky_1st_nodly), .q(hs_xky_1st_dly));
 
   // Final 1st CLCT flipflop
-  reg [MXPIDB - 1: 0]  hs_pid_1st;
-  reg [MXHITB - 1: 0]  hs_hit_1st;
-  reg [MXKEYBX - 1: 0] hs_key_1st;
+  reg [MXPIDB - 1:0] hs_pid_1st;
+  reg [MXHITB - 1:0] hs_hit_1st;
+  reg [MXKEYBX- 1:0] hs_key_1st;
+  reg [MXQLTB - 1:0] hs_qlt_1st;//CCLUT, Tao
+  reg [MXBNDB - 1:0] hs_bnd_1st;
+  reg [MXPATC - 1:0] hs_car_1st;
+  reg [MXXKYB - 1:0] hs_xky_1st;
 
   assign hs_hit_1st_dly = hs_pat_1st_dly[MXPATB - 1: MXPIDB];
+
   wire blank_1st    = ((hs_hit_1st_dly == 0) && (clct_blanking == 1)) || purging;
   wire lyr_trig_1st = (hs_layer_latch && layer_trig_en_ff);
+
 
   always @(posedge clock) begin
     if (blank_1st) begin       // blank 1st CLCT
       hs_pid_1st <= 0;
       hs_hit_1st <= 0;
       hs_key_1st <= 0;
+      hs_qlt_1st <= 0;
+      hs_bnd_1st <= 0;
+      hs_car_1st <= 0;
+      hs_xky_1st <= 0;
     end
-    else if (lyr_trig_1st) begin       // layer-trigger mode
+    else if (lyr_trig_1st) begin        // layer-trigger mode
       hs_pid_1st <= 1;                  // Pattern id=1 for layer triggers
       hs_hit_1st <= hs_nlayers_hit_dly; // Insert number of layers hit
       hs_key_1st <= 0;                  // Dummy key
+      hs_qlt_1st <= 0;
+      hs_bnd_1st <= 0;
+      hs_car_1st <= 0;
+      hs_xky_1st <= 0;
     end
     else begin          // else assert final 1st clct
       hs_key_1st <= hs_key_1st_dly;
       hs_pid_1st <= hs_pat_1st_dly[MXPIDB - 1: 0];
       hs_hit_1st <= hs_pat_1st_dly[MXPATB - 1: MXPIDB];
+      hs_qlt_1st <= hs_qlt_1st_dly;
+      hs_bnd_1st <= hs_bnd_1st_dly;
+      hs_car_1st <= hs_car_1st_dly;
+      hs_xky_1st <= hs_xky_1st_dly;
     end
   end
 
@@ -1072,12 +1332,14 @@ module pattern_finder (
   reg                 hs_layer_trig;
   reg [MXLY - 1: 0]   hs_layer_or;
   reg [MXHITB - 1: 0] hs_nlayers_hit;
+
   always @(posedge clock) begin
     hs_layer_trig  <= hs_layer_trig_dly;
     hs_layer_or    <= hs_layer_or_dly;
     hs_nlayers_hit <= hs_nlayers_hit_dly;
   end
 
+// Stage 6B no change for CCLUT, Tao
 //-------------------------------------------------------------------------------------------------------------------
 // Stage 6B: Mark key 1/2-strips near the 1st CLCT key as busy to exclude them from 2nd CLCT priority encoding
 //-------------------------------------------------------------------------------------------------------------------
@@ -1206,6 +1468,7 @@ module pattern_finder (
 //-------------------------------------------------------------------------------------------------------------------
   // Delay 1st CLCT pattern numbers to align in time with 1st CLCT busy keys
   wire [MXPATB - 1: 0] hs_pat_s3 [MXHSX - 1: 0];
+  wire [MXPATC - 1: 0] hs_carry_s3 [MXHSX - 1: 0];
 
   parameter pdly = 4'd1;
 
@@ -1224,17 +1487,37 @@ module pattern_finder (
           .Q(hs_pat_s3[ikey][ibit])
         );
       end
-    end
+
+    // also do it for comparator code, hit carrry
+      for (ibit = 0; ibit <= MXPATC - 1; ibit = ibit + 1) begin: bit_loop_carry
+        SRL16E u0 ( // Primitive: 16-Bit Shift Register Look-Up Table (LUT) with Clock Enable
+          .CLK(clock),
+          .CE(1'b1),
+          .D(hs_carry_s0[ikey][ibit]),
+          .A0(pdly[0]),
+          .A1(pdly[1]),
+          .A2(pdly[2]),
+          .A3(pdly[3]),
+          .Q(hs_carry_s3[ikey][ibit])
+        );
+      end
+
+  end // end of key_loop
   endgenerate
 
   // Best 7 of 224 1/2-strip patterns
   wire [MXPATB - 1: 0] hs_pat_s4 [6: 0];
   wire [MXKEYB - 1: 0] hs_key_s4 [6: 0]; // partial key for 1 of 32
   wire [6: 0]          hs_bsy_s4;
+  wire [MXOFFSB-1:0]   hs_offs_s4  [6:0];//CCLUT, Tao
+  wire [MXBNDB -1:0]   hs_bend_s4  [6:0];
+  wire [MXPATC -1:0]   hs_carry_s4 [6:0];
+  wire [MXQLTB -1:0]   hs_qlt_s4   [6:0];
 
+  //CCLUT, Tao
   generate
     for (i = 0; i <= 6; i = i + 1) begin: hs_2nd_gen
-      best_1of32_busy ubest1of32_2nd (
+      best_1of32_busy_ccLUT ubest1of32_2nd (
         .clock(clock),
         .pat00(hs_pat_s3[i * 32 + 0]),
         .pat01(hs_pat_s3[i * 32 + 1]),
@@ -1268,10 +1551,46 @@ module pattern_finder (
         .pat29(hs_pat_s3[i * 32 + 29]),
         .pat30(hs_pat_s3[i * 32 + 30]),
         .pat31(hs_pat_s3[i * 32 + 31]),
-        .bsy(busy_key[i * 32 + 31: i * 32]),
-        .best_pat(hs_pat_s4[i]),
-        .best_key(hs_key_s4[i]),
-        .best_bsy(hs_bsy_s4[i])
+        //hit carry, comparator code
+        .carry00(hs_carry_s3[i * 32 + 0]),
+        .carry01(hs_carry_s3[i * 32 + 1]),
+        .carry02(hs_carry_s3[i * 32 + 2]),
+        .carry03(hs_carry_s3[i * 32 + 3]),
+        .carry04(hs_carry_s3[i * 32 + 4]),
+        .carry05(hs_carry_s3[i * 32 + 5]),
+        .carry06(hs_carry_s3[i * 32 + 6]),
+        .carry07(hs_carry_s3[i * 32 + 7]),
+        .carry08(hs_carry_s3[i * 32 + 8]),
+        .carry09(hs_carry_s3[i * 32 + 9]),
+        .carry10(hs_carry_s3[i * 32 + 10]),
+        .carry11(hs_carry_s3[i * 32 + 11]),
+        .carry12(hs_carry_s3[i * 32 + 12]),
+        .carry13(hs_carry_s3[i * 32 + 13]),
+        .carry14(hs_carry_s3[i * 32 + 14]),
+        .carry15(hs_carry_s3[i * 32 + 15]),
+        .carry16(hs_carry_s3[i * 32 + 16]),
+        .carry17(hs_carry_s3[i * 32 + 17]),
+        .carry18(hs_carry_s3[i * 32 + 18]),
+        .carry19(hs_carry_s3[i * 32 + 19]),
+        .carry20(hs_carry_s3[i * 32 + 20]),
+        .carry21(hs_carry_s3[i * 32 + 21]),
+        .carry22(hs_carry_s3[i * 32 + 22]),
+        .carry23(hs_carry_s3[i * 32 + 23]),
+        .carry24(hs_carry_s3[i * 32 + 24]),
+        .carry25(hs_carry_s3[i * 32 + 25]),
+        .carry26(hs_carry_s3[i * 32 + 26]),
+        .carry27(hs_carry_s3[i * 32 + 27]),
+        .carry28(hs_carry_s3[i * 32 + 28]),
+        .carry29(hs_carry_s3[i * 32 + 29]),
+        .carry30(hs_carry_s3[i * 32 + 30]),
+        .carry31(hs_carry_s3[i * 32 + 31]),
+        // Outputs
+        .best_pat   (hs_pat_s4[i]),
+        .best_key   (hs_key_s4[i]),
+        .best_carry (hs_carry_s4[i]),
+        // Busy flags
+        .best_bsy(hs_bsy_s4[i]),
+        .bsy(busy_key[i * 32 + 31: i * 32])
       );
     end
   endgenerate
@@ -1280,9 +1599,46 @@ module pattern_finder (
   wire [MXPATB - 1: 0]  hs_pat_s5;
   wire [MXKEYBX - 1: 0] hs_key_s5;  // full key for 1 of 224
   wire [MXHITB - 1: 0]  hs_hit_s5;
+  wire [MXXKYB -1:0]    hs_xky_s5; // CCLUT, Tao
+  wire [MXQLTB -1:0]    hs_qlt_s5;
+  wire [MXBNDB -1:0]    hs_bnd_s5;
+  wire [MXPATC -1:0]    hs_car_s5;
   wire hs_bsy_s5;
 
-  best_1of7_busy ubest1of7_2nd (
+  //best_1of7_busy ubest1of7_2nd (
+  //  .pat0(hs_pat_s4[0]),
+  //  .pat1(hs_pat_s4[1]),
+  //  .pat2(hs_pat_s4[2]),
+  //  .pat3(hs_pat_s4[3]),
+  //  .pat4(hs_pat_s4[4]),
+  //  .pat5(hs_pat_s4[5]),
+  //  .pat6(hs_pat_s4[6]),
+
+  //  .key0(hs_key_s4[0]),
+  //  .key1(hs_key_s4[1]),
+  //  .key2(hs_key_s4[2]),
+  //  .key3(hs_key_s4[3]),
+  //  .key4(hs_key_s4[4]),
+  //  .key5(hs_key_s4[5]),
+  //  .key6(hs_key_s4[6]),
+
+  //  .bsy0(hs_bsy_s4[0]),
+  //  .bsy1(hs_bsy_s4[1]),
+  //  .bsy2(hs_bsy_s4[2]),
+  //  .bsy3(hs_bsy_s4[3]),
+  //  .bsy4(hs_bsy_s4[4]),
+  //  .bsy5(hs_bsy_s4[5]),
+  //  .bsy6(hs_bsy_s4[6]),
+
+  //  .best_pat(hs_pat_s5),
+  //  .best_key(hs_key_s5),
+  //  .best_bsy(hs_bsy_s5)
+  //);
+
+  // CCLUT, Tao, best_1of7_busy_ccLUT
+  best_1of7_busy #(.PATLUT(PATLUT))
+  ubest1of7_2nd (
+  // pattern inputs
     .pat0(hs_pat_s4[0]),
     .pat1(hs_pat_s4[1]),
     .pat2(hs_pat_s4[2]),
@@ -1290,7 +1646,7 @@ module pattern_finder (
     .pat4(hs_pat_s4[4]),
     .pat5(hs_pat_s4[5]),
     .pat6(hs_pat_s4[6]),
-
+  // key hs inputs
     .key0(hs_key_s4[0]),
     .key1(hs_key_s4[1]),
     .key2(hs_key_s4[2]),
@@ -1298,7 +1654,39 @@ module pattern_finder (
     .key4(hs_key_s4[4]),
     .key5(hs_key_s4[5]),
     .key6(hs_key_s4[6]),
-
+  // carry inputs from fit lut
+    .carry0(hs_carry_s4[0]),
+    .carry1(hs_carry_s4[1]),
+    .carry2(hs_carry_s4[2]),
+    .carry3(hs_carry_s4[3]),
+    .carry4(hs_carry_s4[4]),
+    .carry5(hs_carry_s4[5]),
+    .carry6(hs_carry_s4[6]),
+  // offs inputs from fit lut
+    .offs0(hs_offs_s4[0]),
+    .offs1(hs_offs_s4[1]),
+    .offs2(hs_offs_s4[2]),
+    .offs3(hs_offs_s4[3]),
+    .offs4(hs_offs_s4[4]),
+    .offs5(hs_offs_s4[5]),
+    .offs6(hs_offs_s4[6]),
+  // quality inputs from fit lut
+    .qlt0(hs_qlt_s4[0]),
+    .qlt1(hs_qlt_s4[1]),
+    .qlt2(hs_qlt_s4[2]),
+    .qlt3(hs_qlt_s4[3]),
+    .qlt4(hs_qlt_s4[4]),
+    .qlt5(hs_qlt_s4[5]),
+    .qlt6(hs_qlt_s4[6]),
+  // bend inputs from fit lut
+    .bend0(hs_bend_s4[0]),
+    .bend1(hs_bend_s4[1]),
+    .bend2(hs_bend_s4[2]),
+    .bend3(hs_bend_s4[3]),
+    .bend4(hs_bend_s4[4]),
+    .bend5(hs_bend_s4[5]),
+    .bend6(hs_bend_s4[6]),
+  // best pattern output
     .bsy0(hs_bsy_s4[0]),
     .bsy1(hs_bsy_s4[1]),
     .bsy2(hs_bsy_s4[2]),
@@ -1306,17 +1694,27 @@ module pattern_finder (
     .bsy4(hs_bsy_s4[4]),
     .bsy5(hs_bsy_s4[5]),
     .bsy6(hs_bsy_s4[6]),
-
+  // best pattern output
     .best_pat(hs_pat_s5),
     .best_key(hs_key_s5),
+  // best fit result
+    .best_subkey(hs_xky_s5),
+    .best_qlt   (hs_qlt_s5),
+    .best_bend  (hs_bnd_s5),
+    .best_carry (hs_car_s5),
+  // busy flags
     .best_bsy(hs_bsy_s5)
   );
 
   // Latch final 2nd CLCT
-  reg [MXPIDB - 1: 0]  hs_pid_2nd;
-  reg [MXHITB - 1: 0]  hs_hit_2nd;
-  reg [MXKEYBX - 1: 0] hs_key_2nd;
-  reg hs_bsy_2nd;
+  reg [MXPIDB     - 1:0] hs_pid_2nd;
+  reg [MXHITB     - 1:0] hs_hit_2nd;
+  reg [MXKEYBX    - 1:0] hs_key_2nd;
+  reg [MXQLTB     - 1:0] hs_qlt_2nd;
+  reg [MXBNDB     - 1:0] hs_bnd_2nd;
+  reg [MXPATC     - 1:0] hs_car_2nd;
+  reg [MXXKYB - 1:0]     hs_xky_2nd;
+  reg                    hs_bsy_2nd;
 
   assign hs_hit_s5 = hs_pat_s5[MXPATB - 1: MXPIDB];
   wire blank_2nd    = ((hs_hit_s5 == 0) && (clct_blanking == 1)) || purging;
@@ -1327,12 +1725,20 @@ module pattern_finder (
       hs_pid_2nd <= 0;
       hs_hit_2nd <= 0;
       hs_key_2nd <= 0;
+      hs_qlt_2nd <= 0;
+      hs_bnd_2nd <= 0;
+      hs_car_2nd <= 0;
+      hs_xky_2nd <= 0;
       hs_bsy_2nd <= hs_bsy_s5;
     end
     else if (lyr_trig_2nd) begin    // layer-trigger mode
       hs_pid_2nd <= 0;
       hs_hit_2nd <= 0;
       hs_key_2nd <= 0;
+      hs_qlt_2nd <= 0;
+      hs_bnd_2nd <= 0;
+      hs_car_2nd <= 0;
+      hs_xky_2nd <= 0;
       hs_bsy_2nd <= hs_bsy_s5;
     end
     else begin         // else assert final 2nd clct
@@ -1340,8 +1746,47 @@ module pattern_finder (
       hs_hit_2nd <= hs_pat_s5[MXPATB - 1: MXPIDB];
       hs_key_2nd <= hs_key_s5;
       hs_bsy_2nd <= hs_bsy_s5;
+      hs_qlt_2nd <= hs_qlt_s5;
+      hs_bnd_2nd <= hs_bnd_s5;
+      hs_car_2nd <= hs_car_s5;
+      hs_xky_2nd <= hs_xky_s5;
     end
   end
+
+  //--------------------------------------------------------------------------------------------------------------------
+  // Pattern LUT Uses Dual Port RAM to Operate Simultanously on first and second CLCTs (from different BX)
+  //--------------------------------------------------------------------------------------------------------------------
+
+  generate
+  for (i = 0; i <= 6; i = i + 1) begin: pat_lut
+  pattern_lut_ccLUT upattern_lut (
+    // 40 MHz clock input
+    .clock(clock),
+
+    // Sortable pattern inputs
+    .pat00(hs_pat_s1[i]),
+    .pat01(hs_pat_s4[i]),
+
+    // Carried half-strip bits
+    .carry00(hs_carry_s1[i]),
+    .carry01(hs_carry_s4[i]),
+
+    // LUT Quarterstrip output
+    .offs0(hs_offs_s1[i]),
+    .offs1(hs_offs_s4[i]),
+
+    // LUT Bend angle output
+    .bend0(hs_bend_s1[i]),
+    .bend1(hs_bend_s4[i]),
+
+    // LUT Quality Output
+    .quality0(hs_qlt_s1[i]),
+    .quality1(hs_qlt_s4[i])
+  );
+  end
+  endgenerate
+
+
 
 //------------------------------------------------------------------------------------------------------------------------
 // Prodcedural function to sum number of layers hit into a binary value - ROM version
