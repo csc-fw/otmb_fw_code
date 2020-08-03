@@ -137,7 +137,7 @@ module pattern_finder (
   //parameter MXPIDB  = 4;             // Pattern ID bits
   //parameter MXHITB  = 3;             // Hits on pattern bits
   //parameter MXPATB  = 3 + 4;         // Pattern bits
-  //parameter MXDRIFT = 2;             // Number drift delay bits
+  parameter MXDRIFT = 2;             // Number drift delay bits
 //-------------------------------------------------------------------------------------------------------------------
 // Ports
 //-------------------------------------------------------------------------------------------------------------------

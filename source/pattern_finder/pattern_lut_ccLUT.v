@@ -132,77 +132,77 @@ else
   assign rd0_pat6 = 0;
 endgenerate
 
-generate
-if (pat_en[5])
-rom #(
-  .ROM_FILE("../source/pattern_finder/rom_pat5.mem"),
-  .FALLING_EDGE(1'b1),
-  .MXADRB(MXADRB),
-  .MXDATB(MXDATB)
-) rom5 (
-  .clock(clock),
-  .adr0(carry00),
-  .adr1(carry01),
-  .rd0 (rd0_pat5),
-  .rd1 (rd1_pat5)
-);
-else
-  assign rd0_pat5 = 0;
-endgenerate
-
-generate
-if (pat_en[4])
-rom #(
-  .ROM_FILE("../source/pattern_finder/rom_pat4.mem"),
-  .FALLING_EDGE(1'b1),
-  .MXADRB(MXADRB),
-  .MXDATB(MXDATB)
-) rom4 (
-  .clock(clock),
-  .adr0(carry00),
-  .adr1(carry01),
-  .rd0 (rd0_pat4),
-  .rd1 (rd1_pat4)
-);
-else
-  assign rd0_pat4 = 0;
-endgenerate
-
-generate
-if (pat_en[3])
-rom #(
-  .ROM_FILE("../source/pattern_finder/rom_pat3.mem"),
-  .FALLING_EDGE(1'b1),
-  .MXADRB(MXADRB),
-  .MXDATB(MXDATB)
-) rom3 (
-  .clock(clock),
-  .adr0(carry00),
-  .adr1(carry01),
-  .rd0 (rd0_pat3),
-  .rd1 (rd1_pat3)
-);
-else
-  assign rd0_pat3 = 0;
-endgenerate
-
-generate
-if (pat_en[2])
-  rom #(
-.ROM_FILE("../source/pattern_finder/rom_pat2.mem"),
-.FALLING_EDGE(1'b1),
-  .MXADRB(MXADRB),
-  .MXDATB(MXDATB)
-) rom2 (
-  .clock(clock),
-  .adr0(carry00),
-  .adr1(carry01),
-  .rd0 (rd0_pat2),
-  .rd1 (rd1_pat2)
-);
-else
-  assign rd0_pat2 = 0;
-endgenerate
+//generate
+//if (pat_en[5])
+//rom #(
+//  .ROM_FILE("../source/pattern_finder/rom_pat5.mem"),
+//  .FALLING_EDGE(1'b1),
+//  .MXADRB(MXADRB),
+//  .MXDATB(MXDATB)
+//) rom5 (
+//  .clock(clock),
+//  .adr0(carry00),
+//  .adr1(carry01),
+//  .rd0 (rd0_pat5),
+//  .rd1 (rd1_pat5)
+//);
+//else
+//  assign rd0_pat5 = 0;
+//endgenerate
+//
+//generate
+//if (pat_en[4])
+//rom #(
+//  .ROM_FILE("../source/pattern_finder/rom_pat4.mem"),
+//  .FALLING_EDGE(1'b1),
+//  .MXADRB(MXADRB),
+//  .MXDATB(MXDATB)
+//) rom4 (
+//  .clock(clock),
+//  .adr0(carry00),
+//  .adr1(carry01),
+//  .rd0 (rd0_pat4),
+//  .rd1 (rd1_pat4)
+//);
+//else
+//  assign rd0_pat4 = 0;
+//endgenerate
+//
+//generate
+//if (pat_en[3])
+//rom #(
+//  .ROM_FILE("../source/pattern_finder/rom_pat3.mem"),
+//  .FALLING_EDGE(1'b1),
+//  .MXADRB(MXADRB),
+//  .MXDATB(MXDATB)
+//) rom3 (
+//  .clock(clock),
+//  .adr0(carry00),
+//  .adr1(carry01),
+//  .rd0 (rd0_pat3),
+//  .rd1 (rd1_pat3)
+//);
+//else
+//  assign rd0_pat3 = 0;
+//endgenerate
+//
+//generate
+//if (pat_en[2])
+//  rom #(
+//.ROM_FILE("../source/pattern_finder/rom_pat2.mem"),
+//.FALLING_EDGE(1'b1),
+//  .MXADRB(MXADRB),
+//  .MXDATB(MXDATB)
+//) rom2 (
+//  .clock(clock),
+//  .adr0(carry00),
+//  .adr1(carry01),
+//  .rd0 (rd0_pat2),
+//  .rd1 (rd1_pat2)
+//);
+//else
+//  assign rd0_pat2 = 0;
+//endgenerate
 
 //----------------------------------------------------------------------------------------------------------------------
 //

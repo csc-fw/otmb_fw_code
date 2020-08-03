@@ -25,7 +25,7 @@
 //  02/11/2013  Remove clock_2x
 //  03/21/2013  Replace adders with ROM, reduces area ratio from 26% to 20%
 //------------------------------------------------------------------------------------------------------------------------
-  module pattern_unit
+  module pattern_unit_ccLUT
   (
 // Inputs
   input [10:0] ly0,

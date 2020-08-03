@@ -89,7 +89,7 @@ module pattern_finder_ccLUT (
   hs_qlt_1st,
   hs_bnd_1st,
   hs_xky_1st,
-  hs_carry_1st,
+  hs_car_1st,
 
   hs_hit_2nd,
   hs_pid_2nd,
@@ -99,7 +99,7 @@ module pattern_finder_ccLUT (
   hs_qlt_2nd,
   hs_bnd_2nd,
   hs_xky_2nd,
-  hs_carry_2nd,
+  hs_car_2nd,
 
   hs_layer_trig,
   hs_nlayers_hit,
@@ -147,7 +147,7 @@ module pattern_finder_ccLUT (
   //parameter MXPIDB  = 4;             // Pattern ID bits
   //parameter MXHITB  = 3;             // Hits on pattern bits
   //parameter MXPATB  = 3 + 4;         // Pattern bits
-  //parameter MXDRIFT = 2;             // Number drift delay bits
+  parameter MXDRIFT = 2;             // Number drift delay bits
 //-------------------------------------------------------------------------------------------------------------------
 // Ports
 //-------------------------------------------------------------------------------------------------------------------

@@ -496,7 +496,7 @@
   parameter MXOFFSB = 4;                 // Quarter-strip bits
   parameter MXQLTB  = 9;                 // Fit quality bits
   parameter MXBNDB  = 4;                 // Bend bits
-  parameter MXSUBKEYBX = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
+  parameter MXXKYB = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
 //------------------------------------------------------------------------------------------------------------------
 //Ports
 //------------------------------------------------------------------------------------------------------------------
@@ -578,11 +578,11 @@
 
   input [MXQLTB - 1   : 0] clct0_qlt_xtmb; // new quality
   input [MXBNDB - 1   : 0] clct0_bnd_xtmb; // new bending 
-  input [MXSUBKEYBX-1 : 0] clct0_xky_xtmb; // new position with 1/8 precision
+  input [MXXKYB-1     : 0] clct0_xky_xtmb; // new position with 1/8 precision
   input [MXPATC-1     : 0] clct0_carry_xtmb; // CC code 
   input [MXQLTB - 1   : 0] clct1_qlt_xtmb; // new quality
   input [MXBNDB - 1   : 0] clct1_bnd_xtmb; // new bending 
-  input [MXSUBKEYBX-1 : 0] clct1_xky_xtmb; // new position with 1/8 precision
+  input [MXXKYB-1     : 0] clct1_xky_xtmb; // new position with 1/8 precision
   input [MXPATC-1     : 0] clct1_carry_xtmb; // CC code 
 
   output                tmb_trig_pulse;    // ALCT or CLCT or both triggered
