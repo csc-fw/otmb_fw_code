@@ -27,8 +27,8 @@ module gem_sync_mon (
   input gemA_sync_done, // ttc resync is done
   input gemB_sync_done,
 
-  input gemA_rxd_int_delay,
-  input gemB_rxd_int_delay,
+  input [3:0] gemA_rxd_int_delay,
+  input [3:0] gemB_rxd_int_delay,
 
   output reg gemA_synced,  // fibers from same OH are desynced
   output reg gemB_synced,  // fibers from same OH are desynced

@@ -149,7 +149,7 @@ module copad (
 
     output reg any_match, // Output: 1 bit, any match was found
 
-    output reg [MXFEB-1:0] active_feb_list_copad,  // 24 bit register of active FEBs. Can be used e.g. in GEM only self-trigger
+    //output reg [MXFEB-1:0] active_feb_list_copad,  // 24 bit register of active FEBs. Can be used e.g. in GEM only self-trigger
 
     output sump
 );

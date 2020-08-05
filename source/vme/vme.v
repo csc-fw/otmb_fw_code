@@ -321,6 +321,7 @@
   pid_thresh_pretrig,
   dmb_thresh_pretrig,
   adjcfeb_dist,
+  ccLUT_enable,
 
 // CFEB Ports: Hot Channel Mask
   cfeb0_ly0_hcm,
@@ -1668,7 +1669,7 @@
 
   // CSC register ends 10'h198 = 408, for ALGO2016, Tao,2019-07-26
 
-  // CCLUT register starts from 10'h19A = 410
+  // Tao,CCLUT register starts from 10'h19A = 410
   parameter ADR_CLCT0_CC              = 10'h19A;  // Comparator code, for 1st CLCT, readonly
   parameter ADR_CLCT1_CC              = 10'h19C;  // Comparator code, for 2nd CLCT, readonly
   parameter ADR_CLCT0_QLT             = 10'h19E;  // new Quality
@@ -1677,6 +1678,8 @@
   parameter ADR_CLCT1_BND             = 10'h1A4; 
   parameter ADR_CLCT0_XKY             = 10'h1A6; // new position with 1/8 strip precision
   parameter ADR_CLCT1_XKY             = 10'h1A8; 
+
+  parameter ADR_CCLUT_FORMAT_CTRL     = 10'h1AA; // control for CCLUT, data format
 
   // GEM Registers, start from 10'h300 = 768
 
@@ -2099,6 +2102,8 @@
   output  [MXPIDB-1:0]    pid_thresh_pretrig; // Pattern shape ID pre-trigger threshold
   output  [MXHITB-1:0]    dmb_thresh_pretrig; // Hits on pattern template DMB active-feb threshold
   output  [MXKEYB-1+1:0]  adjcfeb_dist;       // Distance from key to cfeb boundary for marking adjacent cfeb as hit
+
+  input ccLUT_enable; // In 
 
 // CFEB Ports: Hot Channel Mask
   output  [MXDS-1:0]    cfeb0_ly0_hcm;      // 1=enable DiStrip
@@ -3584,6 +3589,9 @@
   wire [15:0] clct0_xky_rd;
   wire [15:0] clct1_xky_rd;
 
+  reg  [15:0] cclut_format_ctrl_wr;
+  wire [15:0] cclut_format_ctrl_rd;
+
   wire [15:0] gem_debug_fifo_data_rd; // read only
 
   reg  [15:0] gem_debug_fifo_ctrl_wr;
@@ -4463,6 +4471,8 @@
   ADR_CLCT1_BND:             data_out <= clct1_bnd_rd; 
   ADR_CLCT0_XKY:             data_out <= clct0_xky_rd; // new position with 1/8 strip precision
   ADR_CLCT1_XKY:             data_out <= clct1_xky_rd; 
+
+  ADR_CCLUT_FORMAT_CTRL:     data_out <= cclut_format_ctrl_rd;
 
   ADR_GEM_DEBUG_FIFO_CTRL:   data_out <= gem_debug_fifo_ctrl_rd;
   ADR_GEM_DEBUG_FIFO_DATA:   data_out <= gem_debug_fifo_data_rd;
@@ -8838,16 +8848,23 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign clct0_cc_rd[MXPATC-1:0] = clct0_vme_carry[MXPATC-1:0]; 
   assign clct1_cc_rd[MXPATC-1:0] = clct1_vme_carry[MXPATC-1:0]; 
   assign clct0_qlt_rd[MXQLTB - 1    : 0] = clct0_vme_qlt[MXQLTB - 1   : 0];
-  assign clct0_bnd_rd[MXQLTB - 1    : 0] = clct0_vme_bnd[MXBNDB - 1   : 0];
+  assign clct0_bnd_rd[MXBNDB - 1    : 0] = clct0_vme_bnd[MXBNDB - 1   : 0];
   assign clct0_xky_rd[MXXKYB - 1    : 0] = clct0_vme_xky[MXXKYB - 1   : 0];
   assign clct1_qlt_rd[MXQLTB - 1    : 0] = clct1_vme_qlt[MXQLTB - 1   : 0];
-  assign clct1_bnd_rd[MXQLTB - 1    : 0] = clct1_vme_bnd[MXBNDB - 1   : 0];
+  assign clct1_bnd_rd[MXBNDB - 1    : 0] = clct1_vme_bnd[MXBNDB - 1   : 0];
   assign clct1_xky_rd[MXXKYB - 1    : 0] = clct1_vme_xky[MXXKYB - 1   : 0];
 
+//------------------------------------------------------------------------------------------------------------------
+// ADR_CCLUT_FORMAT_CTRL = 0x30C  GEM Raw Hits Readout RAM Simple Controller
+//------------------------------------------------------------------------------------------------------------------
 
-  //assign clct0_cc_rd[15:MXPATC] = 0;
-  //assign clct1_cc_rd[15:MXPATC] = 0;
-
+  initial begin
+    cclut_format_ctrl_wr[0] = 0;
+    //cclut_format_ctrl_wr[1] = 0; //CLCT pattern sorting, 0= use {pat, nhits}, 1={new quality}
+    //cclut_format_ctrl_wr[2] = 0; //LCT data format control, 0 = use Run2, 1= use Run3 with GEM-CSC+CCLUT
+  end
+  assign cclut_format_ctrl_rd[0] = ccLUT_enable;
+      
 //------------------------------------------------------------------------------------------------------------------
 // GEM_DEBUG_FIFO_CTRL = 0x30C  GEM Raw Hits Readout RAM Simple Controller
 //------------------------------------------------------------------------------------------------------------------

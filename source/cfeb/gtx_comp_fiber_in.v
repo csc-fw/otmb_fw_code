@@ -74,7 +74,7 @@
   output        VALID;
   output        MATCH;
   output [47:0] RCV_DATA;
-  output [47:0] RCV_KCHAR;
+  output [15:0] RCV_KCHAR;
   output [47:0] PROMPT_DATA;
   output [3:1]  NONZERO_WORD;
   output        CEW0;

@@ -275,6 +275,7 @@ module pattern_finder_ccLUT (
 `ifdef CSC_TYPE_C initial $display ("CSC_TYPE_C=%H",`CSC_TYPE_C); `endif // Normal   ME1B, reversed ME1A
 `ifdef CSC_TYPE_D initial $display ("CSC_TYPE_D=%H",`CSC_TYPE_D); `endif // Reversed ME1B, normal   ME1A
 
+ initial $display ("CCLUT pattern finder module is used "); 
 //-------------------------------------------------------------------------------------------------------------------
 // Debug mode, FF aligns inputs, and has local DLL to generate 2x clock and lac clock
 //-------------------------------------------------------------------------------------------------------------------

@@ -563,6 +563,11 @@
   clct_window,
   algo2016_clct_window,
   algo2016_clct_to_alct,
+// Algo2016: configuration
+  algo2016_use_dead_time_zone,
+// JG: this functionality is being removed, 10/25/2017...
+  algo2016_dead_time_zone_size,
+  algo2016_use_dynamic_dead_time_zone,
 
   tmb_allow_alct,
   tmb_allow_clct,
@@ -1139,11 +1144,6 @@
   deb_buf_push_data,
   deb_buf_pop_data,
 
-// Algo2016: configuration
-  algo2016_use_dead_time_zone,
-// JG: this functionality is being removed, 10/25/2017...
-  algo2016_dead_time_zone_size,
-  algo2016_use_dynamic_dead_time_zone,
 
   //to test GEM BC0 
   gemA_bxn_counter,
@@ -3085,7 +3085,13 @@
   assign clct0[7:4]  = hs_pid_1st[3:0]; // Pattern shape 0-A
   assign clct0[15:8] = hs_key_1st[7:0]; // 1/2-strip ID number
 
+  assign clct0_qlt[MXQLTB - 1: 0]= hs_qlt_1st[MXQLTB - 1   : 0]; 
+  assign clct0_bnd[MXBNDB - 1: 0]= hs_bnd_1st[MXBNDB - 1   : 0]; 
+  assign clct0_xky[MXXKYB - 1: 0]= hs_xky_1st[MXXKYB - 1   : 0]; 
   assign clct0_carry[MXPATC-1:0] = hs_carry_1st[MXPATC-1:0];
+  assign clct1_qlt[MXQLTB - 1: 0]= hs_qlt_2nd[MXQLTB - 1   : 0]; 
+  assign clct1_bnd[MXBNDB - 1: 0]= hs_bnd_2nd[MXBNDB - 1   : 0]; 
+  assign clct1_xky[MXXKYB - 1: 0]= hs_xky_2nd[MXXKYB - 1   : 0]; 
   assign clct1_carry[MXPATC-1:0] = hs_carry_2nd[MXPATC-1:0];
 
   assign clct1[0]    = clct1_vpf;       // Valid pattern flag

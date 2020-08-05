@@ -498,6 +498,8 @@
   `ifdef CSC_TYPE_C     initial $display ("CSC_TYPE_C    %H", `CSC_TYPE_C   );  `endif
   `ifdef CSC_TYPE_D     initial $display ("CSC_TYPE_D    %H", `CSC_TYPE_D   );  `endif
 
+  `ifdef CCLUT          initial $display ("CCLUT         %H", `CCLUT        );  `endif
+
 //-------------------------------------------------------------------------------------------------------------------
 // Clock DCM Instantiation
 //-------------------------------------------------------------------------------------------------------------------
@@ -1526,10 +1528,10 @@
   assign gem_rxd_posneg[2] = gemB_rxd_posneg;
   assign gem_rxd_posneg[3] = gemB_rxd_posneg;
 
-  assign gem_rxd_int_delay[0] = gemA_rxd_int_delay;
-  assign gem_rxd_int_delay[1] = gemA_rxd_int_delay;
-  assign gem_rxd_int_delay[2] = gemB_rxd_int_delay;
-  assign gem_rxd_int_delay[3] = gemB_rxd_int_delay;
+  assign gem_rxd_int_delay[0][3:0] = gemA_rxd_int_delay[3:0];
+  assign gem_rxd_int_delay[1][3:0] = gemA_rxd_int_delay[3:0];
+  assign gem_rxd_int_delay[2][3:0] = gemB_rxd_int_delay[3:0];
+  assign gem_rxd_int_delay[3][3:0] = gemB_rxd_int_delay[3:0];
 
   wire  [13:0] gem_debug_fifo_rdata [MXGEM-1:0];    // GEM FIFO RAM read data
 
@@ -1952,6 +1954,8 @@
   reg  [CLSTBITS -1 :0] gem_copad_reg  [MXCLUSTER_CHAMBER-1:0];
   wire [CLSTBITS -1 :0] gem_copad      [MXCLUSTER_CHAMBER-1:0];
 
+  wire [3:0] gem_match_deltaPad;
+
   copad u_copad (
 
     .clock(clock),
@@ -2354,6 +2358,30 @@ end
   wire [MXBNDB - 1   : 0] hs_bnd_2nd; // new bending 
   wire [MXXKYB-1     : 0] hs_xky_2nd; // new position with 1/8 precision
   wire [MXPATC-1     : 0] hs_carry_2nd; // CC code 
+
+  reg reg_ccLUT_enable = 1'b0;
+  //enable CCLUT, Tao
+  `ifdef CCLUT
+	always @ (posedge *) begin
+           reg_ccLUT_enable <= 1'b1;
+        end
+  `endif
+
+   wire ccLUT_enable;
+   assign ccLUT_enable = reg_ccLUT_enable;
+
+
+  //CCLUT is off
+  `ifndef CCLUT
+   assign hs_qlt_1st[MXQLTB - 1   : 0] = 0;
+   assign hs_bnd_1st[MXBNDB - 1   : 0] = 0;
+   assign hs_xky_1st[MXXKYB - 1   : 0] = 0;
+   assign hs_carry_1st[MXPATC - 1 : 0] = 0;
+   assign hs_qlt_2nd[MXQLTB - 1   : 0] = 0;
+   assign hs_bnd_2nd[MXBNDB - 1   : 0] = 0;
+   assign hs_xky_2nd[MXXKYB - 1   : 0] = 0;
+   assign hs_carry_2nd[MXPATC - 1 : 0] = 0;
+  `endif
 
   wire                hs_layer_trig;  // Layer triggered
   wire  [MXHITB-1:0]  hs_nlayers_hit; // Number of layers hit
@@ -3006,6 +3034,8 @@ end
 
   .alct_delay  (alct_delay[3:0]),  // In  Delay ALCT for CLCT match window
   .clct_window (clct_window[3:0]), // In  CLCT match window width
+  .algo2016_clct_window (algo2016_window[3:0]), // CLCT-centric matching window size
+  .algo2016_clct_to_alct (algo2016_clct_to_alct), // switch to CLCT-centric matching window or not
    
   .algo2016_use_dead_time_zone         (algo2016_use_dead_time_zone),         // In Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
   .algo2016_dead_time_zone_size        (algo2016_dead_time_zone_size[4:0]),   // In Constant size of the dead time zone
@@ -3060,14 +3090,14 @@ end
   .bxn_clct_vme    (bxn_clct_vme[MXBXN-1:0]), // Out  CLCT BXN at pre-trigger
   .bxn_l1a_vme     (bxn_l1a_vme[MXBXN-1:0]),  // Out  CLCT BXN at L1A
 
-  .clct0_vme_qlt   (clct0_vme_qlt[MXQLTB - 1   : 0]),
-  .clct0_vme_bnd   (clct0_vme_bnd[MXBNDB - 1   : 0]),
-  .clct0_vme_xky   (clct0_vme_xky[MXXKYB-1 : 0]),
-  .clct0_vme_carry (clct0_vme_carry[MXPATC-1   : 0]),
-  .clct1_vme_qlt   (clct1_vme_qlt[MXQLTB - 1   : 0]),
-  .clct1_vme_bnd   (clct1_vme_bnd[MXBNDB - 1   : 0]),
-  .clct1_vme_xky   (clct1_vme_xky[MXXKYB-1 : 0]),
-  .clct1_vme_carry (clct1_vme_carry[MXPATC-1   : 0]),
+  .clct0_vme_qlt   (clct0_vme_qlt[MXQLTB - 1   : 0]), // Out, clct0 new quality
+  .clct0_vme_bnd   (clct0_vme_bnd[MXBNDB - 1   : 0]), // Out, clct0 new bending 
+  .clct0_vme_xky   (clct0_vme_xky[MXXKYB-1 : 0]),     // Out, clct0 new position with 1/8 strip resolution
+  .clct0_vme_carry (clct0_vme_carry[MXPATC-1   : 0]), // Out ,clct0 comparator code
+  .clct1_vme_qlt   (clct1_vme_qlt[MXQLTB - 1   : 0]), // out
+  .clct1_vme_bnd   (clct1_vme_bnd[MXBNDB - 1   : 0]),  // out 
+  .clct1_vme_xky   (clct1_vme_xky[MXXKYB-1 : 0]),     // out
+  .clct1_vme_carry (clct1_vme_carry[MXPATC-1   : 0]),  // out
 // Sequencer RPC VME Configuration Ports
   .rpc_exists       (rpc_exists[MXRPC-1:0]),        // In  RPC Readout list
   .rpc_read_enable  (rpc_read_enable),              // In  1 Enable RPC Readout
@@ -4080,14 +4110,14 @@ wire [15:0] gemB_bxn_counter;
   .clct1_xtmb (clct1_xtmb[MXCLCT-1:0]),  // In  Second CLCT
   .clctc_xtmb (clctc_xtmb[MXCLCTC-1:0]), // In  Common to CLCT0/1 to TMB
   .clctf_xtmb (clctf_xtmb[MXCFEB-1:0]),  // In  Active cfeb list to TMB
-  .clct0_qlt_xtmb   (clct0_qlt_xtmb[MXQLTB - 1   : 0]),
-  .clct0_bnd_xtmb   (clct0_bnd_xtmb[MXBNDB - 1   : 0]),
-  .clct0_xky_xtmb   (clct0_xky_xtmb[MXXKYB-1 : 0]),
-  .clct0_carry_xtmb (clct0_carry_xtmb[MXPATC-1:0]),  // Out  First  CLCT
-  .clct1_qlt_xtmb   (clct1_qlt_xtmb[MXQLTB - 1   : 0]),
-  .clct1_bnd_xtmb   (clct1_bnd_xtmb[MXBNDB - 1   : 0]),
-  .clct1_xky_xtmb   (clct1_xky_xtmb[MXXKYB-1 : 0]),
-  .clct1_carry_xtmb (clct1_carry_xtmb[MXPATC-1:0]),  // Out  Second CLCT
+  .clct0_qlt_xtmb   (clct0_qlt_xtmb[MXQLTB - 1   : 0]), //In
+  .clct0_bnd_xtmb   (clct0_bnd_xtmb[MXBNDB - 1   : 0]), //In
+  .clct0_xky_xtmb   (clct0_xky_xtmb[MXXKYB-1 : 0]),    //In
+  .clct0_carry_xtmb (clct0_carry_xtmb[MXPATC-1:0]),  // In  First  CLCT
+  .clct1_qlt_xtmb   (clct1_qlt_xtmb[MXQLTB - 1   : 0]),   //In
+  .clct1_bnd_xtmb   (clct1_bnd_xtmb[MXBNDB - 1   : 0]),  // In
+  .clct1_xky_xtmb   (clct1_xky_xtmb[MXXKYB-1 : 0]),   // In 
+  .clct1_carry_xtmb (clct1_carry_xtmb[MXPATC-1:0]),  // In  Second CLCT
   .bx0_xmpc   (bx0_xmpc),                // In  bx0 to mpc
 
   .tmb_trig_pulse    (tmb_trig_pulse),           // Out  ALCT or CLCT or both triggered
@@ -4806,6 +4836,8 @@ wire [15:0] gemB_bxn_counter;
       .pid_thresh_pretrig (pid_thresh_pretrig[MXPIDB-1:0]), // Out  Pattern shape ID pre-trigger threshold
       .dmb_thresh_pretrig (dmb_thresh_pretrig[MXHITB-1:0]), // Out  Hits on pattern template DMB active-feb threshold
       .adjcfeb_dist       (adjcfeb_dist[MXKEYB-1+1:0]),     // Out  Distance from key to cfeb boundary for marking adjacent cfeb as hit
+      //Enable CCLUT or not
+      .ccLUT_enable       (ccLUT_enable),  // In
 
       // CFEB Ports: Hot Channel Mask
       .cfeb0_ly0_hcm (cfeb_ly0_hcm[0][MXDS-1:0]), // Out  1=enable DiStrip
@@ -5007,9 +5039,15 @@ wire [15:0] gemB_bxn_counter;
       .bxn_alct_vme      (bxn_alct_vme[4:0]),       // In  ALCT BXN at alct valid pattern flag
       .clct_bx0_sync_err (clct_bx0_sync_err),       // In  Sync error: BXN counter==0 did not match bx0
 
-      .clct0_vme_carry (clct0_vme_carry[MXPATC-1:0]),
-      .clct1_vme_carry (clct1_vme_carry[MXPATC-1:0]),
-
+      //CCLUT, Tao 
+      .clct0_vme_qlt   (clct0_vme_qlt[MXQLTB - 1   : 0]), // In clct0 new quality
+      .clct0_vme_bnd   (clct0_vme_bnd[MXBNDB - 1   : 0]), // In clct0 new bending 
+      .clct0_vme_xky   (clct0_vme_xky[MXXKYB-1 : 0]),     // In clct0 new key position with 1/8 strip resolution
+      .clct0_vme_carry (clct0_vme_carry[MXPATC-1   : 0]), // In clct0 Comparator code
+      .clct1_vme_qlt   (clct1_vme_qlt[MXQLTB - 1   : 0]), // In
+      .clct1_vme_bnd   (clct1_vme_bnd[MXBNDB - 1   : 0]), // In 
+      .clct1_vme_xky   (clct1_vme_xky[MXXKYB-1 : 0]),    // IN 
+      .clct1_vme_carry (clct1_vme_carry[MXPATC-1   : 0]),  // in
 
       // Sequencer Ports: Raw Hits Ram
       .dmb_wr    (dmb_wr),                   // Out  Raw hits RAM VME write enable
@@ -5037,7 +5075,7 @@ wire [15:0] gemB_bxn_counter;
       // GEM Ports: GEM copad control
       .gem_match_neighborRoll  (gem_match_neighborRoll),  // Out copad matching with neighboring roll enable
       .gem_match_neighborPad   (gem_match_neighborPad),   // out copad matching with neighboring pad enable
-      .gem_match_deltaPad      (gem_match_deltaPad),      // Out max pad difference between two GEM chamber in copad matching
+      .gem_match_deltaPad      (gem_match_deltaPad[3:0]),      // Out max pad difference between two GEM chamber in copad matching
 
       // Sequencer Ports: Buffer Status
       .wr_buf_ready     (wr_buf_ready),                      // In  Write buffer is ready
