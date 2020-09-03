@@ -1521,7 +1521,7 @@
 
   // both fibers on gemA, and both fibers on gemB share posnegs and int_delays
   wire  [MXGEM-1:0]     gem_rxd_posneg;
-  wire  [MXGEM-1:0]     gem_rxd_int_delay [3:0];
+  wire  [3:0]     gem_rxd_int_delay [MXGEM-1:0]; // reg [7:0] a[0:3] will give you a 4x8 bit array
 
   assign gem_rxd_posneg[0] = gemA_rxd_posneg;
   assign gem_rxd_posneg[1] = gemA_rxd_posneg;
