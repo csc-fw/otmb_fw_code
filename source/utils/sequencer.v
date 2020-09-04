@@ -497,8 +497,11 @@
   cfeb_layer_trig,
   cfeb_layer_or,
   cfeb_nlayers_hit,
+//HMT results
+  hmt_nhits_trig,
 
 // Pattern Finder CLCT results
+ 
   hs_hit_1st,
   hs_pid_1st,
   hs_key_1st,
@@ -607,6 +610,8 @@
 
   seq_trigger,
   sequencer_state,
+
+  hmt_nhits_trig_vme,
 
   event_clear_vme,
   clct0_vme,
@@ -777,6 +782,8 @@
   wr_avail_rmpc,
 
 // TMB LCT Match
+  hmt_nhits_trig_xtmb;
+  
   clct0_xtmb,
   clct1_xtmb,
   clctc_xtmb,
@@ -1451,6 +1458,7 @@
   input  [MXLY-1:0]    cfeb_layer_or;      // OR of hstrips on each layer at pre-trigger
   input  [MXHITB-1:0]  cfeb_nlayers_hit;    // Number of CSC layers hit
 
+  input  [9:0]  hmt_nhits_trig; // HMT results 
 // Pattern Finder CLCT results
   input  [MXHITB-1:0]  hs_hit_1st;        // 1st CLCT pattern hits
   input  [MXPIDB-1:0]  hs_pid_1st;        // 1st CLCT pattern ID
@@ -1558,6 +1566,7 @@
   output        seq_trigger;     // Sequencer requests L1A from CCB
   output [11:0] sequencer_state; // Sequencer state for vme read
 
+  output  [9:0]  hmt_nhits_trig_vme;      // First  CLCT
   input          event_clear_vme;  // Event clear for aff,alct,clct,mpc vme diagnostic registers
   output  [MXCLCT-1:0]  clct0_vme;      // First  CLCT
   output  [MXCLCT-1:0]  clct1_vme;      // Second CLCT
@@ -1727,6 +1736,7 @@
   input          wr_avail_rmpc; // Buffer available at MPC received
 
 // TMB LCT Match
+  output  [9:0]          hmt_nhits_trig_xtmb;
   output  [MXCLCT-1:0]   clct0_xtmb; // 1st CLCT to TMB
   output  [MXCLCT-1:0]   clct1_xtmb; // 2nd CLCT to TMB
   output  [MXCLCTC-1:0]  clctc_xtmb; // Common to CLCT0/1 to TMB
@@ -3059,6 +3069,10 @@
   assign clct1_vpf = clct1_valid && clct_pop_xtmb;
 
 // Construct CLCTs for sending to TMB matching. These are node names only
+  wire [9:0]  hmt_nhits_trig, hmt_nhits_trig_xtmb;
+  assign hmt_nhits_trig_xtmb[9:0] = hmt_nhits_trig[9:0] & {10{clct0_vpf}}; //only valid if at least one CLCT is found
+
+
   wire [MXCLCT-1:0]  clct0, clct0_xtmb;
   wire [MXCLCT-1:0]  clct1, clct1_xtmb;
   wire [MXCLCTA-1:0] clcta, clcta_xtmb;
@@ -3128,6 +3142,7 @@
   assign clct1_xky_xtmb   = clct1_xky & {MXXKYB {!clct1_blanking}};
 
 // Latch CLCTs for VME
+  reg [9:0] hmt_nhits_trig_vme=0;
   reg [MXCLCT-1:0]  clct0_vme=0;
   reg [MXCLCT-1:0]  clct1_vme=0;
   reg [MXCLCTC-1:0] clctc_vme=0;
@@ -3157,6 +3172,7 @@
       clct1_vme_qlt   <= 0;
       clct1_vme_bnd   <= 0;
       clct1_vme_xky   <= 0;
+      hmt_nhits_trig_vme <= 0;
     end
     else if (clct0_vpf) begin
       clct0_vme <= clct0_xtmb;
@@ -3171,7 +3187,10 @@
       clct1_vme_qlt   <= clct1_qlt_xtmb;
       clct1_vme_bnd   <= clct1_bnd_xtmb;
       clct1_vme_xky   <= clct1_xky_xtmb;
+      // should latch hmt in other case ?? may consider the trigger result of hmt_nhits_trig
+      hmt_nhits_trig_vme <= hmt_nhits_trig_xtmb;
     end
+    
   end
 
 // Discard event if there was no valid first pattern after drift

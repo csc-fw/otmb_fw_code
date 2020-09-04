@@ -2322,6 +2322,10 @@ end
   wire  [3:0] pid_thresh_pretrig;
   wire  [2:0] dmb_thresh_pretrig;
 
+  wire  hmt_enable;
+  wire  hmt_me1a_enable;
+  wire [9:0] hmt_nhits_trig;
+
 // 2nd CLCT separation RAM Ports
   wire         clct_sep_src;       // CLCT separation source 1=vme, 0=ram
   wire  [7:0]  clct_sep_vme;       // CLCT separation from vme
@@ -2476,6 +2480,11 @@ end
   .cfeb_layer_trig  (cfeb_layer_trig),              // Out  Layer pretrigger
   .cfeb_layer_or    (cfeb_layer_or[MXLY-1:0]),      // Out  OR of hstrips on each layer
   .cfeb_nlayers_hit (cfeb_nlayers_hit[MXHITB-1:0]), // Out  Number of CSC layers hit
+
+//HMT, 2020
+  .hmt_me1a_enable     (hmt_me1a_enable), 
+  .hmt_nhits_trig      (hmt_nhits_trig[9:0]),
+
 //to add dead time feature in 2016Algo  
   .drift_delay        (drift_delay[MXDRIFT-1:0]),      // In  CSC Drift delay clocks
   .algo2016_use_dead_time_zone         (algo2016_use_dead_time_zone), // In Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
@@ -2595,6 +2604,9 @@ end
   .cfeb_layer_trig  (cfeb_layer_trig),              // Out  Layer pretrigger
   .cfeb_layer_or    (cfeb_layer_or[MXLY-1:0]),      // Out  OR of hstrips on each layer
   .cfeb_nlayers_hit (cfeb_nlayers_hit[MXHITB-1:0]), // Out  Number of CSC layers hit
+//HMT, 2020
+  .hmt_me1a_enable     (hmt_me1a_enable), 
+  .hmt_nhits_trig      (hmt_nhits_trig[9:0]),
 //to add dead time feature in 2016Algo  
   .drift_delay        (drift_delay[MXDRIFT-1:0]),      // In  CSC Drift delay clocks
   .algo2016_use_dead_time_zone         (algo2016_use_dead_time_zone), // In Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
@@ -2632,7 +2644,8 @@ end
    wire [MXCFEBB-1:0]     cfeb_adr;
    wire [MXTBIN-1:0]      cfeb_tbin;
    wire [7:0]             cfeb_rawhits;
-
+   
+   wire [9:0]             hmt_nhits_trig_xtmb;
    wire [MXCLCT-1:0]      clct0_xtmb;
    wire [MXCLCT-1:0]      clct1_xtmb;
    wire [MXCLCTC-1:0]     clctc_xtmb; // Common to CLCT0/1 to TMB
@@ -2694,6 +2707,8 @@ end
 
    wire [3:0]             l1a_preClct_width;
    wire [7:0]             l1a_preClct_dly;
+
+   wire [9:0]             hmt_nhits_trig_vme;
 
    wire [MXCLCT-1:0]      clct0_vme;
    wire [MXCLCT-1:0]      clct1_vme;
@@ -2971,6 +2986,9 @@ end
   .cfeb_layer_or    (cfeb_layer_or[MXLY-1:0]),      // In  OR of hstrips on each layer
   .cfeb_nlayers_hit (cfeb_nlayers_hit[MXHITB-1:0]), // In  Number of CSC layers hit
 
+  //HMT results 
+  .hmt_nhits_trig      (hmt_nhits_trig[9:0]), //In hit counter from pattern finding  module
+
 // Sequencer Pattern Finder CLCT results
   .hs_hit_1st (hs_hit_1st[MXHITB-1:0]),  // In  1st CLCT pattern hits
   .hs_pid_1st (hs_pid_1st[MXPIDB-1:0]),  // In  1st CLCT pattern ID
@@ -3079,6 +3097,8 @@ end
 
   .seq_trigger     (seq_trigger),           // Out  Sequencer requests L1A from CCB
   .sequencer_state (sequencer_state[11:0]), // Out  Sequencer state for vme
+
+  .hmt_nhits_trig_vme (hmt_nhits_trig_vme[9:0]);// Out HMT nhits for trigger
 
   .event_clear_vme (event_clear_vme),         // In  Event clear for aff,clct,mpc vme diagnostic registers
   .clct0_vme       (clct0_vme[MXCLCT-1:0]),   // Out  First  CLCT
@@ -3249,6 +3269,7 @@ end
   .wr_avail_rmpc (wr_avail_rmpc), // In  Buffer available at MPC received
 
 // Sequencer TMB LCT Match results
+  .hmt_nhits_trig_xtmb (hmt_nhits_trig_xtmb[9:0]);// Out HMT nhits for trigger
   .clct0_xtmb (clct0_xtmb[MXCLCT-1:0]),  // Out  First  CLCT
   .clct1_xtmb (clct1_xtmb[MXCLCT-1:0]),  // Out  Second CLCT
   .clctc_xtmb (clctc_xtmb[MXCLCTC-1:0]), // Out  Common to CLCT0/1 to TMB
@@ -4106,6 +4127,7 @@ wire [15:0] gemB_bxn_counter;
   .wr_avail_rmpc (wr_avail_rmpc), // Out  Buffer available at MPC received
 
 // Sequencer
+  .hmt_nhits_trig_xtmb (hmt_nhits_trig_xtmb[9:0]);// Out HMT nhits for trigger
   .clct0_xtmb (clct0_xtmb[MXCLCT-1:0]),  // In  First  CLCT
   .clct1_xtmb (clct1_xtmb[MXCLCT-1:0]),  // In  Second CLCT
   .clctc_xtmb (clctc_xtmb[MXCLCTC-1:0]), // In  Common to CLCT0/1 to TMB
@@ -5025,6 +5047,10 @@ wire [15:0] gemB_bxn_counter;
       .bxn_offset_l1a     (bxn_offset_l1a[MXBXN-1:0]),     // Out  BXN offset at reset, for l1a bxn
       .lhc_cycle          (lhc_cycle[MXBXN-1:0]),          // Out  LHC period, max BXN count+1
       .l1a_offset          (l1a_offset[MXL1ARX-1:0]),      // Out  L1A counter preset value
+
+      .hmt_enable         (hmt_enable),        // out ME1a enable or not in HMT
+      .hmt_me1a_enable    (hmt_me1a_enable),        // out ME1a enable or not in HMT
+      .hmt_nhits_trig_vme (hmt_nhits_trig_vme[9:0]),        //In, nhit counter for  HMT
 
       // Sequencer Ports: Latched CLCTs + Status
       .event_clear_vme   (event_clear_vme),         // Out  Event clear for vme diagnostic registers

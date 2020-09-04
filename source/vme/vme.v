@@ -510,6 +510,11 @@
   lhc_cycle,
   l1a_offset,
 
+  //HMT part
+  hmt_enable,
+  hmt_me1a_enable, 
+  hmt_nhits_trig_vme,
+
 // Sequencer Ports: Latched CLCTs + Status
   event_clear_vme,
   clct0_vme,
@@ -1328,6 +1333,10 @@
   $display ("vme.ALCT_MUONIC      = %H",ALCT_MUONIC);
   $display ("vme.CFEB_MUONIC      = %H",CFEB_MUONIC);
   $display ("vme.CCB_BX0_EMULATOR = %H",CCB_BX0_EMULATOR);
+  $display ("SEMANTIC_VERSIONING  = %H",SEMANTIC_VERSIONING);
+  $display ("VERSION_FORMAT       = %H",VERSION_FORMAT);
+  $display ("VERSION_MAJOR        = %H",VERSION_MAJOR);
+  $display ("VERSION_MINOR        = %H",VERSION_MINOR);
   end
 
 //------------------------------------------------------------------------------------------------------------------
@@ -1680,6 +1689,7 @@
   parameter ADR_CLCT1_XKY             = 10'h1A8; 
 
   parameter ADR_CCLUT_FORMAT_CTRL     = 10'h1AA; // control for CCLUT, data format
+  parameter ADR_HMT_CTRL              = 10'h1AC; // control for HMT
 
   // GEM Registers, start from 10'h300 = 768
 
@@ -2293,6 +2303,11 @@
   output  [MXBXN-1:0]    bxn_offset_l1a;     // BXN offset at reset, for L1A bxn
   output  [MXBXN-1:0]    lhc_cycle;          // LHC period, max BXN count+1
   output  [MXL1ARX-1:0]  l1a_offset;         // L1A counter preset value
+
+  //HMT part
+  output hmt_enable, 
+  output hmt_me1a_enable, 
+  input [9:0] hmt_nhits_trig_vme,
 
 // Sequencer Ports: Latched CLCTs
   output                event_clear_vme;   // Event clear for aff,clct,mpc vme diagnostic registers
@@ -3592,6 +3607,9 @@
   reg  [15:0] cclut_format_ctrl_wr;
   wire [15:0] cclut_format_ctrl_rd;
 
+  reg  [15:0] hmt_ctrl_wr;
+  wire [15:0] hmt_ctrl_rd;
+
   wire [15:0] gem_debug_fifo_data_rd; // read only
 
   reg  [15:0] gem_debug_fifo_ctrl_wr;
@@ -3784,6 +3802,9 @@
   wire [3:0]wr_gem_gtx_rx; //3==MXGEM
   wire      wr_virtex6_sysmon;
   wire      wr_virtex6_extend;
+
+  wire      wr_cclut_format_ctrl;
+  wire      wr_hmt_ctrl;
 
   wire      wr_gem_debug_fifo_ctrl;
   wire      wr_gem_inj_ctrl;
@@ -4473,6 +4494,7 @@
   ADR_CLCT1_XKY:             data_out <= clct1_xky_rd; 
 
   ADR_CCLUT_FORMAT_CTRL:     data_out <= cclut_format_ctrl_rd;
+  ADR_HMT_CTRL:              data_out <= hmt_ctrl_rd;
 
   ADR_GEM_DEBUG_FIFO_CTRL:   data_out <= gem_debug_fifo_ctrl_rd;
   ADR_GEM_DEBUG_FIFO_DATA:   data_out <= gem_debug_fifo_data_rd;
@@ -4720,6 +4742,9 @@
 
   assign wr_virtex6_snap12_qpll   =  (reg_adr==ADR_V6_SNAP12_QPLL         && clk_en);
   assign wr_virtex6_gtx_rx_all    =  (reg_adr==ADR_V6_GTX_RX_ALL          && clk_en);
+
+  assign wr_cclut_format_ctrl     =  (reg_adr==ADR_CCLUT_FORMAT_CTRL      && clk_en);
+  assign wr_hmt_ctrl              =  (reg_adr==ADR_HMT_CTRL               && clk_en);
 
   assign wr_gem_gtx_rx[0]         =  (reg_adr==ADR_GEM_GTX_RX0            && clk_en);
   assign wr_gem_gtx_rx[1]         =  (reg_adr==ADR_GEM_GTX_RX1            && clk_en);
@@ -8855,7 +8880,7 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign clct1_xky_rd[MXXKYB - 1    : 0] = clct1_vme_xky[MXXKYB - 1   : 0];
 
 //------------------------------------------------------------------------------------------------------------------
-// ADR_CCLUT_FORMAT_CTRL = 0x30C  GEM Raw Hits Readout RAM Simple Controller
+// ADR_CCLUT_FORMAT_CTRL = 0x1AA  CCLUT
 //------------------------------------------------------------------------------------------------------------------
 
   initial begin
@@ -8865,6 +8890,27 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   end
   assign cclut_format_ctrl_rd[0] = ccLUT_enable;
       
+
+//------------------------------------------------------------------------------------------------------------------
+// ADR_HMT_CTRL = 0x1AC  HMT
+//------------------------------------------------------------------------------------------------------------------
+
+  initial begin
+    hmt_ctrl_wr[0] = 1'b1; // RW, enable the HMT or not
+    hmt_ctrl_wr[1] = 1'b1; //RW, enable ME1a or not
+    hmt_ctrl_wr[11:2] = 10'b0; //R only nhits for trigger 
+    hmt_ctrl_wr[13:12] = 2'b0; // result of over threshold, reserved
+  end
+  assign hmt_enable  = hmt_ctrl_wr[0];
+  //hmt_me1a_enable = hmt_ctrl_wr[1];
+  assign hmt_me1a_enable = 1'b1;// always enable now 
+
+
+  assign hm_ctrl_rd[0] = hmt_enable;
+  assign hm_ctrl_rd[1] = hmt_me1a_enable;
+  assign hm_ctrl_rd[11:2] = hmt_nhits_trig_vme[9:0];
+  //reserved for HMT results 
+
 //------------------------------------------------------------------------------------------------------------------
 // GEM_DEBUG_FIFO_CTRL = 0x30C  GEM Raw Hits Readout RAM Simple Controller
 //------------------------------------------------------------------------------------------------------------------
@@ -9393,6 +9439,8 @@ always @(posedge clock_vme) begin
   if    (wr_virtex6_gtx_rx[6])     virtex6_gtx_rx_wr[6]    <= d[15:0];
   if    (wr_virtex6_sysmon)        virtex6_sysmon_wr       <= d[15:0];
   if    (wr_virtex6_extend)        virtex6_extend_wr       <= d[15:0];
+  if    (wr_cclut_format_ctrl)     cclut_format_ctrl_wr    <= d[15:0];
+  if    (wr_hmt_ctrl)              hmt_ctrl_wr             <= d[15:0];
   if    (wr_gem_debug_fifo_ctrl)   gem_debug_fifo_ctrl_wr  <= d[15:0];
   if    (wr_gem_inj_ctrl)          gem_inj_ctrl_wr         <= d[15:0];
   if    (wr_gem_inj_data)          gem_inj_data_wr         <= d[15:0];

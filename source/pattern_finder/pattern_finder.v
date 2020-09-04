@@ -67,6 +67,10 @@ module pattern_finder (
   cfeb_layer_trig,
   cfeb_layer_or,
   cfeb_nlayers_hit,
+  
+  //HMT part
+  hmt_me1a_enable, 
+  nhits_trig,
 
   drift_delay,
 // Algo2016: configuration
@@ -196,6 +200,8 @@ module pattern_finder (
   output [MXLY - 1: 0]   cfeb_layer_or;    // OR of hstrips on each layer
   output [MXHITB - 1: 0] cfeb_nlayers_hit; // Number of CSC layers hit
 
+  input hmt_me1a_enable;
+  output [9:0] nhits_trig;
   // 2nd CLCT separation RAM Ports
   input          clct_sep_src;       // CLCT separation source 1=VME, 0=RAM
   input  [7: 0]  clct_sep_vme;       // CLCT separation from VME
@@ -597,6 +603,36 @@ module pattern_finder (
     layer_or_s0[4] = | {|cfeb6_ly4hs&cfeb_en_ff[6], |cfeb5_ly4hs&cfeb_en_ff[5], |cfeb4_ly4hs&cfeb_en_ff[4], |cfeb3_ly4hs&cfeb_en_ff[3], |cfeb2_ly4hs&cfeb_en_ff[2], |cfeb1_ly4hs&cfeb_en_ff[1], |cfeb0_ly4hs&cfeb_en_ff[0]};
     layer_or_s0[5] = | {|cfeb6_ly5hs&cfeb_en_ff[6], |cfeb5_ly5hs&cfeb_en_ff[5], |cfeb4_ly5hs&cfeb_en_ff[4], |cfeb3_ly5hs&cfeb_en_ff[3], |cfeb2_ly5hs&cfeb_en_ff[2], |cfeb1_ly5hs&cfeb_en_ff[1], |cfeb0_ly5hs&cfeb_en_ff[0]};
   end
+
+// sum number of layers hit on each hs
+  // each cfeb hit counter, 32x6, 8bits
+  reg [7:0] nhits_cfeb0;
+  reg [7:0] nhits_cfeb1;
+  reg [7:0] nhits_cfeb2;
+  reg [7:0] nhits_cfeb3;
+  reg [7:0] nhits_cfeb4;
+  reg [7:0] nhits_cfeb5;
+  reg [7:0] nhits_cfeb6;
+
+  count1s32 cfeb0_hitcount(cfeb0_ly0hs, cfeb0_ly1hs, cfeb0_ly2hs, cfeb0_ly3hs, cfeb0_ly4hs, cfeb0_ly5hs, nhits_cfeb0, clock, cfeb_en_ff[0]);
+  count1s32 cfeb1_hitcount(cfeb1_ly0hs, cfeb1_ly1hs, cfeb1_ly2hs, cfeb1_ly3hs, cfeb1_ly4hs, cfeb1_ly5hs, nhits_cfeb1, clock, cfeb_en_ff[1]);
+  count1s32 cfeb2_hitcount(cfeb2_ly0hs, cfeb2_ly1hs, cfeb2_ly2hs, cfeb2_ly3hs, cfeb2_ly4hs, cfeb2_ly5hs, nhits_cfeb2, clock, cfeb_en_ff[2]);
+  count1s32 cfeb3_hitcount(cfeb3_ly0hs, cfeb3_ly1hs, cfeb3_ly2hs, cfeb3_ly3hs, cfeb3_ly4hs, cfeb3_ly5hs, nhits_cfeb3, clock, cfeb_en_ff[3]);
+  count1s32 cfeb4_hitcount(cfeb4_ly0hs, cfeb4_ly1hs, cfeb4_ly2hs, cfeb4_ly3hs, cfeb4_ly4hs, cfeb4_ly5hs, nhits_cfeb4, clock, cfeb_en_ff[4]);
+  count1s32 cfeb5_hitcount(cfeb5_ly0hs, cfeb5_ly1hs, cfeb5_ly2hs, cfeb5_ly3hs, cfeb5_ly4hs, cfeb5_ly5hs, nhits_cfeb5, clock, cfeb_en_ff[5]);
+  count1s32 cfeb6_hitcount(cfeb6_ly0hs, cfeb6_ly1hs, cfeb6_ly2hs, cfeb6_ly3hs, cfeb6_ly4hs, cfeb6_ly5hs, nhits_cfeb6, clock, cfeb_en_ff[6]);
+
+  reg [9:0] nhits_me1a;
+  reg [9:0] nhits_me1b;
+  reg [9:0] nhits_all;
+
+
+  always @(posedge clock) begin
+      nhits_all  = nhits_cfeb0 + nhits_cfeb1 + nhits_cfeb2 + nhits_cfeb3 + nhits_cfeb4 + nhits_cfeb5 +nhits_cfeb6;
+      nhits_me1a = nhits_cfeb4 + nhits_cfeb5 +nhits_cfeb6;
+      nhits_me1b = nhits_cfeb0 + nhits_cfeb1 + nhits_cfeb2 + nhits_cfeb3;
+  end
+  assign nhits_trig = hmt_me1a_enable ? nhits_all : nhits_me1b;
 
   // Sum number of layers hit into a binary pattern number
   wire [MXHITB - 1: 0] nlayers_hit_s0;
