@@ -70,7 +70,7 @@ module pattern_finder (
   
   //HMT part
   hmt_me1a_enable, 
-  nhits_trig,
+  hmt_nhits_trig,
 
   drift_delay,
 // Algo2016: configuration
@@ -201,7 +201,7 @@ module pattern_finder (
   output [MXHITB - 1: 0] cfeb_nlayers_hit; // Number of CSC layers hit
 
   input hmt_me1a_enable;
-  output [9:0] nhits_trig;
+  output [9:0] hmt_nhits_trig;
   // 2nd CLCT separation RAM Ports
   input          clct_sep_src;       // CLCT separation source 1=VME, 0=RAM
   input  [7: 0]  clct_sep_vme;       // CLCT separation from VME
@@ -606,13 +606,13 @@ module pattern_finder (
 
 // sum number of layers hit on each hs
   // each cfeb hit counter, 32x6, 8bits
-  reg [7:0] nhits_cfeb0;
-  reg [7:0] nhits_cfeb1;
-  reg [7:0] nhits_cfeb2;
-  reg [7:0] nhits_cfeb3;
-  reg [7:0] nhits_cfeb4;
-  reg [7:0] nhits_cfeb5;
-  reg [7:0] nhits_cfeb6;
+  wire [7:0] nhits_cfeb0;
+  wire [7:0] nhits_cfeb1;
+  wire [7:0] nhits_cfeb2;
+  wire [7:0] nhits_cfeb3;
+  wire [7:0] nhits_cfeb4;
+  wire [7:0] nhits_cfeb5;
+  wire [7:0] nhits_cfeb6;
 
   count1s32 cfeb0_hitcount(cfeb0_ly0hs, cfeb0_ly1hs, cfeb0_ly2hs, cfeb0_ly3hs, cfeb0_ly4hs, cfeb0_ly5hs, nhits_cfeb0, clock, cfeb_en_ff[0]);
   count1s32 cfeb1_hitcount(cfeb1_ly0hs, cfeb1_ly1hs, cfeb1_ly2hs, cfeb1_ly3hs, cfeb1_ly4hs, cfeb1_ly5hs, nhits_cfeb1, clock, cfeb_en_ff[1]);
@@ -626,13 +626,17 @@ module pattern_finder (
   reg [9:0] nhits_me1b;
   reg [9:0] nhits_all;
 
+  wire [9:0] nhits_trig_s0;
+  wire [9:0] nhits_trig_pre;// synchronized with pretrigger
+  wire [9:0] nhits_trig_dly;// synchronized with 2nd CLCT
+
 
   always @(posedge clock) begin
       nhits_all  = nhits_cfeb0 + nhits_cfeb1 + nhits_cfeb2 + nhits_cfeb3 + nhits_cfeb4 + nhits_cfeb5 +nhits_cfeb6;
       nhits_me1a = nhits_cfeb4 + nhits_cfeb5 +nhits_cfeb6;
       nhits_me1b = nhits_cfeb0 + nhits_cfeb1 + nhits_cfeb2 + nhits_cfeb3;
   end
-  assign nhits_trig = hmt_me1a_enable ? nhits_all : nhits_me1b;
+  assign nhits_trig_s0[9:0] = hmt_me1a_enable ? nhits_all[9:0] : nhits_me1b[9:0];
 
   // Sum number of layers hit into a binary pattern number
   wire [MXHITB - 1: 0] nlayers_hit_s0;
@@ -646,6 +650,7 @@ module pattern_finder (
   srl16e_bbl #(1)      udlya0 ( .clock(clock), .ce(1'b1), .adr(dlya), .d(layer_trig_s0 ), .q(cfeb_layer_trig ) );
   srl16e_bbl #(MXHITB) udlya1 ( .clock(clock), .ce(1'b1), .adr(dlya), .d(nlayers_hit_s0), .q(cfeb_nlayers_hit) );
   srl16e_bbl #(MXLY)   udlya2 ( .clock(clock), .ce(1'b1), .adr(dlya), .d(layer_or_s0   ), .q(cfeb_layer_or   ) );
+  srl16e_bbl #(10)   udnhits( .clock(clock), .ce(1'b1), .adr(dlya), .d(nhits_trig_s0   ), .q(nhits_trig_pre   ) );
 
   // Delay 4bx to latch in time with 1st and 2nd clct, need to FF these again to align
   wire [MXLY - 1: 0]   hs_layer_or_dly;
@@ -656,6 +661,7 @@ module pattern_finder (
   srl16e_bbl #(MXHITB) udlyb1 ( .clock(clock), .ce(1'b1), .adr(dlyb), .d(nlayers_hit_s0), .q(hs_nlayers_hit_dly) );
   srl16e_bbl #(1)      udlyb2 ( .clock(clock), .ce(1'b1), .adr(dlyb), .d(layer_trig_s0 ), .q(hs_layer_trig_dly ) );
   srl16e_bbl #(MXLY)   udlyb3 ( .clock(clock), .ce(1'b1), .adr(dlyb), .d(layer_or_s0   ), .q(hs_layer_or_dly   ) );
+  srl16e_bbl #(10)   udnhits2 ( .clock(clock), .ce(1'b1), .adr(dlya), .d(nhits_trig_s0   ), .q(nhits_trig_dly   ) );
 
 //-------------------------------------------------------------------------------------------------------------------
 // Stage 4D: 1/2-Strip Pattern Finder

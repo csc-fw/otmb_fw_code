@@ -2305,9 +2305,9 @@
   output  [MXL1ARX-1:0]  l1a_offset;         // L1A counter preset value
 
   //HMT part
-  output hmt_enable, 
-  output hmt_me1a_enable, 
-  input [9:0] hmt_nhits_trig_vme,
+  output hmt_enable; 
+  output hmt_me1a_enable; 
+  input [9:0] hmt_nhits_trig_vme;
 
 // Sequencer Ports: Latched CLCTs
   output                event_clear_vme;   // Event clear for aff,clct,mpc vme diagnostic registers
@@ -8906,9 +8906,9 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign hmt_me1a_enable = 1'b1;// always enable now 
 
 
-  assign hm_ctrl_rd[0] = hmt_enable;
-  assign hm_ctrl_rd[1] = hmt_me1a_enable;
-  assign hm_ctrl_rd[11:2] = hmt_nhits_trig_vme[9:0];
+  assign hmt_ctrl_rd[0] = hmt_enable;
+  assign hmt_ctrl_rd[1] = hmt_me1a_enable;
+  assign hmt_ctrl_rd[11:2] = hmt_nhits_trig_vme[9:0];
   //reserved for HMT results 
 
 //------------------------------------------------------------------------------------------------------------------

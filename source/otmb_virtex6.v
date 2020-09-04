@@ -3099,7 +3099,7 @@ end
   .seq_trigger     (seq_trigger),           // Out  Sequencer requests L1A from CCB
   .sequencer_state (sequencer_state[11:0]), // Out  Sequencer state for vme
 
-  .hmt_nhits_trig_vme (hmt_nhits_trig_vme[9:0]);// Out HMT nhits for trigger
+  .hmt_nhits_trig_vme (hmt_nhits_trig_vme[9:0]),// Out HMT nhits for trigger
 
   .event_clear_vme (event_clear_vme),         // In  Event clear for aff,clct,mpc vme diagnostic registers
   .clct0_vme       (clct0_vme[MXCLCT-1:0]),   // Out  First  CLCT
@@ -3270,7 +3270,7 @@ end
   .wr_avail_rmpc (wr_avail_rmpc), // In  Buffer available at MPC received
 
 // Sequencer TMB LCT Match results
-  .hmt_nhits_trig_xtmb (hmt_nhits_trig_xtmb[9:0]);// Out HMT nhits for trigger
+  .hmt_nhits_trig_xtmb (hmt_nhits_trig_xtmb[9:0]),// Out HMT nhits for trigger
   .clct0_xtmb (clct0_xtmb[MXCLCT-1:0]),  // Out  First  CLCT
   .clct1_xtmb (clct1_xtmb[MXCLCT-1:0]),  // Out  Second CLCT
   .clctc_xtmb (clctc_xtmb[MXCLCTC-1:0]), // Out  Common to CLCT0/1 to TMB
@@ -4128,7 +4128,7 @@ wire [15:0] gemB_bxn_counter;
   .wr_avail_rmpc (wr_avail_rmpc), // Out  Buffer available at MPC received
 
 // Sequencer
-  .hmt_nhits_trig_xtmb (hmt_nhits_trig_xtmb[9:0]);// Out HMT nhits for trigger
+  .hmt_nhits_trig_xtmb (hmt_nhits_trig_xtmb[9:0]),// Out HMT nhits for trigger
   .clct0_xtmb (clct0_xtmb[MXCLCT-1:0]),  // In  First  CLCT
   .clct1_xtmb (clct1_xtmb[MXCLCT-1:0]),  // In  Second CLCT
   .clctc_xtmb (clctc_xtmb[MXCLCTC-1:0]), // In  Common to CLCT0/1 to TMB

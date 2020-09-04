@@ -782,7 +782,7 @@
   wr_avail_rmpc,
 
 // TMB LCT Match
-  hmt_nhits_trig_xtmb;
+  hmt_nhits_trig_xtmb,
   
   clct0_xtmb,
   clct1_xtmb,

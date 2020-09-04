@@ -630,13 +630,13 @@ module pattern_finder_ccLUT (
 
 // sum number of layers hit on each hs
   // each cfeb hit counter, 32x6, 8bits
-  reg [7:0] nhits_cfeb0;
-  reg [7:0] nhits_cfeb1;
-  reg [7:0] nhits_cfeb2;
-  reg [7:0] nhits_cfeb3;
-  reg [7:0] nhits_cfeb4;
-  reg [7:0] nhits_cfeb5;
-  reg [7:0] nhits_cfeb6;
+  wire [7:0] nhits_cfeb0;
+  wire [7:0] nhits_cfeb1;
+  wire [7:0] nhits_cfeb2;
+  wire [7:0] nhits_cfeb3;
+  wire [7:0] nhits_cfeb4;
+  wire [7:0] nhits_cfeb5;
+  wire [7:0] nhits_cfeb6;
 
   count1s32 cfeb0_hitcount(cfeb0_ly0hs, cfeb0_ly1hs, cfeb0_ly2hs, cfeb0_ly3hs, cfeb0_ly4hs, cfeb0_ly5hs, nhits_cfeb0, clock, cfeb_en_ff[0]);
   count1s32 cfeb1_hitcount(cfeb1_ly0hs, cfeb1_ly1hs, cfeb1_ly2hs, cfeb1_ly3hs, cfeb1_ly4hs, cfeb1_ly5hs, nhits_cfeb1, clock, cfeb_en_ff[1]);
@@ -658,7 +658,7 @@ module pattern_finder_ccLUT (
       nhits_me1a <= nhits_cfeb4 + nhits_cfeb5 +nhits_cfeb6;
       nhits_me1b <= nhits_cfeb0 + nhits_cfeb1 + nhits_cfeb2 + nhits_cfeb3;
   end
-  assign nhits_trig_s0 = hmt_me1a_enable ? nhits_all : nhits_me1b;
+  assign nhits_trig_s0[9:0] = hmt_me1a_enable ? nhits_all[9:0] : nhits_me1b[9:0];
 
   // Sum number of layers hit into a binary pattern number
   wire [MXHITB - 1: 0] nlayers_hit_s0;
@@ -1384,7 +1384,7 @@ module pattern_finder_ccLUT (
   reg [MXLY - 1: 0]   hs_layer_or;
   reg [MXHITB - 1: 0] hs_nlayers_hit;
 
-  reg [9:0]           nhit_hmt_trig;
+  reg [9:0]           hmt_nhits_trig;
 
   always @(posedge clock) begin
     hs_layer_trig  <= hs_layer_trig_dly;
@@ -1928,26 +1928,6 @@ function [2: 0] count1s;
 endfunction
 
 
-// latency of this module
-module count1s32 #(parameter WIDTH=32) (
-    input [WIDTH-1:0] in1, 
-    input [WIDTH-1:0] in2, 
-    input [WIDTH-1:0] in3, 
-    input [WIDTH-1:0] in4, 
-    input [WIDTH-1:0] in5, 
-    input [WIDTH-1:0] in6, 
-    output reg [7:0] out,
-    input clk, enable);
-  reg [WIDTH-1:0] temp;
-  integer ii;
-  always @(clk)
-    begin
-      temp = 0;
-      for(ii=0; ii<WIDTH; ii = ii + 1)   
-         temp = temp + in1[ii] + in2[ii] + in3[ii] + in4[ii] + in5[ii] + in6[ii];
-      out <= enable ? temp : 7'b0;
-    end
-endmodule 
 
 
 //-------------------------------------------------------------------------------------------------------------------
