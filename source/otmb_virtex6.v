@@ -2359,12 +2359,13 @@ end
   wire [MXXKYB-1     : 0] hs_xky_2nd; // new position with 1/8 precision
   wire [MXPATC-1     : 0] hs_carry_2nd; // CC code 
 
-  reg reg_ccLUT_enable = 1'b0;
+  reg reg_ccLUT_enable;
   //enable CCLUT, Tao
   `ifdef CCLUT
-	always @ (posedge *) begin
-           reg_ccLUT_enable <= 1'b1;
-        end
+  initial reg_ccLUT_enable = 1'b1;
+
+  `else
+  initial reg_ccLUT_enable = 1'b0;
   `endif
 
    wire ccLUT_enable;

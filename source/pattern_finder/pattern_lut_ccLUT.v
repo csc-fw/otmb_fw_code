@@ -44,7 +44,7 @@ assign rd1_blnk = 0;
 generate
 if (pat_en[A])
 rom #(
-  .ROM_FILE("../source/pattern_finder/rom_patA.mem"),
+  .ROM_FILE("rom_patA.mem"),
   .FALLING_EDGE(1'b1),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB)
@@ -63,7 +63,7 @@ endgenerate
 generate
 if (pat_en[9])
 rom #(
-  .ROM_FILE("../source/pattern_finder/rom_pat9.mem"),
+  .ROM_FILE("rom_pat9.mem"),
   .FALLING_EDGE(1'b1),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB)
@@ -81,7 +81,7 @@ endgenerate
 generate
 if (pat_en[8])
 rom #(
-  .ROM_FILE("../source/pattern_finder/rom_pat8.mem"),
+  .ROM_FILE("rom_pat8.mem"),
   .FALLING_EDGE(1'b1),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB)
@@ -99,7 +99,7 @@ endgenerate
 generate
 if (pat_en[7])
 rom #(
-  .ROM_FILE("../source/pattern_finder/rom_pat7.mem"),
+  .ROM_FILE("rom_pat7.mem"),
   .FALLING_EDGE(1'b1),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB)
@@ -117,7 +117,7 @@ endgenerate
 generate
 if (pat_en[6])
 rom #(
-  .ROM_FILE("../source/pattern_finder/rom_pat6.mem"),
+  .ROM_FILE("rom_pat6.mem"),
   .FALLING_EDGE(1'b1),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB)

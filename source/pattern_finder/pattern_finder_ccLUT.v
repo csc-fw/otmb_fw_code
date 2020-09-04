@@ -678,9 +678,9 @@ module pattern_finder_ccLUT (
 // ly0[10:0]  00000|aaaaaaaa......bbbbbbbb|00000
 // ly1[ 7:3]    000|aaaaaaaa......bbbbbbbb|000
 // ly2[ 5:5]       |aaaaaaaa......bbbbbbbb|
-// ly3[ 7:3]    000|aaaaaaaa......bbbbbbbb|000
-// ly4[ 9:1]  00000|aaaaaaaa......bbbbbbbb|00000
-// ly5[10:0] 000000|aaaaaaaa......bbbbbbbb|000000
+// ly3[ 7:3]     00|aaaaaaaa......bbbbbbbb|00
+// ly4[ 9:1]   0000|aaaaaaaa......bbbbbbbb|0000
+// ly5[10:0]  00000|aaaaaaaa......bbbbbbbb|00000
 
 
 
