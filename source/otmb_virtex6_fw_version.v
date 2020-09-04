@@ -5,7 +5,7 @@
 // Firmware version global definitions
   `define FIRMWARE_TYPE        04'hC    // C=Normal CLCT/TMB, D=Debug PCB loopback version
   `define VERSION              04'hE    // Version revision number, A=TMB2004 and earlier, E=TMB2005E production
-  `define MONTHDAY             16'h0801 // Version date
+  `define MONTHDAY             16'h0901 // Version date
   `define YEAR                 16'h2020 // Version year
   `define REVISION             04'h01   // Firmware Revision
 
@@ -28,7 +28,7 @@
   `define VERSION_MAJOR        04'h0;
   `define VERSION_MINOR        05'h0;
 
-  `define CCLUT                01'h1;  // 1=turn on CCLUT
+  `define CCLUT                01'h1  // 1=turn on CCLUT
 
 
 // Conditional compile flags: Enable only one CSC_TYPE

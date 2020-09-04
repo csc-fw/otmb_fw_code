@@ -3900,7 +3900,10 @@
   reg seq_trigger=0;
 
   always @(posedge clock) begin
-    seq_trigger <= tmb_trig_pulse && (tmb_trig_keep || tmb_non_trig_keep) && !seq_trigger;
+    //seq_trigger <= tmb_trig_pulse && (tmb_trig_keep || tmb_non_trig_keep) && !seq_trigger;
+    //old logic would block the second L1A request when two triggers are in
+    //a row, Tao
+    seq_trigger <= tmb_trig_pulse && (tmb_trig_keep || tmb_non_trig_keep);
   end
 
 // Scintillator Veto for FAST sites, Assert veto on l1a request, persist until clear on VME, copy to VME
