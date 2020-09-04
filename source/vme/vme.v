@@ -8902,8 +8902,8 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
     hmt_ctrl_wr[13:12] = 2'b0; // result of over threshold, reserved
   end
   assign hmt_enable  = hmt_ctrl_wr[0];
-  //hmt_me1a_enable = hmt_ctrl_wr[1];
-  assign hmt_me1a_enable = 1'b1;// always enable now 
+  assign hmt_me1a_enable = hmt_ctrl_wr[1];
+  //assign hmt_me1a_enable = 1'b1;// always enable now 
 
 
   assign hmt_ctrl_rd[0] = hmt_enable;

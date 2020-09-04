@@ -15,11 +15,11 @@ module count1s32 #(parameter WIDTH=32) (
     input clk, enable);
   reg [WIDTH-1:0] temp;
   integer ii;
-  always @(clk)
+  always @(posedge clk)
     begin
       temp = 0;
       for(ii=0; ii<WIDTH; ii = ii + 1)   
          temp = temp + in1[ii] + in2[ii] + in3[ii] + in4[ii] + in5[ii] + in6[ii];
-      out <= enable ? temp : 7'b0;
+      out[7:0] <= enable ? temp[7:0] : 8'b0;
     end
 endmodule 

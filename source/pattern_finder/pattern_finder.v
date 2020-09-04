@@ -632,8 +632,8 @@ module pattern_finder (
 
 
   always @(posedge clock) begin
-      nhits_all  = nhits_cfeb0 + nhits_cfeb1 + nhits_cfeb2 + nhits_cfeb3 + nhits_cfeb4 + nhits_cfeb5 +nhits_cfeb6;
-      nhits_me1a = nhits_cfeb4 + nhits_cfeb5 +nhits_cfeb6;
+      nhits_all  = nhits_cfeb0 + nhits_cfeb1 + nhits_cfeb2 + nhits_cfeb3 + nhits_cfeb4 + nhits_cfeb5 + nhits_cfeb6;
+      nhits_me1a = nhits_cfeb4 + nhits_cfeb5 + nhits_cfeb6;
       nhits_me1b = nhits_cfeb0 + nhits_cfeb1 + nhits_cfeb2 + nhits_cfeb3;
   end
   assign nhits_trig_s0[9:0] = hmt_me1a_enable ? nhits_all[9:0] : nhits_me1b[9:0];
