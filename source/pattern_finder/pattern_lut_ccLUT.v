@@ -11,6 +11,8 @@
     input      [MXPATC-1:0]  carry00, carry01,
 
     output reg [MXOFFSB -1:0]  offs0, offs1,
+    //output reg [MXKEYOFFSB -1:0]  key_offs0, key_offs1,
+    //output reg [MXSUBKEYOFFSB -1:0]  subkey_offs0, subkey_offs1,
     output reg [MXBNDB-1:0]  bend0, bend1,
     output reg [MXQLTB-1:0]  quality0, quality1
 
@@ -250,10 +252,40 @@ always @(*) begin
 end
 
 // FAST
+//convention of CCLUT output:
+//     [8:0] is quality (set all to 0 for now)                                                                                                                  
+//     [12:9] is slope value                                                                                                                                   
+//     [13] is slope sign                                                                                                                                       
+//     [17:14] is offset    
+//  for offset:default output is in middle of halfstrip: n+0.5 in halfstrip unit; n*4+2 in ES unit
+//  | Value | Value (B)| HS Offset  | Delta HS  | QS Bit  | ES Bit |
+//  |-------|          |------------|-----------|---------|--------|
+//  |   0   | 0000     |   -7/4     |   -2      |   0     |   1    |
+//  |   1   | 0001     |   -3/2     |   -2      |   1     |   0    |
+//  |   2   | 0010     |   -5/4     |   -2      |   1     |   1    |
+//  |   3   | 0011     |   -1       |   -1      |   0     |   0    |
+//  |   4   | 0100     |   -3/4     |   -1      |   0     |   1    |
+//  |   5   | 0101     |   -1/2     |   -1      |   1     |   0    |
+//  |   6   | 0110     |   -1/4     |   -1      |   1     |   1    |
+//  |   7   | 0111     |   0        |   0       |   0     |   0    |
+//  |   8   | 1000     |   1/4      |   0       |   0     |   1    |
+//  |   9   | 1001     |   1/2      |   0       |   1     |   0    |
+//  |   10  | 1010     |   3/4      |   0       |   1     |   1    |
+//  |   11  | 1011     |   1        |   1       |   0     |   0    |
+//  |   12  | 1100     |   5/4      |   1       |   0     |   1    |
+//  |   13  | 1101     |   3/2      |   1       |   1     |   0    |
+//  |   14  | 1110     |   7/4      |   1       |   1     |   1    |
+//  |   15  | 1111     |   2        |   2       |   0     |   0    |
 always @(*) begin
 
   offs0    <= rd0[17:14];
   offs1    <= rd1[17:14];
+  
+  //key_offs0 <= rd0[17:16] + (rd0[14]&rd0[15]);// real_keyoffs = keyoffs0 -2
+  //key_offs1 <= rd1[17:16] + (rd1[14]&rd1[15]);// real_keyoffs = keyoffs1 -2
+
+  //subkey_offs0 <= rd0[15:14]+2'b01;// 2bits
+  //subkey_offs1 <= rd1[15:14]+2'b01;// 2bits
 
   bend0    <= rd0[13:9];
   bend1    <= rd1[13:9];

@@ -1,0 +1,17 @@
+CC->quality+slopevalue+slopesign+offset
+2020/10/01/ quality is 0
+[8:0] is quality (set all to 0 for now)                                                                                                                  
+[12:9] is slope value                                                                                                                                   
+[13] is slope sign                                                                                                                                       
+[17:14] is offset 
+
+
+
+
+special Comparator code
+first pat 10
+CC(b)              CC(D)  keyoffset  output
+00 00 00 00 00 00   0       0
+01 01 01 01 01 01   1365    
+10 10 10 10 10 10   2730    
+11 11 11 11 11 11   4095   

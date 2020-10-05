@@ -62,7 +62,8 @@ reg [MXOFFSB-1:0] best_offs;
       best_bend  = bend6;
       best_carry = carry6;
       best_offs  = offs6;
-      best_key   = {3'd6,key6};
+      //best_key   = {3'd6,key6};
+      best_key   = {3'd6,key6} + offs6[3:2]+(offs6[1]&offs6[0])-2;
       end
 
   else if((sort_key5 > sort_key4) &&
@@ -76,7 +77,8 @@ reg [MXOFFSB-1:0] best_offs;
       best_bend  = bend5;
       best_carry = carry5;
       best_offs  = offs5;
-      best_key   = {3'd5,key5};
+      //best_key   = {3'd5,key5};
+      best_key   = {3'd5,key5} + offs5[3:2]+(offs5[1]&offs5[0])-2;
       end
 
   else if((sort_key4 > sort_key3) &&
@@ -89,7 +91,8 @@ reg [MXOFFSB-1:0] best_offs;
       best_bend  = bend4;
       best_carry = carry4;
       best_offs  = offs4;
-      best_key   = {3'd4,key4};
+      //best_key   = {3'd4,key4};
+      best_key   = {3'd4,key4} + offs4[3:2]+(offs4[1]&offs4[0])-2;
       end
 
   else if((sort_key3 > sort_key2) &&
@@ -101,7 +104,8 @@ reg [MXOFFSB-1:0] best_offs;
       best_bend  = bend3;
       best_carry = carry3;
       best_offs  = offs3;
-      best_key   = {3'd3,key3};
+      //best_key   = {3'd3,key3};
+      best_key   = {3'd3,key3} + offs3[3:2]+(offs3[1]&offs3[0])-2;
       end
 
   else if((sort_key2 > sort_key1) &&
@@ -112,7 +116,8 @@ reg [MXOFFSB-1:0] best_offs;
       best_bend  = bend2;
       best_carry = carry2;
       best_offs  = offs2;
-      best_key   = {3'd2,key2};
+      //best_key   = {3'd2,key2};
+      best_key   = {3'd2,key2} + offs2[3:2]+(offs2[1]&offs2[0])-2;
       end
 
   else if(sort_key1 > sort_key0)
@@ -122,7 +127,8 @@ reg [MXOFFSB-1:0] best_offs;
       best_bend  = bend1;
       best_carry = carry1;
       best_offs  = offs1;
-      best_key   = {3'd1,key1};
+      //best_key   = {3'd1,key1};
+      best_key   = {3'd1,key1} + offs1[3:2]+(offs1[1]&offs1[0])-2;
       end
 
   else
@@ -132,26 +138,31 @@ reg [MXOFFSB-1:0] best_offs;
       best_bend  = bend0;
       best_carry = carry0;
       best_offs  = offs0;
-      best_key   = {3'd0,key0};
+      //best_key   = {3'd0,key0};
+      best_key   = {3'd0,key0} + offs0[3:2]+(offs0[1]&offs0[0])-2;
       end
   end
 
-  wire signed [MXOFFSB -1:0] best_offs_signed   = best_offs;
-  wire signed [MXKEYBX -1:0] best_key_signed    = best_key;
-  wire        [MXXKYB  -1:0] best_subkey_signed = 4*best_key_signed + best_offs_signed;
+  //wire signed [MXOFFSB -1:0] best_offs_signed   = best_offs;
+  //wire signed [MXKEYBX -1:0] best_key_signed    = best_key;
+  //wire        [MXXKYB  -1:0] best_subkey_signed = 4*best_key_signed + best_offs_signed;
+
+  //always @(*) begin
+  //  if      ((best_key==0   && best_offs<=0) || (best_key==1   && best_offs<=-4))
+  //    best_subkey <= 0;
+  //  else if ((best_key==127 && best_offs>=3) || (best_key==126 && best_offs>= 7))
+  //    best_subkey <= 127*4+3;
+  //  else if ((best_key==128 && best_offs<=0) || (best_key==129 && best_offs<=-4))
+  //    best_subkey <= 128*4;
+  //  else if ((best_key==223 && best_offs>=3) || (best_key==222 && best_offs>= 7))
+  //    best_subkey <= 223*4+3;
+  //  else
+  //    best_subkey <= best_subkey_signed;
+  //end
 
   always @(*) begin
-    if      ((best_key==0   && best_offs<=0) || (best_key==1   && best_offs<=-4))
-      best_subkey <= 0;
-    else if ((best_key==127 && best_offs>=3) || (best_key==126 && best_offs>= 7))
-      best_subkey <= 127*4+3;
-    else if ((best_key==128 && best_offs<=0) || (best_key==129 && best_offs<=-4))
-      best_subkey <= 128*4;
-    else if ((best_key==223 && best_offs>=3) || (best_key==222 && best_offs>= 7))
-      best_subkey <= 223*4+3;
-    else
-      best_subkey <= best_subkey_signed;
-  end
+      best_subkey <= {best_key, best_offs[1:0]+1'b1} + 1;// 
+  end 
 
 //-------------------------------------------------------------------------------------------------------------------
   endmodule
