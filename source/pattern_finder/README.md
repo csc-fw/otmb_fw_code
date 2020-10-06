@@ -54,6 +54,7 @@ pattern A, also it is pattern 4 in CMSSW
 
 pattern 9, also it is pattern 3 in CMSSW   
 | ly  | 0123456789A | 
+|-----|-------------|
 | ly0 | --xxx------ | 
 | ly1 | ---xxx----- | 
 | ly2 | ----xkx---- | 
@@ -62,31 +63,34 @@ pattern 9, also it is pattern 3 in CMSSW
 | ly5 | ------xxx-- | 
 
 pattern 8 , also it is pattern 2 in CMSSW   
-|       | 0123456789A |
-|   ly0 | ------xxx-- |
-|   ly1 | -----xxx--- |
-|   ly2 | ----xkx---- |
-|   ly3 | ----xxx---- |
-|   ly4 | ---xxx----- |
-|   ly5 | --xxx------ |
+|     | 0123456789A |
+|-----|-------------|
+| ly0 | ------xxx-- |
+| ly1 | -----xxx--- |
+| ly2 | ----xkx---- |
+| ly3 | ----xxx---- |
+| ly4 | ---xxx----- |
+| ly5 | --xxx------ |
 
 pattern 7, , also it is pattern 1 in CMSSW   
-|        | 0123456789A | 
-|   ly0  | xxx-------- | 
-|   ly1  | -xxx------- | 
-|   ly2  | ---xxk----- | 
-|   ly3  | -----xxx--- | 
-|   ly4  | -------xxx- | 
-|   ly5  | --------xxx | 
+|     | 0123456789A | 
+|-----|-------------|
+| ly0 | xxx-------- | 
+| ly1 | -xxx------- | 
+| ly2 | ---xxk----- | 
+| ly3 | -----xxx--- | 
+| ly4 | -------xxx- | 
+| ly5 | --------xxx | 
 
 pattern 6, also it is pattern 0 in CMSSW
-|       | 0123456789ABC | 
-|   ly0 | --------xxx-- |
-|   ly1 | -------xxx--- |
-|   ly2 | -----kxx----- |
-|   ly3 | ---xxx------- |
-|   ly4 | -xxx--------- |
-|   ly5 | xxx---------- |
+|     | 0123456789ABC | 
+|-----|---------------|
+| ly0 | --------xxx-- |
+| ly1 | -------xxx--- |
+| ly2 | -----kxx----- |
+| ly3 | ---xxx------- |
+| ly4 | -xxx--------- |
+| ly5 | xxx---------- |
 
 
 rom_patA.mem is the LUT for the straight pattern A and the index is the comparator code and value in mem file is the 18bits output, similar for other patterns
