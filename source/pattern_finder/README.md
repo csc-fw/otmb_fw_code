@@ -43,7 +43,7 @@
 * Convention of LUT for FW and patterns 
 
 pattern A, also it is pattern 4 in CMSSW   
-  |     | 0123456789A | 
+  | ly  | 0123456789A | 
   | ly0 | ----xxx---- | 
   | ly1 | ----xxx---- | 
   | ly2 | ----xkx---- | 
@@ -52,7 +52,7 @@ pattern A, also it is pattern 4 in CMSSW
   | ly5 | ----xxx---- | 
 
 pattern 9, also it is pattern 3 in CMSSW   
-  |     | 0123456789A | 
+  | ly  | 0123456789A | 
   | ly0 | --xxx------ | 
   | ly1 | ---xxx----- | 
   | ly2 | ----xkx---- | 
