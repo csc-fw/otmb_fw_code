@@ -44,6 +44,7 @@
 
 pattern A, also it is pattern 4 in CMSSW   
 | ly  | 0123456789A | 
+|-----|-------------|
 | ly0 | ----xxx---- | 
 | ly1 | ----xxx---- | 
 | ly2 | ----xkx---- | 
