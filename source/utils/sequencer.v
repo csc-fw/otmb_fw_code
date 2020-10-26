@@ -1118,6 +1118,12 @@
   parameter MXL1ARX      = 12;        // Number L1As received counter bits
   parameter MXORBIT      = 30;        // Number orbit counter bits
 
+  //CCLUT
+  parameter MXPATC  = 12;                // Pattern Carry Bits
+  parameter MXOFFSB = 4;                 // Quarter-strip bits
+  parameter MXQLTB  = 9;                 // Fit quality bits
+  parameter MXBNDB  = 4;                 // Bend bits
+  parameter MXXKYB = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
 //------------------------------------------------------------------------------------------------------------------
 // I/O Ports:
 //------------------------------------------------------------------------------------------------------------------
@@ -1211,11 +1217,22 @@
   input  [MXHITB-1:0]  hs_hit_1st;        // 1st CLCT pattern hits
   input  [MXPIDB-1:0]  hs_pid_1st;        // 1st CLCT pattern ID
   input  [MXKEYBX-1:0]  hs_key_1st;        // 1st CLCT key 1/2-strip
+//Tao CCLUT pattern
+  input [MXXKYB     - 1 : 0] hs_xky_1st; // 1st CLCT key 1/8-strip
+  input [MXQLTB     - 1 : 0] hs_qlt_1st; // 1st CLCT pattern lookup quality
+  input [MXBNDB     - 1 : 0] hs_bnd_1st; // 1st CLCT pattern lookup bend angle
+  input [MXPATC     - 1 : 0] hs_carry_1st; // 1st CLCT pattern lookup comparator-code
 
-  input  [MXHITB-1:0]  hs_hit_2nd;        // 2nd CLCT pattern hits
-  input  [MXPIDB-1:0]  hs_pid_2nd;        // 2nd CLCT pattern ID
-  input  [MXKEYBX-1:0]  hs_key_2nd;        // 2nd CLCT key 1/2-strip
-  input          hs_bsy_2nd;        // 2nd CLCT busy, logic error indicator
+  input [MXHITB - 1: 0]  hs_hit_2nd; // 2nd CLCT pattern hits
+  input [MXPIDB - 1: 0]  hs_pid_2nd; // 2nd CLCT pattern ID
+  input [MXKEYBX - 1: 0] hs_key_2nd; // 2nd CLCT key 1/2-strip
+  input                  hs_bsy_2nd; // 2nd CLCT busy, logic error indicator
+
+//Tao CCLUT pattern
+  input [MXXKYB     - 1 : 0] hs_xky_2nd; // 1st CLCT key 1/8-strip     
+  input [MXQLTB     - 1 : 0] hs_qlt_2nd; // 1st CLCT pattern lookup quality
+  input [MXBNDB     - 1 : 0] hs_bnd_2nd; // 1st CLCT pattern lookup bend angle
+  input [MXPATC     - 1 : 0] hs_carry_2nd; // 1st CLCT pattern lookup comparator-code
 
   input          hs_layer_trig;      // Layer triggered
   input  [MXHITB-1:0]  hs_nlayers_hit;      // Number of layers hit
