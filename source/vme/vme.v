@@ -526,6 +526,15 @@
   nlayers_hit_vme,
   clct_bx0_sync_err,
 
+  clct0_vme_qlt,
+  clct0_vme_bnd,
+  clct0_vme_xky,
+  clct0_vme_carry,
+  clct1_vme_qlt,
+  clct1_vme_bnd,
+  clct1_vme_xky,
+  clct1_vme_carry,
+
 // Sequencer Ports: Raw Hits Ram
   dmb_wr,
   dmb_reset,
@@ -1044,6 +1053,12 @@
   parameter MXL1ARX    = 12;       // Number L1As received counter bits
   parameter MXORBIT    = 30;       // Number orbit counter bits
 
+  // ccLUT
+  parameter MXPATC  = 12;                // Pattern Carry Bits
+  parameter MXOFFSB = 4;                 // Quarter-strip bits
+  parameter MXQLTB  = 9;                 // Fit quality bits
+  parameter MXBNDB  = 4;                 // Bend bits
+  parameter MXXKYB = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
 //------------------------------------------------------------------------------------------------------------------
 // VME Addresses
 //------------------------------------------------------------------------------------------------------------------
@@ -1314,6 +1329,19 @@
   //parameter ADR_V6_HCM645      = 9'h178;  // CFEB6 Ly4,Ly5 Hot Channel Mask
 
   parameter ADR_V6_EXTEND      = 9'h17A;  // DCFEB 7-bit extensions
+
+  // Tao,CCLUT register starts from 10'h19A = 410
+  parameter ADR_CLCT0_CC              = 10'h19A;  // Comparator code, for 1st CLCT, readonly
+  parameter ADR_CLCT1_CC              = 10'h19C;  // Comparator code, for 2nd CLCT, readonly
+  parameter ADR_CLCT0_QLT             = 10'h19E;  // new Quality
+  parameter ADR_CLCT1_QLT             = 10'h1A0; 
+  parameter ADR_CLCT0_BND             = 10'h1A2;  // new bending
+  parameter ADR_CLCT1_BND             = 10'h1A4; 
+  parameter ADR_CLCT0_XKY             = 10'h1A6; // new position with 1/8 strip precision
+  parameter ADR_CLCT1_XKY             = 10'h1A8; 
+
+  parameter ADR_CCLUT_FORMAT_CTRL     = 10'h1AA; // control for CCLUT, data format
+  parameter ADR_HMT_CTRL              = 10'h1AC; // control for HMT
 
   parameter ADR_ODMB      = 9'h1EE;  // ODMB mode: various addresses are handled inside odmb_device
 
@@ -1832,6 +1860,14 @@
   input  [10:0]      trig_source_vme;    // Trigger source readback
   input  [2:0]      nlayers_hit_vme;    // Number layers hit on layer trigger
   input          clct_bx0_sync_err;    // Sync error: BXN counter==0 did not match bx0
+  input  [MXQLTB - 1   : 0] clct0_vme_qlt; // new quality
+  input  [MXBNDB - 1   : 0] clct0_vme_bnd; // new bending 
+  input  [MXXKYB-1     : 0] clct0_vme_xky; // new position with 1/8 precision
+  input  [MXQLTB - 1   : 0] clct1_vme_qlt; // new quality
+  input  [MXBNDB - 1   : 0] clct1_vme_bnd; // new bending 
+  input  [MXXKYB-1     : 0] clct1_vme_xky; // new position with 1/8 precision
+  input  [MXPATC-1     : 0] clct0_vme_carry;         // First  CLCT
+  input  [MXPATC-1     : 0] clct1_vme_carry;         // Second CLCT
 
 // Sequencer Ports: Raw Hits Ram
   output          dmb_wr;          // Raw hits RAM VME write enable
@@ -2749,6 +2785,21 @@
   reg   [15:0]  virtex6_extend_wr;
   wire  [15:0]  virtex6_extend_rd;
 
+  wire [15:0] clct0_cc_rd;
+  wire [15:0] clct1_cc_rd;
+  wire [15:0] clct0_qlt_rd;
+  wire [15:0] clct1_qlt_rd;
+  wire [15:0] clct0_bnd_rd;
+  wire [15:0] clct1_bnd_rd;
+  wire [15:0] clct0_xky_rd;
+  wire [15:0] clct1_xky_rd;
+
+  reg  [15:0] cclut_format_ctrl_wr;
+  wire [15:0] cclut_format_ctrl_rd;
+
+  reg  [15:0] hmt_ctrl_wr;
+  wire [15:0] hmt_ctrl_rd;
+
 //------------------------------------------------------------------------------------------------------------------
 // Address Write Decodes
 //------------------------------------------------------------------------------------------------------------------
@@ -2887,6 +2938,9 @@
   wire [MXCFEB-1:0]    wr_virtex6_gtx_rx;
   wire      wr_virtex6_sysmon;
   wire      wr_virtex6_extend;
+  //CCLUT
+  wire      wr_cclut_format_ctrl;
+  wire      wr_hmt_ctrl;
   wire      wr_adr_cap;
   
        // Virtex-6 GTX error counters
@@ -3439,6 +3493,19 @@
 
   ADR_V6_EXTEND:      data_out  <= virtex6_extend_rd;
 
+  //CCLUT, Tao
+  ADR_CLCT0_CC:              data_out <= clct0_cc_rd;
+  ADR_CLCT1_CC:              data_out <= clct1_cc_rd;
+  ADR_CLCT0_QLT:             data_out <= clct0_qlt_rd;  // new Quality
+  ADR_CLCT1_QLT:             data_out <= clct1_qlt_rd; 
+  ADR_CLCT0_BND:             data_out <= clct0_bnd_rd;  // new bending
+  ADR_CLCT1_BND:             data_out <= clct1_bnd_rd; 
+  ADR_CLCT0_XKY:             data_out <= clct0_xky_rd; // new position with 1/8 strip precision
+  ADR_CLCT1_XKY:             data_out <= clct1_xky_rd; 
+
+  ADR_CCLUT_FORMAT_CTRL:     data_out <= cclut_format_ctrl_rd;
+  ADR_HMT_CTRL:              data_out <= hmt_ctrl_rd;
+
   ADR_ODMB:      data_out  <= odmb_data;
 
   default:      data_out  <= 16'hDEAF;
@@ -3589,6 +3656,9 @@
   assign wr_virtex6_gtx_rx[2]  = (reg_adr==ADR_V6_GTX_RX2    && clk_en);
   assign wr_virtex6_gtx_rx[3]  = (reg_adr==ADR_V6_GTX_RX3    && clk_en);
   assign wr_virtex6_gtx_rx[4]  = (reg_adr==ADR_V6_GTX_RX4    && clk_en);
+
+  assign wr_cclut_format_ctrl     =  (reg_adr==ADR_CCLUT_FORMAT_CTRL      && clk_en);
+  assign wr_hmt_ctrl              =  (reg_adr==ADR_HMT_CTRL               && clk_en);
   //Tao, ME1/1->MEX/1, the following two could be ignored for ME234
   //assign wr_virtex6_gtx_rx[5]  = (reg_adr==ADR_V6_GTX_RX5    && clk_en);
   //assign wr_virtex6_gtx_rx[6]  = (reg_adr==ADR_V6_GTX_RX6    && clk_en);
@@ -7294,6 +7364,57 @@
   assign algo2016_clct_use_corrected_bx      = algo2016_ctrl_wr[10];  // Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
 
   assign algo2016_ctrl_rd[15:0] = algo2016_ctrl_wr[15:0];
+
+//------------------------------------------------------------------------------------------------------------------
+// ADR_CLCT0_CC= 0x19A    1st CLCT Comparator Code
+// ADR_CLCT1_CC= 0x19C    2nd CLCT Comparator Code
+// ADR_CLCT0_QLT= 0x19E    1st CLCT new quality
+// ADR_CLCT1_QLT= 0x1A0    2nd CLCT new quality
+// ADR_CLCT0_BND= 0x1A2    1st CLCT new bnd
+// ADR_CLCT1_BND= 0x1A4    2nd CLCT new bnd
+// ADR_CLCT0_XKY= 0x1A6    1st CLCT new position
+// ADR_CLCT1_XKY= 0x1A8    2nd CLCT new position
+//------------------------------------------------------------------------------------------------------------------
+  assign clct0_cc_rd[MXPATC-1:0] = clct0_vme_carry[MXPATC-1:0]; 
+  assign clct1_cc_rd[MXPATC-1:0] = clct1_vme_carry[MXPATC-1:0]; 
+  assign clct0_qlt_rd[MXQLTB - 1    : 0] = clct0_vme_qlt[MXQLTB - 1   : 0];
+  assign clct0_bnd_rd[MXBNDB - 1    : 0] = clct0_vme_bnd[MXBNDB - 1   : 0];
+  assign clct0_xky_rd[MXXKYB - 1    : 0] = clct0_vme_xky[MXXKYB - 1   : 0];
+  assign clct1_qlt_rd[MXQLTB - 1    : 0] = clct1_vme_qlt[MXQLTB - 1   : 0];
+  assign clct1_bnd_rd[MXBNDB - 1    : 0] = clct1_vme_bnd[MXBNDB - 1   : 0];
+  assign clct1_xky_rd[MXXKYB - 1    : 0] = clct1_vme_xky[MXXKYB - 1   : 0];
+
+//------------------------------------------------------------------------------------------------------------------
+// ADR_CCLUT_FORMAT_CTRL = 0x1AA  CCLUT
+//------------------------------------------------------------------------------------------------------------------
+
+  initial begin
+    cclut_format_ctrl_wr[0] = 0;
+    //cclut_format_ctrl_wr[1] = 0; //CLCT pattern sorting, 0= use {pat, nhits}, 1={new quality}
+    //cclut_format_ctrl_wr[2] = 0; //LCT data format control, 0 = use Run2, 1= use Run3 with GEM-CSC+CCLUT
+  end
+  assign cclut_format_ctrl_rd[0] = ccLUT_enable;
+      
+
+//------------------------------------------------------------------------------------------------------------------
+// ADR_HMT_CTRL = 0x1AC  HMT
+//------------------------------------------------------------------------------------------------------------------
+
+  initial begin
+    hmt_ctrl_wr[0] = 1'b1; // RW, enable the HMT or not
+    hmt_ctrl_wr[1] = 1'b1; //RW, enable ME1a or not
+    hmt_ctrl_wr[11:2] = 10'b0; //R only nhits for trigger 
+    hmt_ctrl_wr[13:12] = 2'b0; // result of over threshold, reserved
+  end
+  assign hmt_enable  = hmt_ctrl_wr[0];
+  assign hmt_me1a_enable = hmt_ctrl_wr[1];
+  //assign hmt_me1a_enable = 1'b1;// always enable now 
+
+
+  assign hmt_ctrl_rd[0] = hmt_enable;
+  assign hmt_ctrl_rd[1] = hmt_me1a_enable;
+  assign hmt_ctrl_rd[11:2] = hmt_nhits_trig_vme[9:0];
+  //reserved for HMT results 
 
 //------------------------------------------------------------------------------------------------------------------
 // VME Write-Registers latch data when addressed + latch power-up defaults

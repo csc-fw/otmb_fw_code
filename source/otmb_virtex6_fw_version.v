@@ -20,6 +20,7 @@
 //  `define FPGAID     16'h6195 // FPGA Type 6195 XC6VLX195T
   `define FPGAID       16'h6240 // FPGA Type 6240 XC6VLX240T
 
+  `define CCLUT                01'h1  // 1=turn on CCLUT
 // Conditional compile flags: Enable only one CSC_TYPE
     `define CSC_TYPE_A			04'hA		// Normal   CSC:  Normal chambers facing toward IR
 //`define CSC_TYPE_B			04'hB		// Normal   CSC:  Normal chambers facing toward IR
