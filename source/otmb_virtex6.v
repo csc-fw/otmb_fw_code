@@ -3494,6 +3494,8 @@
       .pid_thresh_pretrig    (pid_thresh_pretrig[MXPIDB-1:0]),  // Out  Pattern shape ID pre-trigger threshold
       .dmb_thresh_pretrig    (dmb_thresh_pretrig[MXHITB-1:0]),  // Out  Hits on pattern template DMB active-feb threshold
       .adjcfeb_dist      (adjcfeb_dist[MXKEYB-1+1:0]),    // Out  Distance from key to cfeb boundary for marking adjacent cfeb as hit
+      //Enable CCLUT or not
+      .ccLUT_enable       (ccLUT_enable),  // In
 
       // CFEB Ports: Hot Channel Mask
       .cfeb0_ly0_hcm      (cfeb_ly0_hcm[0][MXDS-1:0]),  // Out  1=enable DiStrip
