@@ -669,13 +669,9 @@ module pattern_finder_ccLUT (
   wire [9:0] nhits_trig_dly;
 
   always @(posedge clock) begin
-      nhits_all  <= nhits_cfeb0 + nhits_cfeb1 + nhits_cfeb2 + nhits_cfeb3 + nhits_cfeb4 + nhits_cfeb5 + nhits_cfeb6;
+      nhits_all  <= nhits_cfeb0 + nhits_cfeb1 + nhits_cfeb2 + nhits_cfeb3 + nhits_cfeb4;
   end
   assign nhits_trig_s0[9:0] = nhits_all[9:0];
-
-  // Sum number of layers hit into a binary pattern number
-  wire [MXHITB - 1: 0] nlayers_hit_s0;
-  wire                 layer_trig_s0;
 
   // Sum number of layers hit into a binary pattern number
   wire [MXHITB - 1: 0] nlayers_hit_s0;
@@ -783,7 +779,7 @@ module pattern_finder_ccLUT (
 
 	generate
 	for (ihs=0; ihs<=MXHSX-1; ihs=ihs+1) begin: patgen
-	    pattern_unit upat (
+	    pattern_unit_ccLUT upat (
 	    .ly0 (ly0hs_pad[ihs + 5 + k: ihs - 5 + k]),
 	    .ly1 (ly1hs_pad[ihs + 4 + k: ihs - 2 + k]),
 	    .ly2 (ly2hs_pad[ihs + 2 + k: ihs - 2 + k]),	//key on ly2
