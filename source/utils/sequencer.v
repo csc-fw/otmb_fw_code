@@ -488,11 +488,6 @@
   hs_xky_2nd,
   hs_carry_2nd,
 
-  hs_hit_2nd,
-  hs_pid_2nd,
-  hs_key_2nd,
-  hs_bsy_2nd,
-
   hs_layer_trig,
   hs_nlayers_hit,
   hs_layer_or,
