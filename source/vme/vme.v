@@ -324,6 +324,7 @@
   pid_thresh_pretrig,
   dmb_thresh_pretrig,
   adjcfeb_dist,
+  ccLUT_enable,
 
 // CFEB Ports: Hot Channel Mask
   cfeb0_ly0_hcm,
@@ -512,6 +513,10 @@
   bxn_offset_l1a,
   lhc_cycle,
   l1a_offset,
+
+  //HMT part
+  hmt_enable,
+  hmt_nhits_trig_vme,
 
 // Sequencer Ports: Latched CLCTs + Status
   event_clear_vme,
@@ -1657,6 +1662,7 @@
   output  [MXPIDB-1:0]  pid_thresh_pretrig;    // Pattern shape ID pre-trigger threshold
   output  [MXHITB-1:0]  dmb_thresh_pretrig;    // Hits on pattern template DMB active-feb threshold
   output  [MXKEYB-1+1:0]  adjcfeb_dist;      // Distance from key to cfeb boundary for marking adjacent cfeb as hit
+  input ccLUT_enable,
 
 // CFEB Ports: Hot Channel Mask
   output  [MXDS-1:0]    cfeb0_ly0_hcm;      // 1=enable DiStrip
@@ -1847,6 +1853,9 @@
   output  [MXBXN-1:0]    bxn_offset_l1a;      // BXN offset at reset, for L1A bxn
   output  [MXBXN-1:0]    lhc_cycle;        // LHC period, max BXN count+1
   output  [MXL1ARX-1:0]  l1a_offset;        // L1A counter preset value
+  //HMT part
+  output hmt_enable;
+  input [9:0] hmt_nhits_trig_vme;
 
 // Sequencer Ports: Latched CLCTs
   output          event_clear_vme;    // Event clear for aff,clct,mpc vme diagnostic registers
