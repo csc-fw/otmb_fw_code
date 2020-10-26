@@ -161,7 +161,8 @@ reg [MXOFFSB-1:0] best_offs;
   //end
 
   always @(*) begin
-      best_subkey <= {best_key, best_offs[1:0]+1'b1} + 1;// 
+      best_subkey <= {best_key, best_offs[1:0]+1'b1};// 
+      //best_subkey <= {best_key, best_offs[1:0]+1'b1} + 1;// +1 is to add 1 offset 
   end 
 
 //-------------------------------------------------------------------------------------------------------------------
