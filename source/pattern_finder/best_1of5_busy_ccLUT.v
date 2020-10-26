@@ -46,8 +46,6 @@ reg [MXOFFSB-1:0] best_offs;
   wire [5:0] sort_key2 = (PATLUT && SORT_ON_PATLUT) ? qlt2 : pat2[6:1];
   wire [5:0] sort_key3 = (PATLUT && SORT_ON_PATLUT) ? qlt3 : pat3[6:1];
   wire [5:0] sort_key4 = (PATLUT && SORT_ON_PATLUT) ? qlt4 : pat4[6:1];
-  wire [5:0] sort_key5 = (PATLUT && SORT_ON_PATLUT) ? qlt5 : pat5[6:1];
-  wire [5:0] sort_key6 = (PATLUT && SORT_ON_PATLUT) ? qlt6 : pat6[6:1];
 
 // Stage 3: Best 1 of 7
 
