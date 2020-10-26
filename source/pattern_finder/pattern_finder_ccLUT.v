@@ -1619,7 +1619,7 @@ module pattern_finder_ccLUT (
 
   generate
     for (i = 0; i <= MXCFEB - 1; i = i + 1) begin: hs_2nd_gen
-      best_1of32_busy ubest1of32_2nd (
+      best_1of32_busy_ccLUT ubest1of32_2nd (
         .clock(clock),
         .pat00(hs_pat_s3[i * 32 + 0]),
         .pat01(hs_pat_s3[i * 32 + 1]),
