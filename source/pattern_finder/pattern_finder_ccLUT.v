@@ -757,11 +757,11 @@ module pattern_finder_ccLUT (
 `ifdef STAGGER_HS_CSC
 // Pad 0s beyond csc edges: whole CSC
 	assign ly0hs_pad = {5'b00000, ly0hs[MXHSX-1+j:j],              5'b00000};
-	assign ly1hs_pad = {4'b0000,  ly1hs[MXHSX-1+j:j], ly1hs[-1+j], 3'b000};
-	assign ly2hs_pad = {2'b00,    ly2hs[MXHSX-1+j:j],              2'b00};
-	assign ly3hs_pad = {2'b00,    ly3hs[MXHSX-1+j:j], ly3hs[-1+j], 1'b0};
-	assign ly4hs_pad = {4'b0000,  ly4hs[MXHSX-1+j:j],              4'b0000};
-	assign ly5hs_pad = {5'b00000, ly5hs[MXHSX-1+j:j], ly5hs[-1+j], 4'b0000};
+	assign ly1hs_pad = {4'b0000,  ly1hs[MXHSX-1+j:j], ly1hs[-1+j], 3'b000  };
+	assign ly2hs_pad = {2'b00,    ly2hs[MXHSX-1+j:j],              2'b00   };
+	assign ly3hs_pad = {2'b00,    ly3hs[MXHSX-1+j:j], ly3hs[-1+j], 1'b0    };
+	assign ly4hs_pad = {4'b0000,  ly4hs[MXHSX-1+j:j],              4'b0000 };
+	assign ly5hs_pad = {5'b00000, ly5hs[MXHSX-1+j:j], ly5hs[-1+j], 4'b0000 };
 
 `else
 	assign ly0hs_pad = {5'b00000, me234_ly0hs[MXHSX-1:0], 5'b00000};
@@ -781,7 +781,7 @@ module pattern_finder_ccLUT (
 	for (ihs=0; ihs<=MXHSX-1; ihs=ihs+1) begin: patgen
 	    pattern_unit_ccLUT upat (
 	    .ly0 (ly0hs_pad[ihs + 5 + k: ihs - 5 + k]),
-	    .ly1 (ly1hs_pad[ihs + 4 + k: ihs - 2 + k]),
+	    .ly1 (ly1hs_pad[ihs + 4 + k: ihs - 4 + k]),
 	    .ly2 (ly2hs_pad[ihs + 2 + k: ihs - 2 + k]),	//key on ly2
             .ly3 (ly3hs_pad[ihs + 2 + k: ihs - 2 + k]),
             .ly4 (ly4hs_pad[ihs + 4 + k: ihs - 4 + k]),
@@ -792,60 +792,42 @@ module pattern_finder_ccLUT (
         end
        endgenerate
 
-  //Tao, ME1/1->MEX/1, following par is not needed anymore
-  //wire [MXHSXB - 1 + 5 + k: 0 - 5 + k] ly0hs_pad_me1b;
-  //wire [MXHSXB - 1 + 2 + k: 0 - 2 + k] ly1hs_pad_me1b;
-  //wire [MXHSXB - 1 + 0 + k: 0 - 0 + k] ly2hs_pad_me1b; // 132:5
-  //wire [MXHSXB - 1 + 2 + k: 0 - 2 + k] ly3hs_pad_me1b;
-  //wire [MXHSXB - 1 + 4 + k: 0 - 4 + k] ly4hs_pad_me1b;
-  //wire [MXHSXB - 1 + 5 + k: 0 - 5 + k] ly5hs_pad_me1b;
-
-  //// Pad 0s beyond CSC edges ME1A hs128-223, isolate it from ME1B
-  //assign ly0hs_pad_me1a = {5'b00000, ly0hs[223: 128], 5'b00000}; // JG, later use MXKEYX-1:MXHSXB here.
-  //assign ly1hs_pad_me1a = {   2'b00, ly1hs[223: 128], 2'b00   }; // JG, MXHSXB=128 here... for non-ME1/1 upgrades use MXHSXB=0
-  //assign ly2hs_pad_me1a = {          ly2hs[223: 128]          }; // MXKEYX is based on nCFEB, so that auto-corrects for upgrades
-  //assign ly3hs_pad_me1a = {   2'b00, ly3hs[223: 128], 2'b00   };
-  //assign ly4hs_pad_me1a = { 4'b0000, ly4hs[223: 128], 4'b0000 };
-  //assign ly5hs_pad_me1a = {5'b00000, ly5hs[223: 128], 5'b00000};
-
-  //// Pad 0s beyond CSC edges ME1B hs0-127, isolate it from ME1A
-  //assign ly0hs_pad_me1b = {5'b00000, ly0hs[127: 0], 5'b00000};
-  //assign ly1hs_pad_me1b = {   2'b00, ly1hs[127: 0], 2'b00   };
-  //assign ly2hs_pad_me1b = {          ly2hs[127: 0]          };
-  //assign ly3hs_pad_me1b = {   2'b00, ly3hs[127: 0], 2'b00   };
-  //assign ly4hs_pad_me1b = { 4'b0000, ly4hs[127: 0], 4'b0000 };
-  //assign ly5hs_pad_me1b = {5'b00000, ly5hs[127: 0], 5'b00000};
-
-  //// Find pattern hits for each HalfStrip key
-  //wire [MXHITB - 1: 0] hs_hit [MXHSX - 1: 0];
-  //wire [MXPIDB - 1: 0] hs_pid [MXHSX - 1: 0];
-  //generate
-  //  for (ihs = 128; ihs <= 223; ihs = ihs + 1) begin: patgen_me1a  // JG, later use MXHSXB, MXKEYX-1 here.
-  //    pattern_unit upat_me1a (
-  //      .ly0 (ly0hs_pad_me1a[ihs + 5 + k: ihs - 5 + k]),
-  //      .ly1 (ly1hs_pad_me1a[ihs + 2 + k: ihs - 2 + k]),
-  //      .ly2 (ly2hs_pad_me1a[ihs + 0 + k: ihs - 0 + k]),  //key on ly2
-  //      .ly3 (ly3hs_pad_me1a[ihs + 2 + k: ihs - 2 + k]),
-  //      .ly4 (ly4hs_pad_me1a[ihs + 4 + k: ihs - 4 + k]),
-  //      .ly5 (ly5hs_pad_me1a[ihs + 5 + k: ihs - 5 + k]),
-  //      .pat_nhits (hs_hit[ihs]),
-  //      .pat_id (hs_pid[ihs]));
-  //  end
-  //endgenerate
-
-  //generate
-  //  for (ihs = 0; ihs <= 127; ihs = ihs + 1) begin: patgen_me1b
-  //    pattern_unit upat_me1b (
-  //      .ly0 (ly0hs_pad_me1b[ihs + 5 + k: ihs - 5 + k]),
-  //      .ly1 (ly1hs_pad_me1b[ihs + 2 + k: ihs - 2 + k]),
-  //      .ly2 (ly2hs_pad_me1b[ihs + 0 + k: ihs - 0 + k]),  //key on ly2
-  //      .ly3 (ly3hs_pad_me1b[ihs + 2 + k: ihs - 2 + k]),
-  //      .ly4 (ly4hs_pad_me1b[ihs + 4 + k: ihs - 4 + k]),
-  //      .ly5 (ly5hs_pad_me1b[ihs + 5 + k: ihs - 5 + k]),
-  //      .pat_nhits (hs_hit[ihs]),
-  //      .pat_id (hs_pid[ihs]));
-  //  end
-  //endgenerate
+// before CCLUT, Tao
+//`ifdef STAGGER_HS_CSC
+//// Pad 0s beyond csc edges: whole CSC
+//	assign ly0hs_pad = {5'b00000, ly0hs[MXHSX-1+j:j],              5'b00000};
+//	assign ly1hs_pad = {2'b00,    ly1hs[MXHSX-1+j:j], ly1hs[-1+j], 1'b0};
+//	assign ly2hs_pad = {          ly2hs[MXHSX-1+j:j]};
+//	assign ly3hs_pad = {2'b00,    ly3hs[MXHSX-1+j:j], ly3hs[-1+j], 1'b0};
+//	assign ly4hs_pad = {4'b0000,  ly4hs[MXHSX-1+j:j],              4'b0000};
+//	assign ly5hs_pad = {5'b00000, ly5hs[MXHSX-1+j:j], ly5hs[-1+j], 4'b0000};
+//
+//`else
+//	assign ly0hs_pad = {5'b00000, me234_ly0hs[MXHSX-1:0], 5'b00000};
+//	assign ly1hs_pad = {2'b00,    me234_ly1hs[MXHSX-1:0], 2'b00   };
+//	assign ly2hs_pad = {          me234_ly2hs[MXHSX-1:0]          };
+//	assign ly3hs_pad = {2'b00,    me234_ly3hs[MXHSX-1:0], 2'b00   };
+//	assign ly4hs_pad = {4'b0000,  me234_ly4hs[MXHSX-1:0], 4'b0000 };
+//	assign ly5hs_pad = {5'b00000, me234_ly5hs[MXHSX-1:0], 5'b00000};
+//`endif
+//
+//// Find pattern hits for each 1/2-strip key
+//	wire [MXHITB-1:0] hs_hit [MXHSX-1:0];
+//	wire [MXPIDB-1:0] hs_pid [MXHSX-1:0];
+//
+//	generate
+//	for (ihs=0; ihs<=MXHSX-1; ihs=ihs+1) begin: patgen
+//	    pattern_unit upat (
+//	    .ly0 (ly0hs_pad[ihs + 5 + k: ihs - 5 + k]),
+//	    .ly1 (ly1hs_pad[ihs + 2 + k: ihs - 2 + k]),
+//	    .ly2 (ly2hs_pad[ihs + 0 + k: ihs - 0 + k]),	//key on ly2
+//            .ly3 (ly3hs_pad[ihs + 2 + k: ihs - 2 + k]),
+//            .ly4 (ly4hs_pad[ihs + 4 + k: ihs - 4 + k]),
+//            .ly5 (ly5hs_pad[ihs + 5 + k: ihs - 5 + k]),
+//            .pat_nhits (hs_hit[ihs]),
+//            .pat_id (hs_pid[ihs]));
+//        end
+//       endgenerate
 
   // Store Pattern Unit results
   reg [MXHITB - 1: 0] hs_hit_s0ab [MXHSX - 1: 0];
