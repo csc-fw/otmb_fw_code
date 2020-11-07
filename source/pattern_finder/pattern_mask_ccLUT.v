@@ -1,9 +1,9 @@
-//CCLUT, Tao
-parameter [17:0] pat_maskA = 18'h3f5ff; // 11 1111 0101 1111 1111
-parameter [17:0] pat_mask9 = 18'h3f5ff;
-parameter [17:0] pat_mask8 = 18'h3f5ff;
-parameter [17:0] pat_mask7 = 18'h3f5ff;
-parameter [17:0] pat_mask6 = 18'h3f5ff;
+//CCLUT, Tao, 
+parameter [17:0] pat_maskA = 18'h3ffff; // 11 1111 1111 1111 1111
+parameter [17:0] pat_mask9 = 18'h3ffff;
+parameter [17:0] pat_mask8 = 18'h3ffff;
+parameter [17:0] pat_mask7 = 18'h3ffff;
+parameter [17:0] pat_mask6 = 18'h3ffff;
  // Pattern A                                                    0123456789A
  //  parameter [17:0] pat_maskA = {1'b1 , 1'b1, 1'b1        // ly0 ----xxx----
  //                               ,1'b1 , 1'b1, 1'b1        // ly1 ----xxx----
