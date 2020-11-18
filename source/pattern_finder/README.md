@@ -95,3 +95,5 @@ pattern 6, also it is pattern 0 in CMSSW
 
 rom_patA.mem is the LUT for the straight pattern A and the index is the comparator code and value in mem file is the 18bits output, similar for other patterns
 
+in CMSSW, the pattern ID for CCLUT is from 0 to 4 and ID 4 means the straight pattern
+
