@@ -3889,7 +3889,7 @@
 // Header storage RAMs
 //------------------------------------------------------------------------------------------------------------------
   wire [MXBADR-1:0] rd_buf_adr;            // Block RAM header readout address
-  wire [8:0]        dang;                  // Block RAM dangling output pins
+  wire [9:0]        dang;                  // Block RAM dangling output pins
   wire              rd_enb = !buf_q_empty; // Enable port b for reading when readout in progress
 
 // Store Buffer data on pretrigger
@@ -3900,7 +3900,7 @@
 
 // Store CLCT data post-drift on xtmb
   ramblock #(MXXTMB, MXBADR) uramblock2 (.clock(clock),.wr_wea(wr_en_xtmb ),.wr_adra(wr_adr_xtmb ),.wr_dataa(xtmb_wdata ),.rd_enb(rd_enb),.rd_adrb(rd_buf_adr),.rd_datab(xtmb_rdata ),.dang(dang[2]));
-  ramblock #(MXCCLUTB, MXBADR) uramblock9 (.clock(clock),.wr_wea(wr_en_xtmb ),.wr_adra(wr_adr_xtmb ),.wr_dataa(xtmb_cclut_wdata ),.rd_enb(rd_enb),.rd_adrb(rd_buf_adr),.rd_datab(xtmb_cclut_rdata ),.dang(dang[2]));
+  ramblock #(MXCCLUTB, MXBADR) uramblock9 (.clock(clock),.wr_wea(wr_en_xtmb ),.wr_adra(wr_adr_xtmb ),.wr_dataa(xtmb_cclut_wdata ),.rd_enb(rd_enb),.rd_adrb(rd_buf_adr),.rd_datab(xtmb_cclut_rdata ),.dang(dang[9]));
 
 // Store CLCT counter post-drift on xtmb+1bx
   ramblock #(MXXTMB1,MXBADR) uramblock3 (.clock(clock),.wr_wea(wr_en_xtmb1),.wr_adra(wr_adr_xtmb1),.wr_dataa(xtmb1_wdata),.rd_enb(rd_enb),.rd_adrb(rd_buf_adr),.rd_datab(xtmb1_rdata),.dang(dang[3]));
