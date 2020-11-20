@@ -1018,9 +1018,9 @@
   srl16e_bbl #(MXCLCTC) uclctc (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(clctc_xtmb),.q(clctc_srl));
   srl16e_bbl #(MXCFEB ) uclctf (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(clctf_xtmb),.q(clctf_srl));
   //register shift for CCLUT 
-  srl16e_bbl #(MXCCLUTB ) uclctf (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(clct0_cclut_xtmb),.q(clct0_cclut_srl));
-  srl16e_bbl #(MXCCLUTB ) uclctf (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(clct1_cclut_xtmb),.q(clct1_cclut_srl));
-  srl16e_bbl #(2        ) uclctf (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(hmt_trigger_xtmb),.q(hmt_trigger_srl));
+  srl16e_bbl #(MXCCLUTB ) uclct0cclut (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(clct0_cclut_xtmb),.q(clct0_cclut_srl));
+  srl16e_bbl #(MXCCLUTB ) uclct1cclut (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(clct1_cclut_xtmb),.q(clct1_cclut_srl));
+  srl16e_bbl #(2        ) uhmt        (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(hmt_trigger_xtmb),.q(hmt_trigger_srl));
 
 
 
@@ -1838,6 +1838,7 @@
   reg [MXCLCTC-1:0]  clctc_real;
   reg [MXCCLUTB - 1   : 0] clct0_cclut_real; // new quality
   reg [MXCCLUTB - 1   : 0] clct1_cclut_real; // new quality
+  reg [1:0] hmt_trigger_real;
 
   wire keep_clct = trig_pulse && (trig_keep || non_trig_keep);
 
