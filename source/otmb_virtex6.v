@@ -2315,8 +2315,8 @@ end
 
       );
 
-      assign gemA_csc_cluster_xky_lo[i] = gemA_csc_cluster_me1a[i] ? gemA_csc_cluster_me1ahs_lo[i][7:0] : gemA_csc_cluster_me1bhs_lo[i][7:0];
-      assign gemB_csc_cluster_xky_lo[i] = gemB_csc_cluster_me1a[i] ? gemB_csc_cluster_me1ahs_lo[i][7:0] : gemB_csc_cluster_me1bhs_lo[i][7:0];
+      assign gemA_csc_cluster_xky_lo[iclst_csc] = gemA_csc_cluster_me1a[iclst_csc] ? gemA_csc_cluster_me1ahs_lo[iclst_csc][7:0] : gemA_csc_cluster_me1bhs_lo[iclst_csc][7:0];
+      assign gemB_csc_cluster_xky_lo[iclst_csc] = gemB_csc_cluster_me1a[iclst_csc] ? gemB_csc_cluster_me1ahs_lo[iclst_csc][7:0] : gemB_csc_cluster_me1bhs_lo[iclst_csc][7:0];
   end
   endgenerate
 
@@ -2667,6 +2667,8 @@ end
    
    wire [9:0]             hmt_nhits_trig_xtmb;
    wire [1:0]             hmt_trigger;
+   wire [1:0]             hmt_trigger_xtmb;
+   wire [1:0]             hmt_trigger_vme;
 
    wire [MXCLCT-1:0]      clct0_xtmb;
    wire [MXCLCT-1:0]      clct1_xtmb;
