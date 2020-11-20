@@ -17,6 +17,7 @@
 //
 // 2019-07-30: start to work with VFAT3 data [size=3bits, position=11bits], position is from 0-1535
 // coincidence pad matching: delta pad = 1, detal roll = 1 by default and should be configurable!
+// No matching window in timing for copad!!!!
 //
 //----------------------------------------------------------------------------------------------------------------------
 

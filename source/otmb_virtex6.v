@@ -2179,6 +2179,7 @@ end
   wire [6:0] gemB_csc_cluster_cscwire_hi[MXCLUSTER_CHAMBER-1:0];
   wire [6:0] gemA_csc_cluster_cscwire_mi[MXCLUSTER_CHAMBER-1:0];
   wire [6:0] gemB_csc_cluster_cscwire_mi[MXCLUSTER_CHAMBER-1:0];
+  //Tao, updated to CCLUT algorithm!!!
   wire [7:0] gemA_csc_cluster_me1bhs_lo [MXCLUSTER_CHAMBER-1:0]; // ME1b keyHS from 0-127
   wire [7:0] gemB_csc_cluster_me1bhs_lo [MXCLUSTER_CHAMBER-1:0]; // ME1a keyHS from 128-223
   wire [7:0] gemA_csc_cluster_me1bhs_hi [MXCLUSTER_CHAMBER-1:0]; // 
@@ -2191,6 +2192,14 @@ end
   wire [7:0] gemB_csc_cluster_me1ahs_hi [MXCLUSTER_CHAMBER-1:0]; // 
   wire [7:0] gemA_csc_cluster_me1ahs_mi [MXCLUSTER_CHAMBER-1:0]; // 
   wire [7:0] gemB_csc_cluster_me1ahs_mi [MXCLUSTER_CHAMBER-1:0]; // 
+
+  wire [7:0] gemA_csc_cluster_xky_lo [MXCLUSTER_CHAMBER-1:0]; // 
+  wire [7:0] gemB_csc_cluster_xky_lo [MXCLUSTER_CHAMBER-1:0]; // 
+  wire [7:0] gemA_csc_cluster_xky_hi [MXCLUSTER_CHAMBER-1:0]; // 
+  wire [7:0] gemB_csc_cluster_xky_hi [MXCLUSTER_CHAMBER-1:0]; // 
+  wire [7:0] gemA_csc_cluster_xky_mi [MXCLUSTER_CHAMBER-1:0]; // 
+  wire [7:0] gemB_csc_cluster_xky_mi [MXCLUSTER_CHAMBER-1:0]; // 
+
 
   wire evenchamber = ~csc_id[0];//double check it counts from 0 or 1 in term of even and odd?????
 
@@ -2257,7 +2266,7 @@ end
 
         .cluster0_cscwire_lo (gemA_csc_cluster_cscwire_lo[iclst_csc]), //Out gem roll into wire, low
         .cluster0_cscwire_hi (gemA_csc_cluster_cscwire_hi[iclst_csc]), //Out gem roll into wire, high
-        .cluster0_cscwire_mi (gemA_csc_cluster_cscwire_mi[iclst_csc]), // Out gem roll into wire, mean
+        .cluster0_cscwire_mi (gemA_csc_cluster_cscwire_mi[iclst_csc]), // Out gem roll into wire, median
         .cluster0_me1bhs_lo  (gemA_csc_cluster_me1bhs_lo[iclst_csc]), // Out, gem pad into me1b hs, from 0-127
         .cluster0_me1bhs_hi  (gemA_csc_cluster_me1bhs_hi[iclst_csc]), // Out, gem pad into me1b hs from 0-127
         .cluster0_me1bhs_mi  (gemA_csc_cluster_me1bhs_mi[iclst_csc]), // Out, gem pad into me1b hs from 0-127
@@ -2306,6 +2315,8 @@ end
 
       );
 
+      assign gemA_csc_cluster_xky_lo[i] = gemA_csc_cluster_me1a[i] ? gemA_csc_cluster_me1ahs_lo[i][7:0] : gemA_csc_cluster_me1bhs_lo[i][7:0];
+      assign gemB_csc_cluster_xky_lo[i] = gemB_csc_cluster_me1a[i] ? gemB_csc_cluster_me1ahs_lo[i][7:0] : gemB_csc_cluster_me1bhs_lo[i][7:0];
   end
   endgenerate
 
@@ -2325,6 +2336,13 @@ end
   wire  hmt_enable;
   wire  hmt_me1a_enable;
   wire [9:0] hmt_nhits_trig;
+  //fake threshold
+  wire [9:0]   hmt_thresh1, hmt_thresh2, hmt_thresh3;
+  assign hmt_thresh1 = 10'd40;
+  assign hmt_thresh2 = 10'd60;
+  assign hmt_thresh3 = 10'd80;
+  assign hmt_trigger[0] = (hmt_nhits_trig >= hmt_thresh1) || (hmt_nhits_trig >= hmt_thresh3);
+  assign hmt_trigger[1] = (hmt_nhits_trig >= hmt_thresh2) || (hmt_nhits_trig >= hmt_thresh3);
 
 // 2nd CLCT separation RAM Ports
   wire         clct_sep_src;       // CLCT separation source 1=vme, 0=ram
@@ -2367,7 +2385,6 @@ end
   //enable CCLUT, Tao
   `ifdef CCLUT
   initial reg_ccLUT_enable = 1'b1;
-
   `else
   initial reg_ccLUT_enable = 1'b0;
   `endif
@@ -2375,6 +2392,8 @@ end
    wire ccLUT_enable;
    assign ccLUT_enable = reg_ccLUT_enable;
 
+   wire run3_trig_df; // Run3 trigger data format
+   wire run3_daq_df;// Run3 daq data format
 
   //CCLUT is off
   `ifndef CCLUT
@@ -2647,6 +2666,8 @@ end
    wire [7:0]             cfeb_rawhits;
    
    wire [9:0]             hmt_nhits_trig_xtmb;
+   wire [1:0]             hmt_trigger;
+
    wire [MXCLCT-1:0]      clct0_xtmb;
    wire [MXCLCT-1:0]      clct1_xtmb;
    wire [MXCLCTC-1:0]     clctc_xtmb; // Common to CLCT0/1 to TMB
@@ -2989,6 +3010,7 @@ end
 
   //HMT results 
   .hmt_nhits_trig      (hmt_nhits_trig[9:0]), //In hit counter from pattern finding  module
+  .hmt_trigger         (hmt_trigger[1:0]), // In HMT trigger results
 
 // Sequencer Pattern Finder CLCT results
   .hs_hit_1st (hs_hit_1st[MXHITB-1:0]),  // In  1st CLCT pattern hits
@@ -3059,6 +3081,7 @@ end
   .algo2016_use_dead_time_zone         (algo2016_use_dead_time_zone),         // In Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
   .algo2016_dead_time_zone_size        (algo2016_dead_time_zone_size[4:0]),   // In Constant size of the dead time zone
   .algo2016_use_dynamic_dead_time_zone (algo2016_use_dynamic_dead_time_zone), // In Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
+  .ccLUT_enable       (ccLUT_enable),  // In
 
   .tmb_allow_alct  (tmb_allow_alct),  // In  Allow ALCT only
   .tmb_allow_clct  (tmb_allow_clct),  // In  Allow CLCT only
@@ -3100,6 +3123,7 @@ end
   .sequencer_state (sequencer_state[11:0]), // Out  Sequencer state for vme
 
   .hmt_nhits_trig_vme (hmt_nhits_trig_vme[9:0]),// Out HMT nhits for trigger
+  .hmt_trigger_vme    (hmt_trigger_vme[1:0]), // In HMT trigger results
 
   .event_clear_vme (event_clear_vme),         // In  Event clear for aff,clct,mpc vme diagnostic registers
   .clct0_vme       (clct0_vme[MXCLCT-1:0]),   // Out  First  CLCT
@@ -3271,6 +3295,7 @@ end
 
 // Sequencer TMB LCT Match results
   .hmt_nhits_trig_xtmb (hmt_nhits_trig_xtmb[9:0]),// Out HMT nhits for trigger
+  .hmt_trigger_xtmb    (hmt_trigger_xtmb[1:0]),// Out HMT nhits for trigger
   .clct0_xtmb (clct0_xtmb[MXCLCT-1:0]),  // Out  First  CLCT
   .clct1_xtmb (clct1_xtmb[MXCLCT-1:0]),  // Out  Second CLCT
   .clctc_xtmb (clctc_xtmb[MXCLCTC-1:0]), // Out  Common to CLCT0/1 to TMB
@@ -3338,6 +3363,7 @@ end
   .alct_copad_noclct    (alct_copad_noclct), // In alct+copad match and no clct found
   .clct_copad_noalct    (clct_copad_noalct), // In clct+copad match and no alct found
 
+  .run3_daq_df   (run3_daq_df),
 // Sequencer MPC Status
   .mpc_frame_ff   (mpc_frame_ff),                // In  MPC frame latch strobe
   .mpc0_frame0_ff (mpc0_frame0_ff[MXFRAME-1:0]), // In  MPC best muon 1st frame
@@ -4128,7 +4154,8 @@ wire [15:0] gemB_bxn_counter;
   .wr_avail_rmpc (wr_avail_rmpc), // Out  Buffer available at MPC received
 
 // Sequencer
-  .hmt_nhits_trig_xtmb (hmt_nhits_trig_xtmb[9:0]),// Out HMT nhits for trigger
+  .hmt_nhits_trig_xtmb (hmt_nhits_trig_xtmb[9:0]),// In HMT nhits for trigger
+  .hmt_trigger_xtmb    (hmt_trigger_xtmb[1:0]),// Out HMT nhits for trigger
   .clct0_xtmb (clct0_xtmb[MXCLCT-1:0]),  // In  First  CLCT
   .clct1_xtmb (clct1_xtmb[MXCLCT-1:0]),  // In  Second CLCT
   .clctc_xtmb (clctc_xtmb[MXCLCTC-1:0]), // In  Common to CLCT0/1 to TMB
@@ -4186,6 +4213,7 @@ wire [15:0] gemB_bxn_counter;
   .alct_copad_noclct    (alct_copad_noclct),// Out alct+copad, no clct 
   .clct_copad_noalct    (clct_copad_noalct), // Out clct+copad, no alct
 
+  .run3_trig_df   (run3_trig_df),
 // MPC Status
   .mpc_frame_ff   (mpc_frame_ff),                // Out  MPC frame latch strobe
   .mpc0_frame0_ff (mpc0_frame0_ff[MXFRAME-1:0]), // Out  MPC best muon 1st frame
@@ -4861,6 +4889,8 @@ wire [15:0] gemB_bxn_counter;
       .adjcfeb_dist       (adjcfeb_dist[MXKEYB-1+1:0]),     // Out  Distance from key to cfeb boundary for marking adjacent cfeb as hit
       //Enable CCLUT or not
       .ccLUT_enable       (ccLUT_enable),  // In
+      .run3_trig_df       (run3_trig_df), // output, enable run3 trigger format or not
+      .run3_daq_df        (run3_daq_df),  // output, enable run3 daq format or not
 
       // CFEB Ports: Hot Channel Mask
       .cfeb0_ly0_hcm (cfeb_ly0_hcm[0][MXDS-1:0]), // Out  1=enable DiStrip
@@ -5052,6 +5082,7 @@ wire [15:0] gemB_bxn_counter;
       .hmt_enable         (hmt_enable),        // out ME1a enable or not in HMT
       .hmt_me1a_enable    (hmt_me1a_enable),        // out ME1a enable or not in HMT
       .hmt_nhits_trig_vme (hmt_nhits_trig_vme[9:0]),        //In, nhit counter for  HMT
+      .hmt_trigger_vme    (hmt_trigger_vme[1:0]), // In HMT trigger results
 
       // Sequencer Ports: Latched CLCTs + Status
       .event_clear_vme   (event_clear_vme),         // Out  Event clear for vme diagnostic registers

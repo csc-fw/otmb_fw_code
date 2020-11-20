@@ -22,11 +22,12 @@
 //`define FPGAID               16'h6195 // FPGA Type 6195 XC6VLX195T
   `define FPGAID               16'h6240 // FPGA Type 6240 XC6VLX240T
 
-  `define SEMANTIC_VERSIONING  01'b1
+  //`define SEMANTIC_VERSIONING  01'b1  // replaced by run3_daq_df
 
-  `define VERSION_FORMAT       04'h1;   // 0=TMB standard, 1=OTMB Standard, 2=GEM in DAQ
-  `define VERSION_MAJOR        04'h0;
-  `define VERSION_MINOR        05'h0;
+   // version_format is control by gem_enable, ccLUT_enable
+  `define VERSION_FORMAT       04'h3   // 0=TMB standard, 1=OTMB Standard, 2=CCLUT, 3=GEM+CCLUT
+  `define VERSION_MAJOR        05'h0   // 5 bits = Major Version (major features which breaks compatibility, requires changes to other board firmware) 
+  `define VERSION_MINOR        06'h0 //6 bits = Minor version  (minor features, internal fixes, bug fixes, etc). 
 
   `define CCLUT                01'h1  // 1=turn on CCLUT
 

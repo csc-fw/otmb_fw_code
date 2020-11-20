@@ -179,6 +179,7 @@
 
 // Sequencer
   hmt_nhits_trig_xtmb,
+  hmt_trigger_xtmb,
   clct0_xtmb,
   clct1_xtmb,
   clctc_xtmb,
@@ -238,6 +239,7 @@
   clct_copad_noalct,
   alct_copad_noclct,
 
+  run3_trig_df, // input, flag of run3 data format upgrade
 // MPC Status
   mpc_frame_ff,
   mpc0_frame0_ff,
@@ -493,11 +495,12 @@
   parameter MXMPCDLY   = 4;  // MPC delay time bits
 
   //CCLUT
-  parameter MXPATC  = 12;                // Pattern Carry Bits
-  parameter MXOFFSB = 4;                 // Quarter-strip bits
-  parameter MXQLTB  = 9;                 // Fit quality bits
-  parameter MXBNDB  = 4;                 // Bend bits
-  parameter MXXKYB = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
+  parameter MXPATC   = 12;                // Pattern Carry Bits
+  parameter MXOFFSB  = 4;                 // Quarter-strip bits
+  parameter MXQLTB   = 9;                 // Fit quality bits
+  parameter MXBNDB   = 4;                 // Bend bits
+  parameter MXXKYB   = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
+  parameter MXCCLUTB = 10+4+9+12;  // New 35bits for CCLUT, new quality, bnd, xky, comparator code 
 //------------------------------------------------------------------------------------------------------------------
 //Ports
 //------------------------------------------------------------------------------------------------------------------
@@ -572,6 +575,7 @@
 
 // Sequencer
   input  [9:0]  hmt_nhits_trig_xtmb;
+  input  [1:0]  hmt_trigger_xtmb;
   input  [MXCLCT-1:0]  clct0_xtmb; // First  CLCT
   input  [MXCLCT-1:0]  clct1_xtmb; // Second CLCT
   input  [MXCLCTC-1:0] clctc_xtmb; // Common to CLCT0/1 to TMB
@@ -676,6 +680,7 @@
   input          bx0_vpf_test;    // Sets clct_bx0=lct0_vpf for bx0 alignment tests
   output         bx0_match;       // ALCT bx0 and CLCT bx0 match in time
   output         bx0_match2;
+
 
   input  [MXMPCDLY-1:0]  mpc_rx_delay;        // Wait for MPC accept
   input  [MXMPCDLY-1:0]  mpc_tx_delay;        // Delay LCT to MPC
@@ -855,6 +860,14 @@
 `ifdef DEBUG_MPC
   output          mpc_debug_mode;    // Prevents accidental compile with debug_mpc turned on
 `endif
+
+//------------------------------------------------------------------------------------------------------------------
+//  Run3 data format 
+//------------------------------------------------------------------------------------------------------------------
+  input run3_trig_df; // flag of run3 trigger data format
+  wire [2:0]  lct0_qlt_run3; // new LCT quality defition 
+  wire [2:0]  lct1_qlt_run3; 
+
 //------------------------------------------------------------------------------------------------------------------
 // Local
 //------------------------------------------------------------------------------------------------------------------
@@ -959,7 +972,7 @@
   wire [MXALCT-1:0] alct0_gem_pipe, alct0_gem_srl;
   wire [MXALCT-1:0] alct1_gem_pipe, alct1_gem_srl;
   wire [1:0]        alcte_gem_pipe, alcte_gem_srl, alcte_gem_tmb;
-  reg [3:0] alct_gem_srl_adr = 0;
+  reg  [3:0]        alct_gem_srl_adr = 0;
 
   wire [3:0] gem_alct_win_center = {1'b0, match_gem_alct_window[3:1]}; // namely window/2
   wire alct_delay_forgem = (alct_delay > gem_alct_win_center)? (alct_delay - gem_alct_win_center) : 0;//
@@ -981,12 +994,20 @@
   wire   alct1_gem_pipe_vpf = alct1_gem_pipe[0];
 
 //------------------------------------------------------------------------------------------------------------------
-// Push CLCT data into a 1bx to 16bx pipeline delay to wait for an alct match
+// Push CLCT data into a 1bx to 16bx pipeline delay to wait for an alct-clct match
 //------------------------------------------------------------------------------------------------------------------
   wire [MXCLCT-1:0]  clct0_pipe, clct0_srl; // First  CLCT
   wire [MXCLCT-1:0]  clct1_pipe, clct1_srl; // Second CLCT
   wire [MXCLCTC-1:0] clctc_pipe, clctc_srl; // Common to CLCT0/1 to TMB
   wire [MXCFEB-1:0]  clctf_pipe, clctf_srl; // Active cfeb list to TMB
+
+  wire [MXCCLUTB-1  : 0]  clct0_cclut_xtmb = {clct0_qlt_xtmb, clct0_bnd_xtmb, clct0_xky_xtmb, clct0_carry_xtmb};
+  wire [MXCCLUTB-1  : 0]  clct1_cclut_xtmb = {clct1_qlt_xtmb, clct1_bnd_xtmb, clct1_xky_xtmb, clct1_carry_xtmb};
+  wire [MXCCLUTB-1  : 0]  clct0_cclut_pipe, clct0_cclut_srl;
+  wire [MXCCLUTB-1  : 0]  clct1_cclut_pipe, clct1_cclut_srl;
+
+  wire [1:0] hmt_trigger_pipe,hmt_trigger_srl;
+
   wire [MXBADR-1:0]  wr_adr_xtmb_pipe, wr_adr_xtmb_srl; // Buffer write address after clct pipeline delay
   wire [3:0]         clct_srl_ptr;
 
@@ -996,6 +1017,12 @@
   srl16e_bbl #(MXCLCT ) uclct1 (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(clct1_xtmb),.q(clct1_srl));
   srl16e_bbl #(MXCLCTC) uclctc (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(clctc_xtmb),.q(clctc_srl));
   srl16e_bbl #(MXCFEB ) uclctf (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(clctf_xtmb),.q(clctf_srl));
+  //register shift for CCLUT 
+  srl16e_bbl #(MXCCLUTB ) uclctf (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(clct0_cclut_xtmb),.q(clct0_cclut_srl));
+  srl16e_bbl #(MXCCLUTB ) uclctf (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(clct1_cclut_xtmb),.q(clct1_cclut_srl));
+  srl16e_bbl #(2        ) uclctf (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(hmt_trigger_xtmb),.q(hmt_trigger_srl));
+
+
 
   srl16e_bbl #(MXBADR) utwadr   (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(wr_adr_xtmb  ),.q(wr_adr_xtmb_srl  ));
   srl16e_bbl #(1)      utwpush  (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(wr_push_xtmb ),.q(wr_push_xtmb_srl ));
@@ -1007,6 +1034,10 @@
   assign clct1_pipe = (clct_ptr_is_0) ? clct1_xtmb : clct1_srl;  // Second CLCT after clct pipe delay
   assign clctc_pipe = (clct_ptr_is_0) ? clctc_xtmb : clctc_srl;  // Common to CLCT0/1 after clct pipe delay
   assign clctf_pipe = (clct_ptr_is_0) ? clctf_xtmb : clctf_srl;  // Active cfeb list  after clct pipe delay
+
+  assign clct0_cclut_pipe   = (clct_ptr_is_0) ? clct0_cclut_xtmb : clct0_cclut_srl;
+  assign clct1_cclut_pipe   = (clct_ptr_is_0) ? clct1_cclut_xtmb : clct1_cclut_srl;
+  assign hmt_trigger_pipe   = (clct_ptr_is_0) ? hmt_trigger_xtmb : hmt_trigger_srl;
 
   assign wr_adr_xtmb_pipe   = (clct_ptr_is_0) ? wr_adr_xtmb   : wr_adr_xtmb_srl;  // Buffer write address after clct pipeline delay
   wire   wr_push_xtmb_pipe  = (clct_ptr_is_0) ? wr_push_xtmb  : wr_push_xtmb_srl;
@@ -1146,6 +1177,7 @@
   end
   endgenerate
 
+  // Tao, move below into a module 
   //wire [0:0] win_s0  [7:0];        // Tree encoder Finds best 4 of 16 window positions
   //wire [1:0] win_s1  [3:0];
 
@@ -1523,6 +1555,8 @@
   wire gemB_alct_last_win    = gemB_alct_last_vpf && !gemB_alct_last_tag;  // CLCT reached end of window
   wire gemB_alct_noalct      = gemB_alct_last_win && !alct_gem_pulse;    // No ALCT arrived in window, pushed mpc on last bx
   wire gemB_alct_used        = gemB_alct_match_sr[gem_alct_winclosing]; //gem was used, Tao
+
+
 // ALCT*CLCT match: alct arrived while there were 1 or more un-tagged gems in the window
 //Algo2016, no tag clct if clct_reuse is enabled
  // Tao, maybe later add a configuration for drop_used_gem ???
@@ -1540,11 +1574,12 @@
   assign gemB_alct_match_win_mux = (gemB_alct_noalct) ? gem_alct_winclosing    : gemB_alct_tag_win;    // if GEM only and no alct, disregard priority and take last window position // Pointer to SRL delayed GEM signals to align with ALCT signal after alct_delay_forgem
 
 
-  //coincident pads in timing
-  wire [3:0] gemAB_win_diff = (gemA_alct_match_win_mux > gemB_alct_match_win_mux) ? gemA_alct_match_win_mux -gemB_alct_match_win_mux : gemB_alct_match_win_mux - gemA_alct_match_win_mux;
-  wire [3:0] match_gemcopad_window = 4'd2;// configuration parameter !!!
-  //how about no ALCT case? should we just require both two gem in same BX ?
-  wire gemAB_copad_timing = (gemA_alct_match && gemB_alct_match && gemAB_win_diff <= match_gemcopad_window) || (gemA_alct_noalct && gemB_alct_noalct); 
+  // Copad is built later
+  ////coincident pads in timing
+  //wire [3:0] gemAB_win_diff = (gemA_alct_match_win_mux > gemB_alct_match_win_mux) ? gemA_alct_match_win_mux -gemB_alct_match_win_mux : gemB_alct_match_win_mux - gemA_alct_match_win_mux;
+  //wire [3:0] match_gemcopad_window = 4'd2;// configuration parameter !!!, GEM copad matching timing window when ALCT is presence
+  ////how about no ALCT case? should we just require both two gem in same BX ?
+  //wire gemAB_copad_timing = (gemA_alct_match && gemB_alct_match && gemAB_win_diff <= match_gemcopad_window) || (gemA_alct_noalct && gemB_alct_noalct); 
 
 
   // after GEM-ALCT match, delay GEM to expected ALCT position for GEM-CLCT match, 
@@ -1621,6 +1656,9 @@
   wire [3:0] gemB_final_adr   = gemB_final_delay - 4'b1;
   srl16e_bbl #(8) ugemApulse_gemclct (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemA_vpf),.q(gemA_forclct_srl));
   srl16e_bbl #(8) ugemBpulse_gemclct (.clock(clock),.ce(1'b1),.adr(gemB_final_adr),.d(gemB_vpf),.q(gemB_forclct_srl));
+  //delay GEM pads here:
+  //then check or build copad here:
+  //Question: the latency of building copad
   
   wire [7:0] gemA_forclct_pipe =  (gemA_final_delay == 0) ? gemA_vpf : gemA_forclct_srl;
   wire [7:0] gemB_forclct_pipe =  (gemB_final_delay == 0) ? gemB_vpf : gemB_forclct_srl;
@@ -1798,13 +1836,18 @@
   reg [MXCLCT-1:0]  clct0_real;
   reg [MXCLCT-1:0]  clct1_real;
   reg [MXCLCTC-1:0]  clctc_real;
+  reg [MXCCLUTB - 1   : 0] clct0_cclut_real; // new quality
+  reg [MXCCLUTB - 1   : 0] clct1_cclut_real; // new quality
 
   wire keep_clct = trig_pulse && (trig_keep || non_trig_keep);
 
   always @(posedge clock) begin
-  clct0_real <= clct0_pipe & {MXCLCT  {keep_clct}};
-  clct1_real <= clct1_pipe & {MXCLCT  {keep_clct}};
-  clctc_real <= clctc_pipe & {MXCLCTC {keep_clct}};
+    clct0_real <= clct0_pipe & {MXCLCT  {keep_clct}};
+    clct1_real <= clct1_pipe & {MXCLCT  {keep_clct}};
+    clctc_real <= clctc_pipe & {MXCLCTC {keep_clct}};
+    clct0_cclut_real   <= clct0_cclut_pipe & {MXCCLUTB {keep_clct}};
+    clct1_cclut_real   <= clct1_cclut_pipe & {MXCCLUTB {keep_clct}};
+    hmt_trigger_real   <= hmt_trigger_pipe;
   end
 
 // Latch pipelined ALCTs, aligned in time with CLCTs because CLCTs are delayed 1bx in the SRLs
@@ -1889,14 +1932,37 @@
   reg  [MXCLCTC-1:0] clctc;
   wire [MXCLCTC-1:0] clctc_dummy;
 
+  reg  [MXCCLUTB - 1   : 0] clct0_cclut; // new quality
+  reg  [MXCCLUTB - 1   : 0] clct1_cclut; // new quality
+  wire [MXCCLUTB - 1   : 0] clct_cclut_dummy;
+
   assign alct_dummy  = clct_bxn_insert[1:0] << 11;    // Insert clct bxn for clct-only events
   assign clct_dummy  = 0;                  // Blank  clct for alct-only events
   assign clctc_dummy = 0;                  // Blank  clct common for alct-only events
+  assign clct_cclut_dummy = 0;
 
   always @* begin
-  if      (tmb_no_clct  ) begin clct0 <= clct_dummy; clct1 <= clct_dummy; clctc <= clctc_dummy; end // clct0 and clct1 do not exist, use dummy clct  
-  else if (tmb_dupe_clct) begin clct0 <= clct0_real; clct1 <= clct0_real; clctc <= clctc_real;  end // clct0 exists, but clct1 does not exist, copy clct0 into clct1
-  else                    begin clct0 <= clct0_real; clct1 <= clct1_real; clctc <= clctc_real;  end // clct0 and clct1 exist, so use them
+  if      (tmb_no_clct  ) begin 
+      clct0 <= clct_dummy; 
+      clct1 <= clct_dummy; 
+      clctc <= clctc_dummy; 
+      clct0_cclut <= clct_cclut_dummy; 
+      clct1_cclut <= clct_cclut_dummy;
+  end // clct0 and clct1 do not exist, use dummy clct  
+  else if (tmb_dupe_clct) begin 
+      clct0 <= clct0_real; 
+      clct1 <= clct0_real; 
+      clctc <= clctc_real;  
+      clct0_cclut <= clct0_cclut_real; 
+      clct1_cclut <= clct0_cclut_real;
+  end // clct0 exists, but clct1 does not exist, copy clct0 into clct1
+  else                    begin 
+      clct0 <= clct0_real; 
+      clct1 <= clct1_real; 
+      clctc <= clctc_real;  
+      clct0_cclut <= clct0_cclut_real; 
+      clct1_cclut <= clct1_cclut_real;
+  end // clct0 and clct1 exist, so use them
   end
 
   always @* begin
@@ -1939,6 +2005,20 @@
   wire         clct1_bend  = clct1[4];     // Bend direction, same as pid lsb
   wire  [4:0]  clct1_key   = clct1[12:8];  // 1/2-strip ID number
   wire  [2:0]  clct1_cfeb  = clct1[15:13]; // Key CFEB ID
+
+  // clct0_cclut_xtmb = {clct0_qlt_xtmb, clct0_bnd_xtmb, clct0_xky_xtmb, clct0_carry_xtmb};
+  wire  [MXQLTB - 1   : 0] clct0_qlt; // new quality
+  wire  [MXBNDB - 1   : 0] clct0_bnd; // new bending 
+  wire  [MXXKYB-1     : 0] clct0_xky; // new position with 1/8 precision
+  wire  [MXPATC-1     : 0] clct0_carry; // CC code 
+  wire  [MXQLTB - 1   : 0] clct1_qlt; // new quality
+  wire  [MXBNDB - 1   : 0] clct1_bnd; // new bending 
+  wire  [MXXKYB-1     : 0] clct1_xky; // new position with 1/8 precision
+  wire  [MXPATC-1     : 0] clct1_carry; // CC code 
+
+  assign {clct0_qlt, clct0_bnd, clct0_xky, clct0_carry} = clct0_cclut;
+  assign {clct1_qlt, clct1_bnd, clct1_xky, clct1_carry} = clct1_cclut;
+  
 
 //------------------------------------------------------------------------------------------------------------------
 // LCT Quality
@@ -2036,29 +2116,58 @@
 //------------------------------------------------------------------------------------------------------------------
 // Format MPC output words
 //------------------------------------------------------------------------------------------------------------------
-  assign  mpc0_frame0[6:0]   = alct0_key[6:0];
-  assign  mpc0_frame0[10:7]  = clct0_pat[3:0];
-  assign  mpc0_frame0[14:11] = lct0_quality[3:0];
-  assign  mpc0_frame0[15]    = lct0_vpf;
 
-  assign  mpc0_frame1[7:0]   = {clct0_cfeb[2:0],clct0_key[4:0]};
-  assign  mpc0_frame1[8]     = clct0_bend;
-  assign  mpc0_frame1[9]     = clct_sync_err & tmb_sync_err_en[0];
-  assign  mpc0_frame1[10]    = alct0_bxn[0];
-  assign  mpc0_frame1[11]    = clct_bx0;  // bx0 gets replaced after mpc_tx_delay, keep here to mollify xst
-  assign  mpc0_frame1[15:12] = csc_id[3:0];
 
-  assign  mpc1_frame0[6:0]   = alct1_key[6:0];
-  assign  mpc1_frame0[10:7]  = clct1_pat[3:0];
-  assign  mpc1_frame0[14:11] = lct1_quality[3:0];
-  assign  mpc1_frame0[15]    = lct1_vpf;
+  if (run3_trig_df) begin
+      assign  mpc0_frame0[6:0]   = alct0_key[6:0];
+      assign  mpc0_frame0[10:7]  = clct0_bnd[3:0]; //new bending from CCLUT
+      assign  mpc0_frame0[13:11] = lct0_qlt_run3[2:0];
+      assign  mpc0_frame0[15:14] = clct0_xky[1:0]; // CLCT0 1/4 strip bit and 1/8 strip bit
 
-  assign  mpc1_frame1[7:0]   = {clct1_cfeb[2:0],clct1_key[4:0]};
-  assign  mpc1_frame1[8]     = clct1_bend;
-  assign  mpc1_frame1[9]     = clct_sync_err & tmb_sync_err_en[1];
-  assign  mpc1_frame1[10]    = alct1_bxn[0];
-  assign  mpc1_frame1[11]    = alct_bx0;  // bx0 gets replaced after mpc_tx_delay, keep here to mollify xst
-  assign  mpc1_frame1[15:12] = csc_id[3:0];
+      assign  mpc0_frame1[7:0]   = clct0_xky[9:2];
+      assign  mpc0_frame1[8]     = clct0_bend; // left or right from CCLUT
+      assign  mpc0_frame1[9]     = hmt_trigger_real[0];
+      assign  mpc0_frame1[10]    = alct0_bxn[0];
+      assign  mpc0_frame1[11]    = clct_bx0;  // bx0 gets replaced after mpc_tx_delay, keep here to mollify xst
+      assign  mpc0_frame1[15:12] = csc_id[3:0];
+
+      assign  mpc1_frame0[6:0]   = alct1_key[6:0];
+      assign  mpc1_frame0[10:7]  = clct1_bnd[3:0]; // new bending from CCLUT
+      assign  mpc1_frame0[13:11] = lct1_qlt_run3[2:0];
+      assign  mpc1_frame0[15:14] = clct1_xky[1:0];
+
+      assign  mpc1_frame1[7:0]   = clct1_xky[9:2];
+      assign  mpc1_frame1[8]     = clct1_bend;
+      assign  mpc1_frame1[9]     = hmt_trigger_real[1];
+      assign  mpc1_frame1[10]    = alct1_bxn[0];
+      assign  mpc1_frame1[11]    = alct_bx0;  // bx0 gets replaced after mpc_tx_delay, keep here to mollify xst
+      assign  mpc1_frame1[15:12] = csc_id[3:0];
+  end
+  else begin
+      assign  mpc0_frame0[6:0]   = alct0_key[6:0];
+      assign  mpc0_frame0[10:7]  = clct0_pat[3:0];
+      assign  mpc0_frame0[14:11] = lct0_quality[3:0];
+      assign  mpc0_frame0[15]    = lct0_vpf;
+
+      assign  mpc0_frame1[7:0]   = {clct0_cfeb[2:0],clct0_key[4:0]};
+      assign  mpc0_frame1[8]     = clct0_bend;
+      assign  mpc0_frame1[9]     = clct_sync_err & tmb_sync_err_en[0];
+      assign  mpc0_frame1[10]    = alct0_bxn[0];
+      assign  mpc0_frame1[11]    = clct_bx0;  // bx0 gets replaced after mpc_tx_delay, keep here to mollify xst
+      assign  mpc0_frame1[15:12] = csc_id[3:0];
+
+      assign  mpc1_frame0[6:0]   = alct1_key[6:0];
+      assign  mpc1_frame0[10:7]  = clct1_pat[3:0];
+      assign  mpc1_frame0[14:11] = lct1_quality[3:0];
+      assign  mpc1_frame0[15]    = lct1_vpf;
+
+      assign  mpc1_frame1[7:0]   = {clct1_cfeb[2:0],clct1_key[4:0]};
+      assign  mpc1_frame1[8]     = clct1_bend;
+      assign  mpc1_frame1[9]     = clct_sync_err & tmb_sync_err_en[1];
+      assign  mpc1_frame1[10]    = alct1_bxn[0];
+      assign  mpc1_frame1[11]    = alct_bx0;  // bx0 gets replaced after mpc_tx_delay, keep here to mollify xst
+      assign  mpc1_frame1[15:12] = csc_id[3:0];
+  end 
 
 // Construct MPC output words for MPC, blanked if no muons present, except bx0 [inserted after mpc_tx_delay]
   wire [MXFRAME-1:0]  mpc0_frame0_pulse;
