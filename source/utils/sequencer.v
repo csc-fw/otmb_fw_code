@@ -1816,7 +1816,7 @@
   input  alct_copad_noclct;
   input  clct_copad_noalct;
 
-  input  run3_daq_df,
+  input  run3_daq_df;
 // MPC Status
   input          mpc_frame_ff;    // MPC frame latch strobe
   input  [MXFRAME-1:0]  mpc0_frame0_ff;    // MPC best muon 1st frame
