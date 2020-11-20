@@ -4824,7 +4824,7 @@
   assign  header09_[18:15]  =  0;                       // DDU+DMB control flags
 
   assign  header10_run3_[11: 0]   =  r_clct0_carry_xtmb[11:0]; 
-  assign  header10_run3_[14:12]   =  r_clct0_bnd_xtmb[2:0];
+  assign  header10_run3_[14:12]   =  r_clct0_xky_xtmb[1:0];
   assign  header10_[14:0]   =  run3_daq_df ? header10_run3_[14:0] : r_pretrig_counter[29:15]; // CLCT pre-trigger counter
   assign  header10_[18:15]  =  0;                        // DDU+DMB control flags
 
@@ -4837,7 +4837,7 @@
   assign  header13_[18:15]  =  0;                     // DDU+DMB control flags
 
   assign  header14_run3_[11: 0]   =  r_clct1_carry_xtmb[11:0]; 
-  assign  header14_run3_[14:12]   =  r_clct1_bnd_xtmb[2:0];
+  assign  header14_run3_[14:12]   =  r_clct1_xky_xtmb[1:0];
   assign  header14_[14:0]   =  run3_daq_df ? header14_run3_[14:0] : r_trig_counter[29:15]; // TMB trigger counter
   assign  header14_[18:15]  =  0;                     // DDU+DMB control flags
 
