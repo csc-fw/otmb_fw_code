@@ -1277,9 +1277,9 @@
   $display ("vme.MONTHDAY         = %H",MONTHDAY   );
   $display ("vme.YEAR             = %H",YEAR       );
   $display ("vme.FPGAID           = %H",FPGAID     );
-  $display ("vme.VERSION_FORMAT   = %H",VERSION_FORMAT);
-  $display ("vme.VERSION_MAJOR    = %H",VERSION_MAJOR);
-  $display ("vme.VERSION_MINOR    = %H",VERSION_MINOR);
+  //$display ("vme.VERSION_FORMAT   = %H",VERSION_FORMAT);
+  //$display ("vme.VERSION_MAJOR    = %H",VERSION_MAJOR);
+  //$display ("vme.VERSION_MINOR    = %H",VERSION_MINOR);
   $display ("vme.ISE_VERSION      = %H",ISE_VERSION);
   $display ("vme.AUTO_VME         = %H",AUTO_VME   );
   $display ("vme.AUTO_JTAG        = %H",AUTO_JTAG  );
