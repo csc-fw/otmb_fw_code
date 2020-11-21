@@ -500,9 +500,9 @@
 
   `ifdef CCLUT          initial $display ("CCLUT         %H", `CCLUT        );  `endif
 
-  `ifdef VERSION_FORMAT initial $display ("VERSION_FORMAT %H", `VERSION_FORMAT);  `endif
   `ifdef VERSION_MAJOR  initial $display ("VERSION_MAJOR  %H", `VERSION_MAJOR );  `endif
   `ifdef VERSION_MINOR  initial $display ("VERSION_MINOR  %H", `VERSION_MINOR );  `endif
+  `ifdef VERSION_FORMAT initial $display ("VERSION_FORMAT %H", `VERSION_FORMAT);  `endif
 //-------------------------------------------------------------------------------------------------------------------
 // Clock DCM Instantiation
 //-------------------------------------------------------------------------------------------------------------------

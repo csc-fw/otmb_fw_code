@@ -25,9 +25,9 @@
   //`define SEMANTIC_VERSIONING  01'b1  // replaced by run3_daq_df
 
    // version_format is control by gem_enable, ccLUT_enable
-  `define VERSION_FORMAT       04'h3   // 0=TMB standard, 1=OTMB Standard, 2=CCLUT, 3=GEM+CCLUT
-  `define VERSION_MAJOR        05'h0   // 5 bits = Major Version (major features which breaks compatibility, requires changes to other board firmware) 
-  `define VERSION_MINOR        06'h0 //6 bits = Minor version  (minor features, internal fixes, bug fixes, etc). 
+  `define VERSION_FORMAT       04'h3   // [14:11]; 0=TMB standard, 1=OTMB Standard, 2=CCLUT, 3=GEM+CCLUT
+  `define VERSION_MAJOR        05'h0   // [10:06];5 bits = Major Version (major features which breaks compatibility, requires changes to other board firmware) 
+  `define VERSION_MINOR        06'h0   // [05:00];6 bits = Minor version  (minor features, internal fixes, bug fixes, etc). 
 
   `define CCLUT                01'h1  // 1=turn on CCLUT
 
