@@ -4576,6 +4576,10 @@ wire [15:0] gemB_bxn_counter;
    defparam uvme.CFEB_MUONIC      = `CFEB_MUONIC;      // Floats CFEB boards in clock-space with independent time-of-flight delay
    defparam uvme.CCB_BX0_EMULATOR = `CCB_BX0_EMULATOR; // Turns on bx0 emulator at power up, must be 0 for all CERN versions
 
+   defparam uvme.VERSION_FORMAT   = `VERSION_FORMAT;
+   defparam uvme.VERSION_MAJOR    = `VERSION_MAJOR;
+   defparam uvme.VERSION_MINOR    = `VERSION_MINOR;
+
    wire        raw_mez_busy;
 
    vme uvme

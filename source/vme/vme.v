@@ -1269,7 +1269,7 @@
   parameter CFEB_MUONIC         = 1'b1;     // Floats CFEB boards in clock-space with independent time-of-flight delay
   parameter CCB_BX0_EMULATOR    = 1'b0;     // Turns on bx0 emulator at power up, must be 0 for all CERN versions
 
-  `include "../otmb_virtex6_fw_version.v"
+  //`include "../otmb_virtex6_fw_version.v"
 
   initial begin
   $display ("vme.FIRMWARE_TYPE    = %H",FIRMWARE_TYPE);
@@ -1277,9 +1277,6 @@
   $display ("vme.MONTHDAY         = %H",MONTHDAY   );
   $display ("vme.YEAR             = %H",YEAR       );
   $display ("vme.FPGAID           = %H",FPGAID     );
-  //$display ("vme.VERSION_FORMAT   = %H",VERSION_FORMAT);
-  //$display ("vme.VERSION_MAJOR    = %H",VERSION_MAJOR);
-  //$display ("vme.VERSION_MINOR    = %H",VERSION_MINOR);
   $display ("vme.ISE_VERSION      = %H",ISE_VERSION);
   $display ("vme.AUTO_VME         = %H",AUTO_VME   );
   $display ("vme.AUTO_JTAG        = %H",AUTO_JTAG  );
@@ -1287,10 +1284,10 @@
   $display ("vme.ALCT_MUONIC      = %H",ALCT_MUONIC);
   $display ("vme.CFEB_MUONIC      = %H",CFEB_MUONIC);
   $display ("vme.CCB_BX0_EMULATOR = %H",CCB_BX0_EMULATOR);
+  $display ("vme.VERSION_FORMAT   = %H",VERSION_FORMAT);
+  $display ("vme.VERSION_MAJOR    = %H",VERSION_MAJOR);
+  $display ("vme.VERSION_MINOR    = %H",VERSION_MINOR);
   //$display ("SEMANTIC_VERSIONING  = %H",SEMANTIC_VERSIONING);
-  $display ("VERSION_FORMAT       = %H",VERSION_FORMAT);
-  $display ("VERSION_MAJOR        = %H",VERSION_MAJOR);
-  $display ("VERSION_MINOR        = %H",VERSION_MINOR);
   end
 
 //------------------------------------------------------------------------------------------------------------------
