@@ -517,6 +517,10 @@
   hmt_me1a_enable, 
   hmt_nhits_trig_vme,
   hmt_trigger_vme,
+//output
+  hmt_thresh1,
+  hmt_thresh2,
+  hmt_thresh3,
 
 // Sequencer Ports: Latched CLCTs + Status
   event_clear_vme,
@@ -1641,6 +1645,9 @@
 
   parameter ADR_RUN3_FORMAT_CTRL      = 10'h1AA; // control for CCLUT, data format
   parameter ADR_HMT_CTRL              = 10'h1AC; // control for HMT
+  parameter ADR_HMT_THRESH1           = 10'h1AE; // threshold1 for HMT
+  parameter ADR_HMT_THRESH2           = 10'h1B0; // threshold1 for HMT
+  parameter ADR_HMT_THRESH3           = 10'h1B2; // threshold1 for HMT
 
   // GEM Registers, start from 10'h300 = 768
 
@@ -2215,6 +2222,10 @@
   output hmt_me1a_enable; 
   input [9:0] hmt_nhits_trig_vme;
   input [1:0] hmt_trigger_vme;
+
+  output [9:0] hmt_thresh1;
+  output [9:0] hmt_thresh2;
+  output [9:0] hmt_thresh3;
 
 // Sequencer Ports: Latched CLCTs
   output                event_clear_vme;   // Event clear for aff,clct,mpc vme diagnostic registers
@@ -3469,6 +3480,13 @@
   reg  [15:0] hmt_ctrl_wr;
   wire [15:0] hmt_ctrl_rd;
 
+  reg  [15:0] hmt_thresh1_wr;
+  wire [15:0] hmt_thresh1_rd;
+  reg  [15:0] hmt_thresh2_wr;
+  wire [15:0] hmt_thresh2_rd;
+  reg  [15:0] hmt_thresh3_wr;
+  wire [15:0] hmt_thresh3_rd;
+
   wire [15:0] gem_debug_fifo_data_rd; // read only
 
   reg  [15:0] gem_debug_fifo_ctrl_wr;
@@ -3666,6 +3684,9 @@
 
   wire      wr_run3_format_ctrl;
   wire      wr_hmt_ctrl;
+  wire      wr_hmt_thresh1;
+  wire      wr_hmt_thresh2;
+  wire      wr_hmt_thresh3;
 
   wire      wr_gem_debug_fifo_ctrl;
   wire      wr_gem_inj_ctrl;
@@ -4310,6 +4331,9 @@
 
   ADR_RUN3_FORMAT_CTRL:      data_out <= run3_format_ctrl_rd;
   ADR_HMT_CTRL:              data_out <= hmt_ctrl_rd;
+  ADR_HMT_THRESH1:           data_out <= hmt_thresh1_rd;
+  ADR_HMT_THRESH2:           data_out <= hmt_thresh2_rd;
+  ADR_HMT_THRESH3:           data_out <= hmt_thresh3_rd;
 
   ADR_GEM_DEBUG_FIFO_CTRL:   data_out <= gem_debug_fifo_ctrl_rd;
   ADR_GEM_DEBUG_FIFO_DATA:   data_out <= gem_debug_fifo_data_rd;
@@ -4510,8 +4534,11 @@
   assign wr_virtex6_snap12_qpll   =  (reg_adr==ADR_V6_SNAP12_QPLL         && clk_en);
   assign wr_virtex6_gtx_rx_all    =  (reg_adr==ADR_V6_GTX_RX_ALL          && clk_en);
 
-  assign wr_run3_format_ctrl      =  (reg_adr==ADR_RUN3_FORMAT_CTRL      && clk_en);
+  assign wr_run3_format_ctrl      =  (reg_adr==ADR_RUN3_FORMAT_CTRL       && clk_en);
   assign wr_hmt_ctrl              =  (reg_adr==ADR_HMT_CTRL               && clk_en);
+  assign wr_hmt_thresh1           =  (reg_adr==ADR_HMT_THRESH1            && clk_en);
+  assign wr_hmt_thresh2           =  (reg_adr==ADR_HMT_THRESH2            && clk_en);
+  assign wr_hmt_thresh3           =  (reg_adr==ADR_HMT_THRESH3            && clk_en);
 
   assign wr_gem_gtx_rx[0]         =  (reg_adr==ADR_GEM_GTX_RX0            && clk_en);
   assign wr_gem_gtx_rx[1]         =  (reg_adr==ADR_GEM_GTX_RX1            && clk_en);
@@ -8651,6 +8678,42 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign hmt_ctrl_rd[13:12]= hmt_trigger_vme[1:0];  //reserved for HMT results 
 
 //------------------------------------------------------------------------------------------------------------------
+// ADR_HMT_THRESH1 = 0x1AE  HMT thresh
+// ADR_HMT_THRESH2 = 0x1B0  HMT thresh
+// ADR_HMT_THRESH3 = 0x1B2  HMT thresh
+//------------------------------------------------------------------------------------------------------------------
+
+  initial begin
+    hmt_thresh1_wr[9:0] = 10'd90; // RW, enable the HMT thresh1
+    hmt_thresh2_wr[9:0] = 10'd95; // RW, enable the HMT thresh1
+    hmt_thresh3_wr[9:0] = 10'd100; // RW, enable the HMT thresh1
+    hmt_thresh1_wr[10]  = 1'b0; // pass threshold or not 
+    hmt_thresh2_wr[10]  = 1'b0; // pass threshold or not 
+    hmt_thresh3_wr[10]  = 1'b0; // pass threshold or not 
+    hmt_thres1_wr[15:11] = 5'b0; // not used
+    hmt_thres2_wr[15:11] = 5'b0; // not used
+    hmt_thres3_wr[15:11] = 5'b0; // not used
+  end 
+
+  assign hmt_thresh1[9:0]  = hmt_thresh1_wr[9:0];
+  assign hmt_thresh2[9:0]  = hmt_thresh2_wr[9:0];
+  assign hmt_thresh3[9:0]  = hmt_thresh3_wr[9:0];
+
+  assign hmt_thresh1_rd[9:0] =  hmt_thresh1_wr[9:0];
+  assign hmt_thresh2_rd[9:0] =  hmt_thresh2_wr[9:0];
+  assign hmt_thresh3_rd[9:0] =  hmt_thresh3_wr[9:0];
+  assign hmt_thresh1_rd[10]  = (hmt_nhits_trig_vme > hmt_thresh1);
+  assign hmt_thresh2_rd[10]  = (hmt_nhits_trig_vme > hmt_thresh2);
+  assign hmt_thresh3_rd[10]  = (hmt_nhits_trig_vme > hmt_thresh3);
+  assign hmt_thresh1_rd[15:11] = 5'b0;
+  assign hmt_thresh2_rd[15:11] = 5'b0;
+  assign hmt_thresh3_rd[15:11] = 5'b0;
+
+
+
+
+
+//------------------------------------------------------------------------------------------------------------------
 // GEM_DEBUG_FIFO_CTRL = 0x30C  GEM Raw Hits Readout RAM Simple Controller
 //------------------------------------------------------------------------------------------------------------------
 // Power up
@@ -9119,6 +9182,9 @@ always @(posedge clock_vme) begin
   if    (wr_virtex6_extend)        virtex6_extend_wr       <= d[15:0];
   if    (wr_run3_format_ctrl)      run3_format_ctrl_wr     <= d[15:0];
   if    (wr_hmt_ctrl)              hmt_ctrl_wr             <= d[15:0];
+  if    (wr_hmt_thresh1)           hmt_thresh1_wr          <= d[15:0];
+  if    (wr_hmt_thresh2)           hmt_thresh2_wr          <= d[15:0];
+  if    (wr_hmt_thresh3)           hmt_thresh3_wr          <= d[15:0];
   if    (wr_gem_debug_fifo_ctrl)   gem_debug_fifo_ctrl_wr  <= d[15:0];
   if    (wr_gem_inj_ctrl)          gem_inj_ctrl_wr         <= d[15:0];
   if    (wr_gem_inj_data)          gem_inj_data_wr         <= d[15:0];

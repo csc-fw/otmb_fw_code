@@ -1393,7 +1393,7 @@ module pattern_finder_ccLUT (
     end
     else begin          // else assert final 1st clct
       hs_key_1st <= hs_key_1st_dly;
-      hs_pid_1st <= hs_pat_1st_dly[MXPIDB - 1: 0];
+      hs_pid_1st <= hs_pat_1st_dly[MXPIDB - 1: 0]-4'd6; //Tao, change pid range 10-6 to 4-0  
       hs_hit_1st <= hs_pat_1st_dly[MXPATB - 1: MXPIDB];
       hs_qlt_1st <= hs_qlt_1st_dly;
       hs_bnd_1st <= hs_bnd_1st_dly;
@@ -1819,7 +1819,7 @@ module pattern_finder_ccLUT (
       hs_bsy_2nd <= hs_bsy_s5;
     end
     else begin         // else assert final 2nd clct
-      hs_pid_2nd <= hs_pat_s5[MXPIDB - 1: 0];
+      hs_pid_2nd <= hs_pat_s5[MXPIDB - 1: 0]-4'd6; //Tao, change pid range 10-6 to 4-0
       hs_hit_2nd <= hs_pat_s5[MXPATB - 1: MXPIDB];
       hs_key_2nd <= hs_key_s5;
       hs_bsy_2nd <= hs_bsy_s5;

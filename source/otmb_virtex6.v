@@ -2339,11 +2339,11 @@ end
   wire  hmt_enable;
   wire  hmt_me1a_enable;
   wire [9:0] hmt_nhits_trig;
-  //fake threshold
-  wire [9:0]   hmt_thresh1, hmt_thresh2, hmt_thresh3;
-  assign hmt_thresh1 = 10'd40;
-  assign hmt_thresh2 = 10'd60;
-  assign hmt_thresh3 = 10'd80;
+  wire [1:0] hmt_trigger; // HMT trigger results 
+  wire [9:0] hmt_thresh1, hmt_thresh2, hmt_thresh3;
+  //assign hmt_thresh1 = 10'd40;
+  //assign hmt_thresh2 = 10'd60;
+  //assign hmt_thresh3 = 10'd80;
   assign hmt_trigger[0] = (hmt_nhits_trig >= hmt_thresh1) || (hmt_nhits_trig >= hmt_thresh3);
   assign hmt_trigger[1] = (hmt_nhits_trig >= hmt_thresh2) || (hmt_nhits_trig >= hmt_thresh3);
 
@@ -2669,7 +2669,6 @@ end
    wire [7:0]             cfeb_rawhits;
    
    wire [9:0]             hmt_nhits_trig_xtmb;
-   wire [1:0]             hmt_trigger;
    wire [1:0]             hmt_trigger_xtmb;
    wire [1:0]             hmt_trigger_vme;
 
@@ -3128,7 +3127,7 @@ end
   .sequencer_state (sequencer_state[11:0]), // Out  Sequencer state for vme
 
   .hmt_nhits_trig_vme (hmt_nhits_trig_vme[9:0]),// Out HMT nhits for trigger
-  .hmt_trigger_vme    (hmt_trigger_vme[1:0]), // In HMT trigger results
+  .hmt_trigger_vme    (hmt_trigger_vme[1:0]), // Out HMT trigger results
 
   .event_clear_vme (event_clear_vme),         // In  Event clear for aff,clct,mpc vme diagnostic registers
   .clct0_vme       (clct0_vme[MXCLCT-1:0]),   // Out  First  CLCT
@@ -5092,6 +5091,9 @@ wire [15:0] gemB_bxn_counter;
       .hmt_me1a_enable    (hmt_me1a_enable),        // out ME1a enable or not in HMT
       .hmt_nhits_trig_vme (hmt_nhits_trig_vme[9:0]),        //In, nhit counter for  HMT
       .hmt_trigger_vme    (hmt_trigger_vme[1:0]), // In HMT trigger results
+      .hmt_thresh1        (hmt_thresh1[9:0]), // out, loose HMT thresh
+      .hmt_thresh2        (hmt_thresh2[9:0]), // out, loose HMT thresh
+      .hmt_thresh3        (hmt_thresh3[9:0]), // out, loose HMT thresh
 
       // Sequencer Ports: Latched CLCTs + Status
       .event_clear_vme   (event_clear_vme),         // Out  Event clear for vme diagnostic registers
