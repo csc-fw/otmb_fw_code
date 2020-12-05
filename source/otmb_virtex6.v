@@ -1334,6 +1334,13 @@
 
   wire  hmt_enable;
   wire [9:0] hmt_nhits_trig;
+  wire [1:0] hmt_trigger;
+  wire [9:0] hmt_thresh1, hmt_thresh2, hmt_thresh3;
+  //assign hmt_thresh1 = 10'd40;
+  //assign hmt_thresh2 = 10'd60;
+  //assign hmt_thresh3 = 10'd80;
+  assign hmt_trigger[0] = (hmt_nhits_trig >= hmt_thresh1) || (hmt_nhits_trig >= hmt_thresh3);
+  assign hmt_trigger[1] = (hmt_nhits_trig >= hmt_thresh2) || (hmt_nhits_trig >= hmt_thresh3);
 
   wire  [2:0] lyr_thresh_pretrig;
   wire  [2:0] hit_thresh_pretrig;
@@ -1477,7 +1484,7 @@
   .cfeb_active (cfeb_active[MXCFEB-1:0]), // Out  CFEBs marked active for DMB readout
 
 //HMT, 2020
-  .hmt_nhits_trig      (hmt_nhits_trig[9:0]),
+  .hmt_nhits_trig      (hmt_nhits_trig[9:0]), // Out  Nhits for HMT
 
   .cfeb_layer_trig  (cfeb_layer_trig),              // Out  Layer pretrigger
   .cfeb_layer_or    (cfeb_layer_or[MXLY-1:0]),      // Out  OR of hstrips on each layer
@@ -1626,6 +1633,7 @@
   wire  [7:0]      cfeb_rawhits;
 
   wire [9:0]             hmt_nhits_trig_xtmb;
+  wire [1:0]             hmt_trigger_xtmb; // trigger results
   wire  [MXCLCT-1:0]  clct0_xtmb;
   wire  [MXCLCT-1:0]  clct1_xtmb;
   wire  [MXCLCTC-1:0]  clctc_xtmb;        // Common to CLCT0/1 to TMB
@@ -1689,6 +1697,7 @@
   wire [7:0] l1a_preClct_dly;
   
   wire [9:0]             hmt_nhits_trig_vme;
+  wire [1:0]             hmt_trigger_vme;
   wire  [MXCLCT-1:0]  clct0_vme;
   wire  [MXCLCT-1:0]  clct1_vme;
   wire  [MXCLCTC-1:0]  clctc_vme;
@@ -1914,6 +1923,7 @@
 
   //HMT results 
   .hmt_nhits_trig      (hmt_nhits_trig[9:0]), //In hit counter from pattern finding  module
+  .hmt_trigger         (hmt_trigger[1:0]), //In hit counter from pattern finding  module
 
 // Sequencer Pattern Finder CLCT results
   .hs_hit_1st (hs_hit_1st[MXHITB-1:0]),  // In  1st CLCT pattern hits
@@ -2023,6 +2033,7 @@
   .sequencer_state  (sequencer_state[11:0]),    // Out  Sequencer state for vme
 
   .hmt_nhits_trig_vme (hmt_nhits_trig_vme[9:0]),// Out HMT nhits for trigger
+  .hmt_trigger_vme    (hmt_trigger_vme[1:0]), //In hit counter from pattern finding  module
   .event_clear_vme  (event_clear_vme),      // In  Event clear for aff,clct,mpc vme diagnostic registers
   .clct0_vme    (clct0_vme[MXCLCT-1:0]),    // Out  First  CLCT
   .clct1_vme    (clct1_vme[MXCLCT-1:0]),    // Out  Second CLCT
@@ -2171,6 +2182,7 @@
 
 // Sequencer TMB LCT Match results
   .hmt_nhits_trig_xtmb (hmt_nhits_trig_xtmb[9:0]),// Out HMT nhits for trigger
+  .hmt_trigger_xtmb    (hmt_trigger_xtmb[9:0]),// Out HMT nhits for trigger
   .clct0_xtmb (clct0_xtmb[MXCLCT-1:0]),  // Out  First  CLCT
   .clct1_xtmb (clct1_xtmb[MXCLCT-1:0]),  // Out  Second CLCT
   .clctc_xtmb (clctc_xtmb[MXCLCTC-1:0]), // Out  Common to CLCT0/1 to TMB
@@ -2796,6 +2808,7 @@
 
 // Sequencer
   .hmt_nhits_trig_xtmb (hmt_nhits_trig_xtmb[9:0]),// In HMT nhits for trigger
+  .hmt_trigger_xtmb    (hmt_trigger_xtmb[1:0]),// In HMT nhits for trigger
   .clct0_xtmb (clct0_xtmb[MXCLCT-1:0]),  // In  First  CLCT
   .clct1_xtmb (clct1_xtmb[MXCLCT-1:0]),  // In  Second CLCT
   .clctc_xtmb (clctc_xtmb[MXCLCTC-1:0]), // In  Common to CLCT0/1 to TMB
@@ -3687,6 +3700,10 @@
 
       .hmt_enable         (hmt_enable),        // out ME1a enable or not in HMT
       .hmt_nhits_trig_vme (hmt_nhits_trig_vme[9:0]),        //In, nhit counter for  HMT
+      .hmt_trigger_vme    (hmt_trigger_vme[1:0]),        //In, nhit counter for  HMT
+      .hmt_thresh1        (hmt_thresh1[9:0]),    // Out  loose HMT thresh
+      .hmt_thresh2        (hmt_thresh2[9:0]),    // Out  median HMT thresh
+      .hmt_thresh3        (hmt_thresh3[9:0]),    // Out  tight HMT thresh
 
       // Sequencer Ports: Latched CLCTs + Status
       .event_clear_vme    (event_clear_vme),          // Out  Event clear for vme diagnostic registers

@@ -147,6 +147,7 @@
 
 // Sequencer
   hmt_nhits_trig_xtmb,
+  hmt_trigger_xtmb,
   clct0_xtmb,
   clct1_xtmb,
   clctc_xtmb,
@@ -476,6 +477,7 @@
 
 // Sequencer
   input [9:0]  hmt_nhits_trig_xtmb;
+  input [1:0]  hmt_trigger_xtmb;
   input [MXCLCT-1:0]  clct0_xtmb; // First  CLCT
   input [MXCLCT-1:0]  clct1_xtmb; // Second CLCT
   input [MXCLCTC-1:0] clctc_xtmb; // Common to CLCT0/1 to TMB

@@ -517,6 +517,11 @@
   //HMT part
   hmt_enable,
   hmt_nhits_trig_vme,
+  hmt_trigger_vme,
+//output
+  hmt_thresh1,
+  hmt_thresh2,
+  hmt_thresh3,
 
 // Sequencer Ports: Latched CLCTs + Status
   event_clear_vme,
@@ -1347,6 +1352,9 @@
 
   parameter ADR_CCLUT_FORMAT_CTRL     = 10'h1AA; // control for CCLUT, data format
   parameter ADR_HMT_CTRL              = 10'h1AC; // control for HMT
+  parameter ADR_HMT_THRESH1           = 10'h1AE; // threshold1 for HMT
+  parameter ADR_HMT_THRESH2           = 10'h1B0; // threshold1 for HMT
+  parameter ADR_HMT_THRESH3           = 10'h1B2; // threshold1 for HMT
 
   parameter ADR_ODMB      = 9'h1EE;  // ODMB mode: various addresses are handled inside odmb_device
 
@@ -1856,6 +1864,11 @@
   //HMT part
   output hmt_enable;
   input [9:0] hmt_nhits_trig_vme;
+  input [1:0] hmt_trigger_vme;
+
+  output [9:0] hmt_thresh1;
+  output [9:0] hmt_thresh2;
+  output [9:0] hmt_thresh3;
 
 // Sequencer Ports: Latched CLCTs
   output          event_clear_vme;    // Event clear for aff,clct,mpc vme diagnostic registers
@@ -2809,6 +2822,12 @@
   reg  [15:0] hmt_ctrl_wr;
   wire [15:0] hmt_ctrl_rd;
 
+  reg  [15:0] hmt_thresh1_wr;
+  wire [15:0] hmt_thresh1_rd;
+  reg  [15:0] hmt_thresh2_wr;
+  wire [15:0] hmt_thresh2_rd;
+  reg  [15:0] hmt_thresh3_wr;
+  wire [15:0] hmt_thresh3_rd;
 //------------------------------------------------------------------------------------------------------------------
 // Address Write Decodes
 //------------------------------------------------------------------------------------------------------------------
@@ -2950,6 +2969,9 @@
   //CCLUT
   wire      wr_cclut_format_ctrl;
   wire      wr_hmt_ctrl;
+  wire      wr_hmt_thresh1;
+  wire      wr_hmt_thresh2;
+  wire      wr_hmt_thresh3;
   wire      wr_adr_cap;
   
        // Virtex-6 GTX error counters
@@ -3514,6 +3536,9 @@
 
   ADR_CCLUT_FORMAT_CTRL:     data_out <= cclut_format_ctrl_rd;
   ADR_HMT_CTRL:              data_out <= hmt_ctrl_rd;
+  ADR_HMT_THRESH1:           data_out <= hmt_thresh1_rd;
+  ADR_HMT_THRESH2:           data_out <= hmt_thresh2_rd;
+  ADR_HMT_THRESH3:           data_out <= hmt_thresh3_rd;
 
   ADR_ODMB:      data_out  <= odmb_data;
 
@@ -3668,6 +3693,9 @@
 
   assign wr_cclut_format_ctrl     =  (reg_adr==ADR_CCLUT_FORMAT_CTRL      && clk_en);
   assign wr_hmt_ctrl              =  (reg_adr==ADR_HMT_CTRL               && clk_en);
+  assign wr_hmt_thresh1           =  (reg_adr==ADR_HMT_THRESH1            && clk_en);
+  assign wr_hmt_thresh2           =  (reg_adr==ADR_HMT_THRESH2            && clk_en);
+  assign wr_hmt_thresh3           =  (reg_adr==ADR_HMT_THRESH3            && clk_en);
   //Tao, ME1/1->MEX/1, the following two could be ignored for ME234
   //assign wr_virtex6_gtx_rx[5]  = (reg_adr==ADR_V6_GTX_RX5    && clk_en);
   //assign wr_virtex6_gtx_rx[6]  = (reg_adr==ADR_V6_GTX_RX6    && clk_en);
@@ -7422,8 +7450,41 @@
 
   assign hmt_ctrl_rd[0] = hmt_enable;
   assign hmt_ctrl_rd[1] = hmt_me1a_enable;
-  assign hmt_ctrl_rd[11:2] = hmt_nhits_trig_vme[9:0];
+  assign hmt_ctrl_rd[11: 2] = hmt_nhits_trig_vme[9:0];
+  assign hmt_ctrl_rd[13:12] = hmt_trigger_vme[1:0];
   //reserved for HMT results 
+
+//------------------------------------------------------------------------------------------------------------------
+// ADR_HMT_THRESH1 = 0x1AE  HMT thresh
+// ADR_HMT_THRESH2 = 0x1B0  HMT thresh
+// ADR_HMT_THRESH3 = 0x1B2  HMT thresh
+//------------------------------------------------------------------------------------------------------------------
+
+  initial begin
+    hmt_thresh1_wr[9:0] = 10'd90; // RW, enable the HMT thresh1
+    hmt_thresh2_wr[9:0] = 10'd95; // RW, enable the HMT thresh1
+    hmt_thresh3_wr[9:0] = 10'd100; // RW, enable the HMT thresh1
+    hmt_thresh1_wr[10]  = 1'b0; // pass threshold or not 
+    hmt_thresh2_wr[10]  = 1'b0; // pass threshold or not 
+    hmt_thresh3_wr[10]  = 1'b0; // pass threshold or not 
+    hmt_thres1_wr[15:11] = 5'b0; // not used
+    hmt_thres2_wr[15:11] = 5'b0; // not used
+    hmt_thres3_wr[15:11] = 5'b0; // not used
+  end 
+
+  assign hmt_thresh1[9:0]  = hmt_thresh1_wr[9:0];
+  assign hmt_thresh2[9:0]  = hmt_thresh2_wr[9:0];
+  assign hmt_thresh3[9:0]  = hmt_thresh3_wr[9:0];
+
+  assign hmt_thresh1_rd[9:0] =  hmt_thresh1_wr[9:0];
+  assign hmt_thresh2_rd[9:0] =  hmt_thresh2_wr[9:0];
+  assign hmt_thresh3_rd[9:0] =  hmt_thresh3_wr[9:0];
+  assign hmt_thresh1_rd[10]  = (hmt_nhits_trig_vme > hmt_thresh1);
+  assign hmt_thresh2_rd[10]  = (hmt_nhits_trig_vme > hmt_thresh2);
+  assign hmt_thresh3_rd[10]  = (hmt_nhits_trig_vme > hmt_thresh3);
+  assign hmt_thresh1_rd[15:11] = 5'b0;
+  assign hmt_thresh2_rd[15:11] = 5'b0;
+  assign hmt_thresh3_rd[15:11] = 5'b0;
 
 //------------------------------------------------------------------------------------------------------------------
 // VME Write-Registers latch data when addressed + latch power-up defaults
@@ -7549,6 +7610,10 @@
   if (wr_virtex6_gtx_rx[2])   virtex6_gtx_rx_wr[2] <=  d[15:0];
   if (wr_virtex6_gtx_rx[3])   virtex6_gtx_rx_wr[3] <=  d[15:0];
   if (wr_virtex6_gtx_rx[4])   virtex6_gtx_rx_wr[4] <=  d[15:0];
+  if (wr_hmt_ctrl)              hmt_ctrl_wr             <= d[15:0];
+  if (wr_hmt_thresh1)           hmt_thresh1_wr          <= d[15:0];
+  if (wr_hmt_thresh2)           hmt_thresh2_wr          <= d[15:0];
+  if (wr_hmt_thresh3)           hmt_thresh3_wr          <= d[15:0];
   //Tao, ME1/1->MEX/1, the following two could be ignored for ME234
   //if (wr_virtex6_gtx_rx[5])   virtex6_gtx_rx_wr[5] <=  d[15:0];
   //if (wr_virtex6_gtx_rx[6])   virtex6_gtx_rx_wr[6] <=  d[15:0];  
