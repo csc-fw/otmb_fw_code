@@ -4760,16 +4760,16 @@
 
 
   //Tao, 2020 definition
-  assign revcode_vme_new [05:00] = VERSION_MINOR;// 6 bits = Minor version  (minor features, internal fixes, bug fixes, etc).  
-  assign revcode_vme_new [10:06] = VERSION_MAJOR;//5 bits = Major Version (major features which breaks compatibility, requires changes to other board firmware) 
+  assign revcode_vme_new [04:00] = VERSION_MINOR;// 5 bits = Minor version  (minor features, internal fixes, bug fixes, etc).  
+  assign revcode_vme_new [08:05] = VERSION_MAJOR;// 4 bits = Major Version (major features which breaks compatibility, requires changes to other board firmware) 
   //[14:11], 4bits for DAQ format
   //0, old TMB
   //1, Run2 OTMB
   //2, Run3 OTMB with CCLUT and without GEM
   //3, Run3 OTMB with CCLUT and GEM 
   //assign revcode_vme_new [14:11] = (ccLUT_enable && gem_read_enable) ? 4'd3 : (ccLUT_enable ? 4'd2 : 4'd1);
-  assign revcode_vme_new [14:11] = VERSION_FORMAT;
-  assign revcode_vme_new [15] = 1'd0;
+  assign revcode_vme_new [12:09] = VERSION_FORMAT;
+  assign revcode_vme_new [15:13] = 3'd0;
 
   assign revcode[14:0] = (run3_daq_df) ? revcode_vme_new[14:0] : revcode_vme[14:0];  // Sequencer format is 15 bits, VME is 16
 
