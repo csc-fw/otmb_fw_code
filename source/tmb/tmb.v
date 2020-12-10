@@ -338,6 +338,7 @@
   clct_vpf_tprt,
   clct_window_tprt,
 
+  alct0_pipe_vpf,
 // Sump
   tmb_sump
 
@@ -345,7 +346,6 @@
 `ifdef DEBUG_TMB
   ,alct0_pipe
   ,alct1_pipe
-  ,alct0_pipe_vpf
 
   ,clct0_pipe
   ,clct1_pipe
@@ -729,10 +729,10 @@
 //------------------------------------------------------------------------------------------------------------------
 // Debug Ports
 //------------------------------------------------------------------------------------------------------------------
+  output                alct0_pipe_vpf; //Tao, test at TAMU
 `ifdef DEBUG_TMB
   output  [MXALCT-1:0]  alct0_pipe;
   output  [MXALCT-1:0]  alct1_pipe;
-  output                alct0_pipe_vpf;
 
   output  [MXCLCT-1:0]  clct0_pipe;
   output  [MXCLCT-1:0]  clct1_pipe;
@@ -940,6 +940,36 @@
 //------------------------------------------------------------------------------------------------------------------
 // Push ALCT data into a 1bx to 16bx pipeline delay to compensate for CLCT processing time
 //------------------------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------------------------
+// Generate fake ALCT with key WG 20 and 30 for TAMU test stand
+//------------------------------------------------------------------------------------------------------------------
+  wire [MXALCT-1:0] alct0_fake, alct1_fake;
+  wire [MXALCT-1:0] alct0_fake_srl, alct1_fake_srl;
+  assign alct0_fake[   0]   = wr_push_xtmb;
+  assign alct0_fake[02:1]   = 2'b11;
+  assign alct0_fake[   3]   = 1'b0;
+  assign alct0_fake[10:4]   = 7'd20;
+  assign alct0_fake[15:11]  = 4'b0;
+
+  assign alct1_fake[   0]   = wr_push_xtmb;
+  assign alct1_fake[02:1]   = 2'b10;
+  assign alct1_fake[   3]   = 1'b0;
+  assign alct1_fake[10:4]   = 7'd30;
+  assign alct1_fake[15:11]  = 4'b0;
+
+  reg [3:0] fakealct_srl_adr = 0;
+  always @(posedge clock) begin
+  fakealct_srl_adr <= clct_win_center-1'b1;
+  end
+
+  srl16e_bbl #(MXALCT) ualct0fake (.clock(clock),.ce(1'b1),.adr(fakealct_srl_adr),.d(alct0_fake),.q(alct0_fake_srl));
+  srl16e_bbl #(MXALCT) ualct1fake (.clock(clock),.ce(1'b1),.adr(fakealct_srl_adr),.d(alct1_fake),.q(alct1_fake_srl));
+
+  wire usefakealct =1'b1;
+//------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------
+  
   wire [MXALCT-1:0] alct0_pipe, alct0_srl;
   wire [MXALCT-1:0] alct1_pipe, alct1_srl;
   wire [1:0]        alcte_pipe, alcte_srl, alcte_tmb;
@@ -957,9 +987,13 @@
 
   wire alct_ptr_is_0 = (alct_delay == 0);               // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
 
-  assign alct0_pipe = (alct_ptr_is_0) ? alct0_tmb : alct0_srl;  // First  ALCT after alct pipe delay
-  assign alct1_pipe = (alct_ptr_is_0) ? alct1_tmb : alct1_srl;  // Second ALCT after alct pipe delay
-  assign alcte_pipe = (alct_ptr_is_0) ? alcte_tmb : alcte_srl;  // Second ALCT after alct pipe delay 
+  //Generate fake ALCT for TAMU test stand!
+  //assign alct0_pipe = (alct_ptr_is_0) ? alct0_tmb : alct0_srl;  // First  ALCT after alct pipe delay
+  //assign alct1_pipe = (alct_ptr_is_0) ? alct1_tmb : alct1_srl;  // Second ALCT after alct pipe delay
+  //assign alcte_pipe = (alct_ptr_is_0) ? alcte_tmb : alcte_srl;  // Second ALCT after alct pipe delay 
+  assign alct0_pipe = usefakealct ? alct0_fake_srl : ((alct_ptr_is_0) ? alct0_tmb : alct0_srl);  // First  ALCT after alct pipe delay
+  assign alct1_pipe = usefakealct ? alct1_fake_srl : ((alct_ptr_is_0) ? alct1_tmb : alct1_srl);  // Second ALCT after alct pipe delay
+  assign alcte_pipe = usefakealct ? alct1_fake_srl : ((alct_ptr_is_0) ? alcte_tmb : alcte_srl);  // Second ALCT after alct pipe delay 
 
   wire   alct0_pipe_vpf = alct0_pipe[0];
   wire   alct1_pipe_vpf = alct1_pipe[0];
