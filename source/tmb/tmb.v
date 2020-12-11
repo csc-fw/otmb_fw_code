@@ -132,17 +132,16 @@
 // GEM
 
 //GEMA trigger match control
+  match_gem_alct_delay,
   match_gem_alct_window,
   match_gem_clct_window,
   gemA_vpf,
-  match_gemA_alct_delay,
   gemA_alct_match, 
   gemA_clct_match,
   gemA_fiber_enable,
 
 //GEMB trigger match control
   gemB_vpf,
-  match_gemB_alct_delay,
   gemB_alct_match,
   gemB_clct_match,
   gemB_fiber_enable,
@@ -519,7 +518,7 @@
   input  [7:0]        gemB_vpf;
 
   //GEMA trigger match control
-  input  [3:0]        match_gemA_alct_delay;
+  input  [7:0]        match_gem_alct_delay;
   input  [3:0]        match_gem_alct_window;
   input  [3:0]        match_gem_clct_window;
   output              gemA_alct_match;
@@ -527,7 +526,6 @@
   input  [1:0]        gemA_fiber_enable;
 
   //GEMB trigger match control
-  input [3:0]         match_gemB_alct_delay;
   output              gemB_alct_match;
   output              gemB_clct_match;
   input [1:0]         gemB_fiber_enable;
@@ -1325,6 +1323,13 @@
   //first delay GEM signal by match_gemA_alct_delay/match_gemB_alct_delay to do GEM-ALCT match
   wire [7:0]  gemA_pipe_foralct, gemA_foralct_srl;
   wire [7:0]  gemB_pipe_foralct, gemB_foralct_srl;
+
+  //Attention!!!
+  //first delay GEM signal by match_gemA_alct_delay/match_gemB_alct_delay to do GEM-ALCT match
+  //Attention:  Only 4 bits delay is used for now!!!!
+  
+  wire [3:0]  match_gemA_alct_delay = match_gem_alct_delay[3:0];
+  wire [3:0]  match_gemB_alct_delay = match_gem_alct_delay[3:0];
 
   reg  [3:0] gemA_srl_adr = 0;
   reg  [3:0] gemB_srl_adr = 0;

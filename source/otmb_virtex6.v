@@ -1672,7 +1672,7 @@
   wire         injector_go_gem;  // Start GEM injector
 
   //GEMA trigger match control
-  wire [3:0]  match_gemA_alct_delay;
+  wire [7:0]  match_gem_alct_delay;
   wire [3:0]  match_gem_alct_window;
   wire [3:0]  match_gem_clct_window;
   wire        gemA_alct_match; 
@@ -1680,7 +1680,6 @@
   wire [1:0]  gemA_fiber_enable;
 
   //GEMB trigger match control
-  wire [3:0]  match_gemB_alct_delay;
   //wire [3:0]  match_gemB_alct_window;
   //wire [3:0]  match_gemB_clct_window;
   wire        gemB_alct_match; 
@@ -4112,7 +4111,7 @@ wire [15:0] gemB_bxn_counter;
   //.gemB_vpf          (gemB_vpf[7:0]),
   .gemA_vpf          (gemA_csc_cluster_vpf[7:0]), //In gem cluster vpf
   //GEMA trigger match control
-  .match_gemA_alct_delay  (match_gemA_alct_delay[3:0]),  //In gemA delay for gemA-ALCT match
+  .match_gem_alct_delay   (match_gem_alct_delay[7:0]),  //In gemA delay for gemA-ALCT match
   .match_gem_alct_window  (match_gem_alct_window[3:0]), //In gemA-alct match window
   .match_gem_clct_window  (match_gem_clct_window[3:0]), //In gemA-clct match window
   .gemA_alct_match        (gemA_alct_match),             //Out gemA+ALCT match
@@ -4121,7 +4120,6 @@ wire [15:0] gemB_bxn_counter;
 
   //GEMB trigger match control
   .gemB_vpf          (gemB_csc_cluster_vpf[7:0]),
-  .match_gemB_alct_delay  (match_gemB_alct_delay[3:0]),    //In gemB delay for gemB-ALCT match
   //.match_gemB_alct_window (match_gemB_alct_window[3:0]),  //In gemB-alct match window
   //.match_gemB_clct_window (match_gemB_clct_window[3:0]),  //In gem-clct match window
   .gemB_alct_match        (gemB_alct_match),       // Out gemB+ALCT match or not
@@ -5229,7 +5227,7 @@ wire [15:0] gemB_bxn_counter;
       .gemB_bx0_match  (gemB_bx0_match),      // In GEMA+CLCT BX0 match
 
       //GEMA trigger match control
-      .match_gemA_alct_delay  (match_gemA_alct_delay[3:0]),  //Out gemA delay for gemA-ALCT match
+      .match_gem_alct_delay   (match_gem_alct_delay[3:0]),  //Out gemA delay for gemA-ALCT match
       .match_gem_alct_window  (match_gem_alct_window[3:0]), //Out gemA-alct match window
       .match_gem_clct_window  (match_gem_clct_window[3:0]), //Out gemA-clct match window
       .gemA_alct_match        (gemA_alct_match),             //In gemA+ALCT match
@@ -5237,7 +5235,6 @@ wire [15:0] gemB_bxn_counter;
       .gemA_fiber_enable      (gemA_fiber_enable[1:0]),     //Out gemA two fibers enabled or not
 
       //GEMB trigger match control
-      .match_gemB_alct_delay  (match_gemB_alct_delay[3:0]),    //Out gemB delay for gemB-ALCT match
       //.match_gemB_alct_window (match_gemB_alct_window[3:0]),  //Out gemB-alct match window
       //.match_gemB_clct_window (match_gemB_clct_window[3:0]),  //Out gem-clct match window
       .gemB_alct_match        (gemB_alct_match),       // In gemB+ALCT match or not
