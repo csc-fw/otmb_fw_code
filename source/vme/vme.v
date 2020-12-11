@@ -8690,9 +8690,9 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
     hmt_thresh1_wr[10]  = 1'b0; // pass threshold or not 
     hmt_thresh2_wr[10]  = 1'b0; // pass threshold or not 
     hmt_thresh3_wr[10]  = 1'b0; // pass threshold or not 
-    hmt_thres1_wr[15:11] = 5'b0; // not used
-    hmt_thres2_wr[15:11] = 5'b0; // not used
-    hmt_thres3_wr[15:11] = 5'b0; // not used
+    hmt_thresh1_wr[15:11] = 5'b0; // not used
+    hmt_thresh2_wr[15:11] = 5'b0; // not used
+    hmt_thresh3_wr[15:11] = 5'b0; // not used
   end 
 
   assign hmt_thresh1[9:0]  = hmt_thresh1_wr[9:0];
