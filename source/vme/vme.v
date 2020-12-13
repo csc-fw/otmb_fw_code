@@ -8650,7 +8650,9 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign run3_daq_df  = run3_format_ctrl_wr[2];
 
   assign run3_format_ctrl_rd[0]    = ccLUT_enable;
-  assign run3_format_ctrl_rd[15:1] = run3_format_ctrl_wr[15:1];
+  assign run3_format_ctrl_rd[1]    = run3_trig_df;
+  assign run3_format_ctrl_rd[2]    = run3_daq_df;
+  assign run3_format_ctrl_rd[15:3] = run3_format_ctrl_wr[15:3];
 
 
 //------------------------------------------------------------------------------------------------------------------

@@ -3050,9 +3050,6 @@
   wire [MXPTRID-1:0] pretrig_data;
   wire [MXPTRID-1:0] postdrift_data;
 
-  wire [9:0] postdrift_hmt_nhits_trig;
-  wire [1:0] postdrift_hmt_trigger;
-
   assign pretrig_data[0]     = clct_push_pretrig;        // Pre-trigger flag alias active_feb_flag
   assign pretrig_data[11:1]  = wr_buf_adr[MXBADR-1:0];   // Buffer address at pre-trigger
   assign pretrig_data[12]    = wr_buf_avail;             // Buffer address was valid at pre-trigger
@@ -3064,14 +3061,10 @@
 
   srl16e_bbl #(MXPTRID) usrldrift (.clock(clock),.ce(1'b1),.adr(postdrift_adr),.d(pretrig_data),.q(postdrift_data));
 
-  srl16e_bbl #(10) usrldrift_nhit (.clock(clock),.ce(1'b1),.adr(postdrift_adr),.d(hmt_nhits_trig),.q(postdrift_hmt_nhits_trig));
-  srl16e_bbl #(2) usrldrift_trigger (.clock(clock),.ce(1'b1),.adr(postdrift_adr),.d(hmt_trigger),.q(postdrift_hmt_trigger));
 
 // Extract pre-trigger data after drift delay, compensated for pattern-finder latency + programmable drift delay
-  //assign hmt_nhits_trig_xtmb[9:0] = hmt_nhits_trig[9:0] & {10{clct0_vpf}}; //only valid if at least one CLCT is found
-  //assign hmt_trigger_xtmb[1:0]    = hmt_trigger[1:0] &    {10{clct0_vpf}}; //only valid if at least one CLCT is found
-  assign hmt_nhits_trig_xtmb[9:0] = postdrift_hmt_nhits_trig[9:0] ;// do not require valid clct 
-  assign hmt_trigger_xtmb[1:0]    = postdrift_hmt_trigger[1:0] ;   // do not require valid clct 
+  assign hmt_nhits_trig_xtmb[9:0] = hmt_nhits_trig[9:0]; //only valid if at least one CLCT is found
+  assign hmt_trigger_xtmb[1:0]    = hmt_trigger[1:0]   ; //only valid if at least one CLCT is found
 
   wire              clct_pop_xtmb        = postdrift_data[0];     // CLCT postdrift flag aka active_feb_flag
   wire [MXBADR-1:0] clct_wr_adr_xtmb     = postdrift_data[11:1];  // Buffer address at pre-trigger
