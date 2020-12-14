@@ -2116,44 +2116,56 @@ end
   reg [CLSTBITS-1 :0] gem_copad_vme  [MXCLUSTER_CHAMBER-1:0];
   reg gems_sync_vme     = 0;
 
+
   //wire clear_gem_vme = event_clear_vme | clct_pretrig;
   wire clear_gem_vme = event_clear_vme;
 
   genvar icluster;
   generate
   for (icluster=0; icluster<MXCLUSTER_CHAMBER; icluster=icluster+1) begin: gen_gem_cluster
+      initial begin
+          gemA_cluster_vme[icluster]  <= {3'b0, 11'd1536};//invalid GEM cluster
+          gemB_cluster_vme[icluster]  <= {3'b0, 11'd1536};
+          gem_copad_vme[icluster]     <= {3'b0, 11'd1536};
+      end 
       always @(posedge clock) begin
         if (clear_gem_vme) begin    // Clear clcts in case event gets flushed
           gemA_cluster_vme[icluster]  <= {3'b0, 11'd1536};//invalid GEM cluster
           gemB_cluster_vme[icluster]  <= {3'b0, 11'd1536};
           gem_copad_vme[icluster]     <= {3'b0, 11'd1536};
-          gemA_overflow_vme <= 0;
-          gemB_overflow_vme <= 0;
-          gemA_sync_vme     <= 0;
-          gemB_sync_vme     <= 0;
-          gems_sync_vme     <= 0;
         end
         else begin
             if (gem_any) begin
                 gemA_cluster_vme[icluster]  <= gemA_vpf[icluster] ? gemA_cluster[icluster] : {3'b0, 11'd1536}; 
-                gemA_overflow_vme           <= gemA_overflow;
-                gemA_sync_vme               <= gemA_synced;
             end
             if (gem_any) begin
                 gemB_cluster_vme[icluster]  <= gemB_vpf[icluster] ? gemB_cluster[icluster] : {3'b0, 11'd1536}; 
-                gemB_overflow_vme           <= gemB_overflow;
-                gemB_sync_vme               <= gemB_synced;
             end
             //if (gem_any) begin
             if (gem_any_match) begin
                 gem_copad_vme[icluster]     <= gem_copad[icluster];
-                gems_sync_vme               <= gems_synced;
             end
         end
       end
   end
   endgenerate
 
+  always @(posedge clock) begin
+    if (clear_gem_vme) begin    // Clear clcts in case event gets flushed
+      gemA_overflow_vme <= 0;
+      gemB_overflow_vme <= 0;
+      gemA_sync_vme     <= 0;
+      gemB_sync_vme     <= 0;
+      gems_sync_vme     <= 0;
+    end
+    else begin
+        gemA_overflow_vme           <= gemA_overflow;
+        gemA_sync_vme               <= gemA_synced;
+        gemB_overflow_vme           <= gemB_overflow;
+        gemB_sync_vme               <= gemB_synced;
+        gems_sync_vme               <= gems_synced;
+    end
+  end
 
   //GEM clusters for GEM-CSC mathcing 
   wire [CLSTBITS-1:0] gemA_csc_cluster  [MXCLUSTER_CHAMBER-1:0];
