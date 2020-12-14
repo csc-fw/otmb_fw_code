@@ -2137,12 +2137,7 @@ end
         else begin
             if (gem_any) begin
                 gemA_cluster_vme[icluster]  <= gemA_vpf[icluster] ? gemA_cluster[icluster] : {3'b0, 11'd1536}; 
-            end
-            if (gem_any) begin
                 gemB_cluster_vme[icluster]  <= gemB_vpf[icluster] ? gemB_cluster[icluster] : {3'b0, 11'd1536}; 
-            end
-            //if (gem_any) begin
-            if (gem_any_match) begin
                 gem_copad_vme[icluster]     <= gem_copad[icluster];
             end
         end
