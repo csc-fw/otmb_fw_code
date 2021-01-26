@@ -401,7 +401,7 @@
 
 // GEM
   gem_any_match,
-  gem_match,
+  copad_match,
   gemA_sync_err,
   gemB_sync_err,
   gems_sync_err,
@@ -430,6 +430,8 @@
   gemA_csc_cluster_active_cfeb_list,
   gemB_csc_cluster_active_cfeb_list,
   gemcopad_csc_cluster_active_cfeb_list,
+
+  copad_match,
   
 // External Triggers
   alct_adb_pulse_sync,
@@ -581,6 +583,11 @@
   tmb_allow_alct_ro,
   tmb_allow_clct_ro,
   tmb_allow_match_ro,
+
+  gemcsc_bend_enable, 
+  gem_alct_delay,
+  gem_clct_win,
+  gem_alct_win,
 
   mpc_tx_delay,
   mpc_sel_ttc_bx0,
@@ -1369,7 +1376,7 @@
 
 // GEM
   input          gem_any_match; // GEM co-pad match was found
-  input [7:0]    gem_match;     // GEM co-pad match was found
+  input [7:0]    copad_match;     // GEM co-pad match was found
   input          gemA_sync_err; // GEM A has sync error
   input          gemB_sync_err; // GEM B has sync error
   input          gems_sync_err; // GEM Super Chamber has sync error
@@ -1397,6 +1404,9 @@
   input [MXCFEB-1:0] gemA_csc_cluster_active_cfeb_list;
   input [MXCFEB-1:0] gemB_csc_cluster_active_cfeb_list;
   input [MXCFEB-1:0] gemcopad_csc_cluster_active_cfeb_list;
+
+
+  input [7:0] copad_match;
 // External Triggers
   input          alct_adb_pulse_sync; // ADB Test pulse trigger
   input          dmb_ext_trig;        // DMB Calibration trigger
@@ -1542,6 +1552,11 @@
   input tmb_allow_alct_ro;  // Allow ALCT only  readout, non-triggering
   input tmb_allow_clct_ro;  // Allow CLCT only  readout, non-triggering
   input tmb_allow_match_ro; // Allow Match only readout, non-triggering
+
+  input       gemcsc_bend_enable;
+  input [7:0] match_gem_alct_delay;
+  input [3:0] gem_clct_win;
+  input [2:0] gem_alct_win;
 
   input  [MXMPCDLY-1:0] mpc_tx_delay;    // Delay LCT to MPC
   input                 mpc_sel_ttc_bx0; // MPC gets ttc_bx0 or bx0_local
@@ -2242,11 +2257,13 @@
   wire  [MXHW-1:0]    header10_run3_;
   wire  [MXHW-1:0]    header11_;
   wire  [MXHW-1:0]    header12_;
+  wire  [MXHW-1:0]    header12_run3_;
   wire  [MXHW-1:0]    header13_;
   wire  [MXHW-1:0]    header14_;
   wire  [MXHW-1:0]    header14_run3_;
   wire  [MXHW-1:0]    header15_;
   wire  [MXHW-1:0]    header16_;
+  wire  [MXHW-1:0]    header16_run3_;
   wire  [MXHW-1:0]    header17_;
   wire  [MXHW-1:0]    header18_;
   wire  [MXHW-1:0]    header19_;
@@ -2270,7 +2287,7 @@
   wire  [MXHW-1:0]    header37_;
   wire  [MXHW-1:0]    header38_;
   wire  [MXHW-1:0]    header39_;
-  wire  [MXHW-1:0]    header39_run3_;
+  //wire  [MXHW-1:0]    header39_run3_;
   wire  [MXHW-1:0]    header40_;
   wire  [MXHW-1:0]    header41_;
 
@@ -3050,6 +3067,9 @@
   wire [MXPTRID-1:0] pretrig_data;
   wire [MXPTRID-1:0] postdrift_data;
 
+  //wire [9:0] postdrift_hmt_nhits_trig;
+  //wire [1:0] postdrift_hmt_trigger;
+
   assign pretrig_data[0]     = clct_push_pretrig;        // Pre-trigger flag alias active_feb_flag
   assign pretrig_data[11:1]  = wr_buf_adr[MXBADR-1:0];   // Buffer address at pre-trigger
   assign pretrig_data[12]    = wr_buf_avail;             // Buffer address was valid at pre-trigger
@@ -3061,10 +3081,14 @@
 
   srl16e_bbl #(MXPTRID) usrldrift (.clock(clock),.ce(1'b1),.adr(postdrift_adr),.d(pretrig_data),.q(postdrift_data));
 
+  //srl16e_bbl #(10) usrldrift_nhit (.clock(clock),.ce(1'b1),.adr(postdrift_adr),.d(hmt_nhits_trig),.q(postdrift_hmt_nhits_trig));
+  //srl16e_bbl #(2) usrldrift_trigger (.clock(clock),.ce(1'b1),.adr(postdrift_adr),.d(hmt_trigger),.q(postdrift_hmt_trigger));
 
 // Extract pre-trigger data after drift delay, compensated for pattern-finder latency + programmable drift delay
   assign hmt_nhits_trig_xtmb[9:0] = hmt_nhits_trig[9:0]; //only valid if at least one CLCT is found
   assign hmt_trigger_xtmb[1:0]    = hmt_trigger[1:0]   ; //only valid if at least one CLCT is found
+  //assign hmt_nhits_trig_xtmb[9:0] = postdrift_hmt_nhits_trig[9:0] ;// do not require valid clct 
+  //assign hmt_trigger_xtmb[1:0]    = postdrift_hmt_trigger[1:0] ;   // do not require valid clct 
 
   wire              clct_pop_xtmb        = postdrift_data[0];     // CLCT postdrift flag aka active_feb_flag
   wire [MXBADR-1:0] clct_wr_adr_xtmb     = postdrift_data[11:1];  // Buffer address at pre-trigger
@@ -4828,26 +4852,41 @@
   assign  header09_[18:15]  =  0;                       // DDU+DMB control flags
 
   assign  header10_run3_[11: 0]   =  r_clct0_carry_xtmb[11:0]; 
-  assign  header10_run3_[14:12]   =  r_clct0_xky_xtmb[1:0];
+  assign  header10_run3_[13:12]   =  r_clct0_xky_xtmb[1:0];
+  assign  header10_run3_[14]      =  hmt_nhits_trig_xtmb[0];
   assign  header10_[14:0]   =  run3_daq_df ? header10_run3_[14:0] : r_pretrig_counter[29:15]; // CLCT pre-trigger counter
   assign  header10_[18:15]  =  0;                        // DDU+DMB control flags
 
   assign  header11_[14:0]   =  r_clct_counter[14:0];  // CLCT post-drift counter, stop on ovf
   assign  header11_[18:15]  =  0;                     // DDU+DMB control flags
-  assign  header12_[14:0]   =  r_clct_counter[29:15]; // CLCT post-drift counter
+
+  assign  header12_run3_[7:0] = copad_match[7:0];//Attention: should be delayed to sync with CLCT signal!!
+  assign  header12_run3_[  8] = gemA_vpf;
+  assign  header12_run3_[  9] = gemB_vpf;
+  assign  header12_run3_[ 10] = gemA_overflow;
+  assign  header12_run3_[ 11] = gemB_overflow;
+  assign  header12_run3_[ 12] = gemA_sync_err;
+  assign  header12_run3_[ 13] = gemB_sync_err;
+  assign  header12_run3_[ 14] = gems_sync_err;
+  assign  header12_[14:0]   =  run3_daq_df ? header12_run3_[14:0] : r_clct_counter[29:15]; // CLCT post-drift counter
   assign  header12_[18:15]  =  0;
 
   assign  header13_[14:0]   =  r_trig_counter[14:0];  // TMB trigger counter, stop on ovf
   assign  header13_[18:15]  =  0;                     // DDU+DMB control flags
 
   assign  header14_run3_[11: 0]   =  r_clct1_carry_xtmb[11:0]; 
-  assign  header14_run3_[14:12]   =  r_clct1_xky_xtmb[1:0];
+  assign  header14_run3_[13:12]   =  r_clct1_xky_xtmb[1:0];
+  assign  header14_run3_[14]      =  hmt_nhits_trig_xtmb[1];
   assign  header14_[14:0]   =  run3_daq_df ? header14_run3_[14:0] : r_trig_counter[29:15]; // TMB trigger counter
   assign  header14_[18:15]  =  0;                     // DDU+DMB control flags
 
   assign  header15_[14:0]   =  r_alct_counter[14:0];  // Counts ALCTs received from ALCT board, stop on ovf
   assign  header15_[18:15]  =  0;                     // DDU+DMB control flags
-  assign  header16_[14:0]   =  r_alct_counter[29:15]; // Counts ALCTs received from ALCT board, stop on ovf
+
+  assign  header16_run3_[7 : 0]   =  match_gem_alct_delay[7:0]; //at the BX with LCT construction
+  assign  header16_run3_[11: 8]   =  gem_clct_win[3:0];
+  assign  header16_run3_[14:12]   =  alct_gem_win[2:0];
+  assign  header16_[14:0]   =  run3_daq_df ? header16_run3_[14:0] : r_alct_counter[29:15]; // Counts ALCTs received from ALCT board, stop on ovf
   assign  header16_[18:15]  =  0;                     // DDU+DMB control flags
 
   assign  header17_[14:0]   =  r_orbit_counter[14:0];  // BX0s since last hard reset, stop on ovf
@@ -4941,7 +4980,7 @@
   assign  header29_[14]     =  hs_layer_trig;        // Layer-mode trigger
   assign  header29_[18:15]  =  0;                    // DDU+DMB control flags
 
-  assign  header30_[4:0]    =  r_alct_bxn[4:0];         // ALCT0/1 bxn
+  assign  header30_[4:0]    =  run3_daq_df ? hmt_nhits_trig_xtmb[6:2] : r_alct_bxn[4:0];         // ALCT0/1 bxn
   assign  header30_[6:5]    =  r_alct_ecc_err[1:0];     // ALCT trigger path ECC error code
   assign  header30_[11:7]   =  cfeb_badbits_found[4:0]; // CFEB[n] has at least 1 bad bit
   assign  header30_[12]     =  cfeb_badbits_blocked;    // A CFEB had bad bits that were blocked
@@ -5027,7 +5066,7 @@
   assign  header40_[7:6]    =  cfeb_badbits_found[6:5]; // Hdr30 CFEB[n] has at least 1 bad bit
   assign  header40_[9:8]    =  cfeb_en[6:5];            // Hdr35 CFEBs enabled for triggering
   assign  header40_[10]     =  buf_fence_cnt_is_peak;   // Current fence is peak number of fences in RAM
-  assign  header40_[11]     =  run3_daq_df ? ccLUT_enable : (MXCFEB==7);             // TMB has 7 DCFEBs so hdr40_[10:1] are active
+  assign  header40_[11]     =  run3_daq_df ? gemcsc_bend_enable : (MXCFEB==7);             // TMB has 7 DCFEBs so hdr40_[10:1] are active
   assign  header40_[12]     =  r_trig_source_vec[9];    // Pre-trigger was ME1A only
   assign  header40_[13]     =  r_trig_source_vec[10];   // Pre-trigger was ME1B only
   assign  header40_[14]     =  r_tmb_trig_pulse;        // TMB trig pulse coincident with rtmb_push

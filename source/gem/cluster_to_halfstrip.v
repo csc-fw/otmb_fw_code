@@ -17,7 +17,7 @@ module cluster_to_halfstrip (
 parameter FALLING_EDGE = 0;
 
 parameter ADDRBITS  = 11;  // cluster address
-parameter DATABITS  = 8;  // strip 
+parameter DATABITS  = 8;  // halfstrip 
 parameter ROMLENGTH = 1 << ADDRBITS;
 
 reg [DATABITS-1:0] rom [ROMLENGTH-1:0];

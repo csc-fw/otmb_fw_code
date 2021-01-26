@@ -1,4 +1,6 @@
 
+//GEM pad to CSC HS LUT
+//2020, Dec, change CSC HS into 1/8HS, with CCLUT implemented. the output should 10bits
 module gem_pad_to_csc_hs_lut(
 
    input          clock,
@@ -10,19 +12,19 @@ module gem_pad_to_csc_hs_lut(
    input          reneven,
 
    input  [7:0]   me1a_r_adr1, 
-   output [7:0]   me1a_r_data1, 
+   output [9:0]   me1a_r_data1, 
    input  [7:0]   me1a_r_adr2, 
-   output [7:0]   me1a_r_data2, 
+   output [9:0]   me1a_r_data2, 
    input  [7:0]   me1b_r_adr1, 
-   output [7:0]   me1b_r_data1, 
+   output [9:0]   me1b_r_data1, 
    input  [7:0]   me1b_r_adr2, 
-   output [7:0]   me1b_r_data2 
+   output [9:0]   me1b_r_data2 
 
 
 );
 
 
-reg [7:0] me1a_r_data1_reg, me1a_r_data2_reg, me1b_r_data1_reg, me1b_r_data2_reg;
+reg [9:0] me1a_r_data1_reg, me1a_r_data2_reg, me1b_r_data1_reg, me1b_r_data2_reg;
 
 always @(posedge clock) begin
     //if (wen)   begin
@@ -33,16 +35,16 @@ always @(posedge clock) begin
     //end
 
     if (renodd)   begin
-        me1a_r_data1_reg <= gem_pad_to_csc_hs_me1a_odd[me1a_r_adr1];
-        me1a_r_data2_reg <= gem_pad_to_csc_hs_me1a_odd[me1a_r_adr2];
-        me1b_r_data1_reg <= gem_pad_to_csc_hs_me1b_odd[me1b_r_adr1];
-        me1b_r_data2_reg <= gem_pad_to_csc_hs_me1b_odd[me1b_r_adr2];
+        me1a_r_data1_reg <= {gem_pad_to_csc_hs_me1a_odd[me1a_r_adr1], 2'b00};
+        me1a_r_data2_reg <= {gem_pad_to_csc_hs_me1a_odd[me1a_r_adr2], 2'b00};
+        me1b_r_data1_reg <= {gem_pad_to_csc_hs_me1b_odd[me1b_r_adr1], 2'b00};
+        me1b_r_data2_reg <= {gem_pad_to_csc_hs_me1b_odd[me1b_r_adr2], 2'b00};
     end
     else if (reneven)  begin
-        me1a_r_data1_reg <= gem_pad_to_csc_hs_me1a_even[me1a_r_adr1];
-        me1a_r_data2_reg <= gem_pad_to_csc_hs_me1a_even[me1a_r_adr2];
-        me1b_r_data1_reg <= gem_pad_to_csc_hs_me1b_even[me1b_r_adr1];
-        me1b_r_data2_reg <= gem_pad_to_csc_hs_me1b_even[me1b_r_adr2];
+        me1a_r_data1_reg <= {gem_pad_to_csc_hs_me1a_even[me1a_r_adr1], 2'b00};
+        me1a_r_data2_reg <= {gem_pad_to_csc_hs_me1a_even[me1a_r_adr2], 2'b00};
+        me1b_r_data1_reg <= {gem_pad_to_csc_hs_me1b_even[me1b_r_adr1], 2'b00};
+        me1b_r_data2_reg <= {gem_pad_to_csc_hs_me1b_even[me1b_r_adr2], 2'b00};
     end
 end
 

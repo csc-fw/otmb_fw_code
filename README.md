@@ -55,12 +55,13 @@ the 2018OTMBfw version code was tested bat.904, gif++, and Point 5 by Tao and CS
 In 2019, Tao checked out Andrew' gem_devel branch and created a branched GE11_ME11_fw to include new features in 2018OTMBfw. And finally GE11_ME11_fw will also include full GEM+CSC algorithm and be commissioned for GE1/1-ME1/1 integrated local triggering. 
 
 
-#### branch GE11_2018ME11_CCLUT_v0
+#### branch GE11_2018ME11_CCLUT_v1
 it is a special version for TAMU test.  It included:
     - part GEMCSC match features
     - HMT 
     - part new format 
     - fake ALCT generated with valid CLCT vpf
+    - update DAQ format with new headers
 
 ### Simulation
 The folder source/simulation contains a test bench, as well as a

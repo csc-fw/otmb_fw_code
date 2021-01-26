@@ -13,6 +13,7 @@ module cluster_to_cscwirehalfstrip (
 	input                     clock,
 
         input                     evenchamber,   // even pair or not
+        input                     gem_match_enable,
         input      [4:0]          gem_clct_deltahs, // matching window in halfstrip direction
         input      [2:0]          gem_alct_deltawire, // matching window in wiregroup direction
 
@@ -22,15 +23,15 @@ module cluster_to_cscwirehalfstrip (
         input      [7:0]          cluster0_pad, // from 0-191
         input      [2:0]          cluster0_size, // from 0-7, 0 means 1 gem pad
 
-        output     [WIREBITS-1:0]          cluster0_cscwire_lo,
-        output     [WIREBITS-1:0]          cluster0_cscwire_hi,
-        output     [WIREBITS-1:0]          cluster0_cscwire_mi,//middle
-        output     [STRIPBITS-1:0]         cluster0_me1bhs_lo, // from 0-127
-        output     [STRIPBITS-1:0]         cluster0_me1bhs_hi, // from 0-127
-        output     [STRIPBITS-1:0]         cluster0_me1bhs_mi, // from 128-223, middle
-        output     [STRIPBITS-1:0]         cluster0_me1ahs_lo, // from 128-223
-        output     [STRIPBITS-1:0]         cluster0_me1ahs_hi, // from 128-223
-        output     [STRIPBITS-1:0]         cluster0_me1ahs_mi, // from 128-223, middle
+        output     [WIREBITS-1:0] cluster0_cscwire_lo,
+        output     [WIREBITS-1:0] cluster0_cscwire_hi,
+        output     [WIREBITS-1:0] cluster0_cscwire_mi,//middle
+        output     [MXXKYB-1:0]   cluster0_me1bxky_lo, // from 0-127
+        output     [MXXKYB-1:0]   cluster0_me1bxky_hi, // from 0-127
+        output     [MXXKYB-1:0]   cluster0_me1bxky_mi, // from 128-223, middle
+        output     [MXXKYB-1:0]   cluster0_me1axky_lo, // from 128-223
+        output     [MXXKYB-1:0]   cluster0_me1axky_hi, // from 128-223
+        output     [MXXKYB-1:0]   cluster0_me1axky_mi, // from 128-223, middle
         output                    csc_cluster0_me1a,
         output     [13:0]         csc_cluster0,  
         output                    csc_cluster0_vpf,// valid or not
@@ -51,28 +52,29 @@ parameter FALLING_EDGE = 0;
 
 parameter MXCFEB       = 7;
 
-parameter STRIPBITS    = 8;  // strip 
+parameter MXXKYB       = 10;            // Number of EightStrip key bits on 7 CFEBs
 parameter WIREBITS     = 7; //wiregroup
 parameter MAXWIRE      = 7'd47; //counting from0, max is 47, in total=48
-parameter MINKEYHSME1B = 8'd0;
-parameter MAXKEYHSME1B = 8'd127;
-parameter MINKEYHSME1A = 8'd128;
-parameter MAXKEYHSME1A = 8'd223;
+parameter MINKEYHSME1B = 10'd0;
+parameter MAXKEYHSME1B = 10'd511;
+parameter MINKEYHSME1A = 10'd512;
+parameter MAXKEYHSME1A = 10'd895;
 
 //counter
 parameter ICLST        = 0;
 
 //reg [DATABITS-1:0] rom [ROMLENGTH-1:0];
-//reg [STRIPBITS-1:0] me1a_hs_lo, me1a_hs_hi, me1b_hs_lo, me1b_hs_hi; 
+//reg [MXXKYB-1:0] me1a_hs_lo, me1a_hs_hi, me1b_hs_lo, me1b_hs_hi; 
 //reg [WIREBITS-1:0]  wire_lo, wire_hi;
+wire gem_clct_deltaxky = {gem_clct_deltahs, 2'b00};// convert HS level window to 1/8 strip level window
 
-wire [STRIPBITS-1:0] me1a_hs_lo, me1a_hs_hi, me1b_hs_lo, me1b_hs_hi; 
+wire [MXXKYB-1:0] me1a_hs_lo, me1a_hs_hi, me1b_hs_lo, me1b_hs_hi; 
 wire [WIREBITS-1:0]  wire_lo, wire_hi;
 
 wire we = 0;
 wire [7:0] w_adr1;
 wire [2:0] w_adr2;
-wire [STRIPBITS-1:0] din1 = 0;
+wire [MXXKYB-1:0] din1 = 0;
 wire [WIREBITS-1:0] din2 = 0;
 
 wire logic_clock;
@@ -172,7 +174,7 @@ wire [WIREBITS-1:0] wire_real_lo, wire_real_hi;
 assign wire_real_lo = (wire_lo < wire_hi) ? wire_lo : wire_hi; // in case of low and high values swapped
 assign wire_real_hi = (wire_lo > wire_hi) ? wire_lo : wire_hi; // in case of low and high values swapped
 
-wire [STRIPBITS-1:0] me1a_hs_real_lo, me1a_hs_real_hi, me1b_hs_real_lo, me1b_hs_real_hi;
+wire [MXXKYB-1:0] me1a_hs_real_lo, me1a_hs_real_hi, me1b_hs_real_lo, me1b_hs_real_hi;
 assign me1a_hs_real_lo = (me1a_hs_lo < me1a_hs_hi) ? me1a_hs_lo : me1a_hs_hi;
 assign me1a_hs_real_hi = (me1a_hs_lo > me1a_hs_hi) ? me1a_hs_lo : me1a_hs_hi;
 assign me1b_hs_real_lo = (me1b_hs_lo < me1b_hs_hi) ? me1b_hs_lo : me1b_hs_hi;
@@ -182,18 +184,19 @@ assign me1b_hs_real_hi = (me1b_hs_lo > me1b_hs_hi) ? me1b_hs_lo : me1b_hs_hi;
 assign cluster0_cscwire_lo  = (wire_real_lo > gem_alct_deltawire) ? wire_real_lo-gem_alct_deltawire : 7'd0;
 assign cluster0_cscwire_hi  = (wire_real_hi + gem_alct_deltawire < MAXWIRE) ? wire_real_hi+gem_alct_deltawire : 7'd47;
 
-assign cluster0_me1bhs_lo   = (csc_cluster0_me1a) ? 8'd224 : ((me1b_hs_real_lo > MINKEYHSME1B+gem_clct_deltahs) ? me1b_hs_real_lo-gem_clct_deltahs : MINKEYHSME1B); //if not in Me1b region, give it an invalid value
-assign cluster0_me1bhs_hi   = (csc_cluster0_me1a) ? 8'd224 : ((me1b_hs_real_hi+gem_clct_deltahs > MAXKEYHSME1B) ? MAXKEYHSME1B : me1b_hs_real_hi+gem_clct_deltahs);
+//
+assign cluster0_me1bhs_lo   = (csc_cluster0_me1a) ? 10'd896 : ((me1b_hs_real_lo > MINKEYHSME1B+gem_clct_deltaxky) ? me1b_hs_real_lo-gem_clct_deltaxky : MINKEYHSME1B); //if not in Me1b region, give it an invalid value
+assign cluster0_me1bhs_hi   = (csc_cluster0_me1a) ? 10'd896 : ((me1b_hs_real_hi+gem_clct_deltaxky > MAXKEYHSME1B) ? MAXKEYHSME1B : me1b_hs_real_hi+gem_clct_deltaxky);
 
-assign cluster0_me1ahs_lo   = (csc_cluster0_me1a) ? ((me1a_hs_real_lo > MINKEYHSME1A+gem_clct_deltahs) ? me1a_hs_real_lo-gem_clct_deltahs : MINKEYHSME1A) : 8'd224; //if not in Me1a region, give it an invalid value
-assign cluster0_me1ahs_hi   = (csc_cluster0_me1a) ? ((me1a_hs_real_hi+gem_clct_deltahs > MAXKEYHSME1A) ? MAXKEYHSME1A : me1a_hs_real_hi+gem_clct_deltahs) : 8'd224;
+assign cluster0_me1ahs_lo   = (csc_cluster0_me1a) ? ((me1a_hs_real_lo > MINKEYHSME1A+gem_clct_deltaxky) ? me1a_hs_real_lo-gem_clct_deltaxky : MINKEYHSME1A) : 8'd224; //if not in Me1a region, give it an invalid value
+assign cluster0_me1ahs_hi   = (csc_cluster0_me1a) ? ((me1a_hs_real_hi+gem_clct_deltaxky > MAXKEYHSME1A) ? MAXKEYHSME1A : me1a_hs_real_hi+gem_clct_deltaxky) : 8'd224;
 
 assign cluster0_cscwire_mi = cluster0_cscwire_lo[WIREBITS-1:1] + cluster0_cscwire_hi[WIREBITS-1:1] + (cluster0_cscwire_lo[0] | cluster0_cscwire_hi[0]);
-assign cluster0_me1ahs_mi  = cluster0_me1ahs_lo[STRIPBITS-1:1] + cluster0_me1ahs_hi[STRIPBITS-1:1] + (cluster0_me1ahs_lo[0] | cluster0_me1ahs_hi[0]);
-assign cluster0_me1bhs_mi  = cluster0_me1bhs_lo[STRIPBITS-1:1] + cluster0_me1bhs_hi[STRIPBITS-1:1] + (cluster0_me1bhs_lo[0] | cluster0_me1bhs_hi[0]);
+assign cluster0_me1ahs_mi  = cluster0_me1ahs_lo[MXXKYB-1:1] + cluster0_me1ahs_hi[MXXKYB-1:1] + (cluster0_me1ahs_lo[0] | cluster0_me1ahs_hi[0]);
+assign cluster0_me1bhs_mi  = cluster0_me1bhs_lo[MXXKYB-1:1] + cluster0_me1bhs_hi[MXXKYB-1:1] + (cluster0_me1bhs_lo[0] | cluster0_me1bhs_hi[0]);
 
 assign csc_cluster0       = reg_cluster0;
-assign csc_cluster0_vpf   = reg_cluster0_vpf;// valid or not
+assign csc_cluster0_vpf   = reg_cluster0_vpf && gem_match_enable;// valid or not
 assign csc_cluster0_roll  = reg_cluster0_roll; // 0-7 
 assign csc_cluster0_pad   = reg_cluster0_pad; // from 0-191
 assign csc_cluster0_size  = reg_cluster0_size; // from 0-7, 0 means 1 gem pad

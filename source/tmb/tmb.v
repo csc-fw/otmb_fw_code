@@ -132,16 +132,22 @@
 // GEM
 
 //GEMA trigger match control
-  match_gem_alct_delay,
-  match_gem_alct_window,
-  match_gem_clct_window,
   gemA_vpf,
-  gemA_alct_match, 
-  gemA_clct_match,
-  gemA_fiber_enable,
 
 //GEMB trigger match control
   gemB_vpf,
+
+  copad_match,
+
+  match_gem_alct_delay,
+  match_gem_alct_window,
+  match_gem_clct_window,
+
+  gemA_match_enable,
+  gemA_alct_match, 
+  gemA_clct_match,
+  gemA_fiber_enable,
+  gemB_match_enable,
   gemB_alct_match,
   gemB_clct_match,
   gemB_fiber_enable,
@@ -516,16 +522,19 @@
 // GEM
   input  [7:0]        gemA_vpf;
   input  [7:0]        gemB_vpf;
+  input  [7:0]        copad_match;
 
   //GEMA trigger match control
   input  [7:0]        match_gem_alct_delay;
   input  [3:0]        match_gem_alct_window;
   input  [3:0]        match_gem_clct_window;
+  input               gemA_match_enable;
   output              gemA_alct_match;
   output              gemA_clct_match;
   input  [1:0]        gemA_fiber_enable;
 
   //GEMB trigger match control
+  input               gemA_match_enable;
   output              gemB_alct_match;
   output              gemB_clct_match;
   input [1:0]         gemB_fiber_enable;
@@ -538,10 +547,11 @@
   input               gem_me1b_match_noclct;// no clct is fine for GEM-CSC match
   input               gem_me1b_match_nogem;// no gem is fine for GEM-CSC match
   input               gem_me1b_match_noalct;// no alct is fine for GEM-CSC match
-  input               gem_me1a_match_promotequal;
-  input               gem_me1b_match_promotequal;
-  input               gem_me1a_match_promotepat;
-  input               gem_me1b_match_promotepat;
+  //input               gem_me1a_match_promotequal;
+  //input               gem_me1b_match_promotequal;
+  //input               gem_me1a_match_promotepat;
+  //input               gem_me1b_match_promotepat;
+  input               gemcsc_bend_enable;
 
   input               gemA_bx0_rx;
   input  [5:0]        gemA_bx0_delay;
