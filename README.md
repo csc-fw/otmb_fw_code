@@ -62,6 +62,7 @@ it is a special version for TAMU test.  It included:
     - part new format 
     - fake ALCT generated with valid CLCT vpf
     - update DAQ format with new headers
+    - the only missing part for final GEMCSC algorithm is the GEMCSC matching in tmb.v file
 
 ### Simulation
 The folder source/simulation contains a test bench, as well as a
