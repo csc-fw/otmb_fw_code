@@ -8647,7 +8647,7 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   initial begin
     run3_format_ctrl_wr[0] = 1'b0;
     run3_format_ctrl_wr[1] = 1'b0; // default, Run3 trigger format upgrade is off
-    run3_format_ctrl_wr[2] = 1'b0; // default, Run3 daq format upgrade is off
+    run3_format_ctrl_wr[2] = 1'b1; // default, Run3 daq format upgrade is ON
     run3_format_ctrl_wr[15:3] = 13'b0; // NOT used
     //cclut_format_ctrl_wr[1] = 0; //CLCT pattern sorting, 0= use {pat, nhits}, 1={new quality}
     //cclut_format_ctrl_wr[2] = 0; //LCT data format control, 0 = use Run2, 1= use Run3 with GEM-CSC+CCLUT

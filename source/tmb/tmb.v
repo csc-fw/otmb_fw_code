@@ -974,7 +974,7 @@
   srl16e_bbl #(MXALCT) ualct0fake (.clock(clock),.ce(1'b1),.adr(fakealct_srl_adr),.d(alct0_fake),.q(alct0_fake_srl));
   srl16e_bbl #(MXALCT) ualct1fake (.clock(clock),.ce(1'b1),.adr(fakealct_srl_adr),.d(alct1_fake),.q(alct1_fake_srl));
 
-  wire usefakealct =1'b1;
+  wire usefakealct =1'b1; // should be false in normal OTMB Firmware
 //------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------
   
