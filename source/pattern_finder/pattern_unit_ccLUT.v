@@ -87,7 +87,7 @@
   assign pat[8][5] = {3{pat_en[8]}} &  pat_mask8[0 +:3] & {              ly5[2],ly5[3],ly5[4]                                            }; // ly5 --xxx------
 
 // Pattern 7                                                                                                                                       0123456789ABC
-  assign pat[7][0] = {3{pat_en[7]}} &  pat_mask7[15+:3] & {ly0[1],ly0[1],ly0[2]                                                          }; // ly0 xxx--------
+  assign pat[7][0] = {3{pat_en[7]}} &  pat_mask7[15+:3] & {ly0[0],ly0[1],ly0[2]                                                          }; // ly0 xxx--------
   assign pat[7][1] = {3{pat_en[7]}} &  pat_mask7[12+:3] & {       ly1[1],ly1[2],ly1[3]                                                   }; // ly1 -xxx-------
   assign pat[7][2] = {3{pat_en[7]}} &  pat_mask7[9 +:3] & {                     ly2[3],ly2[4],ly2[5]                                     }; // ly2 ---xxk-----
   assign pat[7][3] = {3{pat_en[7]}} &  pat_mask7[6 +:3] & {                                   ly3[5],ly3[6],ly3[7]                       }; // ly3 -----xxx---
