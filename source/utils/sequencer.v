@@ -431,7 +431,6 @@
   gemB_csc_cluster_active_cfeb_list,
   gemcopad_csc_cluster_active_cfeb_list,
 
-  copad_match,
   
 // External Triggers
   alct_adb_pulse_sync,
@@ -585,9 +584,9 @@
   tmb_allow_match_ro,
 
   gemcsc_bend_enable, 
-  gem_alct_delay,
+  match_gem_alct_delay,
   gem_clct_win,
-  gem_alct_win,
+  alct_gem_win,
 
   mpc_tx_delay,
   mpc_sel_ttc_bx0,
@@ -1406,7 +1405,6 @@
   input [MXCFEB-1:0] gemcopad_csc_cluster_active_cfeb_list;
 
 
-  input [7:0] copad_match;
 // External Triggers
   input          alct_adb_pulse_sync; // ADB Test pulse trigger
   input          dmb_ext_trig;        // DMB Calibration trigger
@@ -1556,7 +1554,7 @@
   input       gemcsc_bend_enable;
   input [7:0] match_gem_alct_delay;
   input [3:0] gem_clct_win;
-  input [2:0] gem_alct_win;
+  input [2:0] alct_gem_win;
 
   input  [MXMPCDLY-1:0] mpc_tx_delay;    // Delay LCT to MPC
   input                 mpc_sel_ttc_bx0; // MPC gets ttc_bx0 or bx0_local
