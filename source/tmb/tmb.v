@@ -167,6 +167,9 @@
   //gem_me1b_match_promotepat,     //Out promote pattern or not for match in ME1b region, 
   gemcsc_bend_enable,
 
+  gem_clct_win,
+  alct_gem_win,
+
 // TMB-Sequencer Pipelines
   wr_adr_xtmb,
   wr_adr_rtmb,
@@ -565,6 +568,9 @@
   input               gemB_bx0_enable;
   output              gemB_bx0_match;
   output              gemB_bx0_match2;
+
+  output  [3:0]       gem_clct_win;
+  output  [3:0]       alct_gem_win;
 
 // TMB-Sequencer Pipelines
   input  [MXBADR-1:0]  wr_adr_xtmb; // Buffer write address after drift time
