@@ -2650,6 +2650,20 @@ end
    wire [MXXKYB-1     : 0] clct1_xky_xtmb; // new position with 1/8 precision
    wire [MXPATC-1     : 0] clct1_carry_xtmb; // CC code 
 
+
+   //GEM CSC match
+   wire        gemA_alct_match; 
+   wire        gemA_clct_match;
+   wire        gemB_alct_match; 
+   wire        gemB_clct_match;
+   wire        gemcsc_bend_enable;
+
+   wire [7:0]  match_gem_alct_delay;
+   wire [3:0]  match_gem_alct_window;
+   wire [3:0]  match_gem_clct_window;
+   wire [3:0]  gem_clct_win;
+   wire [3:0]  alct_gem_win;
+
    wire [MXBADR-1:0]      wr_adr_xtmb; // Buffer write address to TMB
    wire [MXBADR-1:0]      wr_adr_rtmb; // Buffer write address at TMB matching time
    wire [MXBADR-1:0]      wr_adr_xmpc; // wr_adr at mpc xmit to sequencer
@@ -4047,17 +4061,6 @@ wire [15:0] gemB_bxn_counter;
 //    Receives 80MHz MPC desision result, sends de-muxed to Sequencer
 //-------------------------------------------------------------------------------------------------------------------
 // Local
-  wire        gemA_alct_match; 
-  wire        gemA_clct_match;
-  wire        gemB_alct_match; 
-  wire        gemB_clct_match;
-  wire        gemcsc_bend_enable;
-
-  wire [7:0]  match_gem_alct_delay;
-  wire [3:0]  match_gem_alct_window;
-  wire [3:0]  match_gem_clct_window;
-  wire [3:0]  gem_clct_win;
-  wire [3:0]  alct_gem_win;
 
   wire  [1:0]      tmb_sync_err_en;
   wire  [7:0]      mpc_nframes;
