@@ -161,10 +161,11 @@
   gem_me1b_match_noalct,       //Out gem-csc match without alct is allowed in ME1a 
   gem_me1a_match_noclct,       //Out gem-csc match without clct is allowed in ME1b => allow GEM-ALCT match to build LCT
   gem_me1b_match_noclct,       //Out gem-csc match without clct is allowed in ME1a
-  gem_me1a_match_promotequal,     //Out promote quality or not for match in ME1a region, 
-  gem_me1b_match_promotequal,     //Out promote quality or not for match in ME1b region 
-  gem_me1a_match_promotepat,     //Out promote pattern or not for match in ME1a region, 
-  gem_me1b_match_promotepat,     //Out promote pattern or not for match in ME1b region, 
+  //gem_me1a_match_promotequal,     //Out promote quality or not for match in ME1a region, 
+  //gem_me1b_match_promotequal,     //Out promote quality or not for match in ME1b region 
+  //gem_me1a_match_promotepat,     //Out promote pattern or not for match in ME1a region, 
+  //gem_me1b_match_promotepat,     //Out promote pattern or not for match in ME1b region, 
+  gemcsc_bend_enable,
 
 // TMB-Sequencer Pipelines
   wr_adr_xtmb,
@@ -534,7 +535,7 @@
   input  [1:0]        gemA_fiber_enable;
 
   //GEMB trigger match control
-  input               gemA_match_enable;
+  input               gemB_match_enable;
   output              gemB_alct_match;
   output              gemB_clct_match;
   input [1:0]         gemB_fiber_enable;
