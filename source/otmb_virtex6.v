@@ -4207,7 +4207,7 @@ wire [15:0] gemB_bxn_counter;
   //.gemB_cluster6_cscwire_hi  (gemB_csc_cluster_cscwire_lo[6]),// In CSC wire group mapped from GEM pad
   //.gemB_cluster7_cscwire_hi  (gemB_csc_cluster_cscwire_lo[7]),// In CSC wire group mapped from GEM pad
 
-  .copad_match   (copad_match[7:0]);
+  .copad_match   (copad_match[7:0]),
 
   .match_gem_alct_delay   (match_gem_alct_delay[7:0]),  //In gem delay for gem-ALCT match
   .match_gem_alct_window  (match_gem_alct_window[3:0]), //In gem-alct match window
