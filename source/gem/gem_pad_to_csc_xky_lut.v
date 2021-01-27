@@ -1,7 +1,7 @@
 
 //GEM pad to CSC HS LUT
 //2020, Dec, change CSC HS into 1/8HS, with CCLUT implemented. the output should 10bits
-module gem_pad_to_csc_hs_lut(
+module gem_pad_to_csc_xky_lut(
 
    input          clock,
    input          wen, // write enable
