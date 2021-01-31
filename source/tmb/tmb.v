@@ -2178,6 +2178,9 @@
 // Format MPC output words
 //------------------------------------------------------------------------------------------------------------------
 
+  //GEMCSC algorithm is not ready yet. Use the lct quality with ALCT+CLCT case
+  assign lct0_qlt_run3 = (alct0_valid && clct0_valid) ? 3'b011 : 0;
+  assign lct1_qlt_run3 = (alct1_valid && clct1_valid) ? 3'b011 : 0;
 
   assign  mpc0_frame0_run3[6:0]   = alct0_key[6:0];
   assign  mpc0_frame0_run3[10:7]  = clct0_bnd[3:0]; //new bending from CCLUT
