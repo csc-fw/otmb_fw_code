@@ -2188,7 +2188,7 @@
 //------------------------------------------------------------------------------------------------------------------
 // Format MPC output words
 //------------------------------------------------------------------------------------------------------------------
-  wire   hmt_trigger_run3 = {2'b0, hmt_trigger_real};
+  wire [3:0]  hmt_trigger_run3 = {2'b0, hmt_trigger_real};
 
   //GEMCSC algorithm is not ready yet. Use the lct quality with ALCT+CLCT case
   assign lct0_qlt_run3 = (alct0_valid && clct0_valid) ? 3'b011 : 0;
@@ -2214,7 +2214,7 @@
   assign  mpc1_frame0_run3[6:0]   = alct1_key[6:0];
   //assign  mpc1_frame0_run3[10:7]  = clct1_bnd[3:0]; // new bending from CCLUT
   assign  mpc1_frame0_run3[7]     = lct_pid_run3[4]; // new bending from CCLUT
-  assign  mpc1_frame0_run3[10:8]  = hmt_trigger_run3[1:3];//
+  assign  mpc1_frame0_run3[10:8]  = hmt_trigger_run3[3:1];//
   assign  mpc1_frame0_run3[13:11] = lct1_qlt_run3[2:0];
   //assign  mpc1_frame0_run3[15:14] = clct1_xky[1:0];
   assign  mpc1_frame0_run3[14]    = clct1_xky[0]; // CLCT0 1/4 strip bit
