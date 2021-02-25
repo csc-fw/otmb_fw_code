@@ -817,7 +817,7 @@ module pattern_finder_ccLUT (
   //  end
   //endgenerate
 
-  //new pattern finding for k=6, CCLUT, Tao
+  //new pattern finding for k=5, CCLUT, Tao
   generate  
     for (ihs = 128; ihs <= 223; ihs = ihs + 1) begin: patgen_me1a  // JG, later use MXHSXB, MXKEYX-1 here.
       pattern_unit_ccLUT upat_me1a (
