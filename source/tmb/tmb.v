@@ -2199,13 +2199,13 @@
   assign  mpc0_frame0_run3[10:7]  = lct_pid_run3[3:0]; //new bending from CCLUT
   assign  mpc0_frame0_run3[13:11] = lct0_qlt_run3[2:0];
   //assign  mpc0_frame0_run3[15:14] = clct0_xky[1:0]; // CLCT0 1/4 strip bit and 1/8 strip bit
-  assign  mpc0_frame0_run3[14]    = clct0_xky[0]; // CLCT0 1/4 strip bit and 1/8 strip bit
+  assign  mpc0_frame0_run3[14]    = clct0_xky[1]; // CLCT0 1/4 strip bit
   assign  mpc0_frame0_run3[15]    = lct0_vpf_run3; //LCT run3 vpf
 
   assign  mpc0_frame1_run3[7:0]   = clct0_xky[9:2];
   assign  mpc0_frame1_run3[8]     = clct0_bend; // left or right from CCLUT
   //assign  mpc0_frame1_run3[9]     = hmt_trigger_real[0];
-  assign  mpc0_frame1_run3[9]     = clct0_xky[1];// CLCT0 1/8 strip bit
+  assign  mpc0_frame1_run3[9]     = clct0_xky[0];// CLCT0 1/8 strip bit
   assign  mpc0_frame1_run3[10]    = alct0_bxn[0];
   assign  mpc0_frame1_run3[11]    = clct_bx0;  // bx0 gets replaced after mpc_tx_delay, keep here to mollify xst
   //assign  mpc0_frame1_run3[15:12] = csc_id[3:0];
@@ -2217,13 +2217,13 @@
   assign  mpc1_frame0_run3[10:8]  = hmt_trigger_run3[3:1];//
   assign  mpc1_frame0_run3[13:11] = lct1_qlt_run3[2:0];
   //assign  mpc1_frame0_run3[15:14] = clct1_xky[1:0];
-  assign  mpc1_frame0_run3[14]    = clct1_xky[0]; // CLCT0 1/4 strip bit
+  assign  mpc1_frame0_run3[14]    = clct1_xky[1]; // CLCT0 1/4 strip bit
   assign  mpc1_frame0_run3[15]    = lct1_vpf_run3; //LCT run3 vpf
 
   assign  mpc1_frame1_run3[7:0]   = clct1_xky[9:2];
   assign  mpc1_frame1_run3[8]     = clct1_bend;
   //assign  mpc1_frame1_run3[9]     = hmt_trigger_real[1];
-  assign  mpc1_frame1_run3[9]     = clct1_xky[1];// CLCT0 1/8 strip bit
+  assign  mpc1_frame1_run3[9]     = clct1_xky[0];// CLCT0 1/8 strip bit
   //assign  mpc1_frame1_run3[10]    = alct1_bxn[0];
   assign  mpc1_frame1_run3[10]    = hmt_trigger_run3[0];
   assign  mpc1_frame1_run3[11]    = alct_bx0;  // bx0 gets replaced after mpc_tx_delay, keep here to mollify xst
