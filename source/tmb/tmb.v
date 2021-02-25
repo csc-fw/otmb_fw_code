@@ -2123,9 +2123,9 @@
   wire [4:0] lct_pid_run3;
   patid_5bits upid5bit(
   .lct0_vpf  (lct0_vpf_run3),
-  .clct0_pid (clct0_pid[2:0]),
+  .clct0_pid (clct0_pat[2:0]),
   .lct1_vpf  (lct1_vpf_run3),
-  .clct1_pid (clct1_pid[2:0]),
+  .clct1_pid (clct1_pat[2:0]),
   .out_pid   (lct_pid_run3[4:0])
   );
 //------------------------------------------------------------------------------------------------------------------
