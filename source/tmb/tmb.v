@@ -2184,7 +2184,7 @@
           gemB_bx0_match <= gemB_bx0;
       end
   end
-
+lct0_vpf_run3
 //------------------------------------------------------------------------------------------------------------------
 // Format MPC output words
 //------------------------------------------------------------------------------------------------------------------
@@ -2203,7 +2203,7 @@
   assign  mpc0_frame0_run3[15]    = lct0_vpf_run3; //LCT run3 vpf
 
   assign  mpc0_frame1_run3[7:0]   = clct0_xky[9:2];
-  assign  mpc0_frame1_run3[8]     = clct0_bend; // left or right from CCLUT
+  assign  mpc0_frame1_run3[8]     = clct0_bnd[4]; // left or right from CCLUT
   //assign  mpc0_frame1_run3[9]     = hmt_trigger_real[0];
   assign  mpc0_frame1_run3[9]     = clct0_xky[0];// CLCT0 1/8 strip bit
   assign  mpc0_frame1_run3[10]    = alct0_bxn[0];
@@ -2221,7 +2221,7 @@
   assign  mpc1_frame0_run3[15]    = lct1_vpf_run3; //LCT run3 vpf
 
   assign  mpc1_frame1_run3[7:0]   = clct1_xky[9:2];
-  assign  mpc1_frame1_run3[8]     = clct1_bend;
+  assign  mpc1_frame1_run3[8]     = clct1_bnd[4];
   //assign  mpc1_frame1_run3[9]     = hmt_trigger_real[1];
   assign  mpc1_frame1_run3[9]     = clct1_xky[0];// CLCT0 1/8 strip bit
   //assign  mpc1_frame1_run3[10]    = alct1_bxn[0];
