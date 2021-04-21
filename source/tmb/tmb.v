@@ -2230,7 +2230,9 @@ lct0_vpf_run3
   assign  mpc0_frame1_run3inj[15:12] = 4'b1111;//clct_bnd run3
   //second LCT=empty
   assign  mpc1_frame0_run3inj[15:0]  = 16'b0;//empty
-  assign  mpc1_frame1_run3inj[15:0]  = 16'b0;//empty
+  assign  mpc1_frame1_run3inj[10]       = 1'b1;
+  assign  mpc1_frame1_run3inj[9 : 0] = 10'b0;//empty
+  assign  mpc1_frame1_run3inj[15:11] = 5'b0;//empty
   //assign  mpc1_frame0_run3inj[6:0]   = 7'b0;
   //assign  mpc1_frame0_run3inj[10:7]  = 4'b0;//new bending from CCLUT
   //assign  mpc1_frame0_run3inj[13:11] = 3'b0;
