@@ -2604,8 +2604,8 @@ end
   .cfeb_layer_or    (cfeb_layer_or[MXLY-1:0]),      // Out  OR of hstrips on each layer
   .cfeb_nlayers_hit (cfeb_nlayers_hit[MXHITB-1:0]), // Out  Number of CSC layers hit
 //HMT, 2020
-  .hmt_me1a_enable     (hmt_me1a_enable), 
-  .hmt_nhits_trig      (hmt_nhits_trig[9:0]),
+  .hmt_me1a_enable     (hmt_me1a_enable),     //Out
+  .hmt_nhits_trig      (hmt_nhits_trig[9:0]), //Out
   .hmt_nhits_trig_bx678      (hmt_nhits_trig_bx678[9:0]),//Out
   .hmt_nhits_trig_bx2345     (hmt_nhits_trig_bx2345[9:0]), // Out
 //to add dead time feature in 2016Algo  
@@ -2727,6 +2727,8 @@ end
    wire [7:0]             l1a_preClct_dly;
 
    wire [9:0]             hmt_nhits_trig_vme;
+   wire [9:0]             hmt_nhits_trig_bx2345_vme;
+   wire [9:0]             hmt_nhits_trig_bx678_vme;
 
    wire [MXCLCT-1:0]      clct0_vme;
    wire [MXCLCT-1:0]      clct1_vme;
@@ -3004,8 +3006,10 @@ end
   .cfeb_layer_or    (cfeb_layer_or[MXLY-1:0]),      // In  OR of hstrips on each layer
   .cfeb_nlayers_hit (cfeb_nlayers_hit[MXHITB-1:0]), // In  Number of CSC layers hit
 
-  //HMT results 
+  //Sequencer HMT results 
   .hmt_nhits_trig      (hmt_nhits_trig[9:0]), //In hit counter from pattern finding  module
+  .hmt_nhits_trig_bx678      (hmt_nhits_trig_bx678[9:0]),//In
+  .hmt_nhits_trig_bx2345     (hmt_nhits_trig_bx2345[9:0]), //In
   .hmt_trigger         (hmt_trigger[MXHMTB-1:0]), // In HMT trigger results
 
 // Sequencer Pattern Finder CLCT results
@@ -3123,8 +3127,10 @@ end
   .seq_trigger     (seq_trigger),           // Out  Sequencer requests L1A from CCB
   .sequencer_state (sequencer_state[11:0]), // Out  Sequencer state for vme
 
-  .hmt_nhits_trig_vme (hmt_nhits_trig_vme[9:0]),// Out HMT nhits for trigger
-  .hmt_trigger_vme    (hmt_trigger_vme[MXHMTB-1:0]), // Out HMT trigger results
+  .hmt_nhits_trig_vme        (hmt_nhits_trig_vme[9:0]),// Out HMT nhits for trigger
+  .hmt_nhits_trig_bx678_vme  (hmt_nhits_trig_bx678_vme[9:0]),// Out HMT nhits for trigger
+  .hmt_nhits_trig_bx2345_vme (hmt_nhits_trig_bx2345_vme[9:0]),// Out HMT nhits for trigger
+  .hmt_trigger_vme           (hmt_trigger_vme[MXHMTB-1:0]), // Out HMT trigger results
 
   .event_clear_vme (event_clear_vme),         // In  Event clear for aff,clct,mpc vme diagnostic registers
   .clct0_vme       (clct0_vme[MXCLCT-1:0]),   // Out  First  CLCT
@@ -4104,9 +4110,9 @@ wire [15:0] gemB_bxn_counter;
   .clock      (clock),      // In  40MHz TMB main clock
   .ttc_resync (ttc_resync), // In  TTC resync
   //injected LCT
-  .lct_inj_hs         (lct_inj_hs[7:0]), //Out injected LCT hs 
-  .lct_inj_wg         (lct_inj_wg[6:0]),//Out injected LCT wg
-  .lct_inj_enable     (lct_inj_enable), //Out, enable LCT injection
+  .lct_inj_hs         (lct_inj_hs[7:0]), //In injected LCT hs 
+  .lct_inj_wg         (lct_inj_wg[6:0]),//In injected LCT wg
+  .lct_inj_enable     (lct_inj_enable), //In, enable LCT injection
 
 // ALCT
   .alct0_tmb    (alct0_tmb[MXALCT-1:0]), // In  ALCT best muon
@@ -5213,6 +5219,8 @@ wire [15:0] gemB_bxn_counter;
       .hmt_enable         (hmt_enable),        // out ME1a enable or not in HMT
       .hmt_me1a_enable    (hmt_me1a_enable),        // out ME1a enable or not in HMT
       .hmt_nhits_trig_vme (hmt_nhits_trig_vme[9:0]),        //In, nhit counter for  HMT
+      .hmt_nhits_trig_bx678_vme  (hmt_nhits_trig_bx678_vme[9:0]),// In HMT nhits for trigger
+      .hmt_nhits_trig_bx2345_vme (hmt_nhits_trig_bx2345_vme[9:0]),// In HMT nhits for trigger
       .hmt_trigger_vme    (hmt_trigger_vme[MXHMTB-1:0]), // In HMT trigger results
       .hmt_thresh1        (hmt_thresh1[9:0]), // out, loose HMT thresh
       .hmt_thresh2        (hmt_thresh2[9:0]), // out, loose HMT thresh

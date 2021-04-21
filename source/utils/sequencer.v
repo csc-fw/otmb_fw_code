@@ -500,6 +500,8 @@
   cfeb_nlayers_hit,
 //HMT results
   hmt_nhits_trig,
+  hmt_nhits_trig_bx678,
+  hmt_nhits_trig_bx2345,
   hmt_trigger,
 
 // Pattern Finder CLCT results
@@ -620,6 +622,8 @@
   sequencer_state,
 
   hmt_nhits_trig_vme,
+  hmt_nhits_trig_bx678_vme,
+  hmt_nhits_trig_bx2345_vme,
   hmt_trigger_vme,
 
   event_clear_vme,
@@ -1475,6 +1479,8 @@
   input  [MXHITB-1:0]  cfeb_nlayers_hit;    // Number of CSC layers hit
 
   input  [9:0]         hmt_nhits_trig; // HMT results 
+  input  [9:0]         hmt_nhits_trig_bx678; // HMT results 
+  input  [9:0]         hmt_nhits_trig_bx2345; // HMT results 
   input  [MXHMTB-1:0]  hmt_trigger; // HMT nhits passing thresholds
 // Pattern Finder CLCT results
   input  [MXHITB-1:0]  hs_hit_1st;        // 1st CLCT pattern hits
@@ -1589,7 +1595,9 @@
   output        seq_trigger;     // Sequencer requests L1A from CCB
   output [11:0] sequencer_state; // Sequencer state for vme read
 
-  output  [9:0]         hmt_nhits_trig_vme;      // First  CLCT
+  output  [9:0]         hmt_nhits_trig_vme;      // Nhits at CLCT BX
+  output  [9:0]         hmt_nhits_trig_bx678_vme;      // Nhits at bx678, assume bx7 is CLCTBX
+  output  [9:0]         hmt_nhits_trig_bx2345_vme;      // Nhits at bx2345, assume bx7 is CLCTBX
   output  [MXHMTB-1:0]  hmt_trigger_vme; // HMT nhits passing thresholds
   input          event_clear_vme;  // Event clear for aff,alct,clct,mpc vme diagnostic registers
   output  [MXCLCT-1:0]  clct0_vme;      // First  CLCT
@@ -3057,6 +3065,8 @@
 // Pushes CLCT pretrigger data into pipeline to wait for pattern finder and drift delay
 //------------------------------------------------------------------------------------------------------------------
   wire [9:0]         hmt_nhits_trig, hmt_nhits_trig_xtmb;
+  wire [9:0]         hmt_nhits_trig_bx678, hmt_nhits_trig_bx678_xtmb;
+  wire [9:0]         hmt_nhits_trig_bx2345, hmt_nhits_trig_bx2345_xtmb;
   wire [MXHMTB-1:0]  hmt_trigger, hmt_trigger_xtmb;
 
 // On pretrigger push buffer address and bxn into the pre-trigger pipeline
@@ -3086,6 +3096,8 @@
 
 // Extract pre-trigger data after drift delay, compensated for pattern-finder latency + programmable drift delay
   assign hmt_nhits_trig_xtmb[9:0]        = hmt_nhits_trig[9:0]; //only valid if at least one CLCT is found
+  assign hmt_nhits_trig_bx678_xtmb[9:0]  = hmt_nhits_trig_bx678[9:0]; //only valid if at least one CLCT is found
+  assign hmt_nhits_trig_bx2345_xtmb[9:0] = hmt_nhits_trig_bx2345[9:0]; //only valid if at least one CLCT is found
   assign hmt_trigger_xtmb[MXHMTB-1:0]    = hmt_trigger[MXHMTB-1:0]   ; //only valid if at least one CLCT is found
   //assign hmt_nhits_trig_xtmb[9:0] = postdrift_hmt_nhits_trig[9:0] ;// do not require valid clct 
   //assign hmt_trigger_xtmb[1:0]    = postdrift_hmt_trigger[1:0] ;   // do not require valid clct 
@@ -3186,6 +3198,8 @@
 
 // Latch CLCTs for VME
   reg [9:0]        hmt_nhits_trig_vme=0;
+  reg [9:0]        hmt_nhits_trig_bx678_vme=0;
+  reg [9:0]        hmt_nhits_trig_bx2345_vme=0;
   reg [MXHMTB-1:0] hmt_trigger_vme=0;
   reg [MXCLCT-1:0]  clct0_vme=0;
   reg [MXCLCT-1:0]  clct1_vme=0;
@@ -3217,6 +3231,8 @@
       clct1_vme_bnd   <= 0;
       clct1_vme_xky   <= 0;
       hmt_nhits_trig_vme <= 0;
+      hmt_nhits_trig_bx678_vme <= 0;
+      hmt_nhits_trig_bx2345_vme <= 0;
       hmt_trigger_vme <= 0;
     end
     //else if (clct0_vpf) begin
@@ -3234,7 +3250,9 @@
       clct1_vme_bnd   <= clct1_bnd_xtmb;
       clct1_vme_xky   <= clct1_xky_xtmb;
       // should latch hmt in other case ?? may consider the trigger result of hmt_nhits_trig
-      hmt_nhits_trig_vme <= hmt_nhits_trig_xtmb;
+      hmt_nhits_trig_vme        <= hmt_nhits_trig_xtmb;
+      hmt_nhits_trig_bx678_vme  <= hmt_nhits_trig_bx678_xtmb;
+      hmt_nhits_trig_bx2345_vme <= hmt_nhits_trig_bx2345_xtmb;
       hmt_trigger_vme  <= hmt_trigger_xtmb;
     end
     
