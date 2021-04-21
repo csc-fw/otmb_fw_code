@@ -216,6 +216,8 @@ module pattern_finder_ccLUT (
 
   input hmt_me1a_enable;
   output [9:0] hmt_nhits_trig;
+  output [9:0] hmt_nhits_trig_bx2345;
+  output [9:0] hmt_nhits_trig_bx678;
 
   // 2nd CLCT separation RAM Ports
   input          clct_sep_src;       // CLCT separation source 1=VME, 0=RAM

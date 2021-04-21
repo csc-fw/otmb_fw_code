@@ -8715,7 +8715,7 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   
   assign lct_inj_hs[7:0]      = lct_injection_wr[7:0];
   assign lct_inj_wg[6:0]      = lct_injection_wr[14:8];
-  assign lct_inj_enable[0]    = lct_injection_wr[15];
+  assign lct_inj_enable       = lct_injection_wr[15];
 
   assign lct_injection_rd[15:0] = lct_injection_wr[15:0];
 

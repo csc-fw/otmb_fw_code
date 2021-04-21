@@ -2483,8 +2483,6 @@ end
 //HMT, 2020
   .hmt_me1a_enable     (hmt_me1a_enable), 
   .hmt_nhits_trig      (hmt_nhits_trig[9:0]), // Out
-  .hmt_nhits_trig_bx678      (hmt_nhits_trig_bx678[9:0]),//Out
-  .hmt_nhits_trig_bx2345     (hmt_nhits_trig_bx2345[9:0]), // Out
 
 //to add dead time feature in 2016Algo  
   .drift_delay        (drift_delay[MXDRIFT-1:0]),      // In  CSC Drift delay clocks
