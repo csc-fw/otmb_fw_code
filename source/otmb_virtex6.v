@@ -2303,13 +2303,21 @@ end
   wire  hmt_enable;
   wire  hmt_me1a_enable;
   wire [9:0] hmt_nhits_trig;
+  wire [9:0] hmt_nhits_trig_bx678;
+  wire [9:0] hmt_nhits_trig_bx2345;
   wire [1:0] hmt_trigger; // HMT trigger results 
+  wire [1:0] hmt_trigger_bx678; // HMT trigger results 
+  wire [1:0] hmt_trigger_bx2345; // HMT trigger results 
   wire [9:0] hmt_thresh1, hmt_thresh2, hmt_thresh3;
   //assign hmt_thresh1 = 10'd40;
   //assign hmt_thresh2 = 10'd60;
   //assign hmt_thresh3 = 10'd80;
   assign hmt_trigger[0] = (hmt_nhits_trig >= hmt_thresh1) || (hmt_nhits_trig >= hmt_thresh3);
   assign hmt_trigger[1] = (hmt_nhits_trig >= hmt_thresh2) || (hmt_nhits_trig >= hmt_thresh3);
+  assign hmt_trigger_bx678[0] = (hmt_nhits_trig_bx678 >= hmt_thresh1) || (hmt_nhits_trig_bx678 >= hmt_thresh3);
+  assign hmt_trigger_bx678[1] = (hmt_nhits_trig_bx678 >= hmt_thresh2) || (hmt_nhits_trig_bx678 >= hmt_thresh3);
+  assign hmt_trigger_bx2345[0] = (hmt_nhits_trig_bx2345 >= hmt_thresh1) || (hmt_nhits_trig_bx2345 >= hmt_thresh3);
+  assign hmt_trigger_bx2345[1] = (hmt_nhits_trig_bx2345 >= hmt_thresh2) || (hmt_nhits_trig_bx2345 >= hmt_thresh3);
 
 // 2nd CLCT separation RAM Ports
   wire         clct_sep_src;       // CLCT separation source 1=vme, 0=ram
@@ -2470,7 +2478,9 @@ end
 
 //HMT, 2020
   .hmt_me1a_enable     (hmt_me1a_enable), 
-  .hmt_nhits_trig      (hmt_nhits_trig[9:0]),
+  .hmt_nhits_trig      (hmt_nhits_trig[9:0]), // Out
+  .hmt_nhits_trig_bx678      (hmt_nhits_trig_bx678[9:0]),//Out
+  .hmt_nhits_trig_bx2345     (hmt_nhits_trig_bx2345[9:0]), // Out
 
 //to add dead time feature in 2016Algo  
   .drift_delay        (drift_delay[MXDRIFT-1:0]),      // In  CSC Drift delay clocks
@@ -2594,6 +2604,8 @@ end
 //HMT, 2020
   .hmt_me1a_enable     (hmt_me1a_enable), 
   .hmt_nhits_trig      (hmt_nhits_trig[9:0]),
+  .hmt_nhits_trig_bx678      (hmt_nhits_trig_bx678[9:0]),//Out
+  .hmt_nhits_trig_bx2345     (hmt_nhits_trig_bx2345[9:0]), // Out
 //to add dead time feature in 2016Algo  
   .drift_delay        (drift_delay[MXDRIFT-1:0]),      // In  CSC Drift delay clocks
   .algo2016_use_dead_time_zone         (algo2016_use_dead_time_zone), // In Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
@@ -2632,7 +2644,7 @@ end
    wire [MXTBIN-1:0]      cfeb_tbin;
    wire [7:0]             cfeb_rawhits;
    
-   wire [9:0]             hmt_nhits_trig_xtmb;
+   //wire [9:0]             hmt_nhits_trig_xtmb;
    wire [1:0]             hmt_trigger_xtmb;
    wire [1:0]             hmt_trigger_vme;
 
@@ -3281,7 +3293,7 @@ end
   .wr_avail_rmpc (wr_avail_rmpc), // In  Buffer available at MPC received
 
 // Sequencer TMB LCT Match results
-  .hmt_nhits_trig_xtmb (hmt_nhits_trig_xtmb[9:0]),// Out HMT nhits for trigger
+  //.hmt_nhits_trig_xtmb (hmt_nhits_trig_xtmb[9:0]),// Out HMT nhits for trigger
   .hmt_trigger_xtmb    (hmt_trigger_xtmb[1:0]),// Out HMT nhits for trigger
   .clct0_xtmb (clct0_xtmb[MXCLCT-1:0]),  // Out  First  CLCT
   .clct1_xtmb (clct1_xtmb[MXCLCT-1:0]),  // Out  Second CLCT
@@ -4062,6 +4074,12 @@ wire [15:0] gemB_bxn_counter;
 //-------------------------------------------------------------------------------------------------------------------
 // Local
 
+  //injected lct
+  wire  [7:0] lct_inj_hs;
+  wire  [6:0] lct_inj_wg;
+  wire        lct_inj_enable;
+
+
   wire  [1:0]      tmb_sync_err_en;
   wire  [7:0]      mpc_nframes;
   wire  [3:0]      mpc_wen;
@@ -4083,6 +4101,10 @@ wire [15:0] gemB_bxn_counter;
 // Clock
   .clock      (clock),      // In  40MHz TMB main clock
   .ttc_resync (ttc_resync), // In  TTC resync
+  //injected LCT
+  .lct_inj_hs         (lct_inj_hs[7:0]), //Out injected LCT hs 
+  .lct_inj_wg         (lct_inj_wg[6:0]),//Out injected LCT wg
+  .lct_inj_enable     (lct_inj_enable), //Out, enable LCT injection
 
 // ALCT
   .alct0_tmb    (alct0_tmb[MXALCT-1:0]), // In  ALCT best muon
@@ -4257,7 +4279,7 @@ wire [15:0] gemB_bxn_counter;
   .wr_avail_rmpc (wr_avail_rmpc), // Out  Buffer available at MPC received
 
 // Sequencer
-  .hmt_nhits_trig_xtmb (hmt_nhits_trig_xtmb[9:0]),// In HMT nhits for trigger
+  //.hmt_nhits_trig_xtmb (hmt_nhits_trig_xtmb[9:0]),// In HMT nhits for trigger
   .hmt_trigger_xtmb    (hmt_trigger_xtmb[1:0]),// Out HMT nhits for trigger
   .clct0_xtmb (clct0_xtmb[MXCLCT-1:0]),  // In  First  CLCT
   .clct1_xtmb (clct1_xtmb[MXCLCT-1:0]),  // In  Second CLCT
@@ -5194,6 +5216,9 @@ wire [15:0] gemB_bxn_counter;
       .hmt_thresh2        (hmt_thresh2[9:0]), // out, loose HMT thresh
       .hmt_thresh3        (hmt_thresh3[9:0]), // out, loose HMT thresh
 
+      .lct_inj_hs         (lct_inj_hs[7:0]), //Out injected LCT hs 
+      .lct_inj_wg         (lct_inj_wg[6:0]),//Out injected LCT wg
+      .lct_inj_enable     (lct_inj_enable), //Out, enable LCT injection
       // Sequencer Ports: Latched CLCTs + Status
       .event_clear_vme   (event_clear_vme),         // Out  Event clear for vme diagnostic registers
       .clct0_vme         (clct0_vme[MXCLCT-1:0]),   // In  First  CLCT

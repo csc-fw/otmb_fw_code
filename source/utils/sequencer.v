@@ -791,7 +791,7 @@
   wr_avail_rmpc,
 
 // TMB LCT Match
-  hmt_nhits_trig_xtmb,
+  //hmt_nhits_trig_xtmb,
   hmt_trigger_xtmb,
   
   clct0_xtmb,
@@ -1758,7 +1758,7 @@
   input          wr_avail_rmpc; // Buffer available at MPC received
 
 // TMB LCT Match
-  output  [9:0]          hmt_nhits_trig_xtmb;
+  //output  [9:0]          hmt_nhits_trig_xtmb;
   output  [1:0]          hmt_trigger_xtmb; // HMT nhits passing thresholds
   output  [MXCLCT-1:0]   clct0_xtmb; // 1st CLCT to TMB
   output  [MXCLCT-1:0]   clct1_xtmb; // 2nd CLCT to TMB
