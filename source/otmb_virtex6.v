@@ -286,6 +286,8 @@
   parameter MXORBIT    =  30; // Number orbit counter bits
   parameter MXL1ARX    =  12; // Number L1As received counter bits
 
+  parameter MXHMTB     =  4;// bits for HMT
+
 //-------------------------------------------------------------------------------------------------------------------
 // I/O Port Declarations
 //-------------------------------------------------------------------------------------------------------------------
@@ -2305,19 +2307,21 @@ end
   wire [9:0] hmt_nhits_trig;
   wire [9:0] hmt_nhits_trig_bx678;
   wire [9:0] hmt_nhits_trig_bx2345;
-  wire [1:0] hmt_trigger; // HMT trigger results 
+  wire [1:0] hmt_trigger_bx7; // HMT trigger results 
   wire [1:0] hmt_trigger_bx678; // HMT trigger results 
   wire [1:0] hmt_trigger_bx2345; // HMT trigger results 
   wire [9:0] hmt_thresh1, hmt_thresh2, hmt_thresh3;
+  wire [MXHMTB-1:0] hmt_trigger ;
   //assign hmt_thresh1 = 10'd40;
   //assign hmt_thresh2 = 10'd60;
   //assign hmt_thresh3 = 10'd80;
-  assign hmt_trigger[0] = (hmt_nhits_trig >= hmt_thresh1) || (hmt_nhits_trig >= hmt_thresh3);
-  assign hmt_trigger[1] = (hmt_nhits_trig >= hmt_thresh2) || (hmt_nhits_trig >= hmt_thresh3);
+  assign hmt_trigger_bx7[0] = (hmt_nhits_trig >= hmt_thresh1) || (hmt_nhits_trig >= hmt_thresh3);
+  assign hmt_trigger_bx7[1] = (hmt_nhits_trig >= hmt_thresh2) || (hmt_nhits_trig >= hmt_thresh3);
   assign hmt_trigger_bx678[0] = (hmt_nhits_trig_bx678 >= hmt_thresh1) || (hmt_nhits_trig_bx678 >= hmt_thresh3);
   assign hmt_trigger_bx678[1] = (hmt_nhits_trig_bx678 >= hmt_thresh2) || (hmt_nhits_trig_bx678 >= hmt_thresh3);
   assign hmt_trigger_bx2345[0] = (hmt_nhits_trig_bx2345 >= hmt_thresh1) || (hmt_nhits_trig_bx2345 >= hmt_thresh3);
   assign hmt_trigger_bx2345[1] = (hmt_nhits_trig_bx2345 >= hmt_thresh2) || (hmt_nhits_trig_bx2345 >= hmt_thresh3);
+  assign hmt_trigger = {hmt_trigger_bx2345, hmt_trigger_bx678};
 
 // 2nd CLCT separation RAM Ports
   wire         clct_sep_src;       // CLCT separation source 1=vme, 0=ram
@@ -2645,8 +2649,8 @@ end
    wire [7:0]             cfeb_rawhits;
    
    //wire [9:0]             hmt_nhits_trig_xtmb;
-   wire [1:0]             hmt_trigger_xtmb;
-   wire [1:0]             hmt_trigger_vme;
+   wire [MXHMTB-1:0]             hmt_trigger_xtmb;
+   wire [MXHMTB-1:0]             hmt_trigger_vme;
 
    wire [MXCLCT-1:0]      clct0_xtmb;
    wire [MXCLCT-1:0]      clct1_xtmb;
@@ -3004,7 +3008,7 @@ end
 
   //HMT results 
   .hmt_nhits_trig      (hmt_nhits_trig[9:0]), //In hit counter from pattern finding  module
-  .hmt_trigger         (hmt_trigger[1:0]), // In HMT trigger results
+  .hmt_trigger         (hmt_trigger[MXHMTB-1:0]), // In HMT trigger results
 
 // Sequencer Pattern Finder CLCT results
   .hs_hit_1st (hs_hit_1st[MXHITB-1:0]),  // In  1st CLCT pattern hits
@@ -3122,7 +3126,7 @@ end
   .sequencer_state (sequencer_state[11:0]), // Out  Sequencer state for vme
 
   .hmt_nhits_trig_vme (hmt_nhits_trig_vme[9:0]),// Out HMT nhits for trigger
-  .hmt_trigger_vme    (hmt_trigger_vme[1:0]), // Out HMT trigger results
+  .hmt_trigger_vme    (hmt_trigger_vme[MXHMTB-1:0]), // Out HMT trigger results
 
   .event_clear_vme (event_clear_vme),         // In  Event clear for aff,clct,mpc vme diagnostic registers
   .clct0_vme       (clct0_vme[MXCLCT-1:0]),   // Out  First  CLCT
@@ -3294,7 +3298,7 @@ end
 
 // Sequencer TMB LCT Match results
   //.hmt_nhits_trig_xtmb (hmt_nhits_trig_xtmb[9:0]),// Out HMT nhits for trigger
-  .hmt_trigger_xtmb    (hmt_trigger_xtmb[1:0]),// Out HMT nhits for trigger
+  .hmt_trigger_xtmb    (hmt_trigger_xtmb[MXHMTB-1:0]),// Out HMT nhits for trigger
   .clct0_xtmb (clct0_xtmb[MXCLCT-1:0]),  // Out  First  CLCT
   .clct1_xtmb (clct1_xtmb[MXCLCT-1:0]),  // Out  Second CLCT
   .clctc_xtmb (clctc_xtmb[MXCLCTC-1:0]), // Out  Common to CLCT0/1 to TMB
@@ -4280,7 +4284,7 @@ wire [15:0] gemB_bxn_counter;
 
 // Sequencer
   //.hmt_nhits_trig_xtmb (hmt_nhits_trig_xtmb[9:0]),// In HMT nhits for trigger
-  .hmt_trigger_xtmb    (hmt_trigger_xtmb[1:0]),// Out HMT nhits for trigger
+  .hmt_trigger_xtmb    (hmt_trigger_xtmb[MXHMTB-1:0]),// Out HMT nhits for trigger
   .clct0_xtmb (clct0_xtmb[MXCLCT-1:0]),  // In  First  CLCT
   .clct1_xtmb (clct1_xtmb[MXCLCT-1:0]),  // In  Second CLCT
   .clctc_xtmb (clctc_xtmb[MXCLCTC-1:0]), // In  Common to CLCT0/1 to TMB
@@ -5211,7 +5215,7 @@ wire [15:0] gemB_bxn_counter;
       .hmt_enable         (hmt_enable),        // out ME1a enable or not in HMT
       .hmt_me1a_enable    (hmt_me1a_enable),        // out ME1a enable or not in HMT
       .hmt_nhits_trig_vme (hmt_nhits_trig_vme[9:0]),        //In, nhit counter for  HMT
-      .hmt_trigger_vme    (hmt_trigger_vme[1:0]), // In HMT trigger results
+      .hmt_trigger_vme    (hmt_trigger_vme[MXHMTB-1:0]), // In HMT trigger results
       .hmt_thresh1        (hmt_thresh1[9:0]), // out, loose HMT thresh
       .hmt_thresh2        (hmt_thresh2[9:0]), // out, loose HMT thresh
       .hmt_thresh3        (hmt_thresh3[9:0]), // out, loose HMT thresh

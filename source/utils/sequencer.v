@@ -1350,6 +1350,8 @@
   parameter MXBNDB  = 5;                 // Bend bits
   parameter MXXKYB = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
 
+  parameter MXHMTB     =  4;// bits for HMT
+
 //------------------------------------------------------------------------------------------------------------------
 // I/O Ports:
 //------------------------------------------------------------------------------------------------------------------
@@ -1472,8 +1474,8 @@
   input  [MXLY-1:0]    cfeb_layer_or;      // OR of hstrips on each layer at pre-trigger
   input  [MXHITB-1:0]  cfeb_nlayers_hit;    // Number of CSC layers hit
 
-  input  [9:0]  hmt_nhits_trig; // HMT results 
-  input  [1:0]  hmt_trigger; // HMT nhits passing thresholds
+  input  [9:0]         hmt_nhits_trig; // HMT results 
+  input  [MXHMTB-1:0]  hmt_trigger; // HMT nhits passing thresholds
 // Pattern Finder CLCT results
   input  [MXHITB-1:0]  hs_hit_1st;        // 1st CLCT pattern hits
   input  [MXPIDB-1:0]  hs_pid_1st;        // 1st CLCT pattern ID
@@ -1587,8 +1589,8 @@
   output        seq_trigger;     // Sequencer requests L1A from CCB
   output [11:0] sequencer_state; // Sequencer state for vme read
 
-  output  [9:0]  hmt_nhits_trig_vme;      // First  CLCT
-  output  [1:0]  hmt_trigger_vme; // HMT nhits passing thresholds
+  output  [9:0]         hmt_nhits_trig_vme;      // First  CLCT
+  output  [MXHMTB-1:0]  hmt_trigger_vme; // HMT nhits passing thresholds
   input          event_clear_vme;  // Event clear for aff,alct,clct,mpc vme diagnostic registers
   output  [MXCLCT-1:0]  clct0_vme;      // First  CLCT
   output  [MXCLCT-1:0]  clct1_vme;      // Second CLCT
@@ -1759,7 +1761,7 @@
 
 // TMB LCT Match
   //output  [9:0]          hmt_nhits_trig_xtmb;
-  output  [1:0]          hmt_trigger_xtmb; // HMT nhits passing thresholds
+  output  [MXHMTB-1:0]   hmt_trigger_xtmb; // HMT nhits passing thresholds
   output  [MXCLCT-1:0]   clct0_xtmb; // 1st CLCT to TMB
   output  [MXCLCT-1:0]   clct1_xtmb; // 2nd CLCT to TMB
   output  [MXCLCTC-1:0]  clctc_xtmb; // Common to CLCT0/1 to TMB
@@ -3054,8 +3056,8 @@
 // Pre-trigger Pipeline
 // Pushes CLCT pretrigger data into pipeline to wait for pattern finder and drift delay
 //------------------------------------------------------------------------------------------------------------------
-  wire [9:0]  hmt_nhits_trig, hmt_nhits_trig_xtmb;
-  wire [1:0]  hmt_trigger, hmt_trigger_xtmb;
+  wire [9:0]         hmt_nhits_trig, hmt_nhits_trig_xtmb;
+  wire [MXHMTB-1:0]  hmt_trigger, hmt_trigger_xtmb;
 
 // On pretrigger push buffer address and bxn into the pre-trigger pipeline
   parameter PATTERN_FINDER_LATENCY = 2;  // Tuned 4/22/08
@@ -3083,8 +3085,8 @@
   //srl16e_bbl #(2) usrldrift_trigger (.clock(clock),.ce(1'b1),.adr(postdrift_adr),.d(hmt_trigger),.q(postdrift_hmt_trigger));
 
 // Extract pre-trigger data after drift delay, compensated for pattern-finder latency + programmable drift delay
-  assign hmt_nhits_trig_xtmb[9:0] = hmt_nhits_trig[9:0]; //only valid if at least one CLCT is found
-  assign hmt_trigger_xtmb[1:0]    = hmt_trigger[1:0]   ; //only valid if at least one CLCT is found
+  assign hmt_nhits_trig_xtmb[9:0]        = hmt_nhits_trig[9:0]; //only valid if at least one CLCT is found
+  assign hmt_trigger_xtmb[MXHMTB-1:0]    = hmt_trigger[MXHMTB-1:0]   ; //only valid if at least one CLCT is found
   //assign hmt_nhits_trig_xtmb[9:0] = postdrift_hmt_nhits_trig[9:0] ;// do not require valid clct 
   //assign hmt_trigger_xtmb[1:0]    = postdrift_hmt_trigger[1:0] ;   // do not require valid clct 
 
@@ -3183,8 +3185,8 @@
   assign clct1_xky_xtmb   = clct1_xky & {MXXKYB {!clct1_blanking}};
 
 // Latch CLCTs for VME
-  reg [9:0] hmt_nhits_trig_vme=0;
-  reg [1:0] hmt_trigger_vme=0;
+  reg [9:0]        hmt_nhits_trig_vme=0;
+  reg [MXHMTB-1:0] hmt_trigger_vme=0;
   reg [MXCLCT-1:0]  clct0_vme=0;
   reg [MXCLCT-1:0]  clct1_vme=0;
   reg [MXCLCTC-1:0] clctc_vme=0;

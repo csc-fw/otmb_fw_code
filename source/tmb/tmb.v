@@ -516,6 +516,9 @@
   parameter MXXKYB   = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
   //parameter MXCCLUTB = 10+5+9+12;  // New 35bits for CCLUT, new quality, bnd, xky, comparator code 
   parameter MXCCLUTB = MXPATC+MXQLTB+MXBNDB+MXXKYB;
+
+  //HMT
+  parameter MXHMTB   = 4;
 //------------------------------------------------------------------------------------------------------------------
 //Ports
 //------------------------------------------------------------------------------------------------------------------
@@ -601,7 +604,7 @@
 
 // Sequencer
   //input  [9:0]  hmt_nhits_trig_xtmb;
-  input  [1:0]  hmt_trigger_xtmb;
+  input  [MXHMTB-1:0]  hmt_trigger_xtmb;
   input  [MXCLCT-1:0]  clct0_xtmb; // First  CLCT
   input  [MXCLCT-1:0]  clct1_xtmb; // Second CLCT
   input  [MXCLCTC-1:0] clctc_xtmb; // Common to CLCT0/1 to TMB
@@ -1080,7 +1083,7 @@
   wire [MXCCLUTB-1  : 0]  clct0_cclut_pipe, clct0_cclut_srl;
   wire [MXCCLUTB-1  : 0]  clct1_cclut_pipe, clct1_cclut_srl;
 
-  wire [1:0] hmt_trigger_pipe,hmt_trigger_srl;
+  wire [MXHMTB-1    :0] hmt_trigger_pipe,hmt_trigger_srl;
 
   wire [MXBADR-1:0]  wr_adr_xtmb_pipe, wr_adr_xtmb_srl; // Buffer write address after clct pipeline delay
   wire [3:0]         clct_srl_ptr;
@@ -1094,7 +1097,7 @@
   //register shift for CCLUT 
   srl16e_bbl #(MXCCLUTB ) uclct0cclut (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(clct0_cclut_xtmb),.q(clct0_cclut_srl));
   srl16e_bbl #(MXCCLUTB ) uclct1cclut (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(clct1_cclut_xtmb),.q(clct1_cclut_srl));
-  srl16e_bbl #(2        ) uhmt        (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(hmt_trigger_xtmb),.q(hmt_trigger_srl));
+  srl16e_bbl #(MXHMTB   ) uhmt        (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(hmt_trigger_xtmb),.q(hmt_trigger_srl));
 
 
 
@@ -1917,7 +1920,7 @@
   reg [MXCLCTC-1:0]  clctc_real;
   reg [MXCCLUTB - 1   : 0] clct0_cclut_real; // new quality
   reg [MXCCLUTB - 1   : 0] clct1_cclut_real; // new quality
-  reg [1:0] hmt_trigger_real;
+  reg [MXHMTB - 1     : 0] hmt_trigger_real;
 
   wire keep_clct = trig_pulse && (trig_keep || non_trig_keep);
 
@@ -2206,7 +2209,8 @@ lct0_vpf_run3
 //------------------------------------------------------------------------------------------------------------------
 // Format MPC output words
 //------------------------------------------------------------------------------------------------------------------
-  wire [3:0]  hmt_trigger_run3 = {2'b0, hmt_trigger_real};
+  //wire [3:0]  hmt_trigger_run3 = {2'b0, hmt_trigger_real};
+  wire [MXHMTB-1:0]  hmt_trigger_run3 = hmt_trigger_real;
 
   //GEMCSC algorithm is not ready yet. Use the lct quality with ALCT+CLCT case
   assign lct0_qlt_run3 = (alct0_valid && clct0_valid) ? 3'b011 : 0;
