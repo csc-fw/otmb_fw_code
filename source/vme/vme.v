@@ -516,8 +516,8 @@
   hmt_enable,
   hmt_me1a_enable, 
   hmt_nhits_trig_vme,
-  hmt_nhits_trig_bx2345_vme,
   hmt_nhits_trig_bx678_vme,
+  hmt_nhits_trig_bx2345_vme,
   hmt_trigger_vme,
 //output
   hmt_thresh1,
