@@ -2727,8 +2727,8 @@ end
    wire [7:0]             l1a_preClct_dly;
 
    wire [9:0]             hmt_nhits_trig_vme;
-   wire [9:0]             hmt_nhits_trig_bx2345_vme;
    wire [9:0]             hmt_nhits_trig_bx678_vme;
+   wire [9:0]             hmt_nhits_trig_bx2345_vme;
 
    wire [MXCLCT-1:0]      clct0_vme;
    wire [MXCLCT-1:0]      clct1_vme;

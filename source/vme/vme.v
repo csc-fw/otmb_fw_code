@@ -2233,8 +2233,8 @@
   output hmt_enable; 
   output hmt_me1a_enable; 
   input [9:0] hmt_nhits_trig_vme;
-  input [9:0] hmt_nhits_trig_bx2345_vme;
   input [9:0] hmt_nhits_trig_bx678_vme;
+  input [9:0] hmt_nhits_trig_bx2345_vme;
   input [MXHMTB-1:0] hmt_trigger_vme;
 
   output [9:0] hmt_thresh1;
