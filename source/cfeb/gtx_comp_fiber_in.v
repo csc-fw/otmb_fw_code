@@ -292,19 +292,23 @@
   reg [3:0] mon_in         = 0;
   reg       mon_rst        = 1;
   reg [3:0] mon_count      = 0;
-  reg[15:0] err_count      = 0;   // at least bit 7 needs to be output for "link_bad" signal
+  //reg[15:0] err_count      = 0;   // at least bit 7 needs to be output for "link_bad" signal
+  reg [7:0] err_count      = 0;   // at least bit 7 needs to be output for "link_bad" signal
   reg       link_err       = 0;
   reg       link_good      = 0;    // needs to be output
-  reg       link_bad       = 0;
+  //reg       link_bad       = 0; //changed into wire, Tao
 //reg       link_went_down = 0;
 //reg       link_had_err   = 0; // needs to be output
+ 
+  reg[15:0] notintable_cnt = 0;
+  reg[15:0] disperr_cnt    = 0;
 
   parameter link_bad_thresh = 128;
-  always @ (posedge CMP_RX_CLK160) begin
-    link_bad <= err_count[7]; //(err_count >= link_bad_thresh);
-  end
-
-  assign    errcount        = err_count[15:0];        // can be a useful output
+  //always @ (posedge CMP_RX_CLK160) begin
+  //  link_bad <= err_count[7]; //(err_count >= link_bad_thresh);
+  //end
+  assign    link_bad        = err_count > 8'd127;           // needs to be output
+  assign    errcount[15:0]  = {8'h00, err_count[7:0]};        // can be a useful output, only 8bits are used
   assign    link_had_err    = (link_err | mon_rst);   // output, signals the link had a problem or was never alive
   wire      link_went_down  = (link_good && mon_rst); // use to signal the link was OK then had a problem
 
@@ -337,7 +341,10 @@
     mon_count[3:0]    <= 4'h0;    // counter to track when 15 good BX cycles are completed
     link_good         <= 0;
     link_err          <= 0;        // clear the error register on resync
-    err_count[15:0]   <= 16'h0000; // use err_count[7] to signal the link is bad
+    err_count[7:0]    <= 8'h00; // use err_count[7] to signal the link is bad
+
+    notintable_cnt[15:0] <= 16'h0000;
+    disperr_cnt[15:0]    <= 16'h0000; 
   end
   else begin
      if(CEW0)  begin     // this gets set for the first time after the first CEW3
@@ -382,6 +389,11 @@
 
      if (!link_err) link_err <= (link_went_down); // use to signal the link was OK then had a problem (== link_went_down) at least once
      if ((err_inj || link_went_down) && err_count[7:0]!=8'hFE) err_count <= err_count + 1'b1; // how many times the link was lost
+
+     if (CEW0 || CEW1 || CEW2 || CEW3) begin
+         if (cmp_rx_notintable[1:0] != 2'b00 && notintable_cnt[15:0] != 16'hFFFE) notintable_cnt <= notintable_cnt +1'b1;
+         if (cmp_rx_disperr[1:0] != 2'b00 && disperr_cnt[15:0] != 16'hFFFE)    disperr_cnt <= disperr_cnt + 1'b1;
+     end
 
   end // else: !if(!RX_SYNC_DONE || ttc_resync)
      end // always @ (posedge CMP_RX_CLK160)
