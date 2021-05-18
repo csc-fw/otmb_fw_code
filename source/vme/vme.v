@@ -1235,6 +1235,21 @@
   gtx_rx_err_count5,
   gtx_rx_err_count6,
 
+  gtx_rx_notintable_count0,
+  gtx_rx_notintable_count1,
+  gtx_rx_notintable_count2,
+  gtx_rx_notintable_count3,
+  gtx_rx_notintable_count4,
+  gtx_rx_notintable_count5,
+  gtx_rx_notintable_count6,
+  gtx_rx_disperr_count0,
+  gtx_rx_disperr_count1,
+  gtx_rx_disperr_count2,
+  gtx_rx_disperr_count3,
+  gtx_rx_disperr_count4,
+  gtx_rx_disperr_count5,
+  gtx_rx_disperr_count6,
+
   gtx_link_had_err,  // cfeb link stability monitor: error happened at least once
   gtx_link_good,     // cfeb link stability monitor: always good, no errors since last resync
   gtx_link_bad,      // cfeb link stability monitor: errors happened over 100 times
@@ -1660,6 +1675,20 @@
   parameter ADR_HMT_NHITS_SIG         = 10'h1B4;
   parameter ADR_HMT_NHITS_BKG         = 10'h1B6;
   parameter ADR_LCT_INJECTION         = 10'h1B8; //LCT injection from configuration
+  parameter ADR_V6_GTX0_NOTINTABLE    = 10'h1BA;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX1_NOTINTABLE    = 10'h1BC;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX2_NOTINTABLE    = 10'h1BE;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX3_NOTINTABLE    = 10'h1C0;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX4_NOTINTABLE    = 10'h1C2;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX5_NOTINTABLE    = 10'h1C4;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX6_NOTINTABLE    = 10'h1C6;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX0_DISPERR       = 10'h1C8;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX1_DISPERR       = 10'h1CA;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX2_DISPERR       = 10'h1CC;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX3_DISPERR       = 10'h1CE;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX4_DISPERR       = 10'h1D0;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX5_DISPERR       = 10'h1D2;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX6_DISPERR       = 10'h1D4;  // Virtex-6 GTX0 control and status
 
   // GEM Registers, start from 10'h300 = 768
 
@@ -2954,6 +2983,23 @@
   input  [15:0]      gtx_rx_err_count5;    // Error count on this fiber channel
   input  [15:0]      gtx_rx_err_count6;    // Error count on this fiber channel
 
+// Virtex-6 GTX error counters: disperr/notintable
+  input  [15:0]      gtx_rx_notintable_count0;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_notintable_count1;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_notintable_count2;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_notintable_count3;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_notintable_count4;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_notintable_count5;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_notintable_count6;    // Error count on this fiber channel
+
+  input  [15:0]      gtx_rx_disperr_count0;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_disperr_count1;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_disperr_count2;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_disperr_count3;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_disperr_count4;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_disperr_count5;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_disperr_count6;    // Error count on this fiber channel
+
 //rdk
   input [15:0] gem_rx_err_count0;
   input [15:0] gem_rx_err_count1;
@@ -3477,6 +3523,9 @@
   reg  [15:0] virtex6_gtx_rx_wr [MXCFEB-1:0];
   wire [15:0] virtex6_gtx_rx_rd [MXCFEB-1:0];
 
+  wire [15:0] virtex6_gtx_rx_notintable_rd [MXCFEB-1:0];
+  wire [15:0] virtex6_gtx_rx_disperr_rd [MXCFEB-1:0];
+
   reg  [15:0] gem_gtx_rx_wr      [MXGEM-1:0];
   wire [15:0] gem_gtx_rx_rd      [MXGEM-1:0];
 
@@ -3774,6 +3823,24 @@
   assign gtx_rx_err_count[5][7:0] = gtx_rx_err_count5[7:0];      //      Error count on this fiber channel
   assign gtx_rx_err_count[6][7:0] = gtx_rx_err_count6[7:0];      //      Error count on this fiber channel
 
+  // Virtex-6 GTX error counters: disperr/notintable
+  wire [15:0] gtx_rx_notintable_count [MXCFEB-1:0];    // JRG In:    Error count on each fiber channel
+  wire [15:0] gtx_rx_disperr_count [MXCFEB-1:0];    // JRG In:    Error count on each fiber channel
+
+  assign gtx_rx_notintable_count[0][15:0] = gtx_rx_notintable_count0[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_notintable_count[1][15:0] = gtx_rx_notintable_count1[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_notintable_count[2][15:0] = gtx_rx_notintable_count2[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_notintable_count[3][15:0] = gtx_rx_notintable_count3[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_notintable_count[4][15:0] = gtx_rx_notintable_count4[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_notintable_count[5][15:0] = gtx_rx_notintable_count5[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_notintable_count[6][15:0] = gtx_rx_notintable_count6[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_disperr_count[0][15:0]    = gtx_rx_disperr_count0[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_disperr_count[1][15:0]    = gtx_rx_disperr_count1[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_disperr_count[2][15:0]    = gtx_rx_disperr_count2[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_disperr_count[3][15:0]    = gtx_rx_disperr_count3[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_disperr_count[4][15:0]    = gtx_rx_disperr_count4[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_disperr_count[5][15:0]    = gtx_rx_disperr_count5[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_disperr_count[6][15:0]    = gtx_rx_disperr_count6[15:0];      //      Error count on this fiber channel
 //rdk
 	wire	[7:0]		gem_rx_err_count [3:0];
 
@@ -4323,6 +4390,21 @@
   ADR_V6_GTX_RX4:            data_out <= virtex6_gtx_rx_rd[4];
   ADR_V6_GTX_RX5:            data_out <= virtex6_gtx_rx_rd[5];
   ADR_V6_GTX_RX6:            data_out <= virtex6_gtx_rx_rd[6];
+
+  ADR_V6_GTX0_NOTINTABLE:    data_out <= virtex6_gtx_rx_notintable_rd[0];
+  ADR_V6_GTX1_NOTINTABLE:    data_out <= virtex6_gtx_rx_notintable_rd[1];
+  ADR_V6_GTX2_NOTINTABLE:    data_out <= virtex6_gtx_rx_notintable_rd[2];
+  ADR_V6_GTX3_NOTINTABLE:    data_out <= virtex6_gtx_rx_notintable_rd[3];
+  ADR_V6_GTX4_NOTINTABLE:    data_out <= virtex6_gtx_rx_notintable_rd[4];
+  ADR_V6_GTX5_NOTINTABLE:    data_out <= virtex6_gtx_rx_notintable_rd[5];
+  ADR_V6_GTX6_NOTINTABLE:    data_out <= virtex6_gtx_rx_notintable_rd[6];
+  ADR_V6_GTX0_DISPERR:       data_out <= virtex6_gtx_rx_disperr_rd[0];
+  ADR_V6_GTX1_DISPERR:       data_out <= virtex6_gtx_rx_disperr_rd[1];
+  ADR_V6_GTX2_DISPERR:       data_out <= virtex6_gtx_rx_disperr_rd[2];
+  ADR_V6_GTX3_DISPERR:       data_out <= virtex6_gtx_rx_disperr_rd[3];
+  ADR_V6_GTX4_DISPERR:       data_out <= virtex6_gtx_rx_disperr_rd[4];
+  ADR_V6_GTX5_DISPERR:       data_out <= virtex6_gtx_rx_disperr_rd[5];
+  ADR_V6_GTX6_DISPERR:       data_out <= virtex6_gtx_rx_disperr_rd[6];
 
   ADR_V6_SYSMON:             data_out <=  virtex6_sysmon_rd;
 
@@ -8449,6 +8531,8 @@
 
 //------------------------------------------------------------------------------------------------------------------
 // Virtex-6 GTX receiver 0 = 0x14C through receiver 6 = 0x158
+// Virtex-6 GTX notintable 0 = 0x1BA through receiver 6 = 0x1C6 
+// Virtex-6 GTX disperr 0 = 0x1C8 through receiver 6 = 0x1d4 
 //------------------------------------------------------------------------------------------------------------------
 // 2D map for generate
   wire [MXCFEB-1:0] virtex6_gtx_rx_sump;
@@ -8487,6 +8571,11 @@
 //assign virtex6_gtx_rx_rd[idcfeb][10]    = gtx_rx_err[idcfeb];               // R    JRG: not useful! -- PRBS test detects an error
 //assign virtex6_gtx_rx_rd[idcfeb][15:11] = virtex6_gtx_rx_wr[idcfeb][15:11]; // RW   JRG: was Unused
   assign virtex6_gtx_rx_sump[idcfeb]      = |virtex6_gtx_rx_wr[idcfeb][10:3]; // R  Unused write bits. JRG: used to be [10:4]
+
+
+  assign virtex6_gtx_rx_notintable_rd[idcfeb][15:0] = gtx_rx_notintable_count[idcfeb][15:0];
+  assign virtex6_gtx_rx_disperr_rd[idcfeb][15:0]    = gtx_rx_disperr_count[idcfeb][15:0];
+
   end
   endgenerate
 

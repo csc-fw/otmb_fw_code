@@ -45,6 +45,8 @@
     link_had_err,
     link_good,
     link_bad,
+    notintablecount, 
+    disperrcount,
     sump
   );
 //-------------------------------------------------------------------------------------------------------------------
@@ -90,6 +92,9 @@
   output        link_had_err;
   output        link_good;
   output        link_bad;
+
+  output [15:0] notintablecount;
+  output [15:0] disperrcount;
 
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -315,6 +320,10 @@
   assign    PROMPT_DATA[47:0] = {cmp_rx_data,w2_reg,w1_reg};
   assign    lt_trg            = (cmp_rx_isk==2'b01) && (cmp_rx_data[7:0] == 8'hFC);
   assign    sync_match        = (cmp_rx_isk==2'b01);
+
+
+  assign    notintablecount = notintable_cnt;
+  assign    disperrcount = disperr_cnt;
 
   always @(posedge CMP_RX_CLK160) begin
     CEW1  <= sync_match;  // k-word comma, this is true at "zero" so "one" is ON next clock

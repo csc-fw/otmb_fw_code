@@ -205,6 +205,8 @@
   link_had_err,
   link_good,
   link_bad,
+  gtx_rx_notintable_count,
+  gtx_rx_disperr_count,
   gtx_rx_sump
 
 // Debug
@@ -344,6 +346,8 @@
   output         gtx_rx_err;           // PRBS test detects an error
   output  [15:0] gtx_rx_err_count;     // Error count on this fiber channel
   output         gtx_rx_sump;          // Unused signals
+  output  [15:0] gtx_rx_notintable_count;     // Error count on this fiber channel
+  output  [15:0] gtx_rx_disperr_count;     // Error count on this fiber channel
 
   output link_had_err; // link stability monitor: error happened at least once
   output link_good;    // link stability monitor: always good, no errors since last resync
@@ -440,6 +444,8 @@
   .link_had_err         (link_had_err),
   .link_good            (link_good),
   .link_bad             (link_bad),
+  .gtx_rx_notintable_count  (gtx_rx_notintable_count[15:0]), // Out  Error count on this fiber channel
+  .gtx_rx_disperr_count     (gtx_rx_disperr_count[15:0]), // Out  Error count on this fiber channel
   .gtx_rx_sump          (gtx_rx_sump)        // Unused signals
   );
 

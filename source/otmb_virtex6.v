@@ -1347,6 +1347,9 @@
   wire  [MXCFEB-1:0]  link_bad;                      // link stability monitor: errors happened over 100 times
   wire  [MXCFEB-1:0]  ready_phaser;                  // phaser dps done and ready status
 
+  wire  [15:0]        gtx_rx_notintable_count [MXCFEB-1:0]; // Out  Error count on this fiber channel
+  wire  [15:0]        gtx_rx_disperr_count [MXCFEB-1:0]; // Out  Error count on this fiber channel
+
   wire  [MXCFEB-1:0]  cfeb_rx_nonzero;               // Out Flags when rx sees non-zero data
 
   wire  ready_phaser_a, ready_phaser_b, auto_gtx_reset;
@@ -1484,6 +1487,8 @@
   .link_had_err         (link_had_err[icfeb]),                         // Out Link stability monitor: error happened at least once
   .link_good            (link_good[icfeb]),                            // Out Link stability monitor: always good, no errors since last resync
   .link_bad             (link_bad[icfeb]),                             // Out Link stability monitor: errors happened over 100 times
+  .gtx_rx_notintable_count  (gtx_rx_notintable_count[icfeb][15:0]),               // Out Error count on this fiber channel
+  .gtx_rx_disperr_count     (gtx_rx_disperr_count[icfeb][15:0]),               // Out Error count on this fiber channel
   .gtx_rx_sump          (gtx_rx_sump[icfeb])                           // Out Unused signals
 
 // Debug Ports
@@ -5476,8 +5481,6 @@ wire [15:0] gemB_bxn_counter;
       //GEM-CSC match window, deltahs, deltawire
       .gem_clct_deltahs          (gem_clct_deltahs[4:0]),               // Out  GEM GEM-CSC match window, deltahs, the final window is deltahs*2+1
       .gem_alct_deltawire        (gem_alct_deltawire[2:0]),               // Out GEM-CSC match window, deltawire, final window is deltawire*2+1
-      .gem_clct_enable           (gem_clct_enable),              //Out gem-clct match is enabled or not
-      .gem_alct_enable           (gem_alct_enable),             //Out gem-alct match is enabled or not
 
       //GEM-CSC match control
       .gem_me1a_match_enable     (gem_me1a_match_enable),       //Out gem-csc match in me1a
@@ -5967,6 +5970,22 @@ wire [15:0] gemB_bxn_counter;
       .gtx_rx_err_count4 (gtx_rx_err_count[4][15:0]), // In  Error count on this fiber channel
       .gtx_rx_err_count5 (gtx_rx_err_count[5][15:0]), // In  Error count on this fiber channel
       .gtx_rx_err_count6 (gtx_rx_err_count[6][15:0]), // In  Error count on this fiber channel
+
+      // Virtex-6 GTX error counters: disperr/notintable
+      .gtx_rx_notintable_count0 (gtx_rx_notintable_count[0][15:0]), // In  Error count on this fiber channel
+      .gtx_rx_notintable_count1 (gtx_rx_notintable_count[1][15:0]), // In  Error count on this fiber channel
+      .gtx_rx_notintable_count2 (gtx_rx_notintable_count[2][15:0]), // In  Error count on this fiber channel
+      .gtx_rx_notintable_count3 (gtx_rx_notintable_count[3][15:0]), // In  Error count on this fiber channel
+      .gtx_rx_notintable_count4 (gtx_rx_notintable_count[4][15:0]), // In  Error count on this fiber channel
+      .gtx_rx_notintable_count5 (gtx_rx_notintable_count[5][15:0]), // In  Error count on this fiber channel
+      .gtx_rx_notintable_count6 (gtx_rx_notintable_count[6][15:0]), // In  Error count on this fiber channel
+      .gtx_rx_disperr_count0 (gtx_rx_disperr_count[0][15:0]), // In  Error count on this fiber channel
+      .gtx_rx_disperr_count1 (gtx_rx_disperr_count[1][15:0]), // In  Error count on this fiber channel
+      .gtx_rx_disperr_count2 (gtx_rx_disperr_count[2][15:0]), // In  Error count on this fiber channel
+      .gtx_rx_disperr_count3 (gtx_rx_disperr_count[3][15:0]), // In  Error count on this fiber channel
+      .gtx_rx_disperr_count4 (gtx_rx_disperr_count[4][15:0]), // In  Error count on this fiber channel
+      .gtx_rx_disperr_count5 (gtx_rx_disperr_count[5][15:0]), // In  Error count on this fiber channel
+      .gtx_rx_disperr_count6 (gtx_rx_disperr_count[6][15:0]), // In  Error count on this fiber channel
 
       .comp_phaser_a_ready (ready_phaser_a), // Out
       .comp_phaser_b_ready (ready_phaser_b), // Out

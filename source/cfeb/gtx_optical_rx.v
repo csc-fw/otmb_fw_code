@@ -49,6 +49,8 @@
   link_had_err,
   link_good,
   link_bad,
+  gtx_rx_notintable_count, 
+  gtx_rx_disperr_count, 
 
 // Sump
   gtx_rx_sump
@@ -92,6 +94,8 @@
   output      link_had_err;
   output      link_good;
   output      link_bad;
+  output  [15:0]  gtx_rx_notintable_count;    // Error count on this fiber channel for notintable
+  output  [15:0]  gtx_rx_disperr_count;    // Error count on this fiber channel for disperr
 // Sump
   output      gtx_rx_sump;    // Unused signals
 
@@ -110,7 +114,9 @@
   wire [47:0]  comp_dat;
   wire [15:0]  comp_kchar;
   wire [47:0]  prompt_dat;
-  wire [15:0]   link_errcount;
+  wire [15:0]  link_errcount;
+  wire [15:0]  notintable_count;
+  wire [15:0]  disperr_count;
   reg          lt_trg_err        = 0;
 
 // GTX instance
@@ -144,6 +150,8 @@
   .force_error      (lt_trg_err),
   .link_good        (link_good),
   .link_bad         (link_bad),
+  .notintablecount  (notintable_count[15:0]),
+  .disperrcount     (disperr_count[15:0]),
   .sump             (sump_comp_fiber)           // Out  Unused signals
   );
 
@@ -209,7 +217,9 @@
   reg    gtx_rx_sync_done= 0;
   reg    gtx_rx_err  = 0;
   reg  [15:0]  gtx_rx_err_count = 0;
-         reg             posneg_ff = 0;
+  reg  [15:0]  gtx_rx_disperr_count = 0;
+  reg  [15:0]  gtx_rx_notintable_count = 0;
+  reg             posneg_ff = 0;
    
   always @(posedge clock) begin
      if (clear_sync) begin  // JRG:  OR gtx_rx_reset??
@@ -221,6 +231,8 @@
         gtx_rx_sync_done      <= 0;
         gtx_rx_err            <= 0;
         gtx_rx_err_count      <= 0;
+        gtx_rx_disperr_count      <= 0;
+        gtx_rx_notintable_count      <= 0;
      end
      else begin
         gtx_rx_data_raw[47:0]  <= comp_dat_r[47:0];  // JRG: for optimal timing use comp_dat, not gtx_rx_data_raw
@@ -232,6 +244,9 @@
         gtx_rx_err             <= err;
         gtx_rx_err_count[7:0]  <= (gtx_rx_en_prbs_test) ? prbs_errcount[7:0] : {link_errcount[7:0]};
         gtx_rx_err_count[15:8] <= 0;
+        gtx_rx_notintable_count[15:0] <=  notintable_count[15:0];
+        gtx_rx_disperr_count[15:0] <=  disperr_count[15:0];
+
 
 //        if (gtx_rx_en_prbs_test) gtx_rx_err_count[15:0] <= prbs_errcount[15:0];
 //        else gtx_rx_err_count[15:0]                     <= {8'h00,link_errcount[7:0]};
