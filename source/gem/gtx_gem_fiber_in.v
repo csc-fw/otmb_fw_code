@@ -42,8 +42,8 @@ module gtx_gem_fiber_in
     output reg [7:0]  k_char, 
     output            sump,
     output     [7:0]  errcount,
-    output     [15:0] notintablecount;
-    output     [15:0] disperrcount;
+    output     [15:0] notintablecount,
+    output     [15:0] disperrcount,
     output            link_had_err,
     output reg        link_good,
     output            link_bad
