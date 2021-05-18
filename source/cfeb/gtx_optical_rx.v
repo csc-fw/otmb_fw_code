@@ -245,7 +245,7 @@
         gtx_rx_err_count[7:0]  <= (gtx_rx_en_prbs_test) ? prbs_errcount[7:0] : {link_errcount[7:0]};
         gtx_rx_err_count[15:8] <= 0;
         gtx_rx_notintable_count[15:0] <=  notintable_count[15:0];
-        gtx_rx_disperr_count[15:0] <=  disperr_count[15:0];
+        gtx_rx_disperr_count[15:0]    <=  disperr_count[15:0];
 
 
 //        if (gtx_rx_en_prbs_test) gtx_rx_err_count[15:0] <= prbs_errcount[15:0];

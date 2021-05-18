@@ -1514,6 +1514,8 @@
   wire  [MXGEM-1:0]     gem_rx_err;                    // Out  PRBS test detects an error
   wire  [MXGEM-1:0]     gem_sump;
   wire  [15:0]          gem_rx_err_count [MXGEM-1:0];  // Out  Error count on this fiber channel
+  wire  [15:0]          gem_rx_notintable_count [MXGEM-1:0];  // Out  Error count on this fiber channel
+  wire  [15:0]          gem_rx_disperr_count [MXGEM-1:0];  // Out  Error count on this fiber channel
   wire  [MXGEM-1:0]     gem_link_had_err;              // link stability monitor: error happened at least once
   wire  [MXGEM-1:0]     gem_link_good;                 // link stability monitor: always good, no errors since last resync
   wire  [MXGEM-1:0]     gem_link_bad;                  // link stability monitor: errors happened over 100 times
@@ -1784,6 +1786,8 @@
   .gtx_rx_pol_swap      (gem_rx_pol_swap      [igem]                  ), // Out  GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
   .gtx_rx_err           (gem_rx_err           [igem]                  ), // Out  PRBS test detects an error
   .gtx_rx_err_count     (gem_rx_err_count     [igem][ 15:0]           ), // Out  Error count on this fiber channel
+  .gtx_rx_notintable_count  (gem_rx_notintable_count     [igem][ 15:0]           ), // Out  Error count on this fiber channel
+  .gtx_rx_disperr_count     (gem_rx_disperr_count     [igem][ 15:0]           ), // Out  Error count on this fiber channel
   .link_had_err         (gem_link_had_err     [igem]                  ), // Out  link stability monitor: error happened at least once
   .link_good            (gem_link_good        [igem]                  ), // Out  link stability monitor: always good, no errors since last resync
   .link_bad             (gem_link_bad         [igem]                  ), // Out  link stability monitor: errors happened over 100 times
@@ -6010,6 +6014,15 @@ wire [15:0] gemB_bxn_counter;
       .gem_rx_err_count1 (gem_rx_err_count[1][15:0]), // In  Error count on this GEM fiber channel
       .gem_rx_err_count2 (gem_rx_err_count[2][15:0]), // In  Error count on this GEM fiber channel
       .gem_rx_err_count3 (gem_rx_err_count[3][15:0]), // In  Error count on this GEM fiber channel
+      // GEM GTX error counters: notintable+disperr
+      .gem_rx_notintable_count0 (gem_rx_notintable_count[0][15:0]), // In  Error count on this GEM fiber channel
+      .gem_rx_notintable_count1 (gem_rx_notintable_count[1][15:0]), // In  Error count on this GEM fiber channel
+      .gem_rx_notintable_count2 (gem_rx_notintable_count[2][15:0]), // In  Error count on this GEM fiber channel
+      .gem_rx_notintable_count3 (gem_rx_notintable_count[3][15:0]), // In  Error count on this GEM fiber channel
+      .gem_rx_disperr_count0 (gem_rx_disperr_count[0][15:0]), // In  Error count on this GEM fiber channel
+      .gem_rx_disperr_count1 (gem_rx_disperr_count[1][15:0]), // In  Error count on this GEM fiber channel
+      .gem_rx_disperr_count2 (gem_rx_disperr_count[2][15:0]), // In  Error count on this GEM fiber channel
+      .gem_rx_disperr_count3 (gem_rx_disperr_count[3][15:0]), // In  Error count on this GEM fiber channel
 
       // Sump
       .vme_sump      (vme_sump)              // Out  Unused signals

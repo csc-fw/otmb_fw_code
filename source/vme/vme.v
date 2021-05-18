@@ -1227,6 +1227,15 @@
   gem_rx_err_count2,
   gem_rx_err_count3,
 
+  gem_rx_notintable_count0,
+  gem_rx_notintable_count1,
+  gem_rx_notintable_count2,
+  gem_rx_notintable_count3,
+  gem_rx_disperr_count0,
+  gem_rx_disperr_count1,
+  gem_rx_disperr_count2,
+  gem_rx_disperr_count3,
+
   gtx_rx_err_count0,
   gtx_rx_err_count1,
   gtx_rx_err_count2,
@@ -1715,6 +1724,8 @@
   parameter ADR_GEMB_TRG_CTRL         = 10'h32a;
   parameter ADR_GEM_CSC_MATCH_CTRL    = 10'h32c;
 
+// 10'h32E, 330, 332, 334??
+
   parameter ADR_GEMA_BXN_COUNTER      = 10'h336;
   parameter ADR_GEMB_BXN_COUNTER      = 10'h338;
 
@@ -1746,6 +1757,15 @@
   parameter ADR_GEM_COPAD5            = 10'h36a;  // GEMcopad 
   parameter ADR_GEM_COPAD6            = 10'h36c;  // GEMcopad 
   parameter ADR_GEM_COPAD7            = 10'h36e;  // GEMcopad 
+
+  parameter ADR_GEM_GTX0_NOTINTABLE   = 10'h370;  //rdk 	GEM GTX0 control and status
+  parameter ADR_GEM_GTX1_NOTINTABLE   = 10'h372;
+  parameter ADR_GEM_GTX2_NOTINTABLE   = 10'h374;
+  parameter ADR_GEM_GTX3_NOTINTABLE   = 10'h376;
+  parameter ADR_GEM_GTX0_DISPERR      = 10'h378;  //rdk 	GEM GTX0 control and status
+  parameter ADR_GEM_GTX1_DISPERR      = 10'h37A;
+  parameter ADR_GEM_GTX2_DISPERR      = 10'h37C;
+  parameter ADR_GEM_GTX3_DISPERR      = 10'h37E;
 
 
 
@@ -3006,6 +3026,15 @@
   input [15:0] gem_rx_err_count2;
   input [15:0] gem_rx_err_count3;
 
+  input [15:0] gem_rx_notintable_count0;
+  input [15:0] gem_rx_notintable_count1;
+  input [15:0] gem_rx_notintable_count2;
+  input [15:0] gem_rx_notintable_count3;
+  input [15:0] gem_rx_disperr_count0;
+  input [15:0] gem_rx_disperr_count1;
+  input [15:0] gem_rx_disperr_count2;
+  input [15:0] gem_rx_disperr_count3;
+
   input  [MXGEM-1:0]  gem_link_had_err;
   input  [MXGEM-1:0]  gem_link_good;
   input  [MXGEM-1:0]  gem_link_bad;
@@ -3529,6 +3558,9 @@
   reg  [15:0] gem_gtx_rx_wr      [MXGEM-1:0];
   wire [15:0] gem_gtx_rx_rd      [MXGEM-1:0];
 
+  wire [15:0] gem_gtx_rx_notintable_rd      [MXGEM-1:0];
+  wire [15:0] gem_gtx_rx_disperr_rd      [MXGEM-1:0];
+
   reg  [15:0] virtex6_sysmon_wr;
   wire [15:0] virtex6_sysmon_rd;
 
@@ -3849,6 +3881,17 @@
   assign gem_rx_err_count[2][7:0] = gem_rx_err_count2[7:0]; // Error count on this fiber channel
   assign gem_rx_err_count[3][7:0] = gem_rx_err_count3[7:0]; // Error count on this fiber channel
 
+	wire	[15:0]		gem_rx_notintable_count [3:0];
+	wire	[15:0]		gem_rx_disperr_count [3:0];
+
+  assign gem_rx_notintable_count[0][15:0] = gem_rx_notintable_count0[15:0]; // Error count on this fiber channel
+  assign gem_rx_notintable_count[1][15:0] = gem_rx_notintable_count1[15:0]; // Error count on this fiber channel
+  assign gem_rx_notintable_count[2][15:0] = gem_rx_notintable_count2[15:0]; // Error count on this fiber channel
+  assign gem_rx_notintable_count[3][15:0] = gem_rx_notintable_count3[15:0]; // Error count on this fiber channel
+  assign gem_rx_disperr_count[0][15:0] = gem_rx_disperr_count0[15:0]; // Error count on this fiber channel
+  assign gem_rx_disperr_count[1][15:0] = gem_rx_disperr_count1[15:0]; // Error count on this fiber channel
+  assign gem_rx_disperr_count[2][15:0] = gem_rx_disperr_count2[15:0]; // Error count on this fiber channel
+  assign gem_rx_disperr_count[3][15:0] = gem_rx_disperr_count3[15:0]; // Error count on this fiber channel
   wire wr_mpc_frames_fifo_ctrl;
 
   wire wr_algo2016_ctrl;
@@ -4382,6 +4425,15 @@
   ADR_GEM_GTX_RX1:           data_out <= gem_gtx_rx_rd[1];
   ADR_GEM_GTX_RX2:           data_out <= gem_gtx_rx_rd[2];
   ADR_GEM_GTX_RX3:           data_out <= gem_gtx_rx_rd[3];
+
+  ADR_GEM_GTX0_NOTINTABLE:   data_out <= gem_gtx_rx_notintable_rd[0];
+  ADR_GEM_GTX1_NOTINTABLE:   data_out <= gem_gtx_rx_notintable_rd[1];
+  ADR_GEM_GTX2_NOTINTABLE:   data_out <= gem_gtx_rx_notintable_rd[2];
+  ADR_GEM_GTX3_NOTINTABLE:   data_out <= gem_gtx_rx_notintable_rd[3];
+  ADR_GEM_GTX0_DISPERR:      data_out <= gem_gtx_rx_disperr_rd[0];
+  ADR_GEM_GTX1_DISPERR:      data_out <= gem_gtx_rx_disperr_rd[1];
+  ADR_GEM_GTX2_DISPERR:      data_out <= gem_gtx_rx_disperr_rd[2];
+  ADR_GEM_GTX3_DISPERR:      data_out <= gem_gtx_rx_disperr_rd[3];
 
   ADR_V6_GTX_RX0:            data_out <= virtex6_gtx_rx_rd[0];
   ADR_V6_GTX_RX1:            data_out <= virtex6_gtx_rx_rd[1];
@@ -8612,6 +8664,8 @@
 
   assign gem_gtx_rx_sump[igem]     = |gem_gtx_rx_wr[igem][15:3]; // R  Unused write bits. JRG: used to be [10:4]
 
+  assign gem_gtx_rx_notintable_rd[igem][15:0] = gem_rx_notintable_count[igem];                              // R  JRG: constructed this 8-bit array set above
+  assign gem_gtx_rx_disperr_rd[igem][15:0]    = gem_rx_disperr_count[igem];                              // R  JRG: constructed this 8-bit array set above
   end
   endgenerate
 

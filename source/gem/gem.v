@@ -49,6 +49,8 @@ module gem (
     output         gtx_rx_pol_swap,      // GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
     output         gtx_rx_err,           // PRBS test detects an error
     output  [15:0] gtx_rx_err_count,     // Error count on this fiber channel
+    output  [15:0] gtx_rx_notintable_count,     // Error count on this fiber channel
+    output  [15:0] gtx_rx_disperr_count,     // Error count on this fiber channel
 
     output  [7:0]  k_char, // latched copy of the last k-char received
 
@@ -244,6 +246,8 @@ parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
         .gtx_rx_sync_done     (gtx_rx_sync_done),       // Out  Use these to determine gtx_ready
         .gtx_rx_err           (gtx_rx_err),             // Out  PRBS test detects an error
         .gtx_rx_err_count     (gtx_rx_err_count[15:0]), // Out  Error count on this fiber channel
+        .gtx_rx_notintable_count  (gtx_rx_notintable_count[15:0]), // Out  Error count on this fiber channel
+        .gtx_rx_disperr_count     (gtx_rx_disperr_count[15:0]), // Out  Error count on this fiber channel
         .gtx_rx_data          (gtx_rx_data[55:0]),      // Out  GEM trigger data
         .link_had_err         (link_had_err),
         .link_good            (link_good),
