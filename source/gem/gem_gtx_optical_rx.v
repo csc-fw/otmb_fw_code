@@ -174,6 +174,8 @@
     reg        rst_errcount_r = 0;
 
     wire [7:0]  link_errcount;
+    wire [15:0] notintable_count;
+    wire [15:0] disperr_count;
 
     assign snap_wait = !(rx_sync_done & clocks_rdy);  // Allow pattern checks when RX is ready
 
