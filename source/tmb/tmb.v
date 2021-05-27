@@ -2430,7 +2430,7 @@
       {mpc1_frame0_vme,mpc0_frame0_vme} <= 0;
       {mpc1_frame1_vme,mpc0_frame1_vme} <= 0;
     end
-    else if (trig_mpc_rtmb_dly) begin
+    else if (trig_mpc_rtmb_dly || mpc_frame0_dly[15]) begin
       {mpc1_frame0_vme,mpc0_frame0_vme} <= mpc_frame0_dly; // Latched copy of LCTs for VME
       {mpc1_frame1_vme,mpc0_frame1_vme} <= mpc_frame1_dly;
     end
