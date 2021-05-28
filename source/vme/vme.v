@@ -3797,7 +3797,7 @@
   wire      wr_hmt_thresh2;
   wire      wr_hmt_thresh3;
 
-  wire      wr_lct_injection;
+  //wire      wr_lct_injection;
 
   wire      wr_gem_debug_fifo_ctrl;
   wire      wr_gem_inj_ctrl;
@@ -9389,7 +9389,7 @@ always @(posedge clock_vme) begin
   if    (wr_hmt_thresh1)           hmt_thresh1_wr          <= d[15:0];
   if    (wr_hmt_thresh2)           hmt_thresh2_wr          <= d[15:0];
   if    (wr_hmt_thresh3)           hmt_thresh3_wr          <= d[15:0];
-  if    (wr_lct_injection)         lct_injection_wr        <= d[15:0];
+  //if    (wr_lct_injection)         lct_injection_wr        <= d[15:0];
   if    (wr_gem_debug_fifo_ctrl)   gem_debug_fifo_ctrl_wr  <= d[15:0];
   if    (wr_gem_inj_ctrl)          gem_inj_ctrl_wr         <= d[15:0];
   if    (wr_gem_inj_data)          gem_inj_data_wr         <= d[15:0];
