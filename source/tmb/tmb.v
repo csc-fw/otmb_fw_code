@@ -2343,10 +2343,10 @@
   assign mpc0_frame1_pulse = (trig_mpc0) ? (run3_trig_df ? mpc0_frame1_run3 : mpc0_frame1) : 16'h0;
   assign mpc1_frame0_pulse = (trig_mpc1) ? (run3_trig_df ? mpc1_frame0_run3 : mpc1_frame0) : 16'h0;
   assign mpc1_frame1_pulse = (trig_mpc1) ? (run3_trig_df ? mpc1_frame1_run3 : mpc1_frame1) : 16'h0;
-  assign mpc0_frame0_pulse = (trig_mpc0) ? mpc0_frame0 : 16'h0;
-  assign mpc0_frame1_pulse = (trig_mpc0) ? mpc0_frame1 : 16'h0;
-  assign mpc1_frame0_pulse = (trig_mpc1) ? mpc1_frame0 : 16'h0;
-  assign mpc1_frame1_pulse = (trig_mpc1) ? mpc1_frame1 : 16'h0;
+  //assign mpc0_frame0_pulse = (trig_mpc0) ? mpc0_frame0 : 16'h0;
+  //assign mpc0_frame1_pulse = (trig_mpc0) ? mpc0_frame1 : 16'h0;
+  //assign mpc1_frame0_pulse = (trig_mpc1) ? mpc1_frame0 : 16'h0;
+  //assign mpc1_frame1_pulse = (trig_mpc1) ? mpc1_frame1 : 16'h0;
 
 // TMB is supposed to rank LCTs, but doesn't yet
   assign tmb_rank_err = (lct0_quality[3:0] * lct0_vpf) < (lct1_quality[3:0] * lct1_vpf);
