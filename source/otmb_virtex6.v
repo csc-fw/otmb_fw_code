@@ -4091,10 +4091,10 @@ wire [15:0] gemB_bxn_counter;
 //-------------------------------------------------------------------------------------------------------------------
 // Local
 
-  //injected lct
-  wire  [7:0] lct_inj_hs;
-  wire  [6:0] lct_inj_wg;
-  wire        lct_inj_enable;
+  ////injected lct
+  //wire  [7:0] lct_inj_hs;
+  //wire  [6:0] lct_inj_wg;
+  //wire        lct_inj_enable;
 
 
   wire  [1:0]      tmb_sync_err_en;
@@ -4118,10 +4118,10 @@ wire [15:0] gemB_bxn_counter;
 // Clock
   .clock      (clock),      // In  40MHz TMB main clock
   .ttc_resync (ttc_resync), // In  TTC resync
-  //injected LCT
-  .lct_inj_hs         (lct_inj_hs[7:0]), //In injected LCT hs 
-  .lct_inj_wg         (lct_inj_wg[6:0]),//In injected LCT wg
-  .lct_inj_enable     (lct_inj_enable), //In, enable LCT injection
+  ////injected LCT
+  //.lct_inj_hs         (lct_inj_hs[7:0]), //In injected LCT hs 
+  //.lct_inj_wg         (lct_inj_wg[6:0]),//In injected LCT wg
+  //.lct_inj_enable     (lct_inj_enable), //In, enable LCT injection
 
 // ALCT
   .alct0_tmb    (alct0_tmb[MXALCT-1:0]), // In  ALCT best muon
@@ -5235,9 +5235,9 @@ wire [15:0] gemB_bxn_counter;
       .hmt_thresh2        (hmt_thresh2[9:0]), // out, loose HMT thresh
       .hmt_thresh3        (hmt_thresh3[9:0]), // out, loose HMT thresh
 
-      .lct_inj_hs         (lct_inj_hs[7:0]), //Out injected LCT hs 
-      .lct_inj_wg         (lct_inj_wg[6:0]),//Out injected LCT wg
-      .lct_inj_enable     (lct_inj_enable), //Out, enable LCT injection
+      //.lct_inj_hs         (lct_inj_hs[7:0]), //Out injected LCT hs 
+      //.lct_inj_wg         (lct_inj_wg[6:0]),//Out injected LCT wg
+      //.lct_inj_enable     (lct_inj_enable), //Out, enable LCT injection
       // Sequencer Ports: Latched CLCTs + Status
       .event_clear_vme   (event_clear_vme),         // Out  Event clear for vme diagnostic registers
       .clct0_vme         (clct0_vme[MXCLCT-1:0]),   // In  First  CLCT

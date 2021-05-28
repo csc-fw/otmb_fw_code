@@ -524,10 +524,10 @@
   hmt_thresh2,
   hmt_thresh3,
 
-  //LCT injection
-  lct_inj_hs,
-  lct_inj_wg,
-  lct_inj_enable,
+  ////LCT injection
+  //lct_inj_hs,
+  //lct_inj_wg,
+  //lct_inj_enable,
 
 // Sequencer Ports: Latched CLCTs + Status
   event_clear_vme,
@@ -1683,7 +1683,7 @@
   parameter ADR_HMT_THRESH3           = 10'h1B2; // threshold3 for HMT
   parameter ADR_HMT_NHITS_SIG         = 10'h1B4;
   parameter ADR_HMT_NHITS_BKG         = 10'h1B6;
-  parameter ADR_LCT_INJECTION         = 10'h1B8; //LCT injection from configuration
+  //parameter ADR_LCT_INJECTION         = 10'h1B8; //LCT injection from configuration
   parameter ADR_V6_GTX0_NOTINTABLE    = 10'h1BA;  // Virtex-6 GTX0 control and status
   parameter ADR_V6_GTX1_NOTINTABLE    = 10'h1BC;  // Virtex-6 GTX0 control and status
   parameter ADR_V6_GTX2_NOTINTABLE    = 10'h1BE;  // Virtex-6 GTX0 control and status
@@ -2291,9 +2291,9 @@
   output [9:0] hmt_thresh3;
 
   // LCT injection 
-  output [7:0] lct_inj_hs;
-  output [6:0] lct_inj_wg;
-  output       lct_inj_enable;
+  //output [7:0] lct_inj_hs;
+  //output [6:0] lct_inj_wg;
+  //output       lct_inj_enable;
 
 
 // Sequencer Ports: Latched CLCTs
@@ -3593,8 +3593,8 @@
   wire [15:0] hmt_nhits_sig_rd; 
   wire [15:0] hmt_nhits_bkg_rd; 
 
-  reg  [15:0] lct_injection_wr;
-  wire [15:0] lct_injection_rd;
+  //reg  [15:0] lct_injection_wr;
+  //wire [15:0] lct_injection_rd;
 
   wire [15:0] gem_debug_fifo_data_rd; // read only
 
@@ -4502,7 +4502,7 @@
   ADR_HMT_NHITS_SIG:         data_out <= hmt_nhits_sig_rd;
   ADR_HMT_NHITS_BKG:         data_out <= hmt_nhits_bkg_rd;
 
-  ADR_LCT_INJECTION:         data_out <= lct_injection_rd;
+  //ADR_LCT_INJECTION:         data_out <= lct_injection_rd;
 
   ADR_GEM_DEBUG_FIFO_CTRL:   data_out <= gem_debug_fifo_ctrl_rd;
   ADR_GEM_DEBUG_FIFO_DATA:   data_out <= gem_debug_fifo_data_rd;
@@ -4709,7 +4709,7 @@
   assign wr_hmt_thresh2           =  (reg_adr==ADR_HMT_THRESH2            && clk_en);
   assign wr_hmt_thresh3           =  (reg_adr==ADR_HMT_THRESH3            && clk_en);
 
-  assign wr_lct_injection         =  (reg_adr==ADR_LCT_INJECTION          && clk_en);
+  //assign wr_lct_injection         =  (reg_adr==ADR_LCT_INJECTION          && clk_en);
 
   assign wr_gem_gtx_rx[0]         =  (reg_adr==ADR_GEM_GTX_RX0            && clk_en);
   assign wr_gem_gtx_rx[1]         =  (reg_adr==ADR_GEM_GTX_RX1            && clk_en);
@@ -8899,21 +8899,21 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign hmt_nhits_bkg_rd[9:0]   = hmt_nhits_trig_bx2345_vme[9:0];
   assign hmt_nhits_bkg_rd[15:10] = 6'b0;
 
-//------------------------------------------------------------------------------------------------------------------
-// ADR_LCT_INJECTION = 0x1B8  LCT injection for joint test 
-//------------------------------------------------------------------------------------------------------------------
-
-  initial begin
-    lct_injection_wr[7 : 0] = 8'b0; // RW, injected halfstrip
-    lct_injection_wr[14: 8] = 7'b0; //RW, injected wiregroup
-    lct_injection_wr[15   ] = 1'b0; //RW, enable injection. defualt=0
-  end
-  
-  assign lct_inj_hs[7:0]      = lct_injection_wr[7:0];
-  assign lct_inj_wg[6:0]      = lct_injection_wr[14:8];
-  assign lct_inj_enable       = lct_injection_wr[15];
-
-  assign lct_injection_rd[15:0] = lct_injection_wr[15:0];
+////------------------------------------------------------------------------------------------------------------------
+//// ADR_LCT_INJECTION = 0x1B8  LCT injection for joint test 
+////------------------------------------------------------------------------------------------------------------------
+//
+//  initial begin
+//    lct_injection_wr[7 : 0] = 8'b0; // RW, injected halfstrip
+//    lct_injection_wr[14: 8] = 7'b0; //RW, injected wiregroup
+//    lct_injection_wr[15   ] = 1'b0; //RW, enable injection. defualt=0
+//  end
+//  
+//  assign lct_inj_hs[7:0]      = lct_injection_wr[7:0];
+//  assign lct_inj_wg[6:0]      = lct_injection_wr[14:8];
+//  assign lct_inj_enable       = lct_injection_wr[15];
+//
+//  assign lct_injection_rd[15:0] = lct_injection_wr[15:0];
 
 
 //------------------------------------------------------------------------------------------------------------------

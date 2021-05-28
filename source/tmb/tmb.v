@@ -124,9 +124,9 @@
   ttc_resync,
 
   //LCT injection
-  lct_inj_hs,
-  lct_inj_wg,
-  lct_inj_enable,
+  //lct_inj_hs,
+  //lct_inj_wg,
+  //lct_inj_enable,
 
 // ALCT
   alct0_tmb,
@@ -526,9 +526,9 @@
   input          clock;      // 40MHz TMB main clock
   input          ttc_resync; // Purge CLCT pipeline
 
-  input  [7:0] lct_inj_hs;
-  input  [6:0] lct_inj_wg;
-  input        lct_inj_enable;
+  //input  [7:0] lct_inj_hs;
+  //input  [6:0] lct_inj_wg;
+  //input        lct_inj_enable;
 
   wire  [1:0]      tmb_sync_err_en;
 // ALCT
@@ -929,10 +929,10 @@
   wire [MXFRAME-1:0]  mpc1_frame1_run3;
 
 
-  wire [MXFRAME-1:0]  mpc0_frame0inj;
-  wire [MXFRAME-1:0]  mpc0_frame1inj;
-  wire [MXFRAME-1:0]  mpc1_frame0inj;
-  wire [MXFRAME-1:0]  mpc1_frame1inj;
+  //wire [MXFRAME-1:0]  mpc0_frame0inj;
+  //wire [MXFRAME-1:0]  mpc0_frame1inj;
+  //wire [MXFRAME-1:0]  mpc1_frame0inj;
+  //wire [MXFRAME-1:0]  mpc1_frame1inj;
   wire [MXFRAME-1:0]  mpc0_frame0_run3inj;
   wire [MXFRAME-1:0]  mpc0_frame1_run3inj;
   wire [MXFRAME-1:0]  mpc1_frame0_run3inj;
@@ -2216,23 +2216,23 @@
   assign lct0_qlt_run3 = (alct0_valid && clct0_valid) ? 3'b011 : 0;
   assign lct1_qlt_run3 = (alct1_valid && clct1_valid) ? 3'b011 : 0;
 
-  //injected LCT0
-  assign  mpc0_frame0_run3inj[6:0]   = lct_inj_wg[6:0];
-  assign  mpc0_frame0_run3inj[10:7]  = 4'b0;//new bending from CCLUT
-  assign  mpc0_frame0_run3inj[13:11] = 3'b011;//lct_qulity run3
-  assign  mpc0_frame0_run3inj[14]    = 1'b0; // CLCT0 1/4 strip bit
-  assign  mpc0_frame0_run3inj[15]    = 1'b1; //LCT run3 vpf
-  assign  mpc0_frame1_run3inj[7:0]   = lct_inj_hs[7:0];
-  assign  mpc0_frame1_run3inj[8]     = 1'b0; // left or right from CCLUT
-  assign  mpc0_frame1_run3inj[9]     = 1'b0;// CLCT0 1/8 strip bit
-  assign  mpc0_frame1_run3inj[10]    = 1'b0;
-  assign  mpc0_frame1_run3inj[11]    = 1'b0;  // bx0 gets replaced after mpc_tx_delay, keep here to mollify xst
-  assign  mpc0_frame1_run3inj[15:12] = 4'b1111;//clct_bnd run3
-  //second LCT=empty
-  assign  mpc1_frame0_run3inj[15:0]  = 16'b0;//empty
-  assign  mpc1_frame1_run3inj[10]       = 1'b1;
-  assign  mpc1_frame1_run3inj[9 : 0] = 10'b0;//empty
-  assign  mpc1_frame1_run3inj[15:11] = 5'b0;//empty
+  ////injected LCT0
+  //assign  mpc0_frame0_run3inj[6:0]   = lct_inj_wg[6:0];
+  //assign  mpc0_frame0_run3inj[10:7]  = 4'b0;//new bending from CCLUT
+  //assign  mpc0_frame0_run3inj[13:11] = 3'b011;//lct_qulity run3
+  //assign  mpc0_frame0_run3inj[14]    = 1'b0; // CLCT0 1/4 strip bit
+  //assign  mpc0_frame0_run3inj[15]    = 1'b1; //LCT run3 vpf
+  //assign  mpc0_frame1_run3inj[7:0]   = lct_inj_hs[7:0];
+  //assign  mpc0_frame1_run3inj[8]     = 1'b0; // left or right from CCLUT
+  //assign  mpc0_frame1_run3inj[9]     = 1'b0;// CLCT0 1/8 strip bit
+  //assign  mpc0_frame1_run3inj[10]    = 1'b0;
+  //assign  mpc0_frame1_run3inj[11]    = 1'b0;  // bx0 gets replaced after mpc_tx_delay, keep here to mollify xst
+  //assign  mpc0_frame1_run3inj[15:12] = 4'b1111;//clct_bnd run3
+  ////second LCT=empty
+  //assign  mpc1_frame0_run3inj[15:0]  = 16'b0;//empty
+  //assign  mpc1_frame1_run3inj[10]       = 1'b1;
+  //assign  mpc1_frame1_run3inj[9 : 0] = 10'b0;//empty
+  //assign  mpc1_frame1_run3inj[15:11] = 5'b0;//empty
   //assign  mpc1_frame0_run3inj[6:0]   = 7'b0;
   //assign  mpc1_frame0_run3inj[10:7]  = 4'b0;//new bending from CCLUT
   //assign  mpc1_frame0_run3inj[13:11] = 3'b0;
@@ -2284,21 +2284,21 @@
   //assign  mpc1_frame1_run3[15:12] = csc_id[3:0];
 
   //Injection
-  assign  mpc0_frame0inj[6:0]   = lct_inj_wg[6:0];
-  assign  mpc0_frame0inj[10:7]  = 4'd10;//pattern 10
-  assign  mpc0_frame0inj[14:11] = 4'd15;//quality
-  assign  mpc0_frame0inj[15]    = 1'b1;//vpf
+  //assign  mpc0_frame0inj[6:0]   = lct_inj_wg[6:0];
+  //assign  mpc0_frame0inj[10:7]  = 4'd10;//pattern 10
+  //assign  mpc0_frame0inj[14:11] = 4'd15;//quality
+  //assign  mpc0_frame0inj[15]    = 1'b1;//vpf
 
-  assign  mpc0_frame1inj[7:0]   = lct_inj_hs[7:0];
-  assign  mpc0_frame1inj[8]     = 1'b0;
-  assign  mpc0_frame1inj[9]     = 1'b0;
-  assign  mpc0_frame1inj[10]    = 1'b0;
-  assign  mpc0_frame1inj[11]    = 1'b0;  // bx0 gets replaced after mpc_tx_delay, keep here to mollify xst
-  assign  mpc0_frame1inj[15:12] = csc_id[3:0];
+  //assign  mpc0_frame1inj[7:0]   = lct_inj_hs[7:0];
+  //assign  mpc0_frame1inj[8]     = 1'b0;
+  //assign  mpc0_frame1inj[9]     = 1'b0;
+  //assign  mpc0_frame1inj[10]    = 1'b0;
+  //assign  mpc0_frame1inj[11]    = 1'b0;  // bx0 gets replaced after mpc_tx_delay, keep here to mollify xst
+  //assign  mpc0_frame1inj[15:12] = csc_id[3:0];
 
-  assign  mpc1_frame0inj[15:0]  = 16'b0;
-  assign  mpc1_frame1inj[11:0]  = 12'b0;//empty
-  assign  mpc1_frame1inj[15:12] = csc_id[3:0];
+  //assign  mpc1_frame0inj[15:0]  = 16'b0;
+  //assign  mpc1_frame1inj[11:0]  = 12'b0;//empty
+  //assign  mpc1_frame1inj[15:12] = csc_id[3:0];
 
   //real LCT
   assign  mpc0_frame0[6:0]   = alct0_key[6:0];
@@ -2335,10 +2335,18 @@
   wire trig_mpc0 = trig_mpc && lct0_vpf && !kill_clct0;  // LCT 0 is valid, send to mpc
   wire trig_mpc1 = trig_mpc && lct1_vpf && !kill_clct1;  // LCT 1 is valid, send to mpc
 
-  assign mpc0_frame0_pulse = (trig_mpc0) ? (run3_trig_df ? (lct_inj_enable ? mpc0_frame0_run3inj : mpc0_frame0_run3) : (lct_inj_enable ? mpc0_frame0inj : mpc0_frame0)) : 16'h0;
-  assign mpc0_frame1_pulse = (trig_mpc0) ? (run3_trig_df ? (lct_inj_enable ? mpc0_frame1_run3inj : mpc0_frame1_run3) : (lct_inj_enable ? mpc0_frame1inj : mpc0_frame1)) : 16'h0;
-  assign mpc1_frame0_pulse = (trig_mpc1) ? (run3_trig_df ? (lct_inj_enable ? mpc1_frame0_run3inj : mpc1_frame0_run3) : (lct_inj_enable ? mpc1_frame0inj : mpc1_frame0)) : 16'h0;
-  assign mpc1_frame1_pulse = (trig_mpc1) ? (run3_trig_df ? (lct_inj_enable ? mpc1_frame1_run3inj : mpc1_frame1_run3) : (lct_inj_enable ? mpc1_frame1inj : mpc1_frame1)) : 16'h0;
+  //assign mpc0_frame0_pulse = (trig_mpc0) ? (run3_trig_df ? (lct_inj_enable ? mpc0_frame0_run3inj : mpc0_frame0_run3) : (lct_inj_enable ? mpc0_frame0inj : mpc0_frame0)) : 16'h0;
+  //assign mpc0_frame1_pulse = (trig_mpc0) ? (run3_trig_df ? (lct_inj_enable ? mpc0_frame1_run3inj : mpc0_frame1_run3) : (lct_inj_enable ? mpc0_frame1inj : mpc0_frame1)) : 16'h0;
+  //assign mpc1_frame0_pulse = (trig_mpc1) ? (run3_trig_df ? (lct_inj_enable ? mpc1_frame0_run3inj : mpc1_frame0_run3) : (lct_inj_enable ? mpc1_frame0inj : mpc1_frame0)) : 16'h0;
+  //assign mpc1_frame1_pulse = (trig_mpc1) ? (run3_trig_df ? (lct_inj_enable ? mpc1_frame1_run3inj : mpc1_frame1_run3) : (lct_inj_enable ? mpc1_frame1inj : mpc1_frame1)) : 16'h0;
+  assign mpc0_frame0_pulse = (trig_mpc0) ? (run3_trig_df ? mpc0_frame0_run3 : mpc0_frame0) : 16'h0;
+  assign mpc0_frame1_pulse = (trig_mpc0) ? (run3_trig_df ? mpc0_frame1_run3 : mpc0_frame1) : 16'h0;
+  assign mpc1_frame0_pulse = (trig_mpc1) ? (run3_trig_df ? mpc1_frame0_run3 : mpc1_frame0) : 16'h0;
+  assign mpc1_frame1_pulse = (trig_mpc1) ? (run3_trig_df ? mpc1_frame1_run3 : mpc1_frame1) : 16'h0;
+  assign mpc0_frame0_pulse = (trig_mpc0) ? mpc0_frame0 : 16'h0;
+  assign mpc0_frame1_pulse = (trig_mpc0) ? mpc0_frame1 : 16'h0;
+  assign mpc1_frame0_pulse = (trig_mpc1) ? mpc1_frame0 : 16'h0;
+  assign mpc1_frame1_pulse = (trig_mpc1) ? mpc1_frame1 : 16'h0;
 
 // TMB is supposed to rank LCTs, but doesn't yet
   assign tmb_rank_err = (lct0_quality[3:0] * lct0_vpf) < (lct1_quality[3:0] * lct1_vpf);
