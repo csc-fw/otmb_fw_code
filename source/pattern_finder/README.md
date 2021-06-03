@@ -96,4 +96,14 @@ pattern 6, also it is pattern 0 in CMSSW
 rom_patA.mem is the LUT for the straight pattern A and the index is the comparator code and value in mem file is the 18bits output, similar for other patterns
 
 in CMSSW, the pattern ID for CCLUT is from 0 to 4 and ID 4 means the straight pattern
+| CMSSW pattern ID |  pattern ID for firmware input |
+|         0        |            6                   |
+|         1        |            7                   |
+|         2        |            8                   |
+|         3        |            9                   |
+|         4        |            A                   |
 
+The firmware also changed the pattern ID into 0-4 for trigger and DAQ. The LUT filename in firmware was not changed yet
+
+
+The most LUT files(rom_patA.mem etc) are taken from https://github.com/cms-data/L1Trigger-CSCTriggerPrimitives and the current firmware is using the version from 2021 April
