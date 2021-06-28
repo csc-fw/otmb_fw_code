@@ -4114,6 +4114,7 @@ wire [15:0] gemB_bxn_counter;
   wire  [1:0]      mpc_accept_vme;
   wire  [1:0]      mpc_reserved_vme;
 
+  wire alct0_pipe_vpf;
   tmb utmb
   (
 // Clock
@@ -4129,6 +4130,8 @@ wire [15:0] gemB_bxn_counter;
   .alct1_tmb    (alct1_tmb[MXALCT-1:0]), // In  ALCT second best muon
   .alct_bx0_rx  (alct_bx0_rx),           // In  ALCT bx0 received
   .alct_ecc_err (alct_ecc_err[1:0]),     // In  ALCT ecc syndrome code
+
+  .alct0_pipe_vpf  (alct0_pipe_vpf),// Out, from fake ALCT for debugging
 
 // GEM
   //.gemA_vpf          (gemA_vpf[7:0]),

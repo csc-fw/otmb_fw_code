@@ -537,6 +537,8 @@
   input                alct_bx0_rx;  // ALCT bx0 received
   input  [1:0]         alct_ecc_err; // ALCT ecc syndrome code
 
+  output                alct0_pipe_vpf; //Tao, test at TAMU
+
 // GEM
   input  [7:0]        gemA_vpf;
   input  [7:0]        gemB_vpf;
@@ -758,7 +760,6 @@
 //------------------------------------------------------------------------------------------------------------------
 // Debug Ports
 //------------------------------------------------------------------------------------------------------------------
-  output                alct0_pipe_vpf; //Tao, test at TAMU
 `ifdef DEBUG_TMB
   output  [MXALCT-1:0]  alct0_pipe;
   output  [MXALCT-1:0]  alct1_pipe;
