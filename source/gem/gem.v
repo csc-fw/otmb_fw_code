@@ -7,6 +7,27 @@
 //  12/09/2016 Addition of GEM Injector RAMS
 //-------------------------------------------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------------------------------------------
+//V1 GEM trigger format {cnt, address}, 14bits per cluster, 4 clusters per BX
+// 3.2 Gpbs
+//comma cycles between BC, F7, FB, FD, until 2021
+//------------------------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------------------------
+//V2 GEM trigger format {cnt, roll, padnumber},  14bits per cluster, 4 clusters per BX
+// 3.2 Gpbs
+//comma cycles between BC, F7, FB, FD, Full Run3?
+//------------------------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------------------------
+//V3 GEM trigger format: LS3 upgrade?
+//4.0 Gpbs
+//16 bits / cluster  (strip + partition + cnt + status + last bx overflow)
+//5 clusters / bx
+//can retransmit clusters from the previous bx
+//------------------------------------------------------------------------------------------------------------------
+
 
 //------------------------------------------------------------------------------------------------------------------
 // Bus Widths
@@ -303,7 +324,10 @@ parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
   wire [13:0] cluster_raw [3:0];
   wire [15:0] gem_inj     [3:0];
   wire [13:0] cluster_inj [3:0];
-  wire [11:0] adr         [3:0];
+  //wire [11:0] adr         [3:0];
+  wire [ 7:0] pad         [3:0];//0-191, 8bits
+  wire [ 2:0] roll        [3:0];//0-7, 3bits
+  wire [ 4:0] feb         [3:0];
   wire [ 2:0] cnt         [3:0];
   wire [ 0:0] vpf         [3:0];
   reg [ 4:0] cluster_feb [3:0];       
@@ -311,16 +335,8 @@ parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
   reg [ 7:0] cluster_pad [3:0];       
 
 
-  //wire [MXPAD-1:0] gemhit_roll0 = 0;
-  //wire [MXPAD-1:0] gemhit_roll1 = 0;
-  //wire [MXPAD-1:0] gemhit_roll2 = 0;
-  //wire [MXPAD-1:0] gemhit_roll3 = 0;
-  //wire [MXPAD-1:0] gemhit_roll4 = 0;
-  //wire [MXPAD-1:0] gemhit_roll5 = 0;
-  //wire [MXPAD-1:0] gemhit_roll6 = 0;
-  //wire [MXPAD-1:0] gemhit_roll7 = 0;
-  //wire [MXPAD*MXROLL-1:0] hits = 0;
-  //wire [MXPAD*MXROLL-1:0] hits_cluster [3:0];
+
+  //                            | V1 GEM trigger format               
   //GEM   real VFAT numbering   |   natural ID using adr[iclst][10:6]
   //Roll1     7, 15, 23         |   0,  1, 2
   //Roll2     6, 14, 22         |   3,  4, 5
@@ -331,6 +347,11 @@ parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
   //Roll7     1,  9, 17         |  18, 19, 20
   //Roll8     0,  8, 16         |  21, 22, 23
 
+  //V2 gem trigger format
+  // real_vfat_id =  7-roll_id+ {pad[7:6], 3'b0}, namely 7-roll_id+pad[7:6]*8
+
+  
+
   reg pass_ff=1; // pass raw data or use injector ?
 
   genvar iclst;
@@ -339,41 +360,58 @@ parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
     assign cluster     [iclst] = (pass_ff) ? cluster_raw [iclst] : cluster_inj [iclst];
     assign cluster_raw [iclst] = gtx_rx_data[(iclst+1)*14-1 : iclst*14];
     assign cluster_inj [iclst] = gem_inj[iclst][13:0];
-    assign adr         [iclst] = cluster[iclst][10:0];
+    //assign adr         [iclst] = cluster[iclst][10:0];
     assign cnt         [iclst] = cluster[iclst][13:11];
-    assign vpf         [iclst] = ~(adr[iclst][10:9]==2'b11);
+    //assign vpf         [iclst] = ~(adr[iclst][10:9]==2'b11);
+
+    //v2 GEM trigger format
+    assign roll        [iclst] = cluster[iclst][10:8];
+    assign vpf         [iclst] = ~(cluster[iclst][7:0] > 8'd191);
+    assign pad         [iclst] = vpf[iclst] ? cluster[iclst][ 7:0] : 8'd255;//invalid pad = 255
+    assign fed         [iclst] = {pad[iclst][7:6], ~roll[iclst][2:0]};
+
     
     //assign hits_cluster[iclst] = (vpf[iclst] ? {(1536-cnt[iclst]-1-adr[iclst])*{0},(cnt[iclst]+1)*{1}, adr[iclst]*{0}} : 0);
 
-   always @(*) begin
-   case (adr[iclst][10:6]) // adr[10:6] is the "natural" vfatid
-     5'd0:    begin  cluster_feb[iclst] <= 5'd7 ;  cluster_roll[iclst] <= 3'd0; cluster_pad[iclst] <= {2'b00,adr[iclst][5:0]}; end
-     5'd1:    begin  cluster_feb[iclst] <= 5'd15;  cluster_roll[iclst] <= 3'd0; cluster_pad[iclst] <= {2'b01,adr[iclst][5:0]}; end
-     5'd2:    begin  cluster_feb[iclst] <= 5'd23;  cluster_roll[iclst] <= 3'd0; cluster_pad[iclst] <= {2'b10,adr[iclst][5:0]}; end
-     5'd3:    begin  cluster_feb[iclst] <= 5'd6 ;  cluster_roll[iclst] <= 3'd1; cluster_pad[iclst] <= {2'b00,adr[iclst][5:0]}; end
-     5'd4:    begin  cluster_feb[iclst] <= 5'd14;  cluster_roll[iclst] <= 3'd1; cluster_pad[iclst] <= {2'b01,adr[iclst][5:0]}; end
-     5'd5:    begin  cluster_feb[iclst] <= 5'd22;  cluster_roll[iclst] <= 3'd1; cluster_pad[iclst] <= {2'b10,adr[iclst][5:0]}; end
-     5'd6:    begin  cluster_feb[iclst] <= 5'd5 ;  cluster_roll[iclst] <= 3'd2; cluster_pad[iclst] <= {2'b00,adr[iclst][5:0]}; end
-     5'd7:    begin  cluster_feb[iclst] <= 5'd13;  cluster_roll[iclst] <= 3'd2; cluster_pad[iclst] <= {2'b01,adr[iclst][5:0]}; end
-     5'd8:    begin  cluster_feb[iclst] <= 5'd21;  cluster_roll[iclst] <= 3'd2; cluster_pad[iclst] <= {2'b10,adr[iclst][5:0]}; end
-     5'd9:    begin  cluster_feb[iclst] <= 5'd4 ;  cluster_roll[iclst] <= 3'd3; cluster_pad[iclst] <= {2'b00,adr[iclst][5:0]}; end
-     5'd10:   begin  cluster_feb[iclst] <= 5'd12;  cluster_roll[iclst] <= 3'd3; cluster_pad[iclst] <= {2'b01,adr[iclst][5:0]}; end
-     5'd11:   begin  cluster_feb[iclst] <= 5'd20;  cluster_roll[iclst] <= 3'd3; cluster_pad[iclst] <= {2'b10,adr[iclst][5:0]}; end
-     5'd12:   begin  cluster_feb[iclst] <= 5'd3 ;  cluster_roll[iclst] <= 3'd4; cluster_pad[iclst] <= {2'b00,adr[iclst][5:0]}; end
-     5'd13:   begin  cluster_feb[iclst] <= 5'd11;  cluster_roll[iclst] <= 3'd4; cluster_pad[iclst] <= {2'b01,adr[iclst][5:0]}; end
-     5'd14:   begin  cluster_feb[iclst] <= 5'd19;  cluster_roll[iclst] <= 3'd4; cluster_pad[iclst] <= {2'b10,adr[iclst][5:0]}; end
-     5'd15:   begin  cluster_feb[iclst] <= 5'd2 ;  cluster_roll[iclst] <= 3'd5; cluster_pad[iclst] <= {2'b00,adr[iclst][5:0]}; end
-     5'd16:   begin  cluster_feb[iclst] <= 5'd10;  cluster_roll[iclst] <= 3'd5; cluster_pad[iclst] <= {2'b01,adr[iclst][5:0]}; end
-     5'd17:   begin  cluster_feb[iclst] <= 5'd18;  cluster_roll[iclst] <= 3'd5; cluster_pad[iclst] <= {2'b10,adr[iclst][5:0]}; end
-     5'd18:   begin  cluster_feb[iclst] <= 5'd1 ;  cluster_roll[iclst] <= 3'd6; cluster_pad[iclst] <= {2'b00,adr[iclst][5:0]}; end
-     5'd19:   begin  cluster_feb[iclst] <= 5'd9 ;  cluster_roll[iclst] <= 3'd6; cluster_pad[iclst] <= {2'b01,adr[iclst][5:0]}; end
-     5'd20:   begin  cluster_feb[iclst] <= 5'd17;  cluster_roll[iclst] <= 3'd6; cluster_pad[iclst] <= {2'b10,adr[iclst][5:0]}; end
-     5'd21:   begin  cluster_feb[iclst] <= 5'd0 ;  cluster_roll[iclst] <= 3'd7; cluster_pad[iclst] <= {2'b00,adr[iclst][5:0]}; end
-     5'd22:   begin  cluster_feb[iclst] <= 5'd8 ;  cluster_roll[iclst] <= 3'd7; cluster_pad[iclst] <= {2'b01,adr[iclst][5:0]}; end
-     5'd23:   begin  cluster_feb[iclst] <= 5'd16;  cluster_roll[iclst] <= 3'd7; cluster_pad[iclst] <= {2'b10,adr[iclst][5:0]}; end
-     default: begin  cluster_feb[iclst] <= 5'd24;  cluster_roll[iclst] <= 3'd0; cluster_pad[iclst] <=                   8'd192; end  //invalid case
-   endcase
-   end
+   //always @(*) begin
+    //===============================================================
+    //V1 GEM trigger format {cnt, address}
+    //===============================================================
+   //case (adr[iclst][10:6]) // adr[10:6] is the "natural" vfatid
+   //  5'd0:    begin  cluster_feb[iclst] <= 5'd7 ;  cluster_roll[iclst] <= 3'd0; cluster_pad[iclst] <= {2'b00,adr[iclst][5:0]}; end
+   //  5'd1:    begin  cluster_feb[iclst] <= 5'd15;  cluster_roll[iclst] <= 3'd0; cluster_pad[iclst] <= {2'b01,adr[iclst][5:0]}; end
+   //  5'd2:    begin  cluster_feb[iclst] <= 5'd23;  cluster_roll[iclst] <= 3'd0; cluster_pad[iclst] <= {2'b10,adr[iclst][5:0]}; end
+   //  5'd3:    begin  cluster_feb[iclst] <= 5'd6 ;  cluster_roll[iclst] <= 3'd1; cluster_pad[iclst] <= {2'b00,adr[iclst][5:0]}; end
+   //  5'd4:    begin  cluster_feb[iclst] <= 5'd14;  cluster_roll[iclst] <= 3'd1; cluster_pad[iclst] <= {2'b01,adr[iclst][5:0]}; end
+   //  5'd5:    begin  cluster_feb[iclst] <= 5'd22;  cluster_roll[iclst] <= 3'd1; cluster_pad[iclst] <= {2'b10,adr[iclst][5:0]}; end
+   //  5'd6:    begin  cluster_feb[iclst] <= 5'd5 ;  cluster_roll[iclst] <= 3'd2; cluster_pad[iclst] <= {2'b00,adr[iclst][5:0]}; end
+   //  5'd7:    begin  cluster_feb[iclst] <= 5'd13;  cluster_roll[iclst] <= 3'd2; cluster_pad[iclst] <= {2'b01,adr[iclst][5:0]}; end
+   //  5'd8:    begin  cluster_feb[iclst] <= 5'd21;  cluster_roll[iclst] <= 3'd2; cluster_pad[iclst] <= {2'b10,adr[iclst][5:0]}; end
+   //  5'd9:    begin  cluster_feb[iclst] <= 5'd4 ;  cluster_roll[iclst] <= 3'd3; cluster_pad[iclst] <= {2'b00,adr[iclst][5:0]}; end
+   //  5'd10:   begin  cluster_feb[iclst] <= 5'd12;  cluster_roll[iclst] <= 3'd3; cluster_pad[iclst] <= {2'b01,adr[iclst][5:0]}; end
+   //  5'd11:   begin  cluster_feb[iclst] <= 5'd20;  cluster_roll[iclst] <= 3'd3; cluster_pad[iclst] <= {2'b10,adr[iclst][5:0]}; end
+   //  5'd12:   begin  cluster_feb[iclst] <= 5'd3 ;  cluster_roll[iclst] <= 3'd4; cluster_pad[iclst] <= {2'b00,adr[iclst][5:0]}; end
+   //  5'd13:   begin  cluster_feb[iclst] <= 5'd11;  cluster_roll[iclst] <= 3'd4; cluster_pad[iclst] <= {2'b01,adr[iclst][5:0]}; end
+   //  5'd14:   begin  cluster_feb[iclst] <= 5'd19;  cluster_roll[iclst] <= 3'd4; cluster_pad[iclst] <= {2'b10,adr[iclst][5:0]}; end
+   //  5'd15:   begin  cluster_feb[iclst] <= 5'd2 ;  cluster_roll[iclst] <= 3'd5; cluster_pad[iclst] <= {2'b00,adr[iclst][5:0]}; end
+   //  5'd16:   begin  cluster_feb[iclst] <= 5'd10;  cluster_roll[iclst] <= 3'd5; cluster_pad[iclst] <= {2'b01,adr[iclst][5:0]}; end
+   //  5'd17:   begin  cluster_feb[iclst] <= 5'd18;  cluster_roll[iclst] <= 3'd5; cluster_pad[iclst] <= {2'b10,adr[iclst][5:0]}; end
+   //  5'd18:   begin  cluster_feb[iclst] <= 5'd1 ;  cluster_roll[iclst] <= 3'd6; cluster_pad[iclst] <= {2'b00,adr[iclst][5:0]}; end
+   //  5'd19:   begin  cluster_feb[iclst] <= 5'd9 ;  cluster_roll[iclst] <= 3'd6; cluster_pad[iclst] <= {2'b01,adr[iclst][5:0]}; end
+   //  5'd20:   begin  cluster_feb[iclst] <= 5'd17;  cluster_roll[iclst] <= 3'd6; cluster_pad[iclst] <= {2'b10,adr[iclst][5:0]}; end
+   //  5'd21:   begin  cluster_feb[iclst] <= 5'd0 ;  cluster_roll[iclst] <= 3'd7; cluster_pad[iclst] <= {2'b00,adr[iclst][5:0]}; end
+   //  5'd22:   begin  cluster_feb[iclst] <= 5'd8 ;  cluster_roll[iclst] <= 3'd7; cluster_pad[iclst] <= {2'b01,adr[iclst][5:0]}; end
+   //  5'd23:   begin  cluster_feb[iclst] <= 5'd16;  cluster_roll[iclst] <= 3'd7; cluster_pad[iclst] <= {2'b10,adr[iclst][5:0]}; end
+   //  default: begin  cluster_feb[iclst] <= 5'd24;  cluster_roll[iclst] <= 3'd0; cluster_pad[iclst] <=                   8'd192; end  //invalid case
+   //endcase
+   
+    //===============================================================
+    //V2 GEM trigger format {cnt, roll, padnumber}
+    //===============================================================
+    //cluster_feb[iclst]  <= ~roll[iclst][2:0]+ {pad[iclst][7:6], 3'b0};
+    //cluster_roll[iclst] <=  roll[iclst][2:0];
+    //cluster_pad[iclst]  <=  pad [iclst][7:0];
+   //end
 
   end
   endgenerate
@@ -758,11 +796,11 @@ parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
 //  Hot vfat mask
 //----------------------------------------------------------------------------------------------------------------------
 
-  wire  cluster_maskout    [3:0];// cluster is maksed or partial masked
-  assign cluster_maskout[0] = ~gem_vfat_hcm[cluster_feb[0]];
-  assign cluster_maskout[1] = ~gem_vfat_hcm[cluster_feb[1]];
-  assign cluster_maskout[2] = ~gem_vfat_hcm[cluster_feb[2]];
-  assign cluster_maskout[3] = ~gem_vfat_hcm[cluster_feb[3]];
+  wire  cluster_maskout    [3:0];// cluster is masked out or partial masked
+  assign cluster_maskout[0] = ~gem_vfat_hcm[feb[0]];
+  assign cluster_maskout[1] = ~gem_vfat_hcm[feb[1]];
+  assign cluster_maskout[2] = ~gem_vfat_hcm[feb[2]];
+  assign cluster_maskout[3] = ~gem_vfat_hcm[feb[3]];
 
 //----------------------------------------------------------------------------------------------------------------------
 // outputs
@@ -777,19 +815,33 @@ parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
   assign  cluster1      = cluster [1];
   assign  cluster2      = cluster [2];
   assign  cluster3      = cluster [3];
-  assign  cluster0_feb  = cluster_feb[0];
-  assign  cluster1_feb  = cluster_feb[1];
-  assign  cluster2_feb  = cluster_feb[2];
-  assign  cluster3_feb  = cluster_feb[3];
-  assign  cluster0_roll = cluster_roll[0];
-  assign  cluster1_roll = cluster_roll[1];
-  assign  cluster2_roll = cluster_roll[2];
-  assign  cluster3_roll = cluster_roll[3];
-  assign  cluster0_pad  = cluster_pad[0];
-  assign  cluster1_pad  = cluster_pad[1];
-  assign  cluster2_pad  = cluster_pad[2];
-  assign  cluster3_pad  = cluster_pad[3];
+  //V1 gem trigger format 
+  //assign  cluster0_feb  = cluster_feb[0];
+  //assign  cluster1_feb  = cluster_feb[1];
+  //assign  cluster2_feb  = cluster_feb[2];
+  //assign  cluster3_feb  = cluster_feb[3];
+  //assign  cluster0_roll = cluster_roll[0];
+  //assign  cluster1_roll = cluster_roll[1];
+  //assign  cluster2_roll = cluster_roll[2];
+  //assign  cluster3_roll = cluster_roll[3];
+  //assign  cluster0_pad  = cluster_pad[0];
+  //assign  cluster1_pad  = cluster_pad[1];
+  //assign  cluster2_pad  = cluster_pad[2];
+  //assign  cluster3_pad  = cluster_pad[3];
 
+  //V2 gem trigger format 
+  assign  cluster0_feb  = feb[0];
+  assign  cluster1_feb  = feb[1];
+  assign  cluster2_feb  = feb[2];
+  assign  cluster3_feb  = feb[3];
+  assign  cluster0_roll = roll[0];
+  assign  cluster1_roll = roll[1];
+  assign  cluster2_roll = roll[2];
+  assign  cluster3_roll = roll[3];
+  assign  cluster0_pad  = pad[0];
+  assign  cluster1_pad  = pad[1];
+  assign  cluster2_pad  = pad[2];
+  assign  cluster3_pad  = pad[3];
 //-------------------------------------------------------------------------------------------------------------------
 endmodule
 //-------------------------------------------------------------------------------------------------------------------
