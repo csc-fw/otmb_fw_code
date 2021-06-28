@@ -272,6 +272,7 @@
   parameter MXCLUSTER_SUPERCHAMBER  = 16; //Num GEM cluster  per superchamber
   parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
   parameter MXVFAT     = 24;  // VFAT number
+  parameter INVALIDGEM = 11'd192;
   
 
 // RPC Constants
@@ -1548,10 +1549,10 @@
 
   wire  [13:0] gem_debug_fifo_rdata [MXGEM-1:0];    // GEM FIFO RAM read data
 
-  wire [13:0] gem_cluster0 [MXGEM-1:0]; // cluster0 in GEM coordinates (0-1535)
-  wire [13:0] gem_cluster1 [MXGEM-1:0]; // cluster1 in GEM coordinates (0-1535)
-  wire [13:0] gem_cluster2 [MXGEM-1:0]; // cluster2 in GEM coordinates (0-1535)
-  wire [13:0] gem_cluster3 [MXGEM-1:0]; // cluster3 in GEM coordinates (0-1535)
+  wire [13:0] gem_cluster0 [MXGEM-1:0]; // cluster0 in GEM coordinates (0-191 for pad num)
+  wire [13:0] gem_cluster1 [MXGEM-1:0]; // cluster1 in GEM coordinates (0-191 for pad num)
+  wire [13:0] gem_cluster2 [MXGEM-1:0]; // cluster2 in GEM coordinates (0-191 for pad num)
+  wire [13:0] gem_cluster3 [MXGEM-1:0]; // cluster3 in GEM coordinates (0-191 for pad num)
 
   wire [ 4:0] gem_cluster0_feb  [MXGEM-1:0]; // VFAT number 
   wire [ 4:0] gem_cluster1_feb  [MXGEM-1:0]; // VFAT number 
@@ -2083,14 +2084,14 @@ always @ (posedge clock) begin
   gem_copad_reg[7] <=  gemA_cluster[7];
 end
 
-  assign gem_copad[0] = copad_match[0] ? gem_copad_reg[0] : {3'd0,11'd1536};
-  assign gem_copad[1] = copad_match[1] ? gem_copad_reg[1] : {3'd0,11'd1536};
-  assign gem_copad[2] = copad_match[2] ? gem_copad_reg[2] : {3'd0,11'd1536};
-  assign gem_copad[3] = copad_match[3] ? gem_copad_reg[3] : {3'd0,11'd1536};
-  assign gem_copad[4] = copad_match[4] ? gem_copad_reg[4] : {3'd0,11'd1536};
-  assign gem_copad[5] = copad_match[5] ? gem_copad_reg[5] : {3'd0,11'd1536};
-  assign gem_copad[6] = copad_match[6] ? gem_copad_reg[6] : {3'd0,11'd1536};
-  assign gem_copad[7] = copad_match[7] ? gem_copad_reg[7] : {3'd0,11'd1536};
+  assign gem_copad[0] = copad_match[0] ? gem_copad_reg[0] : {3'd0,11'd255};
+  assign gem_copad[1] = copad_match[1] ? gem_copad_reg[1] : {3'd0,11'd255};
+  assign gem_copad[2] = copad_match[2] ? gem_copad_reg[2] : {3'd0,11'd255};
+  assign gem_copad[3] = copad_match[3] ? gem_copad_reg[3] : {3'd0,11'd255};
+  assign gem_copad[4] = copad_match[4] ? gem_copad_reg[4] : {3'd0,11'd255};
+  assign gem_copad[5] = copad_match[5] ? gem_copad_reg[5] : {3'd0,11'd255};
+  assign gem_copad[6] = copad_match[6] ? gem_copad_reg[6] : {3'd0,11'd255};
+  assign gem_copad[7] = copad_match[7] ? gem_copad_reg[7] : {3'd0,11'd255};
 
 
   wire copad_sump =
@@ -2130,21 +2131,21 @@ end
   generate
   for (icluster=0; icluster<MXCLUSTER_CHAMBER; icluster=icluster+1) begin: gen_gem_cluster
       initial begin
-          gemA_cluster_vme[icluster]  <= {3'b0, 11'd1536};//invalid GEM cluster
-          gemB_cluster_vme[icluster]  <= {3'b0, 11'd1536};
-          gem_copad_vme[icluster]     <= {3'b0, 11'd1536};
+          gemA_cluster_vme[icluster]  <= {3'b0, 11'd255};//invalid GEM cluster
+          gemB_cluster_vme[icluster]  <= {3'b0, 11'd255};
+          gem_copad_vme[icluster]     <= {3'b0, 11'd255};
       end
 
       always @(posedge clock) begin
         if (clear_gem_vme) begin    // Clear clcts in case event gets flushed
-          gemA_cluster_vme[icluster]  <= {3'b0, 11'd1536};//invalid GEM cluster
-          gemB_cluster_vme[icluster]  <= {3'b0, 11'd1536};
-          gem_copad_vme[icluster]     <= {3'b0, 11'd1536};
+          gemA_cluster_vme[icluster]  <= {3'b0, 11'd255};//invalid GEM cluster
+          gemB_cluster_vme[icluster]  <= {3'b0, 11'd255};
+          gem_copad_vme[icluster]     <= {3'b0, 11'd255};
         end
         else begin
             if (gem_any) begin
-                gemA_cluster_vme[icluster]  <= gemA_vpf[icluster] ? gemA_cluster[icluster] : {3'b0, 11'd1536}; 
-                gemB_cluster_vme[icluster]  <= gemB_vpf[icluster] ? gemB_cluster[icluster] : {3'b0, 11'd1536}; 
+                gemA_cluster_vme[icluster]  <= gemA_vpf[icluster] ? gemA_cluster[icluster] : {3'b0, 11'd255}; 
+                gemB_cluster_vme[icluster]  <= gemB_vpf[icluster] ? gemB_cluster[icluster] : {3'b0, 11'd255}; 
                 gem_copad_vme[icluster]     <= gem_copad[icluster];
             end
         end
