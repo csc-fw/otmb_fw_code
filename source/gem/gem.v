@@ -366,7 +366,7 @@ parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
 
     //v2 GEM trigger format
     assign roll        [iclst] = cluster[iclst][10:8];
-    assign vpf         [iclst] = ~(cluster[iclst][7:0] > 8'd191);
+    assign vpf         [iclst] = cluster[iclst][7:0] < 8'd192;
     assign pad         [iclst] = vpf[iclst] ? cluster[iclst][ 7:0] : 8'd255;//invalid pad = 255
     assign feb         [iclst] = {pad[iclst][7:6], ~roll[iclst][2:0]};
 

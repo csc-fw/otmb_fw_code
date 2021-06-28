@@ -2917,7 +2917,7 @@ end
 
 // Sequencer GEM Ports
   .gem_any_match     (gem_any_match), // In  GEM co-pad match was found
-  .copad_match         (copad_match),     // In  8 Bit GEM Match Flag
+  .copad_match       (copad_match),     // In  8 Bit GEM Match Flag
   .gemA_sync_err     (~gemA_synced),  // In  GEM0 has intra-chamber sync error
   .gemB_sync_err     (~gemB_synced),  // In  GEM1 has intra-chamber sync error
   .gems_sync_err     (~gems_synced),  // In  GEM Super Chamber has sync error
@@ -4542,10 +4542,14 @@ wire [15:0] gemB_bxn_counter;
 // JRG: if set_sw8 & 7 are both low, put BPI debug signals on the mezanine test points
     assign mez_tp[9] = (!set_sw[7] ? bpi_dtack       : (|link_bad) || ((set_sw == 2'b01) && sump));
     assign mez_tp[8] = (!set_sw[7] ? bpi_we          : (&link_good || ((set_sw == 2'b01) && alct_wait_cfg)));
-    assign mez_tp[7] =   set_sw[8] ? alct_txd_posneg : (!set_sw[7] ? bpi_enbl : link_good[6]);
-    assign mez_tp[6] = (!set_sw[7] ? bpi_dsbl        :                          link_good[5]);
-    assign mez_tp[5] =   set_sw[8] ? alct_rxd_posneg : (!set_sw[7] ? bpi_rst  : link_good[4]);
-    assign mez_tp[4] = (!set_sw[7] ? bpi_dev         :                          link_good[3]);
+    //assign mez_tp[7] =   set_sw[8] ? alct_txd_posneg : (!set_sw[7] ? bpi_enbl : link_good[6]);
+    //assign mez_tp[6] = (!set_sw[7] ? bpi_dsbl        :                          link_good[5]);
+    //assign mez_tp[5] =   set_sw[8] ? alct_rxd_posneg : (!set_sw[7] ? bpi_rst  : link_good[4]);
+    //assign mez_tp[4] = (!set_sw[7] ? bpi_dev         :                          link_good[3]);
+    assign mez_tp[7]  = alct0_pipe_vpf; // ALCT vpf signal
+    assign mez_tp[6]  = wr_push_xtmb; // CLCT vpf signal
+    assign mez_tp[5]  = (|gemA_csc_cluster_vpf) || (|gemB_csc_cluster_vpf);// gemA or gemB vpf signal
+    assign mez_tp[4]  = |copad_match; // gem copad vpf signal
 //    assign mez_tp[MXCFEB:4] = link_good[MXCFEB-1:3];
 //    reg  [3:1]  testled_r;
 //    assign mez_tp[3] = link_good[2] || ((set_sw == 2'b01) && clock_alct_txd);
