@@ -368,7 +368,7 @@ parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
     assign roll        [iclst] = cluster[iclst][10:8];
     assign vpf         [iclst] = ~(cluster[iclst][7:0] > 8'd191);
     assign pad         [iclst] = vpf[iclst] ? cluster[iclst][ 7:0] : 8'd255;//invalid pad = 255
-    assign fed         [iclst] = {pad[iclst][7:6], ~roll[iclst][2:0]};
+    assign feb         [iclst] = {pad[iclst][7:6], ~roll[iclst][2:0]};
 
     
     //assign hits_cluster[iclst] = (vpf[iclst] ? {(1536-cnt[iclst]-1-adr[iclst])*{0},(cnt[iclst]+1)*{1}, adr[iclst]*{0}} : 0);
