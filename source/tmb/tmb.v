@@ -148,11 +148,11 @@
   match_gem_alct_window,
   match_gem_clct_window,
 
-  gemA_match_enable,
+  //gemA_match_enable,
   gemA_alct_match, 
   gemA_clct_match,
   gemA_fiber_enable,
-  gemB_match_enable,
+  //gemB_match_enable,
   gemB_alct_match,
   gemB_clct_match,
   gemB_fiber_enable,
@@ -548,13 +548,13 @@
   input  [7:0]        match_gem_alct_delay;
   input  [3:0]        match_gem_alct_window;
   input  [3:0]        match_gem_clct_window;
-  input               gemA_match_enable;
+  //input               gemA_match_enable;
   output              gemA_alct_match;
   output              gemA_clct_match;
   input  [1:0]        gemA_fiber_enable;
 
   //GEMB trigger match control
-  input               gemB_match_enable;
+  //input               gemB_match_enable;
   output              gemB_alct_match;
   output              gemB_clct_match;
   input [1:0]         gemB_fiber_enable;

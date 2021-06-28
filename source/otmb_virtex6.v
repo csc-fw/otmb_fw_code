@@ -1668,6 +1668,39 @@
 
   wire gem_any = (|gemA_vpf) | (|gemB_vpf);
    
+  //GEMA trigger match control
+  //wire  gemA_match_enable;
+  //wire  gemB_match_enable;
+  wire [1:0]  gemA_fiber_enable;
+
+  //GEMB trigger match control
+  //wire [3:0]  match_gemB_alct_window;
+  //wire [3:0]  match_gemB_clct_window;
+  wire [1:0]  gemB_fiber_enable;
+
+  wire [3:0] gem_fiber_enable = {gemB_fiber_enable, gemA_fiber_enable};
+
+  wire [MXCLUSTER_CHAMBER-1:0] gemA_cluster_enable = {
+      gemA_fiber_enable[1],
+      gemA_fiber_enable[1],
+      gemA_fiber_enable[1],
+      gemA_fiber_enable[1],
+      gemA_fiber_enable[0],
+      gemA_fiber_enable[0],
+      gemA_fiber_enable[0],
+      gemA_fiber_enable[0]
+      };
+  wire [MXCLUSTER_CHAMBER-1:0] gemB_cluster_enable = {
+      gemB_fiber_enable[1],
+      gemB_fiber_enable[1],
+      gemB_fiber_enable[1],
+      gemB_fiber_enable[1],
+      gemB_fiber_enable[0],
+      gemB_fiber_enable[0],
+      gemB_fiber_enable[0],
+      gemB_fiber_enable[0]
+      };
+
   wire [9:0]   gem_debug_fifo_adr;    // FIFO RAM read tbin address
   wire [1:0]   gem_debug_fifo_sel;    // FIFO RAM read layer clusters 0-3
   wire [1:0]   gem_debug_fifo_igem;   // FIFO RAM read chamber 0-3
@@ -1681,18 +1714,6 @@
   wire [15:0]  gem_inj_data_vme; // FIFO RAM read chamber 0-3
   wire         gem_inj_wen;      // GEM Injector Write Enable
   wire         injector_go_gem;  // Start GEM injector
-
-  //GEMA trigger match control
-  wire  gemA_match_enable;
-  wire  gemB_match_enable;
-  wire [1:0]  gemA_fiber_enable;
-
-  //GEMB trigger match control
-  //wire [3:0]  match_gemB_alct_window;
-  //wire [3:0]  match_gemB_clct_window;
-  wire [1:0]  gemB_fiber_enable;
-
-  wire [3:0] gem_fiber_enable = {gemB_fiber_enable, gemA_fiber_enable};
 
   wire [4:0] gem_clct_deltahs;
   wire [2:0] gem_alct_deltawire;
@@ -1963,6 +1984,7 @@
   wire [23:0] gemcopad_active_feb_list;
   reg  [CLSTBITS -1 :0] gem_copad_reg  [MXCLUSTER_CHAMBER-1:0];
   wire [CLSTBITS -1 :0] gem_copad      [MXCLUSTER_CHAMBER-1:0];
+  reg  gem_any_copad_ff;
 
   wire [3:0] gem_match_deltaPad;
 
@@ -2082,6 +2104,7 @@ always @ (posedge clock) begin
   gem_copad_reg[5] <=  gemA_cluster[5];
   gem_copad_reg[6] <=  gemA_cluster[6];
   gem_copad_reg[7] <=  gemA_cluster[7];
+  gem_any_copad_ff <=  gem_any;
 end
 
   assign gem_copad[0] = copad_match[0] ? gem_copad_reg[0] : {3'd0,11'd255};
@@ -2146,6 +2169,8 @@ end
             if (gem_any) begin
                 gemA_cluster_vme[icluster]  <= gemA_vpf[icluster] ? gemA_cluster[icluster] : {3'b0, 11'd255}; 
                 gemB_cluster_vme[icluster]  <= gemB_vpf[icluster] ? gemB_cluster[icluster] : {3'b0, 11'd255}; 
+            end
+            if (gem_any_copad_ff) begin
                 gem_copad_vme[icluster]     <= gem_copad[icluster];
             end
         end
@@ -2232,7 +2257,7 @@ end
 	.clock (clock),    //in clock
 
         .evenchamber (evenchamber),   //in,  even pair or not
-        .gem_match_enable  (gemA_match_enable),//In enable GEMA for GEMCSC match or not, if not, vpf is invalid from here
+        .gem_match_enable  (gemA_cluster_enable[iclst_csc]),//In enable GEMA for GEMCSC match or not, if not, vpf is invalid from here
         .gem_clct_deltahs  (gem_clct_deltahs), // In matching window in halfstrip direction
         .gem_alct_deltawire(gem_alct_deltawire), //In  matching window in wiregroup direction
 
@@ -2265,7 +2290,7 @@ end
 	.clock (clock),
 
         .evenchamber (evenchamber),   // even pair or not
-        .gem_match_enable  (gemB_match_enable),
+        .gem_match_enable  (gemB_cluster_enable[iclst_csc]),
         .gem_clct_deltahs  (gem_clct_deltahs), // matching window in halfstrip direction
         .gem_alct_deltawire(gem_alct_deltawire), // matching window in wiregroup direction
 
@@ -4114,6 +4139,11 @@ wire [15:0] gemB_bxn_counter;
   wire  [1:0]      mpc_accept_vme;
   wire  [1:0]      mpc_reserved_vme;
 
+  //GEMCSC match
+  //(|gemA_csc_cluster_vpf) || (|gemB_csc_cluster_vpf);// gemA or gemB vpf signal
+  // copad_match; // gem copad vpf signal
+  //these two are in same BX
+
   wire alct0_pipe_vpf;
   tmb utmb
   (
@@ -4259,11 +4289,11 @@ wire [15:0] gemB_bxn_counter;
   .match_gem_alct_window  (match_gem_alct_window[3:0]), //In gem-alct match window
   .match_gem_clct_window  (match_gem_clct_window[3:0]), //In gem-clct match window
 
-  .gemA_match_enable      (gemA_match_enable),             //In gemA+ALCT match
+  //.gemA_match_enable      (gemA_match_enable),             //In gemA+ALCT match
   .gemA_alct_match        (gemA_alct_match),             //Out gemA+ALCT match
   .gemA_clct_match        (gemA_clct_match),             //Out gemA+CLCT match
   .gemA_fiber_enable      (gemA_fiber_enable[1:0]),     //In gemA two fibers enabled or not
-  .gemB_match_enable      (gemB_match_enable),             //IN gemB+ALCT match
+  //.gemB_match_enable      (gemB_match_enable),             //IN gemB+ALCT match
   .gemB_alct_match        (gemB_alct_match),       // Out gemB+ALCT match or not
   .gemB_clct_match        (gemB_clct_match),      // Out gemB+CLCT match or not
   .gemB_fiber_enable      (gemB_fiber_enable[1:0]),    //In gemB two fibers enabled or not
@@ -5507,8 +5537,8 @@ wire [15:0] gemB_bxn_counter;
       //.gem_me1b_match_promotequal  (gem_me1b_match_promotequal),     //Out promote quality or not for match in ME1b region 
       //.gem_me1a_match_promotepat   (gem_me1a_match_promotepat),     //Out promote pattern or not for match in ME1a region, 
       //.gem_me1b_match_promotepat   (gem_me1b_match_promotepat),     //Out promote pattern or not for match in ME1b region 
-      .gemA_match_enable           (gemA_match_enable),         // out enable GEMA for match
-      .gemB_match_enable           (gemB_match_enable),         // out enable GEMB for match
+      //.gemA_match_enable           (gemA_match_enable),         // out enable GEMA for match
+      //.gemB_match_enable           (gemB_match_enable),         // out enable GEMB for match
       .gemcsc_bend_enable          (gemcsc_bend_enable),         // out enable GEMCSC bending angle for match
 
       // RPC Ports: RAT Control                                                                                      
