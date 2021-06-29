@@ -1976,6 +1976,9 @@
 
   //--------------------------------------------------------------------------------------------------------------------
   // GEM Co-pad Matching
+  // Assume Comparator hits and GEM hits arrived at OTMB at same BX
+  // GEM copad vpf and GEM cluster after coordination conversion is at same BX, 1Bx after GEM cluster from receiver 
+  // then CLCT is ~10BX later then GEM copad VPF
   //--------------------------------------------------------------------------------------------------------------------
   wire [7:0]  copad_match;
   wire [7:0]  gem_match_upper;
