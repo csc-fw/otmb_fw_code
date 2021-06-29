@@ -331,9 +331,9 @@ parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
   wire [ 2:0] cnt         [3:0];
   wire [ 0:0] vpf         [3:0];
   //following variables not used for v2 gem trigger format 
-  reg [ 4:0] cluster_feb [3:0];       
-  reg [ 2:0] cluster_roll[3:0];       
-  reg [ 7:0] cluster_pad [3:0];       
+  //reg [ 4:0] cluster_feb [3:0];       
+  //reg [ 2:0] cluster_roll[3:0];       
+  //reg [ 7:0] cluster_pad [3:0];       
 
 
 
