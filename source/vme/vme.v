@@ -682,7 +682,7 @@
 // GEM VME Configuration Ports
   gem_read_enable,
   gem_exists,
-  gem_enable,
+  gem_read_mask,
   gem_zero_suppress,
   fifo_tbins_gem,
   fifo_pretrig_gem,
@@ -2459,7 +2459,7 @@
 // GEM VME Configuration Ports
   output              gem_read_enable;   // Out  1 Enable GEM Readout
   input  [3:0]        gem_exists;        // In   1 GEM Exists Read only
-  output [3:0]        gem_enable;        // Out  1 GEM Enabled
+  output [3:0]        gem_read_mask;        // Out  1 GEM Enabled for readout!!
   output              gem_zero_suppress; // Out  1 Enable GEM Readout Zero-suppression
   output [MXTBIN-1:0] fifo_tbins_gem;    // Out  Number GEM FIFO time bins to read out
   output [MXTBIN-1:0] fifo_pretrig_gem;  // Out  Number GEM FIFO time bins before pretrigger
@@ -8994,7 +8994,7 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   wire [3:0] gemB_rxd_int_delay_wr = gem_cfg_wr[7:4];
 
   wire gem_rxd_int_delay_decouple = gem_cfg_wr[8];
-  assign gem_enable               = gem_cfg_wr[12:9];
+  assign gem_read_mask            = gem_cfg_wr[12:9];
 
   // FF Buffer gem rxd integer delay
   reg [3:0] gemA_rxd_int_delay = 0;
@@ -9108,7 +9108,7 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
       gemA_trg_ctrl_wr[11: 8]      = 4'd5;  //RW, gemA and CLCT match window
       gemA_trg_ctrl_wr[   12]      = 1'b0;  //Ronly, gemA and ALCT match
       gemA_trg_ctrl_wr[   13]      = 1'b0;  //R only, gemA and CLCT match 
-      gemA_trg_ctrl_wr[15:14]      = 2'b11;  //RW, gemA two fibers enabled or not
+      gemA_trg_ctrl_wr[15:14]      = 2'b11;  //RW, gemA two fibers enabled or not, for triggering
   end
 
   assign match_gem_alct_window            = gemA_trg_ctrl_wr[7:4];
@@ -9131,7 +9131,7 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
       gemB_trg_ctrl_wr[11: 8]      = 4'd5;  //RW,gemB and CLCT match window
       gemB_trg_ctrl_wr[   12]      = 1'b0;  //R,gemB and ALCT match
       gemB_trg_ctrl_wr[   13]      = 1'b0;  //R, gemB and CLCT match 
-      gemB_trg_ctrl_wr[15:14]      = 2'b11; //RW, gemB two fibers enabled or not
+      gemB_trg_ctrl_wr[15:14]      = 2'b11; //RW, gemB two fibers enabled or not, for triggering
   end
 
   assign match_gem_alct_delay             = gemB_trg_ctrl_wr[7:0];
