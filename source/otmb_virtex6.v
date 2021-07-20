@@ -1337,17 +1337,16 @@
 
   assign nhits_trig_s0[9:0] = hmt_me1a_enable ? nhits_all[9:0] : nhits_me1b[9:0];
 
-  reg [9:0] nhits_trig_s0_srl [7:0];//array 8x10bits
+  reg [9:0] nhits_trig_s0_srl [7:1];//array 7x10bits
 
   always @(posedge clock) begin
-      nhits_trig_s0_srl[0] <= nhits_trig_s0_srl[1];
-      nhits_trig_s0_srl[1] <= nhits_trig_s0_srl[2];
-      nhits_trig_s0_srl[2] <= nhits_trig_s0_srl[3];
-      nhits_trig_s0_srl[3] <= nhits_trig_s0_srl[4];
-      nhits_trig_s0_srl[4] <= nhits_trig_s0_srl[5];
-      nhits_trig_s0_srl[5] <= nhits_trig_s0_srl[6];
-      nhits_trig_s0_srl[6] <= nhits_trig_s0_srl[7];
-      nhits_trig_s0_srl[7] <= nhits_trig_s0;
+      nhits_trig_s0_srl[7] <= nhits_trig_s0_srl[6];
+      nhits_trig_s0_srl[6] <= nhits_trig_s0_srl[5];
+      nhits_trig_s0_srl[5] <= nhits_trig_s0_srl[4];
+      nhits_trig_s0_srl[4] <= nhits_trig_s0_srl[3];
+      nhits_trig_s0_srl[3] <= nhits_trig_s0_srl[2];
+      nhits_trig_s0_srl[2] <= nhits_trig_s0_srl[1];
+      nhits_trig_s0_srl[1] <= nhits_trig_s0;
   end
 
   //signal: over 3BX;   control region: over 4BX 
