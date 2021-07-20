@@ -4635,7 +4635,8 @@ wire [15:0] gemB_bxn_counter;
     assign mez_tp[7]  = alct0_pipe_vpf; // ALCT vpf signal
     assign mez_tp[6]  = wr_push_xtmb; // CLCT vpf signal
     assign mez_tp[5]  = (|gemA_csc_cluster_vpf) || (|gemB_csc_cluster_vpf);// gemA or gemB vpf signal
-    assign mez_tp[4]  = |copad_match; // gem copad vpf signal
+    //assign mez_tp[4]  = |copad_match; // gem copad vpf signal
+    assign mez_tp[4]  = hmt_nhits_trig_bx678 >= hmt_nhits_trig_bx2345+10'h3; // gem copad vpf signal
 //    assign mez_tp[MXCFEB:4] = link_good[MXCFEB-1:3];
 //    reg  [3:1]  testled_r;
 //    assign mez_tp[3] = link_good[2] || ((set_sw == 2'b01) && clock_alct_txd);
