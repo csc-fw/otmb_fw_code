@@ -5204,6 +5204,7 @@
   always @(posedge clock) begin
     rd_list_gem [MXGEM-1:0] <= gem_read_mask[3:0]; // List of GEMs to read out
     rd_ngems    [MXGEMB :0] <= 3'd4;            // Number of GEMs in gem_list (should be 4)
+    //rd_ngems    [MXGEMB :0] <= gem_read_mask[0]+gem_read_mask[1]+gem_read_mask[2]+gem_read_mask[3];  // Number of GEMs in gem_list
     gems_all_empty          <= !(|gem_read_mask);  // At least 1 GEM to read;
                                                 // Right now we read all the GEMs with every DAQ readout; might
                                                 // want to include Zero-suppression later

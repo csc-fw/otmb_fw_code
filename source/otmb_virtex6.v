@@ -1300,6 +1300,76 @@
   wire  [MXHS-1:0]    cfeb_ly4hs [MXCFEB-1:0];    // Decoded 1/2-strip pulses
   wire  [MXHS-1:0]    cfeb_ly5hs [MXCFEB-1:0];    // Decoded 1/2-strip pulses
 
+  wire  [9:0]         cfeb_nhits [MXCFEB-1:0];
+
+  //=====================================================
+  // HMT trigger 
+  //=====================================================
+  // number of hits for ME1/1, 7 DCFEBs
+  //wire  [9:0]         allcfeb_nhits = cfeb_nhits[0] + cfeb_nhits[1] + cfeb_nhits[2] + cfeb_nhits[3] + cfeb_nhits[4] + cfeb_nhits[5] + cfeb_nhits[6];
+  wire  hmt_enable;
+  wire  hmt_me1a_enable;
+  wire [9:0] hmt_nhits_trig;
+  wire [9:0] hmt_nhits_trig_bx678;
+  wire [9:0] hmt_nhits_trig_bx2345;
+  wire [1:0] hmt_trigger_bx7; // HMT trigger results 
+  wire [1:0] hmt_trigger_bx678; // HMT trigger results 
+  wire [1:0] hmt_trigger_bx2345; // HMT trigger results 
+  wire [9:0] hmt_thresh1, hmt_thresh2, hmt_thresh3;
+  wire [MXHMTB-1:0] hmt_trigger ;
+  assign hmt_trigger_bx7[0] = (hmt_nhits_trig >= hmt_thresh1) || (hmt_nhits_trig >= hmt_thresh3);
+  assign hmt_trigger_bx7[1] = (hmt_nhits_trig >= hmt_thresh2) || (hmt_nhits_trig >= hmt_thresh3);
+  assign hmt_trigger_bx678[0] = (hmt_nhits_trig_bx678 >= hmt_thresh1) || (hmt_nhits_trig_bx678 >= hmt_thresh3);
+  assign hmt_trigger_bx678[1] = (hmt_nhits_trig_bx678 >= hmt_thresh2) || (hmt_nhits_trig_bx678 >= hmt_thresh3);
+  assign hmt_trigger_bx2345[0] = (hmt_nhits_trig_bx2345 >= hmt_thresh1) || (hmt_nhits_trig_bx2345 >= hmt_thresh3);
+  assign hmt_trigger_bx2345[1] = (hmt_nhits_trig_bx2345 >= hmt_thresh2) || (hmt_nhits_trig_bx2345 >= hmt_thresh3);
+  assign hmt_trigger = {hmt_trigger_bx2345, hmt_trigger_bx678};
+
+  reg  [9:0] nhits_me1a;
+  reg  [9:0] nhits_me1b;
+  reg  [9:0] nhits_all;
+
+  always @(posedge clock) begin
+      nhits_all  <= cfeb_nhits[0] + cfeb_nhits[1] + cfeb_nhits[2] + cfeb_nhits[3] + cfeb_nhits[4] + cfeb_nhits[5] + cfeb_nhits[6];
+      nhits_me1a <= cfeb_nhits[4] + cfeb_nhits[5] + cfeb_nhits[6];
+      nhits_me1b <= cfeb_nhits[0] + cfeb_nhits[1] + cfeb_nhits[2] + cfeb_nhits[3];
+  end
+
+  assign nhits_trig_s0[9:0] = hmt_me1a_enable ? nhits_all[9:0] : nhits_me1b[9:0];
+
+  reg [9:0] nhits_trig_s0_srl [7:0];//array 8x10bits
+
+  always @(posedge clock) begin
+      nhits_trig_s0_srl[0] <= nhits_trig_s0_srl[1];
+      nhits_trig_s0_srl[1] <= nhits_trig_s0_srl[2];
+      nhits_trig_s0_srl[2] <= nhits_trig_s0_srl[3];
+      nhits_trig_s0_srl[3] <= nhits_trig_s0_srl[4];
+      nhits_trig_s0_srl[4] <= nhits_trig_s0_srl[5];
+      nhits_trig_s0_srl[5] <= nhits_trig_s0_srl[6];
+      nhits_trig_s0_srl[6] <= nhits_trig_s0_srl[7];
+      nhits_trig_s0_srl[7] <= nhits_trig_s0;
+  end
+
+  //signal: over 3BX;   control region: over 4BX 
+  wire [11:0] nhits_trig_s0_bx678_tmp = nhits_trig_s0_srl[7] + nhits_trig_s0_srl[6] + nhits_trig_s0_srl[5];
+  wire [11:0] nhits_trig_s0_bx2345_tmp = nhits_trig_s0_srl[4] + nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] + nhits_trig_s0_srl[1];
+
+  wire [9:0] nhits_trig_s0_bx7    = nhits_trig_s0_srl[6];
+  wire [9:0] nhits_trig_s0_bx2345 = (nhits_trig_s0_bx2345_tmp[11:10] > 0 ) ? 10'h3FF : nhits_trig_s0_bx2345_tmp[9:0];//cutoff at [9:0]
+  wire [9:0] nhits_trig_s0_bx678  = (nhits_trig_s0_bx678_tmp[11:10] > 0 ) ? 10'h3FF : nhits_trig_s0_bx678_tmp[9:0];
+
+  parameter hmt_dly = 4'd2; //delay HMT trigger to CLCT VPF BX
+  wire [9:0] nhits_trig_dly_bx2345;
+  wire [9:0] nhits_trig_dly_bx678;
+  wire [9:0] nhits_trig_dly_bx7;
+  srl16e_bbl #(10)    udnhitsbx7   ( .clock(clock), .ce(1'b1), .adr(hmt_dly), .d(nhits_trig_s0_bx7    ), .q(nhits_trig_dly_bx7      ) );
+  srl16e_bbl #(10)    udnhitsbx678 ( .clock(clock), .ce(1'b1), .adr(hmt_dly), .d(nhits_trig_s0_bx678  ), .q(nhits_trig_dly_bx678    ) );
+  srl16e_bbl #(10)    udnhitsbx2345( .clock(clock), .ce(1'b1), .adr(hmt_dly), .d(nhits_trig_s0_bx2345 ), .q(nhits_trig_dly_bx2345   ) );
+
+  assign  hmt_nhits_trig  = nhits_trig_dly_bx7[9:0];
+  assign  hmt_nhits_trig_bx678  = nhits_trig_dly_bx678[9:0];
+  assign  hmt_nhits_trig_bx2345 = nhits_trig_dly_bx2345[9:0];
+
 // Status Ports
   wire  [MXCFEB-1:0]  demux_tp_1st;
   wire  [MXCFEB-1:0]  demux_tp_2nd;
@@ -1451,6 +1521,7 @@
   .ly4hs (cfeb_ly4hs[icfeb][MXHS-1:0]),  // Out  Decoded 1/2-strip pulses
   .ly5hs (cfeb_ly5hs[icfeb][MXHS-1:0]),  // Out  Decoded 1/2-strip pulses
 
+  .nhits_per_cfeb (cfeb_nhits[icfeb]),  // Out nhits per cfeb for HMT
 // CFEB data received on optical link
   .gtx_rx_data_bits_or (gtx_rx_data_bits_or[icfeb]), // Out  CFEB data received on optical link = OR of all 48 bits for a given CFEB
 
@@ -2340,27 +2411,6 @@ end
   wire  [3:0] pid_thresh_pretrig;
   wire  [2:0] dmb_thresh_pretrig;
 
-  wire  hmt_enable;
-  wire  hmt_me1a_enable;
-  wire [9:0] hmt_nhits_trig;
-  wire [9:0] hmt_nhits_trig_bx678;
-  wire [9:0] hmt_nhits_trig_bx2345;
-  wire [1:0] hmt_trigger_bx7; // HMT trigger results 
-  wire [1:0] hmt_trigger_bx678; // HMT trigger results 
-  wire [1:0] hmt_trigger_bx2345; // HMT trigger results 
-  wire [9:0] hmt_thresh1, hmt_thresh2, hmt_thresh3;
-  wire [MXHMTB-1:0] hmt_trigger ;
-  //assign hmt_thresh1 = 10'd40;
-  //assign hmt_thresh2 = 10'd60;
-  //assign hmt_thresh3 = 10'd80;
-  assign hmt_trigger_bx7[0] = (hmt_nhits_trig >= hmt_thresh1) || (hmt_nhits_trig >= hmt_thresh3);
-  assign hmt_trigger_bx7[1] = (hmt_nhits_trig >= hmt_thresh2) || (hmt_nhits_trig >= hmt_thresh3);
-  assign hmt_trigger_bx678[0] = (hmt_nhits_trig_bx678 >= hmt_thresh1) || (hmt_nhits_trig_bx678 >= hmt_thresh3);
-  assign hmt_trigger_bx678[1] = (hmt_nhits_trig_bx678 >= hmt_thresh2) || (hmt_nhits_trig_bx678 >= hmt_thresh3);
-  assign hmt_trigger_bx2345[0] = (hmt_nhits_trig_bx2345 >= hmt_thresh1) || (hmt_nhits_trig_bx2345 >= hmt_thresh3);
-  assign hmt_trigger_bx2345[1] = (hmt_nhits_trig_bx2345 >= hmt_thresh2) || (hmt_nhits_trig_bx2345 >= hmt_thresh3);
-  assign hmt_trigger = {hmt_trigger_bx2345, hmt_trigger_bx678};
-
 // 2nd CLCT separation RAM Ports
   wire         clct_sep_src;       // CLCT separation source 1=vme, 0=ram
   wire  [7:0]  clct_sep_vme;       // CLCT separation from vme
@@ -2519,8 +2569,8 @@ end
   .cfeb_nlayers_hit (cfeb_nlayers_hit[MXHITB-1:0]), // Out  Number of CSC layers hit
 
 //HMT, 2020
-  .hmt_me1a_enable     (hmt_me1a_enable), 
-  .hmt_nhits_trig      (hmt_nhits_trig[9:0]), // Out
+  //.hmt_me1a_enable     (hmt_me1a_enable), 
+  //.hmt_nhits_trig      (hmt_nhits_trig[9:0]), // Out
 
 //to add dead time feature in 2016Algo  
   .drift_delay        (drift_delay[MXDRIFT-1:0]),      // In  CSC Drift delay clocks
@@ -2641,11 +2691,11 @@ end
   .cfeb_layer_trig  (cfeb_layer_trig),              // Out  Layer pretrigger
   .cfeb_layer_or    (cfeb_layer_or[MXLY-1:0]),      // Out  OR of hstrips on each layer
   .cfeb_nlayers_hit (cfeb_nlayers_hit[MXHITB-1:0]), // Out  Number of CSC layers hit
-//HMT, 2020
-  .hmt_me1a_enable     (hmt_me1a_enable),     //Out
-  .hmt_nhits_trig      (hmt_nhits_trig[9:0]), //Out
-  .hmt_nhits_trig_bx678      (hmt_nhits_trig_bx678[9:0]),//Out
-  .hmt_nhits_trig_bx2345     (hmt_nhits_trig_bx2345[9:0]), // Out
+  // //HMT, 2020
+  //.hmt_me1a_enable     (hmt_me1a_enable),     //Out
+  //.hmt_nhits_trig      (hmt_nhits_trig[9:0]), //Out
+  //.hmt_nhits_trig_bx678      (hmt_nhits_trig_bx678[9:0]),//Out
+  //.hmt_nhits_trig_bx2345     (hmt_nhits_trig_bx2345[9:0]), // Out
 //to add dead time feature in 2016Algo  
   .drift_delay        (drift_delay[MXDRIFT-1:0]),      // In  CSC Drift delay clocks
   .algo2016_use_dead_time_zone         (algo2016_use_dead_time_zone), // In Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
@@ -3992,6 +4042,7 @@ wire [15:0] gemB_bxn_counter;
   .fifo_tbins_gem    (fifo_tbins_gem[MXTBIN-1:0]),   // In  Number GEM  FIFO time bins to read out
   .fifo_pretrig_gem  (fifo_pretrig_gem[MXTBIN-1:0]), // In  Number GEM  FIFO time bins before pretrigger
   .gem_zero_suppress (gem_zero_suppress),            // In  GEM zero suppress enable
+  .gem_read_mask   (gem_read_mask [MXGEM-1:0]),       // out  GEM Readout List
 
 // Miniscope VME Configuration Ports
   .mini_tbins_word   (mini_tbins_word),               // In  Insert tbins and pretrig tbins in 1st word
