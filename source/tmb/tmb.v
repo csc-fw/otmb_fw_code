@@ -284,6 +284,8 @@
   //gem_me1b_match_promotequal,     //Out promote quality or not for match in ME1b region 
   //gem_me1a_match_promotepat,     //Out promote pattern or not for match in ME1a region, 
   //gem_me1b_match_promotepat,     //Out promote pattern or not for match in ME1b region, 
+  gemA_match_ignore_position,
+  gemB_match_ignore_position,
   gemcsc_bend_enable,
 
   gem_clct_win,
@@ -805,6 +807,8 @@
   //input               gem_me1b_match_promotequal;
   //input               gem_me1a_match_promotepat;
   //input               gem_me1b_match_promotepat;
+  input               gemA_match_ignore_position;
+  input               gemB_match_ignore_position;
   input               gemcsc_bend_enable;
 
   input               gemA_bx0_rx;
@@ -2284,6 +2288,9 @@
   .clct0_bend (clct0_bnd_pipe[4]),//clct0_vpf from pipe
   .clct1_bend (clct1_bnd_pipe[4]),
 
+  .gemA_match_ignore_position(gemA_match_ignore_position),
+  .gemB_match_ignore_position(gemB_match_ignore_position),
+
   .gemA_vpf (gemA_forclct_pipe[7:0]),
   .gemB_vpf (gemB_forclct_pipe[7:0]),
 
@@ -2628,8 +2635,8 @@
 
     wr_adr_rtmb          <= wr_adr_xtmb_pipe;   // Buffer write address at TMB matching time, continuous
     wr_push_rtmb         <= wr_push_mux;        // Buffer write strobe at TMB matching time
-    //wr_avail_rtmb        <= wr_avail_xtmb_pipe; // Buffer available at TMB matching time
-    wr_avail_rtmb        <= wr_avail_xtmb_pipe_run3; // Buffer available at TMB matching time
+    wr_avail_rtmb        <= wr_avail_xtmb_pipe; // Buffer available at TMB matching time
+    //wr_avail_rtmb        <= wr_avail_xtmb_pipe_run3; // Buffer available at TMB matching time
 
 
     //GEM part:gemA_alct_match_win_mux_pipe
@@ -2991,8 +2998,10 @@
   wire [6:0] alct1_key_run3 =  alct1fromcopad_run3 ? alct1wg_fromcopad[6:0] : alct1_key[6:0];
   wire [9:0] clct0_xky_run3 =  clct0fromcopad_run3 ? clct0xky_fromcopad[9:0] : clct0_xky[9:0];
   wire [9:0] clct1_xky_run3 =  clct1fromcopad_run3 ? clct1xky_fromcopad[9:0] : clct1_xky[9:0];
-  wire [3:0] clct0_bnd_run3 =  alct0fromcopad_run3 ? 4'b0 : (gemcsc_bend_enable ? gemcsc_bnd[3:0] : clct0_bnd[3:0]);    
-  wire [3:0] clct1_bnd_run3 =  alct0fromcopad_run3 ? 4'b0 : (gemcsc_bend_enable ? gemcsc_bnd[3:0] : clct0_bnd[3:0]);    
+  //wire [4:0] clct0_bnd_run3 =  alct0fromcopad_run3 ? 4'b0 : (gemcsc_bend_enable ? gemcsc_bnd0[4:0] : clct0_bnd[4:0]);    
+  //wire [4:0] clct1_bnd_run3 =  alct1fromcopad_run3 ? 4'b0 : (gemcsc_bend_enable ? gemcsc_bnd1[4:0] : clct1_bnd[4:0]);    
+  wire [4:0] clct0_bnd_run3 = clct0_bnd[4:0];  
+  wire [4:0] clct1_bnd_run3 = clct1_bnd[4:0];  
 
 
   //GEMCSC algorithm is not ready yet. Use the lct quality with ALCT+CLCT case

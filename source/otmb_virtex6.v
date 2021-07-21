@@ -2760,6 +2760,8 @@ end
    wire        gemA_clct_match;
    wire        gemB_alct_match; 
    wire        gemB_clct_match;
+   wire        gemA_match_ignore_position;
+   wire        gemB_match_ignore_position;
    wire        gemcsc_bend_enable;
 
    wire [7:0]  match_gem_alct_delay;
@@ -4365,6 +4367,8 @@ wire [15:0] gemB_bxn_counter;
   .gem_me1b_match_noclct     (gem_me1b_match_noclct),     //IN gem-csc match without clct is allowed in ME1a
   .tmb_copad_alct_allow      (tmb_copad_alct_allow),       //In gem-csc match, allow ALCT+copad match
   .tmb_copad_clct_allow      (tmb_copad_clct_allow),       //In gem-csc match, allow CLCT+copad match
+  .gemA_match_ignore_position     (gemA_match_ignore_position),             //In GEMCSC match, no position match
+  .gemB_match_ignore_position     (gemB_match_ignore_position),             //In GEMCSC match, no position match
   .gemcsc_bend_enable        (gemcsc_bend_enable),             //In GEMCSC bending angle enabled
 
   .gem_clct_win           (gem_clct_win[3:0]), // out gem location in GEM-CLCT window
@@ -5600,6 +5604,8 @@ wire [15:0] gemB_bxn_counter;
       //.gem_me1b_match_promotepat   (gem_me1b_match_promotepat),     //Out promote pattern or not for match in ME1b region 
       //.gemA_match_enable           (gemA_match_enable),         // out enable GEMA for match
       //.gemB_match_enable           (gemB_match_enable),         // out enable GEMB for match
+      .gemA_match_ignore_position     (gemA_match_ignore_position),             //out GEMCSC match, no position match
+      .gemB_match_ignore_position     (gemB_match_ignore_position),             //out GEMCSC match, no position match
       .gemcsc_bend_enable          (gemcsc_bend_enable),         // out enable GEMCSC bending angle for match
 
       // RPC Ports: RAT Control                                                                                      
