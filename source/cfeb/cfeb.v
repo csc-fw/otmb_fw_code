@@ -837,7 +837,7 @@
 
   reg [9:0] nhits_s0;
   always  @(posedge clock) begin
-      nhits_per_cfeb <= hs_fired[0][0] + hs_fired[0][1] + hs_fired[0][1] + hs_fired[0][2] + hs_fired[0][3] + hs_fired[0][4] + hs_fired[0][5] + hs_fired[0][6] + hs_fired[0][7] + 
+      nhits_s0       <= hs_fired[0][0] + hs_fired[0][1] + hs_fired[0][1] + hs_fired[0][2] + hs_fired[0][3] + hs_fired[0][4] + hs_fired[0][5] + hs_fired[0][6] + hs_fired[0][7] + 
                         hs_fired[1][0] + hs_fired[1][1] + hs_fired[1][1] + hs_fired[1][2] + hs_fired[1][3] + hs_fired[1][4] + hs_fired[1][5] + hs_fired[1][6] + hs_fired[1][7] + 
                         hs_fired[2][0] + hs_fired[2][1] + hs_fired[2][1] + hs_fired[2][2] + hs_fired[2][3] + hs_fired[2][4] + hs_fired[2][5] + hs_fired[2][6] + hs_fired[2][7] + 
                         hs_fired[3][0] + hs_fired[3][1] + hs_fired[3][1] + hs_fired[3][2] + hs_fired[3][3] + hs_fired[3][4] + hs_fired[3][5] + hs_fired[3][6] + hs_fired[3][7] + 
