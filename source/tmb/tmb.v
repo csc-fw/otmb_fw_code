@@ -1481,6 +1481,17 @@
   wire   wr_push_xtmb_pipe  = (clct_ptr_is_0) ? wr_push_xtmb  : wr_push_xtmb_srl;
   wire   wr_avail_xtmb_pipe = (clct_ptr_is_0) ? wr_avail_xtmb : wr_avail_xtmb_srl;
 
+  wire  [MXQLTB - 1   : 0] clct0_qlt_pipe; // new quality
+  wire  [MXBNDB - 1   : 0] clct0_bnd_pipe; // new bending 
+  wire  [MXXKYB-1     : 0] clct0_xky_pipe; // new position with 1/8 precision
+  wire  [MXPATC-1     : 0] clct0_carry_pipe; // CC code 
+  wire  [MXQLTB - 1   : 0] clct1_qlt_pipe; // new quality
+  wire  [MXBNDB - 1   : 0] clct1_bnd_pipe; // new bending 
+  wire  [MXXKYB-1     : 0] clct1_xky_pipe; // new position with 1/8 precision
+  wire  [MXPATC-1     : 0] clct1_carry_pipe; // CC code 
+
+  assign {clct0_qlt_pipe, clct0_bnd_pipe, clct0_xky_pipe, clct0_carry_pipe} = clct0_cclut_pipe;
+  assign {clct1_qlt_pipe, clct1_bnd_pipe, clct1_xky_pipe, clct1_carry_pipe} = clct1_cclut_pipe;
 //------------------------------------------------------------------------------------------------------------------
 // Pre-calculate dynamic clct window parameters
 //------------------------------------------------------------------------------------------------------------------
@@ -2461,6 +2472,8 @@
   reg  [3:0]        tmb_match_pri = 0;
   wire              alct_only_trig;
 
+  //------------------------------------------------------------------------------------------------------------------
+  //run2 legacy logic
   //add clct_used to CLCT readout control
   wire clct_keep     =((clct_match && tmb_allow_match   ) || (clct_noalct &&  tmb_allow_clct    && !clct_noalct_lost && !clct_used));
   wire alct_keep     = (clct_match && tmb_allow_match   ) || (alct_noclct &&  tmb_allow_alct);
@@ -2474,24 +2487,25 @@
 
   wire clct_kept = (clct_keep || clct_keep_ro);
 
+  //------------------------------------------------------------------------------------------------------------------
   // Run3 logic with GEMCSC match
   wire clct0_copad_match_good = clct0_copad_match_found_pos && tmb_copad_clct_allow;
   wire alct0_copad_match_good = alct0_copad_match_found_pos && tmb_copad_alct_allow;
   wire clct1_copad_match_good = clct1_copad_match_found_pos && tmb_copad_clct_allow;
   wire alct1_copad_match_good = alct1_copad_match_found_pos && tmb_copad_alct_allow;
-  wire clct_keep_run2     =((clct_match_run2 && tmb_allow_match   ) || (clct_noalct &&  tmb_allow_clct    && !clct_noalct_lost && !clct_used));
-  wire alct_keep_run2     = (clct_match_run2 && tmb_allow_match   ) || (alct_noclct &&  tmb_allow_alct);
-  wire clct_keep_ro_run2  = (clct_match_run2 && tmb_allow_match_ro) || (clct_noalct &&  tmb_allow_clct_ro && !clct_noalct_lost && !clct_used);
-  wire alct_keep_ro_run2  = (clct_match_run2 && tmb_allow_match_ro) || (alct_noclct &&  tmb_allow_alct_ro);
-  wire clct_keep_run3 = clct_keep_run2 || clct0_copad_match_good;
-  wire alct_keep_run3 = alct_keep_run2 || alct0_copad_match_good;
-  wire clct_keep_ro_run3 = clct_keep_ro_run2 || clct0_copad_match_good;
-  wire alct_keep_ro_run3 = alct_keep_ro_run2 || alct0_copad_match_good;
 
-  wire clct_discard_run3 = (clct_match_run2 && !tmb_allow_match) || (clct_noalct && !tmb_allow_clct && !clct0_copad_match_good) || clct_noalct_lost || clct_used;
+  wire clct_keep_run3 = clct_keep || clct0_copad_match_good;
+  wire alct_keep_run3 = alct_keep || alct0_copad_match_good;
+
+  wire clct_keep_ro_run3 = clct_keep_ro || clct0_copad_match_good;
+  wire alct_keep_ro_run3 = alct_keep_ro || alct0_copad_match_good;
+
+  wire clct_discard_run3 = (clct_match && !tmb_allow_match) || (clct_noalct && !tmb_allow_clct && !clct0_copad_match_good) || clct_noalct_lost || clct_used;
   wire alct_discard_run3 =  alct_pulse && !alct_keep_run3;
 
 
+  //------------------------------------------------------------------------------------------------------------------
+  //run2 legacy logic
 // Match window mux
   wire [3:0] match_win;
   wire [3:0] match_win_mux;
@@ -2501,12 +2515,15 @@
 //!  assign match_win   = (clct_keep || clct_keep_ro) ? clct_tag_win : clct_win_center;  // Default window position for alct-only events
   //assign clct_srl_ptr   = match_win;
 
+  //------------------------------------------------------------------------------------------------------------------
   //Run3 GEMCSC algorithm
   assign match_win_mux_run3 = (clct_noalct && clct_nocopad) ? winclosing    : clct_tag_win;   
   assign match_win_run3 = (clct_kept) ? match_win_mux_run3 : clct_win_center;
   assign clct_srl_ptr = match_win_run3;
   assign gem_clct_win = (clct_keep_run3 && (gemA_pulse_forclct || gemB_pulse_forclct)) ? match_win_run3 : 4'b1111; //
 
+  //------------------------------------------------------------------------------------------------------------------
+  //run2 legacy logic
 //  wire trig_pulse    = clct_match || clct_noalct || clct_noalct_lost || alct_noclct;    // Event pulse
   wire trig_pulse    = clct_match || (clct_noalct && !clct_used) || clct_noalct_lost || alct_only_trig;  // Event pulse
 
@@ -2526,17 +2543,22 @@
 
   assign alct_only_trig = (alct_noclct && tmb_allow_alct) || (alct_noclct_ro && tmb_allow_alct_ro);// ALCT-only triggers are allowed
 
+  //------------------------------------------------------------------------------------------------------------------
   // Run3 logic with GEMCSC match. if GEM is not enable for match, it should fall back to above logic
-  wire trig_pulse_run2    = clct_match_run2 || (clct_noalct && !clct_used) || clct_noalct_lost || alct_only_trig;  // Event pulse
-  wire trig_pulse_run3    = trig_pulse_run2 || clct0_copad_match_good || alct0_copad_match_good;
+  //wire trig_pulse_run2    = clct_match_run2 || (clct_noalct && !clct_used) || clct_noalct_lost || alct_only_trig;  // Event pulse
+  wire trig_pulse_run3    = trig_pulse || clct0_copad_match_good || alct0_copad_match_good;
+
   wire trig_keep_run3     = (clct_keep_run3   || alct_keep_run3);
   wire non_trig_keep_run3 = (clct_keep_ro_run3 || alct_keep_ro_run3);
+
   wire alct_only_run3     = (alct_noclct && tmb_allow_alct) && !clct_keep_run3 && !alct0_copad_match_good; 
   wire wr_push_mux_run3   = (alct_only_run3) ? trig_pulse_run3 : (wr_push_xtmb_pipe  && trig_pulse_run3); 
-  wire clct_match_tr_run3 = (clct_match_run2 || clct0_copad_match_good || alct0_copad_match_good)  && trig_keep_run3;
+
+  wire clct_match_tr_run3 = (clct_match || clct0_copad_match_good || alct0_copad_match_good)  && trig_keep_run3;
   wire alct_noclct_tr_run3= (alct_noclct || alct0_copad_match_good) && trig_keep_run3;
   wire clct_noalct_tr_run3= ((clct_noalct && !clct_used) || clct0_copad_match_good) && trig_keep_run3;
-  wire clct_match_ro_run3 = (clct_match_run2 || clct0_copad_match_good || alct0_copad_match_good) && non_trig_keep_run3;
+
+  wire clct_match_ro_run3 = (clct_match || clct0_copad_match_good || alct0_copad_match_good) && non_trig_keep_run3;
   wire alct_noclct_ro_run3= (alct_noclct || alct0_copad_match_good) && non_trig_keep_run3;
   wire clct_noalct_ro_run3= ((clct_noalct && !clct_used) || clct0_copad_match_good) && non_trig_keep_run3;
 
