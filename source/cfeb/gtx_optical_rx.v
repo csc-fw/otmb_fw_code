@@ -302,7 +302,7 @@
   srl16e_bbl #(16) udcfebkcdly (.clock(~clock),.ce(1'b1),.adr(idly),.d(comp_kchar_mux[15:0]),.q(gtx_rx_kchar[15:0])); // JRG: comp data leaves module on FALLING LHC_CLOCK edge (~clock)
 
   //--------------------------------------------------------------------------------------------------------------------
-  //
+  // following logic is not working at lab when AC is not working!!!
   //--------------------------------------------------------------------------------------------------------------------
 
   assign lt_trg = (gtx_rx_kchar==16'h50FC);

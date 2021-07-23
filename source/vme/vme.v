@@ -9164,8 +9164,8 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   gem_csc_match_ctrl_wr[ 9]   = 1'b1; // RW GEMCSC match, promote quality in me1b with good match
   gem_csc_match_ctrl_wr[10]   = 1'b0; // RW GEMCSC match, promote pattern in me1a with good match
   gem_csc_match_ctrl_wr[11]   = 1'b0; // RW GEMCSC match, promote pattern in me1b with good match
-  gem_csc_match_ctrl_wr[12]   = 1'b1; // RW GEMCSC match, enable GEMA for GEMCSC match without position match
-  gem_csc_match_ctrl_wr[13]   = 1'b1; // RW GEMCSC match, enable GEMA for GEMCSC match without position match
+  gem_csc_match_ctrl_wr[12]   = 1'b0; // RW GEMCSC match, enable GEMA for GEMCSC match without position match
+  gem_csc_match_ctrl_wr[13]   = 1'b0; // RW GEMCSC match, enable GEMA for GEMCSC match without position match
   gem_csc_match_ctrl_wr[14]   = 1'b1; // RW GEMCSC bending angle enable 
   gem_csc_match_ctrl_wr[15]   = 1'b1; // NOT used yet
 
