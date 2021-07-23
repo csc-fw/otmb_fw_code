@@ -2188,6 +2188,8 @@
   //wire gemA_clct_used        = clct_match_sr[winclosing]; //CLCT was used
   //wire gemA_clct_nogem_lost = clct_last_win &&  gemA_pulse_forclct && clct_win_best!=winclosing;// No ALCT arrived in window, lost to mpc contention
 
+  wire clct_copad_match = copad_pulse_forclct  && clct_window_haslcts;  // gem matches CLCT window, push to mpc on current bx
+
 //------------------------------------------------------------------------------------------------------------------
 //ALCT-CLCT-GEM pulse match, namely match in timing
 //------------------------------------------------------------------------------------------------------------------
@@ -2199,11 +2201,11 @@
   assign alct_clct_gemB_pulse        = gemB_pulse_forclct && clct_match;
   assign alct_clct_gem_pulse         = clct_match && gem_pulse;
 
-  assign alct_gem_noclct_pulse       = alct_gem_pulse && alct_noclct;
-  assign clct_gem_noalct_pulse       = clct_gem_pulse && gemA_alct_noalct && gemB_alct_noalct;
+  assign alct_gem_noclct_pulse       = alct_pulse && gem_pulse && alct_noclct;
+  assign clct_gem_noalct_pulse       = clct_gem_pulse && clct_noalct;
 
-  assign alct_copad_noclct_pulse     = alct_pulse && gemA_pulse_forclct && gemB_pulse_forclct && alct_noclct;
-  assign clct_copad_noalct_pulse     = gemA_clct_match && gemB_clct_match && gemA_alct_noalct && gemB_alct_noalct;
+  assign alct_copad_noclct_pulse     = alct_pulse && copad_pulse_forclct && alct_noclct;
+  assign clct_copad_noalct_pulse     = clct_copad_match && clct_noalct;
    
  // from the alct position in gem-tagged window, we should know where is the gem pulse
   // delay the GEM pulse to re-do matching as it is leaving the window (to match to clct_noalct and alct_noclct)
@@ -2414,8 +2416,8 @@
   .copad_match  (copad_match_pipe), // copad 
 
   .alct_gemA_match_found (alct_gemA_match_pos),
-  .alct_gemB_match_found (clct_gemB_match_pos),
-  .clct_gemA_match_found (alct_gemA_match_pos),
+  .alct_gemB_match_found (alct_gemB_match_pos),
+  .clct_gemA_match_found (clct_gemA_match_pos),
   .clct_gemB_match_found (clct_gemB_match_pos),
   .alct_copad_match_found(alct_copad_match_pos),
   .clct_copad_match_found(clct_copad_match_pos),
