@@ -2188,7 +2188,9 @@
   //wire gemA_clct_used        = clct_match_sr[winclosing]; //CLCT was used
   //wire gemA_clct_nogem_lost = clct_last_win &&  gemA_pulse_forclct && clct_win_best!=winclosing;// No ALCT arrived in window, lost to mpc contention
 
-  //ALCT-CLCT-GEM pulse match, namely match in timing
+//------------------------------------------------------------------------------------------------------------------
+//ALCT-CLCT-GEM pulse match, namely match in timing
+//------------------------------------------------------------------------------------------------------------------
   wire   gem_pulse                   = gemA_pulse_forclct || gemB_pulse_forclct;
   //assign alct_gem_pulse              = alct_pulse && gem_pulse;
   assign clct_gem_pulse              = gemB_clct_match || gemA_clct_match; 
@@ -2197,8 +2199,8 @@
   assign alct_clct_gemB_pulse        = gemB_pulse_forclct && clct_match;
   assign alct_clct_gem_pulse         = clct_match && gem_pulse;
 
-  assign alct_gem_noclct_pulse       = alct_gem && alct_noclct;
-  assign clct_gem_noalct_pulse       = clct_gem && gemA_alct_noalct && gemB_alct_noalct;
+  assign alct_gem_noclct_pulse       = alct_gem_pulse && alct_noclct;
+  assign clct_gem_noalct_pulse       = clct_gem_pulse && gemA_alct_noalct && gemB_alct_noalct;
 
   assign alct_copad_noclct_pulse     = alct_pulse && gemA_pulse_forclct && gemB_pulse_forclct && alct_noclct;
   assign clct_copad_noalct_pulse     = gemA_clct_match && gemB_clct_match && gemA_alct_noalct && gemB_alct_noalct;
