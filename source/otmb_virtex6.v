@@ -3448,19 +3448,32 @@ end
   .tmb_alctb (tmb_alctb[4:0]),  // In  ALCT bxn latched at trigger
   .tmb_alcte (tmb_alcte[1:0]),  // In  ALCT ecc error syndrome latched at trigger
 
-  .gemA_alct_match      (gemA_alct_match), // In Gem alct/clct match 
-  .gemB_alct_match      (gemB_alct_match), // In Gem alct/clct matc/
-  .gemA_clct_match      (gemA_clct_match), // In Gem alct/clct matc/
-  .gemB_clct_match      (gemB_clct_match), // In Gem alct/clct matc/
-  .gemA_alct_clct_match (gemA_alct_clct_match),// In  Gem alct/clct match 
-  .gemB_alct_clct_match (gemB_alct_clct_match),// In  Gem alct/clct match 
-  .alct_gem             (alct_gem),        // In GEM matched (in time) to ALCT
-  .clct_gem             (clct_gem),        // In GEM in CLCT open window
-  .alct_clct_gem        (alct_clct_gem),   // In CLCT*(ALCT*GEM) match
-  .clct_gem_noalct      (clct_gem_noalct), // In CLCT lost (no alct), but with GEM
-  .alct_gem_noclct      (alct_gem_noclct), // In ALCT lost (no clct), but with GEM
-  .alct_copad_noclct    (alct_copad_noclct), // In alct+copad match and no clct found
-  .clct_copad_noalct    (clct_copad_noalct), // In clct+copad match and no alct found
+       //GEM-CSC match output, time_only
+  .gemA_alct_match      (gemA_alct_match), // In Gem alct/clct match in timing only 
+  .gemB_alct_match      (gemB_alct_match), // In Gem alct/clct match in timing only
+  .gemA_clct_match      (gemA_clct_match), // In Gem alct/clct match in timing only
+  .gemB_clct_match      (gemB_clct_match), // In Gem alct/clct match in timing only
+
+  .alct_gem_pulse          (alct_gem_pulse), // Out GEM-CSC matching in timing only 
+  .clct_gem_pulse          (clct_gem_pulse), // Out GEM-CSC matching in timing only
+  .alct_clct_gemA_pulse    (alct_clct_gemA_pulse), // Out GEM-CSC matching in timing only
+  .alct_clct_gemB_pulse    (alct_clct_gemB_pulse), // Out GEM-CSC matching in timing only
+  .alct_clct_gem_pulse     (alct_clct_gem_pulse), // Out GEM-CSC matching in timing only
+  .alct_gem_noclct_pulse   (alct_gem_noclct_pulse), // Out GEM-CSC matching in timing only
+  .clct_gem_noalct_pulse   (alct_gem_noalct_pulse), // Out GEM-CSC matching in timing only
+  .alct_copad_noclct_pulse (alct_copad_noclct_pulse), // Out GEM-CSC matching in timing only
+  .clct_copad_noalct_pulse (clct_copad_noalct_pulse), // Out GEM-CSC matching in timing only
+
+        //GEM-CSC match output, time_+ position
+  .alct_gemA_match_pos       (alct_gemA_match_pos),// Out GEM-CSC matching in timing and position
+  .alct_gemB_match_pos       (alct_gemB_match_pos),// Out GEM-CSC matching in timing and position
+  .clct_gemA_match_pos       (clct_gemA_match_pos),// Out GEM-CSC matching in timing and position
+  .clct_gemB_match_pos       (clct_gemB_match_pos),// Out GEM-CSC matching in timing and position
+  .alct_copad_match_pos      (alct_copad_match_pos),// Out GEM-CSC matching in timing and position
+  .clct_copad_match_pos      (clct_copad_match_pos),// Out GEM-CSC matching in timing and position
+  .alct_clct_copad_match_pos (alct_clct_copad_match_pos),// Out GEM-CSC matching in timing and position  
+  .alct_clct_gemA_match_pos  (alct_clct_gemA_match_pos),// Out GEM-CSC matching in timing and position
+  .alct_clct_gemB_match_pos  (alct_clct_gemB_match_pos),// Out GEM-CSC matching in timing and position
 
   .run3_daq_df   (run3_daq_df),
 // Sequencer MPC Status
@@ -4441,15 +4454,27 @@ wire [15:0] gemB_bxn_counter;
   .tmb_alctb (tmb_alctb[4:0]),  // Out  ALCT bxn latched at trigger
   .tmb_alcte (tmb_alcte[1:0]),  // Out  ALCT ecc error syndrome latched at trigger
 
-  .gemA_alct_clct_match (gemA_alct_clct_match), // Out gemA alct clct match
-  .gemB_alct_clct_match (gemB_alct_clct_match), // Out GemB alct clct match
-  .alct_gem             (alct_gem),        // Out GEM matched (in time) to ALCT
-  .clct_gem             (clct_gem),        // Out GEM in CLCT open window
-  .alct_clct_gem        (alct_clct_gem),   // Out CLCT*(ALCT*GEM) match
-  .clct_gem_noalct      (clct_gem_noalct), // Out CLCT lost (no alct), but with GEM
-  .alct_gem_noclct      (alct_gem_noclct), // Out ALCT lost (no clct), but with GEM
-  .alct_copad_noclct    (alct_copad_noclct),// Out alct+copad, no clct 
-  .clct_copad_noalct    (clct_copad_noalct), // Out clct+copad, no alct
+  //GEM-CSC match output, time_only
+  .alct_gem_pulse          (alct_gem_pulse), // Out GEM-CSC matching in timing only 
+  .clct_gem_pulse          (clct_gem_pulse), // Out GEM-CSC matching in timing only
+  .alct_clct_gemA_pulse    (alct_clct_gemA_pulse), // Out GEM-CSC matching in timing only
+  .alct_clct_gemB_pulse    (alct_clct_gemB_pulse), // Out GEM-CSC matching in timing only
+  .alct_clct_gem_pulse     (alct_clct_gem_pulse), // Out GEM-CSC matching in timing only
+  .alct_gem_noclct_pulse   (alct_gem_noclct_pulse), // Out GEM-CSC matching in timing only
+  .clct_gem_noalct_pulse   (alct_gem_noalct_pulse), // Out GEM-CSC matching in timing only
+  .alct_copad_noclct_pulse (alct_copad_noclct_pulse), // Out GEM-CSC matching in timing only
+  .clct_copad_noalct_pulse (clct_copad_noalct_pulse), // Out GEM-CSC matching in timing only
+
+  //GEM-CSC match output, time_+ position
+  .alct_gemA_match_pos       (alct_gemA_match_pos),// Out GEM-CSC matching in timing and position
+  .alct_gemB_match_pos       (alct_gemB_match_pos),// Out GEM-CSC matching in timing and position
+  .clct_gemA_match_pos       (clct_gemA_match_pos),// Out GEM-CSC matching in timing and position
+  .clct_gemB_match_pos       (clct_gemB_match_pos),// Out GEM-CSC matching in timing and position
+  .alct_copad_match_pos      (alct_copad_match_pos),// Out GEM-CSC matching in timing and position
+  .clct_copad_match_pos      (clct_copad_match_pos),// Out GEM-CSC matching in timing and position
+  .alct_clct_copad_match_pos (alct_clct_copad_match_pos),// Out GEM-CSC matching in timing and position  
+  .alct_clct_gemA_match_pos  (alct_clct_gemA_match_pos),// Out GEM-CSC matching in timing and position
+  .alct_clct_gemB_match_pos  (alct_clct_gemB_match_pos),// Out GEM-CSC matching in timing and position
 
   .run3_trig_df   (run3_trig_df),
 // MPC Status

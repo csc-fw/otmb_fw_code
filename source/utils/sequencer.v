@@ -851,19 +851,42 @@
   tmb_alctb,
   tmb_alcte,
 
+  //GEM-CSC match output, time_only
   gemA_alct_match,
   gemB_alct_match,
   gemA_clct_match,
   gemB_clct_match,
-  gemA_alct_clct_match,
-  gemB_alct_clct_match,
-  alct_gem,
-  clct_gem,
-  alct_clct_gem,
-  clct_gem_noalct,
-  alct_gem_noclct,
-  alct_copad_noclct,
-  clct_copad_noalct,
+
+  alct_gem_pulse,
+  clct_gem_pulse,
+  alct_clct_gemA_pulse,
+  alct_clct_gemB_pulse,
+  alct_clct_gem_pulse,
+  alct_gem_noclct_pulse,
+  clct_gem_noalct_pulse,
+  alct_copad_noclct_pulse,
+  clct_copad_noalct_pulse,
+
+  //GEM-CSC match output, time_+ position
+  alct_gemA_match_pos,
+  alct_gemB_match_pos,
+  clct_gemA_match_pos,
+  clct_gemB_match_pos,
+  alct_copad_match_pos,
+  clct_copad_match_pos,
+  alct_clct_copad_match_pos,  
+  alct_clct_gemA_match_pos,
+  alct_clct_gemB_match_pos,
+
+  //gemA_alct_clct_match,
+  //gemB_alct_clct_match,
+  //alct_gem,
+  //clct_gem,
+  //alct_clct_gem,
+  //clct_gem_noalct,
+  //alct_gem_noclct,
+  //alct_copad_noclct,
+  //clct_copad_noalct,
 
 
   run3_daq_df,
@@ -1825,19 +1848,33 @@
   input  [4:0]      tmb_alctb;      // ALCT bxn latched at trigger
   input  [1:0]      tmb_alcte;      // ALCT ecc error syndrome latched at trigger
 
+  //GEM-CSC match output, timing only
   input  gemA_alct_match; 
   input  gemB_alct_match;
   input  gemA_clct_match;
   input  gemB_clct_match;
-  input  gemA_alct_clct_match;
-  input  gemB_alct_clct_match;
-  input  alct_gem;        // GEM matched (in time) to ALCT
-  input  clct_gem;        // GEM in CLCT open window
-  input  alct_clct_gem;   // CLCT*(ALCT*GEM) match
-  input  clct_gem_noalct; // CLCT lost (no alct), but with GEM
-  input  alct_gem_noclct; // ALCT lost (no clct), but with GEM
-  input  alct_copad_noclct;
-  input  clct_copad_noalct;
+
+  input             alct_gem_pulse;        // GEM matched (in time) to ALCT
+  input             clct_gem_pulse;        // GEM in CLCT open window
+  input             alct_clct_gemA_pulse;
+  input             alct_clct_gemB_pulse;
+  input             alct_clct_gem_pulse;   // CLCT*(ALCT*GEM) match
+  input             alct_gem_noclct_pulse; // ALCT lost (no clct), but with GEM
+  input             clct_gem_noalct_pulse; // CLCT lost (no alct), but with GEM
+  input             alct_copad_noclct_pulse;
+  input             clct_copad_noalct_pulse;
+
+  //GEM-CSC match output, timing+position
+  input              alct_gemA_match_pos;
+  input              alct_gemB_match_pos;
+  input              clct_gemA_match_pos;
+  input              clct_gemB_match_pos;
+  input              alct_copad_match_pos;
+  input              clct_copad_match_pos;
+  input              alct_clct_copad_match_pos; 
+  input              alct_clct_gemA_match_pos;
+  input              alct_clct_gemB_match_pos;
+
 
   input  run3_daq_df;
 // MPC Status
@@ -3483,8 +3520,8 @@
 //------------------------------------------------------------------------------------------------------------------
   parameter ACTVFAT_CNT_START       = 12;
   parameter GEMCSCMAP_CNT_START     = 84; // 12+24*3
-  parameter GEMCSCMATCH_CNT_START   = 109; // 84+4+7*3
-  parameter GEM_UNUSED_START        = 119; //+9
+  parameter GEMCSCMATCH_CNT_START   = 88; // 84+4
+  parameter GEM_UNUSED_START        = 107; //+19
   
 
 // Counter enable strobes
@@ -3507,6 +3544,7 @@
     gem_cnt_en[11] <= gem_any_match;
 
 
+      //GEM-CSC match output, time_ only
     gem_cnt_en[GEMCSCMAP_CNT_START   ]    <= gemA_anycluster_me1a;
     gem_cnt_en[GEMCSCMAP_CNT_START+1 ]    <= gemB_anycluster_me1a;
     gem_cnt_en[GEMCSCMAP_CNT_START+2 ]    <= gemA_anycluster_me1b;
@@ -3518,10 +3556,21 @@
     gem_cnt_en[GEMCSCMATCH_CNT_START+3 ]    <= gemB_alct_match;
     gem_cnt_en[GEMCSCMATCH_CNT_START+4 ]    <= gemA_clct_match;
     gem_cnt_en[GEMCSCMATCH_CNT_START+5 ]    <= gemB_clct_match;
-    gem_cnt_en[GEMCSCMATCH_CNT_START+6 ]    <= gemA_alct_clct_match;
-    gem_cnt_en[GEMCSCMATCH_CNT_START+7 ]    <= gemB_alct_clct_match;
-    gem_cnt_en[GEMCSCMATCH_CNT_START+8 ]    <= clct_copad_noalct;
-    gem_cnt_en[GEMCSCMATCH_CNT_START+9 ]    <= alct_copad_noclct;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+6 ]    <= alct_clct_gemA_pulse;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+7 ]    <= alct_clct_gemB_pulse;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+8 ]    <= clct_copad_noalct_pulse;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+9 ]    <= alct_copad_noclct_pulse;
+
+      //GEM-CSC match output, time_+ position
+    gem_cnt_en[GEMCSCMATCH_CNT_START+10]    <= alct_gemA_match_pos;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+11]    <= alct_gemB_match_pos;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+12]    <= clct_gemA_match_pos;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+13]    <= clct_gemB_match_pos;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+14]    <= alct_copad_match_pos;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+15]    <= clct_copad_match_pos;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+16]    <= alct_clct_copad_match_pos;  
+    gem_cnt_en[GEMCSCMATCH_CNT_START+17]    <= alct_clct_gemA_match_pos;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+18]    <= alct_clct_gemB_match_pos;
 
 
   end
@@ -3538,15 +3587,16 @@
   endgenerate
 
   //genvar k;
-  generate
-    for (k=0; k< MXCFEB; k=k+1) begin: gemcscmapcnt
-       always @(posedge clock) begin
-            gem_cnt_en[GEMCSCMAP_CNT_START+ 4 +k           ] <= gemA_csc_cluster_active_cfeb_list[k];
-            gem_cnt_en[GEMCSCMAP_CNT_START+ 4 +k + MXCFEB  ] <= gemB_csc_cluster_active_cfeb_list[k];
-            gem_cnt_en[GEMCSCMAP_CNT_START+ 4 +k + 2*MXCFEB] <= gemcopad_csc_cluster_active_cfeb_list[k];
-        end
-    end
-  endgenerate
+  //gem converted cfeb list : not used
+  //generate
+  //  for (k=0; k< MXCFEB; k=k+1) begin: gemcscmapcnt
+  //     always @(posedge clock) begin
+  //          gem_cnt_en[GEMCSCMAP_CNT_START+ 4 +k           ] <= gemA_csc_cluster_active_cfeb_list[k];
+  //          gem_cnt_en[GEMCSCMAP_CNT_START+ 4 +k + MXCFEB  ] <= gemB_csc_cluster_active_cfeb_list[k];
+  //          gem_cnt_en[GEMCSCMAP_CNT_START+ 4 +k + 2*MXCFEB] <= gemcopad_csc_cluster_active_cfeb_list[k];
+  //      end
+  //  end
+  //endgenerate
 
   //genvar k;
   generate

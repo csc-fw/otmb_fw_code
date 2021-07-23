@@ -131,6 +131,13 @@ module  alct_clct_gem_matching(
   input [9:0] copad_cluster6_xky_mi,
   input [9:0] copad_cluster7_xky_mi,
 
+  output       alct_gemA_match_found,
+  output       alct_gemB_match_found,
+  output       clct_gemA_match_found,
+  output       clct_gemB_match_found,
+  output       alct_copad_match_found,
+  output       clct_copad_match_found,
+
   output [2:0] alct0_clct0_copad_best_icluster,
   output [9:0] alct0_clct0_copad_best_angle,
   output [9:0] alct0_clct0_copad_best_cscxky,
@@ -181,6 +188,8 @@ module  alct_clct_gem_matching(
   output       alct1_clct1_gem_match_found,
   output       swapclct_gem_match,
   output       swapalct_gem_match,
+  output       alct_clct_gemA_match,
+  output       alct_clct_gemB_match,
   output       alct_clct_gem_nomatch,
 
   output       alct0_clct0_nogem_match_found,
@@ -489,6 +498,16 @@ module  alct_clct_gem_matching(
 
     end
   endgenerate 
+
+  //-------------------------------------------------------------------------------------------------------------------
+  //match results : ALCT-GEM, CLCT-GEM, ALCT_copad, CLCT_copad
+  //-------------------------------------------------------------------------------------------------------------------
+  assign alct_gemA_match_found  = (|alct0_gemA_match)  || (|alct1_gemA_match);
+  assign alct_gemB_match_found  = (|alct0_gemB_match)  || (|alct1_gemB_match);
+  assign clct_gemA_match_found  = (|clct0_gemA_match)  || (|clct1_gemA_match);
+  assign clct_gemB_match_found  = (|clct0_gemA_match)  || (|clct1_gemB_match);
+  assign alct_copad_match_found = (|alct0_copad_match) || (|alct1_copad_match);
+  assign clct_copad_match_found = (|clct0_copad_match) || (|clct1_copad_match);
 
   //-------------------------------------------------------------------------------------------------------------------
   //ALCT-CLCT+GEM Copad match, very challenging part!, lot of combinations!

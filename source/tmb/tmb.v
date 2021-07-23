@@ -291,6 +291,7 @@
   gem_clct_win,
   alct_gem_win,
 
+
 // TMB-Sequencer Pipelines
   wr_adr_xtmb,
   wr_adr_rtmb,
@@ -359,15 +360,27 @@
   tmb_alctb,
   tmb_alcte,
 
-  gemA_alct_clct_match,
-  gemB_alct_clct_match,
-  alct_gem,
-  clct_gem,
-  alct_clct_gem,
-  clct_gem_noalct,
-  alct_gem_noclct,
-  clct_copad_noalct,
-  alct_copad_noclct,
+  //GEM-CSC match output, time_only
+  alct_gem_pulse,
+  clct_gem_pulse,
+  alct_clct_gemA_pulse,
+  alct_clct_gemB_pulse,
+  alct_clct_gem_pulse,
+  alct_gem_noclct_pulse,
+  clct_gem_noalct_pulse,
+  alct_copad_noclct_pulse,
+  clct_copad_noalct_pulse,
+
+  //GEM-CSC match output, time_+ position
+  alct_gemA_match_pos,
+  alct_gemB_match_pos,
+  clct_gemA_match_pos,
+  clct_gemB_match_pos,
+  alct_copad_match_pos,
+  clct_copad_match_pos,
+  alct_clct_copad_match_pos,  
+  alct_clct_gemA_match_pos,
+  alct_clct_gemB_match_pos,
 
   run3_trig_df, // input, flag of run3 data format upgrade
 // MPC Status
@@ -826,6 +839,8 @@
   output  [3:0]       gem_clct_win;
   output  [3:0]       alct_gem_win;
 
+
+
 // TMB-Sequencer Pipelines
   input  [MXBADR-1:0]  wr_adr_xtmb; // Buffer write address after drift time
   output [MXBADR-1:0]  wr_adr_rtmb; // Buffer write address at TMB matching time
@@ -893,16 +908,27 @@
   output  [4:0]      tmb_alctb; // ALCT bxn latched at trigger
   output  [1:0]      tmb_alcte; // ALCT ecc error syndrome latched at trigger
 
-  output  gemA_alct_clct_match;
-  output  gemB_alct_clct_match;
-  output  alct_copad_noclct;
-  output  clct_copad_noalct;
-  output  alct_gem;        // GEM matched (in time) to ALCT
-  output  clct_gem;        // GEM in CLCT open window
-  output  alct_clct_gem;   // CLCT*(ALCT*GEM) match
-  output  clct_gem_noalct; // CLCT lost (no alct), but with GEM
-  output  alct_gem_noclct; // ALCT lost (no clct), but with GEM
+  //GEM-CSC match output, timing only
+  output             alct_gem_pulse;        // GEM matched (in time) to ALCT
+  output             clct_gem_pulse;        // GEM in CLCT open window
+  output             alct_clct_gemA_pulse;
+  output             alct_clct_gemB_pulse;
+  output             alct_clct_gem_pulse;   // CLCT*(ALCT*GEM) match
+  output             alct_gem_noclct_pulse; // ALCT lost (no clct), but with GEM
+  output             clct_gem_noalct_pulse; // CLCT lost (no alct), but with GEM
+  output             alct_copad_noclct_pulse;
+  output             clct_copad_noalct_pulse;
 
+  //GEM-CSC match output, timing+position
+  output              alct_gemA_match_pos;
+  output              alct_gemB_match_pos;
+  output              clct_gemA_match_pos;
+  output              clct_gemB_match_pos;
+  output              alct_copad_match_pos;
+  output              clct_copad_match_pos;
+  output              alct_clct_copad_match_pos; 
+  output              alct_clct_gemA_match_pos;
+  output              alct_clct_gemB_match_pos;
 
 // MPC Status
   output                 mpc_frame_ff;   // MPC frame latch
@@ -1432,8 +1458,8 @@
   assign alct0_gem_pipe = (alct_gem_ptr_is_0) ? alct0_tmb : alct0_gem_srl;  // First  ALCT after alct pipe delay
   assign alct1_gem_pipe = (alct_gem_ptr_is_0) ? alct1_tmb : alct1_gem_srl;  // Second ALCT after alct pipe delay
 
-  wire   alct0_gem_pipe_vpf = alct0_gem_pipe[0];
-  wire   alct1_gem_pipe_vpf = alct1_gem_pipe[0];
+  wire   alct0_gem_pipe_vpf = usefakealct ? alct0_fake[0] : alct0_gem_pipe[0];
+  wire   alct1_gem_pipe_vpf = usefakealct ? alct1_fake[1] : alct1_gem_pipe[0];
 
 //------------------------------------------------------------------------------------------------------------------
 // Push CLCT data into a 1bx to 16bx pipeline delay to wait for an alct-clct match
@@ -1951,7 +1977,7 @@
   wire   gemB_alct_last_tag = gemB_alct_tag_sr[gem_alct_winclosing];    // push it to GEM-CLCT matching sequence anyway    
 
 // GEM matched or alct-only
-  wire    alct_gem_pulse        = alct0_gem_pipe_vpf | alct1_gem_pipe_vpf;              // ALCT vpf
+  assign  alct_gem_pulse        = alct0_gem_pipe_vpf | alct1_gem_pipe_vpf;              // ALCT vpf
   assign  gemA_alct_match       = alct_gem_pulse   &&  gemA_alct_window_hasgem;  // ALCT matches GEM window, push to CLCT match
   assign  gemB_alct_match       = alct_gem_pulse   &&  gemB_alct_window_hasgem;  // ALCT matches GEM window, push to CLCT match
 
@@ -2163,22 +2189,19 @@
   //wire gemA_clct_nogem_lost = clct_last_win &&  gemA_pulse_forclct && clct_win_best!=winclosing;// No ALCT arrived in window, lost to mpc contention
 
   //ALCT-CLCT-GEM pulse match, namely match in timing
-  wire   alct_gem_match_pulse;
-  wire   clct_gem_match_pulse;
-  wire   alct_clct_gem_match_pulse;
-  wire   alct_gem_noclct_match_pulse;
-  wire   clct_gem_noalct_match_pulse;
-  assign gem_pulse                         = gemA_pulse_forclct || gemB_pulse_forclct;
-  assign alct_gem_match_pulse              = alct_pulse && gem_pulse;
-  assign clct_gem_match_pulse              = gemB_clct_match || gemA_clct_match; 
-  assign alct_clct_gem_match_pulse         = clct_match && gem_pulse;
-  assign clct_gem_noalct_match_pulse       = clct_gem && gemA_alct_noalct && gemB_alct_noalct;
-  assign alct_gem_noclct_match_pulse       = alct_gem && alct_noclct;
+  wire   gem_pulse                   = gemA_pulse_forclct || gemB_pulse_forclct;
+  //assign alct_gem_pulse              = alct_pulse && gem_pulse;
+  assign clct_gem_pulse              = gemB_clct_match || gemA_clct_match; 
+  
+  assign alct_clct_gemA_pulse        = gemA_pulse_forclct && clct_match;
+  assign alct_clct_gemB_pulse        = gemB_pulse_forclct && clct_match;
+  assign alct_clct_gem_pulse         = clct_match && gem_pulse;
 
-  assign alct_copad_noclct_pulse           = alct_pulse && gemA_pulse_forclct && gemB_pulse_forclct && alct_noclct;
-  assign clct_copad_noalct_pulse           = gemA_clct_match && gemB_clct_match && gemA_alct_noalct && gemB_alct_noalct;
-  assign gemA_alct_clct_match_pulse        = gemA_pulse_forclct && clct_match;
-  assign gemB_alct_clct_match_pulse        = gemB_pulse_forclct && clct_match;
+  assign alct_gem_noclct_pulse       = alct_gem && alct_noclct;
+  assign clct_gem_noalct_pulse       = clct_gem && gemA_alct_noalct && gemB_alct_noalct;
+
+  assign alct_copad_noclct_pulse     = alct_pulse && gemA_pulse_forclct && gemB_pulse_forclct && alct_noclct;
+  assign clct_copad_noalct_pulse     = gemA_clct_match && gemB_clct_match && gemA_alct_noalct && gemB_alct_noalct;
    
  // from the alct position in gem-tagged window, we should know where is the gem pulse
   // delay the GEM pulse to re-do matching as it is leaving the window (to match to clct_noalct and alct_noclct)
@@ -2237,6 +2260,8 @@
   wire       alct1_clct1_gem_match_found_pos;
   wire       swapclct_gem_match_pos;
   wire       swapalct_gem_match_pos;
+  wire       alct_clct_gemA_match_pos;
+  wire       alct_clct_gemB_match_pos;
   wire       alct_clct_gem_nomatch_pos;
 
   wire       alct0_clct0_nogem_match_found_pos;
@@ -2386,6 +2411,13 @@
 
   .copad_match  (copad_match_pipe), // copad 
 
+  .alct_gemA_match_found (alct_gemA_match_pos),
+  .alct_gemB_match_found (clct_gemB_match_pos),
+  .clct_gemA_match_found (alct_gemA_match_pos),
+  .clct_gemB_match_found (clct_gemB_match_pos),
+  .alct_copad_match_found(alct_copad_match_pos),
+  .clct_copad_match_found(clct_copad_match_pos),
+
   .alct0_clct0_copad_best_icluster(alct0_clct0_copad_best_icluster[2:0]),
   .alct0_clct0_copad_best_angle   (alct0_clct0_copad_best_angle[9:0]),
   .alct0_clct0_copad_best_cscxky  (alct0_clct0_copad_best_cscxky[9:0]),
@@ -2438,6 +2470,8 @@
   .alct1_clct1_gem_match_found    (alct1_clct1_gem_match_found_pos),
   .swapalct_gem_match             (swapalct_gem_match_pos),
   .swapclct_gem_match             (swapclct_gem_match_pos),
+  .alct_clct_gemA_match           (alct_clct_gemA_match_pos),
+  .alct_clct_gemB_match           (alct_clct_gemB_match_pos),
   .alct_clct_gem_nomatch          (alct_clct_gem_nomatch_pos),
 
   .alct0_clct0_nogem_match_found  (alct0_clct0_nogem_match_found_pos),
