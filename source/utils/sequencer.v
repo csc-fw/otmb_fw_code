@@ -3272,8 +3272,8 @@
       hmt_nhits_trig_bx2345_vme <= 0;
       hmt_trigger_vme <= 0;
     end
-    //else if (clct0_vpf) begin
-    else if (clct0_vpf || hmt_trigger_xtmb) begin
+    else if (clct0_vpf) begin
+    //else if (clct0_vpf || hmt_trigger_xtmb) begin
       clct0_vme <= clct0_xtmb;
       clct1_vme <= clct1_xtmb;
       clctc_vme <= clctc_xtmb;

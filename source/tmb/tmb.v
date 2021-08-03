@@ -481,7 +481,12 @@
   clct_vpf_tprt,
   clct_window_tprt,
 
-  alct0_pipe_vpf,
+  alct0_pipe_vpf_tp,
+  clct0_pipe_vpf_tp,
+  gem_foralct_vpf_tp,
+  gem_forclct_vpf_tp,
+  clct_window_haslcts_tp,
+  gem_alct_window_hasgem_tp,
 // Sump
   tmb_sump
 
@@ -670,8 +675,6 @@
   input  [MXALCT-1:0]  alct1_tmb;    // ALCT second best muon
   input                alct_bx0_rx;  // ALCT bx0 received
   input  [1:0]         alct_ecc_err; // ALCT ecc syndrome code
-
-  output                alct0_pipe_vpf; //Tao, test at TAMU
 
 // GEM
   input  [7:0]          gemA_vpf;
@@ -1017,6 +1020,13 @@
   output          alct1_vpf_tprt;   // Timing test point
   output          clct_vpf_tprt;    // Timing test point
   output          clct_window_tprt; // Timing test point
+
+  output          alct0_pipe_vpf_tp; //Tao, test at TAMU
+  output          clct0_pipe_vpf_tp;
+  output          gem_foralct_vpf_tp;
+  output          gem_forclct_vpf_tp;
+  output          clct_window_haslcts_tp;
+  output          gem_alct_window_hasgem_tp;
 
 // Sump
   output          tmb_sump; // Unused signals
@@ -1427,6 +1437,7 @@
 
   wire   alct0_pipe_vpf = alct0_pipe[0];
   wire   alct1_pipe_vpf = alct1_pipe[0];
+  wire   alct0_pipe_vpf_tp = alct0_pipe[0];
 
 //------------------------------------------------------------------------------------------------------------------
 // Push ALCT data into a 1bx to 16bx pipeline delay for GEM-ALCT match
@@ -1510,6 +1521,8 @@
   assign wr_adr_xtmb_pipe   = (clct_ptr_is_0) ? wr_adr_xtmb   : wr_adr_xtmb_srl;  // Buffer write address after clct pipeline delay
   wire   wr_push_xtmb_pipe  = (clct_ptr_is_0) ? wr_push_xtmb  : wr_push_xtmb_srl;
   wire   wr_avail_xtmb_pipe = (clct_ptr_is_0) ? wr_avail_xtmb : wr_avail_xtmb_srl;
+
+  assign clct0_pipe_vpf_tp = clct0_pipe[0];
 
   wire  [MXQLTB - 1   : 0] clct0_qlt_pipe; // new quality
   wire  [MXBNDB - 1   : 0] clct0_bnd_pipe; // new bending 
@@ -1686,6 +1699,8 @@
   wire clct_window_open    = |(clct_vpf_sr & clct_sr_include);
   wire clct_window_haslcts = |(clct_vpf_sr & clct_sr_include & ~clct_tag_sr);
 
+  wire clct_window_haslcts_tp = clct_window_haslcts;
+
 // CLCT window closes on next bx, check for un-tagged clct in last bx
   wire   clct_last_vpf = clct_vpf_sr[winclosing];        // CLCT token reaches last window position 1bx before tag
   wire   clct_last_tag = clct_tag_sr[winclosing];        // Push this event into MPC queue as it reaches last window bx
@@ -1745,8 +1760,10 @@
 
   wire gemA_pulse_foralct = (|gemA_pipe_foralct);
   wire gemB_pulse_foralct = (|gemB_pipe_foralct);
+
   //wire gem_pulse = (|gemA_pipe_foralct || |gemB_pipe_foralct);
   wire gem_pulse_foralct = (|gemA_pipe_foralct || |gemB_pipe_foralct);
+  assign gem_foralct_vpf_tp = gem_pulse_foralct; 
 
   //---------------------------------------------------------------------
   // pre-calculate GEM-ALCT matching window 
@@ -1970,6 +1987,9 @@
   wire gemB_alct_window_open    = |(gemB_vpf_sr & gem_sr_include);
   wire gemB_alct_window_hasgem  = |(gemB_vpf_sr & gem_sr_include & ~gemB_alct_tag_sr);
 
+
+  wire gem_alct_window_hasgem_tp = gemA_alct_window_hasgem || gemB_alct_window_hasgem;
+
 // GEM window closes on next bx, check for un-tagged gem in last bx
   wire   gemA_alct_last_vpf = gemA_vpf_sr[gem_alct_winclosing];        // GEM token reaches last window position 1bx before tag
   wire   gemA_alct_last_tag = gemA_alct_tag_sr[gem_alct_winclosing];    // push it to GEM-CLCT matching sequence anyway    
@@ -1977,18 +1997,18 @@
   wire   gemB_alct_last_tag = gemB_alct_tag_sr[gem_alct_winclosing];    // push it to GEM-CLCT matching sequence anyway    
 
 // GEM matched or alct-only
-  assign  alct_gem_pulse        = alct0_gem_pipe_vpf | alct1_gem_pipe_vpf;              // ALCT vpf
-  assign  gemA_alct_match       = alct_gem_pulse   &&  gemA_alct_window_hasgem;  // ALCT matches GEM window, push to CLCT match
-  assign  gemB_alct_match       = alct_gem_pulse   &&  gemB_alct_window_hasgem;  // ALCT matches GEM window, push to CLCT match
+  assign  alct_gem_vpf          = alct0_gem_pipe_vpf | alct1_gem_pipe_vpf;              // ALCT vpf
+  assign  gemA_alct_match       = alct_gem_vpf   &&  gemA_alct_window_hasgem;  // ALCT matches GEM window, push to CLCT match
+  assign  gemB_alct_match       = alct_gem_vpf   &&  gemB_alct_window_hasgem;  // ALCT matches GEM window, push to CLCT match
 
-  wire alct_gemA_nogem       = alct_gem_pulse   && !gemA_alct_window_hasgem;  // ALCT arrived, but there was no GEM window open
+  wire alct_gemA_nogem       = alct_gem_vpf   && !gemA_alct_window_hasgem;  // ALCT arrived, but there was no GEM window open
   wire gemA_alct_last_win    = gemA_alct_last_vpf && !gemA_alct_last_tag;  // CLCT reached end of window
-  wire gemA_alct_noalct      = gemA_alct_last_win && !alct_gem_pulse;    // No ALCT arrived in window, pushed mpc on last bx
+  wire gemA_alct_noalct      = gemA_alct_last_win && !alct_gem_vpf;    // No ALCT arrived in window, pushed mpc on last bx
   wire gemA_alct_used        = gemA_alct_match_sr[gem_alct_winclosing]; //gem was used, Tao
 
-  wire alct_gemB_nogem       = alct_gem_pulse   && !gemB_alct_window_hasgem;  // ALCT arrived, but there was no GEM window open
+  wire alct_gemB_nogem       = alct_gem_vpf   && !gemB_alct_window_hasgem;  // ALCT arrived, but there was no GEM window open
   wire gemB_alct_last_win    = gemB_alct_last_vpf && !gemB_alct_last_tag;  // CLCT reached end of window
-  wire gemB_alct_noalct      = gemB_alct_last_win && !alct_gem_pulse;    // No ALCT arrived in window, pushed mpc on last bx
+  wire gemB_alct_noalct      = gemB_alct_last_win && !alct_gem_vpf;    // No ALCT arrived in window, pushed mpc on last bx
   wire gemB_alct_used        = gemB_alct_match_sr[gem_alct_winclosing]; //gem was used, Tao
 
 
@@ -2093,6 +2113,49 @@
   srl16e_bbl #(8) ugemBpulse_gemclct (.clock(clock),.ce(1'b1),.adr(gemB_final_adr),.d(gemB_vpf),.q(gemB_forclct_srl));
 
 //------------------------------------------------------------------------------------------------------------------
+//ALCT-CLCT-GEM pulse match, namely match in timing
+//------------------------------------------------------------------------------------------------------------------
+  wire [7:0] gemA_forclct_pipe =  (gemA_final_delay == 0) ? gemA_vpf : gemA_forclct_srl;
+  wire [7:0] gemB_forclct_pipe =  (gemB_final_delay == 0) ? gemB_vpf : gemB_forclct_srl;
+
+  wire gemA_pulse_forclct = |gemA_forclct_pipe;
+  wire gemB_pulse_forclct = |gemB_forclct_pipe;
+  wire copad_pulse_forclct = gemA_pulse_forclct && gemB_pulse_forclct && (|copad_match_pipe);
+
+  assign gem_forclct_vpf_tp = gemA_pulse_forclct || gemB_pulse_forclct; 
+
+  assign gemA_clct_match  = gemA_pulse_forclct  &&  clct_window_haslcts;  // gem matches CLCT window, push to mpc on current bx
+  assign gemB_clct_match  = gemB_pulse_forclct  &&  clct_window_haslcts;  // gem matches CLCT window, push to mpc on current bx
+
+  wire clct_gemA_noclct = gemA_pulse_forclct  && !clct_window_haslcts;  // gem arrived, but there was no CLCT window open
+  wire gemA_clct_nogem  = clct_last_win && !gemA_pulse_forclct;    // No ALCT arrived in window, pushed mpc on last bx
+  //wire gemA_clct_used        = clct_match_sr[winclosing]; //CLCT was used
+  wire clct_gemB_noclct = gemB_pulse_forclct  && !clct_window_haslcts;  // gem arrived, but there was no CLCT window open
+  wire gemB_clct_nogem  = clct_last_win && !gemB_pulse_forclct;    // No ALCT arrived in window, pushed mpc on last bx
+  //wire gemA_clct_used        = clct_match_sr[winclosing]; //CLCT was used
+  //wire gemA_clct_nogem_lost = clct_last_win &&  gemA_pulse_forclct && clct_win_best!=winclosing;// No ALCT arrived in window, lost to mpc contention
+
+  wire clct_copad_match = copad_pulse_forclct  && clct_window_haslcts;  // gem matches CLCT window, push to mpc on current bx
+
+  wire   gem_pulse                   = gemA_pulse_forclct || gemB_pulse_forclct;
+  assign alct_gem_pulse              = alct_pulse  && gem_pulse;
+  assign clct_gem_pulse              = gemB_clct_match || gemA_clct_match; 
+  
+  assign alct_clct_gemA_pulse        = gemA_pulse_forclct && clct_match;
+  assign alct_clct_gemB_pulse        = gemB_pulse_forclct && clct_match;
+  assign alct_clct_gem_pulse         = clct_match && gem_pulse;
+
+  assign alct_gem_noclct_pulse       = alct_pulse && gem_pulse && alct_noclct;
+  assign clct_gem_noalct_pulse       = clct_gem_pulse && clct_noalct;
+
+  assign alct_copad_noclct_pulse     = alct_pulse && copad_pulse_forclct && alct_noclct;
+  assign clct_copad_noalct_pulse     = clct_copad_match && clct_noalct;
+   
+ // from the alct position in gem-tagged window, we should know where is the gem pulse
+  // delay the GEM pulse to re-do matching as it is leaving the window (to match to clct_noalct and alct_noclct)
+  //srl16e_bbl #(1) ugempulse (.clock(clock),.ce(1'b1),.adr(winclosing-clct_win_center),.d(gem_pulse),.q(gem_pulse_winclose)); //andrew
+
+//------------------------------------------------------------------------------------------------------------------
 //  delay GEM data for GEM-CSC position match
 //Question: the latency of building copad: current range 0-16BX
 //------------------------------------------------------------------------------------------------------------------
@@ -2136,9 +2199,9 @@
       srl16e_bbl #(WIREBITS) ugemAwirelo  (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemA_cluster_cscwire_lo[k]),.q(gemA_cluster_cscwire_lo_srl[k]));
       srl16e_bbl #(WIREBITS) ugemAwiremi  (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemA_cluster_cscwire_mi[k]),.q(gemA_cluster_cscwire_mi_srl[k]));
       srl16e_bbl #(WIREBITS) ugemAwirehi  (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemA_cluster_cscwire_hi[k]),.q(gemA_cluster_cscwire_hi_srl[k]));
-      srl16e_bbl #(MXXKYB)   ugemAxkylo  (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemA_cluster_cscxky_lo[k]), .q(gemA_cluster_cscxky_lo_srl[k]));
-      srl16e_bbl #(MXXKYB)   ugemAxkymi  (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemA_cluster_cscxky_mi[k]), .q(gemA_cluster_cscxky_mi_srl[k]));
-      srl16e_bbl #(MXXKYB)   ugemAxkyhi  (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemA_cluster_cscxky_hi[k]), .q(gemA_cluster_cscxky_hi_srl[k]));
+      srl16e_bbl #(MXXKYB)   ugemAxkylo   (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemA_cluster_cscxky_lo[k]), .q(gemA_cluster_cscxky_lo_srl[k]));
+      srl16e_bbl #(MXXKYB)   ugemAxkymi   (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemA_cluster_cscxky_mi[k]), .q(gemA_cluster_cscxky_mi_srl[k]));
+      srl16e_bbl #(MXXKYB)   ugemAxkyhi   (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemA_cluster_cscxky_hi[k]), .q(gemA_cluster_cscxky_hi_srl[k]));
       srl16e_bbl #(CLSTBITS) ugemBcluster (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemB_cluster[k]),           .q(gemB_cluster_srl[k]));
       srl16e_bbl #(WIREBITS) ugemBwirelo  (.clock(clock),.ce(1'b1),.adr(gemB_final_adr),.d(gemB_cluster_cscwire_lo[k]),.q(gemB_cluster_cscwire_lo_srl[k]));
       srl16e_bbl #(WIREBITS) ugemBwiremi  (.clock(clock),.ce(1'b1),.adr(gemB_final_adr),.d(gemB_cluster_cscwire_mi[k]),.q(gemB_cluster_cscwire_mi_srl[k]));
@@ -2150,14 +2213,14 @@
 
       srl16e_bbl #(CLSTBITS) ucopad       (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(copad_match[k]),      .q(copad_match_srl[k]));
 
-      assign gemA_cluster_pipe[k]        = (gemA_final_delay == 0) ? gemA_cluster[k]        : gemA_cluster_srl[k];
+      assign gemA_cluster_pipe[k]            = (gemA_final_delay == 0) ? gemA_cluster[k]        : gemA_cluster_srl[k];
       assign gemA_cluster_cscwire_lo_pipe[k] = (gemA_final_delay == 0) ? gemA_cluster_cscwire_lo[k] : gemA_cluster_cscwire_lo_srl[k];
       assign gemA_cluster_cscwire_mi_pipe[k] = (gemA_final_delay == 0) ? gemA_cluster_cscwire_mi[k] : gemA_cluster_cscwire_mi_srl[k];
       assign gemA_cluster_cscwire_hi_pipe[k] = (gemA_final_delay == 0) ? gemA_cluster_cscwire_hi[k] : gemA_cluster_cscwire_hi_srl[k];
       assign gemA_cluster_cscxky_lo_pipe[k]  = (gemA_final_delay == 0) ? gemA_cluster_cscxky_lo[k]  : gemA_cluster_cscxky_lo_srl[k];
       assign gemA_cluster_cscxky_mi_pipe[k]  = (gemA_final_delay == 0) ? gemA_cluster_cscxky_mi[k]  : gemA_cluster_cscxky_mi_srl[k];
       assign gemA_cluster_cscxky_hi_pipe[k]  = (gemA_final_delay == 0) ? gemA_cluster_cscxky_hi[k]  : gemA_cluster_cscxky_hi_srl[k];
-      assign gemB_cluster_pipe[k]        = (gemB_final_delay == 0) ? gemB_cluster[k]        : gemB_cluster_srl[k];
+      assign gemB_cluster_pipe[k]            = (gemB_final_delay == 0) ? gemB_cluster[k]        : gemB_cluster_srl[k];
       assign gemB_cluster_cscwire_lo_pipe[k] = (gemB_final_delay == 0) ? gemB_cluster_cscwire_lo[k] : gemB_cluster_cscwire_lo_srl[k];
       assign gemB_cluster_cscwire_mi_pipe[k] = (gemB_final_delay == 0) ? gemB_cluster_cscwire_mi[k] : gemB_cluster_cscwire_mi_srl[k];
       assign gemB_cluster_cscwire_hi_pipe[k] = (gemB_final_delay == 0) ? gemB_cluster_cscwire_hi[k] : gemB_cluster_cscwire_hi_srl[k];
@@ -2169,47 +2232,6 @@
   end 
   endgenerate 
   
-  wire [7:0] gemA_forclct_pipe =  (gemA_final_delay == 0) ? gemA_vpf : gemA_forclct_srl;
-  wire [7:0] gemB_forclct_pipe =  (gemB_final_delay == 0) ? gemB_vpf : gemB_forclct_srl;
-
-  wire gemA_pulse_forclct = |gemA_forclct_pipe;
-  wire gemB_pulse_forclct = |gemB_forclct_pipe;
-  wire copad_pulse_forclct = gemA_pulse_forclct && gemB_pulse_forclct && (|copad_match_pipe);
-
-  //match in timing
-  assign gemA_clct_match  = gemA_pulse_forclct  &&  clct_window_haslcts;  // gem matches CLCT window, push to mpc on current bx
-  assign gemB_clct_match  = gemB_pulse_forclct  &&  clct_window_haslcts;  // gem matches CLCT window, push to mpc on current bx
-
-  wire clct_gemA_noclct = gemA_pulse_forclct  && !clct_window_haslcts;  // gem arrived, but there was no CLCT window open
-  wire gemA_clct_nogem  = clct_last_win && !gemA_pulse_forclct;    // No ALCT arrived in window, pushed mpc on last bx
-  //wire gemA_clct_used        = clct_match_sr[winclosing]; //CLCT was used
-  wire clct_gemB_noclct = gemB_pulse_forclct  && !clct_window_haslcts;  // gem arrived, but there was no CLCT window open
-  wire gemB_clct_nogem  = clct_last_win && !gemB_pulse_forclct;    // No ALCT arrived in window, pushed mpc on last bx
-  //wire gemA_clct_used        = clct_match_sr[winclosing]; //CLCT was used
-  //wire gemA_clct_nogem_lost = clct_last_win &&  gemA_pulse_forclct && clct_win_best!=winclosing;// No ALCT arrived in window, lost to mpc contention
-
-  wire clct_copad_match = copad_pulse_forclct  && clct_window_haslcts;  // gem matches CLCT window, push to mpc on current bx
-
-//------------------------------------------------------------------------------------------------------------------
-//ALCT-CLCT-GEM pulse match, namely match in timing
-//------------------------------------------------------------------------------------------------------------------
-  wire   gem_pulse                   = gemA_pulse_forclct || gemB_pulse_forclct;
-  //assign alct_gem_pulse              = alct_pulse && gem_pulse;
-  assign clct_gem_pulse              = gemB_clct_match || gemA_clct_match; 
-  
-  assign alct_clct_gemA_pulse        = gemA_pulse_forclct && clct_match;
-  assign alct_clct_gemB_pulse        = gemB_pulse_forclct && clct_match;
-  assign alct_clct_gem_pulse         = clct_match && gem_pulse;
-
-  assign alct_gem_noclct_pulse       = alct_pulse && gem_pulse && alct_noclct;
-  assign clct_gem_noalct_pulse       = clct_gem_pulse && clct_noalct;
-
-  assign alct_copad_noclct_pulse     = alct_pulse && copad_pulse_forclct && alct_noclct;
-  assign clct_copad_noalct_pulse     = clct_copad_match && clct_noalct;
-   
- // from the alct position in gem-tagged window, we should know where is the gem pulse
-  // delay the GEM pulse to re-do matching as it is leaving the window (to match to clct_noalct and alct_noclct)
-  //srl16e_bbl #(1) ugempulse (.clock(clock),.ce(1'b1),.adr(winclosing-clct_win_center),.d(gem_pulse),.q(gem_pulse_winclose)); //andrew
 
 //------------------------------------------------------------------------------------------------------------------
 // GEM-ALCT-CLCT position match part
@@ -2264,8 +2286,6 @@
   wire       alct1_clct1_gem_match_found_pos;
   wire       swapclct_gem_match_pos;
   wire       swapalct_gem_match_pos;
-  wire       alct_clct_gemA_match_pos;
-  wire       alct_clct_gemB_match_pos;
   wire       alct_clct_gem_nomatch_pos;
 
   wire       alct0_clct0_nogem_match_found_pos;
@@ -2314,7 +2334,7 @@
   .clct1_vpf (clct1_pipe[0]),
   .clct0_xky (clct0_xky_pipe[9:0]),
   .clct1_xky (clct1_xky_pipe[9:0]),
-  .clct0_bend (clct0_bnd_pipe[4]),//clct0_vpf from pipe
+  .clct0_bend (clct0_bnd_pipe[4]),
   .clct1_bend (clct1_bnd_pipe[4]),
 
   .gemA_match_ignore_position(gemA_match_ignore_position),
@@ -2350,23 +2370,23 @@
   .gemA_cluster6_xky_lo(gemA_cluster_cscxky_lo_pipe[6][MXXKYB-1:0]),
   .gemA_cluster7_xky_lo(gemA_cluster_cscxky_lo_pipe[7][MXXKYB-1:0]),
 
-  .gemA_cluster0_xky_hi(gemA_cluster_cscxky_lo_pipe[0][MXXKYB-1:0]),
-  .gemA_cluster1_xky_hi(gemA_cluster_cscxky_lo_pipe[1][MXXKYB-1:0]),
-  .gemA_cluster2_xky_hi(gemA_cluster_cscxky_lo_pipe[2][MXXKYB-1:0]),
-  .gemA_cluster3_xky_hi(gemA_cluster_cscxky_lo_pipe[3][MXXKYB-1:0]),
-  .gemA_cluster4_xky_hi(gemA_cluster_cscxky_lo_pipe[4][MXXKYB-1:0]),
-  .gemA_cluster5_xky_hi(gemA_cluster_cscxky_lo_pipe[5][MXXKYB-1:0]),
-  .gemA_cluster6_xky_hi(gemA_cluster_cscxky_lo_pipe[6][MXXKYB-1:0]),
-  .gemA_cluster7_xky_hi(gemA_cluster_cscxky_lo_pipe[7][MXXKYB-1:0]),
+  .gemA_cluster0_xky_hi(gemA_cluster_cscxky_hi_pipe[0][MXXKYB-1:0]),
+  .gemA_cluster1_xky_hi(gemA_cluster_cscxky_hi_pipe[1][MXXKYB-1:0]),
+  .gemA_cluster2_xky_hi(gemA_cluster_cscxky_hi_pipe[2][MXXKYB-1:0]),
+  .gemA_cluster3_xky_hi(gemA_cluster_cscxky_hi_pipe[3][MXXKYB-1:0]),
+  .gemA_cluster4_xky_hi(gemA_cluster_cscxky_hi_pipe[4][MXXKYB-1:0]),
+  .gemA_cluster5_xky_hi(gemA_cluster_cscxky_hi_pipe[5][MXXKYB-1:0]),
+  .gemA_cluster6_xky_hi(gemA_cluster_cscxky_hi_pipe[6][MXXKYB-1:0]),
+  .gemA_cluster7_xky_hi(gemA_cluster_cscxky_hi_pipe[7][MXXKYB-1:0]),
 
-  .gemA_cluster0_xky_mi(gemA_cluster_cscxky_lo_pipe[0][MXXKYB-1:0]),
-  .gemA_cluster1_xky_mi(gemA_cluster_cscxky_lo_pipe[1][MXXKYB-1:0]),
-  .gemA_cluster2_xky_mi(gemA_cluster_cscxky_lo_pipe[2][MXXKYB-1:0]),
-  .gemA_cluster3_xky_mi(gemA_cluster_cscxky_lo_pipe[3][MXXKYB-1:0]),
-  .gemA_cluster4_xky_mi(gemA_cluster_cscxky_lo_pipe[4][MXXKYB-1:0]),
-  .gemA_cluster5_xky_mi(gemA_cluster_cscxky_lo_pipe[5][MXXKYB-1:0]),
-  .gemA_cluster6_xky_mi(gemA_cluster_cscxky_lo_pipe[6][MXXKYB-1:0]),
-  .gemA_cluster7_xky_mi(gemA_cluster_cscxky_lo_pipe[7][MXXKYB-1:0]),
+  .gemA_cluster0_xky_mi(gemA_cluster_cscxky_mi_pipe[0][MXXKYB-1:0]),
+  .gemA_cluster1_xky_mi(gemA_cluster_cscxky_mi_pipe[1][MXXKYB-1:0]),
+  .gemA_cluster2_xky_mi(gemA_cluster_cscxky_mi_pipe[2][MXXKYB-1:0]),
+  .gemA_cluster3_xky_mi(gemA_cluster_cscxky_mi_pipe[3][MXXKYB-1:0]),
+  .gemA_cluster4_xky_mi(gemA_cluster_cscxky_mi_pipe[4][MXXKYB-1:0]),
+  .gemA_cluster5_xky_mi(gemA_cluster_cscxky_mi_pipe[5][MXXKYB-1:0]),
+  .gemA_cluster6_xky_mi(gemA_cluster_cscxky_mi_pipe[6][MXXKYB-1:0]),
+  .gemA_cluster7_xky_mi(gemA_cluster_cscxky_mi_pipe[7][MXXKYB-1:0]),
 
   .gemB_cluster0_wg_lo(gemB_cluster_cscwire_lo_pipe[0][WIREBITS-1:0]),
   .gemB_cluster1_wg_lo(gemB_cluster_cscwire_lo_pipe[1][WIREBITS-1:0]),
@@ -2395,25 +2415,25 @@
   .gemB_cluster6_xky_lo(gemB_cluster_cscxky_lo_pipe[6][MXXKYB-1:0]),
   .gemB_cluster7_xky_lo(gemB_cluster_cscxky_lo_pipe[7][MXXKYB-1:0]),
 
-  .gemB_cluster0_xky_hi(gemB_cluster_cscxky_lo_pipe[0][MXXKYB-1:0]),
-  .gemB_cluster1_xky_hi(gemB_cluster_cscxky_lo_pipe[1][MXXKYB-1:0]),
-  .gemB_cluster2_xky_hi(gemB_cluster_cscxky_lo_pipe[2][MXXKYB-1:0]),
-  .gemB_cluster3_xky_hi(gemB_cluster_cscxky_lo_pipe[3][MXXKYB-1:0]),
-  .gemB_cluster4_xky_hi(gemB_cluster_cscxky_lo_pipe[4][MXXKYB-1:0]),
-  .gemB_cluster5_xky_hi(gemB_cluster_cscxky_lo_pipe[5][MXXKYB-1:0]),
-  .gemB_cluster6_xky_hi(gemB_cluster_cscxky_lo_pipe[6][MXXKYB-1:0]),
-  .gemB_cluster7_xky_hi(gemB_cluster_cscxky_lo_pipe[7][MXXKYB-1:0]),
+  .gemB_cluster0_xky_hi(gemB_cluster_cscxky_hi_pipe[0][MXXKYB-1:0]),
+  .gemB_cluster1_xky_hi(gemB_cluster_cscxky_hi_pipe[1][MXXKYB-1:0]),
+  .gemB_cluster2_xky_hi(gemB_cluster_cscxky_hi_pipe[2][MXXKYB-1:0]),
+  .gemB_cluster3_xky_hi(gemB_cluster_cscxky_hi_pipe[3][MXXKYB-1:0]),
+  .gemB_cluster4_xky_hi(gemB_cluster_cscxky_hi_pipe[4][MXXKYB-1:0]),
+  .gemB_cluster5_xky_hi(gemB_cluster_cscxky_hi_pipe[5][MXXKYB-1:0]),
+  .gemB_cluster6_xky_hi(gemB_cluster_cscxky_hi_pipe[6][MXXKYB-1:0]),
+  .gemB_cluster7_xky_hi(gemB_cluster_cscxky_hi_pipe[7][MXXKYB-1:0]),
 
-  .gemB_cluster0_xky_mi(gemB_cluster_cscxky_lo_pipe[0][MXXKYB-1:0]),
-  .gemB_cluster1_xky_mi(gemB_cluster_cscxky_lo_pipe[1][MXXKYB-1:0]),
-  .gemB_cluster2_xky_mi(gemB_cluster_cscxky_lo_pipe[2][MXXKYB-1:0]),
-  .gemB_cluster3_xky_mi(gemB_cluster_cscxky_lo_pipe[3][MXXKYB-1:0]),
-  .gemB_cluster4_xky_mi(gemB_cluster_cscxky_lo_pipe[4][MXXKYB-1:0]),
-  .gemB_cluster5_xky_mi(gemB_cluster_cscxky_lo_pipe[5][MXXKYB-1:0]),
-  .gemB_cluster6_xky_mi(gemB_cluster_cscxky_lo_pipe[6][MXXKYB-1:0]),
-  .gemB_cluster7_xky_mi(gemB_cluster_cscxky_lo_pipe[7][MXXKYB-1:0]),
+  .gemB_cluster0_xky_mi(gemB_cluster_cscxky_mi_pipe[0][MXXKYB-1:0]),
+  .gemB_cluster1_xky_mi(gemB_cluster_cscxky_mi_pipe[1][MXXKYB-1:0]),
+  .gemB_cluster2_xky_mi(gemB_cluster_cscxky_mi_pipe[2][MXXKYB-1:0]),
+  .gemB_cluster3_xky_mi(gemB_cluster_cscxky_mi_pipe[3][MXXKYB-1:0]),
+  .gemB_cluster4_xky_mi(gemB_cluster_cscxky_mi_pipe[4][MXXKYB-1:0]),
+  .gemB_cluster5_xky_mi(gemB_cluster_cscxky_mi_pipe[5][MXXKYB-1:0]),
+  .gemB_cluster6_xky_mi(gemB_cluster_cscxky_mi_pipe[6][MXXKYB-1:0]),
+  .gemB_cluster7_xky_mi(gemB_cluster_cscxky_mi_pipe[7][MXXKYB-1:0]),
 
-  .copad_match  (copad_match_pipe), // copad 
+  .copad_match  (copad_match_pipe[7:0]), // copad 
 
   .alct_gemA_match_found (alct_gemA_match_pos),
   .alct_gemB_match_found (alct_gemB_match_pos),
@@ -2941,6 +2961,8 @@
         .alct_clct_match      (alct0_clct0_nogem_match_found_pos), 
         .clct_copad_match     (clct0_copad_match_good), 
         .alct_copad_match     (alct0_copad_match_good),  
+        .alct_vpf             (alct0_valid),
+        .clct_vpf             (clct0_valid),
         .gemcsc_bend_enable   (gemcsc_bend_enable),
         .Q                    (lct0_qlt_run3[2:0])
     );
@@ -2953,6 +2975,8 @@
         .alct_clct_match      (alct1_clct1_nogem_match_found_pos || tmb_dupe_alctorclct), //special case: alct or clct is duplicated and by default use them for alct+clct match
         .clct_copad_match     (clct1_copad_match_good), 
         .alct_copad_match     (alct1_copad_match_good),  
+        .alct_vpf             (alct1_valid),
+        .clct_vpf             (clct1_valid),
         .gemcsc_bend_enable   (gemcsc_bend_enable),
         .Q                    (lct1_qlt_run3[2:0])
     );

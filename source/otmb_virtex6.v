@@ -1358,6 +1358,7 @@
   wire [9:0] nhits_trig_s0_bx2345 = (nhits_trig_s0_bx2345_tmp[11:10] > 0 ) ? 10'h3FF : nhits_trig_s0_bx2345_tmp[9:0];//cutoff at [9:0]
   wire [9:0] nhits_trig_s0_bx678  = (nhits_trig_s0_bx678_tmp[11:10] > 0 ) ? 10'h3FF : nhits_trig_s0_bx678_tmp[9:0];
 
+  //hits to build CLCT is counted at nhits_trig_s0_srl[5]
   parameter hmt_dly = 4'd0; //delay HMT trigger to CLCT VPF BX
   wire [9:0] nhits_trig_dly_bx2345;
   wire [9:0] nhits_trig_dly_bx678;
@@ -4215,7 +4216,14 @@ wire [15:0] gemB_bxn_counter;
   // copad_match; // gem copad vpf signal
   //these two are in same BX
 
-  wire alct0_pipe_vpf;
+  wire alct0_pipe_vpf_tp;
+  wire clct0_pipe_vpf_tp;
+  wire gem_foralct_vpf_tp;
+  wire gem_forclct_vpf_tp;
+  wire clct_window_haslcts_tp;
+  wire gem_alct_window_hasgem_tp;
+  
+
   tmb utmb
   (
 // Clock
@@ -4232,7 +4240,6 @@ wire [15:0] gemB_bxn_counter;
   .alct_bx0_rx  (alct_bx0_rx),           // In  ALCT bx0 received
   .alct_ecc_err (alct_ecc_err[1:0]),     // In  ALCT ecc syndrome code
 
-  .alct0_pipe_vpf  (alct0_pipe_vpf),// Out, from fake ALCT for debugging
 
 // GEM
   //.gemA_vpf          (gemA_vpf[7:0]),
@@ -4575,6 +4582,13 @@ wire [15:0] gemB_bxn_counter;
   .clct_vpf_tprt    (clct_vpf_tprt),    // Out  Timing test point
   .clct_window_tprt (clct_window_tprt), // Out  Timing test point
 
+  .alct0_pipe_vpf_tp        (alct0_pipe_vpf_tp),// Out,  ALCT vpf from pipeline
+  .clct0_pipe_vpf_tp        (clct0_pipe_vpf_tp), // Out, CLCT vpf from pipeline 
+  .gem_foralct_vpf_tp       (gem_foralct_vpf_tp),// Out, gem for gem-alct match, from pipeline
+  .gem_forclct_vpf_tp       (gem_forclct_vpf_tp),// Out, gem for gem-clct match, from pipeline
+  .clct_window_haslcts_tp   (clct_window_haslcts_tp),
+  .gem_alct_window_hasgem_tp(gem_alct_window_hasgem_tp),
+
   .tmb_sump      (tmb_sump)            // Out  Unused signals
   );
 
@@ -4660,17 +4674,23 @@ wire [15:0] gemB_bxn_counter;
      assign mez_tp10_busy = (raw_mez_busy | alct_startup_msec | alct_wait_dll | alct_startup_done | alct_wait_vme | alct_wait_cfg);
 
 // JRG: if set_sw8 & 7 are both low, put BPI debug signals on the mezanine test points
-    assign mez_tp[9] = (!set_sw[7] ? bpi_dtack       : (|link_bad) || ((set_sw == 2'b01) && sump));
-    assign mez_tp[8] = (!set_sw[7] ? bpi_we          : (&link_good || ((set_sw == 2'b01) && alct_wait_cfg)));
+    //assign mez_tp[9] = (!set_sw[7] ? bpi_dtack       : (|link_bad) || ((set_sw == 2'b01) && sump));
+    //assign mez_tp[8] = (!set_sw[7] ? bpi_we          : (&link_good || ((set_sw == 2'b01) && alct_wait_cfg)));
+
     //assign mez_tp[7] =   set_sw[8] ? alct_txd_posneg : (!set_sw[7] ? bpi_enbl : link_good[6]);
     //assign mez_tp[6] = (!set_sw[7] ? bpi_dsbl        :                          link_good[5]);
     //assign mez_tp[5] =   set_sw[8] ? alct_rxd_posneg : (!set_sw[7] ? bpi_rst  : link_good[4]);
     //assign mez_tp[4] = (!set_sw[7] ? bpi_dev         :                          link_good[3]);
-    assign mez_tp[7]  = alct0_pipe_vpf; // ALCT vpf signal
-    assign mez_tp[6]  = wr_push_xtmb; // CLCT vpf signal
-    assign mez_tp[5]  = (|gemA_csc_cluster_vpf) || (|gemB_csc_cluster_vpf);// gemA or gemB vpf signal
+    assign mez_tp[9]  = clct_window_haslcts_tp; //CLCT window for  CLCT-ALCT and CLCT-GEM
+    assign mez_tp[8]  = gem_alct_window_hasgem_tp;//gem window for gem-ALCT
+    assign mez_tp[7]  = alct0_pipe_vpf_tp; // ALCT vpf signal
+    //assign mez_tp[6]  = wr_push_xtmb; // CLCT vpf signal
+    assign mez_tp[6]  = clct0_pipe_vpf_tp; // CLCT vpf signal after pipeline 
+    assign mez_tp[5]  = gem_foralct_vpf_tp;
+    assign mez_tp[4]  = gem_forclct_vpf_tp;
+    //assign mez_tp[5]  = (|gemA_csc_cluster_vpf) || (|gemB_csc_cluster_vpf);// gemA or gemB vpf signal
     //assign mez_tp[4]  = |copad_match; // gem copad vpf signal
-    assign mez_tp[4]  = hmt_nhits_trig_bx678 >= hmt_nhits_trig_bx2345+10'h3; // gem copad vpf signal
+    //assign mez_tp[4]  = hmt_nhits_trig_bx678 >= hmt_nhits_trig_bx2345+10'h3; // gem copad vpf signal
 //    assign mez_tp[MXCFEB:4] = link_good[MXCFEB-1:3];
 //    reg  [3:1]  testled_r;
 //    assign mez_tp[3] = link_good[2] || ((set_sw == 2'b01) && clock_alct_txd);
