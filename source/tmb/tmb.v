@@ -485,12 +485,10 @@
   clct_vpf_tprt,
   clct_window_tprt,
 
-  alct0_pipe_vpf_tp,
-  clct0_pipe_vpf_tp,
   gem_foralct_vpf_tp,
   gem_forclct_vpf_tp,
-  clct_window_haslcts_tp,
   gem_alct_window_hasgem_tp,
+  lct0_vpf_run2_tp,
 // Sump
   tmb_sump
 
@@ -1031,12 +1029,10 @@
   output          clct_vpf_tprt;    // Timing test point
   output          clct_window_tprt; // Timing test point
 
-  output          alct0_pipe_vpf_tp; //Tao, test at TAMU
-  output          clct0_pipe_vpf_tp;
   output          gem_foralct_vpf_tp;
   output          gem_forclct_vpf_tp;
-  output          clct_window_haslcts_tp;
   output          gem_alct_window_hasgem_tp;
+  output          lct0_vpf_run2_tp;
 
 // Sump
   output          tmb_sump; // Unused signals
@@ -1453,7 +1449,6 @@
 
   wire   alct0_pipe_vpf = alct0_pipe[0];
   wire   alct1_pipe_vpf = alct1_pipe[0];
-  wire   alct0_pipe_vpf_tp = alct0_pipe[0];
 
 //------------------------------------------------------------------------------------------------------------------
 // Push ALCT data into a 1bx to 16bx pipeline delay for GEM-ALCT match
@@ -1544,8 +1539,6 @@
 
   wire   kill_clct0_pipe  = clct0_cfeb456_pipe && kill_me1a_clcts;  // Delete CLCT0 from ME1A
   wire   kill_clct1_pipe  = clct1_cfeb456_pipe && kill_me1a_clcts;  // Delete CLCT1 from ME1A
-
-  assign clct0_pipe_vpf_tp = clct0_pipe[0];
 
   wire  [MXQLTB - 1   : 0] clct0_qlt_pipe; // new quality
   wire  [MXBNDB - 1   : 0] clct0_bnd_pipe; // new bending 
@@ -2895,6 +2888,8 @@
 // LCT valid pattern flags
   wire lct0_vpf  = alct0_vpf || clct0_vpf;      // First muon exists
   wire lct1_vpf  = alct1_vpf || clct1_vpf;      // Second muon exists
+
+  assign lct0_vpf_run2_tp = lct0_vpf;
 
 // Decompose ALCT muons
   wire         alct0_valid   = alct0[0];     // Valid pattern flag
