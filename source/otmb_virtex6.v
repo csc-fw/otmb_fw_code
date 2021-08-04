@@ -3475,6 +3475,12 @@ end
   .alct_clct_copad_match_pos (alct_clct_copad_match_pos),// Out GEM-CSC matching in timing and position  
   .alct_clct_gemA_match_pos  (alct_clct_gemA_match_pos),// Out GEM-CSC matching in timing and position
   .alct_clct_gemB_match_pos  (alct_clct_gemB_match_pos),// Out GEM-CSC matching in timing and position
+  .tmb_dupe_alct_run3        (tmb_dupe_alct_run3),// Out GEMCSC match results  
+  .tmb_dupe_clct_run3        (tmb_dupe_clct_run3),// Out GEMCSC match results  
+  .alct0fromcopad_run3       (alct0fromcopad_run3),// Out GEMCSC match results 
+  .alct1fromcopad_run3       (alct1fromcopad_run3),// Out GEMCSC match results 
+  .clct0fromcopad_run3       (clct0fromcopad_run3),// Out GEMCSC match results 
+  .clct1fromcopad_run3       (clct1fromcopad_run3),// Out GEMCSC match results 
 
   .run3_daq_df   (run3_daq_df),
 // Sequencer MPC Status
@@ -4482,6 +4488,13 @@ wire [15:0] gemB_bxn_counter;
   .alct_clct_copad_match_pos (alct_clct_copad_match_pos),// Out GEM-CSC matching in timing and position  
   .alct_clct_gemA_match_pos  (alct_clct_gemA_match_pos),// Out GEM-CSC matching in timing and position
   .alct_clct_gemB_match_pos  (alct_clct_gemB_match_pos),// Out GEM-CSC matching in timing and position
+
+  .tmb_dupe_alct_run3        (tmb_dupe_alct_run3),// Out GEMCSC match results  
+  .tmb_dupe_clct_run3        (tmb_dupe_clct_run3),// Out GEMCSC match results  
+  .alct0fromcopad_run3       (alct0fromcopad_run3),// Out GEMCSC match results 
+  .alct1fromcopad_run3       (alct1fromcopad_run3),// Out GEMCSC match results 
+  .clct0fromcopad_run3       (clct0fromcopad_run3),// Out GEMCSC match results 
+  .clct1fromcopad_run3       (clct1fromcopad_run3),// Out GEMCSC match results 
 
   .run3_trig_df   (run3_trig_df),
 // MPC Status

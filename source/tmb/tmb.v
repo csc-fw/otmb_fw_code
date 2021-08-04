@@ -327,21 +327,20 @@
   bx0_xmpc,
 
 
+  //the followings are updated with GEMCSC 
   tmb_trig_pulse,
   tmb_trig_keep,  //update with GEMCSC
   tmb_non_trig_keep,
-
-  //following for CSC counters
   tmb_match,
   tmb_alct_only,
   tmb_clct_only,
-  tmb_match_win,
-  tmb_match_pri,
+  tmb_match_win,  //for ALCT-CLCT match win
+  tmb_match_pri, // for ALCT-CLCT match 
   tmb_alct_discard,
   tmb_clct_discard,
   tmb_clct0_discard,
   tmb_clct1_discard,
-  tmb_aff_list,
+  tmb_aff_list, // from CSC only, may add HMT trigger condition
 
   tmb_match_ro,
   tmb_alct_only_ro,
@@ -353,8 +352,8 @@
   tmb_one_clct,
   tmb_two_alct,
   tmb_two_clct,
-  tmb_dupe_alct,//update with GEMCSC
-  tmb_dupe_clct, //update with GEMCSC
+  tmb_dupe_alct,
+  tmb_dupe_clct,
   tmb_rank_err,
 
   tmb_alct0,
@@ -385,6 +384,8 @@
   alct_clct_gemB_match_pos,
 
   //use copad to build ALCT/CLCT
+  tmb_dupe_alct_run3, 
+  tmb_dupe_clct_run3, 
   alct0fromcopad_run3,
   alct1fromcopad_run3,
   clct0fromcopad_run3,
@@ -404,8 +405,6 @@
   mpc_response_ff,
   mpc_accept_ff,
   mpc_reserved_ff,
-
-// MPC IOBs
   _mpc_rx,
   _mpc_tx,
 
@@ -941,6 +940,8 @@
   output             alct_clct_gemA_match_pos;
   output             alct_clct_gemB_match_pos;
 
+  output             tmb_dupe_alct_run3; // ALCT0 copied into ALCT1 to make 2nd LCT
+  output             tmb_dupe_clct_run3; // CLCT0 copied into CLCT1 to make 2nd LCT
   output             alct0fromcopad_run3;
   output             alct1fromcopad_run3;
   output             clct0fromcopad_run3;

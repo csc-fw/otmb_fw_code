@@ -878,6 +878,13 @@
   alct_clct_gemA_match_pos,
   alct_clct_gemB_match_pos,
 
+  //use copad to build ALCT/CLCT
+  tmb_dupe_alct_run3, 
+  tmb_dupe_clct_run3, 
+  alct0fromcopad_run3,
+  alct1fromcopad_run3,
+  clct0fromcopad_run3,
+  clct1fromcopad_run3,
   //gemA_alct_clct_match,
   //gemB_alct_clct_match,
   //alct_gem,
@@ -1875,6 +1882,13 @@
   input              alct_clct_gemA_match_pos;
   input              alct_clct_gemB_match_pos;
 
+  input             tmb_dupe_alct_run3; // ALCT0 copied into ALCT1 to make 2nd LCT
+  input             tmb_dupe_clct_run3; // CLCT0 copied into CLCT1 to make 2nd LCT
+  input             alct0fromcopad_run3;
+  input             alct1fromcopad_run3;
+  input             clct0fromcopad_run3;
+  input             clct1fromcopad_run3;
+// MPC Status
 
   input  run3_daq_df;
 // MPC Status
@@ -3521,7 +3535,7 @@
   parameter ACTVFAT_CNT_START       = 12;
   parameter GEMCSCMAP_CNT_START     = 84; // 12+24*3
   parameter GEMCSCMATCH_CNT_START   = 88; // 84+4
-  parameter GEM_UNUSED_START        = 107; //+19
+  parameter GEM_UNUSED_START        = 113; //+25
   
 
 // Counter enable strobes
@@ -3571,6 +3585,12 @@
     gem_cnt_en[GEMCSCMATCH_CNT_START+16]    <= alct_clct_copad_match_pos;  
     gem_cnt_en[GEMCSCMATCH_CNT_START+17]    <= alct_clct_gemA_match_pos;
     gem_cnt_en[GEMCSCMATCH_CNT_START+18]    <= alct_clct_gemB_match_pos;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+19]    <= tmb_dupe_alct_run3;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+20]    <= tmb_dupe_clct_run3;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+21]    <= alct0fromcopad_run3;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+22]    <= alct1fromcopad_run3;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+23]    <= clct0fromcopad_run3;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+24]    <= clct1fromcopad_run3;
 
 
   end
