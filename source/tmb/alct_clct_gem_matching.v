@@ -93,6 +93,15 @@ module  alct_clct_gem_matching(
   input [6:0] gemB_cluster6_wg_lo,
   input [6:0] gemB_cluster7_wg_lo,
 
+  //input [6:0] gemB_cluster0_wg_mi,
+  //input [6:0] gemB_cluster1_wg_mi,
+  //input [6:0] gemB_cluster2_wg_mi,
+  //input [6:0] gemB_cluster3_wg_mi,
+  //input [6:0] gemB_cluster4_wg_mi,
+  //input [6:0] gemB_cluster5_wg_mi,
+  //input [6:0] gemB_cluster6_wg_mi,
+  //input [6:0] gemB_cluster7_wg_mi,
+
   input [6:0] gemB_cluster0_wg_hi,
   input [6:0] gemB_cluster1_wg_hi,
   input [6:0] gemB_cluster2_wg_hi,
