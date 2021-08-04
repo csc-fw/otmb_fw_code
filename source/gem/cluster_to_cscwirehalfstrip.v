@@ -199,9 +199,9 @@ assign cluster0_cscwire_mi = cluster0_cscwire_lo[WIREBITS-1:1] + cluster0_cscwir
 wire [MXXKYB-1:0]  cluster0_me1axky_mi  = cluster0_me1axky_lo[MXXKYB-1:1] + cluster0_me1axky_hi[MXXKYB-1:1] + (cluster0_me1axky_lo[0] | cluster0_me1axky_hi[0]);
 wire [MXXKYB-1:0]  cluster0_me1bxky_mi  = cluster0_me1bxky_lo[MXXKYB-1:1] + cluster0_me1bxky_hi[MXXKYB-1:1] + (cluster0_me1bxky_lo[0] | cluster0_me1bxky_hi[0]);
 
-assign cluster0_cscxky_lo = (csc_cluster0_me1a) ? ((me1a_xky_real_lo > MINKEYHSME1A+gem_clct_deltaxky) ? me1a_xky_real_lo-gem_clct_deltaxky : ((me1b_xky_real_lo > MINKEYHSME1B+gem_clct_deltaxky) ? me1b_xky_real_lo-gem_clct_deltaxky : MINKEYHSME1B)
+assign cluster0_cscxky_lo = (csc_cluster0_me1a) ? ((me1a_xky_real_lo > MINKEYHSME1A+gem_clct_deltaxky) ? me1a_xky_real_lo-gem_clct_deltaxky : ((me1b_xky_real_lo > MINKEYHSME1B+gem_clct_deltaxky) ? me1b_xky_real_lo-gem_clct_deltaxky : MINKEYHSME1B);
 assign cluster0_cscxky_hi = (csc_cluster0_me1a) ? ((me1a_xky_real_hi+gem_clct_deltaxky > MAXKEYHSME1A) ? MAXKEYHSME1A : me1a_xky_real_hi+gem_clct_deltaxky) : ((me1b_xky_real_hi+gem_clct_deltaxky > MAXKEYHSME1B) ? MAXKEYHSME1B : me1b_xky_real_hi+gem_clct_deltaxky);
-assign cluster0_cscxky_mi =  (csc_cluster0_me1a) ? cluster0_me1axky_mi : cluster0_me1bxky_mi;
+assign cluster0_cscxky_mi =  cluster0_cscxky_lo[MXXKYB-1:1] + cluster0_cscxky_hi[MXXKYB-1:1] + (cluster0_cscxky_lo[0] | cluster0_cscxky_hi[0]);
 
 
 assign csc_cluster0       = reg_cluster0;
