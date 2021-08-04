@@ -270,20 +270,17 @@
   gemB_fiber_enable,
 
   //GEM-CSC match control
-  gem_me1a_match_enable,       //Out gem-csc match in me1a
-  gem_me1b_match_enable,       //Out gem-csc match in me1b
-  gem_me1a_match_nogem,       //Out gem-csc match without gem is allowed in ME1b, => allow lowQ ALCT-CLCT match
-  gem_me1b_match_nogem,       //Out gem-csc match without gem is allowed in ME1a
-  gem_me1a_match_noalct,       //Out gem-csc match without alct is allowed in ME1b=> allow GEM-CLCT match to build LCT
-  gem_me1b_match_noalct,       //Out gem-csc match without alct is allowed in ME1a 
-  gem_me1a_match_noclct,       //Out gem-csc match without clct is allowed in ME1b => allow GEM-ALCT match to build LCT
-  gem_me1b_match_noclct,       //Out gem-csc match without clct is allowed in ME1a
+  gem_me1a_match_enable,      //in gem-csc match in me1a. applied during GEM-CSC coordination conversion
+  gem_me1b_match_enable,      //in gem-csc match in me1b. applied during GEM-CSC coordination conversion
+  gem_me1a_match_nogem,       //??? not used yet. gem-csc match without gem is allowed in ME1b, => allow lowQ ALCT-CLCT match
+  gem_me1b_match_nogem,       //??? not used yet. gem-csc match without gem is allowed in ME1a
+
+  gem_me1a_match_noalct,       //??? not used yet.  gem-csc match without alct is allowed in ME1b=> allow GEM-CLCT match to build LCT
+  gem_me1b_match_noalct,       //??? not used yet.  gem-csc match without alct is allowed in ME1a 
+  gem_me1a_match_noclct,       //??? not used yet.  gem-csc match without clct is allowed in ME1b => allow GEM-ALCT match to build LCT
+  gem_me1b_match_noclct,       //??? not used yet.  gem-csc match without clct is allowed in ME1a
   tmb_copad_alct_allow,
   tmb_copad_clct_allow,
-  //gem_me1a_match_promotequal,     //Out promote quality or not for match in ME1a region, 
-  //gem_me1b_match_promotequal,     //Out promote quality or not for match in ME1b region 
-  //gem_me1a_match_promotepat,     //Out promote pattern or not for match in ME1a region, 
-  //gem_me1b_match_promotepat,     //Out promote pattern or not for match in ME1b region, 
   gemA_match_ignore_position,
   gemB_match_ignore_position,
   gemcsc_bend_enable,
@@ -1182,8 +1179,6 @@
 //  Run3 data format 
 //------------------------------------------------------------------------------------------------------------------
   input run3_trig_df; // flag of run3 trigger data format
-  wire [2:0]  lct0_qlt_run3; // new LCT quality defition 
-  wire [2:0]  lct1_qlt_run3; 
 
 //------------------------------------------------------------------------------------------------------------------
 //  GEM input data 
@@ -1425,7 +1420,9 @@
   srl16e_bbl #(MXALCT) ualct0fake (.clock(clock),.ce(1'b1),.adr(fakealct_srl_adr),.d(alct0_fake),.q(alct0_fake_srl));
   srl16e_bbl #(MXALCT) ualct1fake (.clock(clock),.ce(1'b1),.adr(fakealct_srl_adr),.d(alct1_fake),.q(alct1_fake_srl));
 
-  wire usefakealct =1'b1; // should be false in normal OTMB Firmware
+  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  //Attention!! disable this for OTMB at b904 and P5!!!!
+  wire usefakealct = gem_me1a_match_noalct; //1'b1; // should be false in normal OTMB Firmware
 //------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------
   
@@ -1540,6 +1537,13 @@
   assign wr_adr_xtmb_pipe   = (clct_ptr_is_0) ? wr_adr_xtmb   : wr_adr_xtmb_srl;  // Buffer write address after clct pipeline delay
   wire   wr_push_xtmb_pipe  = (clct_ptr_is_0) ? wr_push_xtmb  : wr_push_xtmb_srl;
   wire   wr_avail_xtmb_pipe = (clct_ptr_is_0) ? wr_avail_xtmb : wr_avail_xtmb_srl;
+
+
+  wire clct0_cfeb456_pipe  = clct0_pipe[15];          // CLCT0 is on CFEB4-6 hence ME1A
+  wire clct1_cfeb456_pipe  = clct1_pipe[15];          // CLCT1 is on CFEB4-6 hence ME1A
+
+  wire   kill_clct0_pipe  = clct0_cfeb456_pipe && kill_me1a_clcts;  // Delete CLCT0 from ME1A
+  wire   kill_clct1_pipe  = clct1_cfeb456_pipe && kill_me1a_clcts;  // Delete CLCT1 from ME1A
 
   assign clct0_pipe_vpf_tp = clct0_pipe[0];
 
@@ -2061,8 +2065,10 @@
   // how no GEM case? does it bother ?
   //wire [3:0] gemA_extra_delay_forclct = (alct_pulse) ?  gem_alct_win_center : 0;//address to find gem-alct match best win
   //wire [3:0] gemB_extra_delay_forclct = (alct_pulse) ?  gem_alct_win_center : 0;
-  wire [3:0] gemA_extra_delay_forclct = gemA_alct_noalct ?  0 : gem_alct_win_center;//address to find gem-alct match best win
-  wire [3:0] gemB_extra_delay_forclct = gemB_alct_noalct ?  0 : gem_alct_win_center;
+  //wire [3:0] gemA_extra_delay_forclct = gemA_alct_noalct ?  0 : gem_alct_win_center;//address to find gem-alct match best win
+  //wire [3:0] gemB_extra_delay_forclct = gemB_alct_noalct ?  0 : gem_alct_win_center;
+  wire [3:0] gemA_extra_delay_forclct = gem_alct_win_center;//address to find gem-alct match best win
+  wire [3:0] gemB_extra_delay_forclct = gem_alct_win_center;
   
 
   wire [3:0] gemA_forclct_adr = gemA_extra_delay_forclct-4'b1;
@@ -2088,8 +2094,12 @@
   wire [3:0] gemB_final_delay_withalct = gemB_alct_match_win_mux_pipe + match_gemB_alct_delay + gem_alct_win_center;
   wire [3:0] gemA_final_delay_noalct = match_gemA_alct_delay + gem_alct_winclosing;
   wire [3:0] gemB_final_delay_noalct = match_gemB_alct_delay + gem_alct_winclosing;
-  wire [3:0] gemA_final_delay = gemA_alct_noalct ? gemA_final_delay_noalct : gemA_final_delay_withalct;
-  wire [3:0] gemB_final_delay = gemB_alct_noalct ? gemB_final_delay_noalct : gemB_final_delay_withalct;
+
+  wire [3:0] gemA_final_delay = alct_pulse ? gemA_final_delay_withalct : gemA_final_delay_noalct;
+  wire [3:0] gemB_final_delay = alct_pulse ? gemB_final_delay_withalct : gemB_final_delay_noalct;
+
+  //wire [3:0] gemA_final_delay = gemA_alct_noalct ? gemA_final_delay_noalct : gemA_final_delay_withalct;
+  //wire [3:0] gemB_final_delay = gemB_alct_noalct ? gemB_final_delay_noalct : gemB_final_delay_withalct;
 
 
   wire [3:0] gemA_final_adr   = gemA_final_delay - 4'b1;
@@ -2221,6 +2231,9 @@
 //------------------------------------------------------------------------------------------------------------------
 // GEM-ALCT-CLCT position match part
 //------------------------------------------------------------------------------------------------------------------
+
+  wire gemcsc_match_enable = gem_me1a_match_enable || gem_me1b_match_enable;
+
   wire [2:0] alct0_clct0_copad_best_icluster;
   wire [9:0] alct0_clct0_copad_best_angle;
   wire [9:0] alct0_clct0_copad_best_cscxky;
@@ -2315,8 +2328,8 @@
   .alct0_wg  (alct0_pipe_key),
   .alct1_wg  (alct1_pipe_key),
 
-  .clct0_vpf (clct0_pipe[0]),//clct0_vpf from pipe
-  .clct1_vpf (clct1_pipe[0]),
+  .clct0_vpf (clct0_pipe[0] && !kill_clct0_pipe),//clct0_vpf from pipe
+  .clct1_vpf (clct1_pipe[0] && !kill_clct1_pipe),
   .clct0_xky (clct0_xky_pipe[9:0]),
   .clct1_xky (clct1_xky_pipe[9:0]),
   .clct0_bend (clct0_bnd_pipe[4]),
@@ -2517,6 +2530,8 @@
   .copyclct0_forclct1             (copyclct0_foralct1_pos),
   .gemcsc_match_dummy             (gemcsc_match_dummy)
   );
+
+
 
 //------------------------------------------------------------------------------------------------------------------
 // ALCT-CLCT match results 
@@ -2740,6 +2755,26 @@
   alct1_real <= (swapalct_final_pos ? alct1_pipe : alct0_pipe);
   end
 
+
+  reg copyalct0_foralct1_pos_r, copyclct0_forclct1_pos_r;
+  reg alct0fromcopad_run3_r, alct1fromcopad_run3_r, clct0fromcopad_run3_r, clct1fromcopad_run3_r;
+  reg [6:0] alct0wg_fromcopad_r, alct1wg_fromcopad_r;
+  reg [9:0] clct0xky_fromcopad_r, clct1xky_fromcopad_r;
+  always @(posedge clock) begin
+      copyalct0_foralct1_pos_r <= copyalct0_foralct1_pos;
+      copyclct0_forclct1_pos_r <= copyclct0_forclct1_pos;
+
+      alct0fromcopad_run3_r    <= alct0fromcopad_run3;
+      alct1fromcopad_run3_r    <= alct1fromcopad_run3;
+      clct0fromcopad_run3_r    <= clct0fromcopad_run3;
+      clct1fromcopad_run3_r    <= clct1fromcopad_run3;
+
+      alct0wg_fromcopad_r      <= alct0wg_fromcopad;
+      alct1wg_fromcopad_r      <= alct1wg_fromcopad;
+      clct0xky_fromcopad_r     <= clct0xky_fromcopad;
+      clct1xky_fromcopad_r     <= clct1xky_fromcopad;
+  end
+
 // Output vpf test point signals for timing-in, removed FFs so internal scope will be in real-time
   reg  alct_vpf_tp    = 0;
   reg  clct_vpf_tp    = 0;
@@ -2801,8 +2836,8 @@
   wire  tmb_dupe_alct = tmb_one_alct && tmb_two_clct;  // Duplicate alct if there are 2 clcts
   wire  tmb_dupe_clct = tmb_one_clct && tmb_two_alct;  // Duplicate clct if there are 2 alcts
 
-  wire  tmb_dupe_alct_run3 = tmb_dupe_alct && copyalct0_foralct1_pos;  // Duplicate alct if there are 2 clcts
-  wire  tmb_dupe_clct_run3 = tmb_dupe_alct && copyclct0_forclct1_pos;  // Duplicate clct if there are 2 alcts
+  wire  tmb_dupe_alct_run3 = tmb_dupe_alct && copyalct0_foralct1_pos_r;  // Duplicate alct if there are 2 clcts
+  wire  tmb_dupe_clct_run3 = tmb_dupe_alct && copyclct0_forclct1_pos_r;  // Duplicate clct if there are 2 alcts
 
 // Duplicate alct and clct
   reg  [MXALCT-1:0]  alct0;
@@ -2942,8 +2977,21 @@
   .Q    (lct1_quality[3:0]) // Out  4-bit TMB quality output
   );
 
-  //wire   lct0_vpf_run3 = lct0_vpf;
-  //wire   lct1_vpf_run3 = lct1_vpf;
+
+  
+  wire [2:0]  lct0_qlt_run3_pipe; // new LCT quality defition 
+  wire [2:0]  lct1_qlt_run3_pipe; 
+  //align with latched trigger results
+  reg  [2:0]  lct0_qlt_run3_real; 
+  reg  [2:0]  lct1_qlt_run3_real; 
+
+  always @(posedge clock) begin
+      lct0_qlt_run3_real  <= lct0_qlt_run3_pipe;
+      lct1_qlt_run3_real  <= lct1_qlt_run3_pipe;
+  end
+  
+  wire [2:0] lct0_vpf_run3 = lct0_vpf_run3_real;
+  wire [2:0] lct1_vpf_run3 = lct1_vpf_run3_real;
   //Run3 LCT quality
   lct_quality_run3 ulct0qualityrun3
     (
@@ -2952,24 +3000,19 @@
         .alct_clct_match      (alct0_clct0_nogem_match_found_pos), 
         .clct_copad_match     (clct0_copad_match_good), 
         .alct_copad_match     (alct0_copad_match_good),  
-        .alct_vpf             (alct0_valid),
-        .clct_vpf             (clct0_valid),
         .gemcsc_bend_enable   (gemcsc_bend_enable),
-        .Q                    (lct0_qlt_run3[2:0])
+        .Q                    (lct0_qlt_run3_pipe[2:0])
     );
 
-  wire tmb_dupe_alctorclct = (tmb_dupe_alct_run3 || tmb_dupe_clct_run3) && !(tmb_dupe_alct_run3 && tmb_dupe_clct_run3);
   lct_quality_run3 ulct1qualityrun3
     (
         .alct_clct_copad_match(alct1_clct1_copad_match_found_pos), 
         .alct_clct_gem_match  (alct1_clct1_gem_match_found_pos), 
-        .alct_clct_match      (alct1_clct1_nogem_match_found_pos || tmb_dupe_alctorclct), //special case: alct or clct is duplicated and by default use them for alct+clct match
+        .alct_clct_match      (alct1_clct1_nogem_match_found_pos || copyalct0_foralct1_pos || copyclct0_forclct1_pos), //special case: alct or clct is duplicated and by default use them for alct+clct match
         .clct_copad_match     (clct1_copad_match_good), 
         .alct_copad_match     (alct1_copad_match_good),  
-        .alct_vpf             (alct1_valid),
-        .clct_vpf             (clct1_valid),
         .gemcsc_bend_enable   (gemcsc_bend_enable),
-        .Q                    (lct1_qlt_run3[2:0])
+        .Q                    (lct1_qlt_run3_pipe[2:0])
     );
 
   wire   lct0_vpf_run3 = (lct0_qlt_run3[2:0] > 3'b0);
@@ -3047,12 +3090,13 @@
   wire [MXHMTB-1:0]  hmt_trigger_run3 = hmt_trigger_real;
 //Attention!!! add run3 case for alct0fromcopad_run3!!!
 //GEMCSC bending angle is missing!!
-  wire [6:0] alct0_key_run3 =  alct0fromcopad_run3 ? alct0wg_fromcopad[6:0] : alct0_key[6:0];
-  wire [6:0] alct1_key_run3 =  alct1fromcopad_run3 ? alct1wg_fromcopad[6:0] : alct1_key[6:0];
-  wire [9:0] clct0_xky_run3 =  clct0fromcopad_run3 ? clct0xky_fromcopad[9:0] : clct0_xky[9:0];
-  wire [9:0] clct1_xky_run3 =  clct1fromcopad_run3 ? clct1xky_fromcopad[9:0] : clct1_xky[9:0];
+  wire [6:0] alct0_key_run3 =  alct0fromcopad_run3_r ?  alct0wg_fromcopad_r[6:0] : alct0_key[6:0];
+  wire [6:0] alct1_key_run3 =  alct1fromcopad_run3_r ?  alct1wg_fromcopad_r[6:0] : alct1_key[6:0];
+  wire [9:0] clct0_xky_run3 =  clct0fromcopad_run3_r ? clct0xky_fromcopad_r[9:0] : clct0_xky[9:0];
+  wire [9:0] clct1_xky_run3 =  clct1fromcopad_run3_r ? clct1xky_fromcopad_r[9:0] : clct1_xky[9:0];
   //wire [4:0] clct0_bnd_run3 =  alct0fromcopad_run3 ? 4'b0 : (gemcsc_bend_enable ? gemcsc_bnd0[4:0] : clct0_bnd[4:0]);    
   //wire [4:0] clct1_bnd_run3 =  alct1fromcopad_run3 ? 4'b0 : (gemcsc_bend_enable ? gemcsc_bnd1[4:0] : clct1_bnd[4:0]);    
+  //should we use bending direction also from GEM-CSC???
   wire [4:0] clct0_bnd_run3 = clct0_bnd[4:0];  
   wire [4:0] clct1_bnd_run3 = clct1_bnd[4:0];  
 
@@ -3168,8 +3212,8 @@
   wire [MXFRAME-1:0]  mpc1_frame1_pulse;
 
   wire trig_mpc  = tmb_trig_pulse && tmb_trig_keep;    // Trigger this event
-  wire trig_mpc0 = trig_mpc && lct0_vpf && !kill_clct0;  // LCT 0 is valid, send to mpc
-  wire trig_mpc1 = trig_mpc && lct1_vpf && !kill_clct1;  // LCT 1 is valid, send to mpc
+  wire trig_mpc0 = run3_trig_df ? (trig_mpc && lct0_vpf_run3 && !kill_clct0): (trig_mpc && lct0_vpf && !kill_clct0);  // LCT 0 is valid, send to mpc
+  wire trig_mpc1 = run3_trig_df ? (trig_mpc && lct1_vpf_run3 && !kill_clct0): (trig_mpc && lct1_vpf && !kill_clct1);  // LCT 1 is valid, send to mpc
 
   //assign mpc0_frame0_pulse = (trig_mpc0) ? (run3_trig_df ? (lct_inj_enable ? mpc0_frame0_run3inj : mpc0_frame0_run3) : (lct_inj_enable ? mpc0_frame0inj : mpc0_frame0)) : 16'h0;
   //assign mpc0_frame1_pulse = (trig_mpc0) ? (run3_trig_df ? (lct_inj_enable ? mpc0_frame1_run3inj : mpc0_frame1_run3) : (lct_inj_enable ? mpc0_frame1inj : mpc0_frame1)) : 16'h0;

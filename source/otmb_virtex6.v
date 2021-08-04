@@ -2338,6 +2338,9 @@ end
         .gem_clct_deltahs  (gem_clct_deltahs), // In matching window in halfstrip direction
         .gem_alct_deltawire(gem_alct_deltawire), //In  matching window in wiregroup direction
 
+        .gem_me1a_match_enable     (gem_me1a_match_enable),       //in gem-csc match in me1a
+        .gem_me1b_match_enable     (gem_me1b_match_enable),       //in gem-csc match in me1b
+
         .cluster0      (gemA_cluster[iclst_csc]),//In gem cluster
         .cluster0_vpf  (gemA_vpf[iclst_csc]),// In, cluster valid or not
         .cluster0_roll (gemA_cluster_roll[iclst_csc]), //In clsuter roll,  0-7 

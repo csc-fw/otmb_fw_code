@@ -7,7 +7,8 @@
 // 08/17/2010 Port to ISE 12
 //-------------------------------------------------------------------------------------------------------------------
 
-module lct_quality_run3 (alct_clct_copad_match, alct_clct_gem_match, alct_clct_match, clct_copad_match, alct_copad_match, alct_vpf, clct_vpf, gemcsc_bend_enable,Q);
+//module lct_quality_run3 (alct_clct_copad_match, alct_clct_gem_match, alct_clct_match, clct_copad_match, alct_copad_match, alct_vpf, clct_vpf, gemcsc_bend_enable,Q);
+module lct_quality_run3 (alct_clct_copad_match, alct_clct_gem_match, alct_clct_match, clct_copad_match, alct_copad_match, gemcsc_bend_enable,Q);
 
 // Ports
   input  alct_clct_copad_match;
@@ -15,8 +16,8 @@ module lct_quality_run3 (alct_clct_copad_match, alct_clct_gem_match, alct_clct_m
   input  alct_clct_match;
   input  clct_copad_match;
   input  alct_copad_match;
-  input  alct_vpf;
-  input  clct_vpf;
+  //input  alct_vpf;
+  //input  clct_vpf;
   input  gemcsc_bend_enable;
   output [2:0] Q;
 
@@ -28,7 +29,7 @@ module lct_quality_run3 (alct_clct_copad_match, alct_clct_gem_match, alct_clct_m
       else if (alct_clct_copad_match && !gemcsc_bend_enable ) Q=3'b110;
       else if (alct_clct_gem_match && gemcsc_bend_enable )    Q=3'b101;
       else if (alct_clct_gem_match && !gemcsc_bend_enable )   Q=3'b100;
-      else if (alct_vpf && clct_vpf )                         Q=3'b011;
+      else if (alct_clct_match  )                             Q=3'b011;
       else if (clct_copad_match )                             Q=3'b001;
       else if (alct_copad_match )                             Q=3'b010;
       else Q=3'b000;

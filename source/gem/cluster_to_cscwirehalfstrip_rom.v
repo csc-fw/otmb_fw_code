@@ -17,6 +17,8 @@ module cluster_to_cscwirehalfstrip_rom (
         input                     gem_match_enable,
         input      [4:0]          gem_clct_deltahs, // matching window in halfstrip direction
         input      [2:0]          gem_alct_deltawire, // matching window in wiregroup direction
+        input                     gem_me1a_match_enable,
+        input                     gem_me1b_match_enable,
 
         input     [13:0]          cluster0,
         input                     cluster0_vpf,// valid or not
@@ -290,12 +292,12 @@ assign cluster0_me1axky_mi  = cluster0_me1axky_lo[MXXKYB-1:1] + cluster0_me1axky
 assign cluster0_me1bxky_mi  = cluster0_me1bxky_lo[MXXKYB-1:1] + cluster0_me1bxky_hi[MXXKYB-1:1] + (cluster0_me1bxky_lo[0] | cluster0_me1bxky_hi[0]);
 
 assign csc_cluster0       = reg_cluster0;
-assign csc_cluster0_vpf   = reg_cluster0_vpf && gem_match_enable;// valid or not
+assign csc_cluster0_vpf   = reg_cluster0_vpf && gem_match_enable && (gem_me1b_match_enable || csc_cluster0_me1a);// valid or not
 assign csc_cluster0_roll  = reg_cluster0_roll; // 0-7 
 assign csc_cluster0_pad   = reg_cluster0_pad; // from 0-191
 assign csc_cluster0_size  = reg_cluster0_size; // from 0-7, 0 means 1 gem pad
 
-assign csc_cluster0_me1a  = (reg_cluster0_roll == 3'd7); // only roll7 is matchd to ME1a, 1 for ME1a, 0 for ME1b
+assign csc_cluster0_me1a  = (reg_cluster0_roll == 3'd7) && gem_me1a_match_enable; // only roll7 is matchd to ME1a, 1 for ME1a, 0 for ME1b
 
 
 endmodule

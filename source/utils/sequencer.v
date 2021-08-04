@@ -3537,7 +3537,7 @@
   parameter GEMCSCMATCH_CNT_START   = 88; // 84+4
   parameter GEM_UNUSED_START        = 113; //+25
   
-
+  wire alct_clct_gem_match = alct_clct_copad_match_pos || alct_clct_gemA_match_pos || alct_clct_gemB_match_pos;
 // Counter enable strobes
   always @(posedge clock) begin
 
@@ -5922,7 +5922,8 @@
     led_alct_ff        <=  alct_pat_trig_os;             // ALCT active_feb
     led_clct_ff        <=  trig_clct_flash;              // CLCT or external trigger, not ALCT
     led_l1a_intime_ff  <=  l1a_keep;                     // L1A arrived in window or forced L1A
-    led_invpat_ff      <=  discard_event_led;            // Invalid pattern after drift
+    //led_invpat_ff      <=  discard_event_led;            // Invalid pattern after drift
+    led_invpat_ff      <=  alct_clct_gem_match;            // ALCT-CLCT-GEM match found
     led_nol1a_flush_ff <=  tmb_nol1a;                    // L1A never arrived, event flushed
     led_nomatch_ff     <=  tmb_trig_pulse && !tmb_match; // Trigger but no match
   end
