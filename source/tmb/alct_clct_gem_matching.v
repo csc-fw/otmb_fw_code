@@ -396,6 +396,8 @@ module  alct_clct_gem_matching(
   wire        clct1_gemB_bend [MXCLUSTER_CHAMBER-1:0];
   wire [9:0]  clct0_gemA_angle [MXCLUSTER_CHAMBER-1:0];
   wire [9:0]  clct1_gemA_angle [MXCLUSTER_CHAMBER-1:0];
+  wire [9:0]  clct0_gemB_angle [MXCLUSTER_CHAMBER-1:0];
+  wire [9:0]  clct1_gemB_angle [MXCLUSTER_CHAMBER-1:0];
   wire [9:0]  alct0_clct0_gemA_angle [MXCLUSTER_CHAMBER-1:0];
   wire [9:0]  alct0_clct1_gemA_angle [MXCLUSTER_CHAMBER-1:0];
   wire [9:0]  alct0_clct0_gemB_angle [MXCLUSTER_CHAMBER-1:0];
