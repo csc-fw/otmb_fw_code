@@ -2333,7 +2333,7 @@ end
       cluster_to_cscwirehalfstrip #(.ICLST(iclst_csc)) ucluster_to_cscwirehalfstripA (
 	.clock (clock),    //in clock
 
-        .evenchamber (evenchamber),   //in,  even pair or not
+        .evenchamber       (evenchamber),   //in,  even pair or not
         .gem_match_enable  (gemA_cluster_enable[iclst_csc]),//In enable GEMA for GEMCSC match or not, if not, vpf is invalid from here
         .gem_clct_deltahs  (gem_clct_deltahs), // In matching window in halfstrip direction
         .gem_alct_deltawire(gem_alct_deltawire), //In  matching window in wiregroup direction
@@ -2366,7 +2366,7 @@ end
       cluster_to_cscwirehalfstrip #(.ICLST(iclst_csc)) ucluster_to_cscwirehalfstripB (
 	.clock (clock),
 
-        .evenchamber (evenchamber),   // even pair or not
+        .evenchamber       (evenchamber),   // even pair or not
         .gem_match_enable  (gemB_cluster_enable[iclst_csc]),
         .gem_clct_deltahs  (gem_clct_deltahs), // matching window in halfstrip direction
         .gem_alct_deltawire(gem_alct_deltawire), // matching window in wiregroup direction
@@ -4687,7 +4687,7 @@ wire [15:0] gemB_bxn_counter;
     //assign mez_tp[6]  = wr_push_xtmb; // CLCT vpf signal
     assign mez_tp[6]  = clct0_pipe_vpf_tp; // CLCT vpf signal after pipeline 
     assign mez_tp[5]  = gem_foralct_vpf_tp;
-    assign mez_tp[4]  = gem_forclct_vpf_tp;
+    assign mez_tp[4]  = gem_forclct_vpf_tp;//pulse width=2BX???? why????
     //assign mez_tp[5]  = (|gemA_csc_cluster_vpf) || (|gemB_csc_cluster_vpf);// gemA or gemB vpf signal
     //assign mez_tp[4]  = |copad_match; // gem copad vpf signal
     //assign mez_tp[4]  = hmt_nhits_trig_bx678 >= hmt_nhits_trig_bx2345+10'h3; // gem copad vpf signal

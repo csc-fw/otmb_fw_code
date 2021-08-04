@@ -328,8 +328,10 @@
 
 
   tmb_trig_pulse,
-  tmb_trig_keep,
+  tmb_trig_keep,  //update with GEMCSC
   tmb_non_trig_keep,
+
+  //following for CSC counters
   tmb_match,
   tmb_alct_only,
   tmb_clct_only,
@@ -351,8 +353,8 @@
   tmb_one_clct,
   tmb_two_alct,
   tmb_two_clct,
-  tmb_dupe_alct,
-  tmb_dupe_clct,
+  tmb_dupe_alct,//update with GEMCSC
+  tmb_dupe_clct, //update with GEMCSC
   tmb_rank_err,
 
   tmb_alct0,
@@ -381,6 +383,12 @@
   alct_clct_copad_match_pos,  
   alct_clct_gemA_match_pos,
   alct_clct_gemB_match_pos,
+
+  //use copad to build ALCT/CLCT
+  alct0fromcopad_run3,
+  alct1fromcopad_run3,
+  clct0fromcopad_run3,
+  clct1fromcopad_run3,
 
   run3_trig_df, // input, flag of run3 data format upgrade
 // MPC Status
@@ -923,16 +931,20 @@
   output             clct_copad_noalct_pulse;
 
   //GEM-CSC match output, timing+position
-  output              alct_gemA_match_pos;
-  output              alct_gemB_match_pos;
-  output              clct_gemA_match_pos;
-  output              clct_gemB_match_pos;
-  output              alct_copad_match_pos;
-  output              clct_copad_match_pos;
-  output              alct_clct_copad_match_pos; 
-  output              alct_clct_gemA_match_pos;
-  output              alct_clct_gemB_match_pos;
+  output             alct_gemA_match_pos;
+  output             alct_gemB_match_pos;
+  output             clct_gemA_match_pos;
+  output             clct_gemB_match_pos;
+  output             alct_copad_match_pos;
+  output             clct_copad_match_pos;
+  output             alct_clct_copad_match_pos; 
+  output             alct_clct_gemA_match_pos;
+  output             alct_clct_gemB_match_pos;
 
+  output             alct0fromcopad_run3;
+  output             alct1fromcopad_run3;
+  output             clct0fromcopad_run3;
+  output             clct1fromcopad_run3;
 // MPC Status
   output                 mpc_frame_ff;   // MPC frame latch
   output  [MXFRAME-1:0]  mpc0_frame0_ff; // MPC best muon 1st frame
@@ -1386,21 +1398,27 @@
 //------------------------------------------------------------------------------------------------------------------
   wire [MXALCT-1:0] alct0_fake, alct1_fake;
   wire [MXALCT-1:0] alct0_fake_srl, alct1_fake_srl;
-  assign alct0_fake[   0]   = wr_push_xtmb;
+  reg   alct0_fake_vpf = 1'b0;
+  reg   alct1_fake_vpf = 1'b0;
+  always #(posedge clock) begin
+     alct0_fake_vpf <= clct0_xtmb[0];
+     alct1_fake_vpf <= clct1_xtmb[0];
+  end
+  assign alct0_fake[   0]   = alct0_fake_vpf;
   assign alct0_fake[02:1]   = 2'b11;
   assign alct0_fake[   3]   = 1'b0;
-  assign alct0_fake[10:4]   = 7'd20;
+  assign alct0_fake[10:4]   = alct0_fake_vpf ? 7'd20 : 0;
   assign alct0_fake[15:11]  = 4'b0;
 
-  assign alct1_fake[   0]   = wr_push_xtmb;
+  assign alct1_fake[   0]   = alct1_fake_vpf;
   assign alct1_fake[02:1]   = 2'b10;
   assign alct1_fake[   3]   = 1'b0;
-  assign alct1_fake[10:4]   = 7'd30;
+  assign alct1_fake[10:4]   = alct1_fake_vpf ? 7'd30 : 0;
   assign alct1_fake[15:11]  = 4'b0;
 
   reg [3:0] fakealct_srl_adr = 0;
   always @(posedge clock) begin
-  fakealct_srl_adr <= clct_win_center-1'b1;
+  fakealct_srl_adr <= gem_alct_win_center-1'b1;
   end
 
   srl16e_bbl #(MXALCT) ualct0fake (.clock(clock),.ce(1'b1),.adr(fakealct_srl_adr),.d(alct0_fake),.q(alct0_fake_srl));
@@ -2040,8 +2058,10 @@
   // after GEM-ALCT match, delay GEM to expected ALCT position for GEM-CLCT match, 
   //if no ALCT in GEM tagged window, 
   // how no GEM case? does it bother ?
-  wire [3:0] gemA_extra_delay_forclct = (alct_pulse) ?  gem_alct_win_center : 0;//address to find gem-alct match best win
-  wire [3:0] gemB_extra_delay_forclct = (alct_pulse) ?  gem_alct_win_center : 0;
+  //wire [3:0] gemA_extra_delay_forclct = (alct_pulse) ?  gem_alct_win_center : 0;//address to find gem-alct match best win
+  //wire [3:0] gemB_extra_delay_forclct = (alct_pulse) ?  gem_alct_win_center : 0;
+  wire [3:0] gemA_extra_delay_forclct = gemA_alct_noalct ?  0 : gem_alct_win_center;//address to find gem-alct match best win
+  wire [3:0] gemB_extra_delay_forclct = gemB_alct_noalct ?  0 : gem_alct_win_center;
   
 
   wire [3:0] gemA_forclct_adr = gemA_extra_delay_forclct-4'b1;
@@ -2057,54 +2077,18 @@
   wire [3:0] gemA_alct_match_win_mux_pipe = gemA_extra_delay_forclct_is_0 ? gemA_alct_match_win_mux : gemA_alct_match_win_mux_srl;
   wire [3:0] gemB_alct_match_win_mux_pipe = gemB_extra_delay_forclct_is_0 ? gemB_alct_match_win_mux : gemB_alct_match_win_mux_srl;
 
-  //another way to get gemA_alct_match_win_mux_pipe by using register, when alct_pulse_gem is valid in gem-alct matching
-  // reg [3:0] gemA_alct_match_win_mux_reg = 0;
-  // always @(clock)
-  //   if (alct_pulse_forgem) gemA_alct_match_win_mux_reg = gemA_alct_match_win_mux;
-  //
-  // then gemA_alct_match_win_mux_pipe = gemA_alct_match_win_mux_reg
-  // or use 16-stage FF register, reg [3:0] gemA_match_win_ff[15:0];
-  //always @(clock) begin 
-  //  if (reset_sr) begin 
-  //    i = 0;
-  //    while ( i <= 15 ) begin
-  //        gemA_match_win_ff[i] <= 4'b0;
-  //        i = i+1;
-  //    end
-  //  end
-  //  if (gemA_alct_match) gemA_match_win_ff[0] <= gemA_alct_match_win_mux;
-  //  else 
-  //      gemA_match_win_ff[0] = 4'b0;
-  //  i = 1;
-  //  while (i <= 14 ) begin
-  //    gemA_match_win_ff[i+1] <= gemA_match_win_ff[i];
-  //      i = i+1
-  //  end
-  //end //close always
-
-
-
 //------------------------------------------------------------------------------------------------------------------
 // Push GEM data into a 1bx to 16bx pipeline delay to do GEM-CLCT match
 //------------------------------------------------------------------------------------------------------------------
   //find out GEM vpf for CLCT-GEM matching 
   wire [7:0] gemA_forclct, gemA_forclct_srl;
   wire [7:0] gemB_forclct, gemB_forclct_srl;
-  //srl16e_bbl #(8) ugemApulse_gemclct (.clock(clock),.ce(1'b1),.adr(gemA_alct_match_win_mux_pipe),.d(gemA_pipe_foralct),.q(gemA_forclct_srl));
-  //srl16e_bbl #(8) ugemBpulse_gemclct (.clock(clock),.ce(1'b1),.adr(gemB_alct_match_win_mux_pipe),.d(gemB_pipe_foralct),.q(gemB_forclct_srl));
-  //wire gemA_alct_match_win_mux_pipe_is_0 = gemA_alct_match_win_mux_pipe == 0;
-  //wire gemB_alct_match_win_mux_pipe_is_0 = gemB_alct_match_win_mux_pipe == 0;
-  //wire [7:0] gemA_forclct_pipe = gemA_alct_match_win_mux_pipe_is_0 ? gemA_pipe_foralct : gemA_forclct_srl;
-  //wire [7:0] gemB_forclct_pipe = gemB_alct_match_win_mux_pipe_is_0 ? gemB_pipe_foralct : gemB_forclct_srl;
-  //or 
-  //wire [3:0] gemA_final_delay = gemA_alct_match_win_mux_pipe + match_gemA_alct_delay + gemA_extra_delay_forclct;//
-  //wire [3:0] gemB_final_delay = gemB_alct_match_win_mux_pipe + match_gemB_alct_delay + gemB_extra_delay_forclct;//
   wire [3:0] gemA_final_delay_withalct = gemA_alct_match_win_mux_pipe + match_gemA_alct_delay + gem_alct_win_center;
   wire [3:0] gemB_final_delay_withalct = gemB_alct_match_win_mux_pipe + match_gemB_alct_delay + gem_alct_win_center;
   wire [3:0] gemA_final_delay_noalct = match_gemA_alct_delay + gem_alct_winclosing;
   wire [3:0] gemB_final_delay_noalct = match_gemB_alct_delay + gem_alct_winclosing;
-  wire [3:0] gemA_final_delay = alct_pulse ? gemA_final_delay_withalct : gemA_final_delay_noalct;
-  wire [3:0] gemB_final_delay = alct_pulse ? gemB_final_delay_withalct : gemB_final_delay_noalct;
+  wire [3:0] gemA_final_delay = gemA_alct_noalct ? gemA_final_delay_noalct : gemA_final_delay_withalct;
+  wire [3:0] gemB_final_delay = gemB_alct_noalct ? gemB_final_delay_noalct : gemB_final_delay_withalct;
 
 
   wire [3:0] gemA_final_adr   = gemA_final_delay - 4'b1;
@@ -2442,6 +2426,7 @@
   .alct_copad_match_found(alct_copad_match_pos),
   .clct_copad_match_found(clct_copad_match_pos),
 
+   // step1  ALCT+CLCT+Copad matching
   .alct0_clct0_copad_best_icluster(alct0_clct0_copad_best_icluster[2:0]),
   .alct0_clct0_copad_best_angle   (alct0_clct0_copad_best_angle[9:0]),
   .alct0_clct0_copad_best_cscxky  (alct0_clct0_copad_best_cscxky[9:0]),
@@ -2460,6 +2445,7 @@
   .swapalct_copad_match           (swapalct_copad_match_pos),
   .alct_clct_copad_nomatch        (alct_clct_copad_nomatch_pos),
 
+   // step2  ALCT+CLCT+singleGEM matching plus no copad matching
   .alct0_clct0_gemA_best_icluster (alct0_clct0_gemA_best_icluster[2:0]),
   .alct0_clct0_gemA_best_angle    (alct0_clct0_gemA_best_angle[9:0]),
   .alct0_clct0_gemA_best_cscxky   (alct0_clct0_gemA_best_cscxky[9:0]),
@@ -2498,21 +2484,25 @@
   .alct_clct_gemB_match           (alct_clct_gemB_match_pos),
   .alct_clct_gem_nomatch          (alct_clct_gem_nomatch_pos),
 
+   // step3  ALCT+CLCT matching
   .alct0_clct0_nogem_match_found  (alct0_clct0_nogem_match_found_pos),
   .alct1_clct1_nogem_match_found  (alct1_clct1_nogem_match_found_pos),
 
+   // step4  CLCT+Copad matching
   .clct0_copad_match_found        (clct0_copad_match_found_pos),
   .clct1_copad_match_found        (clct1_copad_match_found_pos),
   .alct0wg_fromcopad              (alct0wg_fromcopad[WIREBITS-1:0]),
   .alct1wg_fromcopad              (alct1wg_fromcopad[WIREBITS-1:0]),
   .swapclct_clctcopad_match       (swapclct_clctcopad_match_pos),
 
+   // step5  ALCT+Copad matching
   .alct0_copad_match_found        (alct0_copad_match_found_pos),
   .alct1_copad_match_found        (alct1_copad_match_found_pos),
   .clct0xky_fromcopad             (clct0xky_fromcopad[MXXKYB-1:0]),
   .clct1xky_fromcopad             (clct1xky_fromcopad[MXXKYB-1:0]),
   .swapalct_alctcopad_match       (swapalct_alctcopad_match_pos),
 
+   // summary
   .alct0_clct0_match_found_final  (alct0_clct0_match_found_final_pos),
   .alct1_clct1_match_found_final  (alct1_clct1_match_found_final_pos),
   .swapalct_final                 (swapalct_final_pos),
@@ -2810,8 +2800,8 @@
   wire  tmb_dupe_alct = tmb_one_alct && tmb_two_clct;  // Duplicate alct if there are 2 clcts
   wire  tmb_dupe_clct = tmb_one_clct && tmb_two_alct;  // Duplicate clct if there are 2 alcts
 
-  wire  tmb_dupe_alct_run3 = tmb_dupe_alct && !clct1_copad_match_good;  // Duplicate alct if there are 2 clcts
-  wire  tmb_dupe_clct_run3 = tmb_dupe_alct && !alct1_copad_match_good;  // Duplicate clct if there are 2 alcts
+  wire  tmb_dupe_alct_run3 = tmb_dupe_alct && copyalct0_foralct1_pos;  // Duplicate alct if there are 2 clcts
+  wire  tmb_dupe_clct_run3 = tmb_dupe_alct && copyclct0_forclct1_pos;  // Duplicate clct if there are 2 alcts
 
 // Duplicate alct and clct
   reg  [MXALCT-1:0]  alct0;
