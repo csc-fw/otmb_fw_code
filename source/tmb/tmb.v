@@ -1400,7 +1400,7 @@
   wire [MXALCT-1:0] alct0_fake_srl, alct1_fake_srl;
   reg   alct0_fake_vpf = 1'b0;
   reg   alct1_fake_vpf = 1'b0;
-  always #(posedge clock) begin
+  always @(posedge clock) begin
      alct0_fake_vpf <= clct0_xtmb[0];
      alct1_fake_vpf <= clct1_xtmb[0];
   end
