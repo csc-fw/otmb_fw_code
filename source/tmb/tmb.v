@@ -2985,8 +2985,8 @@
       lct1_qlt_run3_real  <= lct1_qlt_run3_pipe;
   end
   
-  wire [2:0] lct0_vpf_run3 = lct0_vpf_run3_real;
-  wire [2:0] lct1_vpf_run3 = lct1_vpf_run3_real;
+  wire [2:0] lct0_qlt_run3 = lct0_qlt_run3_real;
+  wire [2:0] lct1_qlt_run3 = lct1_qlt_run3_real;
   //Run3 LCT quality
   lct_quality_run3 ulct0qualityrun3
     (
