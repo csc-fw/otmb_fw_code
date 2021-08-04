@@ -22,14 +22,14 @@ module  tree_encoder_alctclctgem(
   input [9:0] gem_xky_7 ,
 
   output [9:0] gem_xky_best,
-  output [2:0] win_best,
-  output [9:0] pri_best
+  output [9:0] pri_best,
+  output [2:0] win_best
 
   );
 
 
   wire [0:0] win_s1  [3:0];        // Tree encoder Finds best 4 of 16 window positions
-  reg  [1:0] win_s2  [0:0];
+  reg  [2:0] win_s2  [0:0];
 
   wire [9:0] pri_s1  [3:0];
   reg  [9:0] pri_s2  [0:0];

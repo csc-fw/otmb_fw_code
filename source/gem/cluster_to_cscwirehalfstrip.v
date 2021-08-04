@@ -32,12 +32,9 @@ module cluster_to_cscwirehalfstrip (
         output     [WIREBITS-1:0] cluster0_cscwire_lo,
         output     [WIREBITS-1:0] cluster0_cscwire_hi,
         output     [WIREBITS-1:0] cluster0_cscwire_mi,//middle
-        output     [MXXKYB-1:0]   cluster0_me1bxky_lo, // from 0-127 for halfstrip, later replaced by xky resolution
-        output     [MXXKYB-1:0]   cluster0_me1bxky_hi, // from 0-127
-        output     [MXXKYB-1:0]   cluster0_me1bxky_mi, // from 128-223, middle
-        output     [MXXKYB-1:0]   cluster0_me1axky_lo, // from 128-223
-        output     [MXXKYB-1:0]   cluster0_me1axky_hi, // from 128-223
-        output     [MXXKYB-1:0]   cluster0_me1axky_mi, // from 128-223, middle
+        output     [MXXKYB-1:0]   cluster0_cscxky_lo, // from 0-127 for halfstrip, later replaced by xky resolution
+        output     [MXXKYB-1:0]   cluster0_cscxky_hi, // from 0-127
+        output     [MXXKYB-1:0]   cluster0_cscxky_mi, // from 128-223, middle
         output                    csc_cluster0_me1a,
         output     [13:0]         csc_cluster0,  
         output                    csc_cluster0_vpf,// valid or not
@@ -54,6 +51,7 @@ module cluster_to_cscwirehalfstrip (
        //output                    cluster0_cschs_vpf, // whether a CSC hs could be mapped from gem pad or not, 
 );
 
+//use falling logic to reduce the latency if necessary
 parameter FALLING_EDGE = 0;
 
 parameter MXCFEB       = 7;
@@ -192,14 +190,19 @@ assign cluster0_cscwire_hi  = (wire_real_hi + gem_alct_deltawire < MAXWIRE) ? wi
 assign cluster0_cscwire_mi = cluster0_cscwire_lo[WIREBITS-1:1] + cluster0_cscwire_hi[WIREBITS-1:1] + (cluster0_cscwire_lo[0] | cluster0_cscwire_hi[0]);
 
 //
-assign cluster0_me1bxky_lo   = (csc_cluster0_me1a) ? 10'd896 : ((me1b_xky_real_lo > MINKEYHSME1B+gem_clct_deltaxky) ? me1b_xky_real_lo-gem_clct_deltaxky : MINKEYHSME1B); //if not in Me1b region, give it an invalid value
-assign cluster0_me1bxky_hi   = (csc_cluster0_me1a) ? 10'd896 : ((me1b_xky_real_hi+gem_clct_deltaxky > MAXKEYHSME1B) ? MAXKEYHSME1B : me1b_xky_real_hi+gem_clct_deltaxky);
+//assign cluster0_me1bxky_lo   = (csc_cluster0_me1a) ? 10'd896 : ((me1b_xky_real_lo > MINKEYHSME1B+gem_clct_deltaxky) ? me1b_xky_real_lo-gem_clct_deltaxky : MINKEYHSME1B); //if not in Me1b region, give it an invalid value
+//assign cluster0_me1bxky_hi   = (csc_cluster0_me1a) ? 10'd896 : ((me1b_xky_real_hi+gem_clct_deltaxky > MAXKEYHSME1B) ? MAXKEYHSME1B : me1b_xky_real_hi+gem_clct_deltaxky);
+//
+//assign cluster0_me1axky_lo   = (csc_cluster0_me1a) ? ((me1a_xky_real_lo > MINKEYHSME1A+gem_clct_deltaxky) ? me1a_xky_real_lo-gem_clct_deltaxky : MINKEYHSME1A) : 8'd224; //if not in Me1a region, give it an invalid value
+//assign cluster0_me1axky_hi   = (csc_cluster0_me1a) ? ((me1a_xky_real_hi+gem_clct_deltaxky > MAXKEYHSME1A) ? MAXKEYHSME1A : me1a_xky_real_hi+gem_clct_deltaxky) : 8'd224;
+//
+wire [MXXKYB-1:0]  cluster0_me1axky_mi  = cluster0_me1axky_lo[MXXKYB-1:1] + cluster0_me1axky_hi[MXXKYB-1:1] + (cluster0_me1axky_lo[0] | cluster0_me1axky_hi[0]);
+wire [MXXKYB-1:0]  cluster0_me1bxky_mi  = cluster0_me1bxky_lo[MXXKYB-1:1] + cluster0_me1bxky_hi[MXXKYB-1:1] + (cluster0_me1bxky_lo[0] | cluster0_me1bxky_hi[0]);
 
-assign cluster0_me1axky_lo   = (csc_cluster0_me1a) ? ((me1a_xky_real_lo > MINKEYHSME1A+gem_clct_deltaxky) ? me1a_xky_real_lo-gem_clct_deltaxky : MINKEYHSME1A) : 8'd224; //if not in Me1a region, give it an invalid value
-assign cluster0_me1axky_hi   = (csc_cluster0_me1a) ? ((me1a_xky_real_hi+gem_clct_deltaxky > MAXKEYHSME1A) ? MAXKEYHSME1A : me1a_xky_real_hi+gem_clct_deltaxky) : 8'd224;
+assign cluster0_cscxky_lo = (csc_cluster0_me1a) ? ((me1a_xky_real_lo > MINKEYHSME1A+gem_clct_deltaxky) ? me1a_xky_real_lo-gem_clct_deltaxky : ((me1b_xky_real_lo > MINKEYHSME1B+gem_clct_deltaxky) ? me1b_xky_real_lo-gem_clct_deltaxky : MINKEYHSME1B)
+assign cluster0_cscxky_hi = (csc_cluster0_me1a) ? ((me1a_xky_real_hi+gem_clct_deltaxky > MAXKEYHSME1A) ? MAXKEYHSME1A : me1a_xky_real_hi+gem_clct_deltaxky) : ((me1b_xky_real_hi+gem_clct_deltaxky > MAXKEYHSME1B) ? MAXKEYHSME1B : me1b_xky_real_hi+gem_clct_deltaxky);
+assign cluster0_cscxky_mi =  (csc_cluster0_me1a) ? cluster0_me1axky_mi : cluster0_me1bxky_mi;
 
-assign cluster0_me1axky_mi  = cluster0_me1axky_lo[MXXKYB-1:1] + cluster0_me1axky_hi[MXXKYB-1:1] + (cluster0_me1axky_lo[0] | cluster0_me1axky_hi[0]);
-assign cluster0_me1bxky_mi  = cluster0_me1bxky_lo[MXXKYB-1:1] + cluster0_me1bxky_hi[MXXKYB-1:1] + (cluster0_me1bxky_lo[0] | cluster0_me1bxky_hi[0]);
 
 assign csc_cluster0       = reg_cluster0;
 assign csc_cluster0_vpf   = reg_cluster0_vpf && gem_match_enable && (gem_me1b_match_enable || csc_cluster0_me1a);// valid or not

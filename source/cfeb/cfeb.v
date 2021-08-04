@@ -835,7 +835,7 @@
 
   assign triad_skip = (|tskip[0]) | (|tskip[1]) | (|tskip[2]) | (|tskip[3]) | (|tskip[4]) | (|tskip[5]);
 
-  reg [9:0] nhits_s0;
+  reg [9:0] nhits_s0 = 10'b0;
   always  @(posedge clock) begin
       nhits_s0       <= hs_fired[0][0] + hs_fired[0][1] + hs_fired[0][1] + hs_fired[0][2] + hs_fired[0][3] + hs_fired[0][4] + hs_fired[0][5] + hs_fired[0][6] + hs_fired[0][7] + 
                         hs_fired[1][0] + hs_fired[1][1] + hs_fired[1][1] + hs_fired[1][2] + hs_fired[1][3] + hs_fired[1][4] + hs_fired[1][5] + hs_fired[1][6] + hs_fired[1][7] + 

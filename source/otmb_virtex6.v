@@ -2299,18 +2299,18 @@ end
   wire [WIREBITS-1:0] gemA_csc_cluster_cscwire_mi[MXCLUSTER_CHAMBER-1:0];
   wire [WIREBITS-1:0] gemB_csc_cluster_cscwire_mi[MXCLUSTER_CHAMBER-1:0];
   //Tao, updated to CCLUT algorithm!!!, use 11 bits
-  wire [MXXKYB-1:0] gemA_csc_cluster_me1bxky_lo [MXCLUSTER_CHAMBER-1:0]; // ME1b keyHS from 0-127
-  wire [MXXKYB-1:0] gemB_csc_cluster_me1bxky_lo [MXCLUSTER_CHAMBER-1:0]; // ME1a keyHS from 128-223
-  wire [MXXKYB-1:0] gemA_csc_cluster_me1bxky_hi [MXCLUSTER_CHAMBER-1:0]; // 
-  wire [MXXKYB-1:0] gemB_csc_cluster_me1bxky_hi [MXCLUSTER_CHAMBER-1:0]; // 
-  wire [MXXKYB-1:0] gemA_csc_cluster_me1bxky_mi [MXCLUSTER_CHAMBER-1:0]; // 
-  wire [MXXKYB-1:0] gemB_csc_cluster_me1bxky_mi [MXCLUSTER_CHAMBER-1:0]; // 
-  wire [MXXKYB-1:0] gemA_csc_cluster_me1axky_lo [MXCLUSTER_CHAMBER-1:0]; // 
-  wire [MXXKYB-1:0] gemB_csc_cluster_me1axky_lo [MXCLUSTER_CHAMBER-1:0]; // 
-  wire [MXXKYB-1:0] gemA_csc_cluster_me1axky_hi [MXCLUSTER_CHAMBER-1:0]; // 
-  wire [MXXKYB-1:0] gemB_csc_cluster_me1axky_hi [MXCLUSTER_CHAMBER-1:0]; // 
-  wire [MXXKYB-1:0] gemA_csc_cluster_me1axky_mi [MXCLUSTER_CHAMBER-1:0]; // 
-  wire [MXXKYB-1:0] gemB_csc_cluster_me1axky_mi [MXCLUSTER_CHAMBER-1:0]; // 
+  //wire [MXXKYB-1:0] gemA_csc_cluster_me1bxky_lo [MXCLUSTER_CHAMBER-1:0]; // ME1b keyHS from 0-127
+  //wire [MXXKYB-1:0] gemB_csc_cluster_me1bxky_lo [MXCLUSTER_CHAMBER-1:0]; // ME1a keyHS from 128-223
+  //wire [MXXKYB-1:0] gemA_csc_cluster_me1bxky_hi [MXCLUSTER_CHAMBER-1:0]; // 
+  //wire [MXXKYB-1:0] gemB_csc_cluster_me1bxky_hi [MXCLUSTER_CHAMBER-1:0]; // 
+  //wire [MXXKYB-1:0] gemA_csc_cluster_me1bxky_mi [MXCLUSTER_CHAMBER-1:0]; // 
+  //wire [MXXKYB-1:0] gemB_csc_cluster_me1bxky_mi [MXCLUSTER_CHAMBER-1:0]; // 
+  //wire [MXXKYB-1:0] gemA_csc_cluster_me1axky_lo [MXCLUSTER_CHAMBER-1:0]; // 
+  //wire [MXXKYB-1:0] gemB_csc_cluster_me1axky_lo [MXCLUSTER_CHAMBER-1:0]; // 
+  //wire [MXXKYB-1:0] gemA_csc_cluster_me1axky_hi [MXCLUSTER_CHAMBER-1:0]; // 
+  //wire [MXXKYB-1:0] gemB_csc_cluster_me1axky_hi [MXCLUSTER_CHAMBER-1:0]; // 
+  //wire [MXXKYB-1:0] gemA_csc_cluster_me1axky_mi [MXCLUSTER_CHAMBER-1:0]; // 
+  //wire [MXXKYB-1:0] gemB_csc_cluster_me1axky_mi [MXCLUSTER_CHAMBER-1:0]; // 
 
   wire [MXXKYB-1:0] gemA_csc_cluster_xky_lo [MXCLUSTER_CHAMBER-1:0]; // 
   wire [MXXKYB-1:0] gemB_csc_cluster_xky_lo [MXCLUSTER_CHAMBER-1:0]; // 
@@ -2350,12 +2350,9 @@ end
         .cluster0_cscwire_lo (gemA_csc_cluster_cscwire_lo[iclst_csc]), //Out gem roll into wire, low
         .cluster0_cscwire_hi (gemA_csc_cluster_cscwire_hi[iclst_csc]), //Out gem roll into wire, high
         .cluster0_cscwire_mi (gemA_csc_cluster_cscwire_mi[iclst_csc]), // Out gem roll into wire, median
-        .cluster0_me1bxky_lo (gemA_csc_cluster_me1bxky_lo[iclst_csc]), // Out, gem pad into me1b hs, from 0-127
-        .cluster0_me1bxky_hi (gemA_csc_cluster_me1bxky_hi[iclst_csc]), // Out, gem pad into me1b hs from 0-127
-        .cluster0_me1bxky_mi (gemA_csc_cluster_me1bxky_mi[iclst_csc]), // Out, gem pad into me1b hs from 0-127
-        .cluster0_me1axky_lo (gemA_csc_cluster_me1axky_lo[iclst_csc]), // Out, gem pad into me1a hs from 128-223
-        .cluster0_me1axky_hi (gemA_csc_cluster_me1axky_hi[iclst_csc]), // Out, gem pad into me1a hs from 128-223
-        .cluster0_me1axky_mi (gemA_csc_cluster_me1axky_mi[iclst_csc]), // Out, gem pad into me1a hs from 128-223
+        .cluster0_cscxky_lo  (gemA_csc_cluster_xky_lo[iclst_csc]), // Out, gem pad into me1b hs, from 0-127
+        .cluster0_cscxky_hi  (gemA_csc_cluster_xky_hi[iclst_csc]), // Out, gem pad into me1b hs from 0-127
+        .cluster0_cscxky_mi  (gemA_csc_cluster_xky_mi[iclst_csc]), // Out, gem pad into me1b hs from 0-127
         .csc_cluster0_me1a   (gemA_csc_cluster_me1a[iclst_csc]),  //Out gem cluster in me1a or not
 
         .csc_cluster0      (gemA_csc_cluster[iclst_csc]),  // Out, aligned gem cluster 
@@ -2374,6 +2371,9 @@ end
         .gem_clct_deltahs  (gem_clct_deltahs), // matching window in halfstrip direction
         .gem_alct_deltawire(gem_alct_deltawire), // matching window in wiregroup direction
 
+        .gem_me1a_match_enable     (gem_me1a_match_enable),       //in gem-csc match in me1a
+        .gem_me1b_match_enable     (gem_me1b_match_enable),       //in gem-csc match in me1b
+
         .cluster0      (gemB_cluster[iclst_csc]),
         .cluster0_vpf  (gemB_vpf[iclst_csc]),// valid or not
         .cluster0_roll (gemB_cluster_roll[iclst_csc]), // 0-7 
@@ -2383,12 +2383,9 @@ end
         .cluster0_cscwire_lo (gemB_csc_cluster_cscwire_lo[iclst_csc]),
         .cluster0_cscwire_hi (gemB_csc_cluster_cscwire_hi[iclst_csc]),
         .cluster0_cscwire_mi (gemB_csc_cluster_cscwire_mi[iclst_csc]),
-        .cluster0_me1bxky_lo (gemB_csc_cluster_me1bxky_lo[iclst_csc]), // from 0-127
-        .cluster0_me1bxky_hi (gemB_csc_cluster_me1bxky_hi[iclst_csc]), // from 0-127
-        .cluster0_me1bxky_mi (gemB_csc_cluster_me1bxky_mi[iclst_csc]), // from 0-127
-        .cluster0_me1axky_lo (gemB_csc_cluster_me1axky_lo[iclst_csc]), // from 128-223
-        .cluster0_me1axky_hi (gemB_csc_cluster_me1axky_hi[iclst_csc]), // from 128-223
-        .cluster0_me1axky_mi (gemB_csc_cluster_me1axky_mi[iclst_csc]), // from 128-223
+        .cluster0_cscxky_lo  (gemB_csc_cluster_xky_lo[iclst_csc]), // from 0-127
+        .cluster0_cscxky_hi  (gemB_csc_cluster_xky_hi[iclst_csc]), // from 0-127
+        .cluster0_cscxky_mi  (gemB_csc_cluster_xky_mi[iclst_csc]), // from 0-127
         .csc_cluster0_me1a   (gemB_csc_cluster_me1a[iclst_csc]),
 
         .csc_cluster0      (gemB_csc_cluster[iclst_csc]),  
@@ -2399,8 +2396,6 @@ end
 
       );
 
-      assign gemA_csc_cluster_xky_lo[iclst_csc] = gemA_csc_cluster_me1a[iclst_csc] ? gemA_csc_cluster_me1axky_lo[iclst_csc][9:0] : gemA_csc_cluster_me1bxky_lo[iclst_csc][9:0];
-      assign gemB_csc_cluster_xky_lo[iclst_csc] = gemB_csc_cluster_me1a[iclst_csc] ? gemB_csc_cluster_me1axky_lo[iclst_csc][9:0] : gemB_csc_cluster_me1bxky_lo[iclst_csc][9:0];
   end
   endgenerate
 

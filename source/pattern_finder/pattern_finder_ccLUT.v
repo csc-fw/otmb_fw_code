@@ -895,25 +895,25 @@ module pattern_finder_ccLUT (
 // JG: add cfeb_en requirement to prevent triggers from killed boards
 `ifdef CSC_TYPE_C
 	if ((ihs/MXHS) > 3) begin // Reverse ME1/1a
-           hs_hit_s0ab[ihs] <= cfeb_en_ff[10-(ihs/MXHS)] ? hs_hit[ihs] : 0;
-           hs_pid_s0ab[ihs] <= cfeb_en_ff[10-(ihs/MXHS)] ? hs_pid[ihs] : 0;
-           hs_carry_s0ab[ihs] <= cfeb_en_ff[10-(ihs/MXHS)] ? hs_carry[ihs] : 0;
+           hs_hit_s0ab[ihs] <= cfeb_en_ff[10-(ihs/MXHS)] ? hs_hit[ihs] : 3'b0;
+           hs_pid_s0ab[ihs] <= cfeb_en_ff[10-(ihs/MXHS)] ? hs_pid[ihs] : 4'b0;
+           hs_carry_s0ab[ihs] <= cfeb_en_ff[10-(ihs/MXHS)] ? hs_carry[ihs] : 12'b0;
 	end
 	else begin
-          hs_hit_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_hit[ihs] : 0;
-          hs_pid_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_pid[ihs] : 0;
-          hs_carry_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_carry[ihs] : 0;
+          hs_hit_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_hit[ihs] : 3'b0;
+          hs_pid_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_pid[ihs] : 4'b0;
+          hs_carry_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_carry[ihs] : 12'b0;
 	end 
 `elsif CSC_TYPE_D
 	if ((ihs/MXHS) > 3) begin
-           hs_hit_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_hit[ihs] : 0;
-           hs_pid_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_pid[ihs] : 0;
-           hs_carry_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_carry[ihs] : 0;
+           hs_hit_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_hit[ihs] : 3'b0;
+           hs_pid_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_pid[ihs] : 4'b0;
+           hs_carry_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_carry[ihs] : 12'b0;
 	end
 	else begin    // Reverse ME1/1b
-          hs_hit_s0ab[ihs] <= cfeb_en_ff[3-(ihs/MXHS)] ? hs_hit[ihs] : 0;
-          hs_pid_s0ab[ihs] <= cfeb_en_ff[3-(ihs/MXHS)] ? hs_pid[ihs] : 0;
-          hs_carry_s0ab[ihs] <= cfeb_en_ff[3-(ihs/MXHS)] ? hs_carry[ihs] : 0;
+          hs_hit_s0ab[ihs] <= cfeb_en_ff[3-(ihs/MXHS)] ? hs_hit[ihs] : 3'b0;
+          hs_pid_s0ab[ihs] <= cfeb_en_ff[3-(ihs/MXHS)] ? hs_pid[ihs] : 4'b0;
+          hs_carry_s0ab[ihs] <= cfeb_en_ff[3-(ihs/MXHS)] ? hs_carry[ihs] : 12'b0;
 	end 
 `endif
       end
@@ -1060,7 +1060,7 @@ module pattern_finder_ccLUT (
 
 // JG: delay the dead zone to apply it on hs_hit/pid arrays going into the best_1of logic after the drift time
   wire [3:0]         drift_adr;
-  assign drift_adr = drift_delay - 1;
+  assign drift_adr = drift_delay - 4'b1;
   srl16e_bbl #(MXKEYX) deadzone_drift (.clock(clock),.ce(1'b1),.adr(drift_adr),.d(hs_key_dead),.q(hs_dead_drift));
 
 

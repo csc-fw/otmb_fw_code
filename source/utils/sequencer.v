@@ -4948,9 +4948,10 @@
   assign  header11_[14:0]   =  r_clct_counter[14:0];  // CLCT post-drift counter, stop on ovf
   assign  header11_[18:15]  =  0;                     // DDU+DMB control flags
 
+  //Attention!!! work required!! align GEM data to LCT BX?
   assign  header12_run3_[7:0] = copad_match[7:0];//Attention: should be delayed to sync with CLCT signal!!
-  assign  header12_run3_[  8] = gemA_vpf;
-  assign  header12_run3_[  9] = gemB_vpf;
+  assign  header12_run3_[  8] = |gemA_vpf;
+  assign  header12_run3_[  9] = |gemB_vpf;
   assign  header12_run3_[ 10] = gemA_overflow;
   assign  header12_run3_[ 11] = gemB_overflow;
   assign  header12_run3_[ 12] = gemA_sync_err;

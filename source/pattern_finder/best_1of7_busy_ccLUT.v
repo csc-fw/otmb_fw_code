@@ -61,7 +61,7 @@ reg [MXOFFSB-1:0] best_offs;
       begin
       best_pat   = pat6;
       //best_key   = {3'd6,key6};
-      best_key   = {3'd6,key6} + offs6[3:2]+(offs6[1]&offs6[0])-2;
+      best_key   = {3'd6,key6} + offs6[3:2]+(offs6[1]&offs6[0])-8'd2;
       best_qlt   = qlt6;
       best_bend  = bend6;
       best_carry = carry6;
@@ -77,7 +77,7 @@ reg [MXOFFSB-1:0] best_offs;
       begin
       best_pat   = pat5;
       //best_key   = {3'd5,key5};
-      best_key   = {3'd5,key5} + offs5[3:2]+(offs5[1]&offs5[0])-2;
+      best_key   = {3'd5,key5} + offs5[3:2]+(offs5[1]&offs5[0])-8'd2;
       best_qlt   = qlt5;
       best_bend  = bend5;
       best_carry = carry5;
@@ -92,7 +92,7 @@ reg [MXOFFSB-1:0] best_offs;
       begin
       best_pat   = pat4;
       //best_key   = {3'd4,key4};
-      best_key   = {3'd4,key4} + offs4[3:2]+(offs4[1]&offs4[0])-2;
+      best_key   = {3'd4,key4} + offs4[3:2]+(offs4[1]&offs4[0])-8'd2;
       best_qlt   = qlt4;
       best_bend  = bend4;
       best_carry = carry4;
@@ -109,7 +109,7 @@ reg [MXOFFSB-1:0] best_offs;
       best_bend  = bend3;
       best_carry = carry3;
       best_offs  = offs3;
-      best_key   = {3'd3,key3} + offs3[3:2]+(offs3[1]&offs3[0])-2;
+      best_key   = {3'd3,key3} + offs3[3:2]+(offs3[1]&offs3[0])-8'd2;
       //best_key   = {3'd3,key3};
       best_bsy   = 0;
       end
@@ -122,7 +122,7 @@ reg [MXOFFSB-1:0] best_offs;
       best_bend  = bend2;
       best_carry = carry2;
       best_offs  = offs2;
-      best_key   = {3'd2,key2} + offs2[3:2]+(offs2[1]&offs2[0])-2;
+      best_key   = {3'd2,key2} + offs2[3:2]+(offs2[1]&offs2[0])-8'd2;
       ///best_key   = {3'd2,key2};
       best_bsy   = 0;
       end
@@ -135,7 +135,7 @@ reg [MXOFFSB-1:0] best_offs;
       best_carry = carry1;
       best_offs  = offs1;
       //best_key   = {3'd1,key1};
-      best_key   = {3'd1,key1} + offs1[3:2]+(offs1[1]&offs1[0])-2;
+      best_key   = {3'd1,key1} + offs1[3:2]+(offs1[1]&offs1[0])-8'd2;
       best_bsy   = 0;
       end
 
@@ -147,7 +147,7 @@ reg [MXOFFSB-1:0] best_offs;
       best_carry = carry0;
       best_offs  = offs0;
       //best_key   = {3'd0,key0};
-      best_key   = {3'd0,key0} + offs0[3:2]+(offs0[1]&offs0[0])-2;
+      best_key   = {3'd0,key0} + offs0[3:2]+(offs0[1]&offs0[0])-8'd2;
       best_bsy   = 0;
       end
 
