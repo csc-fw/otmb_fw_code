@@ -698,10 +698,10 @@
   gem_me1b_match_enable,       //Out gem-csc match in me1b
   gem_me1a_match_nogem,       //Out gem-csc match without gem is allowed in ME1b, => allow lowQ ALCT-CLCT match
   gem_me1b_match_nogem,       //Out gem-csc match without gem is allowed in ME1a
-  gem_me1a_match_noalct,       //Out gem-csc match without alct is allowed in ME1b=> allow GEM-CLCT match to build LCT
-  gem_me1b_match_noalct,       //Out gem-csc match without alct is allowed in ME1a 
-  gem_me1a_match_noclct,       //Out gem-csc match without clct is allowed in ME1b => allow GEM-ALCT match to build LCT
-  gem_me1b_match_noclct,       //Out gem-csc match without clct is allowed in ME1a
+  //match_drop_lowqalct,       //Out gem-csc match without alct is allowed in ME1b=> allow GEM-CLCT match to build LCT
+  match_drop_lowqalct,       //Out gem-csc match without alct is allowed in ME1a 
+  me1a_match_drop_lowqclct,       //Out gem-csc match without clct is allowed in ME1b => allow GEM-ALCT match to build LCT
+  me1b_match_drop_lowqclct,       //Out gem-csc match without clct is allowed in ME1a
   tmb_copad_alct_allow,       //In gem-csc match, allow ALCT+copad match
   tmb_copad_clct_allow,       //In gem-csc match, allow CLCT+copad match
   //gem_me1a_match_promotequal,     //Out promote quality or not for match in ME1a region, 
@@ -2498,12 +2498,12 @@
 
   output       gem_me1a_match_enable;
   output       gem_me1b_match_enable;
-  output       gem_me1a_match_noclct;// no clct is fine for GEM-CSC match
   output       gem_me1a_match_nogem;// no gem is fine for GEM-CSC match
-  output       gem_me1a_match_noalct;// no alct is fine for GEM-CSC match
-  output       gem_me1b_match_noclct;// no clct is fine for GEM-CSC match
   output       gem_me1b_match_nogem;// no gem is fine for GEM-CSC match
-  output       gem_me1b_match_noalct;// no alct is fine for GEM-CSC match
+  //output       me1b_match_drop_lowqalct;// no alct is fine for GEM-CSC match
+  output       match_drop_lowqalct;// no alct is fine for GEM-CSC match
+  output       me1a_match_drop_lowqclct;// no clct is fine for GEM-CSC match
+  output       me1b_match_drop_lowqclct;// no clct is fine for GEM-CSC match
   output       tmb_copad_alct_allow;       //In gem-csc match, allow ALCT+copad match
   output       tmb_copad_clct_allow;       //In gem-csc match, allow CLCT+copad match
   //output       gem_me1a_match_promotequal;
@@ -9171,9 +9171,9 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   gem_csc_match_ctrl_wr[ 2]   = 1'b1; // RW GEMCSC match, match without gem is allowed in me1a
   gem_csc_match_ctrl_wr[ 3]   = 1'b0; // RW GEMCSC match, match without gem is allowed in me1b
   gem_csc_match_ctrl_wr[ 4]   = 1'b0; // RW GEMCSC match, match without alct is allowed in me1a
-  gem_csc_match_ctrl_wr[ 5]   = 1'b0; // RW GEMCSC match, match without alct is allowed in me1b
-  gem_csc_match_ctrl_wr[ 6]   = 1'b0; // RW GEMCSC match, match without clct is allowed in me1a
-  gem_csc_match_ctrl_wr[ 7]   = 1'b0; // RW GEMCSC match, match without clct is allowed in me1b
+  gem_csc_match_ctrl_wr[ 5]   = 1'b1; // RW GEMCSC match, match without alct is allowed in me1b
+  gem_csc_match_ctrl_wr[ 6]   = 1'b1; // RW GEMCSC match, match without clct is allowed in me1a
+  gem_csc_match_ctrl_wr[ 7]   = 1'b1; // RW GEMCSC match, match without clct is allowed in me1b
   gem_csc_match_ctrl_wr[ 8]   = 1'b1; // RW GEMCSC match, promote quality in me1a with good match
   gem_csc_match_ctrl_wr[ 9]   = 1'b1; // RW GEMCSC match, promote quality in me1b with good match
   gem_csc_match_ctrl_wr[10]   = 1'b0; // RW GEMCSC match, promote pattern in me1a with good match
@@ -9189,10 +9189,10 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign gem_me1b_match_enable        = gem_csc_match_ctrl_wr[ 1];
   assign gem_me1a_match_nogem         = gem_csc_match_ctrl_wr[ 2]; //ALCT-CLCT match
   assign gem_me1b_match_nogem         = gem_csc_match_ctrl_wr[ 3]; // 
-  assign gem_me1a_match_noalct        = gem_csc_match_ctrl_wr[ 4]; //CLCT-Copad match
-  assign gem_me1b_match_noalct        = gem_csc_match_ctrl_wr[ 5]; 
-  assign gem_me1a_match_noclct        = gem_csc_match_ctrl_wr[ 6];//ALCT-copad match
-  assign gem_me1b_match_noclct        = gem_csc_match_ctrl_wr[ 7];
+  //assign gem_me1a_match_noalct        = gem_csc_match_ctrl_wr[ 4]; //CLCT-Copad match
+  assign match_drop_lowqalct          = gem_csc_match_ctrl_wr[ 5]; 
+  assign me1a_match_drop_lowqclct     = gem_csc_match_ctrl_wr[ 6];//ALCT-copad match
+  assign me1b_match_drop_lowqclct     = gem_csc_match_ctrl_wr[ 7];
   //assign gem_me1a_match_promotequal   = gem_csc_match_ctrl_wr[ 8];
   //assign gem_me1b_match_promotequal   = gem_csc_match_ctrl_wr[ 9];
   //assign gem_me1a_match_promotepat    = gem_csc_match_ctrl_wr[10];

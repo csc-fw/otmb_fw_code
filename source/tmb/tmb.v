@@ -274,11 +274,10 @@
   gem_me1b_match_enable,      //in gem-csc match in me1b. applied during GEM-CSC coordination conversion
   gem_me1a_match_nogem,       //??? not used yet. gem-csc match without gem is allowed in ME1b, => allow lowQ ALCT-CLCT match
   gem_me1b_match_nogem,       //??? not used yet. gem-csc match without gem is allowed in ME1a
-
-  gem_me1a_match_noalct,       //??? not used yet.  gem-csc match without alct is allowed in ME1b=> allow GEM-CLCT match to build LCT
-  gem_me1b_match_noalct,       //??? not used yet.  gem-csc match without alct is allowed in ME1a 
-  gem_me1a_match_noclct,       //??? not used yet.  gem-csc match without clct is allowed in ME1b => allow GEM-ALCT match to build LCT
-  gem_me1b_match_noclct,       //??? not used yet.  gem-csc match without clct is allowed in ME1a
+  match_drop_lowqalct, // drop lowQ stub when no GEM      
+  //me1b_match_drop_lowqalct, // drop lowQ stub when no GEM      
+  me1a_match_drop_lowqclct, // drop lowQ stub when no GEM      
+  me1b_match_drop_lowqclct, // drop lowQ stub when no GEM      
   tmb_copad_alct_allow,
   tmb_copad_clct_allow,
   gemA_match_ignore_position,
@@ -827,12 +826,11 @@
 
   input               gem_me1a_match_enable;
   input               gem_me1b_match_enable;
-  input               gem_me1a_match_noclct;// no clct is fine for GEM-CSC match
   input               gem_me1a_match_nogem;// no gem is fine for GEM-CSC match
-  input               gem_me1a_match_noalct;// no alct is fine for GEM-CSC match
-  input               gem_me1b_match_noclct;// no clct is fine for GEM-CSC match
   input               gem_me1b_match_nogem;// no gem is fine for GEM-CSC match
-  input               gem_me1b_match_noalct;// no alct is fine for GEM-CSC match
+  input               match_drop_lowqalct;// drop low Q alct for  match when no GEM is available
+  input               me1a_match_drop_lowqclct;// drop low Q clct for  match when no GEM is available 
+  input               me1b_match_drop_lowqclct;// drop low Q clct for  match when no GEM is available
   input               tmb_copad_alct_allow;
   input               tmb_copad_clct_allow;
   //input               gem_me1a_match_promotequal;
@@ -1444,7 +1442,8 @@
 
   //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   //Attention!! disable this for OTMB at b904 and P5!!!!
-  wire usefakealct = gem_me1a_match_noalct; //1'b1; // should be false in normal OTMB Firmware
+  wire usefakealct = !tmb_copad_clct_allow; //1'b1; // should be false in normal OTMB Firmware
+  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------
   
@@ -2352,19 +2351,26 @@
 
   alct_clct_gem_matching ualct_clct_gem_matching(
     
-  .alct0_vpf (alct0_pipe_vpf),
-  .alct1_vpf (alct1_pipe_vpf),
+  .alct0_vpf    (alct0_pipe_vpf),
+  .alct1_vpf    (alct1_pipe_vpf),
 
-  .alct0_wg  (alct0_pipe_key[6:0]),
-  .alct1_wg  (alct1_pipe_key[6:0]),
+  .alct0_wg     (alct0_pipe_key[6:0]),
+  .alct1_wg     (alct1_pipe_key[6:0]),
+  .alct0_nhit   (alct0_pipe_key[2:1]+3'd3),
+  .alct1_nhit   (alct1_pipe_key[2:1]+3'd3),
 
-  .clct0_vpf (clct0_pipe[0]),//clct0_vpf from pipe
-  .clct1_vpf (clct1_pipe[0]),
-  .clct0_xky (clct0_xky_pipe[9:0]),
-  .clct1_xky (clct1_xky_pipe[9:0]),
+  .clct0_vpf  (clct0_pipe[0]),//clct0_vpf from pipe
+  .clct1_vpf  (clct1_pipe[0]),
+  .clct0_xky  (clct0_xky_pipe[9:0]),
+  .clct1_xky  (clct1_xky_pipe[9:0]),
   .clct0_bend (clct0_bnd_pipe[4]),
   .clct1_bend (clct1_bnd_pipe[4]),
+  .clct0_nhit (clct0_pipe[3:1]),
+  .clct1_nhit (clct1_pipe[3:1]),
 
+  .match_drop_lowqalct        (match_drop_lowqalct), // drop lowQ stub when no GEM      
+  .me1a_match_drop_lowqclct   (me1a_match_drop_lowqclct), // drop lowQ stub when no GEM      
+  .me1b_match_drop_lowqclct   (me1b_match_drop_lowqclct), // drop lowQ stub when no GEM      
   .gemA_match_ignore_position(gemA_match_ignore_position),
   .gemB_match_ignore_position(gemB_match_ignore_position),
   .tmb_copad_alct_allow      (tmb_copad_alct_allow),       //In gem-csc match, allow ALCT+copad match

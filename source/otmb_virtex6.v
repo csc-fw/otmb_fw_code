@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
 `include "otmb_virtex6_fw_version.v"
-`include "pattern_finder/pattern_params.v"
+//`include "pattern_finder/pattern_params.v"
 
 //`define DEBUG_OTMB_VIRTEX6 1
 //-------------------------------------------------------------------------------------------------------------------
@@ -222,6 +222,20 @@
   parameter MXPIDB   =  4;     // Pattern ID bits
   parameter MXHITB   =  3;     // Hits on pattern bits
   parameter MXPATB   =  3+4;   // Pattern bits
+  parameter MXKEYX   = MXCFEB * MXHS; // Number of key HalfSrips on 7 CFEBs
+  parameter MXKEYBX  = 8;             // Number of HalfSrip key bits on 7 CFEBs
+  parameter MXXKYB   = 10;            // Number of EightStrip key bits on 7 CFEBs
+  
+    //CCLUT
+  //parameter MXSUBKEYBX = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
+  parameter MXPATC   = 12;                // Pattern Carry Bits
+  parameter MXOFFSB = 4;                 // Quarter-strip bits
+  parameter MXQLTB  = 9;                 // Fit quality bits
+  parameter MXBNDB  = 5;                 // Bend bits, 4bits for value, 1bit for sign
+  
+  parameter MXPID   = 11;                // Number of patterns
+  parameter MXPAT   = 5;                 // Number of patterns
+
 
 // Sequencer Constants
   parameter INJ_MXTBIN    =  5;  // Injector time bin counter width
@@ -1794,11 +1808,11 @@
   wire       gem_me1a_match_enable;
   wire       gem_me1b_match_enable;
   wire       gem_me1a_match_nogem;// no gem is fine for GEM-CSC match
-  wire       gem_me1a_match_noalct;// no alct is fine for GEM-CSC match
-  wire       gem_me1a_match_noclct;// no clct is fine for GEM-CSC match
   wire       gem_me1b_match_nogem;// no gem is fine for GEM-CSC match
-  wire       gem_me1b_match_noalct;// no alct is fine for GEM-CSC match
-  wire       gem_me1b_match_noclct;// no clct is fine for GEM-CSC match
+  //wire       me1a_match_drop_lowqalct;// no alct is fine for GEM-CSC match
+  wire       match_drop_lowqalct;     //drop low Q stub 
+  wire       me1a_match_drop_lowqclct;//drop low Q stub 
+  wire       me1b_match_drop_lowqclct;//drop low Q stub 
   wire       tmb_copad_alct_allow; // allow Copad+ALCT
   wire       tmb_copad_clct_allow; // allow Copad+CLCT
   //wire       gem_me1a_match_promotequal;
@@ -4381,10 +4395,10 @@ wire [15:0] gemB_bxn_counter;
   .gem_me1b_match_enable     (gem_me1b_match_enable),       //IN gem-csc match in me1b
   .gem_me1a_match_nogem      (gem_me1a_match_nogem),      //IN gem-csc match without gem is allowed in ME1b
   .gem_me1b_match_nogem      (gem_me1b_match_nogem),      //IN gem-csc match without gem is allowed in ME1a
-  .gem_me1a_match_noalct     (gem_me1a_match_noalct),     //IN gem-csc match without alct is allowed in ME1b
-  .gem_me1b_match_noalct     (gem_me1b_match_noalct),     //IN gem-csc match without alct is allowed in ME1a
-  .gem_me1a_match_noclct     (gem_me1a_match_noclct),     //IN gem-csc match without clct is allowed in ME1b
-  .gem_me1b_match_noclct     (gem_me1b_match_noclct),     //IN gem-csc match without clct is allowed in ME1a
+  //.gem_me1a_match_noalct     (gem_me1a_match_noalct),     //IN gem-csc match without alct is allowed in ME1b
+  .match_drop_lowqalct     (match_drop_lowqalct),               //IN gem-csc match drop lowQ stub 
+  .me1a_match_drop_lowqclct     (me1a_match_drop_lowqclct),     //IN gem-csc match drop lowQ stub 
+  .me1b_match_drop_lowqclct     (me1b_match_drop_lowqclct),     //IN gem-csc match drop lowQ stub 
   .tmb_copad_alct_allow      (tmb_copad_alct_allow),       //In gem-csc match, allow ALCT+copad match
   .tmb_copad_clct_allow      (tmb_copad_clct_allow),       //In gem-csc match, allow CLCT+copad match
   .gemA_match_ignore_position     (gemA_match_ignore_position),             //In GEMCSC match, no position match
@@ -5645,10 +5659,10 @@ wire [15:0] gemB_bxn_counter;
       .gem_me1b_match_enable     (gem_me1b_match_enable),       //Out gem-csc match in me1b
       .gem_me1a_match_nogem        (gem_me1a_match_nogem),       //Out gem-csc match without gem is allowed in ME1b
       .gem_me1b_match_nogem        (gem_me1b_match_nogem),       //Out gem-csc match without gem is allowed in ME1a
-      .gem_me1a_match_noalct       (gem_me1a_match_noalct),       //Out gem-csc match without alct is allowed in ME1b
-      .gem_me1b_match_noalct       (gem_me1b_match_noalct),       //Out gem-csc match without alct is allowed in ME1a
-      .gem_me1a_match_noclct       (gem_me1a_match_noclct),       //Out gem-csc match without clct is allowed in ME1b
-      .gem_me1b_match_noclct       (gem_me1b_match_noclct),       //Out gem-csc match without clct is allowed in ME1a
+      //.gem_me1a_match_noalct       (gem_me1a_match_noalct),       //Out gem-csc match without alct is allowed in ME1b
+      .match_drop_lowqalct         (match_drop_lowqalct),       //Out gem-csc match drop lowQ stub 
+      .me1a_match_drop_lowqclct    (me1a_match_drop_lowqclct),       //Out gem-csc match drop lowQ stub 
+      .me1b_match_drop_lowqclct    (me1b_match_drop_lowqclct),       //Out gem-csc match drop lowQ stub 
       .tmb_copad_alct_allow      (tmb_copad_alct_allow),       //In gem-csc match, allow ALCT+copad match
       .tmb_copad_clct_allow      (tmb_copad_clct_allow),       //In gem-csc match, allow CLCT+copad match
       //.gem_me1a_match_promotequal  (gem_me1a_match_promotequal),     //Out promote quality or not for match in ME1a region, 

@@ -8,6 +8,8 @@
 //  after above match:
 //  if CLCT+copad is not found or not allowed by configuration, then copy ALCT0 into ALCT1
 //  if ALCT+copad is not found or not allowed by configuration, then copy CLCT0 into CLCT1
+//  low Q ALCT/CLCT (nhit=3) could be removed for step3,4,5 match, and this is controlled by configuration
+//  default:   match_drop_lowqalct=false, me1a_match_drop_lowqclct=True, me1b_match_drop_lowqclct=True
 //
 //2021.08  ignore the consistency check between GEMCSC bending and CLCT bending . may add this later
 
@@ -19,13 +21,21 @@ module  alct_clct_gem_matching(
   input [6:0] alct0_wg,
   input [6:0] alct1_wg,
 
+  input [2:0] alct0_nhit,
+  input [2:0] alct1_nhit,
+
   input clct0_vpf,
   input clct1_vpf,
   input [9:0] clct0_xky,
   input [9:0] clct1_xky,
   input clct0_bend,//l or r
   input clct1_bend,
+  input [2:0] clct0_nhit,
+  input [2:0] clct1_nhit,
 
+  input match_drop_lowqalct, // drop lowQ stub when no GEM      
+  input me1a_match_drop_lowqclct, // drop lowQ stub when no GEM      
+  input me1b_match_drop_lowqclct, // drop lowQ stub when no GEM      
   input gemA_match_ignore_position, 
   input gemB_match_ignore_position, 
   input tmb_copad_alct_allow,
@@ -253,6 +263,18 @@ module  alct_clct_gem_matching(
   parameter MXCLUSTER_CHAMBER       = 8; // Num GEM clusters  per Chamber
   parameter MXCLUSTER_SUPERCHAMBER  = 16; //Num GEM cluster  per superchamber
   parameter MXBENDANGLEB            = 10; //internal,  10bits for bending angle 
+
+  //low quality stub
+  wire alct0_lowQ = alct0_nhit == 3'd3;
+  wire alct1_lowQ = alct1_nhit == 3'd3;
+  wire clct0_lowQ = clct0_nhit == 3'd3;
+  wire clct1_lowQ = clct1_nhit == 3'd3;
+
+  wire  drop_lowqalct0 = alct0_lowQ && match_drop_lowqalct;
+  wire  drop_lowqalct1 = alct1_lowQ && match_drop_lowqalct;
+  
+  wire  drop_lowqclct0 = clct0_lowQ && ((me1a_match_drop_lowqalct && clct0_xky[9]) || (me1b_match_drop_lowqalct && !clct0_xky[9]));
+  wire  drop_lowqclct1 = clct1_lowQ && ((me1a_match_drop_lowqalct && clct1_xky[9]) || (me1b_match_drop_lowqalct && !clct1_xky[9]));
 
   wire [6:0] gemA_cluster_cscwg_lo[MXCLUSTER_CHAMBER-1:0] = {
       gemA_cluster0_wg_lo,
@@ -1152,7 +1174,7 @@ module  alct_clct_gem_matching(
   wire alct_clct_nogem_nocopad   = alct_clct_gem_nomatch && alct_clct_copad_nomatch;
   wire alct1_clct1_nogem_nocopad = !alct1_clct1_gem_match_found && !alct1_clct1_copad_match_found;
 
-  assign alct0_clct0_nogem_match_found = alct_clct_nogem_nocopad && alct0_vpf && clct0_vpf; 
+  assign alct0_clct0_nogem_match_found = alct_clct_nogem_nocopad && alct0_vpf && clct0_vpf && !drop_lowqalct0 && !drop_lowqclct0; 
 
   //wire alct1_vpf_nocopad  = (swapalct_copad_match ? alct0_vpf : alct1_vpf);
   //wire alct1_vpf_nogem    = (swapalct_gem_match   ? alct0_vpf : alct1_vpf);
@@ -1161,8 +1183,8 @@ module  alct_clct_gem_matching(
 
   //assign alct1_clct1_nogem_match_found = alct_clct_nogem_nocopad ? (alct1_vpf && clct1_vpf) : ((alct1_vpf_nocopad && clct1_vpf_nocopad && !alct1_clct1_copad_match_found) || (alct1_vpf_nogem && clct1_vpf_nogem && !alct1_clct1_gem_match_found)); 
 
-  wire alct1_vpf_afterswap = (swapalct_copad_match || swapalct_gem_match) ? alct0_vpf : alct1_vpf;
-  wire clct1_vpf_afterswap = (swapclct_copad_match || swapclct_gem_match) ? clct0_vpf : clct1_vpf;
+  wire alct1_vpf_afterswap = (swapalct_copad_match || swapalct_gem_match) ? (alct0_vpf && !drop_lowqalct0) : (alct1_vpf && !drop_lowqalct1);
+  wire clct1_vpf_afterswap = (swapclct_copad_match || swapclct_gem_match) ? (clct0_vpf && !drop_lowqclct0) : (clct1_vpf && !drop_lowqclct1);
   assign alct1_clct1_nogem_match_found = (alct1_vpf_afterswap && clct1_vpf_afterswap && alct1_clct1_nogem_nocopad);
 
   //-------------------------------------------------------------------------------------------------------------------
@@ -1228,8 +1250,8 @@ module  alct_clct_gem_matching(
   // no alct1 is found.
 
   //still need to find out wire group of GEM pad
-  wire clct0_copad_match_any = |clct0_copad_match;
-  wire clct1_copad_match_any = |clct1_copad_match;
+  wire clct0_copad_match_any = ( |clct0_copad_match ) && !drop_lowqclct0;
+  wire clct1_copad_match_any = ( |clct1_copad_match ) && !drop_lowqclct1;
   assign clct0_copad_match_found  = !alct0_vpf && (clct0_copad_match_any || clct1_copad_match_any);
   assign clct1_copad_match_found  = !alct1_vpf && ((swapclct_copad_match || swapclct_gem_match) ? clct0_copad_match_any : clct1_copad_match_any);
   //only case to swap clct0 and clct1 here: both LCTs built from CLCT+copad
@@ -1301,8 +1323,8 @@ module  alct_clct_gem_matching(
   //assign alct0_copad_match_found  = !clct0_vpf && (alct1_copad_best_angle != MAXGEMCSCBND) || (alct1_copad_best_angle != MAXGEMCSCBND);
   //assign alct1_copad_match_found  = !clct1_vpf && (alct0_copad_best_angle != MAXGEMCSCBND) && (alct1_copad_best_angle != MAXGEMCSCBND);
 
-  wire alct0_copad_match_any = |alct0_copad_match;
-  wire alct1_copad_match_any = |alct1_copad_match;
+  wire alct0_copad_match_any = (|alct0_copad_match) && !drop_lowqalct0;
+  wire alct1_copad_match_any = (|alct1_copad_match) && !drop_lowqalct1;
   assign alct0_copad_match_found = !clct0_vpf && (alct0_copad_match_any || alct1_copad_match_any);
   assign alct1_copad_match_found = !clct1_vpf && ((swapalct_copad_match || swapalct_gem_match) ? alct0_copad_match_any : alct1_copad_match_any);//
   //no bending agnle comparison for LCTs built from ALCT+copad
