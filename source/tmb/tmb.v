@@ -2333,12 +2333,12 @@
 
   wire       copyalct0_foralct1_pos;
   wire       copyclct0_forclct1_pos;
-  wire       best_cluster0_ingemB,
-  wire       best_cluster0_iclst,
-  wire       best_cluster0_vpf,
-  wire       best_cluster1_ingemB,
-  wire       best_cluster1_iclst,
-  wire       best_cluster1_vpf,
+  wire       best_cluster0_ingemB;
+  wire       best_cluster0_iclst;
+  wire       best_cluster0_vpf;
+  wire       best_cluster1_ingemB;
+  wire       best_cluster1_iclst;
+  wire       best_cluster1_vpf;
 
   wire       gemcsc_match_dummy;
 

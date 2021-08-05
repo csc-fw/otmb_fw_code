@@ -273,8 +273,8 @@ module  alct_clct_gem_matching(
   wire  drop_lowqalct0 = alct0_lowQ && match_drop_lowqalct;
   wire  drop_lowqalct1 = alct1_lowQ && match_drop_lowqalct;
   
-  wire  drop_lowqclct0 = clct0_lowQ && ((me1a_match_drop_lowqalct && clct0_xky[9]) || (me1b_match_drop_lowqalct && !clct0_xky[9]));
-  wire  drop_lowqclct1 = clct1_lowQ && ((me1a_match_drop_lowqalct && clct1_xky[9]) || (me1b_match_drop_lowqalct && !clct1_xky[9]));
+  wire  drop_lowqclct0 = clct0_lowQ && ((me1a_match_drop_lowqclct && clct0_xky[9]) || (me1b_match_drop_lowqclct && !clct0_xky[9]));
+  wire  drop_lowqclct1 = clct1_lowQ && ((me1a_match_drop_lowqclct && clct1_xky[9]) || (me1b_match_drop_lowqclct && !clct1_xky[9]));
 
   wire [6:0] gemA_cluster_cscwg_lo[MXCLUSTER_CHAMBER-1:0] = {
       gemA_cluster0_wg_lo,
