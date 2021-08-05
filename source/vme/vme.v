@@ -2514,8 +2514,8 @@
   output       gemB_match_ignore_position;
   output       gemcsc_bend_enable;
 
-  output [15:0] gemcscmatch_cluster0_vme;   // In
-  output [15:0] gemcscmatch_cluster1_vme;   // In
+  input [15:0] gemcscmatch_cluster0_vme;   // In
+  input [15:0] gemcscmatch_cluster1_vme;   // In
 
   output [MXVFAT-1:0] gemA_vfat_hcm;
   output [MXVFAT-1:0] gemB_vfat_hcm;
@@ -9213,8 +9213,8 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 // ADR_GEM_CSC_MATCH_CLUSTER1=0x330,      2nd GEM CLUSTER for LCT1 from GEMCSC Match
 //------------------------------------------------------------------------------------------------------------------
 
-   assign gem_csc_match_cluster0_rd   = gem_csc_match_clsuter0_vme;
-   assign gem_csc_match_cluster1_rd   = gem_csc_match_clsuter1_vme;
+  assign gem_csc_match_cluster0_rd   = gemcscmatch_cluster0_vme;
+  assign gem_csc_match_cluster1_rd   = gemcscmatch_cluster1_vme;
 
 //------------------------------------------------------------------------------------------------------------------
 // GEM_CLUSTERs and COPADs from 0x340 to 0x36e
