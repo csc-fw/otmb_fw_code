@@ -217,13 +217,11 @@
   parameter MXSTAT   =  3;        // Buffer status bits
 
 // Pattern Finder Constants
-  parameter MXKEYX   =  MXHSX; // Number of key 1/2-strips on 7 CFEBs
+  parameter MXKEYX   =  MXCFEB * MXHS; // Number of key 1/2-strips on 7 CFEBs
   parameter MXKEYBX  =  8;     // Number of 1/2-strip key bits on 7 CFEBs
   parameter MXPIDB   =  4;     // Pattern ID bits
   parameter MXHITB   =  3;     // Hits on pattern bits
   parameter MXPATB   =  3+4;   // Pattern bits
-  parameter MXKEYX   = MXCFEB * MXHS; // Number of key HalfSrips on 7 CFEBs
-  parameter MXKEYBX  = 8;             // Number of HalfSrip key bits on 7 CFEBs
   parameter MXXKYB   = 10;            // Number of EightStrip key bits on 7 CFEBs
   
     //CCLUT
