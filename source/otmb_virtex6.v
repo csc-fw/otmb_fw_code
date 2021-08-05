@@ -4227,6 +4227,9 @@ wire [15:0] gemB_bxn_counter;
   wire  [1:0]      mpc_accept_vme;
   wire  [1:0]      mpc_reserved_vme;
 
+  wire  [15:0] gemcscmatch_cluster0_vme;
+  wire  [15:0] gemcscmatch_cluster1_vme;
+
   //GEMCSC match
   //(|gemA_csc_cluster_vpf) || (|gemB_csc_cluster_vpf);// gemA or gemB vpf signal
   // copad_match; // gem copad vpf signal
