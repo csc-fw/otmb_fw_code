@@ -712,6 +712,9 @@
   gemB_match_ignore_position,
   gemcsc_bend_enable,
 
+  gemcscmatch_cluster0_vme,   // In
+  gemcscmatch_cluster1_vme,   // In
+
 // GEM Configuration Ports
   gemA_rxd_posneg,
   gemB_rxd_posneg,
@@ -1725,8 +1728,9 @@
   parameter ADR_GEMA_TRG_CTRL         = 10'h328;
   parameter ADR_GEMB_TRG_CTRL         = 10'h32a;
   parameter ADR_GEM_CSC_MATCH_CTRL    = 10'h32c;
-
-// 10'h32E, 330, 332, 334??
+  parameter ADR_GEM_CSC_MATCH_CLUSTER0= 10'h32e;
+  parameter ADR_GEM_CSC_MATCH_CLUSTER1= 10'h330;
+// 332, 334??
 
   parameter ADR_GEMA_BXN_COUNTER      = 10'h336;
   parameter ADR_GEMB_BXN_COUNTER      = 10'h338;
@@ -3635,6 +3639,9 @@
   reg  [15:0] gem_csc_match_ctrl_wr;
   wire [15:0] gem_csc_match_ctrl_rd;
 
+  wire [15:0] gem_csc_match_cluster0_rd;
+  wire [15:0] gem_csc_match_cluster1_rd;
+
   wire [15:0] gemA_cluster_rd [MXCLUSTER_CHAMBER-1:0];
   wire [15:0] gemB_cluster_rd [MXCLUSTER_CHAMBER-1:0];
   wire [15:0] gem_copad_rd    [MXCLUSTER_CHAMBER-1:0];
@@ -3810,6 +3817,8 @@
   wire      wr_gem_cfg;
   wire      wr_gem_csc_window;
   wire      wr_gem_csc_match_ctrl;
+  wire      wr_gem_csc_match_cluster0;
+  wire      wr_gem_csc_match_cluster1;
 
   wire      wr_gem_copad_ctrl;
   wire      wr_gem_bx0_delay;
@@ -4523,6 +4532,9 @@
   ADR_GEM_BX0_DELAY:         data_out <= gem_bx0_delay_rd;
   ADR_GEM_CSC_MATCH_CTRL:    data_out <= gem_csc_match_ctrl_rd;
 
+  ADR_GEM_CSC_MATCH_CLUSTER0:data_out <= gem_csc_match_cluster0_rd;
+  ADR_GEM_CSC_MATCH_CLUSTER1:data_out <= gem_csc_match_cluster1_rd;
+
   ADR_GEMA_BXN_COUNTER:      data_out <= gemA_bxn_counter_rd;
   ADR_GEMB_BXN_COUNTER:      data_out <= gemB_bxn_counter_rd;
 
@@ -4742,6 +4754,8 @@
   assign wr_gemA_trg_ctrl         =  (reg_adr==ADR_GEMA_TRG_CTRL          && clk_en);
   assign wr_gemB_trg_ctrl         =  (reg_adr==ADR_GEMB_TRG_CTRL          && clk_en);
   assign wr_gem_csc_match_ctrl    =  (reg_adr==ADR_GEM_CSC_MATCH_CTRL     && clk_en);
+  assign wr_gem_csc_match_cluster0=  (reg_adr==ADR_GEM_CSC_MATCH_CLUSTER0 && clk_en);
+  assign wr_gem_csc_match_cluster1=  (reg_adr==ADR_GEM_CSC_MATCH_CLUSTER1 && clk_en);
 
   
   assign wr_gem_vfat_hcm0         =  (reg_adr==ADR_GEM_VFAT_HCM0          && clk_en);
@@ -9190,6 +9204,14 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign gemcsc_bend_enable           = gem_csc_match_ctrl_wr[14];
 
   assign gem_csc_match_ctrl_rd        = gem_csc_match_ctrl_wr[15:0];
+
+//------------------------------------------------------------------------------------------------------------------
+// ADR_GEM_CSC_MATCH_CLUSTER0=0x32e,      1st GEM CLUSTER for LCT0 from GEMCSC Match
+// ADR_GEM_CSC_MATCH_CLUSTER1=0x330,      2nd GEM CLUSTER for LCT1 from GEMCSC Match
+//------------------------------------------------------------------------------------------------------------------
+
+   assign gem_csc_match_cluster0_rd   = gem_csc_match_clsuter0_vme;
+   assign gem_csc_match_cluster1_rd   = gem_csc_match_clsuter1_vme;
 
 //------------------------------------------------------------------------------------------------------------------
 // GEM_CLUSTERs and COPADs from 0x340 to 0x36e

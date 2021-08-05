@@ -1,13 +1,15 @@
 `timescale 1ns / 1ps
 // the module is to check ALCT, CLCT, GEM position matching
 // step1  ALCT+CLCT+Copad matching
-// step2  ALCT+CLCT+singleGEM matching plus no copad matching
-// step3  ALCT+CLCT matching
-// step4  CLCT+Copad matching
-// step5  ALCT+Copad matching
+// step2  ALCT+CLCT+singleGEM matching if no copad matching is found
+// step3  ALCT+CLCT matching if ALCT+CLCT+singleGEM and ALCT+CLCT+copad are not found
+// step4  CLCT+Copad matching if ALCT is not found
+// step5  ALCT+Copad matching if CLCT is not found
+//  after above match:
+//  if CLCT+copad is not found or not allowed by configuration, then copy ALCT0 into ALCT1
+//  if ALCT+copad is not found or not allowed by configuration, then copy CLCT0 into CLCT1
 //
-//2021.08  ignore the consistency check between GEMCSC bending and CLCT bending 
-// try to pick up the best cluster for GEM-CSC match
+//2021.08  ignore the consistency check between GEMCSC bending and CLCT bending . may add this later
 
 module  alct_clct_gem_matching(
     
@@ -237,6 +239,14 @@ module  alct_clct_gem_matching(
 
   output       copyalct0_foralct1,
   output       copyclct0_forclct1,
+
+  output       best_cluster0_ingemB,
+  output       best_cluster0_iclst,
+  output       best_cluster0_vpf,
+  output       best_cluster1_ingemB,
+  output       best_cluster1_iclst,
+  output       best_cluster1_vpf,
+
   output       gemcsc_match_dummy
   );
 
@@ -1301,19 +1311,41 @@ module  alct_clct_gem_matching(
   assign clct0xky_fromcopad = alct0_copad_best_cscxky;
   assign clct1xky_fromcopad = alct1_copad_best_cscxky;
 
-  assign  alct0_clct0_match_found_final = alct0_clct0_copad_match_found || alct0_clct0_gem_match_found || alct0_clct0_nogem_match_found || clct0_copad_match_found || alct0_copad_match_found;
-  assign  alct1_clct1_match_found_final = alct1_clct1_copad_match_found || alct1_clct1_gem_match_found || alct1_clct1_nogem_match_found || clct1_copad_match_found || alct1_copad_match_found;
+  wire clct0_copad_match_good = clct0_copad_match_found && tmb_copad_clct_allow;
+  wire alct0_copad_match_good = alct0_copad_match_found && tmb_copad_alct_allow;
+  wire clct1_copad_match_good = clct1_copad_match_found && tmb_copad_clct_allow;
+  wire alct1_copad_match_good = alct1_copad_match_found && tmb_copad_alct_allow;
+
+  assign  alct0_clct0_match_found_final = alct0_clct0_copad_match_found || alct0_clct0_gem_match_found || alct0_clct0_nogem_match_found || clct0_copad_match_good || alct0_copad_match_good;
+  assign  alct1_clct1_match_found_final = alct1_clct1_copad_match_found || alct1_clct1_gem_match_found || alct1_clct1_nogem_match_found || clct1_copad_match_good || alct1_copad_match_good;
 
   assign  swapalct_final  = swapalct_copad_match || swapalct_gem_match;
-  assign  swapclct_final  = swapclct_copad_match || swapclct_gem_match || swapclct_clctcopad_match;
+  assign  swapclct_final  = swapclct_copad_match || swapclct_gem_match || (swapclct_clctcopad_match && tmb_copad_clct_allow);
 
-  assign  alct0fromcopad  = clct0_copad_match_found && !alct0_vpf;
-  assign  alct1fromcopad  = clct1_copad_match_found && !alct1_vpf;
-  assign  clct0fromcopad  = alct0_copad_match_found && !clct0_vpf;
-  assign  clct1fromcopad  = alct1_copad_match_found && !clct1_vpf;
+  assign  alct0fromcopad  = clct0_copad_match_good && !alct0_vpf;
+  assign  alct1fromcopad  = clct1_copad_match_good && !alct1_vpf;
+  assign  clct0fromcopad  = alct0_copad_match_good && !clct0_vpf;
+  assign  clct1fromcopad  = alct1_copad_match_good && !clct1_vpf;
 
-  assign  copyalct0_foralct1 = !alct1_vpf && !(clct1_copad_match_found && tmb_copad_clct_allow) && clct1_vpf;
-  assign  copyclct0_forclct1 = !clct1_vpf && !(alct1_copad_match_found && tmb_copad_alct_allow) && alct1_vpf;
+  assign  copyalct0_foralct1 = !alct1_vpf && !clct1_copad_match_good && clct1_vpf;
+  assign  copyclct0_forclct1 = !clct1_vpf && !alct1_copad_match_good && alct1_vpf;
+
+  //select the best match cluster
+  assign  best_cluster0_ingemB = best_cluster0_alct_clct_gem_vpf & cluster0layer_alct_clct_gem_r;
+  assign  best_cluster0_vpf    = best_cluster0_alct_clct_copad_vpf || best_cluster0_alct_clct_gem_vpf || clct0_copad_match_good || alct0_copad_match_good;
+  assign  best_cluster0_iclst  = ({3{best_cluster0_alct_clct_copad_vpf}} & best_cluster0_alct_clct_copad_r) | 
+                                 ({3{best_cluster0_alct_clct_gem_vpf}}   & best_cluster0_alct_clct_gem_r) | 
+                                 ({3{clct0_copad_match_good}}            & clct0_copad_best_icluster) | 
+                                 ({3{alct0_copad_match_good}}            & alct0_copad_best_icluster);
+
+  assign  best_cluster1_ingemB = best_cluster1_alct_clct_gem_vpf & cluster1layer_alct_clct_gem_r;
+  assign  best_cluster1_vpf    = best_cluster1_alct_clct_copad_vpf || best_cluster1_alct_clct_gem_vpf || clct1_copad_match_good || alct1_copad_match_good;
+  assign  best_cluster1_iclst  = ({3{best_cluster1_alct_clct_copad_vpf}} & best_cluster1_alct_clct_copad_r) | 
+                                 ({3{best_cluster1_alct_clct_gem_vpf}}   & best_cluster1_alct_clct_gem_r) | 
+                                 ({3{clct1_copad_match_good}}            & clct1_copad_best_icluster) | 
+                                 ({3{alct1_copad_match_good}}            & alct1_copad_best_icluster);
+
+
   assign  gemcsc_match_dummy = 1'b1;
 
   assign alct0wg_fromcopad = wgfromGEMcluster(

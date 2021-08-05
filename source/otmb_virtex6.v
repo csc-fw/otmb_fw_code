@@ -4565,6 +4565,9 @@ wire [15:0] gemB_bxn_counter;
   .mpc_accept_vme   (mpc_accept_vme[1:0]),          // Out  MPC accept latched for VME
   .mpc_reserved_vme (mpc_reserved_vme[1:0]),        // Out  MPC reserved latched for VME
 
+  .gemcscmatch_cluster0_vme  (gemcscmatch_cluster0_vme[15:0]), // Out, 1st cluster for LCT0 from GEMCSC match
+  .gemcscmatch_cluster1_vme  (gemcscmatch_cluster1_vme[15:0]), // Out, 2nd cluster for LCT1 from GEMCSC match
+
 // MPC Injector
   .mpc_inject       (mpc_inject),            // In  Start MPC test pattern injector, VME
   .ttc_mpc_inject   (ttc_mpc_inject),        // In  Start MPC injector, ttc command
@@ -5657,6 +5660,9 @@ wire [15:0] gemB_bxn_counter;
       .gemA_match_ignore_position     (gemA_match_ignore_position),             //out GEMCSC match, no position match
       .gemB_match_ignore_position     (gemB_match_ignore_position),             //out GEMCSC match, no position match
       .gemcsc_bend_enable          (gemcsc_bend_enable),         // out enable GEMCSC bending angle for match
+
+      .gemcscmatch_cluster0_vme  (gemcscmatch_cluster0_vme[15:0]), // in, 1st cluster for LCT0 from GEMCSC match
+      .gemcscmatch_cluster1_vme  (gemcscmatch_cluster1_vme[15:0]), // in, 2nd cluster for LCT1 from GEMCSC match
 
       // RPC Ports: RAT Control                                                                                      
       .rpc_sync     (rpc_sync),     // Out  Sync mode

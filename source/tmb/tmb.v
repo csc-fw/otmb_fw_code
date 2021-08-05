@@ -388,6 +388,17 @@
   clct0fromcopad_run3,
   clct1fromcopad_run3,
 
+  //select clusters for GEMCSC match
+  //gemcscmatch_cluster0_vpf,
+  //gemcscmatch_cluster0_iclst,
+  //gemcscmatch_cluster0_roll,
+  //gemcscmatch_cluster0_cscxky,
+  //gemcscmatch_cluster1_vpf,
+  //gemcscmatch_cluster1_iclst,
+  //gemcscmatch_cluster1_roll,
+  //gemcscmatch_cluster1_cscxky,
+  //gemcscmatch_cluster1_vpf,
+
   run3_trig_df, // input, flag of run3 data format upgrade
 // MPC Status
   mpc_frame_ff,
@@ -460,6 +471,9 @@
   mpc1_frame1_vme,
   mpc_accept_vme,
   mpc_reserved_vme,
+
+  gemcscmatch_cluster0_vme,
+  gemcscmatch_cluster1_vme,
 
 // MPC Injector
   mpc_inject,
@@ -941,6 +955,16 @@
   output             alct1fromcopad_run3;
   output             clct0fromcopad_run3;
   output             clct1fromcopad_run3;
+
+  //output             gemcscmatch_cluster0_vpf;
+  //output             gemcscmatch_cluster0_iclst;
+  //output             gemcscmatch_cluster0_roll;
+  //output             gemcscmatch_cluster0_cscxky;
+  //output             gemcscmatch_cluster1_vpf;
+  //output             gemcscmatch_cluster1_iclst;
+  //output             gemcscmatch_cluster1_roll;
+  //output             gemcscmatch_cluster1_cscxky;
+
 // MPC Status
   output                 mpc_frame_ff;   // MPC frame latch
   output  [MXFRAME-1:0]  mpc0_frame0_ff; // MPC best muon 1st frame
@@ -1005,6 +1029,8 @@
   output  [1:0]          mpc_accept_vme;   // MPC accept latched for VME
   output  [1:0]          mpc_reserved_vme; // MPC reserved latched for VME
 
+  output  [15:0]         gemcscmatch_cluster0_vme;// gem cluster0 from gemcsc match
+  output  [15:0]         gemcscmatch_cluster1_vme;// gem cluster1 from gemcsc match
 // MPC Injector
   input             mpc_inject;       // Start MPC test pattern injector, VME
   input             ttc_mpc_inject;   // Start MPC injector, TTC command
@@ -2229,61 +2255,61 @@
 
   wire gemcsc_match_enable = gem_me1a_match_enable || gem_me1b_match_enable;
 
-  wire [2:0] alct0_clct0_copad_best_icluster;
-  wire [9:0] alct0_clct0_copad_best_angle;
-  wire [9:0] alct0_clct0_copad_best_cscxky;
-  wire [2:0] alct0_clct1_copad_best_icluster;
-  wire [9:0] alct0_clct1_copad_best_angle;
-  wire [9:0] alct0_clct1_copad_best_cscxky;
-  wire [2:0] alct1_clct0_copad_best_icluster;
-  wire [9:0] alct1_clct0_copad_best_angle;
-  wire [9:0] alct1_clct0_copad_best_cscxky;
-  wire [2:0] alct1_clct1_copad_best_icluster;
-  wire [9:0] alct1_clct1_copad_best_angle;
-  wire [9:0] alct1_clct1_copad_best_cscxky;
-  wire       alct0_clct0_copad_match_found_pos;
-  wire       alct1_clct1_copad_match_found_pos;
+  //wire [2:0] alct0_clct0_copad_best_icluster;
+  //wire [9:0] alct0_clct0_copad_best_angle;
+  //wire [9:0] alct0_clct0_copad_best_cscxky;
+  //wire [2:0] alct0_clct1_copad_best_icluster;
+  //wire [9:0] alct0_clct1_copad_best_angle;
+  //wire [9:0] alct0_clct1_copad_best_cscxky;
+  //wire [2:0] alct1_clct0_copad_best_icluster;
+  //wire [9:0] alct1_clct0_copad_best_angle;
+  //wire [9:0] alct1_clct0_copad_best_cscxky;
+  //wire [2:0] alct1_clct1_copad_best_icluster;
+  //wire [9:0] alct1_clct1_copad_best_angle;
+  //wire [9:0] alct1_clct1_copad_best_cscxky;
+  wire       alct0_clct0_copad_match_found_pos;//LCT0 from ALCTxCLCTxCopad 
+  wire       alct1_clct1_copad_match_found_pos;//LCT1 from ALCTxCLCTxCopad
   wire       swapalct_copad_match_pos;
   wire       swapclct_copad_match_pos;
   wire       alct_clct_copad_nomatch_pos;
 
 
-  wire [2:0] alct0_clct0_gemA_best_icluster;
-  wire [9:0] alct0_clct0_gemA_best_angle;
-  wire [9:0] alct0_clct0_gemA_best_cscxky;
-  wire [2:0] alct0_clct1_gemA_best_icluster;
-  wire [9:0] alct0_clct1_gemA_best_angle;
-  wire [9:0] alct0_clct1_gemA_best_cscxky;
-  wire [2:0] alct1_clct0_gemA_best_icluster;
-  wire [9:0] alct1_clct0_gemA_best_angle;
-  wire [9:0] alct1_clct0_gemA_best_cscxky;
-  wire [2:0] alct1_clct1_gemA_best_icluster;
-  wire [9:0] alct1_clct1_gemA_best_angle;
-  wire [9:0] alct1_clct1_gemA_best_cscxky;
-  wire [2:0] alct0_clct0_gemB_best_icluster;
-  wire [9:0] alct0_clct0_gemB_best_angle;
-  wire [9:0] alct0_clct0_gemB_best_cscxky;
-  wire [2:0] alct0_clct1_gemB_best_icluster;
-  wire [9:0] alct0_clct1_gemB_best_angle;
-  wire [9:0] alct0_clct1_gemB_best_cscxky;
-  wire [2:0] alct1_clct0_gemB_best_icluster;
-  wire [9:0] alct1_clct0_gemB_best_angle;
-  wire [9:0] alct1_clct0_gemB_best_cscxky;
-  wire [2:0] alct1_clct1_gemB_best_icluster;
-  wire [9:0] alct1_clct1_gemB_best_angle;
-  wire [9:0] alct1_clct1_gemB_best_cscxky;
+  //wire [2:0] alct0_clct0_gemA_best_icluster;
+  //wire [9:0] alct0_clct0_gemA_best_angle;
+  //wire [9:0] alct0_clct0_gemA_best_cscxky;
+  //wire [2:0] alct0_clct1_gemA_best_icluster;
+  //wire [9:0] alct0_clct1_gemA_best_angle;
+  //wire [9:0] alct0_clct1_gemA_best_cscxky;
+  //wire [2:0] alct1_clct0_gemA_best_icluster;
+  //wire [9:0] alct1_clct0_gemA_best_angle;
+  //wire [9:0] alct1_clct0_gemA_best_cscxky;
+  //wire [2:0] alct1_clct1_gemA_best_icluster;
+  //wire [9:0] alct1_clct1_gemA_best_angle;
+  //wire [9:0] alct1_clct1_gemA_best_cscxky;
+  //wire [2:0] alct0_clct0_gemB_best_icluster;
+  //wire [9:0] alct0_clct0_gemB_best_angle;
+  //wire [9:0] alct0_clct0_gemB_best_cscxky;
+  //wire [2:0] alct0_clct1_gemB_best_icluster;
+  //wire [9:0] alct0_clct1_gemB_best_angle;
+  //wire [9:0] alct0_clct1_gemB_best_cscxky;
+  //wire [2:0] alct1_clct0_gemB_best_icluster;
+  //wire [9:0] alct1_clct0_gemB_best_angle;
+  //wire [9:0] alct1_clct0_gemB_best_cscxky;
+  //wire [2:0] alct1_clct1_gemB_best_icluster;
+  //wire [9:0] alct1_clct1_gemB_best_angle;
+  //wire [9:0] alct1_clct1_gemB_best_cscxky;
   wire       alct0_clct0_bestgem_pos; // 0 for GEMA, 1 for GEMB
   wire       alct0_clct1_bestgem_pos;
   wire       alct1_clct0_bestgem_pos;
   wire       alct1_clct1_bestgem_pos;
-  wire       alct0_clct0_gem_match_found_pos;
-  wire       alct1_clct1_gem_match_found_pos;
+  wire       alct0_clct0_gem_match_found_pos;//LCT0 from ALCTxCLCTxGEM
+  wire       alct1_clct1_gem_match_found_pos;//LCT1 from ALCTxCLCTxGEM
   wire       swapalct_gem_match_pos;
   wire       swapclct_gem_match_pos;
   wire       alct_clct_gem_nomatch_pos;
 
-  wire       alct0_clct0_nogem_match_found_pos;
-  wire       alct1_clct1_nogem_match_found_pos;
+  wire       alct0_clct0_nogem_match_found_pos;//LCT0 from ALCTxCLCT
+  wire       alct1_clct1_nogem_match_found_pos;//LCT1 from ALCTxCLCT, but not include the case of copying ALCT/CLCT to build 2nd LCT
 
   wire       clct0_copad_match_found_pos;
   wire       clct1_copad_match_found_pos;
@@ -2308,6 +2334,13 @@
 
   wire       copyalct0_foralct1_pos;
   wire       copyclct0_forclct1_pos;
+  wire       best_cluster0_ingemB,
+  wire       best_cluster0_iclst,
+  wire       best_cluster0_vpf,
+  wire       best_cluster1_ingemB,
+  wire       best_cluster1_iclst,
+  wire       best_cluster1_vpf,
+
   wire       gemcsc_match_dummy;
 
   assign     alct_clct_copad_match_pos  = alct0_clct0_copad_match_found_pos;
@@ -2545,6 +2578,14 @@
 
   .copyalct0_foralct1             (copyalct0_foralct1_pos),
   .copyclct0_forclct1             (copyclct0_forclct1_pos),
+
+  .best_cluster0_ingemB           (best_cluster0_ingemB),
+  .best_cluster0_iclst            (best_cluster0_iclst),
+  .best_cluster0_vpf              (best_cluster0_vpf),
+  .best_cluster1_ingemB           (best_cluster1_ingemB),
+  .best_cluster1_iclst            (best_cluster1_iclst),
+  .best_cluster1_vpf              (best_cluster1_vpf),
+
   .gemcsc_match_dummy             (gemcsc_match_dummy)
   );
 
@@ -2576,7 +2617,7 @@
   wire clct_kept = (clct_keep || clct_keep_ro);
 
   //------------------------------------------------------------------------------------------------------------------
-  // Run3 logic with GEMCSC match
+  // Run3 logic with GEMCSC match: ALCT+copad, CLCT+copad
   wire clct0_copad_match_good = clct0_copad_match_found_pos && tmb_copad_clct_allow;
   wire alct0_copad_match_good = alct0_copad_match_found_pos && tmb_copad_alct_allow;
   wire clct1_copad_match_good = clct1_copad_match_found_pos && tmb_copad_clct_allow;
@@ -2794,6 +2835,122 @@
       clct0xky_fromcopad_r     <= clct0xky_fromcopad;
       clct1xky_fromcopad_r     <= clct1xky_fromcopad;
   end
+
+  //selected best clsuters from GEMCSC match
+  reg [ 2:0] best_cluster0_icluster_ff   = 3'b0;
+  reg [ 2:0] best_cluster0_roll_ff       = 3'b0;
+  reg [ 7:0] best_cluster0_pad_ff        = 8'b0;
+  reg [ 9:0] best_cluster0_cscxky_ff     = 10'b0;
+  reg        best_cluster0_vpf_ff       = 1'b0;
+  reg [ 2:0] best_cluster1_icluster_ff   = 3'b0;
+  reg [ 2:0] best_cluster1_roll_ff       = 3'b0;
+  reg [ 7:0] best_cluster1_pad_ff        = 8'b0;
+  reg [ 9:0] best_cluster1_cscxky_ff     = 10'b0;
+  reg        best_cluster1_vpf_ff       = 1'b0;
+  always @(posedge clock) begin
+      case(best_cluster0_iclst)
+          3'd0: begin 
+              best_cluster0_roll_ff   <= best_cluster0_vpf ? (best_cluster0_ingemB ? gemB_cluster_pipe[0][10:8] : gemA_cluster_pipe[0][10:8]) : 3'b0; 
+              best_cluster0_pad_ff    <= best_cluster0_vpf ? (best_cluster0_ingemB ? gemB_cluster_pipe[0][ 7:0] : gemA_cluster_pipe[0][ 7:0]) : 8'hFF; 
+              best_cluster0_cscxky_ff <= best_cluster0_vpf ? (best_cluster0_ingemB ? gemB_cluster_cscxky_mi_pipe[0][9:0] : gemA_cluster_cscxky_mi_pipe[0][9:0]) : 10'h3FF; 
+          end
+          3'd1: begin 
+              best_cluster0_roll_ff   <= best_cluster0_ingemB ?           gemB_cluster_pipe[1][10:8] :           gemA_cluster_pipe[1][10:8]; 
+              best_cluster0_pad_ff    <= best_cluster0_ingemB ?           gemB_cluster_pipe[1][ 7:0] :           gemA_cluster_pipe[1][ 7:0]; 
+              best_cluster0_cscxky_ff <= best_cluster0_ingemB ? gemB_cluster_cscxky_mi_pipe[1][ 9:0] : gemA_cluster_cscxky_mi_pipe[1][ 9:0];  
+          end
+          3'd2: begin 
+              best_cluster0_roll_ff   <= best_cluster0_ingemB ?           gemB_cluster_pipe[2][10:8] :           gemA_cluster_pipe[2][10:8]; 
+              best_cluster0_pad_ff    <= best_cluster0_ingemB ?           gemB_cluster_pipe[2][ 7:0] :           gemA_cluster_pipe[2][ 7:0]; 
+              best_cluster0_cscxky_ff <= best_cluster0_ingemB ? gemB_cluster_cscxky_mi_pipe[2][ 9:0] : gemA_cluster_cscxky_mi_pipe[2][ 9:0];  
+          end
+          3'd3: begin 
+              best_cluster0_roll_ff   <= best_cluster0_ingemB ?           gemB_cluster_pipe[3][10:8] :           gemA_cluster_pipe[3][10:8]; 
+              best_cluster0_pad_ff    <= best_cluster0_ingemB ?           gemB_cluster_pipe[3][ 7:0] :           gemA_cluster_pipe[3][ 7:0]; 
+              best_cluster0_cscxky_ff <= best_cluster0_ingemB ? gemB_cluster_cscxky_mi_pipe[3][ 9:0] : gemA_cluster_cscxky_mi_pipe[3][ 9:0];  
+          end
+          3'd4: begin 
+              best_cluster0_roll_ff   <= best_cluster0_ingemB ?           gemB_cluster_pipe[4][10:8] :           gemA_cluster_pipe[4][10:8]; 
+              best_cluster0_pad_ff    <= best_cluster0_ingemB ?           gemB_cluster_pipe[4][ 7:0] :           gemA_cluster_pipe[4][ 7:0]; 
+              best_cluster0_cscxky_ff <= best_cluster0_ingemB ? gemB_cluster_cscxky_mi_pipe[4][ 9:0] : gemA_cluster_cscxky_mi_pipe[4][ 9:0];  
+          end
+          3'd5: begin 
+              best_cluster0_roll_ff   <= best_cluster0_ingemB ?           gemB_cluster_pipe[5][10:8] :           gemA_cluster_pipe[5][10:8]; 
+              best_cluster0_pad_ff    <= best_cluster0_ingemB ?           gemB_cluster_pipe[5][ 7:0] :           gemA_cluster_pipe[5][ 7:0]; 
+              best_cluster0_cscxky_ff <= best_cluster0_ingemB ? gemB_cluster_cscxky_mi_pipe[5][ 9:0] : gemA_cluster_cscxky_mi_pipe[5][ 9:0];  
+          end
+          3'd6: begin 
+              best_cluster0_roll_ff   <= best_cluster0_ingemB ?           gemB_cluster_pipe[6][10:8] :           gemA_cluster_pipe[6][10:8]; 
+              best_cluster0_pad_ff    <= best_cluster0_ingemB ?           gemB_cluster_pipe[6][ 7:0] :           gemA_cluster_pipe[6][ 7:0]; 
+              best_cluster0_cscxky_ff <= best_cluster0_ingemB ? gemB_cluster_cscxky_mi_pipe[6][ 9:0] : gemA_cluster_cscxky_mi_pipe[6][ 9:0];  
+          end
+          3'd7: begin 
+              best_cluster0_roll_ff   <= best_cluster0_ingemB ?           gemB_cluster_pipe[7][10:8] :           gemA_cluster_pipe[7][10:8]; 
+              best_cluster0_pad_ff    <= best_cluster0_ingemB ?           gemB_cluster_pipe[7][ 7:0] :           gemA_cluster_pipe[7][ 7:0]; 
+              best_cluster0_cscxky_ff <= best_cluster0_ingemB ? gemB_cluster_cscxky_mi_pipe[7][ 9:0] : gemA_cluster_cscxky_mi_pipe[7][ 9:0];  
+          end
+      endcase
+
+      case(best_cluster1_iclst)
+          3'd0: begin 
+              best_cluster1_roll_ff   <= best_cluster1_vpf ? (best_cluster1_ingemB ? gemB_cluster_pipe[0][10:8] : gemA_cluster_pipe[0][10:8]) : 3'b0; 
+              best_cluster1_pad_ff    <= best_cluster1_vpf ? (best_cluster1_ingemB ? gemB_cluster_pipe[0][ 7:0] : gemA_cluster_pipe[0][ 7:0]) : 8'hFF; 
+              best_cluster1_cscxky_ff <= best_cluster1_vpf ? (best_cluster1_ingemB ? gemB_cluster_cscxky_mi_pipe[0][9:0] : gemA_cluster_cscxky_mi_pipe[0][9:0]) : 10'h3FF; 
+          end
+          3'd1: begin 
+              best_cluster1_roll_ff   <= best_cluster1_ingemB ?           gemB_cluster_pipe[1][10:8] :           gemA_cluster_pipe[1][10:8]; 
+              best_cluster1_pad_ff    <= best_cluster1_ingemB ?           gemB_cluster_pipe[1][ 7:0] :           gemA_cluster_pipe[1][ 7:0]; 
+              best_cluster1_cscxky_ff <= best_cluster1_ingemB ? gemB_cluster_cscxky_mi_pipe[1][ 9:0] : gemA_cluster_cscxky_mi_pipe[1][ 9:0];  
+          end
+          3'd2: begin 
+              best_cluster1_roll_ff   <= best_cluster1_ingemB ?           gemB_cluster_pipe[2][10:8] :           gemA_cluster_pipe[2][10:8]; 
+              best_cluster1_pad_ff    <= best_cluster1_ingemB ?           gemB_cluster_pipe[2][ 7:0] :           gemA_cluster_pipe[2][ 7:0]; 
+              best_cluster1_cscxky_ff <= best_cluster1_ingemB ? gemB_cluster_cscxky_mi_pipe[2][ 9:0] : gemA_cluster_cscxky_mi_pipe[2][ 9:0];  
+          end
+          3'd3: begin 
+              best_cluster1_roll_ff   <= best_cluster1_ingemB ?           gemB_cluster_pipe[3][10:8] :           gemA_cluster_pipe[3][10:8]; 
+              best_cluster1_pad_ff    <= best_cluster1_ingemB ?           gemB_cluster_pipe[3][ 7:0] :           gemA_cluster_pipe[3][ 7:0]; 
+              best_cluster1_cscxky_ff <= best_cluster1_ingemB ? gemB_cluster_cscxky_mi_pipe[3][ 9:0] : gemA_cluster_cscxky_mi_pipe[3][ 9:0];  
+          end
+          3'd4: begin 
+              best_cluster1_roll_ff   <= best_cluster1_ingemB ?           gemB_cluster_pipe[4][10:8] :           gemA_cluster_pipe[4][10:8]; 
+              best_cluster1_pad_ff    <= best_cluster1_ingemB ?           gemB_cluster_pipe[4][ 7:0] :           gemA_cluster_pipe[4][ 7:0]; 
+              best_cluster1_cscxky_ff <= best_cluster1_ingemB ? gemB_cluster_cscxky_mi_pipe[4][ 9:0] : gemA_cluster_cscxky_mi_pipe[4][ 9:0];  
+          end
+          3'd5: begin 
+              best_cluster1_roll_ff   <= best_cluster1_ingemB ?           gemB_cluster_pipe[5][10:8] :           gemA_cluster_pipe[5][10:8]; 
+              best_cluster1_pad_ff    <= best_cluster1_ingemB ?           gemB_cluster_pipe[5][ 7:0] :           gemA_cluster_pipe[5][ 7:0]; 
+              best_cluster1_cscxky_ff <= best_cluster1_ingemB ? gemB_cluster_cscxky_mi_pipe[5][ 9:0] : gemA_cluster_cscxky_mi_pipe[5][ 9:0];  
+          end
+          3'd6: begin 
+              best_cluster1_roll_ff   <= best_cluster1_ingemB ?           gemB_cluster_pipe[6][10:8] :           gemA_cluster_pipe[6][10:8]; 
+              best_cluster1_pad_ff    <= best_cluster1_ingemB ?           gemB_cluster_pipe[6][ 7:0] :           gemA_cluster_pipe[6][ 7:0]; 
+              best_cluster1_cscxky_ff <= best_cluster1_ingemB ? gemB_cluster_cscxky_mi_pipe[6][ 9:0] : gemA_cluster_cscxky_mi_pipe[6][ 9:0];  
+          end
+          3'd7: begin 
+              best_cluster1_roll_ff   <= best_cluster1_ingemB ?           gemB_cluster_pipe[7][10:8] :           gemA_cluster_pipe[7][10:8]; 
+              best_cluster1_pad_ff    <= best_cluster1_ingemB ?           gemB_cluster_pipe[7][ 7:0] :           gemA_cluster_pipe[7][ 7:0]; 
+              best_cluster1_cscxky_ff <= best_cluster1_ingemB ? gemB_cluster_cscxky_mi_pipe[7][ 9:0] : gemA_cluster_cscxky_mi_pipe[7][ 9:0];  
+          end
+      endcase
+
+     best_cluster0_vpf_ff      <= best_cluster0_vpf;
+     best_cluster0_icluster_ff <= best_cluster0_iclst;
+     best_cluster1_vpf_ff      <= best_cluster1_vpf;
+     best_cluster1_icluster_ff <= best_cluster1_iclst;
+  end
+
+  //assign gemcscmatch_cluster0_vpf    = best_cluster0_vpf_ff;
+  //assign gemcscmatch_cluster0_iclst  = best_cluster0_icluster_ff;
+  //assign gemcscmatch_cluster0_roll   = best_cluster0_roll_ff;
+  //assign gemcscmatch_cluster0_cscxky = best_cluster0_cscxky_ff;
+  //assign gemcscmatch_cluster1_vpf    = best_cluster1_vpf_ff;
+  //assign gemcscmatch_cluster1_iclst  = best_cluster1_iclst_ff;
+  //assign gemcscmatch_cluster1_roll   = best_cluster1_roll_ff;
+  //assign gemcscmatch_cluster1_cscxky = best_cluster1_cscxky_ff;
+
+  wire [15:0] gemcscmatch_cluster0  = best_cluster0_vpf_ff ? {best_cluster0_cscxky_ff, best_cluster0_roll_ff, best_cluster0_icluster_ff} : 16'h0; 
+  wire [15:0] gemcscmatch_cluster1  = best_cluster1_vpf_ff ? {best_cluster1_cscxky_ff, best_cluster1_roll_ff, best_cluster1_icluster_ff} : 16'h0; 
 
 // Output vpf test point signals for timing-in, removed FFs so internal scope will be in real-time
   reg  alct_vpf_tp    = 0;
@@ -3320,6 +3477,17 @@
   wire   wr_avail_rtmb_dly = (mpc_tx_delay_is_0) ? wr_avail_rtmb : wr_avail_rtmb_srl;
   wire   trig_mpc_rtmb_dly = (mpc_tx_delay_is_0) ? trig_mpc      : trig_mpc_srl;
 
+//parallel delay clusters from GEMCSC match
+  wire  [15:0] gemcscmatch_cluster0_srl, gemcscmatch_cluster1_srl;
+  wire  [15:0] gemcscmatch_cluster0_dly, gemcscmatch_cluster1_dly;
+  srl16e_bbl #(16)      umcluster0  (.clock(clock),.ce(wsrlen),.adr(mpc_tx_delaym1),.d(gemcscmatch_cluster0),.q(gemcscmatch_cluster0_srl ));
+  srl16e_bbl #(16)      umcluster1  (.clock(clock),.ce(wsrlen),.adr(mpc_tx_delaym1),.d(gemcscmatch_cluster1),.q(gemcscmatch_cluster1_srl ));
+  assign gemcscmatch_cluster0_dly = (mpc_tx_delay_is_0) ? gemcscmatch_cluster0 : gemcscmatch_cluster0_srl;
+  assign gemcscmatch_cluster1_dly = (mpc_tx_delay_is_0) ? gemcscmatch_cluster1 : gemcscmatch_cluster1_srl;
+
+  reg  [15:0]  gemcscmatch_cluster0_vme_ff;
+  reg  [15:0]  gemcscmatch_cluster1_vme_ff;
+
 // Push MPC frames into header RAM after mpc_tx_delay
   reg  mpc_frame_ff=0;
   always @(posedge clock) begin
@@ -3330,6 +3498,9 @@
 
     {mpc1_frame0_ff,mpc0_frame0_ff} <= mpc_frame0_dly; // Pulsed copy of LCTs for header
     {mpc1_frame1_ff,mpc0_frame1_ff} <= mpc_frame1_dly;
+
+    gemcscmatch_cluster0_vme_ff  <= gemcscmatch_cluster0_dly;
+    gemcscmatch_cluster1_vme_ff  <= gemcscmatch_cluster1_dly;
   end
 
 // Latch MPC output words for VME
@@ -3343,6 +3514,9 @@
     else if (trig_mpc_rtmb_dly || mpc_frame0_dly[15]) begin
       {mpc1_frame0_vme,mpc0_frame0_vme} <= mpc_frame0_dly; // Latched copy of LCTs for VME
       {mpc1_frame1_vme,mpc0_frame1_vme} <= mpc_frame1_dly;
+       
+      gemcscmatch_cluster0_vme  <= gemcscmatch_cluster0_vme_ff;
+      gemcscmatch_cluster1_vme  <= gemcscmatch_cluster1_vme_ff;
     end
   end
 
