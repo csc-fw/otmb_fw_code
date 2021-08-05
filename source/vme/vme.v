@@ -3820,8 +3820,8 @@
   wire      wr_gem_cfg;
   wire      wr_gem_csc_window;
   wire      wr_gem_csc_match_ctrl;
-  wire      wr_gem_csc_match_cluster0;
-  wire      wr_gem_csc_match_cluster1;
+  //wire      wr_gem_csc_match_cluster0;
+  //wire      wr_gem_csc_match_cluster1;
 
   wire      wr_gem_copad_ctrl;
   wire      wr_gem_bx0_delay;
@@ -4757,8 +4757,8 @@
   assign wr_gemA_trg_ctrl         =  (reg_adr==ADR_GEMA_TRG_CTRL          && clk_en);
   assign wr_gemB_trg_ctrl         =  (reg_adr==ADR_GEMB_TRG_CTRL          && clk_en);
   assign wr_gem_csc_match_ctrl    =  (reg_adr==ADR_GEM_CSC_MATCH_CTRL     && clk_en);
-  assign wr_gem_csc_match_cluster0=  (reg_adr==ADR_GEM_CSC_MATCH_CLUSTER0 && clk_en);
-  assign wr_gem_csc_match_cluster1=  (reg_adr==ADR_GEM_CSC_MATCH_CLUSTER1 && clk_en);
+  //assign wr_gem_csc_match_cluster0=  (reg_adr==ADR_GEM_CSC_MATCH_CLUSTER0 && clk_en);
+  //assign wr_gem_csc_match_cluster1=  (reg_adr==ADR_GEM_CSC_MATCH_CLUSTER1 && clk_en);
 
   
   assign wr_gem_vfat_hcm0         =  (reg_adr==ADR_GEM_VFAT_HCM0          && clk_en);

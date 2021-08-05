@@ -1387,8 +1387,8 @@
   reg   [MXFRAME-1:0]  mpc1_frame1_vme = 0;
 
   
-  reg  [15:0]         gemcscmatch_cluster0_vme = 0;// gem cluster0 from gemcsc match
-  reg  [15:0]         gemcscmatch_cluster1_vme = 0;// gem cluster1 from gemcsc match
+  reg  [15:0]         gemcscmatch_cluster0_vme = 16'hFFFF;// gem cluster0 from gemcsc match
+  reg  [15:0]         gemcscmatch_cluster1_vme = 16'hFFFF;// gem cluster1 from gemcsc match
 
   reg   [7:0] mpc_frame_cnt  = 0;
   wire        mpc_frame_done;
@@ -3508,8 +3508,6 @@
   assign gemcscmatch_cluster0_dly = (mpc_tx_delay_is_0) ? gemcscmatch_cluster0 : gemcscmatch_cluster0_srl;
   assign gemcscmatch_cluster1_dly = (mpc_tx_delay_is_0) ? gemcscmatch_cluster1 : gemcscmatch_cluster1_srl;
 
-  reg  [15:0]  gemcscmatch_cluster0_vme_ff;
-  reg  [15:0]  gemcscmatch_cluster1_vme_ff;
 
 // Push MPC frames into header RAM after mpc_tx_delay
   reg  mpc_frame_ff=0;
@@ -3522,8 +3520,6 @@
     {mpc1_frame0_ff,mpc0_frame0_ff} <= mpc_frame0_dly; // Pulsed copy of LCTs for header
     {mpc1_frame1_ff,mpc0_frame1_ff} <= mpc_frame1_dly;
 
-    gemcscmatch_cluster0_vme_ff  <= gemcscmatch_cluster0_dly;
-    gemcscmatch_cluster1_vme_ff  <= gemcscmatch_cluster1_dly;
   end
 
 // Latch MPC output words for VME
@@ -3538,8 +3534,8 @@
       {mpc1_frame0_vme,mpc0_frame0_vme} <= mpc_frame0_dly; // Latched copy of LCTs for VME
       {mpc1_frame1_vme,mpc0_frame1_vme} <= mpc_frame1_dly;
        
-      gemcscmatch_cluster0_vme  <= gemcscmatch_cluster0_vme_ff;
-      gemcscmatch_cluster1_vme  <= gemcscmatch_cluster1_vme_ff;
+      gemcscmatch_cluster0_vme  <= gemcscmatch_cluster0_vme_dly;
+      gemcscmatch_cluster1_vme  <= gemcscmatch_cluster1_vme_dly;
     end
   end
 
