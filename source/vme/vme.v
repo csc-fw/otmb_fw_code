@@ -690,8 +690,8 @@
   //GEM-CSC match window, deltahs, deltawire
   gem_clct_deltahs,               // Out  GEM GEM-CSC match window, deltahs, the final window is deltahs*2+1
   gem_alct_deltawire ,               // Out GEM-CSC match window, deltawire, final window is deltawire*2+1
-  gem_clct_enable,               //Out gem-clct match is enabled or not
-  gem_alct_enable,              //Out gem-alct match is enabled or not
+  //gem_clct_enable,               //Out gem-clct match is enabled or not
+  //gem_alct_enable,              //Out gem-alct match is enabled or not
 
   //GEM-CSC match control
   gem_me1a_match_enable,       //Out gem-csc match in me1a
@@ -2493,8 +2493,8 @@
 
   output [4:0] gem_clct_deltahs;
   output [2:0] gem_alct_deltawire;
-  output       gem_clct_enable;
-  output       gem_alct_enable;
+  //output       gem_clct_enable;
+  //output       gem_alct_enable;
 
   output       gem_me1a_match_enable;
   output       gem_me1b_match_enable;
@@ -9041,8 +9041,8 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 
   assign gem_clct_deltahs  [4:0]       = gem_csc_window_wr[4:0];//
   assign gem_alct_deltawire[2:0]       = gem_csc_window_wr[7:5];//8bits
-  assign gem_clct_enable               = gem_csc_window_wr[8];
-  assign gem_alct_enable               = gem_csc_window_wr[9];
+  //assign gem_clct_enable               = gem_csc_window_wr[8];
+  //assign gem_alct_enable               = gem_csc_window_wr[9];
 
   assign gem_csc_window_rd [15:0] = gem_csc_window_wr [15:0]; // Readback
 

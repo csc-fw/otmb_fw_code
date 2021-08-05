@@ -45,7 +45,7 @@ module  tree_encoder_alctclctgem(
 
   //
   //Line 53: Signal <gem_xky_s1> missing in the sensitivity list is added for synthesis purposes. HDL and post-synthesis simulations may differ as a result.
-  always @(pri_s1[0] or win_s1[0]) begin
+  always @(pri_s1[0] or win_s1[0] or gem_xky_s1[0]) begin
   if      ((pri_s1[3] < pri_s1[2]) &&
       (pri_s1[3] < pri_s1[1]) &&
       (pri_s1[3] < pri_s1[0]))

@@ -236,7 +236,6 @@ module  alct_clct_gem_matching(
   output       alct1_copad_match_found,
   output [9:0] clct0xky_fromcopad,
   output [9:0] clct1xky_fromcopad,
-  output       swapalct_alctcopad_match,
 
   output       alct0_clct0_match_found_final,
   output       alct1_clct1_match_found_final,
@@ -1250,12 +1249,12 @@ module  alct_clct_gem_matching(
   // no alct1 is found.
 
   //still need to find out wire group of GEM pad
-  wire clct0_copad_match_any = ( |clct0_copad_match ) && !drop_lowqclct0;
-  wire clct1_copad_match_any = ( |clct1_copad_match ) && !drop_lowqclct1;
+  wire clct0_copad_match_any = ( |clct0_copad_match_ok ) && !drop_lowqclct0;
+  wire clct1_copad_match_any = ( |clct1_copad_match_ok ) && !drop_lowqclct1;
   assign clct0_copad_match_found  = !alct0_vpf && (clct0_copad_match_any || clct1_copad_match_any);
   assign clct1_copad_match_found  = !alct1_vpf && ((swapclct_copad_match || swapclct_gem_match) ? clct0_copad_match_any : clct1_copad_match_any);
   //only case to swap clct0 and clct1 here: both LCTs built from CLCT+copad
-  assign swapclct_clctcopad_match = clct0_copad_match_found && (clct0_copad_best_angle > clct1_copad_best_angle);
+  assign swapclct_clctcopad_match = clct0_copad_match_found && clct1_copad_match_found && (clct0_copad_best_angle > clct1_copad_best_angle);
   //wire clct1_copad_required     = !alct1_clct1_gem_match_found && !alct1_clct1_copad_match_found && !alct1_clct1_nogem_match_found;
   //wire clct1_copad_match_found  = !alct1_vpf && (clct0_copad_best_angle != MAXGEMCSCBND) && (clct1_copad_best_angle != MAXGEMCSCBND);
   //wire clct0_copad_nomatch      = !clct0_copad_match_found;
@@ -1327,8 +1326,6 @@ module  alct_clct_gem_matching(
   wire alct1_copad_match_any = (|alct1_copad_match) && !drop_lowqalct1;
   assign alct0_copad_match_found = !clct0_vpf && (alct0_copad_match_any || alct1_copad_match_any);
   assign alct1_copad_match_found = !clct1_vpf && ((swapalct_copad_match || swapalct_gem_match) ? alct0_copad_match_any : alct1_copad_match_any);//
-  //no bending agnle comparison for LCTs built from ALCT+copad
-  //assign swapalct_alctcopad_match = alct0_copad_match_found && (alct0_copad_best_angle > alct1_copad_best_angle);
 
   assign clct0xky_fromcopad = alct0_copad_best_cscxky;
   assign clct1xky_fromcopad = alct1_copad_best_cscxky;

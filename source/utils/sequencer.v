@@ -885,6 +885,9 @@
   alct1fromcopad_run3,
   clct0fromcopad_run3,
   clct1fromcopad_run3,
+  alctclctcopad_swapped,
+  alctclctgem_swapped,
+  clct_swapped,
   //gemA_alct_clct_match,
   //gemB_alct_clct_match,
   //alct_gem,
@@ -1888,6 +1891,9 @@
   input             alct1fromcopad_run3;
   input             clct0fromcopad_run3;
   input             clct1fromcopad_run3;
+  input             alctclctcopad_swapped;
+  input             alctclctgem_swapped;
+  input             clct_swapped;
 // MPC Status
 
   input  run3_daq_df;
@@ -3535,7 +3541,7 @@
   parameter ACTVFAT_CNT_START       = 12;
   parameter GEMCSCMAP_CNT_START     = 84; // 12+24*3
   parameter GEMCSCMATCH_CNT_START   = 88; // 84+4
-  parameter GEM_UNUSED_START        = 113; //+25
+  parameter GEM_UNUSED_START        = 116; //+28
   
   wire alct_clct_gem_match = alct_clct_copad_match_pos || alct_clct_gemA_match_pos || alct_clct_gemB_match_pos;
 // Counter enable strobes
@@ -3591,6 +3597,9 @@
     gem_cnt_en[GEMCSCMATCH_CNT_START+22]    <= alct1fromcopad_run3;
     gem_cnt_en[GEMCSCMATCH_CNT_START+23]    <= clct0fromcopad_run3;
     gem_cnt_en[GEMCSCMATCH_CNT_START+24]    <= clct1fromcopad_run3;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+25]    <= alctclctcopad_swapped;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+26]    <= alctclctgem_swapped;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+27]    <= clct_swapped;
 
 
   end

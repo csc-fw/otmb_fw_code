@@ -3489,6 +3489,9 @@ end
   .alct1fromcopad_run3       (alct1fromcopad_run3),// Out GEMCSC match results 
   .clct0fromcopad_run3       (clct0fromcopad_run3),// Out GEMCSC match results 
   .clct1fromcopad_run3       (clct1fromcopad_run3),// Out GEMCSC match results 
+  .alctclctcopad_swapped     (alctclctcopad_swapped), // in, ALCT/CLCT swapped from ACLT+CLCT+copad match
+  .alctclctgem_swapped       (alctclctgem_swapped),   // in, ALCT/CLCT swapped from ACLT+CLCT+gem match
+  .clct_swapped              (clct_swapped),          // in, CLCT swapped from CLCT+copad match
 
   .run3_daq_df   (run3_daq_df),
 // Sequencer MPC Status
@@ -4504,6 +4507,9 @@ wire [15:0] gemB_bxn_counter;
   .alct1fromcopad_run3       (alct1fromcopad_run3),// Out GEMCSC match results 
   .clct0fromcopad_run3       (clct0fromcopad_run3),// Out GEMCSC match results 
   .clct1fromcopad_run3       (clct1fromcopad_run3),// Out GEMCSC match results 
+  .alctclctcopad_swapped     (alctclctcopad_swapped), // out, ALCT/CLCT swapped from ACLT+CLCT+copad match
+  .alctclctgem_swapped       (alctclctgem_swapped),   // out, ALCT/CLCT swapped from ACLT+CLCT+gem match
+  .clct_swapped              (clct_swapped),          // out, CLCT swapped from CLCT+copad match
 
   .run3_trig_df   (run3_trig_df),
 // MPC Status
