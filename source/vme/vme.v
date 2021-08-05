@@ -2514,6 +2514,9 @@
   output       gemB_match_ignore_position;
   output       gemcsc_bend_enable;
 
+  output [15:0] gemcscmatch_cluster0_vme;   // In
+  output [15:0] gemcscmatch_cluster1_vme;   // In
+
   output [MXVFAT-1:0] gemA_vfat_hcm;
   output [MXVFAT-1:0] gemB_vfat_hcm;
 
