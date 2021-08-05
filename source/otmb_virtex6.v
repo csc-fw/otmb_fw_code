@@ -1325,13 +1325,13 @@
   assign hmt_trigger_bx2345[1] = (hmt_nhits_trig_bx2345 >= hmt_thresh2) || (hmt_nhits_trig_bx2345 >= hmt_thresh3);
   assign hmt_trigger = {hmt_trigger_bx2345, hmt_trigger_bx678};
 
-  reg  [9:0] nhits_me1a;
+  //reg  [9:0] nhits_me1a;
   reg  [9:0] nhits_me1b;
   reg  [9:0] nhits_all;
 
   always @(posedge clock) begin
       nhits_all  <= cfeb_nhits[0] + cfeb_nhits[1] + cfeb_nhits[2] + cfeb_nhits[3] + cfeb_nhits[4] + cfeb_nhits[5] + cfeb_nhits[6];
-      nhits_me1a <= cfeb_nhits[4] + cfeb_nhits[5] + cfeb_nhits[6];
+      //nhits_me1a <= cfeb_nhits[4] + cfeb_nhits[5] + cfeb_nhits[6];
       nhits_me1b <= cfeb_nhits[0] + cfeb_nhits[1] + cfeb_nhits[2] + cfeb_nhits[3];
   end
 
@@ -1787,10 +1787,8 @@
   wire         gem_inj_wen;      // GEM Injector Write Enable
   wire         injector_go_gem;  // Start GEM injector
 
-  wire [4:0] gem_clct_deltahs;
-  wire [2:0] gem_alct_deltawire;
-  wire       gem_clct_enable;
-  wire       gem_alct_enable;
+  wire [4:0]   gem_clct_deltahs;
+  wire [2:0]   gem_alct_deltawire;
   
 
   wire       gem_me1a_match_enable;

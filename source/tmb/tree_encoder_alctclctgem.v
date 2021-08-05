@@ -43,6 +43,8 @@ module  tree_encoder_alctclctgem(
   assign {pri_s1[0],gem_xky_s1[0],win_s1[0]} = (win_pri_1 < win_pri_0 ) ? {win_pri_1,gem_xky_1 ,1'b1} : {win_pri_0,gem_xky_0 ,1'b0};
 
 
+  //
+  //Line 53: Signal <gem_xky_s1> missing in the sensitivity list is added for synthesis purposes. HDL and post-synthesis simulations may differ as a result.
   always @(pri_s1[0] or win_s1[0]) begin
   if      ((pri_s1[3] < pri_s1[2]) &&
       (pri_s1[3] < pri_s1[1]) &&

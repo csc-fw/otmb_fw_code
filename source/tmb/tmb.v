@@ -2201,7 +2201,7 @@
       srl16e_bbl #(MXXKYB)   ugemBxkyhi   (.clock(clock),.ce(1'b1),.adr(gemB_final_adr),.d(gemB_cluster_cscxky_hi[k]), .q(gemB_cluster_cscxky_hi_srl[k]));
 
 
-      srl16e_bbl #(MXCLUSTER_CHAMBER) ucopad       (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(copad_match[k]),      .q(copad_match_srl[k]));
+      srl16e_bbl #(1) ucopad       (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(copad_match[k]),      .q(copad_match_srl[k]));
 
       assign gemA_cluster_pipe[k]            = (gemA_final_delay == 0) ? gemA_cluster[k]        : gemA_cluster_srl[k];
       assign gemA_cluster_cscwire_lo_pipe[k] = (gemA_final_delay == 0) ? gemA_cluster_cscwire_lo[k] : gemA_cluster_cscwire_lo_srl[k];
@@ -2243,9 +2243,10 @@
   wire [9:0] alct1_clct1_copad_best_cscxky;
   wire       alct0_clct0_copad_match_found_pos;
   wire       alct1_clct1_copad_match_found_pos;
-  wire       swapclct_copad_match_pos;
   wire       swapalct_copad_match_pos;
+  wire       swapclct_copad_match_pos;
   wire       alct_clct_copad_nomatch_pos;
+
 
   wire [2:0] alct0_clct0_gemA_best_icluster;
   wire [9:0] alct0_clct0_gemA_best_angle;
@@ -2277,8 +2278,8 @@
   wire       alct1_clct1_bestgem_pos;
   wire       alct0_clct0_gem_match_found_pos;
   wire       alct1_clct1_gem_match_found_pos;
-  wire       swapclct_gem_match_pos;
   wire       swapalct_gem_match_pos;
+  wire       swapclct_gem_match_pos;
   wire       alct_clct_gem_nomatch_pos;
 
   wire       alct0_clct0_nogem_match_found_pos;
@@ -2309,11 +2310,12 @@
   wire       copyclct0_forclct1_pos;
   wire       gemcsc_match_dummy;
 
+  assign     alct_clct_copad_match_pos  = alct0_clct0_copad_match_found_pos;
 
-  wire  alct0fromcopad_run3 = alct0fromcopad_pos &&  tmb_copad_clct_allow;
-  wire  alct1fromcopad_run3 = alct1fromcopad_pos &&  tmb_copad_clct_allow;
-  wire  clct0fromcopad_run3 = clct0fromcopad_pos &&  tmb_copad_alct_allow;
-  wire  clct1fromcopad_run3 = clct1fromcopad_pos &&  tmb_copad_alct_allow;
+  assign     alct0fromcopad_run3 = alct0fromcopad_pos &&  tmb_copad_clct_allow;
+  assign     alct1fromcopad_run3 = alct1fromcopad_pos &&  tmb_copad_clct_allow;
+  assign     clct0fromcopad_run3 = clct0fromcopad_pos &&  tmb_copad_alct_allow;
+  assign     clct1fromcopad_run3 = clct1fromcopad_pos &&  tmb_copad_alct_allow;
 
   alct_clct_gem_matching ualct_clct_gem_matching(
     
@@ -2332,6 +2334,8 @@
 
   .gemA_match_ignore_position(gemA_match_ignore_position),
   .gemB_match_ignore_position(gemB_match_ignore_position),
+  .tmb_copad_alct_allow      (tmb_copad_alct_allow),       //In gem-csc match, allow ALCT+copad match
+  .tmb_copad_clct_allow      (tmb_copad_clct_allow),       //In gem-csc match, allow CLCT+copad match
 
   .gemA_vpf (gemA_forclct_pipe[7:0]),
   .gemB_vpf (gemB_forclct_pipe[7:0]),
@@ -2468,8 +2472,8 @@
   //.alct1_clct1_copad_best_cscxky  (alct1_clct1_copad_best_cscxky[9:0]),
   .alct0_clct0_copad_match_found  (alct0_clct0_copad_match_found_pos),
   .alct1_clct1_copad_match_found  (alct1_clct1_copad_match_found_pos),
-  .swapclct_copad_match           (swapclct_copad_match_pos),
   .swapalct_copad_match           (swapalct_copad_match_pos),
+  .swapclct_copad_match           (swapclct_copad_match_pos),
   .alct_clct_copad_nomatch        (alct_clct_copad_nomatch_pos),
 
    // step2  ALCT+CLCT+singleGEM matching plus no copad matching
@@ -2752,11 +2756,11 @@
     //clct0_cclut_real   <= clct0_cclut_pipe & {MXCCLUTB {keep_clct}};
     //clct1_cclut_real   <= clct1_cclut_pipe & {MXCCLUTB {keep_clct}};
     //???? keep_clct =>keep_clct_run3???
-    clct0_real <= (swapclct_final_pos ? clct0_pipe : clct1_pipe) & {MXCLCT  {keep_clct}};
-    clct1_real <= (swapclct_final_pos ? clct1_pipe : clct0_pipe) & {MXCLCT  {keep_clct}};
-    clctc_real <= clctc_pipe & {MXCLCTC {keep_clct}};
-    clct0_cclut_real   <= (swapclct_final_pos ? clct0_cclut_pipe : clct1_cclut_pipe)& {MXCCLUTB {keep_clct}};
-    clct1_cclut_real   <= (swapclct_final_pos ? clct1_cclut_pipe : clct0_cclut_pipe)& {MXCCLUTB {keep_clct}};
+    clct0_real <= (swapclct_final_pos ? clct0_pipe : clct1_pipe) & {MXCLCT  {keep_clct_run3}};
+    clct1_real <= (swapclct_final_pos ? clct1_pipe : clct0_pipe) & {MXCLCT  {keep_clct_run3}};
+    clctc_real <= clctc_pipe & {MXCLCTC {keep_clct_run3}};
+    clct0_cclut_real   <= (swapclct_final_pos ? clct0_cclut_pipe : clct1_cclut_pipe)& {MXCCLUTB {keep_clct_run3}};
+    clct1_cclut_real   <= (swapclct_final_pos ? clct1_cclut_pipe : clct0_cclut_pipe)& {MXCCLUTB {keep_clct_run3}};
     hmt_trigger_real   <= hmt_trigger_pipe;
   end
 
@@ -2840,7 +2844,7 @@
   
   wire [1:0] clct_bxn_insert  = clctc_real[1:0];      // CLCT bunch crossing number for events missing alct
 
-  wire  tmb_no_alct  = !alct0_vpf;
+  wire  tmb_no_alct  = !alct0_vpf; 
   wire  tmb_no_clct  = !clct0_vpf;
 
   wire  tmb_one_alct = alct0_vpf && !alct1_vpf;
