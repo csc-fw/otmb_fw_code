@@ -955,7 +955,7 @@ module  alct_clct_gem_matching(
 
 
   wire [2:0] alct1_clct1_gemB_best_icluster;
-  wire [[MXBENDANGLEB-1:0] alct1_clct1_gemB_best_angle;
+  wire [MXBENDANGLEB-1:0] alct1_clct1_gemB_best_angle;
   wire [9:0] alct1_clct1_gemB_best_cscxky;
   tree_encoder_alctclctgem ualct1_clct1_gemB_match(
       alct1_clct1_gemB_angle[0],
