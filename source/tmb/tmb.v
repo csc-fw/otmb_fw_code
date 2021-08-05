@@ -1377,6 +1377,10 @@
   reg   [MXFRAME-1:0]  mpc1_frame0_vme = 0;
   reg   [MXFRAME-1:0]  mpc1_frame1_vme = 0;
 
+  
+  reg  [15:0]         gemcscmatch_cluster0_vme = 0;// gem cluster0 from gemcsc match
+  reg  [15:0]         gemcscmatch_cluster1_vme = 0;// gem cluster1 from gemcsc match
+
   reg   [7:0] mpc_frame_cnt  = 0;
   wire        mpc_frame_done;
   wire [7:0]  mpc_inj_adr;
