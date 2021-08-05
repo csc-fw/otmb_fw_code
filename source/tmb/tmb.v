@@ -389,7 +389,7 @@
 
   alctclctcopad_swapped,
   alctclctgem_swapped,
-  clct_swapped,
+  clctcopad_swapped,
 
 
   //select clusters for GEMCSC match
@@ -961,7 +961,7 @@
 
   output             alctclctcopad_swapped;
   output             alctclctgem_swapped;
-  output             clct_swapped;
+  output             clctcopad_swapped;
 
   //output             gemcscmatch_cluster0_vpf;
   //output             gemcscmatch_cluster0_iclst;
@@ -2703,7 +2703,7 @@
   wire trig_keep_run3     = (clct_keep_run3   || alct_keep_run3);
   wire non_trig_keep_run3 = (clct_keep_ro_run3 || alct_keep_ro_run3);
 
-  wire alct_only_run3     = (alct_noclct && tmb_allow_alct) && !clct_keep_run3 && !alct0_copad_match_good; 
+  wire alct_only_run3     = (alct_noclct && tmb_allow_alct) && !clct_keep_run3 && !alct0_copad_match_good; //alct-only in gem-csc
   wire wr_push_mux_run3   = (alct_only_run3) ? trig_pulse_run3 : (wr_push_xtmb_pipe  && trig_pulse_run3); 
 
   wire clct_match_tr_run3 = (clct_match || clct0_copad_match_good || alct0_copad_match_good)  && trig_keep_run3;
@@ -2780,9 +2780,9 @@
     tmb_alcte            <= alcte_pipe[1:0];
 
     wr_adr_rtmb          <= wr_adr_xtmb_pipe;   // Buffer write address at TMB matching time, continuous
-    wr_push_rtmb         <= wr_push_mux;        // Buffer write strobe at TMB matching time
+    //wr_push_rtmb         <= wr_push_mux;        // Buffer write strobe at TMB matching time
     wr_avail_rtmb        <= wr_avail_xtmb_pipe; // Buffer available at TMB matching time
-    //wr_avail_rtmb        <= wr_avail_xtmb_pipe_run3; // Buffer available at TMB matching time
+    wr_push_rtmb         <= wr_push_mux_run3;        // Buffer write strobe at TMB matching time
 
 
     //GEM part:gemA_alct_match_win_mux_pipe
@@ -3185,13 +3185,6 @@
   reg  [2:0]  lct0_qlt_run3_real; 
   reg  [2:0]  lct1_qlt_run3_real; 
 
-  always @(posedge clock) begin
-      lct0_qlt_run3_real  <= lct0_qlt_run3_pipe;
-      lct1_qlt_run3_real  <= lct1_qlt_run3_pipe;
-  end
-  
-  wire [2:0] lct0_qlt_run3 = lct0_qlt_run3_real;
-  wire [2:0] lct1_qlt_run3 = lct1_qlt_run3_real;
   //Run3 LCT quality
   lct_quality_run3 ulct0qualityrun3
     (
@@ -3215,6 +3208,14 @@
         .Q                    (lct1_qlt_run3_pipe[2:0])
     );
 
+    //aligned with latched trigger results 
+  always @(posedge clock) begin
+      lct0_qlt_run3_real  <= lct0_qlt_run3_pipe;
+      lct1_qlt_run3_real  <= lct1_qlt_run3_pipe;
+  end
+  
+  wire [2:0] lct0_qlt_run3 = lct0_qlt_run3_real;
+  wire [2:0] lct1_qlt_run3 = lct1_qlt_run3_real;
   wire   lct0_vpf_run3 = (lct0_qlt_run3[2:0] > 3'b0);
   wire   lct1_vpf_run3 = (lct1_qlt_run3[2:0] > 3'b0);
 
@@ -3429,7 +3430,8 @@
   //assign mpc1_frame1_pulse = (trig_mpc1) ? mpc1_frame1 : 16'h0;
 
 // TMB is supposed to rank LCTs, but doesn't yet
-  assign tmb_rank_err = (lct0_quality[3:0] * lct0_vpf) < (lct1_quality[3:0] * lct1_vpf);
+  //assign tmb_rank_err = (lct0_quality[3:0] * lct0_vpf) < (lct1_quality[3:0] * lct1_vpf);
+  assign tmb_rank_err = lct0_qlt_run3[2:0] < lct1_qlt_run3[2:0];
 
 //-------------------------------------------------------------------------------------------------------------------
 // MPC Transmitter Section

@@ -887,7 +887,7 @@
   clct1fromcopad_run3,
   alctclctcopad_swapped,
   alctclctgem_swapped,
-  clct_swapped,
+  clctcopad_swapped,
   //gemA_alct_clct_match,
   //gemB_alct_clct_match,
   //alct_gem,
@@ -1893,7 +1893,7 @@
   input             clct1fromcopad_run3;
   input             alctclctcopad_swapped;
   input             alctclctgem_swapped;
-  input             clct_swapped;
+  input             clctcopad_swapped;
 // MPC Status
 
   input  run3_daq_df;
@@ -3599,7 +3599,7 @@
     gem_cnt_en[GEMCSCMATCH_CNT_START+24]    <= clct1fromcopad_run3;
     gem_cnt_en[GEMCSCMATCH_CNT_START+25]    <= alctclctcopad_swapped;
     gem_cnt_en[GEMCSCMATCH_CNT_START+26]    <= alctclctgem_swapped;
-    gem_cnt_en[GEMCSCMATCH_CNT_START+27]    <= clct_swapped;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+27]    <= clctcopad_swapped;
 
 
   end
