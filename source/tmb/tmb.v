@@ -3534,8 +3534,8 @@
       {mpc1_frame0_vme,mpc0_frame0_vme} <= mpc_frame0_dly; // Latched copy of LCTs for VME
       {mpc1_frame1_vme,mpc0_frame1_vme} <= mpc_frame1_dly;
        
-      gemcscmatch_cluster0_vme  <= gemcscmatch_cluster0_vme_dly;
-      gemcscmatch_cluster1_vme  <= gemcscmatch_cluster1_vme_dly;
+      gemcscmatch_cluster0_vme  <= gemcscmatch_cluster0_dly;
+      gemcscmatch_cluster1_vme  <= gemcscmatch_cluster1_dly;
     end
   end
 
