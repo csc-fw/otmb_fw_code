@@ -2058,6 +2058,15 @@
     .gems_lostsync(gems_lostsync)  // Out
   );
 
+  reg gemA_overflow_ff = 1'b0;
+  reg gemB_overflow_ff = 1'b0;
+  //align with gemA_synced, gemB_synced, gems_synced
+  always @ (posedge clock) begin
+      gemA_overflow_ff <= gemA_overflow;
+      gemB_overflow_ff <= gemB_overflow;
+  end
+
+
   //--------------------------------------------------------------------------------------------------------------------
   // GEM Co-pad Matching
   // Assume Comparator hits and GEM hits arrived at OTMB at same BX
@@ -3194,6 +3203,14 @@ end
 
   .gemcsc_bend_enable     (gemcsc_bend_enable),             //In GEMCSC bending angle enabled
   .match_gem_alct_delay   (match_gem_alct_delay[7:0]),  //In gem delay for gem-ALCT match
+  .gemA_forclct_pipe      (gemA_forclct_pipe[7:0]),
+  .gemB_forclct_pipe      (gemB_forclct_pipe[7:0]),
+  .copad_match_pipe       (copad_match_pipe [7:0]),
+  .gemA_overflow_pipe     (gemA_overflow_pipe),//  Out, latched for headers
+  .gemB_overflow_pipe     (gemB_overflow_pipe),
+  .gemA_sync_err_pipe     (gemA_sync_err_pipe),
+  .gemB_sync_err_pipe     (gemB_sync_err_pipe),
+  .gems_sync_err_pipe     (gems_sync_err_pipe),
   .gem_clct_win           (gem_clct_win[3:0]), // In gem location in GEM-CLCT window
   .alct_gem_win           (alct_gem_win[2:0]), // In gem location in GEM-ALCT window
 
@@ -4262,7 +4279,12 @@ wire [15:0] gemB_bxn_counter;
 // GEM
   //.gemA_vpf          (gemA_vpf[7:0]),
   //.gemB_vpf          (gemB_vpf[7:0]),
-  .gemA_vpf          (gemA_csc_cluster_vpf[7:0]), //In gem cluster vpf
+  .gemA_overflow       (gemA_overflow_ff),// In
+  .gemB_overflow       (gemB_overflow_ff),
+  .gemA_sync_err       (~gemA_synced),
+  .gemB_sync_err       (~gemB_synced),
+  .gems_sync_err       (~gems_synced),
+  .gemA_vpf                  (gemA_csc_cluster_vpf[7:0]), //In gem cluster vpf
   .gemA_cluster0             (gemA_csc_cluster[0]),// In GEM cluster
   .gemA_cluster1             (gemA_csc_cluster[1]),// In GEM cluster
   .gemA_cluster2             (gemA_csc_cluster[2]),// In GEM cluster
@@ -4409,6 +4431,14 @@ wire [15:0] gemB_bxn_counter;
   .gemB_match_ignore_position     (gemB_match_ignore_position),             //In GEMCSC match, no position match
   .gemcsc_bend_enable        (gemcsc_bend_enable),             //In GEMCSC bending angle enabled
 
+  .gemA_forclct_pipe      (gemA_forclct_pipe[7:0]),
+  .gemB_forclct_pipe      (gemB_forclct_pipe[7:0]),
+  .copad_match_pipe       (copad_match_pipe [7:0]),
+  .gemA_overflow_pipe     (gemA_overflow_pipe),//  Out, latched for headers
+  .gemB_overflow_pipe     (gemB_overflow_pipe),
+  .gemA_sync_err_pipe     (gemA_sync_err_pipe),
+  .gemB_sync_err_pipe     (gemB_sync_err_pipe),
+  .gems_sync_err_pipe     (gems_sync_err_pipe),
   .gem_clct_win           (gem_clct_win[3:0]), // out gem location in GEM-CLCT window
   .alct_gem_win           (alct_gem_win[3:0]), // out ALCT location in GEM-ALCT window
 

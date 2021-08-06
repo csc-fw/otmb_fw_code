@@ -250,10 +250,10 @@ module  alct_clct_gem_matching(
   output       copyclct0_forclct1,
 
   output       best_cluster0_ingemB,
-  output       best_cluster0_iclst,
+  output [2:0] best_cluster0_iclst,
   output       best_cluster0_vpf,
   output       best_cluster1_ingemB,
-  output       best_cluster1_iclst,
+  output [2:0] best_cluster1_iclst,
   output       best_cluster1_vpf,
 
   output       gemcsc_match_dummy

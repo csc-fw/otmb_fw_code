@@ -137,6 +137,11 @@
 // GEM
 
 //GEMA trigger match control
+  gemA_overflow,
+  gemB_overflow,
+  gemA_sync_err,
+  gemB_sync_err,
+  gems_sync_err,
   gemA_vpf,
   gemA_cluster0,
   gemA_cluster1,
@@ -284,6 +289,14 @@
   gemB_match_ignore_position,
   gemcsc_bend_enable,
 
+  gemA_forclct_pipe,
+  gemB_forclct_pipe,
+  copad_match_pipe,
+  gemA_overflow_pipe,
+  gemB_overflow_pipe,
+  gemA_sync_err_pipe,
+  gemB_sync_err_pipe,
+  gems_sync_err_pipe,
   gem_clct_win,
   alct_gem_win,
 
@@ -697,6 +710,11 @@
   input  [1:0]         alct_ecc_err; // ALCT ecc syndrome code
 
 // GEM
+  input              gemA_overflow;
+  input              gemB_overflow;
+  input              gemA_sync_err;
+  input              gemB_sync_err;
+  input              gems_sync_err;
   input  [7:0]          gemA_vpf;
   input  [CLSTBITS-1:0] gemA_cluster0;
   input  [CLSTBITS-1:0] gemA_cluster1;
@@ -858,6 +876,14 @@
   output              gemB_bx0_match;
   output              gemB_bx0_match2;
 
+  output  [7:0]       gemA_forclct_pipe;
+  output  [7:0]       gemB_forclct_pipe;
+  output  [7:0]       copad_match_pipe ;
+  output              gemA_overflow_pipe;
+  output              gemB_overflow_pipe;
+  output              gemA_sync_err_pipe;
+  output              gemB_sync_err_pipe;
+  output              gems_sync_err_pipe;
   output  [3:0]       gem_clct_win;
   output  [3:0]       alct_gem_win;
 
@@ -2117,6 +2143,8 @@
   wire [3:0] gemA_alct_match_win_mux_pipe = gemA_extra_delay_forclct_is_0 ? gemA_alct_match_win_mux : gemA_alct_match_win_mux_srl;
   wire [3:0] gemB_alct_match_win_mux_pipe = gemB_extra_delay_forclct_is_0 ? gemB_alct_match_win_mux : gemB_alct_match_win_mux_srl;
 
+  assign  alct_gem_win = gemA_alct_match_win_mux_pipe[2:0];
+
 //------------------------------------------------------------------------------------------------------------------
 // Push GEM data into a 1bx to 16bx pipeline delay to do GEM-CLCT match
 //------------------------------------------------------------------------------------------------------------------
@@ -2130,6 +2158,7 @@
 
   wire [3:0] gemA_final_delay = alct_pulse ? gemA_final_delay_withalct : gemA_final_delay_noalct;
   wire [3:0] gemB_final_delay = alct_pulse ? gemB_final_delay_withalct : gemB_final_delay_noalct;
+
 
   //wire [3:0] gemA_final_delay = gemA_alct_noalct ? gemA_final_delay_noalct : gemA_final_delay_withalct;
   //wire [3:0] gemB_final_delay = gemB_alct_noalct ? gemB_final_delay_noalct : gemB_final_delay_withalct;
@@ -2219,7 +2248,7 @@
   wire [MXXKYB-1:0]   gemB_cluster_cscxky_mi_pipe [MXCLUSTER_CHAMBER-1:0]; // 
 
 
-  wire [7:0]  copad_match_srl, copad_match_pipe;
+  wire [7:0]  copad_match_srl;
   genvar k;                // Table window priorities multipled by windwo position enables
   generate
   for (k=0; k< MXCLUSTER_CHAMBER; k=k+1) begin: gemdatadelay
@@ -2261,6 +2290,22 @@
   endgenerate 
   
 
+  wire gemA_overflow_srl;
+  wire gemB_overflow_srl;
+  wire gemA_sync_err_srl;
+  wire gemB_sync_err_srl;
+  wire gems_sync_err_srl;
+      srl16e_bbl #(1) ugemAoverflow       (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemA_overflow),      .q(gemA_overflow_srl));
+      srl16e_bbl #(1) ugemBoverflow       (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemB_overflow),      .q(gemB_overflow_srl));
+      srl16e_bbl #(1) ugemAsyncerr        (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemA_sync_err),      .q(gemA_sync_err_srl));
+      srl16e_bbl #(1) ugemBsyncerr        (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemB_sync_err),      .q(gemB_sync_err_srl));
+      srl16e_bbl #(1) ugemssyncerr        (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gems_sync_err),      .q(gems_sync_err_srl));
+  assign gemA_overflow_pipe = (gemA_final_delay == 0) ? gemA_overflow : gemA_overflow_srl;
+  assign gemB_overflow_pipe = (gemA_final_delay == 0) ? gemB_overflow : gemB_overflow_srl;
+  assign gemA_sync_err_pipe = (gemA_final_delay == 0) ? gemA_sync_err : gemA_sync_err_srl;
+  assign gemB_sync_err_pipe = (gemA_final_delay == 0) ? gemB_sync_err : gemB_sync_err_srl;
+  assign gems_sync_err_pipe = (gemA_final_delay == 0) ? gems_sync_err : gems_sync_err_srl;
+  
 //------------------------------------------------------------------------------------------------------------------
 // GEM-ALCT-CLCT position match part
 //------------------------------------------------------------------------------------------------------------------
@@ -2346,10 +2391,10 @@
   wire       copyalct0_foralct1_pos;
   wire       copyclct0_forclct1_pos;
   wire       best_cluster0_ingemB;
-  wire       best_cluster0_iclst;
+  wire [2:0] best_cluster0_iclst;
   wire       best_cluster0_vpf;
   wire       best_cluster1_ingemB;
-  wire       best_cluster1_iclst;
+  wire [2:0] best_cluster1_iclst;
   wire       best_cluster1_vpf;
 
   wire       gemcsc_match_dummy;

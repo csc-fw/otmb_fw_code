@@ -587,6 +587,14 @@
 
   gemcsc_bend_enable, 
   match_gem_alct_delay,
+  gemA_forclct_pipe,
+  gemB_forclct_pipe,
+  copad_match_pipe,
+  gemA_overflow_pipe,
+  gemB_overflow_pipe,
+  gemA_sync_err_pipe,
+  gemB_sync_err_pipe,
+  gems_sync_err_pipe,
   gem_clct_win,
   alct_gem_win,
 
@@ -1594,6 +1602,14 @@
 
   input       gemcsc_bend_enable;
   input [7:0] match_gem_alct_delay;
+  input [7:0] gemA_forclct_pipe;
+  input [7:0] gemB_forclct_pipe;
+  input [7:0] copad_match_pipe ;
+  input       gemA_overflow_pipe;
+  input       gemB_overflow_pipe;
+  input       gemA_sync_err_pipe;
+  input       gemB_sync_err_pipe;
+  input       gems_sync_err_pipe;
   input [3:0] gem_clct_win;
   input [2:0] alct_gem_win;
 
@@ -3898,6 +3914,21 @@
   assign alct_wdata[26:22] =  tmb_alctb[4:0];  // ALCT shared bxn
   assign alct_wdata[28:27] =  tmb_alcte[1:0];  // ALCT ecc error syndrome latched at trigger
 
+  parameter MXGEMD = 8*3+5+4+3;//  gem data from gem-csc match
+  wire [MXGEMD-1] gem_wdata;
+  wire [MXGEMD-1] gem_rdata;
+  wire  gem_wdata[ 7: 0]  = gemA_forclct_pipe[7:0]; 
+  wire  gem_wdata[15: 8]  = gemB_forclct_pipe[7:0]; 
+  wire  gem_wdata[23:16]  = copad_match_pipe[7:0]; 
+  wire  gem_wdata[   24]  = gemA_overflow_pipe; 
+  wire  gem_wdata[   25]  = gemB_overflow_pipe; 
+  wire  gem_wdata[   26]  = gemA_sync_err_pipe; 
+  wire  gem_wdata[   27]  = gemB_sync_err_pipe; 
+  wire  gem_wdata[   28]  = gems_sync_err_pipe; 
+  wire  gem_wdata[32:29]  = gem_clct_win; 
+  wire  gem_wdata[35:33]  = alct_gem_win; 
+
+
 // TMB match+1bx: store TMB match results in RAM mapping array, 1bx later to give it time to count current event
   parameter MXRTMB1 = 37;         // Trigger counter
   wire [MXRTMB1-1:0] rtmb1_wdata; // Mapping array
@@ -4033,6 +4064,9 @@
 // Store TMB match data + ALCT data on tmb_trig_pulse
   ramblock #(MXRTMB, MXBADR) uramblock4 (.clock(clock),.wr_wea(wr_en_rtmb ),.wr_adra(wr_adr_rtmb ),.wr_dataa(rtmb_wdata ),.rd_enb(rd_enb),.rd_adrb(rd_buf_adr),.rd_datab(rtmb_rdata ),.dang(dang[4]));
   ramblock #(MXALCTD,MXBADR) uramblock5 (.clock(clock),.wr_wea(wr_en_rtmb ),.wr_adra(wr_adr_rtmb ),.wr_dataa(alct_wdata ),.rd_enb(rd_enb),.rd_adrb(rd_buf_adr),.rd_datab(alct_rdata ),.dang(dang[5]));
+
+  //store GEM data for TMB match here:
+  ramblock #(MXGEMD,MXBADR) uramblock10 (.clock(clock),.wr_wea(wr_en_rtmb ),.wr_adra(wr_adr_rtmb ),.wr_dataa(gem_wdata ),.rd_enb(rd_enb),.rd_adrb(rd_buf_adr),.rd_datab(gem_rdata ),.dang(dang[10]));
 
 // Store TMB trig counter on tmb_trig_pulse +1bx
   ramblock #(MXRTMB1,MXBADR) uramblock6 (.clock(clock),.wr_wea(wr_en_rtmb1),.wr_adra(wr_adr_rtmb1),.wr_dataa(rtmb1_wdata),.rd_enb(rd_enb),.rd_adrb(rd_buf_adr),.rd_datab(rtmb1_rdata),.dang(dang[6]));
@@ -4550,6 +4584,18 @@
   wire  [4:0]  r_alct_bxn     = r_tmb_alctb[4:0]; // ALCT bunch crossing number
   wire  [1:0]  r_alct_ecc_err = r_tmb_alcte[1:0]; // ALCT ecc error syndrome code
 
+  //unpacked GEM data 
+  wire [7:0] r_gemA_forclct_pipe  = gem_rdata[ 7: 0];
+  wire [7:0] r_gemB_forclct_pipe  = gem_rdata[15: 8];
+  wire [7:0] r_copad_match_pipe   = gem_rdata[23:16];
+  wire       r_gemA_overflow_pipe = gem_rdata[   24];
+  wire       r_gemB_overflow_pipe = gem_rdata[   25];
+  wire       r_gemA_sync_err_pipe = gem_rdata[   26];
+  wire       r_gemB_sync_err_pipe = gem_rdata[   27];
+  wire       r_gems_sync_err_pipe = gem_rdata[   28];
+  wire [3:0] r_gem_clct_win       = gem_rdata[32:29];
+  wire [2:0] r_alct_gem_win       = gem_rdata[35:33];
+
 // Unpack TMB match results from RAM mapping array that was delayed 1bx
   wire [29:0]  r_trig_counter = rtmb1_rdata[29:0];  // TMB trigger counter
   wire [6:0]  r_tmb_aff_list  = rtmb1_rdata[36:30]; // Active cfeb list at TMB match, saves 1 ram
@@ -4957,15 +5003,14 @@
   assign  header11_[14:0]   =  r_clct_counter[14:0];  // CLCT post-drift counter, stop on ovf
   assign  header11_[18:15]  =  0;                     // DDU+DMB control flags
 
-  //Attention!!! work required!! align GEM data to LCT BX?
-  assign  header12_run3_[7:0] = copad_match[7:0];//Attention: should be delayed to sync with CLCT signal!!
-  assign  header12_run3_[  8] = |gemA_vpf;
-  assign  header12_run3_[  9] = |gemB_vpf;
-  assign  header12_run3_[ 10] = gemA_overflow;
-  assign  header12_run3_[ 11] = gemB_overflow;
-  assign  header12_run3_[ 12] = gemA_sync_err;
-  assign  header12_run3_[ 13] = gemB_sync_err;
-  assign  header12_run3_[ 14] = gems_sync_err;
+  assign  header12_run3_[7:0] = r_copad_match_pipe[7:0];//Attention: should be delayed to sync with CLCT signal!!
+  assign  header12_run3_[  8] = |r_gemA_forclct_pipe;
+  assign  header12_run3_[  9] = |r_gemB_forclct_pipe;
+  assign  header12_run3_[ 10] = r_gemA_overflow_pipe;
+  assign  header12_run3_[ 11] = r_gemB_overflow_pipe;
+  assign  header12_run3_[ 12] = r_gemA_sync_err_pipe;
+  assign  header12_run3_[ 13] = r_gemB_sync_err_pipe;
+  assign  header12_run3_[ 14] = r_gems_sync_err_pipe;
   assign  header12_[14:0]   =  run3_daq_df ? header12_run3_[14:0] : r_clct_counter[29:15]; // CLCT post-drift counter
   assign  header12_[18:15]  =  0;
 
