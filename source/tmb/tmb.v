@@ -1547,7 +1547,7 @@
   assign alct1_gem_pipe = (alct_gem_ptr_is_0) ? alct1_tmb : alct1_gem_srl;  // Second ALCT after alct pipe delay
 
   wire   alct0_gem_pipe_vpf = usefakealct ? alct0_fake[0] : alct0_gem_pipe[0];
-  wire   alct1_gem_pipe_vpf = usefakealct ? alct1_fake[1] : alct1_gem_pipe[0];
+  wire   alct1_gem_pipe_vpf = usefakealct ? alct1_fake[1] : alct1_gem_pipe[1];
 
 //------------------------------------------------------------------------------------------------------------------
 // Push CLCT data into a 1bx to 16bx pipeline delay to wait for an alct-clct match
@@ -1709,6 +1709,7 @@
   wire [3:0]  clct_tag_win;        // SR stage to insert tag
 
   reg [15:0] clct_match_sr = 0; // record whether CLCT is used, Tao
+  reg [15:0] clct_match_run3_sr = 0; // record whether CLCT is used, Tao
 
   always @(posedge clock) begin
     if (reset_sr) begin            // Sych reset on resync or not power up
@@ -1728,6 +1729,7 @@
   always @(posedge clock) begin
     if (reset_sr) begin             // Sych reset on resync or not power up
       clct_match_sr  <= dynamic_zero; // Load a dynamic 0 on reset, mollify xst
+      clct_match_run3_sr <= dynamic_zero; 
     end
 
     i=0;                  // Loop over 15 window positions 0 to 14 
@@ -1735,6 +1737,9 @@
       if (clct_match ==1 && clct_tag_win==i && clct_sr_include[i]) clct_match_sr[i+1] <= 1;
       else                  // Otherwise parallel shift all data left
         clct_match_sr[i+1] <= clct_match_sr[i];
+      if (clct_match_run3 ==1 && clct_tag_win==i && clct_sr_include[i]) clct_match_run3_sr[i+1] <= 1;
+      else                  // Otherwise parallel shift all data left
+        clct_match_run3_sr[i+1] <= clct_match_run3_sr[i];
       i=i+1;
     end  // close while
   end  // close clock
@@ -1792,8 +1797,6 @@
   wire alct_noclct = alct_pulse   && !clct_window_haslcts;  // ALCT arrived, but there was no CLCT window open
   wire clct_match  = alct_pulse   &&  clct_window_haslcts;  // ALCT matches CLCT window, push to mpc on current bx
 
-  //_run3 to represent the Run3 variable
-  wire clct_match_run3  = (alct_pulse || copad_pulse_forclct) &&  clct_window_haslcts;  // ALCT/copad matches CLCT window, push to mpc on current bx
 
   wire clct_last_win    = clct_last_vpf && !clct_last_tag;  // CLCT reached end of window
   wire clct_noalct      = clct_last_win && !alct_pulse;    // No ALCT arrived in window, pushed mpc on last bx
@@ -1802,12 +1805,17 @@
   wire clct_used        = clct_match_sr[winclosing]; //CLCT was used
 
 // ALCT*CLCT match: alct arrived while there were 1 or more un-tagged clcts in the window
-//Algo2016, no tag clct if clct_reuse is enabled
-  assign clct_tag_me  = (algo2016_drop_used_clcts) ? clct_match : 1'b0;    // Tag the matching clct
+  //Algo2016, no tag clct if clct_reuse is enabled
+  assign clct_tag_me  = (algo2016_drop_used_clcts) ? clct_match_run3 : 1'b0;    // Tag the matching clct
   assign clct_tag_win = clct_win_best;   // But get the one with highest priority
 
+
+  //_run3 to represent the Run3 variable
   //Run3, gemcsc algorithm
   wire clct_nocopad     =  clct_last_win && !copad_pulse_forclct; 
+  wire clct_match_run3  = (alct_pulse || copad_pulse_forclct) &&  clct_window_haslcts;  // ALCT/copad matches CLCT window, push to mpc on current bx
+  wire clct_used_run3   = clct_match_run3_sr[winclosing]; //CLCT was used
+
   wire clct_lost_run3   = clct_last_win &&  (alct_pulse || copad_pulse_forclct) && clct_win_best!=winclosing;
 
 //------------------------------------------------------------------------------------------------------------------
@@ -1919,7 +1927,7 @@
   reg [15:0] gemA_alct_tag_sr = 0;
   wire       gemA_alct_tag_me;
   wire [3:0] gemA_alct_tag_win;
-  reg [15:0] gemA_alct_match_sr = 0;// record whether gem is used
+  //reg [15:0] gemA_alct_match_sr = 0;// record whether gem is used
 
   always @(posedge clock) begin
     if (reset_sr) begin            // Sych reset on resync or not power up
@@ -1936,25 +1944,25 @@
       end  // close while
   end  // close clock
   
- //register shift, mark whether GEM was used for match for not, Tao 
-  always @(posedge clock) begin
-    if (reset_sr) begin             // Sych reset on resync or not power up
-      gemA_alct_match_sr  <= dynamic_zero; // Load a dynamic 0 on reset, mollify xst
-    end
+ ////register shift, mark whether GEM was used for match for not, Tao 
+ // always @(posedge clock) begin
+ //   if (reset_sr) begin             // Sych reset on resync or not power up
+ //     gemA_alct_match_sr  <= dynamic_zero; // Load a dynamic 0 on reset, mollify xst
+ //   end
 
-    i=0;                  // Loop over 15 window positions 0 to 14 
-    while (i<=14) begin
-      if (gemA_alct_match ==1 && gemA_alct_tag_win==i && gem_sr_include[i]) gemA_alct_match_sr[i+1] <= 1;
-      else                  // Otherwise parallel shift all data left
-        gemA_alct_match_sr[i+1] <= gemA_alct_match_sr[i];
-      i=i+1;
-    end  // close while
-  end  // close clock
+ //   i=0;                  // Loop over 15 window positions 0 to 14 
+ //   while (i<=14) begin
+ //     if (gemA_alct_match ==1 && gemA_alct_tag_win==i && gem_sr_include[i]) gemA_alct_match_sr[i+1] <= 1;
+ //     else                  // Otherwise parallel shift all data left
+ //       gemA_alct_match_sr[i+1] <= gemA_alct_match_sr[i];
+ //     i=i+1;
+ //   end  // close while
+ // end  // close clock
   //tag matched GEM
   reg [15:0] gemB_alct_tag_sr = 0;
   wire       gemB_alct_tag_me;
   wire [3:0] gemB_alct_tag_win;
-  reg [15:0] gemB_alct_match_sr = 0;// record whether gem is used
+  //reg [15:0] gemB_alct_match_sr = 0;// record whether gem is used
 
   always @(posedge clock) begin
     if (reset_sr) begin            // Sych reset on resync or not power up
@@ -1971,20 +1979,20 @@
       end  // close while
   end  // close clock
   
- //register shift, mark whether GEM was used for match for not, Tao 
-  always @(posedge clock) begin
-    if (reset_sr) begin             // Sych reset on resync or not power up
-      gemB_alct_match_sr  <= dynamic_zero; // Load a dynamic 0 on reset, mollify xst
-    end
+ ////register shift, mark whether GEM was used for match for not, Tao 
+ // always @(posedge clock) begin
+ //   if (reset_sr) begin             // Sych reset on resync or not power up
+ //     gemB_alct_match_sr  <= dynamic_zero; // Load a dynamic 0 on reset, mollify xst
+ //   end
 
-    i=0;                  // Loop over 15 window positions 0 to 14 
-    while (i<=14) begin
-      if (gemB_alct_match ==1 && gemB_alct_tag_win==i && gem_sr_include[i]) gemB_alct_match_sr[i+1] <= 1;
-      else                  // Otherwise parallel shift all data left
-        gemB_alct_match_sr[i+1] <= gemB_alct_match_sr[i];
-      i=i+1;
-    end  // close while
-  end  // close clock
+ //   i=0;                  // Loop over 15 window positions 0 to 14 
+ //   while (i<=14) begin
+ //     if (gemB_alct_match ==1 && gemB_alct_tag_win==i && gem_sr_include[i]) gemB_alct_match_sr[i+1] <= 1;
+ //     else                  // Otherwise parallel shift all data left
+ //       gemB_alct_match_sr[i+1] <= gemB_alct_match_sr[i];
+ //     i=i+1;
+ //   end  // close while
+ // end  // close clock
 
 
 // Find highest priority window position that has a non-tagged gem
@@ -2086,21 +2094,19 @@
   wire alct_gemA_nogem       = alct_gem_vpf   && !gemA_alct_window_hasgem;  // ALCT arrived, but there was no GEM window open
   wire gemA_alct_last_win    = gemA_alct_last_vpf && !gemA_alct_last_tag;  // CLCT reached end of window
   wire gemA_alct_noalct      = gemA_alct_last_win && !alct_gem_vpf;    // No ALCT arrived in window, pushed mpc on last bx
-  wire gemA_alct_used        = gemA_alct_match_sr[gem_alct_winclosing]; //gem was used, Tao
+  //wire gemA_alct_used        = gemA_alct_match_sr[gem_alct_winclosing]; //gem was used, Tao
 
   wire alct_gemB_nogem       = alct_gem_vpf   && !gemB_alct_window_hasgem;  // ALCT arrived, but there was no GEM window open
   wire gemB_alct_last_win    = gemB_alct_last_vpf && !gemB_alct_last_tag;  // CLCT reached end of window
   wire gemB_alct_noalct      = gemB_alct_last_win && !alct_gem_vpf;    // No ALCT arrived in window, pushed mpc on last bx
-  wire gemB_alct_used        = gemB_alct_match_sr[gem_alct_winclosing]; //gem was used, Tao
+  //wire gemB_alct_used        = gemB_alct_match_sr[gem_alct_winclosing]; //gem was used, Tao
 
 
-// ALCT*CLCT match: alct arrived while there were 1 or more un-tagged gems in the window
-//Algo2016, no tag clct if clct_reuse is enabled
- // Tao, maybe later add a configuration for drop_used_gem ???
-  assign gemA_alct_tag_me  = (algo2016_drop_used_clcts) ? gemA_alct_match : 1'b0;    // Tag the matching clct
+  //assign gemA_alct_tag_me  = (algo2016_drop_used_clcts) ? gemA_alct_match : 1'b0;    // Tag the matching clct
+  assign gemA_alct_tag_me  = gemA_alct_match;    // Tag the matching clct
   assign gemA_alct_tag_win = gemA_alct_win_best;   // But get the one with highest priority
 
-  assign gemB_alct_tag_me  = (algo2016_drop_used_clcts) ? gemB_alct_match : 1'b0;    // Tag the matching clct
+  assign gemB_alct_tag_me  = gemB_alct_match;    // Tag the matching clct
   assign gemB_alct_tag_win = gemB_alct_win_best;   // But get the one with highest priority
 
   wire [3:0] gemA_alct_match_win_mux; //alct position in gem-tagged window. 
@@ -2109,14 +2115,6 @@
 
   wire [3:0] gemB_alct_match_win_mux; //alct position in gem-tagged window. 
   assign gemB_alct_match_win_mux = (gemB_alct_noalct) ? gem_alct_winclosing    : gemB_alct_tag_win;    // if GEM only and no alct, disregard priority and take last window position // Pointer to SRL delayed GEM signals to align with ALCT signal after alct_delay_forgem
-
-
-  // Copad is built later
-  ////coincident pads in timing
-  //wire [3:0] gemAB_win_diff = (gemA_alct_match_win_mux > gemB_alct_match_win_mux) ? gemA_alct_match_win_mux -gemB_alct_match_win_mux : gemB_alct_match_win_mux - gemA_alct_match_win_mux;
-  //wire [3:0] match_gemcopad_window = 4'd2;// configuration parameter !!!, GEM copad matching timing window when ALCT is presence
-  ////how about no ALCT case? should we just require both two gem in same BX ?
-  //wire gemAB_copad_timing = (gemA_alct_match && gemB_alct_match && gemAB_win_diff <= match_gemcopad_window) || (gemA_alct_noalct && gemB_alct_noalct); 
 
 
   // after GEM-ALCT match, delay GEM to expected ALCT position for GEM-CLCT match, 
@@ -2417,8 +2415,8 @@
 
   .alct0_wg     (alct0_pipe_key[6:0]),
   .alct1_wg     (alct1_pipe_key[6:0]),
-  .alct0_nhit   (alct0_pipe_key[2:1]+3'd3),
-  .alct1_nhit   (alct1_pipe_key[2:1]+3'd3),
+  .alct0_nhit   (alct0_pipe[2:1]+3'd3),
+  .alct1_nhit   (alct1_pipe[2:1]+3'd3),
 
   .clct0_vpf  (clct0_pipe[0]),//clct0_vpf from pipe
   .clct1_vpf  (clct1_pipe[0]),
