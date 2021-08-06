@@ -4045,7 +4045,7 @@
 // Header storage RAMs
 //------------------------------------------------------------------------------------------------------------------
   wire [MXBADR-1:0] rd_buf_adr;            // Block RAM header readout address
-  wire [9:0]        dang;                  // Block RAM dangling output pins
+  wire [10:0]        dang;                  // Block RAM dangling output pins
   wire              rd_enb = !buf_q_empty; // Enable port b for reading when readout in progress
 
 // Store Buffer data on pretrigger
