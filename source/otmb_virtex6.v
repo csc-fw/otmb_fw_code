@@ -2785,6 +2785,9 @@ end
    wire [7:0]  match_gem_alct_delay;
    wire [3:0]  match_gem_alct_window;
    wire [3:0]  match_gem_clct_window;
+   wire [7:0]  gemA_forclct_pipe;
+   wire [7:0]  gemB_forclct_pipe;
+   wire [7:0]  copad_match_pipe;
    wire [3:0]  gem_clct_win;
    wire [3:0]  alct_gem_win;
 
