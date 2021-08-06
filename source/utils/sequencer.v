@@ -3915,8 +3915,8 @@
   assign alct_wdata[28:27] =  tmb_alcte[1:0];  // ALCT ecc error syndrome latched at trigger
 
   parameter MXGEMD = 8*3+5+4+3;//  gem data from gem-csc match
-  wire [MXGEMD-1] gem_wdata;
-  wire [MXGEMD-1] gem_rdata;
+  wire [MXGEMD-1 : 0] gem_wdata;
+  wire [MXGEMD-1 : 0] gem_rdata;
   assign  gem_wdata[ 7: 0]  = gemA_forclct_pipe[7:0]; 
   assign  gem_wdata[15: 8]  = gemB_forclct_pipe[7:0]; 
   assign  gem_wdata[23:16]  = copad_match_pipe[7:0]; 
