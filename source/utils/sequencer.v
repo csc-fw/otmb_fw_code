@@ -3917,16 +3917,16 @@
   parameter MXGEMD = 8*3+5+4+3;//  gem data from gem-csc match
   wire [MXGEMD-1] gem_wdata;
   wire [MXGEMD-1] gem_rdata;
-  wire  gem_wdata[ 7: 0]  = gemA_forclct_pipe[7:0]; 
-  wire  gem_wdata[15: 8]  = gemB_forclct_pipe[7:0]; 
-  wire  gem_wdata[23:16]  = copad_match_pipe[7:0]; 
-  wire  gem_wdata[   24]  = gemA_overflow_pipe; 
-  wire  gem_wdata[   25]  = gemB_overflow_pipe; 
-  wire  gem_wdata[   26]  = gemA_sync_err_pipe; 
-  wire  gem_wdata[   27]  = gemB_sync_err_pipe; 
-  wire  gem_wdata[   28]  = gems_sync_err_pipe; 
-  wire  gem_wdata[32:29]  = gem_clct_win; 
-  wire  gem_wdata[35:33]  = alct_gem_win; 
+  assign  gem_wdata[ 7: 0]  = gemA_forclct_pipe[7:0]; 
+  assign  gem_wdata[15: 8]  = gemB_forclct_pipe[7:0]; 
+  assign  gem_wdata[23:16]  = copad_match_pipe[7:0]; 
+  assign  gem_wdata[   24]  = gemA_overflow_pipe; 
+  assign  gem_wdata[   25]  = gemB_overflow_pipe; 
+  assign  gem_wdata[   26]  = gemA_sync_err_pipe; 
+  assign  gem_wdata[   27]  = gemB_sync_err_pipe; 
+  assign  gem_wdata[   28]  = gems_sync_err_pipe; 
+  assign  gem_wdata[32:29]  = gem_clct_win; 
+  assign  gem_wdata[35:33]  = alct_gem_win; 
 
 
 // TMB match+1bx: store TMB match results in RAM mapping array, 1bx later to give it time to count current event
