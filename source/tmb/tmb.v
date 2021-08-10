@@ -1797,8 +1797,7 @@
   wire alct_noclct = alct_pulse   && !clct_window_haslcts;  // ALCT arrived, but there was no CLCT window open
   wire clct_match  = alct_pulse   &&  clct_window_haslcts;  // ALCT matches CLCT window, push to mpc on current bx
 
-
-  wire clct_last_win    = clct_last_vpf && !clct_last_tag;  // CLCT reached end of window
+  wire clct_last_win    = clct_last_vpf && !clct_last_tag;  // CLCT reached end of window 
   wire clct_noalct      = clct_last_win && !alct_pulse;    // No ALCT arrived in window, pushed mpc on last bx
   wire clct_noalct_lost = clct_last_win &&  alct_pulse && clct_win_best!=winclosing;// No ALCT arrived in window, lost to mpc contention
   //Tao, check whether CLCT was used or not, Algo2016
@@ -1809,50 +1808,43 @@
   assign clct_tag_me  = (algo2016_drop_used_clcts) ? clct_match_run3 : 1'b0;    // Tag the matching clct
   assign clct_tag_win = clct_win_best;   // But get the one with highest priority
 
-
   //_run3 to represent the Run3 variable
   //Run3, gemcsc algorithm
-  wire clct_nocopad     =  clct_last_win && !copad_pulse_forclct; 
-  wire clct_match_run3  = (alct_pulse || copad_pulse_forclct) &&  clct_window_haslcts;  // ALCT/copad matches CLCT window, push to mpc on current bx
+  wire clct_nocopad     =  clct_last_win && !copad_pulse_forclct_good; 
+  wire clct_match_run3  = (alct_pulse || copad_pulse_forclct_good) &&  clct_window_haslcts;  // ALCT/copad matches CLCT window, push to mpc on current bx
   wire clct_used_run3   = clct_match_run3_sr[winclosing]; //CLCT was used
-
-  wire clct_lost_run3   = clct_last_win &&  (alct_pulse || copad_pulse_forclct) && clct_win_best!=winclosing;
+  wire clct_lost_run3   = clct_last_win &&  (alct_pulse || copad_pulse_forclct_good) && clct_win_best!=winclosing;
 
 //------------------------------------------------------------------------------------------------------------------
 // Push GEM data into a 1bx to 16bx pipeline delay to do GEM-ALCT match
 //------------------------------------------------------------------------------------------------------------------
   //Attention!!!
-  //first delay GEM signal by match_gemA_alct_delay/match_gemB_alct_delay to do GEM-ALCT match
+  //first delay GEM signal by match_gem_alct_delay to do GEM-ALCT match
   //Attention:  Only 4 bits delay is used for now!!!!
 
-  wire [3:0]  match_gemA_alct_delay = match_gem_alct_delay[3:0];
-  wire [3:0]  match_gemB_alct_delay = match_gem_alct_delay[3:0];
   wire [7:0]  gemA_pipe_foralct, gemA_foralct_srl;
   wire [7:0]  gemB_pipe_foralct, gemB_foralct_srl;
 
-  reg  [3:0] gemA_srl_adr = 0;
-  reg  [3:0] gemB_srl_adr = 0;
+  reg  [3:0] gem_srl_adr = 0;
 
   always @(posedge clock) begin
-  gemA_srl_adr <= match_gemA_alct_delay-1'b1;
-  gemB_srl_adr <= match_gemB_alct_delay-1'b1;
+  gem_srl_adr <= match_gem_alct_delay-1'b1;
   end
 
-  srl16e_bbl #(8) ugemA (.clock(clock),.ce(1'b1),.adr(gemA_srl_adr),.d(gemA_vpf[7:0]),.q(gemA_foralct_srl[7:0])); 
-  srl16e_bbl #(8) ugemB (.clock(clock),.ce(1'b1),.adr(gemB_srl_adr),.d(gemB_vpf[7:0]),.q(gemB_foralct_srl[7:0]));
+  srl16e_bbl #(8) ugemA (.clock(clock),.ce(1'b1),.adr(gem_srl_adr),.d(gemA_vpf[7:0]),.q(gemA_foralct_srl[7:0])); 
+  srl16e_bbl #(8) ugemB (.clock(clock),.ce(1'b1),.adr(gem_srl_adr),.d(gemB_vpf[7:0]),.q(gemB_foralct_srl[7:0]));
 
-  wire gemA_ptr_is_0 = (match_gemA_alct_delay == 0);               // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
-  wire gemB_ptr_is_0 = (match_gemB_alct_delay == 0);               // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
+  wire gem_ptr_is_0 = (match_gem_alct_delay == 0);               // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
 
-  assign gemA_pipe_foralct = (gemA_ptr_is_0) ? gemA_vpf : gemA_foralct_srl;  // First  GEM after pipe delay
-  assign gemB_pipe_foralct = (gemB_ptr_is_0) ? gemB_vpf : gemB_foralct_srl;  // Second GEM after pipe delay
+  assign gemA_pipe_foralct = (gem_ptr_is_0) ? gemA_vpf : gemA_foralct_srl;  // First  GEM after pipe delay
+  assign gemB_pipe_foralct = (gem_ptr_is_0) ? gemB_vpf : gemB_foralct_srl;  // Second GEM after pipe delay
   
 
   wire gemA_pulse_foralct = (|gemA_pipe_foralct);
   wire gemB_pulse_foralct = (|gemB_pipe_foralct);
 
   //wire gem_pulse = (|gemA_pipe_foralct || |gemB_pipe_foralct);
-  wire gem_pulse_foralct = (|gemA_pipe_foralct || |gemB_pipe_foralct);
+  wire gem_pulse_foralct = (|gemA_pipe_foralct) || (|gemB_pipe_foralct);
   assign gem_foralct_vpf_tp = gem_pulse_foralct; 
 
   //---------------------------------------------------------------------
@@ -1896,49 +1888,37 @@
   end
 
   //Similar to CLCT-ALCT match, push GEM vpf into a 16-stage FF register for GEM-ALCT matching
-  //reg   [15:1] gem_vpf_sre = 0;
-  //wire  [15:0] gem_vpf_sr;
-  reg   [15:1] gemA_vpf_sre = 0;
-  wire  [15:0] gemA_vpf_sr;
-  reg   [15:1] gemB_vpf_sre = 0;
-  wire  [15:0] gemB_vpf_sr;
+  reg   [15:1] gem_vpf_sre = 0;
+  wire  [15:0] gem_vpf_sr;
 
-  //assign gem_vpf_sr[0]     = gem_pulse_foralct;
-  //assign gem_vpf_sr[15:1]  = gem_vpf_sre[15:1];
-  assign gemA_vpf_sr[0]    = gemA_pulse_foralct;
-  assign gemA_vpf_sr[15:1] = gemA_vpf_sre[15:1];
-  assign gemB_vpf_sr[0]    = gemB_pulse_foralct;
-  assign gemB_vpf_sr[15:1] = gemB_vpf_sre[15:1];
+  assign gem_vpf_sr[0]     = gem_pulse_foralct;
+  assign gem_vpf_sr[15:1]  = gem_vpf_sre[15:1];
 
   always @(posedge clock ) begin 
-      //gem_vpf_sre[1]  <= gem_vpf_sr[0];
-      gemA_vpf_sre[1] <= gemA_vpf_sr[0];
-      gemB_vpf_sre[1] <= gemB_vpf_sr[0];
+      gem_vpf_sre[1]  <= gem_vpf_sr[0];
       i=1;
       while (i <= 14) begin
-          //gem_vpf_sre[i+1]  <= gem_vpf_sre[i]; //Paralle shift register to left, if vpf=1, then it propagates to next BX
-          gemA_vpf_sre[i+1] <= gemA_vpf_sre[i]; //Paralle shift register to left, if vpf=1, then it propagates to next BX
-          gemB_vpf_sre[i+1] <= gemB_vpf_sre[i]; //Paralle shift register to left, if vpf=1, then it propagates to next BX
+          gem_vpf_sre[i+1]  <= gem_vpf_sre[i]; //Paralle shift register to left, if vpf=1, then it propagates to next BX
           i = i+1;
       end// close while
   end //close always
 
   //tag matched GEM
-  reg [15:0] gemA_alct_tag_sr = 0;
-  wire       gemA_alct_tag_me;
-  wire [3:0] gemA_alct_tag_win;
+  reg [15:0] gem_alct_tag_sr = 0;
+  wire       gem_alct_tag_me;
+  wire [3:0] gem_alct_tag_win;
   //reg [15:0] gemA_alct_match_sr = 0;// record whether gem is used
 
   always @(posedge clock) begin
     if (reset_sr) begin            // Sych reset on resync or not power up
-        gemA_alct_tag_sr  <= dynamic_zero;      // Load a dynamic 0 on reset, mollify xst
+        gem_alct_tag_sr  <= dynamic_zero;      // Load a dynamic 0 on reset, mollify xst
     end
 
     i=0;                  // Loop over 15 window positions 0 to 14 
     while (i<=14) begin
-      if (gemA_alct_tag_me==1 && gemA_alct_tag_win==i && gem_sr_include[i]) gemA_alct_tag_sr[i+1] <= 1;
+      if (gem_alct_tag_me==1 && gem_alct_tag_win==i && gem_sr_include[i]) gem_alct_tag_sr[i+1] <= 1;
       else                  // Otherwise parallel shift all data left
-          gemA_alct_tag_sr[i+1] <= gemA_alct_tag_sr[i];
+          gem_alct_tag_sr[i+1] <= gem_alct_tag_sr[i];
 
       i=i+1;
       end  // close while
@@ -1959,189 +1939,91 @@
  //   end  // close while
  // end  // close clock
   //tag matched GEM
-  reg [15:0] gemB_alct_tag_sr = 0;
-  wire       gemB_alct_tag_me;
-  wire [3:0] gemB_alct_tag_win;
-  //reg [15:0] gemB_alct_match_sr = 0;// record whether gem is used
-
-  always @(posedge clock) begin
-    if (reset_sr) begin            // Sych reset on resync or not power up
-        gemB_alct_tag_sr  <= dynamic_zero;      // Load a dynamic 0 on reset, mollify xst
-    end
-
-    i=0;                  // Loop over 15 window positions 0 to 14 
-    while (i<=14) begin
-      if (gemB_alct_tag_me==1 && gemB_alct_tag_win==i && gem_sr_include[i]) gemB_alct_tag_sr[i+1] <= 1;
-      else                  // Otherwise parallel shift all data left
-          gemB_alct_tag_sr[i+1] <= gemB_alct_tag_sr[i];
-
-      i=i+1;
-      end  // close while
-  end  // close clock
-  
- ////register shift, mark whether GEM was used for match for not, Tao 
- // always @(posedge clock) begin
- //   if (reset_sr) begin             // Sych reset on resync or not power up
- //     gemB_alct_match_sr  <= dynamic_zero; // Load a dynamic 0 on reset, mollify xst
- //   end
-
- //   i=0;                  // Loop over 15 window positions 0 to 14 
- //   while (i<=14) begin
- //     if (gemB_alct_match ==1 && gemB_alct_tag_win==i && gem_sr_include[i]) gemB_alct_match_sr[i+1] <= 1;
- //     else                  // Otherwise parallel shift all data left
- //       gemB_alct_match_sr[i+1] <= gemB_alct_match_sr[i];
- //     i=i+1;
- //   end  // close while
- // end  // close clock
 
 
 // Find highest priority window position that has a non-tagged gem
-  wire [15:0] gemA_alct_win_ena;          // Table of enabled window positions
-  wire [3:0]  gemA_alct_win_pri [15:0];        // Table of window position priorities that are enabled
+  wire [15:0] gem_alct_win_ena;          // Table of enabled window positions
+  wire [3:0]  gem_alct_win_pri [15:0];        // Table of window position priorities that are enabled
 
   //genvar j;                // Table window priorities multipled by windwo position enables
   generate
   for (j=0; j<=15; j=j+1) begin: gengemApri
-      assign gemA_alct_win_ena[j] = (gem_sr_include[j]==1 && gemA_vpf_sr[j]==1 && gemA_alct_tag_sr[j]==0);
-      assign gemA_alct_win_pri[j] = (gem_alct_win_priority[j] * gemA_alct_win_ena[j]);
+      assign gem_alct_win_ena[j] = (gem_sr_include[j]==1 && gem_vpf_sr[j]==1 && gem_alct_tag_sr[j]==0);
+      assign gem_alct_win_pri[j] = (gem_alct_win_priority[j] * gem_alct_win_ena[j]);
   end
   endgenerate
 
 
-  wire [3:0] gemA_alct_win_best;
-  wire [3:0] gemA_alct_pri_best;
+  wire [3:0] gem_alct_win_best;
+  wire [3:0] gem_alct_pri_best;
 
   tree_encoder utree_encoder_gemAalct(
-      .win_pri_0    (gemA_alct_win_pri[ 0]),
-      .win_pri_1    (gemA_alct_win_pri[ 1]),
-      .win_pri_2    (gemA_alct_win_pri[ 2]),
-      .win_pri_3    (gemA_alct_win_pri[ 3]),
-      .win_pri_4    (gemA_alct_win_pri[ 4]),
-      .win_pri_5    (gemA_alct_win_pri[ 5]),
-      .win_pri_6    (gemA_alct_win_pri[ 6]),
-      .win_pri_7    (gemA_alct_win_pri[ 7]),
-      .win_pri_8    (gemA_alct_win_pri[ 8]),
-      .win_pri_9    (gemA_alct_win_pri[ 9]),
-      .win_pri_10   (gemA_alct_win_pri[10]),
-      .win_pri_11   (gemA_alct_win_pri[11]),
-      .win_pri_12   (gemA_alct_win_pri[12]),
-      .win_pri_13   (gemA_alct_win_pri[13]),
-      .win_pri_14   (gemA_alct_win_pri[14]),
-      .win_pri_15   (gemA_alct_win_pri[15]),
+      .win_pri_0    (gem_alct_win_pri[ 0]),
+      .win_pri_1    (gem_alct_win_pri[ 1]),
+      .win_pri_2    (gem_alct_win_pri[ 2]),
+      .win_pri_3    (gem_alct_win_pri[ 3]),
+      .win_pri_4    (gem_alct_win_pri[ 4]),
+      .win_pri_5    (gem_alct_win_pri[ 5]),
+      .win_pri_6    (gem_alct_win_pri[ 6]),
+      .win_pri_7    (gem_alct_win_pri[ 7]),
+      .win_pri_8    (gem_alct_win_pri[ 8]),
+      .win_pri_9    (gem_alct_win_pri[ 9]),
+      .win_pri_10   (gem_alct_win_pri[10]),
+      .win_pri_11   (gem_alct_win_pri[11]),
+      .win_pri_12   (gem_alct_win_pri[12]),
+      .win_pri_13   (gem_alct_win_pri[13]),
+      .win_pri_14   (gem_alct_win_pri[14]),
+      .win_pri_15   (gem_alct_win_pri[15]),
 
-      .win_best     (gemA_alct_win_best),
-      .pri_best     (gemA_alct_pri_best)
-        );
-
-  wire [15:0] gemB_alct_win_ena;          // Table of enabled window positions
-  wire [3:0]  gemB_alct_win_pri [15:0];        // Table of window position priorities that are enabled
-
-  //genvar j;                // Table window priorities multipled by windwo position enables
-  generate
-  for (j=0; j<=15; j=j+1) begin: gengemBpri
-      assign gemB_alct_win_ena[j] = (gem_sr_include[j]==1 && gemB_vpf_sr[j]==1 && gemB_alct_tag_sr[j]==0);
-      assign gemB_alct_win_pri[j] = (gem_alct_win_priority[j] * gemB_alct_win_ena[j]);
-  end
-  endgenerate
-
-
-  wire [3:0] gemB_alct_win_best;
-  wire [3:0] gemB_alct_pri_best;
-
-  tree_encoder utree_encoder_gemBalct(
-      .win_pri_0    (gemB_alct_win_pri[ 0]),
-      .win_pri_1    (gemB_alct_win_pri[ 1]),
-      .win_pri_2    (gemB_alct_win_pri[ 2]),
-      .win_pri_3    (gemB_alct_win_pri[ 3]),
-      .win_pri_4    (gemB_alct_win_pri[ 4]),
-      .win_pri_5    (gemB_alct_win_pri[ 5]),
-      .win_pri_6    (gemB_alct_win_pri[ 6]),
-      .win_pri_7    (gemB_alct_win_pri[ 7]),
-      .win_pri_8    (gemB_alct_win_pri[ 8]),
-      .win_pri_9    (gemB_alct_win_pri[ 9]),
-      .win_pri_10   (gemB_alct_win_pri[10]),
-      .win_pri_11   (gemB_alct_win_pri[11]),
-      .win_pri_12   (gemB_alct_win_pri[12]),
-      .win_pri_13   (gemB_alct_win_pri[13]),
-      .win_pri_14   (gemB_alct_win_pri[14]),
-      .win_pri_15   (gemB_alct_win_pri[15]),
-
-      .win_best     (gemB_alct_win_best),
-      .pri_best     (gemB_alct_pri_best)
+      .win_best     (gem_alct_win_best),
+      .pri_best     (gem_alct_pri_best)
         );
 
 
-  wire gemA_alct_window_open    = |(gemA_vpf_sr & gem_sr_include);
-  wire gemA_alct_window_hasgem  = |(gemA_vpf_sr & gem_sr_include & ~gemA_alct_tag_sr);
 
-  wire gemB_alct_window_open    = |(gemB_vpf_sr & gem_sr_include);
-  wire gemB_alct_window_hasgem  = |(gemB_vpf_sr & gem_sr_include & ~gemB_alct_tag_sr);
+  wire gem_alct_window_open    = |(gem_vpf_sr & gem_sr_include);
+  wire gem_alct_window_hasgem  = |(gem_vpf_sr & gem_sr_include & ~gem_alct_tag_sr);
 
 
-  wire gem_alct_window_hasgem_tp = gemA_alct_window_hasgem || gemB_alct_window_hasgem;
+  wire gem_alct_window_hasgem_tp = gem_alct_window_hasgem;
 
 // GEM window closes on next bx, check for un-tagged gem in last bx
-  wire   gemA_alct_last_vpf = gemA_vpf_sr[gem_alct_winclosing];        // GEM token reaches last window position 1bx before tag
-  wire   gemA_alct_last_tag = gemA_alct_tag_sr[gem_alct_winclosing];    // push it to GEM-CLCT matching sequence anyway    
-  wire   gemB_alct_last_vpf = gemB_vpf_sr[gem_alct_winclosing];        // GEM token reaches last window position 1bx before tag
-  wire   gemB_alct_last_tag = gemB_alct_tag_sr[gem_alct_winclosing];    // push it to GEM-CLCT matching sequence anyway    
+  wire   gem_alct_last_vpf = gem_vpf_sr[gem_alct_winclosing];        // GEM token reaches last window position 1bx before tag
+  wire   gem_alct_last_tag = gem_alct_tag_sr[gem_alct_winclosing];    // push it to GEM-CLCT matching sequence anyway    
 
 // GEM matched or alct-only
   assign  alct_gem_vpf          = alct0_gem_pipe_vpf | alct1_gem_pipe_vpf;              // ALCT vpf
-  assign  gemA_alct_match       = alct_gem_vpf   &&  gemA_alct_window_hasgem;  // ALCT matches GEM window, push to CLCT match
-  assign  gemB_alct_match       = alct_gem_vpf   &&  gemB_alct_window_hasgem;  // ALCT matches GEM window, push to CLCT match
 
-  wire alct_gemA_nogem       = alct_gem_vpf   && !gemA_alct_window_hasgem;  // ALCT arrived, but there was no GEM window open
-  wire gemA_alct_last_win    = gemA_alct_last_vpf && !gemA_alct_last_tag;  // CLCT reached end of window
-  wire gemA_alct_noalct      = gemA_alct_last_win && !alct_gem_vpf;    // No ALCT arrived in window, pushed mpc on last bx
-  //wire gemA_alct_used        = gemA_alct_match_sr[gem_alct_winclosing]; //gem was used, Tao
+  wire alct_gem_nogem       = alct_gem_vpf   && !gem_alct_window_hasgem;  // ALCT arrived, but there was no GEM window open
+  wire gem_alct_match        = alct_gem_vpf   &&  gem_alct_window_hasgem; 
+  wire gem_alct_last_win    = gem_alct_last_vpf && !gem_alct_last_tag;  // CLCT reached end of window
+  wire gem_alct_noalct      = gem_alct_last_win && !alct_gem_vpf;    // No ALCT arrived in window, pushed mpc on last bx
+  //wire gem_alct_used        = gem_alct_match_sr[gem_alct_winclosing]; //gem was used, Tao
 
-  wire alct_gemB_nogem       = alct_gem_vpf   && !gemB_alct_window_hasgem;  // ALCT arrived, but there was no GEM window open
-  wire gemB_alct_last_win    = gemB_alct_last_vpf && !gemB_alct_last_tag;  // CLCT reached end of window
-  wire gemB_alct_noalct      = gemB_alct_last_win && !alct_gem_vpf;    // No ALCT arrived in window, pushed mpc on last bx
-  //wire gemB_alct_used        = gemB_alct_match_sr[gem_alct_winclosing]; //gem was used, Tao
+  //assign gem_alct_tag_me  = (algo2016_drop_used_clcts) ? gem_alct_match : 1'b0;    // Tag the matching clct
+  assign gem_alct_tag_me  = gem_alct_match;    // Tag the matching clct
+  assign gem_alct_tag_win = gem_alct_win_best;   // But get the one with highest priority
 
-
-  //assign gemA_alct_tag_me  = (algo2016_drop_used_clcts) ? gemA_alct_match : 1'b0;    // Tag the matching clct
-  assign gemA_alct_tag_me  = gemA_alct_match;    // Tag the matching clct
-  assign gemA_alct_tag_win = gemA_alct_win_best;   // But get the one with highest priority
-
-  assign gemB_alct_tag_me  = gemB_alct_match;    // Tag the matching clct
-  assign gemB_alct_tag_win = gemB_alct_win_best;   // But get the one with highest priority
-
-  wire [3:0] gemA_alct_match_win_mux; //alct position in gem-tagged window. 
-  assign gemA_alct_match_win_mux = (gemA_alct_noalct) ? gem_alct_winclosing    : gemA_alct_tag_win;    // if GEM only and no alct, disregard priority and take last window position // Pointer to SRL delayed GEM signals to align with ALCT signal after alct_delay_forgem
+  wire [3:0] gem_alct_match_win_mux; //alct position in gem-tagged window. 
+  assign gem_alct_match_win_mux = (gem_alct_noalct) ? gem_alct_winclosing    : gem_alct_tag_win;    // if GEM only and no alct, disregard priority and take last window position // Pointer to SRL delayed GEM signals to align with ALCT signal after alct_delay_forgem
   
-
-  wire [3:0] gemB_alct_match_win_mux; //alct position in gem-tagged window. 
-  assign gemB_alct_match_win_mux = (gemB_alct_noalct) ? gem_alct_winclosing    : gemB_alct_tag_win;    // if GEM only and no alct, disregard priority and take last window position // Pointer to SRL delayed GEM signals to align with ALCT signal after alct_delay_forgem
-
-
   // after GEM-ALCT match, delay GEM to expected ALCT position for GEM-CLCT match, 
   //if no ALCT in GEM tagged window, 
   // how no GEM case? does it bother ?
-  //wire [3:0] gemA_extra_delay_forclct = (alct_pulse) ?  gem_alct_win_center : 0;//address to find gem-alct match best win
-  //wire [3:0] gemB_extra_delay_forclct = (alct_pulse) ?  gem_alct_win_center : 0;
-  //wire [3:0] gemA_extra_delay_forclct = gemA_alct_noalct ?  0 : gem_alct_win_center;//address to find gem-alct match best win
-  //wire [3:0] gemB_extra_delay_forclct = gemB_alct_noalct ?  0 : gem_alct_win_center;
-  wire [3:0] gemA_extra_delay_forclct = gem_alct_win_center;//address to find gem-alct match best win
-  wire [3:0] gemB_extra_delay_forclct = gem_alct_win_center;
+  //wire [3:0] gem_extra_delay_forclct = (alct_pulse) ?  gem_alct_win_center : 0;//address to find gem-alct match best win
+  //wire [3:0] gem_extra_delay_forclct = gem_alct_noalct ?  0 : gem_alct_win_center;//address to find gem-alct match best win
+  wire [3:0] gem_extra_delay_forclct = gem_alct_win_center;//address to find gem-alct match best win
   
 
-  wire [3:0] gemA_forclct_adr = gemA_extra_delay_forclct-4'b1;
-  wire [3:0] gemB_forclct_adr = gemB_extra_delay_forclct-4'b1;
-  wire gemA_extra_delay_forclct_is_0 = gemA_extra_delay_forclct == 0;
-  wire gemB_extra_delay_forclct_is_0 = gemB_extra_delay_forclct == 0;
+  wire [3:0] gem_forclct_adr = gem_extra_delay_forclct-4'b1;
+  wire gem_extra_delay_forclct_is_0 = gem_extra_delay_forclct == 0;
 
-  wire [3:0] gemA_alct_match_win_mux_srl;
-  wire [3:0] gemB_alct_match_win_mux_srl;
-  srl16e_bbl #(4) ugemAmatchwin (.clock(clock),.ce(1'b1),.adr(gemA_forclct_adr),.d(gemA_alct_match_win_mux),.q(gemA_alct_match_win_mux_srl));
-  srl16e_bbl #(4) ugemBmatchwin (.clock(clock),.ce(1'b1),.adr(gemB_forclct_adr),.d(gemB_alct_match_win_mux),.q(gemB_alct_match_win_mux_srl));
+  wire [3:0] gem_alct_match_win_mux_srl;
+  srl16e_bbl #(4) ugemAmatchwin (.clock(clock),.ce(1'b1),.adr(gem_forclct_adr),.d(gem_alct_match_win_mux),.q(gem_alct_match_win_mux_srl));
   
-  wire [3:0] gemA_alct_match_win_mux_pipe = gemA_extra_delay_forclct_is_0 ? gemA_alct_match_win_mux : gemA_alct_match_win_mux_srl;
-  wire [3:0] gemB_alct_match_win_mux_pipe = gemB_extra_delay_forclct_is_0 ? gemB_alct_match_win_mux : gemB_alct_match_win_mux_srl;
+  wire [3:0] gem_alct_match_win_mux_pipe = gem_extra_delay_forclct_is_0 ? gem_alct_match_win_mux : gem_alct_match_win_mux_srl;
 
-  assign  alct_gem_win = gemA_alct_match_win_mux_pipe[2:0];
+  assign  alct_gem_win = gem_alct_match_win_mux_pipe[2:0];
 
 //------------------------------------------------------------------------------------------------------------------
 // Push GEM data into a 1bx to 16bx pipeline delay to do GEM-CLCT match
@@ -2149,48 +2031,43 @@
   //find out GEM vpf for CLCT-GEM matching 
   wire [7:0] gemA_forclct, gemA_forclct_srl;
   wire [7:0] gemB_forclct, gemB_forclct_srl;
-  wire [3:0] gemA_final_delay_withalct = gemA_alct_match_win_mux_pipe + match_gemA_alct_delay + gem_alct_win_center;
-  wire [3:0] gemB_final_delay_withalct = gemB_alct_match_win_mux_pipe + match_gemB_alct_delay + gem_alct_win_center;
-  wire [3:0] gemA_final_delay_noalct = match_gemA_alct_delay + gem_alct_winclosing;
-  wire [3:0] gemB_final_delay_noalct = match_gemB_alct_delay + gem_alct_winclosing;
+  wire [3:0] gem_final_delay_withalct = gem_alct_match_win_mux_pipe + match_gem_alct_delay + gem_alct_win_center;
+  wire [3:0] gem_final_delay_noalct = match_gem_alct_delay + gem_alct_winclosing;
 
-  wire [3:0] gemA_final_delay = alct_pulse ? gemA_final_delay_withalct : gemA_final_delay_noalct;
-  wire [3:0] gemB_final_delay = alct_pulse ? gemB_final_delay_withalct : gemB_final_delay_noalct;
+  wire [3:0] gem_final_delay = alct_pulse ? gem_final_delay_withalct : gem_final_delay_noalct;
+  //wire [3:0] gem_final_delay = gem_alct_noalct ? gem_final_delay_noalct : gem_final_delay_withalct;
 
 
-  //wire [3:0] gemA_final_delay = gemA_alct_noalct ? gemA_final_delay_noalct : gemA_final_delay_withalct;
-  //wire [3:0] gemB_final_delay = gemB_alct_noalct ? gemB_final_delay_noalct : gemB_final_delay_withalct;
-
-
-  wire [3:0] gemA_final_adr   = gemA_final_delay - 4'b1;
-  wire [3:0] gemB_final_adr   = gemB_final_delay - 4'b1;
-  srl16e_bbl #(8) ugemApulse_gemclct (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemA_vpf),.q(gemA_forclct_srl));
-  srl16e_bbl #(8) ugemBpulse_gemclct (.clock(clock),.ce(1'b1),.adr(gemB_final_adr),.d(gemB_vpf),.q(gemB_forclct_srl));
+  wire [3:0] gem_final_adr   = gem_final_delay - 4'b1;
+  srl16e_bbl #(8) ugemApulse_gemclct (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemA_vpf),.q(gemA_forclct_srl));
+  srl16e_bbl #(8) ugemBpulse_gemclct (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_vpf),.q(gemB_forclct_srl));
 
 //------------------------------------------------------------------------------------------------------------------
 //ALCT-CLCT-GEM pulse match, namely match in timing
 //------------------------------------------------------------------------------------------------------------------
-  wire [7:0] gemA_forclct_pipe =  (gemA_final_delay == 0) ? gemA_vpf : gemA_forclct_srl;
-  wire [7:0] gemB_forclct_pipe =  (gemB_final_delay == 0) ? gemB_vpf : gemB_forclct_srl;
+  wire [7:0] gemA_forclct_pipe =  (gem_final_delay == 0) ? gemA_vpf : gemA_forclct_srl;
+  wire [7:0] gemB_forclct_pipe =  (gem_final_delay == 0) ? gemB_vpf : gemB_forclct_srl;
 
   wire gemA_pulse_forclct = |gemA_forclct_pipe;
   wire gemB_pulse_forclct = |gemB_forclct_pipe;
   wire copad_pulse_forclct = gemA_pulse_forclct && gemB_pulse_forclct && (|copad_match_pipe);
+  wire copad_pulse_forclct_good = copad_pulse_forclct && tmb_copad_clct_allow;
 
   assign gem_forclct_vpf_tp = gemA_pulse_forclct || gemB_pulse_forclct; 
 
   assign gemA_clct_match  = gemA_pulse_forclct  &&  clct_window_haslcts;  // gem matches CLCT window, push to mpc on current bx
   assign gemB_clct_match  = gemB_pulse_forclct  &&  clct_window_haslcts;  // gem matches CLCT window, push to mpc on current bx
+  assign gemA_alct_match  = alct_pulse  &&  gemA_pulse_forclct;  // ALCT matches GEM window, push to CLCT match
+  assign gemB_alct_match  = alct_pulse  &&  gemB_pulse_forclct;  // ALCT matches GEM window, push to CLCT match
 
   wire clct_gemA_noclct = gemA_pulse_forclct  && !clct_window_haslcts;  // gem arrived, but there was no CLCT window open
   wire gemA_clct_nogem  = clct_last_win && !gemA_pulse_forclct;    // No ALCT arrived in window, pushed mpc on last bx
-  //wire gemA_clct_used        = clct_match_sr[winclosing]; //CLCT was used
   wire clct_gemB_noclct = gemB_pulse_forclct  && !clct_window_haslcts;  // gem arrived, but there was no CLCT window open
   wire gemB_clct_nogem  = clct_last_win && !gemB_pulse_forclct;    // No ALCT arrived in window, pushed mpc on last bx
-  //wire gemA_clct_used        = clct_match_sr[winclosing]; //CLCT was used
-  //wire gemA_clct_nogem_lost = clct_last_win &&  gemA_pulse_forclct && clct_win_best!=winclosing;// No ALCT arrived in window, lost to mpc contention
 
-  wire clct_copad_match = copad_pulse_forclct  && clct_window_haslcts;  // gem matches CLCT window, push to mpc on current bx
+  wire clct_copad_pulse_match = copad_pulse_forclct && tmb_copad_clct_allow  && clct_window_haslcts;  // gem matches CLCT window, push to mpc on current bx
+  wire alct_copad_pulse_match = copad_pulse_forclct && tmb_copad_alct_allow  && alct_pulse;  // gem matches CLCT window, push to mpc on current bx
+
 
   wire   gem_pulse                   = gemA_pulse_forclct || gemB_pulse_forclct;
   assign alct_gem_pulse              = alct_pulse  && gem_pulse;
@@ -2200,15 +2077,59 @@
   assign alct_clct_gemB_pulse        = gemB_pulse_forclct && clct_match;
   assign alct_clct_gem_pulse         = clct_match && gem_pulse;
 
-  assign alct_gem_noclct_pulse       = alct_pulse && gem_pulse && alct_noclct;
+  assign alct_gem_noclct_pulse       = alct_gem_pulse && alct_noclct;
   assign clct_gem_noalct_pulse       = clct_gem_pulse && clct_noalct;
 
-  assign alct_copad_noclct_pulse     = alct_pulse && copad_pulse_forclct && alct_noclct;
-  assign clct_copad_noalct_pulse     = clct_copad_match && clct_noalct;
-   
- // from the alct position in gem-tagged window, we should know where is the gem pulse
-  // delay the GEM pulse to re-do matching as it is leaving the window (to match to clct_noalct and alct_noclct)
-  //srl16e_bbl #(1) ugempulse (.clock(clock),.ce(1'b1),.adr(winclosing-clct_win_center),.d(gem_pulse),.q(gem_pulse_winclose)); //andrew
+  assign alct_copad_noclct_pulse     = alct_copad_pulse_match && alct_noclct;
+  assign clct_copad_noalct_pulse     = clct_copad_pulse_match && clct_noalct;
+
+  //------------------------------------------------------------------------------------------------------------------
+  //run2 legacy logic
+  //add clct_used to CLCT readout control
+  wire clct_keep     =((clct_match && tmb_allow_match   ) || (clct_noalct &&  tmb_allow_clct    && !clct_noalct_lost && !clct_used));
+  wire alct_keep     = (clct_match && tmb_allow_match   ) || (alct_noclct &&  tmb_allow_alct);
+
+  wire clct_keep_ro  = (clct_match && tmb_allow_match_ro) || (clct_noalct &&  tmb_allow_clct_ro && !clct_noalct_lost && !clct_used);
+  wire alct_keep_ro  = (clct_match && tmb_allow_match_ro) || (alct_noclct &&  tmb_allow_alct_ro);
+
+  wire clct_discard  = (clct_match && !tmb_allow_match  ) || (clct_noalct && !tmb_allow_clct) || clct_noalct_lost || clct_used;
+  wire alct_discard  =  alct_pulse && !alct_keep;
+
+
+  wire clct_kept = (clct_keep || clct_keep_ro);
+
+  //------------------------------------------------------------------------------------------------------------------
+  // Run3 logic with GEMCSC match: ALCT+copad, CLCT+copad
+  wire clct_keep_run3 = (clct_match && tmb_allow_match   ) || (clct_noalct && tmb_allow_clct && !clct_lost_run3 && !clct_used_run3) || clct_copad_pulse_match;
+  wire alct_keep_run3 = (clct_match && tmb_allow_match   ) || (alct_noclct && tmb_allow_alct) || alct_copad_pulse_match;
+
+  wire clct_keep_ro_run3 = (clct_match && tmb_allow_match_ro) || (clct_noalct &&  tmb_allow_clct_ro && !clct_lost_run3 && !clct_used_run3) || clct_copad_pulse_match;
+  wire alct_keep_ro_run3 = (clct_match && tmb_allow_match_ro) || (alct_noclct &&  tmb_allow_alct_ro) || alct_copad_pulse_match;
+
+  wire clct_discard_run3 = (clct_match && !tmb_allow_match) || (clct_noalct && !tmb_allow_clct && !clct0_copad_match_good) || clct_noalct_lost || clct_used;
+  wire alct_discard_run3 =  alct_pulse && !alct_keep_run3;
+
+  wire clct_kept_run3 = (clct_keep_run3 || clct_keep_ro_run3);
+
+  //------------------------------------------------------------------------------------------------------------------
+  //run2 legacy logic
+// Match window mux
+  wire [3:0] match_win;
+  wire [3:0] match_win_mux;
+  assign match_win_mux = (clct_noalct) ? winclosing    : clct_tag_win;    // if clct only, disregard priority and take last window position // Pointer to SRL delayed CLCT signals
+  assign match_win     = (clct_kept  ) ? match_win_mux : clct_win_center; // Default window position for alct-only events
+
+//!  assign match_win   = (clct_keep || clct_keep_ro) ? clct_tag_win : clct_win_center;  // Default window position for alct-only events
+  //assign clct_srl_ptr   = match_win;
+
+  //------------------------------------------------------------------------------------------------------------------
+  //Run3 GEMCSC algorithm
+  wire [3:0] match_win_run3;
+  wire [3:0] match_win_mux_run3;
+  assign match_win_mux_run3 = (clct_noalct && clct_nocopad) ? winclosing         : clct_tag_win;   
+  assign match_win_run3     = (clct_kept_run3             ) ? match_win_mux_run3 : clct_win_center;
+  assign clct_srl_ptr = match_win_run3;
+  assign gem_clct_win = (clct_kept_run3) ? match_win_run3 : 4'b1111; //
 
 //------------------------------------------------------------------------------------------------------------------
 //  delay GEM data for GEM-CSC position match
@@ -2250,40 +2171,40 @@
   genvar k;                // Table window priorities multipled by windwo position enables
   generate
   for (k=0; k< MXCLUSTER_CHAMBER; k=k+1) begin: gemdatadelay
-      srl16e_bbl #(CLSTBITS) ugemAcluster (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemA_cluster[k]),           .q(gemA_cluster_srl[k]));
-      srl16e_bbl #(WIREBITS) ugemAwirelo  (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemA_cluster_cscwire_lo[k]),.q(gemA_cluster_cscwire_lo_srl[k]));
-      srl16e_bbl #(WIREBITS) ugemAwiremi  (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemA_cluster_cscwire_mi[k]),.q(gemA_cluster_cscwire_mi_srl[k]));
-      srl16e_bbl #(WIREBITS) ugemAwirehi  (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemA_cluster_cscwire_hi[k]),.q(gemA_cluster_cscwire_hi_srl[k]));
-      srl16e_bbl #(MXXKYB)   ugemAxkylo   (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemA_cluster_cscxky_lo[k]), .q(gemA_cluster_cscxky_lo_srl[k]));
-      srl16e_bbl #(MXXKYB)   ugemAxkymi   (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemA_cluster_cscxky_mi[k]), .q(gemA_cluster_cscxky_mi_srl[k]));
-      srl16e_bbl #(MXXKYB)   ugemAxkyhi   (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemA_cluster_cscxky_hi[k]), .q(gemA_cluster_cscxky_hi_srl[k]));
-      srl16e_bbl #(CLSTBITS) ugemBcluster (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemB_cluster[k]),           .q(gemB_cluster_srl[k]));
-      srl16e_bbl #(WIREBITS) ugemBwirelo  (.clock(clock),.ce(1'b1),.adr(gemB_final_adr),.d(gemB_cluster_cscwire_lo[k]),.q(gemB_cluster_cscwire_lo_srl[k]));
-      srl16e_bbl #(WIREBITS) ugemBwiremi  (.clock(clock),.ce(1'b1),.adr(gemB_final_adr),.d(gemB_cluster_cscwire_mi[k]),.q(gemB_cluster_cscwire_mi_srl[k]));
-      srl16e_bbl #(WIREBITS) ugemBwirehi  (.clock(clock),.ce(1'b1),.adr(gemB_final_adr),.d(gemB_cluster_cscwire_hi[k]),.q(gemB_cluster_cscwire_hi_srl[k]));
-      srl16e_bbl #(MXXKYB)   ugemBxkylo   (.clock(clock),.ce(1'b1),.adr(gemB_final_adr),.d(gemB_cluster_cscxky_lo[k]), .q(gemB_cluster_cscxky_lo_srl[k]));
-      srl16e_bbl #(MXXKYB)   ugemBxkymi   (.clock(clock),.ce(1'b1),.adr(gemB_final_adr),.d(gemB_cluster_cscxky_mi[k]), .q(gemB_cluster_cscxky_mi_srl[k]));
-      srl16e_bbl #(MXXKYB)   ugemBxkyhi   (.clock(clock),.ce(1'b1),.adr(gemB_final_adr),.d(gemB_cluster_cscxky_hi[k]), .q(gemB_cluster_cscxky_hi_srl[k]));
+      srl16e_bbl #(CLSTBITS) ugemAcluster (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemA_cluster[k]),           .q(gemA_cluster_srl[k]));
+      srl16e_bbl #(WIREBITS) ugemAwirelo  (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemA_cluster_cscwire_lo[k]),.q(gemA_cluster_cscwire_lo_srl[k]));
+      srl16e_bbl #(WIREBITS) ugemAwiremi  (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemA_cluster_cscwire_mi[k]),.q(gemA_cluster_cscwire_mi_srl[k]));
+      srl16e_bbl #(WIREBITS) ugemAwirehi  (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemA_cluster_cscwire_hi[k]),.q(gemA_cluster_cscwire_hi_srl[k]));
+      srl16e_bbl #(MXXKYB)   ugemAxkylo   (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemA_cluster_cscxky_lo[k]), .q(gemA_cluster_cscxky_lo_srl[k]));
+      srl16e_bbl #(MXXKYB)   ugemAxkymi   (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemA_cluster_cscxky_mi[k]), .q(gemA_cluster_cscxky_mi_srl[k]));
+      srl16e_bbl #(MXXKYB)   ugemAxkyhi   (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemA_cluster_cscxky_hi[k]), .q(gemA_cluster_cscxky_hi_srl[k]));
+      srl16e_bbl #(CLSTBITS) ugemBcluster (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_cluster[k]),           .q(gemB_cluster_srl[k]));
+      srl16e_bbl #(WIREBITS) ugemBwirelo  (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_cluster_cscwire_lo[k]),.q(gemB_cluster_cscwire_lo_srl[k]));
+      srl16e_bbl #(WIREBITS) ugemBwiremi  (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_cluster_cscwire_mi[k]),.q(gemB_cluster_cscwire_mi_srl[k]));
+      srl16e_bbl #(WIREBITS) ugemBwirehi  (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_cluster_cscwire_hi[k]),.q(gemB_cluster_cscwire_hi_srl[k]));
+      srl16e_bbl #(MXXKYB)   ugemBxkylo   (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_cluster_cscxky_lo[k]), .q(gemB_cluster_cscxky_lo_srl[k]));
+      srl16e_bbl #(MXXKYB)   ugemBxkymi   (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_cluster_cscxky_mi[k]), .q(gemB_cluster_cscxky_mi_srl[k]));
+      srl16e_bbl #(MXXKYB)   ugemBxkyhi   (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_cluster_cscxky_hi[k]), .q(gemB_cluster_cscxky_hi_srl[k]));
 
 
-      srl16e_bbl #(1) ucopad       (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(copad_match[k]),      .q(copad_match_srl[k]));
+      srl16e_bbl #(1) ucopad       (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(copad_match[k]),      .q(copad_match_srl[k]));
 
-      assign gemA_cluster_pipe[k]            = (gemA_final_delay == 0) ? gemA_cluster[k]        : gemA_cluster_srl[k];
-      assign gemA_cluster_cscwire_lo_pipe[k] = (gemA_final_delay == 0) ? gemA_cluster_cscwire_lo[k] : gemA_cluster_cscwire_lo_srl[k];
-      assign gemA_cluster_cscwire_mi_pipe[k] = (gemA_final_delay == 0) ? gemA_cluster_cscwire_mi[k] : gemA_cluster_cscwire_mi_srl[k];
-      assign gemA_cluster_cscwire_hi_pipe[k] = (gemA_final_delay == 0) ? gemA_cluster_cscwire_hi[k] : gemA_cluster_cscwire_hi_srl[k];
-      assign gemA_cluster_cscxky_lo_pipe[k]  = (gemA_final_delay == 0) ? gemA_cluster_cscxky_lo[k]  : gemA_cluster_cscxky_lo_srl[k];
-      assign gemA_cluster_cscxky_mi_pipe[k]  = (gemA_final_delay == 0) ? gemA_cluster_cscxky_mi[k]  : gemA_cluster_cscxky_mi_srl[k];
-      assign gemA_cluster_cscxky_hi_pipe[k]  = (gemA_final_delay == 0) ? gemA_cluster_cscxky_hi[k]  : gemA_cluster_cscxky_hi_srl[k];
-      assign gemB_cluster_pipe[k]            = (gemB_final_delay == 0) ? gemB_cluster[k]        : gemB_cluster_srl[k];
-      assign gemB_cluster_cscwire_lo_pipe[k] = (gemB_final_delay == 0) ? gemB_cluster_cscwire_lo[k] : gemB_cluster_cscwire_lo_srl[k];
-      assign gemB_cluster_cscwire_mi_pipe[k] = (gemB_final_delay == 0) ? gemB_cluster_cscwire_mi[k] : gemB_cluster_cscwire_mi_srl[k];
-      assign gemB_cluster_cscwire_hi_pipe[k] = (gemB_final_delay == 0) ? gemB_cluster_cscwire_hi[k] : gemB_cluster_cscwire_hi_srl[k];
-      assign gemB_cluster_cscxky_lo_pipe[k]  = (gemB_final_delay == 0) ? gemB_cluster_cscxky_lo[k]  : gemB_cluster_cscxky_lo_srl[k];
-      assign gemB_cluster_cscxky_mi_pipe[k]  = (gemB_final_delay == 0) ? gemB_cluster_cscxky_mi[k]  : gemB_cluster_cscxky_mi_srl[k];
-      assign gemB_cluster_cscxky_hi_pipe[k]  = (gemB_final_delay == 0) ? gemB_cluster_cscxky_hi[k]  : gemB_cluster_cscxky_hi_srl[k];
+      assign gemA_cluster_pipe[k]            = (gem_final_delay == 0) ? gemA_cluster[k]        : gemA_cluster_srl[k];
+      assign gemA_cluster_cscwire_lo_pipe[k] = (gem_final_delay == 0) ? gemA_cluster_cscwire_lo[k] : gemA_cluster_cscwire_lo_srl[k];
+      assign gemA_cluster_cscwire_mi_pipe[k] = (gem_final_delay == 0) ? gemA_cluster_cscwire_mi[k] : gemA_cluster_cscwire_mi_srl[k];
+      assign gemA_cluster_cscwire_hi_pipe[k] = (gem_final_delay == 0) ? gemA_cluster_cscwire_hi[k] : gemA_cluster_cscwire_hi_srl[k];
+      assign gemA_cluster_cscxky_lo_pipe[k]  = (gem_final_delay == 0) ? gemA_cluster_cscxky_lo[k]  : gemA_cluster_cscxky_lo_srl[k];
+      assign gemA_cluster_cscxky_mi_pipe[k]  = (gem_final_delay == 0) ? gemA_cluster_cscxky_mi[k]  : gemA_cluster_cscxky_mi_srl[k];
+      assign gemA_cluster_cscxky_hi_pipe[k]  = (gem_final_delay == 0) ? gemA_cluster_cscxky_hi[k]  : gemA_cluster_cscxky_hi_srl[k];
+      assign gemB_cluster_pipe[k]            = (gem_final_delay == 0) ? gemB_cluster[k]        : gemB_cluster_srl[k];
+      assign gemB_cluster_cscwire_lo_pipe[k] = (gem_final_delay == 0) ? gemB_cluster_cscwire_lo[k] : gemB_cluster_cscwire_lo_srl[k];
+      assign gemB_cluster_cscwire_mi_pipe[k] = (gem_final_delay == 0) ? gemB_cluster_cscwire_mi[k] : gemB_cluster_cscwire_mi_srl[k];
+      assign gemB_cluster_cscwire_hi_pipe[k] = (gem_final_delay == 0) ? gemB_cluster_cscwire_hi[k] : gemB_cluster_cscwire_hi_srl[k];
+      assign gemB_cluster_cscxky_lo_pipe[k]  = (gem_final_delay == 0) ? gemB_cluster_cscxky_lo[k]  : gemB_cluster_cscxky_lo_srl[k];
+      assign gemB_cluster_cscxky_mi_pipe[k]  = (gem_final_delay == 0) ? gemB_cluster_cscxky_mi[k]  : gemB_cluster_cscxky_mi_srl[k];
+      assign gemB_cluster_cscxky_hi_pipe[k]  = (gem_final_delay == 0) ? gemB_cluster_cscxky_hi[k]  : gemB_cluster_cscxky_hi_srl[k];
 
-      assign copad_match_pipe[k]             = (gemA_final_delay == 0) ? copad_match[k] : copad_match_srl[k];
+      assign copad_match_pipe[k]             = (gem_final_delay == 0) ? copad_match[k] : copad_match_srl[k];
   end 
   endgenerate 
   
@@ -2293,16 +2214,16 @@
   wire gemA_sync_err_srl;
   wire gemB_sync_err_srl;
   wire gems_sync_err_srl;
-      srl16e_bbl #(1) ugemAoverflow       (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemA_overflow),      .q(gemA_overflow_srl));
-      srl16e_bbl #(1) ugemBoverflow       (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemB_overflow),      .q(gemB_overflow_srl));
-      srl16e_bbl #(1) ugemAsyncerr        (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemA_sync_err),      .q(gemA_sync_err_srl));
-      srl16e_bbl #(1) ugemBsyncerr        (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gemB_sync_err),      .q(gemB_sync_err_srl));
-      srl16e_bbl #(1) ugemssyncerr        (.clock(clock),.ce(1'b1),.adr(gemA_final_adr),.d(gems_sync_err),      .q(gems_sync_err_srl));
-  assign gemA_overflow_pipe = (gemA_final_delay == 0) ? gemA_overflow : gemA_overflow_srl;
-  assign gemB_overflow_pipe = (gemA_final_delay == 0) ? gemB_overflow : gemB_overflow_srl;
-  assign gemA_sync_err_pipe = (gemA_final_delay == 0) ? gemA_sync_err : gemA_sync_err_srl;
-  assign gemB_sync_err_pipe = (gemA_final_delay == 0) ? gemB_sync_err : gemB_sync_err_srl;
-  assign gems_sync_err_pipe = (gemA_final_delay == 0) ? gems_sync_err : gems_sync_err_srl;
+      srl16e_bbl #(1) ugemAoverflow       (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemA_overflow),      .q(gemA_overflow_srl));
+      srl16e_bbl #(1) ugemBoverflow       (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_overflow),      .q(gemB_overflow_srl));
+      srl16e_bbl #(1) ugemAsyncerr        (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemA_sync_err),      .q(gemA_sync_err_srl));
+      srl16e_bbl #(1) ugemBsyncerr        (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_sync_err),      .q(gemB_sync_err_srl));
+      srl16e_bbl #(1) ugemssyncerr        (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gems_sync_err),      .q(gems_sync_err_srl));
+  assign gemA_overflow_pipe = (gem_final_delay == 0) ? gemA_overflow : gemA_overflow_srl;
+  assign gemB_overflow_pipe = (gem_final_delay == 0) ? gemB_overflow : gemB_overflow_srl;
+  assign gemA_sync_err_pipe = (gem_final_delay == 0) ? gemA_sync_err : gemA_sync_err_srl;
+  assign gemB_sync_err_pipe = (gem_final_delay == 0) ? gemB_sync_err : gemB_sync_err_srl;
+  assign gems_sync_err_pipe = (gem_final_delay == 0) ? gems_sync_err : gems_sync_err_srl;
   
 //------------------------------------------------------------------------------------------------------------------
 // GEM-ALCT-CLCT position match part
@@ -2667,58 +2588,6 @@
 
   //------------------------------------------------------------------------------------------------------------------
   //run2 legacy logic
-  //add clct_used to CLCT readout control
-  wire clct_keep     =((clct_match && tmb_allow_match   ) || (clct_noalct &&  tmb_allow_clct    && !clct_noalct_lost && !clct_used));
-  wire alct_keep     = (clct_match && tmb_allow_match   ) || (alct_noclct &&  tmb_allow_alct);
-
-  wire clct_keep_ro  = (clct_match && tmb_allow_match_ro) || (clct_noalct &&  tmb_allow_clct_ro && !clct_noalct_lost && !clct_used);
-  wire alct_keep_ro  = (clct_match && tmb_allow_match_ro) || (alct_noclct &&  tmb_allow_alct_ro);
-
-  wire clct_discard  = (clct_match && !tmb_allow_match  ) || (clct_noalct && !tmb_allow_clct) || clct_noalct_lost || clct_used;
-  wire alct_discard  =  alct_pulse && !alct_keep;
-
-
-  wire clct_kept = (clct_keep || clct_keep_ro);
-
-  //------------------------------------------------------------------------------------------------------------------
-  // Run3 logic with GEMCSC match: ALCT+copad, CLCT+copad
-  wire clct0_copad_match_good = clct0_copad_match_found_pos && tmb_copad_clct_allow;
-  wire alct0_copad_match_good = alct0_copad_match_found_pos && tmb_copad_alct_allow;
-  wire clct1_copad_match_good = clct1_copad_match_found_pos && tmb_copad_clct_allow;
-  wire alct1_copad_match_good = alct1_copad_match_found_pos && tmb_copad_alct_allow;
-
-  wire clct_keep_run3 = clct_keep || clct0_copad_match_good;
-  wire alct_keep_run3 = alct_keep || alct0_copad_match_good;
-
-  wire clct_keep_ro_run3 = clct_keep_ro || clct0_copad_match_good;
-  wire alct_keep_ro_run3 = alct_keep_ro || alct0_copad_match_good;
-
-  wire clct_discard_run3 = (clct_match && !tmb_allow_match) || (clct_noalct && !tmb_allow_clct && !clct0_copad_match_good) || clct_noalct_lost || clct_used;
-  wire alct_discard_run3 =  alct_pulse && !alct_keep_run3;
-
-
-  //------------------------------------------------------------------------------------------------------------------
-  //run2 legacy logic
-// Match window mux
-  wire [3:0] match_win;
-  wire [3:0] match_win_mux;
-  assign match_win_mux = (clct_noalct) ? winclosing    : clct_tag_win;    // if clct only, disregard priority and take last window position // Pointer to SRL delayed CLCT signals
-  assign match_win     = (clct_kept  ) ? match_win_mux : clct_win_center; // Default window position for alct-only events
-
-//!  assign match_win   = (clct_keep || clct_keep_ro) ? clct_tag_win : clct_win_center;  // Default window position for alct-only events
-  //assign clct_srl_ptr   = match_win;
-
-  //------------------------------------------------------------------------------------------------------------------
-  //Run3 GEMCSC algorithm
-  wire [3:0] match_win_run3;
-  wire [3:0] match_win_mux_run3;
-  assign match_win_mux_run3 = (clct_noalct && clct_nocopad) ? winclosing    : clct_tag_win;   
-  assign match_win_run3 = (clct_kept) ? match_win_mux_run3 : clct_win_center;
-  assign clct_srl_ptr = match_win_run3;
-  assign gem_clct_win = (clct_keep_run3 && (gemA_pulse_forclct || gemB_pulse_forclct)) ? match_win_run3 : 4'b1111; //
-
-  //------------------------------------------------------------------------------------------------------------------
-  //run2 legacy logic
 //  wire trig_pulse    = clct_match || clct_noalct || clct_noalct_lost || alct_noclct;    // Event pulse
   wire trig_pulse    = clct_match || (clct_noalct && !clct_used) || clct_noalct_lost || alct_only_trig;  // Event pulse
 
@@ -2740,8 +2609,16 @@
 
   //------------------------------------------------------------------------------------------------------------------
   // Run3 logic with GEMCSC match. if GEM is not enable for match, it should fall back to above logic
-  //wire trig_pulse_run2    = clct_match_run2 || (clct_noalct && !clct_used) || clct_noalct_lost || alct_only_trig;  // Event pulse
-  wire trig_pulse_run3    = trig_pulse || clct0_copad_match_good || alct0_copad_match_good;
+  // Here position is taken into consideration??
+  wire clct0_copad_match_good = clct0_copad_match_found_pos && tmb_copad_clct_allow;
+  wire alct0_copad_match_good = alct0_copad_match_found_pos && tmb_copad_alct_allow;
+  wire clct1_copad_match_good = clct1_copad_match_found_pos && tmb_copad_clct_allow;
+  wire alct1_copad_match_good = alct1_copad_match_found_pos && tmb_copad_alct_allow;
+
+  wire alctclct_match_run3 = (alct0_clct0_copad_match_found_pos || alct0_clct0_gem_match_found_pos || alct0_clct0_nogem_match_found_pos);
+  wire alctclct_match_good_run3 = alctclct_match_run3 && tmb_allow_match;
+
+  wire trig_pulse_run3    = alctclct_match_run3 || clct0_copad_match_good || alct0_copad_match_good || (clct_noalct && clct_nocopad && !clct_used_run3) || clct_lost_run3 || alct_only_trig_run3;  // Event pulse
 
   wire trig_keep_run3     = (clct_keep_run3   || alct_keep_run3);
   wire non_trig_keep_run3 = (clct_keep_ro_run3 || alct_keep_ro_run3);
@@ -2749,13 +2626,13 @@
   wire alct_only_run3     = (alct_noclct && tmb_allow_alct) && !clct_keep_run3 && !alct0_copad_match_good; //alct-only in gem-csc
   wire wr_push_mux_run3   = (alct_only_run3) ? trig_pulse_run3 : (wr_push_xtmb_pipe  && trig_pulse_run3); 
 
-  wire clct_match_tr_run3 = (clct_match || clct0_copad_match_good || alct0_copad_match_good)  && trig_keep_run3;
-  wire alct_noclct_tr_run3= (alct_noclct || alct0_copad_match_good) && trig_keep_run3;
-  wire clct_noalct_tr_run3= ((clct_noalct && !clct_used) || clct0_copad_match_good) && trig_keep_run3;
+  wire clct_match_tr_run3 = (alctclct_match_run3 || clct0_copad_match_good || alct0_copad_match_good)  && trig_keep_run3;//ALCT+CLCT, ALCT+copad, CLCT+copad
+  wire alct_noclct_tr_run3= (alct_noclct && !alct0_copad_match_good) && trig_keep_run3;//ALCT only
+  wire clct_noalct_tr_run3= ((clct_noalct && !clct_used_run3 && !clct0_copad_match_good) && trig_keep_run3;//CLCT only
 
   wire clct_match_ro_run3 = (clct_match || clct0_copad_match_good || alct0_copad_match_good) && non_trig_keep_run3;
-  wire alct_noclct_ro_run3= (alct_noclct || alct0_copad_match_good) && non_trig_keep_run3;
-  wire clct_noalct_ro_run3= ((clct_noalct && !clct_used) || clct0_copad_match_good) && non_trig_keep_run3;
+  wire alct_noclct_ro_run3= (alct_noclct && !alct0_copad_match_good) && non_trig_keep_run3;
+  wire clct_noalct_ro_run3= ((clct_noalct && !clct_used_run3 && !clct0_copad_match_good) && non_trig_keep_run3;
 
   wire alct_only_trig_run3 = alct_only_trig && !alct0_copad_match_good; //ALCT-copad is not found
 
