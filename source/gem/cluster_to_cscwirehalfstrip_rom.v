@@ -221,8 +221,6 @@ rom_roll_wg #(
 );
 
 
-reg [13:0]    reg_cluster0;
-
 
 reg [13:0]    reg_cluster0;
 reg           reg_cluster0_vpf;// valid or not
@@ -276,7 +274,7 @@ assign me1b_xky_real_hi = (me1b_xky_lo > me1b_xky_hi) ? me1b_xky_lo : me1b_xky_h
 // adding matching window
 assign cluster0_cscwire_lo  = (wire_real_lo > gem_alct_deltawire) ? wire_real_lo-gem_alct_deltawire : 7'd0;
 assign cluster0_cscwire_hi  = (wire_real_hi + gem_alct_deltawire < MAXWIRE) ? wire_real_hi+gem_alct_deltawire : 7'd47;
-assign cluster0_cscwire_mi = cluster0_cscwire_lo[WIREBITS-1:1] + cluster0_cscwire_hi[WIREBITS-1:1] + (cluster0_cscwire_lo[0] | cluster0_cscwire_hi[0]);
+assign cluster0_cscwire_mi = wire_real_lo[WIREBITS-1:1] + wire_real_hi[WIREBITS-1:1] + (wire_real_lo[0] | wire_real_hi[0]);
 
 //
 //assign cluster0_me1bxky_lo   = (csc_cluster0_me1a) ? 10'd896 : ((me1b_xky_real_lo > MINKEYHSME1B+gem_clct_deltaxky) ? me1b_xky_real_lo-gem_clct_deltaxky : MINKEYHSME1B); //if not in Me1b region, give it an invalid value
@@ -290,7 +288,7 @@ assign cluster0_cscwire_mi = cluster0_cscwire_lo[WIREBITS-1:1] + cluster0_cscwir
 
 assign cluster0_cscxky_lo = (csc_cluster0_me1a) ? ((me1a_xky_real_lo > MINKEYHSME1A+gem_clct_deltaxky) ? me1a_xky_real_lo-gem_clct_deltaxky : MINKEYHSME1A) : ((me1b_xky_real_lo > MINKEYHSME1B+gem_clct_deltaxky) ? me1b_xky_real_lo-gem_clct_deltaxky : MINKEYHSME1B);
 assign cluster0_cscxky_hi = (csc_cluster0_me1a) ? ((me1a_xky_real_hi+gem_clct_deltaxky > MAXKEYHSME1A) ? MAXKEYHSME1A : me1a_xky_real_hi+gem_clct_deltaxky) : ((me1b_xky_real_hi+gem_clct_deltaxky > MAXKEYHSME1B) ? MAXKEYHSME1B : me1b_xky_real_hi+gem_clct_deltaxky);
-assign cluster0_cscxky_mi =  cluster0_cscxky_lo[MXXKYB-1:1] + cluster0_cscxky_hi[MXXKYB-1:1] + (cluster0_cscxky_lo[0] | cluster0_cscxky_hi[0]);
+assign cluster0_cscxky_mi = (csc_cluster0_me1a) ? (me1a_xky_real_lo[MXXKYB-1:1]+me1a_xky_real_hi[MXXKYB-1:1]+(me1a_xky_real_lo[0] | me1a_xky_real_hi[0])) : (me1b_xky_real_lo[MXXKYB-1:1]+me1b_xky_real_hi[MXXKYB-1:1]+(me1b_xky_real_lo[0] | me1b_xky_real_hi[0]));
 
 assign csc_cluster0       = reg_cluster0;
 assign csc_cluster0_vpf   = reg_cluster0_vpf && gem_match_enable && (gem_me1b_match_enable || csc_cluster0_me1a);// valid or not
