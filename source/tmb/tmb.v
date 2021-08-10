@@ -519,7 +519,7 @@
   gem_foralct_vpf_tp,
   gem_forclct_vpf_tp,
   gem_alct_window_hasgem_tp,
-  lct0_vpf_run2_tp,
+  keep_clct_run3_tp,
 // Sump
   tmb_sump
 
@@ -1091,7 +1091,7 @@
   output          gem_foralct_vpf_tp;
   output          gem_forclct_vpf_tp;
   output          gem_alct_window_hasgem_tp;
-  output          lct0_vpf_run2_tp;
+  output          keep_clct_run3_tp;
 
 // Sump
   output          tmb_sump; // Unused signals
@@ -2723,6 +2723,9 @@
   wire keep_clct = trig_pulse && (trig_keep || non_trig_keep);
   wire keep_clct_run3 = trig_pulse_run3 && (trig_keep_run3 || non_trig_keep_run3);
 
+  assign keep_clct_run3_tp = keep_clct_run3;
+
+
   always @(posedge clock) begin
     //clct0_real <= clct0_pipe & {MXCLCT  {keep_clct}};
     //clct1_real <= clct1_pipe & {MXCLCT  {keep_clct}};
@@ -3006,7 +3009,6 @@
   wire lct0_vpf  = alct0_vpf || clct0_vpf;      // First muon exists
   wire lct1_vpf  = alct1_vpf || clct1_vpf;      // Second muon exists
 
-  assign lct0_vpf_run2_tp = lct0_vpf;
 
 // Decompose ALCT muons
   wire         alct0_valid   = alct0[0];     // Valid pattern flag
