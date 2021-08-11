@@ -4260,7 +4260,6 @@ wire [15:0] gemB_bxn_counter;
   wire gem_forclct_vpf_tp;
   wire gem_alct_window_hasgem_tp;
   wire keep_clct_run3_tp;
-  wire tmb_trig_pulse, tmb_trig_keep;//for test, declare signals here
   
 
   tmb utmb
