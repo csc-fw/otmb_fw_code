@@ -2733,11 +2733,11 @@
     //clct0_cclut_real   <= clct0_cclut_pipe & {MXCCLUTB {keep_clct}};
     //clct1_cclut_real   <= clct1_cclut_pipe & {MXCCLUTB {keep_clct}};
     //???? keep_clct =>keep_clct_run3???
-    clct0_real <= (swapclct_final_pos ? clct0_pipe : clct1_pipe) & {MXCLCT  {keep_clct_run3}};
-    clct1_real <= (swapclct_final_pos ? clct1_pipe : clct0_pipe) & {MXCLCT  {keep_clct_run3}};
+    clct0_real <= (swapclct_final_pos ? clct1_pipe : clct0_pipe) & {MXCLCT  {keep_clct_run3}};
+    clct1_real <= (swapclct_final_pos ? clct0_pipe : clct1_pipe) & {MXCLCT  {keep_clct_run3}};
     clctc_real <= clctc_pipe & {MXCLCTC {keep_clct_run3}};
-    clct0_cclut_real   <= (swapclct_final_pos ? clct0_cclut_pipe : clct1_cclut_pipe)& {MXCCLUTB {keep_clct_run3}};
-    clct1_cclut_real   <= (swapclct_final_pos ? clct1_cclut_pipe : clct0_cclut_pipe)& {MXCCLUTB {keep_clct_run3}};
+    clct0_cclut_real   <= (swapclct_final_pos ? clct1_cclut_pipe : clct0_cclut_pipe)& {MXCCLUTB {keep_clct_run3}};
+    clct1_cclut_real   <= (swapclct_final_pos ? clct0_cclut_pipe : clct1_cclut_pipe)& {MXCCLUTB {keep_clct_run3}};
     hmt_trigger_real   <= hmt_trigger_pipe;
   end
 
@@ -2748,8 +2748,8 @@
   always @(posedge clock) begin
   //alct0_real <= alct0_pipe;
   //alct1_real <= alct1_pipe;
-  alct0_real <= (swapalct_final_pos ? alct0_pipe : alct1_pipe);
-  alct1_real <= (swapalct_final_pos ? alct1_pipe : alct0_pipe);
+  alct0_real <= (swapalct_final_pos ? alct1_pipe : alct0_pipe);
+  alct1_real <= (swapalct_final_pos ? alct0_pipe : alct1_pipe);
   end
 
 
