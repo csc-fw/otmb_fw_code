@@ -427,9 +427,9 @@
   gemA_anycluster_me1b,
   gemB_anycluster_me1b,
 
-  gemA_csc_cluster_active_cfeb_list,
-  gemB_csc_cluster_active_cfeb_list,
-  gemcopad_csc_cluster_active_cfeb_list,
+  //gemA_csc_cluster_active_cfeb_list,
+  //gemB_csc_cluster_active_cfeb_list,
+  //gemcopad_csc_cluster_active_cfeb_list,
 
   
 // External Triggers
@@ -1447,9 +1447,9 @@
   input              gemB_anycluster_me1a;
   input              gemB_anycluster_me1b;
 
-  input [MXCFEB-1:0] gemA_csc_cluster_active_cfeb_list;
-  input [MXCFEB-1:0] gemB_csc_cluster_active_cfeb_list;
-  input [MXCFEB-1:0] gemcopad_csc_cluster_active_cfeb_list;
+  //input [MXCFEB-1:0] gemA_csc_cluster_active_cfeb_list;
+  //input [MXCFEB-1:0] gemB_csc_cluster_active_cfeb_list;
+  //input [MXCFEB-1:0] gemcopad_csc_cluster_active_cfeb_list;
 
 
 // External Triggers

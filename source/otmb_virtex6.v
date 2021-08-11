@@ -2341,15 +2341,15 @@ end
 
   wire evenchamber = ~csc_id[0];//double check it counts from 0 or 1 in term of even and odd?????
 
-  wire [MXCFEB-1:0] gemA_csc_cluster_active_cfeb_list; //dummy signal!!
-  wire [MXCFEB-1:0] gemB_csc_cluster_active_cfeb_list;
-  wire [MXCFEB-1:0] gemcopad_csc_cluster_active_cfeb_list;
-  assign gemcopad_csc_cluster_active_cfeb_list = (gemA_csc_cluster_active_cfeb_list & gemB_csc_cluster_active_cfeb_list);
+  //wire [MXCFEB-1:0] gemA_csc_cluster_active_cfeb_list; //dummy signal!!
+  //wire [MXCFEB-1:0] gemB_csc_cluster_active_cfeb_list;
+  //wire [MXCFEB-1:0] gemcopad_csc_cluster_active_cfeb_list;
+  //assign gemcopad_csc_cluster_active_cfeb_list = (gemA_csc_cluster_active_cfeb_list & gemB_csc_cluster_active_cfeb_list);
 
   genvar iclst_csc;
   generate
   for (iclst_csc=0; iclst_csc<MXCLUSTER_CHAMBER; iclst_csc=iclst_csc+1) begin: gen_gem_csc_cluster
-      cluster_to_cscwirehalfstrip #(.ICLST(iclst_csc)) ucluster_to_cscwirehalfstripA (
+      cluster_to_cscwirehalfstrip_rom #(.ICLST(iclst_csc)) ucluster_to_cscwirehalfstripA (
 	.clock (clock),    //in clock
 
         .evenchamber       (evenchamber),   //in,  even pair or not
@@ -2382,7 +2382,7 @@ end
 
       );
 
-      cluster_to_cscwirehalfstrip #(.ICLST(iclst_csc)) ucluster_to_cscwirehalfstripB (
+      cluster_to_cscwirehalfstrip_rom #(.ICLST(iclst_csc)) ucluster_to_cscwirehalfstripB (
 	.clock (clock),
 
         .evenchamber       (evenchamber),   // even pair or not
@@ -3046,9 +3046,9 @@ end
   .gemA_anycluster_me1b    (gemA_anycluster_me1b), //In any ME1a region or not by converting gemA clusters into key HS
   .gemB_anycluster_me1b    (gemB_anycluster_me1b), //In any ME1a region or not by converting gemA clusters into key HS
 
-  .gemA_csc_cluster_active_cfeb_list     (gemA_csc_cluster_active_cfeb_list),// In active CFEB by converting gemA clusters into CSC keyhs
-  .gemB_csc_cluster_active_cfeb_list     (gemB_csc_cluster_active_cfeb_list),// In active CFEB by converting gemA clusters into CSC keyhs
-  .gemcopad_csc_cluster_active_cfeb_list (gemcopad_csc_cluster_active_cfeb_list),// In active CFEB by converting gemA clusters into CSC keyhs
+  //.gemA_csc_cluster_active_cfeb_list     (gemA_csc_cluster_active_cfeb_list),// In active CFEB by converting gemA clusters into CSC keyhs
+  //.gemB_csc_cluster_active_cfeb_list     (gemB_csc_cluster_active_cfeb_list),// In active CFEB by converting gemA clusters into CSC keyhs
+  //.gemcopad_csc_cluster_active_cfeb_list (gemcopad_csc_cluster_active_cfeb_list),// In active CFEB by converting gemA clusters into CSC keyhs
 
 // Sequencer External Triggers
   .alct_adb_pulse_sync (alct_adb_pulse_sync), // In  ADB Test pulse trigger

@@ -70,7 +70,7 @@ parameter ICLST        = 0;
 //reg [DATABITS-1:0] rom [ROMLENGTH-1:0];
 //reg [MXXKYB-1:0] me1a_xky_lo, me1a_xky_hi, me1b_xky_lo, me1b_xky_hi; 
 //reg [WIREBITS-1:0]  wire_lo, wire_hi;
-wire gem_clct_deltaxky = {gem_clct_deltahs, 2'b00};// convert HS level window to 1/8 strip level window
+wire [6:0] gem_clct_deltaxky = {gem_clct_deltahs, 2'b00};// convert HS level window to 1/8 strip level window
 
 wire [MXXKYB-1:0] me1a_xky_lo, me1a_xky_hi, me1b_xky_lo, me1b_xky_hi; 
 wire [WIREBITS-1:0]  wire_lo, wire_hi;

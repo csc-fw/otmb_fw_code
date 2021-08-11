@@ -700,7 +700,7 @@ module  alct_clct_gem_matching(
   //reg [2:0] alct_clct_copad_match_type = 3'b111;
   always @(*) begin
       //ALCT0+CLCT0+copad match found
-      if (alct0_clct0_copad_match_any && alct0_clct0_copad_best_angle < alct0_clct1_copad_best_angle && alct0_clct0_copad_best_angle < alct1_clct0_copad_best_angle && alct0_clct0_copad_best_angle<alct1_clct1_copad_best_angle)
+      if (alct0_clct0_copad_match_any && alct0_clct0_copad_best_angle < alct0_clct1_copad_best_angle && alct0_clct0_copad_best_angle < alct1_clct1_copad_best_angle)
       begin
           alct1_clct1_copad_match_found_r <= alct1_clct1_copad_match_any;
           swapclct_copad_match_r          <= 1'b0;
@@ -709,7 +709,7 @@ module  alct_clct_gem_matching(
           best_cluster1_alct_clct_copad_r <= alct1_clct1_copad_best_icluster;
       end
       //ALCT0+CLCT1+copad match found
-      else if (alct0_clct1_copad_match_any && alct0_clct1_copad_best_angle < alct1_clct0_copad_best_angle && alct0_clct1_copad_best_angle < alct1_clct1_copad_best_angle)
+      else if (alct0_clct1_copad_match_any && alct0_clct1_copad_best_angle < alct1_clct0_copad_best_angle && alct0_clct1_copad_best_angle < alct0_clct0_copad_best_angle)
       begin
           alct1_clct1_copad_match_found_r <= alct1_clct0_copad_match_any;
           swapclct_copad_match_r          <= 1'b1;
@@ -1041,7 +1041,7 @@ module  alct_clct_gem_matching(
   always @(*) begin
        //***********************************************************
        //ALCT0+CLCT0+SingleGEM plus no copad match
-      if (alct0_clct0_gem_match_ok && alct0_clct0_gem_best_angle < alct0_clct1_gem_best_angle && alct0_clct0_gem_best_angle < alct1_clct0_gem_best_angle && alct0_clct0_gem_best_angle<alct1_clct1_gem_best_angle)
+      if (alct0_clct0_gem_match_ok && alct0_clct0_gem_best_angle < alct0_clct1_gem_best_angle && alct0_clct0_gem_best_angle < alct1_clct1_gem_best_angle)
       begin // alct0_clct0_gem_best_angle is minimum and good for use.
           // alct_clct_copad_nomatch = true,  alct0_clct0_gem goes to build LCT0
           // alct_clct_copad_nomatch = false, alct0_clct0_gem goes to build LCT1
@@ -1067,7 +1067,7 @@ module  alct_clct_gem_matching(
       end
        //***********************************************************
        //ALCT0+CLCT1+SingleGEM plus no copad
-      else if (alct0_clct1_gem_match_ok && alct0_clct1_gem_best_angle < alct1_clct0_gem_best_angle && alct0_clct1_gem_best_angle < alct1_clct1_gem_best_angle)
+      else if (alct0_clct1_gem_match_ok && alct0_clct1_gem_best_angle < alct0_clct0_gem_best_angle && alct0_clct1_gem_best_angle < alct1_clct0_gem_best_angle)
       begin
           if (alct_clct_copad_nomatch) begin
               alct1_clct1_gem_match_found_r <= alct1_clct0_gem_match_ok;
