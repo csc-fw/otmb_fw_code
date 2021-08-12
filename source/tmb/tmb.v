@@ -788,6 +788,11 @@
   wire [MXFRAME-1:0]  mpc1_frame0;
   wire [MXFRAME-1:0]  mpc1_frame1;
 
+  wire [MXFRAME-1:0]  mpc0_frame0_run3;
+  wire [MXFRAME-1:0]  mpc0_frame1_run3;
+  wire [MXFRAME-1:0]  mpc1_frame0_run3;
+  wire [MXFRAME-1:0]  mpc1_frame1_run3;
+
   reg   [MXFRAME-1:0]  mpc0_frame0_ff  = 0;
   reg   [MXFRAME-1:0]  mpc0_frame1_ff  = 0;
   reg   [MXFRAME-1:0]  mpc1_frame0_ff  = 0;
