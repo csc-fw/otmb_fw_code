@@ -4252,9 +4252,8 @@ wire [15:0] gemB_bxn_counter;
   wire  [15:0] gemcscmatch_cluster1_vme;
 
   //GEMCSC match
-  //(|gemA_csc_cluster_vpf) || (|gemB_csc_cluster_vpf);// gemA or gemB vpf signal
-  // copad_match; // gem copad vpf signal
-  //these two are in same BX
+
+  wire [7:0] copad_match_forgemcsc = (copad_match & gemA_csc_cluster_vpf);//gemA_csc_cluster_vpf with gem_fiber_enable && gem_me1b_match_enable || csc_cluster0_me1a
 
   wire gem_foralct_vpf_tp;
   wire gem_forclct_vpf_tp;
@@ -4404,7 +4403,7 @@ wire [15:0] gemB_bxn_counter;
   .gemB_cluster6_cscwire_hi  (gemB_csc_cluster_cscwire_hi[6]),// In CSC wire group mapped from GEM pad
   .gemB_cluster7_cscwire_hi  (gemB_csc_cluster_cscwire_hi[7]),// In CSC wire group mapped from GEM pad
 
-  .copad_match   (copad_match[7:0]),
+  .copad_match   (copad_match_forgemcsc[7:0]),
 
   .match_gem_alct_delay   (match_gem_alct_delay[7:0]),  //In gem delay for gem-ALCT match
   .match_gem_alct_window  (match_gem_alct_window[3:0]), //In gem-alct match window
@@ -4434,15 +4433,15 @@ wire [15:0] gemB_bxn_counter;
   .gemB_match_ignore_position     (gemB_match_ignore_position),             //In GEMCSC match, no position match
   .gemcsc_bend_enable        (gemcsc_bend_enable),             //In GEMCSC bending angle enabled
 
-  .gemA_forclct_pipe      (gemA_forclct_pipe[7:0]),
-  .gemB_forclct_pipe      (gemB_forclct_pipe[7:0]),
-  .copad_match_pipe       (copad_match_pipe [7:0]),
+  .gemA_forclct_pipe      (gemA_forclct_pipe[7:0]),// Out, latched for headers
+  .gemB_forclct_pipe      (gemB_forclct_pipe[7:0]),// Out, latched for headers
+  .copad_match_pipe       (copad_match_pipe [7:0]),// Out, latched for headers
   .gemA_overflow_pipe     (gemA_overflow_pipe),//  Out, latched for headers
-  .gemB_overflow_pipe     (gemB_overflow_pipe),
-  .gemA_sync_err_pipe     (gemA_sync_err_pipe),
-  .gemB_sync_err_pipe     (gemB_sync_err_pipe),
-  .gems_sync_err_pipe     (gems_sync_err_pipe),
-  .gem_clct_win           (gem_clct_win[3:0]), // out gem location in GEM-CLCT window
+  .gemB_overflow_pipe     (gemB_overflow_pipe),// Out, latched for headers
+  .gemA_sync_err_pipe     (gemA_sync_err_pipe),// Out, latched for headers
+  .gemB_sync_err_pipe     (gemB_sync_err_pipe),// Out, latched for headers
+  .gems_sync_err_pipe     (gems_sync_err_pipe),// Out, latched for headers
+  .gem_clct_win           (gem_clct_win[3:0]), // out gem location in GEM-CLCT window, similar for alct location in ALCT-CLCT window 
   .alct_gem_win           (alct_gem_win[3:0]), // out ALCT location in GEM-ALCT window
 
 

@@ -228,37 +228,20 @@ reg           reg_cluster0_vpf;// valid or not
 reg [2:0]     reg_cluster0_roll; // 0-7 
 reg [7:0]     reg_cluster0_pad; // from 0-191
 reg [2:0]     reg_cluster0_size; // from 0-7, 0 means 1 gem pad
+reg           reg_cluster0_me1a;
 
 
-//`include "gem_pad_to_csc_xky_lut.v"
-//`include "gem_roll_to_csc_wg_lut.v"
 
 
 always @(posedge logic_clock) begin
-    //if (we)   begin
-    //    gem_pad_to_csc_xky_me1a_odd[0]   <= din;  // dummy write to help Xilinx infer a dual port block RAM 
-    //    gem_pad_to_csc_xky_me1a_even[0]  <= din;  // dummy write to help Xilinx infer a dual port block RAM 
-    //    gem_pad_to_csc_xky_me1b_odd[0]   <= din;  // dummy write to help Xilinx infer a dual port block RAM 
-    //    gem_pad_to_csc_xky_me1b_even[0]  <= din;  // dummy write to help Xilinx infer a dual port block RAM 
-    //    gem_roll_to_csc_wg_odd_low  [0]       <= din2;
-    //    gem_roll_to_csc_wg_odd_high [0]       <= din2;
-    //    gem_roll_to_csc_wg_even_low [0]       <= din2;
-    //    gem_roll_to_csc_wg_even_high[0]       <= din2;
-    //end
-    //me1a_xky_lo   <=  (evenchamber ? gem_pad_to_csc_xky_me1a_even[cluster0_pad_lo] : gem_pad_to_csc_xky_me1a_odd[cluster0_pad_lo]);
-    //me1a_xky_hi   <=  (evenchamber ? gem_pad_to_csc_xky_me1a_even[cluster0_pad_hi] : gem_pad_to_csc_xky_me1a_odd[cluster0_pad_hi]);
-    //me1b_xky_lo   <=  (evenchamber ? gem_pad_to_csc_xky_me1b_even[cluster0_pad_lo] : gem_pad_to_csc_xky_me1b_odd[cluster0_pad_lo]);
-    //me1b_xky_hi   <=  (evenchamber ? gem_pad_to_csc_xky_me1b_even[cluster0_pad_hi] : gem_pad_to_csc_xky_me1b_odd[cluster0_pad_hi]);
-
-    //wire_lo      <=  (evenchamber ? gem_roll_to_csc_wg_even_low [cluster0_roll] : gem_roll_to_csc_wg_odd_low [cluster0_roll]);
-    //wire_hi      <=  (evenchamber ? gem_roll_to_csc_wg_even_high[cluster0_roll] : gem_roll_to_csc_wg_odd_high[cluster0_roll]);
 
     //also add cluster_pad, roll, vpf here to align them in timing!!!
     reg_cluster0           <= cluster0;
-    reg_cluster0_vpf       <= cluster0_vpf;
+    reg_cluster0_vpf       <= cluster0_vpf && gem_match_enable && (gem_me1b_match_enable || ((cluster0_roll== 3'd7) && gem_me1a_match_enable));
     reg_cluster0_roll      <= cluster0_roll;
     reg_cluster0_pad       <= cluster0_pad;
     reg_cluster0_size      <= cluster0_size;
+    reg_cluster0_me1a      <= (cluster0_roll== 3'd7) && gem_me1a_match_enable;
 
 end
 
@@ -267,7 +250,7 @@ assign wire_real_lo = (wire_lo < wire_hi) ? wire_lo : wire_hi; // in case of low
 assign wire_real_hi = (wire_lo > wire_hi) ? wire_lo : wire_hi; // in case of low and high values swapped
 
 wire [MXXKYB-1:0] me1a_xky_real_lo, me1a_xky_real_hi, me1b_xky_real_lo, me1b_xky_real_hi;
-assign me1a_xky_real_lo = (me1a_xky_lo < me1a_xky_hi) ? me1a_xky_lo : me1a_xky_hi;
+assign me1a_xky_real_lo = (me1a_xky_lo < me1a_xky_hi) ? me1a_xky_lo : me1a_xky_hi;//even or odd, CSC strip arrangement are different 
 assign me1a_xky_real_hi = (me1a_xky_lo > me1a_xky_hi) ? me1a_xky_lo : me1a_xky_hi;
 assign me1b_xky_real_lo = (me1b_xky_lo < me1b_xky_hi) ? me1b_xky_lo : me1b_xky_hi;
 assign me1b_xky_real_hi = (me1b_xky_lo > me1b_xky_hi) ? me1b_xky_lo : me1b_xky_hi;
@@ -277,27 +260,28 @@ assign cluster0_cscwire_lo  = (wire_real_lo > gem_alct_deltawire) ? wire_real_lo
 assign cluster0_cscwire_hi  = (wire_real_hi + gem_alct_deltawire < MAXWIRE) ? wire_real_hi+gem_alct_deltawire : 7'd47;
 assign cluster0_cscwire_mi = wire_real_lo[WIREBITS-1:1] + wire_real_hi[WIREBITS-1:1] + (wire_real_lo[0] | wire_real_hi[0]);
 
-//
-//assign cluster0_me1bxky_lo   = (csc_cluster0_me1a) ? 10'd896 : ((me1b_xky_real_lo > MINKEYHSME1B+gem_clct_deltaxky) ? me1b_xky_real_lo-gem_clct_deltaxky : MINKEYHSME1B); //if not in Me1b region, give it an invalid value
-//assign cluster0_me1bxky_hi   = (csc_cluster0_me1a) ? 10'd896 : ((me1b_xky_real_hi+gem_clct_deltaxky > MAXKEYHSME1B) ? MAXKEYHSME1B : me1b_xky_real_hi+gem_clct_deltaxky);
-//
-//assign cluster0_me1axky_lo   = (csc_cluster0_me1a) ? ((me1a_xky_real_lo > MINKEYHSME1A+gem_clct_deltaxky) ? me1a_xky_real_lo-gem_clct_deltaxky : MINKEYHSME1A) : 8'd224; //if not in Me1a region, give it an invalid value
-//assign cluster0_me1axky_hi   = (csc_cluster0_me1a) ? ((me1a_xky_real_hi+gem_clct_deltaxky > MAXKEYHSME1A) ? MAXKEYHSME1A : me1a_xky_real_hi+gem_clct_deltaxky) : 8'd224;
+wire [MXXKYB-1:0]  cluster0_me1axky_lo  = (me1a_xky_real_lo > (MINKEYHSME1A+gem_clct_deltaxky)) ? (me1a_xky_real_lo-gem_clct_deltaxky) : MINKEYHSME1A; 
+wire [MXXKYB-1:0]  cluster0_me1bxky_lo  = (me1b_xky_real_lo > (MINKEYHSME1B+gem_clct_deltaxky)) ? (me1b_xky_real_lo-gem_clct_deltaxky) : MINKEYHSME1B;
+wire [MXXKYB-1:0]  cluster0_me1axky_hi  = ((me1a_xky_real_hi+gem_clct_deltaxky) > MAXKEYHSME1A) ? MAXKEYHSME1A : (me1a_xky_real_hi+gem_clct_deltaxky);
+wire [MXXKYB-1:0]  cluster0_me1bxky_hi  = ((me1b_xky_real_hi+gem_clct_deltaxky) > MAXKEYHSME1B) ? MAXKEYHSME1B : (me1b_xky_real_hi+gem_clct_deltaxky);
+wire [MXXKYB-1:0]  cluster0_me1axky_mi  = me1a_xky_real_lo[MXXKYB-1:1]+me1a_xky_real_hi[MXXKYB-1:1]+(me1a_xky_real_lo[0] | me1a_xky_real_hi[0]);
+wire [MXXKYB-1:0]  cluster0_me1bxky_mi  = me1b_xky_real_lo[MXXKYB-1:1]+me1b_xky_real_hi[MXXKYB-1:1]+(me1b_xky_real_lo[0] | me1b_xky_real_hi[0]);
 
-//wire [MXXKYB-1:0]  cluster0_me1axky_mi  = cluster0_me1axky_lo[MXXKYB-1:1] + cluster0_me1axky_hi[MXXKYB-1:1] + (cluster0_me1axky_lo[0] | cluster0_me1axky_hi[0]);
-//wire [MXXKYB-1:0]  cluster0_me1bxky_mi  = cluster0_me1bxky_lo[MXXKYB-1:1] + cluster0_me1bxky_hi[MXXKYB-1:1] + (cluster0_me1bxky_lo[0] | cluster0_me1bxky_hi[0]);
+assign cluster0_cscxky_lo = (csc_cluster0_me1a) ? cluster0_me1axky_lo : cluster0_me1bxky_lo;
+assign cluster0_cscxky_hi = (csc_cluster0_me1a) ? cluster0_me1axky_hi : cluster0_me1bxky_hi;
+assign cluster0_cscxky_mi = (csc_cluster0_me1a) ? cluster0_me1axky_mi : cluster0_me1bxky_mi;
 
-assign cluster0_cscxky_lo = (csc_cluster0_me1a) ? ((me1a_xky_real_lo > MINKEYHSME1A+gem_clct_deltaxky) ? me1a_xky_real_lo-gem_clct_deltaxky : MINKEYHSME1A) : ((me1b_xky_real_lo > MINKEYHSME1B+gem_clct_deltaxky) ? me1b_xky_real_lo-gem_clct_deltaxky : MINKEYHSME1B);
-assign cluster0_cscxky_hi = (csc_cluster0_me1a) ? ((me1a_xky_real_hi+gem_clct_deltaxky > MAXKEYHSME1A) ? MAXKEYHSME1A : me1a_xky_real_hi+gem_clct_deltaxky) : ((me1b_xky_real_hi+gem_clct_deltaxky > MAXKEYHSME1B) ? MAXKEYHSME1B : me1b_xky_real_hi+gem_clct_deltaxky);
-assign cluster0_cscxky_mi = (csc_cluster0_me1a) ? (me1a_xky_real_lo[MXXKYB-1:1]+me1a_xky_real_hi[MXXKYB-1:1]+(me1a_xky_real_lo[0] | me1a_xky_real_hi[0])) : (me1b_xky_real_lo[MXXKYB-1:1]+me1b_xky_real_hi[MXXKYB-1:1]+(me1b_xky_real_lo[0] | me1b_xky_real_hi[0]));
+
+//assign cluster0_cscxky_lo = (csc_cluster0_me1a) ? ((me1a_xky_real_lo > MINKEYHSME1A+gem_clct_deltaxky) ? me1a_xky_real_lo-gem_clct_deltaxky : MINKEYHSME1A) : ((me1b_xky_real_lo > MINKEYHSME1B+gem_clct_deltaxky) ? me1b_xky_real_lo-gem_clct_deltaxky : MINKEYHSME1B);
+//assign cluster0_cscxky_hi = (csc_cluster0_me1a) ? ((me1a_xky_real_hi+gem_clct_deltaxky > MAXKEYHSME1A) ? MAXKEYHSME1A : me1a_xky_real_hi+gem_clct_deltaxky) : ((me1b_xky_real_hi+gem_clct_deltaxky > MAXKEYHSME1B) ? MAXKEYHSME1B : me1b_xky_real_hi+gem_clct_deltaxky);
+//assign cluster0_cscxky_mi = (csc_cluster0_me1a) ? (me1a_xky_real_lo[MXXKYB-1:1]+me1a_xky_real_hi[MXXKYB-1:1]+(me1a_xky_real_lo[0] | me1a_xky_real_hi[0])) : (me1b_xky_real_lo[MXXKYB-1:1]+me1b_xky_real_hi[MXXKYB-1:1]+(me1b_xky_real_lo[0] | me1b_xky_real_hi[0]));
 
 assign csc_cluster0       = reg_cluster0;
-assign csc_cluster0_vpf   = reg_cluster0_vpf && gem_match_enable && (gem_me1b_match_enable || csc_cluster0_me1a);// valid or not
+assign csc_cluster0_vpf   = reg_cluster0_vpf;// valid or not
 assign csc_cluster0_roll  = reg_cluster0_roll; // 0-7 
 assign csc_cluster0_pad   = reg_cluster0_pad; // from 0-191
 assign csc_cluster0_size  = reg_cluster0_size; // from 0-7, 0 means 1 gem pad
-
-assign csc_cluster0_me1a  = (reg_cluster0_roll == 3'd7) && gem_me1a_match_enable; // only roll7 is matchd to ME1a, 1 for ME1a, 0 for ME1b
+assign csc_cluster0_me1a  = reg_cluster0_me1a; // only roll7 is matchd to ME1a, 1 for ME1a, 0 for ME1b
 
 
 endmodule

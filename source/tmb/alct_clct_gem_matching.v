@@ -503,10 +503,10 @@ module  alct_clct_gem_matching(
       //assign clct1_gemA_match_ok[i] = clct1_gemA_match[i] && (clct1_gemA_bend[i] == clct1_bend) && (clct1_gemA_ME1a[i] || clct1_gemA_ME1b[i]);
       //assign clct1_gemB_match_ok[i] = clct1_gemB_match[i] && (clct1_gemB_bend[i] == clct1_bend) && (clct1_gemB_ME1a[i] || clct1_gemB_ME1b[i]);
 
-      assign clct0_gemA_angle[i] = clct0_gemA_match_ok[i] ? (clct0_gemA_bend[i] ? clct0_xky-gemA_cluster_cscxky_mi[i] : gemA_cluster_cscxky_mi[i]-clct0_xky) : MAXGEMCSCBND; 
-      assign clct0_gemB_angle[i] = clct0_gemB_match_ok[i] ? (clct0_gemB_bend[i] ? clct0_xky-gemB_cluster_cscxky_mi[i] : gemB_cluster_cscxky_mi[i]-clct0_xky) : MAXGEMCSCBND; 
-      assign clct1_gemA_angle[i] = clct1_gemA_match_ok[i] ? (clct1_gemA_bend[i] ? clct1_xky-gemA_cluster_cscxky_mi[i] : gemA_cluster_cscxky_mi[i]-clct1_xky) : MAXGEMCSCBND; 
-      assign clct1_gemB_angle[i] = clct1_gemB_match_ok[i] ? (clct1_gemB_bend[i] ? clct1_xky-gemB_cluster_cscxky_mi[i] : gemB_cluster_cscxky_mi[i]-clct1_xky) : MAXGEMCSCBND; 
+      assign clct0_gemA_angle[i] = clct0_gemA_match_ok[i] ? (clct0_gemA_bend[i] ? (clct0_xky-gemA_cluster_cscxky_mi[i]) : (gemA_cluster_cscxky_mi[i]-clct0_xky)) : MAXGEMCSCBND; 
+      assign clct0_gemB_angle[i] = clct0_gemB_match_ok[i] ? (clct0_gemB_bend[i] ? (clct0_xky-gemB_cluster_cscxky_mi[i]) : (gemB_cluster_cscxky_mi[i]-clct0_xky)) : MAXGEMCSCBND; 
+      assign clct1_gemA_angle[i] = clct1_gemA_match_ok[i] ? (clct1_gemA_bend[i] ? (clct1_xky-gemA_cluster_cscxky_mi[i]) : (gemA_cluster_cscxky_mi[i]-clct1_xky)) : MAXGEMCSCBND; 
+      assign clct1_gemB_angle[i] = clct1_gemB_match_ok[i] ? (clct1_gemB_bend[i] ? (clct1_xky-gemB_cluster_cscxky_mi[i]) : (gemB_cluster_cscxky_mi[i]-clct1_xky)) : MAXGEMCSCBND; 
       //
       assign copad_cluster_cscxky_mi[i] = copad_match[i] ? gemA_cluster_cscxky_mi[i] : 10'h3FF;//use all 3FF as default csc coordinate for copad 
 

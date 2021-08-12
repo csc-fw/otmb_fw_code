@@ -2096,7 +2096,7 @@
   wire clct_kept = (clct_keep || clct_keep_ro);
 
   //------------------------------------------------------------------------------------------------------------------
-  // Run3 logic with GEMCSC match: ALCT+copad, CLCT+copad
+  // Run3 logic with GEMCSC match: ALCT+copad, CLCT+copad, only matching in time here
   wire clct_keep_run3 = (clct_match && tmb_allow_match   ) || (clct_noalct && tmb_allow_clct && !clct_lost_run3 && !clct_used_run3) || clct_copad_pulse_match;
   wire alct_keep_run3 = (clct_match && tmb_allow_match   ) || (alct_noclct && tmb_allow_alct) || alct_copad_pulse_match;
 
