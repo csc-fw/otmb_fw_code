@@ -210,14 +210,14 @@ endgenerate
 //
 //----------------------------------------------------------------------------------------------------------------------
 
-wire [MXHITB-1:0] hs_hit00, hs_hit01;
+//wire [MXHITB-1:0] hs_hit00, hs_hit01;
 wire [MXPIDB-1:0] hs_pid00, hs_pid01;
 
 assign hs_pid00 = pat00 [0+:MXPIDB];
 assign hs_pid01 = pat01 [0+:MXPIDB];
 
-assign hs_hit00 = pat00 [MXPIDB+:MXHITB];
-assign hs_hit01 = pat01 [MXPIDB+:MXHITB];
+//assign hs_hit00 = pat00 [MXPIDB+:MXHITB];
+//assign hs_hit01 = pat01 [MXPIDB+:MXHITB];
 
 // demultiplex the different lookup registers
 

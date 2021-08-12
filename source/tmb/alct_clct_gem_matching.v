@@ -252,9 +252,11 @@ module  alct_clct_gem_matching(
   output       best_cluster0_ingemB,
   output [2:0] best_cluster0_iclst,
   output       best_cluster0_vpf,
+  output [9:0] best_cluster0_angle,
   output       best_cluster1_ingemB,
   output [2:0] best_cluster1_iclst,
   output       best_cluster1_vpf,
+  output [9:0] best_cluster1_angle,
 
   output       gemcsc_match_dummy
   );
@@ -514,7 +516,7 @@ module  alct_clct_gem_matching(
       assign clct1_copad_match[i] = clct1_gemA_match[i] && copad_match[i];
 
       assign clct0_copad_match_ok[i] = clct0_copad_match[i] && clct0_gemA_match_ok[i];
-      assign clct1_copad_match_ok[i] = clct1_copad_match[i] && clct0_gemB_match_ok[i];
+      assign clct1_copad_match_ok[i] = clct1_copad_match[i] && clct1_gemA_match_ok[i];
 
       assign clct0_copad_angle[i] = clct0_copad_match_ok[i] ? clct0_gemA_angle[i] : MAXGEMCSCBND;
       assign clct1_copad_angle[i] = clct1_copad_match_ok[i] ? clct1_gemA_angle[i] : MAXGEMCSCBND;
@@ -531,14 +533,14 @@ module  alct_clct_gem_matching(
       assign alct1_clct0_gemB_match[i] = (alct1_gemB_match[i] && clct0_gemB_match_ok[i]);
       assign alct1_clct1_gemB_match[i] = (alct1_gemB_match[i] && clct1_gemB_match_ok[i]);
 
-      assign alct0_clct0_gemA_angle[i] = alct0_clct0_gemA_match[i] ? (clct0_gemA_bend[i] ? clct0_xky-gemA_cluster_cscxky_mi[i] : gemA_cluster_cscxky_mi[i]-clct0_xky) : MAXGEMCSCBND; 
-      assign alct0_clct0_gemB_angle[i] = alct0_clct0_gemB_match[i] ? (clct0_gemB_bend[i] ? clct0_xky-gemB_cluster_cscxky_mi[i] : gemB_cluster_cscxky_mi[i]-clct0_xky) : MAXGEMCSCBND; 
-      assign alct0_clct1_gemA_angle[i] = alct0_clct1_gemA_match[i] ? (clct1_gemA_bend[i] ? clct1_xky-gemA_cluster_cscxky_mi[i] : gemA_cluster_cscxky_mi[i]-clct1_xky) : MAXGEMCSCBND; 
-      assign alct0_clct1_gemB_angle[i] = alct0_clct1_gemB_match[i] ? (clct1_gemB_bend[i] ? clct1_xky-gemB_cluster_cscxky_mi[i] : gemB_cluster_cscxky_mi[i]-clct1_xky) : MAXGEMCSCBND; 
-      assign alct1_clct0_gemA_angle[i] = alct1_clct0_gemA_match[i] ? (clct0_gemA_bend[i] ? clct0_xky-gemA_cluster_cscxky_mi[i] : gemA_cluster_cscxky_mi[i]-clct0_xky) : MAXGEMCSCBND; 
-      assign alct1_clct0_gemB_angle[i] = alct1_clct0_gemB_match[i] ? (clct0_gemB_bend[i] ? clct0_xky-gemB_cluster_cscxky_mi[i] : gemB_cluster_cscxky_mi[i]-clct0_xky) : MAXGEMCSCBND; 
-      assign alct1_clct1_gemA_angle[i] = alct1_clct1_gemA_match[i] ? (clct1_gemA_bend[i] ? clct1_xky-gemA_cluster_cscxky_mi[i] : gemA_cluster_cscxky_mi[i]-clct1_xky) : MAXGEMCSCBND; 
-      assign alct1_clct1_gemB_angle[i] = alct1_clct1_gemB_match[i] ? (clct1_gemB_bend[i] ? clct1_xky-gemB_cluster_cscxky_mi[i] : gemB_cluster_cscxky_mi[i]-clct1_xky) : MAXGEMCSCBND; 
+      assign alct0_clct0_gemA_angle[i] = alct0_clct0_gemA_match[i] ? clct0_gemA_angle[i] : MAXGEMCSCBND; 
+      assign alct0_clct0_gemB_angle[i] = alct0_clct0_gemB_match[i] ? clct0_gemB_angle[i] : MAXGEMCSCBND; 
+      assign alct0_clct1_gemA_angle[i] = alct0_clct1_gemA_match[i] ? clct1_gemA_angle[i] : MAXGEMCSCBND; 
+      assign alct0_clct1_gemB_angle[i] = alct0_clct1_gemB_match[i] ? clct1_gemB_angle[i] : MAXGEMCSCBND; 
+      assign alct1_clct0_gemA_angle[i] = alct1_clct0_gemA_match[i] ? clct0_gemA_angle[i] : MAXGEMCSCBND; 
+      assign alct1_clct0_gemB_angle[i] = alct1_clct0_gemB_match[i] ? clct0_gemB_angle[i] : MAXGEMCSCBND; 
+      assign alct1_clct1_gemA_angle[i] = alct1_clct1_gemA_match[i] ? clct1_gemA_angle[i] : MAXGEMCSCBND; 
+      assign alct1_clct1_gemB_angle[i] = alct1_clct1_gemB_match[i] ? clct1_gemB_angle[i] : MAXGEMCSCBND; 
 
       //alct0_clct0_gem_match[i] = (alct0_gemA_match[i] && clct0_gemA_match_ok[i]) || (alct0_gemB_match[i] && clct0_gemB_match_ok[i]);
       //alct0_clct1_gem_match[i] = (alct0_gemA_match[i] && clct1_gemA_match_ok[i]) || (alct0_gemB_match[i] && clct1_gemB_match_ok[i]);
@@ -697,6 +699,8 @@ module  alct_clct_gem_matching(
 
   reg [2:0] best_cluster0_alct_clct_copad_r = 3'b0;
   reg [2:0] best_cluster1_alct_clct_copad_r = 3'b0;
+  reg [MXBENDANGLEB-1:0] best_angle0_alct_clct_copad_r = 10'b0;
+  reg [MXBENDANGLEB-1:0] best_angle1_alct_clct_copad_r = 10'b0;
   //reg [2:0] alct_clct_copad_match_type = 3'b111;
   always @(*) begin
       //ALCT0+CLCT0+copad match found
@@ -707,6 +711,8 @@ module  alct_clct_gem_matching(
           swapalct_copad_match_r          <= 1'b0;
           best_cluster0_alct_clct_copad_r <= alct0_clct0_copad_best_icluster;
           best_cluster1_alct_clct_copad_r <= alct1_clct1_copad_best_icluster;
+          best_angle0_alct_clct_copad_r   <= alct0_clct0_copad_best_angle;
+          best_angle1_alct_clct_copad_r   <= alct1_clct1_copad_best_angle;
       end
       //ALCT0+CLCT1+copad match found
       else if (alct0_clct1_copad_match_any && alct0_clct1_copad_best_angle < alct1_clct0_copad_best_angle && alct0_clct1_copad_best_angle < alct0_clct0_copad_best_angle)
@@ -716,6 +722,8 @@ module  alct_clct_gem_matching(
           swapalct_copad_match_r          <= 1'b0;
           best_cluster0_alct_clct_copad_r <= alct0_clct1_copad_best_icluster;
           best_cluster1_alct_clct_copad_r <= alct1_clct0_copad_best_icluster;
+          best_angle0_alct_clct_copad_r   <= alct0_clct1_copad_best_angle;
+          best_angle1_alct_clct_copad_r   <= alct1_clct0_copad_best_angle;
       end
       //ALCT1+CLCT0+copad match found
       else if (alct1_clct0_copad_match_any && alct1_clct0_copad_best_angle < alct1_clct1_copad_best_angle)
@@ -725,6 +733,8 @@ module  alct_clct_gem_matching(
           swapalct_copad_match_r          <= 1'b1;
           best_cluster0_alct_clct_copad_r <= alct1_clct0_copad_best_icluster;
           best_cluster1_alct_clct_copad_r <= alct0_clct1_copad_best_icluster;
+          best_angle0_alct_clct_copad_r   <= alct1_clct0_copad_best_angle;
+          best_angle1_alct_clct_copad_r   <= alct0_clct1_copad_best_angle;
       end
       else if (alct1_clct1_copad_match_any)// alct1_clct1_copad has minimum bending angle or no match
       begin
@@ -733,6 +743,8 @@ module  alct_clct_gem_matching(
           swapalct_copad_match_r          <= 1'b1;
           best_cluster0_alct_clct_copad_r <= alct1_clct1_copad_best_icluster;
           best_cluster1_alct_clct_copad_r <= alct0_clct0_copad_best_icluster;
+          best_angle0_alct_clct_copad_r   <= alct1_clct1_copad_best_angle;
+          best_angle1_alct_clct_copad_r   <= alct0_clct0_copad_best_angle;
       end
       else begin
           alct1_clct1_copad_match_found_r <= 1'b0;
@@ -740,6 +752,8 @@ module  alct_clct_gem_matching(
           swapalct_copad_match_r          <= 1'b0;
           best_cluster0_alct_clct_copad_r <= 3'b0;
           best_cluster1_alct_clct_copad_r <= 3'b0;
+          best_angle0_alct_clct_copad_r   <= 10'b0;
+          best_angle1_alct_clct_copad_r   <= 10'b0;
       end
   end
 
@@ -1037,6 +1051,8 @@ module  alct_clct_gem_matching(
   reg       cluster1layer_alct_clct_gem_r = 1'b0;
   reg [2:0] best_cluster0_alct_clct_gem_r = 3'b0;
   reg [2:0] best_cluster1_alct_clct_gem_r = 3'b0;
+  reg [MXBENDANGLEB-1:0] best_angle0_alct_clct_gem_r = 3'b0;
+  reg [MXBENDANGLEB-1:0] best_angle1_alct_clct_gem_r = 3'b0;
 
   always @(*) begin
        //***********************************************************
@@ -1051,8 +1067,10 @@ module  alct_clct_gem_matching(
               swapalct_gem_match_r          <= 1'b0;
               cluster0layer_alct_clct_gem_r <= alct0_clct0_bestgem;
               best_cluster0_alct_clct_gem_r <= alct0_clct0_bestgem ? alct0_clct0_gemB_best_icluster : alct0_clct0_gemA_best_icluster;
+              best_angle0_alct_clct_gem_r   <= alct0_clct0_bestgem ? alct0_clct0_gemB_best_angle    : alct0_clct0_gemA_best_angle;
               cluster1layer_alct_clct_gem_r <= alct1_clct1_bestgem;
               best_cluster1_alct_clct_gem_r <= alct1_clct1_bestgem ? alct1_clct1_gemB_best_icluster : alct1_clct1_gemA_best_icluster;
+              best_angle1_alct_clct_gem_r   <= alct1_clct1_bestgem ? alct1_clct1_gemB_best_angle    : alct1_clct1_gemA_best_angle;
           end 
           else begin
               //alct0_clct0_gem goes to LCT1 and alct1_clct1_copad would go to LCT0
@@ -1061,8 +1079,10 @@ module  alct_clct_gem_matching(
               swapalct_gem_match_r          <= 1'b1;
               cluster0layer_alct_clct_gem_r <= 1'b0;
               best_cluster0_alct_clct_gem_r <= 3'b0;//invlaid cluster
+              best_angle0_alct_clct_gem_r   <= 10'b0;
               cluster1layer_alct_clct_gem_r <= alct0_clct0_bestgem;
               best_cluster1_alct_clct_gem_r <= alct0_clct0_bestgem ? alct0_clct0_gemB_best_icluster : alct0_clct0_gemA_best_icluster;
+              best_angle1_alct_clct_gem_r   <= alct0_clct0_bestgem ? alct0_clct0_gemB_best_angle    : alct0_clct0_gemA_best_angle;
           end
       end
        //***********************************************************
@@ -1075,8 +1095,10 @@ module  alct_clct_gem_matching(
               swapalct_gem_match_r          <= 1'b0;
               cluster0layer_alct_clct_gem_r <= alct0_clct1_bestgem;
               best_cluster0_alct_clct_gem_r <= alct0_clct1_bestgem ? alct0_clct1_gemB_best_icluster : alct0_clct1_gemA_best_icluster;
+              best_angle0_alct_clct_gem_r   <= alct0_clct1_bestgem ? alct0_clct1_gemB_best_angle    : alct0_clct1_gemA_best_angle;
               cluster1layer_alct_clct_gem_r <= alct1_clct0_bestgem;
               best_cluster1_alct_clct_gem_r <= alct1_clct0_bestgem ? alct1_clct0_gemB_best_icluster : alct1_clct0_gemA_best_icluster;
+              best_angle1_alct_clct_gem_r   <= alct1_clct0_bestgem ? alct1_clct0_gemB_best_angle    : alct1_clct0_gemA_best_angle;
           end
           else begin
               //alct0_clct1_gem goes to LCT1 and alct1_clct0_copad would go to LCT0
@@ -1085,8 +1107,10 @@ module  alct_clct_gem_matching(
               swapalct_gem_match_r          <= 1'b1;
               cluster0layer_alct_clct_gem_r <= 1'b0;
               best_cluster0_alct_clct_gem_r <= 3'b0;//invlaid cluster
+              best_angle0_alct_clct_gem_r   <= 10'b0;
               cluster1layer_alct_clct_gem_r <= alct0_clct1_bestgem;
               best_cluster1_alct_clct_gem_r <= alct0_clct1_bestgem ? alct0_clct1_gemB_best_icluster : alct0_clct1_gemA_best_icluster;
+              best_angle1_alct_clct_gem_r   <= alct0_clct1_bestgem ? alct0_clct1_gemB_best_angle    : alct0_clct1_gemA_best_angle;
           end
       end
        //***********************************************************
@@ -1099,8 +1123,10 @@ module  alct_clct_gem_matching(
               swapalct_gem_match_r          <= 1'b1;
               cluster0layer_alct_clct_gem_r <= alct1_clct0_bestgem;
               best_cluster0_alct_clct_gem_r <= alct1_clct0_bestgem ? alct1_clct0_gemB_best_icluster : alct1_clct0_gemA_best_icluster;
+              best_angle0_alct_clct_gem_r   <= alct1_clct0_bestgem ? alct1_clct0_gemB_best_angle    : alct1_clct0_gemA_best_angle;
               cluster1layer_alct_clct_gem_r <= alct0_clct1_bestgem;
               best_cluster1_alct_clct_gem_r <= alct0_clct1_bestgem ? alct0_clct1_gemB_best_icluster : alct0_clct1_gemA_best_icluster;
+              best_angle1_alct_clct_gem_r   <= alct0_clct1_bestgem ? alct0_clct1_gemB_best_angle    : alct0_clct1_gemA_best_angle;
           end
           else begin
               //alct1_clct0_gem goes to LCT1 and alct0_clct1_copad would go to LCT0
@@ -1109,8 +1135,10 @@ module  alct_clct_gem_matching(
               swapalct_gem_match_r          <= 1'b0;
               cluster0layer_alct_clct_gem_r <= 1'b0;
               best_cluster0_alct_clct_gem_r <= 3'b0;//invlaid cluster
+              best_angle0_alct_clct_gem_r   <= 10'b0;
               cluster1layer_alct_clct_gem_r <= alct1_clct0_bestgem;
               best_cluster1_alct_clct_gem_r <= alct1_clct0_bestgem ? alct1_clct0_gemB_best_icluster : alct1_clct0_gemA_best_icluster;
+              best_angle1_alct_clct_gem_r   <= alct1_clct0_bestgem ? alct1_clct0_gemB_best_angle    : alct1_clct0_gemA_best_angle;
           end
       end
        //***********************************************************
@@ -1123,8 +1151,10 @@ module  alct_clct_gem_matching(
               swapalct_gem_match_r          <= 1'b1;
               cluster0layer_alct_clct_gem_r <= alct1_clct1_bestgem;
               best_cluster0_alct_clct_gem_r <= alct1_clct1_bestgem ? alct1_clct1_gemB_best_icluster : alct1_clct1_gemA_best_icluster;
+              best_angle0_alct_clct_gem_r   <= alct1_clct1_bestgem ? alct1_clct1_gemB_best_angle    : alct1_clct1_gemA_best_angle;
               cluster1layer_alct_clct_gem_r <= alct0_clct0_bestgem;
               best_cluster1_alct_clct_gem_r <= alct0_clct0_bestgem ? alct0_clct0_gemB_best_icluster : alct0_clct0_gemA_best_icluster;
+              best_angle1_alct_clct_gem_r   <= alct0_clct0_bestgem ? alct0_clct0_gemB_best_angle    : alct0_clct0_gemA_best_angle;
           end
           else begin
               //alct1_clct1_gem goes to LCT1 and alct0_clct1_copad would go to LCT0
@@ -1133,8 +1163,10 @@ module  alct_clct_gem_matching(
               swapalct_gem_match_r          <= 1'b0;
               cluster0layer_alct_clct_gem_r <= 1'b0;
               best_cluster0_alct_clct_gem_r <= 3'b0;//invlaid cluster
+              best_angle0_alct_clct_gem_r   <= 10'b0;
               cluster1layer_alct_clct_gem_r <= alct1_clct1_bestgem;
               best_cluster1_alct_clct_gem_r <= alct1_clct1_bestgem ? alct1_clct1_gemB_best_icluster : alct1_clct1_gemA_best_icluster;
+              best_angle1_alct_clct_gem_r   <= alct1_clct1_bestgem ? alct1_clct1_gemB_best_angle    : alct1_clct1_gemA_best_angle;
           end
       end
        //***********************************************************
@@ -1147,6 +1179,8 @@ module  alct_clct_gem_matching(
           best_cluster1_alct_clct_gem_r <= 3'b0;//invlaid cluster
           cluster0layer_alct_clct_gem_r <= 1'b0;
           best_cluster0_alct_clct_gem_r <= 3'b0;//invlaid cluster
+          best_angle0_alct_clct_gem_r   <= 10'b0;
+          best_angle1_alct_clct_gem_r   <= 10'b0;
       end
   end
 
@@ -1255,9 +1289,10 @@ module  alct_clct_gem_matching(
   assign clct1_copad_match_found  = !alct1_vpf && ((swapclct_copad_match || swapclct_gem_match) ? clct0_copad_match_any : clct1_copad_match_any);
   //only case to swap clct0 and clct1 here: both LCTs built from CLCT+copad
   assign swapclct_clctcopad_match = clct0_copad_match_found && clct1_copad_match_found && (clct0_copad_best_angle > clct1_copad_best_angle);
-  //wire clct1_copad_required     = !alct1_clct1_gem_match_found && !alct1_clct1_copad_match_found && !alct1_clct1_nogem_match_found;
-  //wire clct1_copad_match_found  = !alct1_vpf && (clct0_copad_best_angle != MAXGEMCSCBND) && (clct1_copad_best_angle != MAXGEMCSCBND);
-  //wire clct0_copad_nomatch      = !clct0_copad_match_found;
+  wire [2:0] best_cluster0_clct_copad_iclst = swapclct_clctcopad_match ?  clct1_copad_best_icluster : clct0_copad_best_icluster;
+  wire [2:0] best_cluster1_clct_copad_iclst = swapclct_clctcopad_match ?  clct0_copad_best_icluster : clct1_copad_best_icluster;
+  wire [MXBENDANGLEB-1:0] best_angle0_clct_copad = swapclct_clctcopad_match ?  clct1_copad_best_angle : clct0_copad_best_angle;
+  wire [MXBENDANGLEB-1:0] best_angle1_clct_copad = swapclct_clctcopad_match ?  clct0_copad_best_angle : clct1_copad_best_angle;
 
 
   //-------------------------------------------------------------------------------------------------------------------
@@ -1354,15 +1389,23 @@ module  alct_clct_gem_matching(
   assign  best_cluster0_vpf    = best_cluster0_alct_clct_copad_vpf || best_cluster0_alct_clct_gem_vpf || clct0_copad_match_good || alct0_copad_match_good;
   assign  best_cluster0_iclst  = ({3{best_cluster0_alct_clct_copad_vpf}} & best_cluster0_alct_clct_copad_r) | 
                                  ({3{best_cluster0_alct_clct_gem_vpf}}   & best_cluster0_alct_clct_gem_r) | 
-                                 ({3{clct0_copad_match_good}}            & clct0_copad_best_icluster) | 
+                                 ({3{clct0_copad_match_good}}            & best_cluster0_clct_copad_iclst) | 
                                  ({3{alct0_copad_match_good}}            & alct0_copad_best_icluster);
+  assign  best_cluster0_angle  = ({MXBENDANGLEB{best_cluster0_alct_clct_copad_vpf}} & best_angle0_alct_clct_copad_r) | 
+                                 ({MXBENDANGLEB{best_cluster0_alct_clct_gem_vpf}}   & best_angle0_alct_clct_gem_r) | 
+                                 ({MXBENDANGLEB{clct0_copad_match_good}}            & best_angle0_clct_copad) | 
+                                 ({MXBENDANGLEB{alct0_copad_match_good}}            & alct0_copad_best_angle);
 
   assign  best_cluster1_ingemB = best_cluster1_alct_clct_gem_vpf & cluster1layer_alct_clct_gem_r;
   assign  best_cluster1_vpf    = best_cluster1_alct_clct_copad_vpf || best_cluster1_alct_clct_gem_vpf || clct1_copad_match_good || alct1_copad_match_good;
   assign  best_cluster1_iclst  = ({3{best_cluster1_alct_clct_copad_vpf}} & best_cluster1_alct_clct_copad_r) | 
                                  ({3{best_cluster1_alct_clct_gem_vpf}}   & best_cluster1_alct_clct_gem_r) | 
-                                 ({3{clct1_copad_match_good}}            & clct1_copad_best_icluster) | 
+                                 ({3{clct1_copad_match_good}}            & best_cluster1_clct_copad_iclst) | 
                                  ({3{alct1_copad_match_good}}            & alct1_copad_best_icluster);
+  assign  best_cluster1_angle  = ({MXBENDANGLEB{best_cluster1_alct_clct_copad_vpf}} & best_angle1_alct_clct_copad_r) | 
+                                 ({MXBENDANGLEB{best_cluster1_alct_clct_gem_vpf}}   & best_angle1_alct_clct_gem_r) | 
+                                 ({MXBENDANGLEB{clct1_copad_match_good}}            & best_angle1_clct_copad) | 
+                                 ({MXBENDANGLEB{alct1_copad_match_good}}            & alct1_copad_best_angle);
 
 
   assign  gemcsc_match_dummy = 1'b1;

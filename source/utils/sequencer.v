@@ -3168,19 +3168,19 @@
   //srl16e_bbl #(2) usrldrift_trigger (.clock(clock),.ce(1'b1),.adr(postdrift_adr),.d(hmt_trigger),.q(postdrift_hmt_trigger));
 
 // Extract pre-trigger data after drift delay, compensated for pattern-finder latency + programmable drift delay
-  assign hmt_nhits_trig_xtmb[9:0]        = hmt_nhits_trig[9:0]; //only valid if at least one CLCT is found
-  assign hmt_nhits_trig_bx678_xtmb[9:0]  = hmt_nhits_trig_bx678[9:0]; //only valid if at least one CLCT is found
-  assign hmt_nhits_trig_bx2345_xtmb[9:0] = hmt_nhits_trig_bx2345[9:0]; //only valid if at least one CLCT is found
-  assign hmt_trigger_xtmb[MXHMTB-1:0]    = hmt_trigger[MXHMTB-1:0]   ; //only valid if at least one CLCT is found
-  //assign hmt_nhits_trig_xtmb[9:0] = postdrift_hmt_nhits_trig[9:0] ;// do not require valid clct 
-  //assign hmt_trigger_xtmb[1:0]    = postdrift_hmt_trigger[1:0] ;   // do not require valid clct 
-
   wire              clct_pop_xtmb        = postdrift_data[0];     // CLCT postdrift flag aka active_feb_flag
   wire [MXBADR-1:0] clct_wr_adr_xtmb     = postdrift_data[11:1];  // Buffer address at pre-trigger
   wire              clct_wr_avail_xtmb   = postdrift_data[12];    // Buffer address was valid at pre-trigger
   wire [1:0]        bxn_counter_xtmb     = postdrift_data[14:13]; // BXN at pre-trigger, only lsbs are needed for clct
   wire              trig_source_ext_xtmb = postdrift_data[15];    // Trigger source was not CLCT pattern
   wire [MXCFEB-1:0] aff_list_xtmb        = postdrift_data[22:16]; // Active feb list
+
+  assign hmt_nhits_trig_xtmb[9:0]        = hmt_nhits_trig[9:0]; //only valid if at least one CLCT is found
+  assign hmt_nhits_trig_bx678_xtmb[9:0]  = hmt_nhits_trig_bx678[9:0]; //only valid if at least one CLCT is found
+  assign hmt_nhits_trig_bx2345_xtmb[9:0] = hmt_nhits_trig_bx2345[9:0]; //only valid if at least one CLCT is found
+  assign hmt_trigger_xtmb[MXHMTB-1:0]    = hmt_trigger[MXHMTB-1:0]   ; //only valid if at least one CLCT is found
+  //assign hmt_nhits_trig_xtmb[9:0] = postdrift_hmt_nhits_trig[9:0] ;// do not require valid clct 
+  //assign hmt_trigger_xtmb[1:0]    = postdrift_hmt_trigger[1:0] ;   // do not require valid clct 
 
 // After drift, send CLCT words to TMB, persist 1 cycle only, blank invalid CLCTs unless override
   wire clct0_hit_valid = (hs_hit_1st >= hit_thresh_postdrift);    // CLCT is over hit thresh
@@ -5172,7 +5172,8 @@
   assign  header36_gem_[18:15] = 0;                     // DDU+DMB control flags
 
   // Run3 format change
-  assign  header36_ [18:0]     = (gem_read_enable) ? header36_gem_ : header36_rpc_;
+  //assign  header36_ [18:0]     = (gem_read_enable) ? header36_gem_ : header36_rpc_;
+  assign  header36_ [18:0]     = (run3_daq_df) ? header36_gem_ : header36_rpc_;
 
 // Buffer Status
 

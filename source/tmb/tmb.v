@@ -1238,7 +1238,6 @@
 //------------------------------------------------------------------------------------------------------------------
 //  GEM input data 
 //------------------------------------------------------------------------------------------------------------------
-  //wire gemcsc_match_enable = gemA_fiber_enable || gemB_fiber_enable;
   wire [CLSTBITS-1:0] gemA_cluster  [MXCLUSTER_CHAMBER-1:0];
   wire [CLSTBITS-1:0] gemB_cluster  [MXCLUSTER_CHAMBER-1:0];
   wire [WIREBITS-1:0] gemA_cluster_cscwire_lo[MXCLUSTER_CHAMBER-1:0];
@@ -2230,6 +2229,7 @@
 //------------------------------------------------------------------------------------------------------------------
 
   wire gemcsc_match_enable = gem_me1a_match_enable || gem_me1b_match_enable;
+  //wire gemcsc_match_enable = gemA_fiber_enable || gemB_fiber_enable;
 
   //wire [2:0] alct0_clct0_copad_best_icluster;
   //wire [9:0] alct0_clct0_copad_best_angle;
@@ -2312,9 +2312,11 @@
   wire       best_cluster0_ingemB;
   wire [2:0] best_cluster0_iclst;
   wire       best_cluster0_vpf;
+  wire [9:0] best_cluster0_angle;//gemcsc bending angle for LCT0
   wire       best_cluster1_ingemB;
   wire [2:0] best_cluster1_iclst;
   wire       best_cluster1_vpf;
+  wire [9:0] best_cluster1_angle;
 
   wire       gemcsc_match_dummy;
 
@@ -2559,9 +2561,11 @@
   .best_cluster0_ingemB           (best_cluster0_ingemB),
   .best_cluster0_iclst            (best_cluster0_iclst),
   .best_cluster0_vpf              (best_cluster0_vpf),
+  .best_cluster0_angle            (best_cluster0_angle),
   .best_cluster1_ingemB           (best_cluster1_ingemB),
   .best_cluster1_iclst            (best_cluster1_iclst),
   .best_cluster1_vpf              (best_cluster1_vpf),
+  .best_cluster1_angle            (best_cluster1_angle),
 
   .gemcsc_match_dummy             (gemcsc_match_dummy)
   );
@@ -2777,12 +2781,14 @@
   reg [ 2:0] best_cluster0_roll_ff       = 3'b0;
   reg [ 7:0] best_cluster0_pad_ff        = 8'b0;
   reg [ 9:0] best_cluster0_cscxky_ff     = 10'b0;
-  reg        best_cluster0_vpf_ff       = 1'b0;
+  reg [ 9:0] best_cluster0_angle_ff      = 10'b0;
+  reg        best_cluster0_vpf_ff        = 1'b0;
   reg [ 2:0] best_cluster1_icluster_ff   = 3'b0;
   reg [ 2:0] best_cluster1_roll_ff       = 3'b0;
   reg [ 7:0] best_cluster1_pad_ff        = 8'b0;
   reg [ 9:0] best_cluster1_cscxky_ff     = 10'b0;
-  reg        best_cluster1_vpf_ff       = 1'b0;
+  reg [ 9:0] best_cluster1_angle_ff      = 10'b0;
+  reg        best_cluster1_vpf_ff        = 1'b0;
   always @(posedge clock) begin
       case(best_cluster0_iclst)
           3'd0: begin 
@@ -2872,8 +2878,10 @@
 
      best_cluster0_vpf_ff      <= best_cluster0_vpf;
      best_cluster0_icluster_ff <= best_cluster0_iclst;
+     best_cluster0_angle_ff    <= best_cluster0_angle;
      best_cluster1_vpf_ff      <= best_cluster1_vpf;
      best_cluster1_icluster_ff <= best_cluster1_iclst;
+     best_cluster1_angle_ff    <= best_cluster1_angle;
   end
 
   //assign gemcscmatch_cluster0_vpf    = best_cluster0_vpf_ff;
@@ -2885,8 +2893,10 @@
   //assign gemcscmatch_cluster1_roll   = best_cluster1_roll_ff;
   //assign gemcscmatch_cluster1_cscxky = best_cluster1_cscxky_ff;
 
-  wire [15:0] gemcscmatch_cluster0  = best_cluster0_vpf_ff ? {best_cluster0_cscxky_ff, best_cluster0_roll_ff, best_cluster0_icluster_ff} : 16'h0; 
-  wire [15:0] gemcscmatch_cluster1  = best_cluster1_vpf_ff ? {best_cluster1_cscxky_ff, best_cluster1_roll_ff, best_cluster1_icluster_ff} : 16'h0; 
+  //wire [15:0] gemcscmatch_cluster0  = best_cluster0_vpf_ff ? {best_cluster0_cscxky_ff, best_cluster0_roll_ff, best_cluster0_icluster_ff} : 16'h0; 
+  //wire [15:0] gemcscmatch_cluster1  = best_cluster1_vpf_ff ? {best_cluster1_cscxky_ff, best_cluster1_roll_ff, best_cluster1_icluster_ff} : 16'h0; 
+  wire [15:0] gemcscmatch_cluster0  = best_cluster0_vpf_ff ? {best_cluster0_angle_ff, best_cluster0_roll_ff, best_cluster0_icluster_ff} : 16'h0; 
+  wire [15:0] gemcscmatch_cluster1  = best_cluster1_vpf_ff ? {best_cluster1_angle_ff, best_cluster1_roll_ff, best_cluster1_icluster_ff} : 16'h0; 
 
 // Output vpf test point signals for timing-in, removed FFs so internal scope will be in real-time
   reg  alct_vpf_tp    = 0;
@@ -3220,37 +3230,7 @@
   //assign lct0_qlt_run3 = (alct0_valid && clct0_valid) ? 3'b011 : 0;
   //assign lct1_qlt_run3 = (alct1_valid && clct1_valid) ? 3'b011 : 0;
 
-  ////injected LCT0
-  //assign  mpc0_frame0_run3inj[6:0]   = lct_inj_wg[6:0];
-  //assign  mpc0_frame0_run3inj[10:7]  = 4'b0;//new bending from CCLUT
-  //assign  mpc0_frame0_run3inj[13:11] = 3'b011;//lct_qulity run3
-  //assign  mpc0_frame0_run3inj[14]    = 1'b0; // CLCT0 1/4 strip bit
-  //assign  mpc0_frame0_run3inj[15]    = 1'b1; //LCT run3 vpf
-  //assign  mpc0_frame1_run3inj[7:0]   = lct_inj_hs[7:0];
-  //assign  mpc0_frame1_run3inj[8]     = 1'b0; // left or right from CCLUT
-  //assign  mpc0_frame1_run3inj[9]     = 1'b0;// CLCT0 1/8 strip bit
-  //assign  mpc0_frame1_run3inj[10]    = 1'b0;
-  //assign  mpc0_frame1_run3inj[11]    = 1'b0;  // bx0 gets replaced after mpc_tx_delay, keep here to mollify xst
-  //assign  mpc0_frame1_run3inj[15:12] = 4'b1111;//clct_bnd run3
-  ////second LCT=empty
-  //assign  mpc1_frame0_run3inj[15:0]  = 16'b0;//empty
-  //assign  mpc1_frame1_run3inj[10]       = 1'b1;
-  //assign  mpc1_frame1_run3inj[9 : 0] = 10'b0;//empty
-  //assign  mpc1_frame1_run3inj[15:11] = 5'b0;//empty
-  //assign  mpc1_frame0_run3inj[6:0]   = 7'b0;
-  //assign  mpc1_frame0_run3inj[10:7]  = 4'b0;//new bending from CCLUT
-  //assign  mpc1_frame0_run3inj[13:11] = 3'b0;
-  //assign  mpc1_frame0_run3inj[14]    = 1'b0; // CLCT0 1/4 strip bit
-  //assign  mpc1_frame0_run3inj[15]    = 1'b0; //LCT run3 vpf
-  //assign  mpc1_frame1_run3inj[7:0]   = 8'b0;
-  //assign  mpc1_frame1_run3inj[8]     = 1'b0; // left or right from CCLUT
-  //assign  mpc1_frame1_run3inj[9]     = 1'b0;// CLCT0 1/8 strip bit
-  //assign  mpc1_frame1_run3inj[10]    = 1'b0;
-  //assign  mpc1_frame1_run3inj[11]    = 1'b0;  // bx0 gets replaced after mpc_tx_delay, keep here to mollify xst
-  //assign  mpc1_frame1_run3inj[15:12] = 4'b0;
-
-
-  //real LCT
+  //real LCT for Run3
   assign  mpc0_frame0_run3[6:0]   = alct0_key_run3[6:0];
   assign  mpc0_frame0_run3[10:7]  = lct_pid_run3[3:0]; //new bending from CCLUT
   assign  mpc0_frame0_run3[13:11] = lct0_qlt_run3[2:0];
@@ -3277,23 +3257,6 @@
   assign  mpc1_frame1_run3[10]    = hmt_trigger_run3[0];
   assign  mpc1_frame1_run3[11]    = alct_bx0;  // bx0 gets replaced after mpc_tx_delay, keep here to mollify xst
   assign  mpc1_frame1_run3[15:12] = clct1_bnd_run3[3:0];
-
-  //Injection
-  //assign  mpc0_frame0inj[6:0]   = lct_inj_wg[6:0];
-  //assign  mpc0_frame0inj[10:7]  = 4'd10;//pattern 10
-  //assign  mpc0_frame0inj[14:11] = 4'd15;//quality
-  //assign  mpc0_frame0inj[15]    = 1'b1;//vpf
-
-  //assign  mpc0_frame1inj[7:0]   = lct_inj_hs[7:0];
-  //assign  mpc0_frame1inj[8]     = 1'b0;
-  //assign  mpc0_frame1inj[9]     = 1'b0;
-  //assign  mpc0_frame1inj[10]    = 1'b0;
-  //assign  mpc0_frame1inj[11]    = 1'b0;  // bx0 gets replaced after mpc_tx_delay, keep here to mollify xst
-  //assign  mpc0_frame1inj[15:12] = csc_id[3:0];
-
-  //assign  mpc1_frame0inj[15:0]  = 16'b0;
-  //assign  mpc1_frame1inj[11:0]  = 12'b0;//empty
-  //assign  mpc1_frame1inj[15:12] = csc_id[3:0];
 
   //real LCT for Run2 legacy data format
   assign  mpc0_frame0[6:0]   = alct0_key[6:0];
@@ -3330,10 +3293,6 @@
   wire trig_mpc0 = run3_trig_df ? (trig_mpc && lct0_vpf_run3 && !kill_clct0): (trig_mpc && lct0_vpf && !kill_clct0);  // LCT 0 is valid, send to mpc
   wire trig_mpc1 = run3_trig_df ? (trig_mpc && lct1_vpf_run3 && !kill_clct0): (trig_mpc && lct1_vpf && !kill_clct1);  // LCT 1 is valid, send to mpc
 
-  //assign mpc0_frame0_pulse = (trig_mpc0) ? (run3_trig_df ? (lct_inj_enable ? mpc0_frame0_run3inj : mpc0_frame0_run3) : (lct_inj_enable ? mpc0_frame0inj : mpc0_frame0)) : 16'h0;
-  //assign mpc0_frame1_pulse = (trig_mpc0) ? (run3_trig_df ? (lct_inj_enable ? mpc0_frame1_run3inj : mpc0_frame1_run3) : (lct_inj_enable ? mpc0_frame1inj : mpc0_frame1)) : 16'h0;
-  //assign mpc1_frame0_pulse = (trig_mpc1) ? (run3_trig_df ? (lct_inj_enable ? mpc1_frame0_run3inj : mpc1_frame0_run3) : (lct_inj_enable ? mpc1_frame0inj : mpc1_frame0)) : 16'h0;
-  //assign mpc1_frame1_pulse = (trig_mpc1) ? (run3_trig_df ? (lct_inj_enable ? mpc1_frame1_run3inj : mpc1_frame1_run3) : (lct_inj_enable ? mpc1_frame1inj : mpc1_frame1)) : 16'h0;
   assign mpc0_frame0_pulse = (trig_mpc0) ? (run3_trig_df ? mpc0_frame0_run3 : mpc0_frame0) : 16'h0;
   assign mpc0_frame1_pulse = (trig_mpc0) ? (run3_trig_df ? mpc0_frame1_run3 : mpc0_frame1) : 16'h0;
   assign mpc1_frame0_pulse = (trig_mpc1) ? (run3_trig_df ? mpc1_frame0_run3 : mpc1_frame0) : 16'h0;
