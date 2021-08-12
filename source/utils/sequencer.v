@@ -3863,7 +3863,7 @@
   assign xtmb_wdata[42]    =  clct_invp[0];     // CLCT had invalid pattern after drift delay
   assign xtmb_wdata[43]    =  clct_invp[1];     // CLCT had invalid pattern after drift delay
 
-  parameter MXCCLUTB = 70;
+  parameter MXCCLUTB = 72;
   wire [MXCCLUTB-1:0]  xtmb_cclut_wdata;                // Mapping array
   wire [MXCCLUTB-1:0]  xtmb_cclut_rdata;                // Mapping array
   assign xtmb_cclut_wdata = {clct1_qlt_xtmb, clct1_bnd_xtmb, clct1_xky_xtmb, clct1_carry_xtmb, clct0_qlt_xtmb, clct0_bnd_xtmb, clct0_xky_xtmb, clct0_carry_xtmb};

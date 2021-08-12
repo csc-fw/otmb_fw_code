@@ -1261,6 +1261,14 @@
   assign gemA_cluster[5] = gemA_cluster5;
   assign gemA_cluster[6] = gemA_cluster6;
   assign gemA_cluster[7] = gemA_cluster7;
+  assign gemB_cluster[0] = gemB_cluster0;
+  assign gemB_cluster[1] = gemB_cluster1;
+  assign gemB_cluster[2] = gemB_cluster2;
+  assign gemB_cluster[3] = gemB_cluster3;
+  assign gemB_cluster[4] = gemB_cluster4;
+  assign gemB_cluster[5] = gemB_cluster5;
+  assign gemB_cluster[6] = gemB_cluster6;
+  assign gemB_cluster[7] = gemB_cluster7;
 
   assign gemA_cluster_cscwire_lo[0] = gemA_cluster0_cscwire_lo;
   assign gemA_cluster_cscwire_lo[1] = gemA_cluster1_cscwire_lo;
@@ -1390,16 +1398,6 @@
   wire [MXFRAME-1:0]  mpc0_frame1_run3;
   wire [MXFRAME-1:0]  mpc1_frame0_run3;
   wire [MXFRAME-1:0]  mpc1_frame1_run3;
-
-
-  //wire [MXFRAME-1:0]  mpc0_frame0inj;
-  //wire [MXFRAME-1:0]  mpc0_frame1inj;
-  //wire [MXFRAME-1:0]  mpc1_frame0inj;
-  //wire [MXFRAME-1:0]  mpc1_frame1inj;
-  wire [MXFRAME-1:0]  mpc0_frame0_run3inj;
-  wire [MXFRAME-1:0]  mpc0_frame1_run3inj;
-  wire [MXFRAME-1:0]  mpc1_frame0_run3inj;
-  wire [MXFRAME-1:0]  mpc1_frame1_run3inj;
 
   reg   [MXFRAME-1:0]  mpc0_frame0_ff  = 0;
   reg   [MXFRAME-1:0]  mpc0_frame1_ff  = 0;

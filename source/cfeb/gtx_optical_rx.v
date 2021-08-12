@@ -45,7 +45,7 @@
   gtx_rx_err,
   gtx_rx_err_count, // switch between  link_errcount or prbs_errcount if it's enabled
   gtx_rx_data,
-  gtx_rx_kchar,
+  //gtx_rx_kchar,
   link_had_err,
   link_good,
   link_bad,
@@ -90,7 +90,7 @@
   output      gtx_rx_err;    // PRBS test detects an error
   output  [15:0]  gtx_rx_err_count;    // Error count on this fiber channel (link errors or PRBS test errors if it's enabled)
   output  [47:0]  gtx_rx_data;      // DCFEB comparator data
-  output  [15:0]  gtx_rx_kchar;      // DCFEB comparator data
+  //output  [15:0]  gtx_rx_kchar;      // DCFEB comparator data
   output      link_had_err;
   output      link_good;
   output      link_bad;
@@ -99,6 +99,7 @@
 // Sump
   output      gtx_rx_sump;    // Unused signals
 
+  wire  [15:0]  gtx_rx_kchar;      // DCFEB comparator data
 //-------------------------------------------------------------------------------------------------------------------
 // Instantiate TAMU SNAP12 optical receiver logic
 //-------------------------------------------------------------------------------------------------------------------
@@ -264,12 +265,12 @@
   reg  [15:0] comp_kchar_phaser;
   reg  [3:0]  idly=0;  // JRG, simple phase delay selector
   reg  [3:0]  dly=0;   // JRG, complex phase delay selector
-  reg         dly_is_0=0;
+  //reg         dly_is_0=0;
   
   always @(negedge clock) begin // JRG: comp data goes out on FALLING LHC_CLOCK edge (~clock) to save .5BX latency
      idly     <=  delay_is;  // Pointer to clct SRL, integer 1-16 clock delay for comparator data
      dly      <=  delay_is-4'd1;  // Pointer to clct SRL data that accounts for SLR 1bx minimum (0-15 bx)
-     dly_is_0 <= (delay_is == 0);  // may use direct input if delay is 0; 1st SRL output has 1bx overhead
+     //dly_is_0 <= (delay_is == 0);  // may use direct input if delay is 0; 1st SRL output has 1bx overhead
      posneg_ff <= posneg;
   end
 

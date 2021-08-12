@@ -332,6 +332,7 @@
     muonic_sump |
     (|gtx_rx_data_raw) |
     (|dly) |
+    (|prompt_dat) |
     dly_is_0 | 
     gtx_rx_reset_err_cnt
     ;

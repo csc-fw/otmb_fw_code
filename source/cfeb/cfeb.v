@@ -404,7 +404,7 @@
 //-------------------------------------------------------------------------------------------------------------------
 // Virtex6 DCFEB optical receivers
   wire [47:0] gtx_rx_data;
-  wire [15:0] gtx_rx_kchar;
+  //wire [15:0] gtx_rx_kchar;
   wire        gtx_rx_data_bits_or = (|gtx_rx_data); // CFEB data received on optical link
   wire gtx_rx_pol_swap = (ICFEB==4 || ICFEB==5);
 
@@ -442,7 +442,7 @@
   .gtx_rx_err           (gtx_rx_err),             // Out  PRBS test detects an error
   .gtx_rx_err_count     (gtx_rx_err_count[15:0]), // Out  Error count on this fiber channel
   .gtx_rx_data          (gtx_rx_data[47:0]),      // Out  DCFEB comparator data
-  .gtx_rx_kchar         (gtx_rx_kchar[15:0]),
+  //.gtx_rx_kchar         (gtx_rx_kchar[15:0]),
   .link_had_err         (link_had_err),
   .link_good            (link_good),
   .link_bad             (link_bad),
