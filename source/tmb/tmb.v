@@ -1244,8 +1244,8 @@
     clct0_real <= clct0_pipe & {MXCLCT  {keep_clct}};
     clct1_real <= clct1_pipe & {MXCLCT  {keep_clct}};
     clctc_real <= clctc_pipe & {MXCLCTC {keep_clct}};
-    clct0_cclut_real   <= clct0_cclut_pipe & {MXCCLUTB {keep_clct}}
-    clct1_cclut_real   <= clct1_cclut_pipe & {MXCCLUTB {keep_clct}}
+    clct0_cclut_real   <= clct0_cclut_pipe & {MXCCLUTB {keep_clct}};
+    clct1_cclut_real   <= clct1_cclut_pipe & {MXCCLUTB {keep_clct}};
     hmt_trigger_real   <= hmt_trigger_pipe;
   end
 
