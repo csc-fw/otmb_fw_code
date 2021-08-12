@@ -5821,6 +5821,7 @@
   assign mpc_frames_fifo_ctrl_rd[6] = mpc_frames_fifo_ctrl_prog_full;
   assign mpc_frames_fifo_ctrl_rd[7] = mpc_frames_fifo_ctrl_sbiterr;
   assign mpc_frames_fifo_ctrl_rd[8] = mpc_frames_fifo_ctrl_dbiterr;
+  assign mpc_frames_fifo_ctrl_rd[15:9] = 7'd0;
   
 //------------------------------------------------------------------------------------------------------------------
 // ADR_MPC_INJ=90    MPC Injector Control Register

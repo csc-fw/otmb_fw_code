@@ -2593,7 +2593,7 @@
 
 // On pretrigger push buffer address and bxn into the pre-trigger pipeline
   parameter PATTERN_FINDER_LATENCY = 2;  // Tuned 4/22/08
-  parameter MXPTRID = 23;
+  parameter MXPTRID = 21;// for non-ME11, 23 for ME11
 
   wire [3:0]         postdrift_adr;
   wire [MXPTRID-1:0] pretrig_data;
@@ -2861,6 +2861,9 @@
     //cnt_en[20]  <= cfeb_hit_at_pretrig[6];       // CLCT pretrigger is on CFEB6
 
     //cnt_en[21]  <= clct_pretrig_me1a;            // CLCT pretrigger is on ME1A cfeb4-6 only
+    cnt_en[19]  <= 1'b0;
+    cnt_en[20]  <= 1'b0;
+    cnt_en[21]  <= 1'b0;
     cnt_en[22]  <= clct_pretrig_me234;            // CLCT pretrigger is on ME1B cfeb0-3 only
 
     cnt_en[23]  <= discard_nowrbuf_cnt_en;       // CLCT pretrig discarded, no wrbuf available, buffer stalled
@@ -3021,6 +3024,7 @@
   wire [MXXPRE-1:0] xpre_rdata; // Mapping array
 
   assign xpre_wdata[MXCFEB-1:0]   =  active_feb_list_pre[MXCFEB-1:0]; // Active FEB list sent to DAQMB
+  assign xpre_wdata[6:5]   = 2'b0; // to make ise happy
   assign xpre_wdata[17:7]  =  trig_source_s0_mod[10:0]; // Trigger source vector
   assign xpre_wdata[29:18] =  bxn_counter[11:0];        // Full Bunch Crossing number at pretrig
   assign xpre_wdata[59:30] =  orbit_counter[29:0];      // Orbit count at pre-trigger
@@ -3054,7 +3058,7 @@
   assign xtmb_wdata[42]    =  clct_invp[0];     // CLCT had invalid pattern after drift delay
   assign xtmb_wdata[43]    =  clct_invp[1];     // CLCT had invalid pattern after drift delay
 
-  parameter MXCCLUTB = 70;
+  parameter MXCCLUTB = 72;
   wire [MXCCLUTB-1:0]  xtmb_cclut_wdata;                // Mapping array
   wire [MXCCLUTB-1:0]  xtmb_cclut_rdata;                // Mapping array
   assign xtmb_cclut_wdata = {clct1_qlt_xtmb, clct1_bnd_xtmb, clct1_xky_xtmb, clct1_carry_xtmb, clct0_qlt_xtmb, clct0_bnd_xtmb, clct0_xky_xtmb, clct0_carry_xtmb};
@@ -3106,7 +3110,7 @@
   assign alct_wdata[28:27] =  tmb_alcte[1:0];  // ALCT ecc error syndrome latched at trigger
 
 // TMB match+1bx: store TMB match results in RAM mapping array, 1bx later to give it time to count current event
-  parameter MXRTMB1 = 37;         // Trigger counter
+  parameter MXRTMB1 = 35;         // Trigger counter, 35 for non-ME1/1, 37 for ME11
   wire [MXRTMB1-1:0] rtmb1_wdata; // Mapping array
   wire [MXRTMB1-1:0] rtmb1_rdata; // Mapping array
 

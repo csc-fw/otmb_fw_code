@@ -885,7 +885,7 @@ begin
     if(load_n)
       count <= count_mux;
     else if(decr)
-      count <= count - 1;
+      count <= count - 1'b1;
     else
       count <= count;
 end
@@ -897,7 +897,7 @@ begin
     if(ld_full || csp_load_count)
       full_count <= ncnt;
     else if(decr)
-      full_count <= full_count - 1;
+      full_count <= full_count - 1'b1;
     else
       full_count <= full_count;
 end
@@ -907,7 +907,7 @@ begin
     rbk_count <= 16'h0000;
   else
     if(next && (read_mode == Rd_Array))
-      rbk_count <= rbk_count + 1;
+      rbk_count <= rbk_count + 1'b1;
     else
       rbk_count <= rbk_count;
 end
@@ -920,7 +920,7 @@ begin
     if(load_offset)
       adr_offset <= start_offset;
     else if(next)
-      adr_offset <= adr_offset + 1;
+      adr_offset <= adr_offset + 1'b1;
     else
       adr_offset <= adr_offset;
 end
@@ -1055,8 +1055,8 @@ begin
     bpi_cmd_cnt <= 11'h000;
   else
     casex ({bpi_cmd_mt,bpi_cmd_full,bpi_wrena,bpi_rdena})
-      4'b01x1,4'b0001:  bpi_cmd_cnt <= bpi_cmd_cnt - 1; // count down
-      4'b101x,4'b0010:  bpi_cmd_cnt <= bpi_cmd_cnt + 1; // count up
+      4'b01x1,4'b0001:  bpi_cmd_cnt <= bpi_cmd_cnt - 1'b1; // count down
+      4'b101x,4'b0010:  bpi_cmd_cnt <= bpi_cmd_cnt + 1'b1; // count up
       default:          bpi_cmd_cnt <= bpi_cmd_cnt;     // hold
     endcase
 end  
@@ -1070,8 +1070,8 @@ begin
     bpi_rbk_cnt <= 11'h000;
   else
     casex ({bpi_rbk_empty,bpi_rbk_full,bpi_rbk_wena,BPI_RE})
-      4'b01x1,4'b0001:  bpi_rbk_cnt <= bpi_rbk_cnt - 1; // count down
-      4'b101x,4'b0010:  bpi_rbk_cnt <= bpi_rbk_cnt + 1; // count up
+      4'b01x1,4'b0001:  bpi_rbk_cnt <= bpi_rbk_cnt - 1'b1; // count down
+      4'b101x,4'b0010:  bpi_rbk_cnt <= bpi_rbk_cnt + 1'b1; // count up
       default:          bpi_rbk_cnt <= bpi_rbk_cnt;     // hold
     endcase
 end  

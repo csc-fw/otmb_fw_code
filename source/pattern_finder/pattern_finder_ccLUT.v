@@ -878,9 +878,9 @@ module pattern_finder_ccLUT (
   generate
     for (ihs = 0; ihs <= MXHSX - 1; ihs = ihs + 1) begin: store_s0
       always @(posedge clock) begin
-        hs_hit_s0[ihs] <= (algo2016_use_dead_time_zone & hs_dead_drift[ihs]) ? 0 : hs_hit_s0ab[ihs];
-        hs_pid_s0[ihs] <= (algo2016_use_dead_time_zone & hs_dead_drift[ihs]) ? 0 : hs_pid_s0ab[ihs];
-        hs_carry_s0[ihs] <= (algo2016_use_dead_time_zone & hs_dead_drift[ihs]) ? 0 : hs_carry_s0ab[ihs];
+        hs_hit_s0[ihs] <= (algo2016_use_dead_time_zone & hs_dead_drift[ihs]) ?    3'b0 : hs_hit_s0ab[ihs];
+        hs_pid_s0[ihs] <= (algo2016_use_dead_time_zone & hs_dead_drift[ihs]) ?    4'b0 : hs_pid_s0ab[ihs];
+        hs_carry_s0[ihs] <= (algo2016_use_dead_time_zone & hs_dead_drift[ihs]) ? 12'b0 : hs_carry_s0ab[ihs];
       end
     end
   endgenerate
