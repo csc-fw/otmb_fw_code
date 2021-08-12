@@ -1089,6 +1089,7 @@
   parameter MXQLTB  = 9;                 // Fit quality bits
   parameter MXBNDB  = 5;                 // Bend bits
   parameter MXXKYB = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
+  parameter MXHMTB  = 4; // max HMT bits  
 //------------------------------------------------------------------------------------------------------------------
 // VME Addresses
 //------------------------------------------------------------------------------------------------------------------
@@ -1905,7 +1906,7 @@
   input [9:0] hmt_nhits_trig_vme;
   input [9:0] hmt_nhits_trig_bx678_vme;
   input [9:0] hmt_nhits_trig_bx2345_vme;
-  input [1:0] hmt_trigger_vme;
+  input [MXHMTB-1:0] hmt_trigger_vme;
 
   output [9:0] hmt_thresh1;
   output [9:0] hmt_thresh2;
@@ -7560,7 +7561,7 @@
   assign hmt_ctrl_rd[0] = hmt_enable;
   assign hmt_ctrl_rd[1] = hmt_me1a_enable;
   assign hmt_ctrl_rd[11: 2] = hmt_nhits_trig_vme[9:0];
-  assign hmt_ctrl_rd[13:12] = hmt_trigger_vme[1:0];
+  assign hmt_ctrl_rd[15:12]= hmt_trigger_vme[MXHMTB-1:0];  //reserved for HMT results
   //reserved for HMT results 
 
 //------------------------------------------------------------------------------------------------------------------
