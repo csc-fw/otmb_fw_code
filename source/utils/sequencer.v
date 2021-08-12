@@ -3701,7 +3701,7 @@
   wire [MXBNDB - 1   : 0] r_clct1_bnd_xtmb; // new bending
   wire [MXXKYB-1     : 0] r_clct1_xky_xtmb; // new position with 1/8 precision
   wire [MXPATC-1     : 0] r_clct1_carry_xtmb; // CC code
-  assign {r_clct1_qlt_xtmb, r_clct1_bnd_xtmb, r_clct1_xky_xtmb, r_clct1_carry_xtmb, r_clct0_qlt_xtmb, r_clct0_bnd_xtmb, r_clct     0_xky_xtmb, r_clct0_carry_xtmb}   = xtmb_cclut_rdata;
+  assign {r_clct1_qlt_xtmb, r_clct1_bnd_xtmb, r_clct1_xky_xtmb, r_clct1_carry_xtmb, r_clct0_qlt_xtmb, r_clct0_bnd_xtmb, r_clct0_xky_xtmb, r_clct0_carry_xtmb}   = xtmb_cclut_rdata;
 
   wire [5:0] r_layers_hit = r_clcta_xtmb[5:0]; // Layers hit
   wire       r_clct1_busy = r_clcta_xtmb[6];   // CLCT1 busy internal check
