@@ -18,7 +18,7 @@ module lct_quality_run3 (A, C, alct_nhit, clct_nhit,Q);
   output [1:0] Q; // 4-bit TMB quality output
 
 // Quality-by-quality definition
-  reg [3:0] Q;
+  reg [1:0] Q;
 
   always @* begin
 

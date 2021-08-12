@@ -7729,6 +7729,7 @@
   if (wr_virtex6_gtx_rx[2])   virtex6_gtx_rx_wr[2] <=  d[15:0];
   if (wr_virtex6_gtx_rx[3])   virtex6_gtx_rx_wr[3] <=  d[15:0];
   if (wr_virtex6_gtx_rx[4])   virtex6_gtx_rx_wr[4] <=  d[15:0];
+  if (wr_run3_format_ctrl)      run3_format_ctrl_wr     <= d[15:0];
   if (wr_hmt_ctrl)              hmt_ctrl_wr             <= d[15:0];
   if (wr_hmt_thresh1)           hmt_thresh1_wr          <= d[15:0];
   if (wr_hmt_thresh2)           hmt_thresh2_wr          <= d[15:0];
