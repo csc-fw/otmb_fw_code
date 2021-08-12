@@ -170,6 +170,7 @@
   ly3hs,
   ly4hs,
   ly5hs,
+  nhits_per_cfeb,
 
 // CFEB data received on optical link = OR of all bits for ALL CFEBs
   gtx_rx_data_bits_or,
@@ -204,6 +205,8 @@
   link_had_err,
   link_good,
   link_bad,
+  gtx_rx_notintable_count,
+  gtx_rx_disperr_count,
   gtx_rx_sump
 
 // Debug
@@ -310,6 +313,7 @@
   output [MXHS-1:0] ly3hs;
   output [MXHS-1:0] ly4hs;
   output [MXHS-1:0] ly5hs;
+  output [9:0] nhits_per_cfeb;
 
 // CFEB data received on optical link = OR of all 48 bits for a given CFEB
   output gtx_rx_data_bits_or;
@@ -341,6 +345,8 @@
   output        gtx_rx_pol_swap;     // GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
   output        gtx_rx_err;          // PRBS test detects an error
   output [15:0] gtx_rx_err_count;    // Error count on this fiber channel
+  output [15:0] gtx_rx_notintable_count;     // Error count on this fiber channel
+  output [15:0] gtx_rx_disperr_count;     // Error count on this fiber channel
   output        gtx_rx_sump;         // Unused signals
 
   output link_had_err; // link stability monitor: error happened at least once
@@ -442,6 +448,8 @@
   .link_had_err         (link_had_err),
   .link_good            (link_good),
   .link_bad             (link_bad),
+  .gtx_rx_notintable_count  (gtx_rx_notintable_count[15:0]), // Out  Error count on this fiber channel
+  .gtx_rx_disperr_count     (gtx_rx_disperr_count[15:0]), // Out  Error count on this fiber channel
   .gtx_rx_sump          (gtx_rx_sump)        // Unused signals
   );
 
@@ -830,6 +838,7 @@
 // Instantiate mxly*mxds = 48 triad decoders
   wire [MXDS-1:0] tskip [MXLY-1:0];  // Skipped triads
   wire [MXHS-1:0] hs    [MXLY-1:0];  // Decoded 1/2-strip pulses
+  wire [MXDS-1:0] hs_fired [MXLY-1:0];  // whether hs is fired at this bx. valid only for 1BX
 
   generate
     for (ily=0; ily<=MXLY-1; ily=ily+1) begin: ily_loop
@@ -840,6 +849,7 @@
           persist,
           persist1,
           triad_s2[ily][ids],
+          hs_fired[ily][ids],
           hs[ily][3+ids*4:ids*4],
           tskip[ily][ids]
         );
@@ -848,6 +858,18 @@
   endgenerate
 
   assign triad_skip = (|tskip[0]) | (|tskip[1]) | (|tskip[2]) | (|tskip[3]) | (|tskip[4]) | (|tskip[5]);
+
+  reg [9:0] nhits_s0 = 10'b0;
+  always  @(posedge clock) begin
+      nhits_s0       <= hs_fired[0][0] + hs_fired[0][1] + hs_fired[0][1] + hs_fired[0][2] + hs_fired[0][3] + hs_fired[0][4] + hs_fired[0][5] + hs_fired[0][6] + hs_fired[0][7] + 
+                        hs_fired[1][0] + hs_fired[1][1] + hs_fired[1][1] + hs_fired[1][2] + hs_fired[1][3] + hs_fired[1][4] + hs_fired[1][5] + hs_fired[1][6] + hs_fired[1][7] + 
+                        hs_fired[2][0] + hs_fired[2][1] + hs_fired[2][1] + hs_fired[2][2] + hs_fired[2][3] + hs_fired[2][4] + hs_fired[2][5] + hs_fired[2][6] + hs_fired[2][7] + 
+                        hs_fired[3][0] + hs_fired[3][1] + hs_fired[3][1] + hs_fired[3][2] + hs_fired[3][3] + hs_fired[3][4] + hs_fired[3][5] + hs_fired[3][6] + hs_fired[3][7] + 
+                        hs_fired[4][0] + hs_fired[4][1] + hs_fired[4][1] + hs_fired[4][2] + hs_fired[4][3] + hs_fired[4][4] + hs_fired[4][5] + hs_fired[4][6] + hs_fired[4][7] + 
+                        hs_fired[5][0] + hs_fired[5][1] + hs_fired[5][1] + hs_fired[5][2] + hs_fired[5][3] + hs_fired[5][4] + hs_fired[5][5] + hs_fired[5][6] + hs_fired[5][7];
+  end 
+
+  assign nhits_per_cfeb = nhits_s0;
 
 // Expand 2d arrays for transmission to next module
   assign ly0hs = hs[0];

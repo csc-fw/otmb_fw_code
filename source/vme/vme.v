@@ -325,6 +325,8 @@
   dmb_thresh_pretrig,
   adjcfeb_dist,
   ccLUT_enable,
+  run3_trig_df,
+  run3_daq_df,
 
 // CFEB Ports: Hot Channel Mask
   cfeb0_ly0_hcm,
@@ -517,6 +519,8 @@
   //HMT part
   hmt_enable,
   hmt_nhits_trig_vme,
+  hmt_nhits_trig_bx678_vme,
+  hmt_nhits_trig_bx2345_vme,
   hmt_trigger_vme,
 //output
   hmt_thresh1,
@@ -955,6 +959,16 @@
   //Tao, ME1/1->MEX/1
   //gtx_rx_err_count5,
   //gtx_rx_err_count6,
+  gtx_rx_notintable_count0,
+  gtx_rx_notintable_count1,
+  gtx_rx_notintable_count2,
+  gtx_rx_notintable_count3,
+  gtx_rx_notintable_count4,
+  gtx_rx_disperr_count0,
+  gtx_rx_disperr_count1,
+  gtx_rx_disperr_count2,
+  gtx_rx_disperr_count3,
+  gtx_rx_disperr_count4,
 
   gtx_link_had_err,  // link stability monitor: error happened at least once
   gtx_link_good,     // link stability monitor: always good, no errors since last resync
@@ -986,6 +1000,9 @@
   parameter MONTHDAY      = 16'h0000;      // Version date
   parameter YEAR        = 16'h0000;      // Version date
   parameter FPGAID      = 16'h0000;      // FPGA Type XCVnnnn
+  parameter VERSION_FORMAT      = 4'h0;     // Version branch
+  parameter VERSION_MAJOR       = 4'h0;     // Major version
+  parameter VERSION_MINOR       = 5'h0;     // Minor version
   parameter ISE_VERSION    = 16'h1234;      // ISE Compiler version
   parameter AUTO_VME      =  1'b1;      // Auto init vme registers
   parameter AUTO_JTAG      =  1'b1;      // Auto init jtag chain
@@ -1009,6 +1026,9 @@
   $display ("vme.ALCT_MUONIC      = %H",ALCT_MUONIC);
   $display ("vme.CFEB_MUONIC      = %H",CFEB_MUONIC);
   $display ("vme.CCB_BX0_EMULATOR = %H",CCB_BX0_EMULATOR);
+  $display ("vme.VERSION_FORMAT   = %H",VERSION_FORMAT);
+  $display ("vme.VERSION_MAJOR    = %H",VERSION_MAJOR);
+  $display ("vme.VERSION_MINOR    = %H",VERSION_MINOR);
   end
 
 //------------------------------------------------------------------------------------------------------------------
@@ -1350,11 +1370,28 @@
   parameter ADR_CLCT0_XKY             = 10'h1A6; // new position with 1/8 strip precision
   parameter ADR_CLCT1_XKY             = 10'h1A8; 
 
-  parameter ADR_CCLUT_FORMAT_CTRL     = 10'h1AA; // control for CCLUT, data format
+  parameter ADR_RUN3_FORMAT_CTRL      = 10'h1AA; // control for CCLUT, data format
   parameter ADR_HMT_CTRL              = 10'h1AC; // control for HMT
   parameter ADR_HMT_THRESH1           = 10'h1AE; // threshold1 for HMT
-  parameter ADR_HMT_THRESH2           = 10'h1B0; // threshold1 for HMT
-  parameter ADR_HMT_THRESH3           = 10'h1B2; // threshold1 for HMT
+  parameter ADR_HMT_THRESH2           = 10'h1B0; // threshold2 for HMT
+  parameter ADR_HMT_THRESH3           = 10'h1B2; // threshold3 for HMT
+  parameter ADR_HMT_NHITS_SIG         = 10'h1B4;
+  parameter ADR_HMT_NHITS_BKG         = 10'h1B6;
+  //parameter ADR_LCT_INJECTION         = 10'h1B8; //LCT injection from configuration
+  parameter ADR_V6_GTX0_NOTINTABLE    = 10'h1BA;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX1_NOTINTABLE    = 10'h1BC;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX2_NOTINTABLE    = 10'h1BE;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX3_NOTINTABLE    = 10'h1C0;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX4_NOTINTABLE    = 10'h1C2;  // Virtex-6 GTX0 control and status
+  //parameter ADR_V6_GTX5_NOTINTABLE    = 10'h1C4;  // Virtex-6 GTX0 control and status
+  //parameter ADR_V6_GTX6_NOTINTABLE    = 10'h1C6;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX0_DISPERR       = 10'h1C8;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX1_DISPERR       = 10'h1CA;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX2_DISPERR       = 10'h1CC;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX3_DISPERR       = 10'h1CE;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX4_DISPERR       = 10'h1D0;  // Virtex-6 GTX0 control and status
+  //parameter ADR_V6_GTX5_DISPERR       = 10'h1D2;  // Virtex-6 GTX0 control and status
+  //parameter ADR_V6_GTX6_DISPERR       = 10'h1D4;  // Virtex-6 GTX0 control and status
 
   parameter ADR_ODMB      = 9'h1EE;  // ODMB mode: various addresses are handled inside odmb_device
 
@@ -1671,6 +1708,8 @@
   output  [MXHITB-1:0]  dmb_thresh_pretrig;    // Hits on pattern template DMB active-feb threshold
   output  [MXKEYB-1+1:0]  adjcfeb_dist;      // Distance from key to cfeb boundary for marking adjacent cfeb as hit
   input ccLUT_enable;
+  output run3_trig_df;
+  output run3_daq_df;
 
 // CFEB Ports: Hot Channel Mask
   output  [MXDS-1:0]    cfeb0_ly0_hcm;      // 1=enable DiStrip
@@ -1864,6 +1903,8 @@
   //HMT part
   output hmt_enable;
   input [9:0] hmt_nhits_trig_vme;
+  input [9:0] hmt_nhits_trig_bx678_vme;
+  input [9:0] hmt_nhits_trig_bx2345_vme;
   input [1:0] hmt_trigger_vme;
 
   output [9:0] hmt_thresh1;
@@ -2305,6 +2346,18 @@
   //Tao, ME1/1->MEX/1
   //input  [15:0]      gtx_rx_err_count5;    // Error count on this fiber channel
   //input  [15:0]      gtx_rx_err_count6;    // Error count on this fiber channel
+   // Virtex-6 GTX error counters: disperr/notintable
+  input  [15:0]      gtx_rx_notintable_count0;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_notintable_count1;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_notintable_count2;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_notintable_count3;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_notintable_count4;    // Error count on this fiber channel
+
+  input  [15:0]      gtx_rx_disperr_count0;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_disperr_count1;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_disperr_count2;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_disperr_count3;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_disperr_count4;    // Error count on this fiber channel
 
   input  [MXCFEB-1:0]  gtx_link_had_err;   // link stability monitor: error happened at least once
   input  [MXCFEB-1:0]  gtx_link_good;      // link stability monitor: always good, no errors since last resync
@@ -2800,6 +2853,8 @@
 
   reg   [15:0]  virtex6_gtx_rx_wr [MXCFEB-1:0];
   wire  [15:0]  virtex6_gtx_rx_rd [MXCFEB-1:0];
+  wire  [15:0]  virtex6_gtx_rx_notintable_rd [MXCFEB-1:0];
+  wire  [15:0]  virtex6_gtx_rx_disperr_rd [MXCFEB-1:0];
 
   reg   [15:0]  virtex6_sysmon_wr;
   wire  [15:0]  virtex6_sysmon_rd;
@@ -2816,8 +2871,8 @@
   wire [15:0] clct0_xky_rd;
   wire [15:0] clct1_xky_rd;
 
-  reg  [15:0] cclut_format_ctrl_wr;
-  wire [15:0] cclut_format_ctrl_rd;
+  reg  [15:0] run3_format_ctrl_wr;
+  wire [15:0] run3_format_ctrl_rd;
 
   reg  [15:0] hmt_ctrl_wr;
   wire [15:0] hmt_ctrl_rd;
@@ -2828,6 +2883,9 @@
   wire [15:0] hmt_thresh2_rd;
   reg  [15:0] hmt_thresh3_wr;
   wire [15:0] hmt_thresh3_rd;
+
+  wire [15:0] hmt_nhits_sig_rd;
+  wire [15:0] hmt_nhits_bkg_rd;
 //------------------------------------------------------------------------------------------------------------------
 // Address Write Decodes
 //------------------------------------------------------------------------------------------------------------------
@@ -2967,7 +3025,7 @@
   wire      wr_virtex6_sysmon;
   wire      wr_virtex6_extend;
   //CCLUT
-  wire      wr_cclut_format_ctrl;
+  wire      wr_run3_format_ctrl;
   wire      wr_hmt_ctrl;
   wire      wr_hmt_thresh1;
   wire      wr_hmt_thresh2;
@@ -2975,16 +3033,30 @@
   wire      wr_adr_cap;
   
        // Virtex-6 GTX error counters
-       wire    [7:0]           gtx_rx_err_count [MXCFEB-1:0];    // JRG In:    Error count on each fiber channel
-         assign        gtx_rx_err_count[0][7:0] = gtx_rx_err_count0[7:0];      //      Error count on this fiber channel
-         assign        gtx_rx_err_count[1][7:0] = gtx_rx_err_count1[7:0];      //      Error count on this fiber channel
-         assign        gtx_rx_err_count[2][7:0] = gtx_rx_err_count2[7:0];      //      Error count on this fiber channel
-         assign        gtx_rx_err_count[3][7:0] = gtx_rx_err_count3[7:0];      //      Error count on this fiber channel
-         assign        gtx_rx_err_count[4][7:0] = gtx_rx_err_count4[7:0];      //      Error count on this fiber channel
-         //assign        gtx_rx_err_count[5][7:0] = gtx_rx_err_count5[7:0];      //      Error count on this fiber channel
-         //assign        gtx_rx_err_count[6][7:0] = gtx_rx_err_count6[7:0];      //      Error count on this fiber channel
-       wire    [11:0]          gtx_rx_err_count_all; // R      JRG: create a sum of all GTX error counts
+  wire    [7:0]           gtx_rx_err_count [MXCFEB-1:0];    // JRG In:    Error count on each fiber channel
+  assign        gtx_rx_err_count[0][7:0] = gtx_rx_err_count0[7:0];      //      Error count on this fiber channel
+  assign        gtx_rx_err_count[1][7:0] = gtx_rx_err_count1[7:0];      //      Error count on this fiber channel
+  assign        gtx_rx_err_count[2][7:0] = gtx_rx_err_count2[7:0];      //      Error count on this fiber channel
+  assign        gtx_rx_err_count[3][7:0] = gtx_rx_err_count3[7:0];      //      Error count on this fiber channel
+  assign        gtx_rx_err_count[4][7:0] = gtx_rx_err_count4[7:0];      //      Error count on this fiber channel
+  //assign        gtx_rx_err_count[5][7:0] = gtx_rx_err_count5[7:0];      //      Error count on this fiber channel
+  //assign        gtx_rx_err_count[6][7:0] = gtx_rx_err_count6[7:0];      //      Error count on this fiber channel
+  wire    [11:0]          gtx_rx_err_count_all; // R      JRG: create a sum of all GTX error counts
 
+  // Virtex-6 GTX error counters: disperr/notintable
+  wire [15:0] gtx_rx_notintable_count [MXCFEB-1:0];    // JRG In:    Error count on each fiber channel
+  wire [15:0] gtx_rx_disperr_count [MXCFEB-1:0];    // JRG In:    Error count on each fiber channel
+
+  assign gtx_rx_notintable_count[0][15:0] = gtx_rx_notintable_count0[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_notintable_count[1][15:0] = gtx_rx_notintable_count1[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_notintable_count[2][15:0] = gtx_rx_notintable_count2[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_notintable_count[3][15:0] = gtx_rx_notintable_count3[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_notintable_count[4][15:0] = gtx_rx_notintable_count4[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_disperr_count[0][15:0]    = gtx_rx_disperr_count0[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_disperr_count[1][15:0]    = gtx_rx_disperr_count1[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_disperr_count[2][15:0]    = gtx_rx_disperr_count2[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_disperr_count[3][15:0]    = gtx_rx_disperr_count3[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_disperr_count[4][15:0]    = gtx_rx_disperr_count4[15:0];      //      Error count on this fiber channel
 
   wire wr_mpc_frames_fifo_ctrl;
   wire wr_algo2016_ctrl;
@@ -3498,6 +3570,16 @@
   //Tao, ME1/1->MEX/1, the following two could be ignored for ME234
   //ADR_V6_GTX_RX5:      data_out  <= virtex6_gtx_rx_rd[5];
   //ADR_V6_GTX_RX6:      data_out  <= virtex6_gtx_rx_rd[6];
+  ADR_V6_GTX0_NOTINTABLE:    data_out <= virtex6_gtx_rx_notintable_rd[0];
+  ADR_V6_GTX1_NOTINTABLE:    data_out <= virtex6_gtx_rx_notintable_rd[1];
+  ADR_V6_GTX2_NOTINTABLE:    data_out <= virtex6_gtx_rx_notintable_rd[2];
+  ADR_V6_GTX3_NOTINTABLE:    data_out <= virtex6_gtx_rx_notintable_rd[3];
+  ADR_V6_GTX4_NOTINTABLE:    data_out <= virtex6_gtx_rx_notintable_rd[4];
+  ADR_V6_GTX0_DISPERR:       data_out <= virtex6_gtx_rx_disperr_rd[0];
+  ADR_V6_GTX1_DISPERR:       data_out <= virtex6_gtx_rx_disperr_rd[1];
+  ADR_V6_GTX2_DISPERR:       data_out <= virtex6_gtx_rx_disperr_rd[2];
+  ADR_V6_GTX3_DISPERR:       data_out <= virtex6_gtx_rx_disperr_rd[3];
+  ADR_V6_GTX4_DISPERR:       data_out <= virtex6_gtx_rx_disperr_rd[4];
 
   ADR_V6_SYSMON:      data_out  <=  virtex6_sysmon_rd;
 
@@ -3534,11 +3616,14 @@
   ADR_CLCT0_XKY:             data_out <= clct0_xky_rd; // new position with 1/8 strip precision
   ADR_CLCT1_XKY:             data_out <= clct1_xky_rd; 
 
-  ADR_CCLUT_FORMAT_CTRL:     data_out <= cclut_format_ctrl_rd;
+  ADR_RUN3_FORMAT_CTRL:      data_out <= run3_format_ctrl_rd;
   ADR_HMT_CTRL:              data_out <= hmt_ctrl_rd;
   ADR_HMT_THRESH1:           data_out <= hmt_thresh1_rd;
   ADR_HMT_THRESH2:           data_out <= hmt_thresh2_rd;
   ADR_HMT_THRESH3:           data_out <= hmt_thresh3_rd;
+
+  ADR_HMT_NHITS_SIG:         data_out <= hmt_nhits_sig_rd;
+  ADR_HMT_NHITS_BKG:         data_out <= hmt_nhits_bkg_rd;
 
   ADR_ODMB:      data_out  <= odmb_data;
 
@@ -3691,7 +3776,7 @@
   assign wr_virtex6_gtx_rx[3]  = (reg_adr==ADR_V6_GTX_RX3    && clk_en);
   assign wr_virtex6_gtx_rx[4]  = (reg_adr==ADR_V6_GTX_RX4    && clk_en);
 
-  assign wr_cclut_format_ctrl     =  (reg_adr==ADR_CCLUT_FORMAT_CTRL      && clk_en);
+  assign wr_run3_format_ctrl      =  (reg_adr==ADR_RUN3_FORMAT_CTRL       && clk_en);
   assign wr_hmt_ctrl              =  (reg_adr==ADR_HMT_CTRL               && clk_en);
   assign wr_hmt_thresh1           =  (reg_adr==ADR_HMT_THRESH1            && clk_en);
   assign wr_hmt_thresh2           =  (reg_adr==ADR_HMT_THRESH2            && clk_en);
@@ -3849,13 +3934,25 @@
 //------------------------------------------------------------------------------------------------------------------
 // Construct firmware revcode from global define, truncate for DMB frame
   wire [15:0]  revcode_vme;
+  wire [15:0]  revcode_vme_new;
   wire [15:0]  version_slot;
 
   assign revcode_vme[8:0]    = (MONTHDAY[15:12]*10 + MONTHDAY[11:8])*32+ (MONTHDAY[7:4]*10 + MONTHDAY[3:0]);
   assign revcode_vme[12:9]  = YEAR[3:0]+4'hA;    // Need to reformat this in year 2018
   assign revcode_vme[15:13]  = FPGAID[15:13];    // Virtex 2,4,6 etc
 
-  assign revcode[14:0]    = revcode_vme[14:0];  // Sequencer format is 15 bits, VME is 16
+  //Tao, 2020 definition
+  assign revcode_vme_new [04:00] = VERSION_MINOR;// 6 bits = Minor version  (minor features, internal fixes, bug fixes, etc).
+  assign revcode_vme_new [08:05] = VERSION_MAJOR;//5 bits = Major Version (major features which breaks compatibility, requires      changes to other board firmware)
+  //[12:09], 4bits for DAQ format
+  //0, old TMB
+  //1, Run2 OTMB
+  //2, Run3 OTMB with CCLUT and without GEM
+  //3, Run3 OTMB with CCLUT and GEM
+  assign revcode_vme_new [12:09] = VERSION_FORMAT;
+  assign revcode_vme_new [15:13] = 3'd0;
+
+  assign revcode[14:0]    = (run3_daq_df) ? revcode_vme_new[14:0] : revcode_vme[14:0];  // Sequencer format is 15 bits, VME is 16
 
 // VME ID Registers, Readonly
   assign version_slot[ 3: 0]  = FIRMWARE_TYPE[3:0];  // Firmware type, C=Normal TMB, D=Debug loopback
@@ -7281,6 +7378,9 @@
 //      assign virtex6_gtx_rx_rd[idcfeb][10]    = gtx_rx_err[idcfeb];               // R    JRG: not useful! -- PRBS test detects an error
 //      assign virtex6_gtx_rx_rd[idcfeb][15:11] = virtex6_gtx_rx_wr[idcfeb][15:11]; // RW   JRG: was Unused
         assign virtex6_gtx_rx_sump[idcfeb] = |virtex6_gtx_rx_wr[idcfeb][10:3]; // R  Unused write bits. JRG: used to be [10:4]
+
+        assign virtex6_gtx_rx_notintable_rd[idcfeb][15:0] = gtx_rx_notintable_count[idcfeb][15:0];
+        assign virtex6_gtx_rx_disperr_rd[idcfeb][15:0]    = gtx_rx_disperr_count[idcfeb][15:0];
   end
   endgenerate
 
@@ -7422,15 +7522,24 @@
   assign clct1_xky_rd[MXXKYB - 1    : 0] = clct1_vme_xky[MXXKYB - 1   : 0];
 
 //------------------------------------------------------------------------------------------------------------------
-// ADR_CCLUT_FORMAT_CTRL = 0x1AA  CCLUT
+// ADR_RUN3_FORMAT_CTRL = 0x1AA  CCLUT
 //------------------------------------------------------------------------------------------------------------------
 
   initial begin
-    cclut_format_ctrl_wr[0] = 0;
+    run3_format_ctrl_wr[0] = 1'b0;
+    run3_format_ctrl_wr[1] = 1'b0; // default, Run3 trigger format upgrade is off
+    run3_format_ctrl_wr[2] = 1'b1; // default, Run3 daq format upgrade is ON
+    run3_format_ctrl_wr[15:3] = 13'b0; // NOT used
     //cclut_format_ctrl_wr[1] = 0; //CLCT pattern sorting, 0= use {pat, nhits}, 1={new quality}
     //cclut_format_ctrl_wr[2] = 0; //LCT data format control, 0 = use Run2, 1= use Run3 with GEM-CSC+CCLUT
   end
-  assign cclut_format_ctrl_rd[0] = ccLUT_enable;
+  assign run3_trig_df = run3_format_ctrl_wr[1];
+  assign run3_daq_df  = run3_format_ctrl_wr[2];
+
+  assign run3_format_ctrl_rd[0]    = ccLUT_enable;
+  assign run3_format_ctrl_rd[1]    = run3_trig_df;
+  assign run3_format_ctrl_rd[2]    = run3_daq_df;
+  assign run3_format_ctrl_rd[15:3] = run3_format_ctrl_wr[15:3];
       
 
 //------------------------------------------------------------------------------------------------------------------
@@ -7485,6 +7594,15 @@
   assign hmt_thresh1_rd[15:11] = 5'b0;
   assign hmt_thresh2_rd[15:11] = 5'b0;
   assign hmt_thresh3_rd[15:11] = 5'b0;
+
+//------------------------------------------------------------------------------------------------------------------
+// ADR_HMT_NHITS_SIG=0x1B4  Nhits for HMT in bx678, Signal
+// ADR_HMT_NHITS_BKG=0x1B6  Nhits for HMT in bx2345, background/control region
+//------------------------------------------------------------------------------------------------------------------
+  assign hmt_nhits_sig_rd[9:0]   = hmt_nhits_trig_bx678_vme[9:0];
+  assign hmt_nhits_sig_rd[15:10] = 6'b0;
+  assign hmt_nhits_bkg_rd[9:0]   = hmt_nhits_trig_bx2345_vme[9:0];
+  assign hmt_nhits_bkg_rd[15:10] = 6'b0;
 
 //------------------------------------------------------------------------------------------------------------------
 // VME Write-Registers latch data when addressed + latch power-up defaults

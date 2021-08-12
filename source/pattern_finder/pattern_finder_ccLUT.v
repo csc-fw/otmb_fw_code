@@ -73,7 +73,7 @@ module pattern_finder_ccLUT (
   cfeb_nlayers_hit,
 
   //HMT part
-  hmt_nhits_trig,
+  //hmt_nhits_trig,
 
   drift_delay,
 // Algo2016: configuration
@@ -214,7 +214,7 @@ module pattern_finder_ccLUT (
   output [MXHITB - 1: 0] cfeb_nlayers_hit; // Number of CSC layers hit
 
   //HMT
-  output [9:0] hmt_nhits_trig;
+  //output [9:0] hmt_nhits_trig;
 
   // 2nd CLCT separation RAM Ports
   input          clct_sep_src;       // CLCT separation source 1=VME, 0=RAM
@@ -650,28 +650,28 @@ module pattern_finder_ccLUT (
   end
 
 // sum number of layers hit on each hs
-  // each cfeb hit counter, 32x6, 8bits
-  wire [7:0] nhits_cfeb0;
-  wire [7:0] nhits_cfeb1;
-  wire [7:0] nhits_cfeb2;
-  wire [7:0] nhits_cfeb3;
-  wire [7:0] nhits_cfeb4;
+  //// each cfeb hit counter, 32x6, 8bits
+  //wire [7:0] nhits_cfeb0;
+  //wire [7:0] nhits_cfeb1;
+  //wire [7:0] nhits_cfeb2;
+  //wire [7:0] nhits_cfeb3;
+  //wire [7:0] nhits_cfeb4;
 
-  count1s32 cfeb0_hitcount(cfeb0_ly0hs, cfeb0_ly1hs, cfeb0_ly2hs, cfeb0_ly3hs, cfeb0_ly4hs, cfeb0_ly5hs, nhits_cfeb0, clock, cfeb_en_ff[0]);
-  count1s32 cfeb1_hitcount(cfeb1_ly0hs, cfeb1_ly1hs, cfeb1_ly2hs, cfeb1_ly3hs, cfeb1_ly4hs, cfeb1_ly5hs, nhits_cfeb1, clock, cfeb_en_ff[1]);
-  count1s32 cfeb2_hitcount(cfeb2_ly0hs, cfeb2_ly1hs, cfeb2_ly2hs, cfeb2_ly3hs, cfeb2_ly4hs, cfeb2_ly5hs, nhits_cfeb2, clock, cfeb_en_ff[2]);
-  count1s32 cfeb3_hitcount(cfeb3_ly0hs, cfeb3_ly1hs, cfeb3_ly2hs, cfeb3_ly3hs, cfeb3_ly4hs, cfeb3_ly5hs, nhits_cfeb3, clock, cfeb_en_ff[3]);
-  count1s32 cfeb4_hitcount(cfeb4_ly0hs, cfeb4_ly1hs, cfeb4_ly2hs, cfeb4_ly3hs, cfeb4_ly4hs, cfeb4_ly5hs, nhits_cfeb4, clock, cfeb_en_ff[4]);
+  //count1s32 cfeb0_hitcount(cfeb0_ly0hs, cfeb0_ly1hs, cfeb0_ly2hs, cfeb0_ly3hs, cfeb0_ly4hs, cfeb0_ly5hs, nhits_cfeb0, clock, cfeb_en_ff[0]);
+  //count1s32 cfeb1_hitcount(cfeb1_ly0hs, cfeb1_ly1hs, cfeb1_ly2hs, cfeb1_ly3hs, cfeb1_ly4hs, cfeb1_ly5hs, nhits_cfeb1, clock, cfeb_en_ff[1]);
+  //count1s32 cfeb2_hitcount(cfeb2_ly0hs, cfeb2_ly1hs, cfeb2_ly2hs, cfeb2_ly3hs, cfeb2_ly4hs, cfeb2_ly5hs, nhits_cfeb2, clock, cfeb_en_ff[2]);
+  //count1s32 cfeb3_hitcount(cfeb3_ly0hs, cfeb3_ly1hs, cfeb3_ly2hs, cfeb3_ly3hs, cfeb3_ly4hs, cfeb3_ly5hs, nhits_cfeb3, clock, cfeb_en_ff[3]);
+  //count1s32 cfeb4_hitcount(cfeb4_ly0hs, cfeb4_ly1hs, cfeb4_ly2hs, cfeb4_ly3hs, cfeb4_ly4hs, cfeb4_ly5hs, nhits_cfeb4, clock, cfeb_en_ff[4]);
 
-  reg  [9:0] nhits_all;
-  wire [9:0] nhits_trig_s0;
-  wire [9:0] nhits_trig_pre;
-  wire [9:0] nhits_trig_dly;
+  //reg  [9:0] nhits_all;
+  //wire [9:0] nhits_trig_s0;
+  //wire [9:0] nhits_trig_pre;
+  //wire [9:0] nhits_trig_dly;
 
-  always @(posedge clock) begin
-      nhits_all  <= nhits_cfeb0 + nhits_cfeb1 + nhits_cfeb2 + nhits_cfeb3 + nhits_cfeb4;
-  end
-  assign nhits_trig_s0[9:0] = nhits_all[9:0];
+  //always @(posedge clock) begin
+  //    nhits_all  <= nhits_cfeb0 + nhits_cfeb1 + nhits_cfeb2 + nhits_cfeb3 + nhits_cfeb4;
+  //end
+  //assign nhits_trig_s0[9:0] = nhits_all[9:0];
 
   // Sum number of layers hit into a binary pattern number
   wire [MXHITB - 1: 0] nlayers_hit_s0;
@@ -685,7 +685,7 @@ module pattern_finder_ccLUT (
   srl16e_bbl #(1)      udlya0 ( .clock(clock), .ce(1'b1), .adr(dlya), .d(layer_trig_s0 ), .q(cfeb_layer_trig ) );
   srl16e_bbl #(MXHITB) udlya1 ( .clock(clock), .ce(1'b1), .adr(dlya), .d(nlayers_hit_s0), .q(cfeb_nlayers_hit) );
   srl16e_bbl #(MXLY)   udlya2 ( .clock(clock), .ce(1'b1), .adr(dlya), .d(layer_or_s0   ), .q(cfeb_layer_or   ) );
-  srl16e_bbl #(10)   udnhits( .clock(clock), .ce(1'b1), .adr(dlya), .d(nhits_trig_s0   ), .q(nhits_trig_pre   ) );
+  //srl16e_bbl #(10)   udnhits( .clock(clock), .ce(1'b1), .adr(dlya), .d(nhits_trig_s0   ), .q(nhits_trig_pre   ) );
 
   // Delay 4bx to latch in time with 1st and 2nd clct, need to FF these again to align
   wire [MXLY - 1: 0]   hs_layer_or_dly;
@@ -696,7 +696,7 @@ module pattern_finder_ccLUT (
   srl16e_bbl #(MXHITB) udlyb1 ( .clock(clock), .ce(1'b1), .adr(dlyb), .d(nlayers_hit_s0), .q(hs_nlayers_hit_dly) );
   srl16e_bbl #(1)      udlyb2 ( .clock(clock), .ce(1'b1), .adr(dlyb), .d(layer_trig_s0 ), .q(hs_layer_trig_dly ) );
   srl16e_bbl #(MXLY)   udlyb3 ( .clock(clock), .ce(1'b1), .adr(dlyb), .d(layer_or_s0   ), .q(hs_layer_or_dly   ) );
-  srl16e_bbl #(10)    udnhits2( .clock(clock), .ce(1'b1), .adr(dlya), .d(nhits_trig_s0 ), .q(nhits_trig_dly    ) );
+  //srl16e_bbl #(10)    udnhits2( .clock(clock), .ce(1'b1), .adr(dlya), .d(nhits_trig_s0 ), .q(nhits_trig_dly    ) );
 
 //-------------------------------------------------------------------------------------------------------------------
 // Stage 4D: 1/2-Strip Pattern Finder
@@ -1407,13 +1407,13 @@ module pattern_finder_ccLUT (
   reg [MXLY - 1: 0]   hs_layer_or;
   reg [MXHITB - 1: 0] hs_nlayers_hit;
 
-  reg [9:0]           hmt_nhits_trig;
+  //reg [9:0]           hmt_nhits_trig;
 
   always @(posedge clock) begin
     hs_layer_trig  <= hs_layer_trig_dly;
     hs_layer_or    <= hs_layer_or_dly;
     hs_nlayers_hit <= hs_nlayers_hit_dly;
-    hmt_nhits_trig  <= nhits_trig_dly; 
+    //hmt_nhits_trig  <= nhits_trig_dly; 
   end
 
 

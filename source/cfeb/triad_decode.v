@@ -51,7 +51,7 @@
 //  08/06/10 Integer truncation for ise 12
 //  08/19/10 Replace * with &
 //------------------------------------------------------------------------------------------------------------------------
-  module triad_decode(clock,reset,persist,persist1,triad,h_strip,triad_skip `triad_sm_dsp_debug);
+  module triad_decode(clock,reset,persist,persist1,triad, hs_fired, h_strip,triad_skip `triad_sm_dsp_debug);
 
 // Version
   initial $display ("triad_decode: Instantiating 1-SRL Version");
@@ -62,6 +62,7 @@
   input  [3:0] persist;    // Output persistence-1, ie 5 gives 6-clk width
   input        persist1;   // Output persistence is 1, use with  persist=0
   input        triad;      // 3-bit serial triad
+  output       hs_fired;
   output [3:0] h_strip;    // 4-bit parallel 1/2-strips
   output       triad_skip; // Triad was skipped while busy with previus triad
 
@@ -129,6 +130,8 @@
   wire fire_hs  = (triad_sm==lhstrip);        // fire the decoded hstrip
   wire clear_hs = (srl_out || reset ) && !fire_hs;  // unfire it, unless 2nd triad arrived at same time
   wire srl_in   = latch_strip;
+
+  assign hs_fired = fire_hs; // added for  HMT trigger
 
   always @(posedge clock or posedge persist1) begin
     if (persist1) busy_hs_ff <= 0;   // never go busy if pulse width is 1
@@ -201,7 +204,7 @@
 //  08/04/10 Change to non-blocking operators
 //  08/06/10 Integer truncation for ise 12
 //------------------------------------------------------------------------------------------------------------------------
-  module triad_decode(clock,reset,persist,triad,h_strip `triad_sm_dsp_debug);
+  module triad_decode(clock,reset,persist,triad,hs_fired, h_strip `triad_sm_dsp_debug);
 
 // Version
   initial $display ("triad_decode: Instantiating 4-Counter Version");
@@ -211,6 +214,7 @@
   input      reset;        // State machine to idle
   input  [3:0]  persist;      // Output persistence-1, ie 5 gives 6-clk width
   input      triad;        // 3-bit serial triad
+  output     hs_fired;
   output  [3:0]  h_strip;      // 4-bit parallel 1/2-strips
 
 // Triad Decode State Machine declarations
@@ -248,6 +252,8 @@
 
 // Store strip bit
   reg strip;
+
+  assign hs_fired = (triad_sm == lhstrip);
   
   always @(posedge clock) begin
   if (triad_sm == lstrip ) strip  <= triad_ff;

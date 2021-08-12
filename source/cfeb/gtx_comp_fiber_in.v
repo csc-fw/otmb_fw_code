@@ -42,6 +42,8 @@
         link_had_err,
         link_good,
 	link_bad,
+        notintablecount,
+        disperrcount,
 	sump
     );
 //-------------------------------------------------------------------------------------------------------------------
@@ -72,18 +74,20 @@
 	output	[47:0]	RCV_DATA;
 	output	[47:0]	PROMPT_DATA;
 	output	[3:1]	NONZERO_WORD;
-	output			CEW0;
-	output			CEW1;
-	output			CEW2;
-	output			CEW3;
-	output			LTNCY_TRIG;
-	output			RX_RST_DONE;
-	output			RX_SYNC_DONE;
-	output			sump;
-        output 	[7:0]		errcount;
-        output 			link_had_err;
-        output 			link_good;
-        output 			link_bad;
+	output		CEW0;
+	output		CEW1;
+	output		CEW2;
+	output		CEW3;
+	output		LTNCY_TRIG;
+	output		RX_RST_DONE;
+	output		RX_SYNC_DONE;
+	output		sump;
+        output 	[7:0]	errcount;
+        output 		link_had_err;
+        output 		link_good;
+        output 		link_bad;
+        output [15:0]   notintablecount;
+        output [15:0]   disperrcount;
    
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -280,6 +284,8 @@
 //-------------------------------------------------------------------------------------------------------------------
 // Receive data
 //-------------------------------------------------------------------------------------------------------------------
+   reg[15:0] notintable_cnt = 0;
+   reg[15:0] disperr_cnt    = 0;
    reg [3:0] mon_in = 0;
    reg 	     mon_rst = 1;
    reg [3:0] mon_count = 0;
@@ -297,6 +303,9 @@
    assign   PROMPT_DATA[47:0]  = {cmp_rx_data,w2_reg,w1_reg};
    assign   lt_trg     = (cmp_rx_isk==2'b01) && (cmp_rx_data[7:0] == 8'hFC);
    assign   sync_match = (cmp_rx_isk==2'b01);
+
+   assign    notintablecount = notintable_cnt;
+   assign    disperrcount = disperr_cnt;
 
 
      always @(posedge CMP_RX_CLK160) begin
@@ -317,6 +326,8 @@
 	   link_good <= 0;
 	   link_err <= 0; // clear the error register on resync
 	   err_count[7:0] <= 8'h00;   // use err_count[7] to signal the link is bad
+           notintable_cnt[15:0] <= 16'h0000;
+           disperr_cnt[15:0]    <= 16'h0000;
 	end
 	else begin
 	   if(CEW0)	begin     // this gets set for the first time after the first CEW3
@@ -358,6 +369,10 @@
 	   if(!link_err) link_err <= (link_went_down); // use to signal the link was OK then had a problem (== link_went_down) at least once
 	   if(link_went_down && err_count[7:4]!=4'hE) err_count <= err_count + 1'b1; // how many times the link was lost
 
+           if (CEW0 || CEW1 || CEW2 || CEW3) begin
+              if (cmp_rx_notintable[1:0] != 2'b00 && notintable_cnt[15:0] != 16'hFFFE) notintable_cnt <= notintable_cnt +1'b1;
+              if (cmp_rx_disperr[1:0] != 2'b00 && disperr_cnt[15:0] != 16'hFFFE)    disperr_cnt <= disperr_cnt + 1'b1;
+           end
 	end // else: !if(!RX_SYNC_DONE || ttc_resync)
      end // always @ (posedge CMP_RX_CLK160)
 
