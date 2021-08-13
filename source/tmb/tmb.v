@@ -519,7 +519,7 @@
   gem_foralct_vpf_tp,
   gem_forclct_vpf_tp,
   gem_alct_window_hasgem_tp,
-  keep_clct_run3_tp,
+  keep_gem_tp,
 // Sump
   tmb_sump
 
@@ -688,8 +688,8 @@
   parameter MXHMTB   = 4;
 
   //GEM
-  parameter CLSTBITS   =  14; // Number bits per GEM cluster
-  parameter WIREBITS   = 7; //wiregroup
+  parameter CLSTBITS                =  14; // Number bits per GEM cluster
+  parameter WIREBITS                = 7; //wiregroup
   parameter MXCLUSTER_CHAMBER       = 8; // Num GEM clusters  per Chamber
 //------------------------------------------------------------------------------------------------------------------
 //Ports
@@ -715,7 +715,7 @@
   input              gemA_sync_err;
   input              gemB_sync_err;
   input              gems_sync_err;
-  input  [7:0]          gemA_vpf;
+  input  [MXCLUSTER_CHAMBER-1:0]          gemA_vpf;
   input  [CLSTBITS-1:0] gemA_cluster0;
   input  [CLSTBITS-1:0] gemA_cluster1;
   input  [CLSTBITS-1:0] gemA_cluster2;
@@ -772,7 +772,7 @@
   input  [WIREBITS-1:0] gemA_cluster5_cscwire_hi;
   input  [WIREBITS-1:0] gemA_cluster6_cscwire_hi;
   input  [WIREBITS-1:0] gemA_cluster7_cscwire_hi;
-  input  [7:0]          gemB_vpf;
+  input  [MXCLUSTER_CHAMBER-1:0]          gemB_vpf;
   input  [CLSTBITS-1:0] gemB_cluster0;
   input  [CLSTBITS-1:0] gemB_cluster1;
   input  [CLSTBITS-1:0] gemB_cluster2;
@@ -1091,7 +1091,7 @@
   output          gem_foralct_vpf_tp;
   output          gem_forclct_vpf_tp;
   output          gem_alct_window_hasgem_tp;
-  output          keep_clct_run3_tp;
+  output          keep_gem_tp;
 
 // Sump
   output          tmb_sump; // Unused signals
@@ -1478,7 +1478,7 @@
 
   //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   //Attention!! disable this for OTMB at b904 and P5!!!!
-  wire usefakealct = tmb_copad_alct_allow; //1'b1; // should be false in normal OTMB Firmware
+  wire usefakealct = gem_me1a_match_nogem; //1'b1; // should be false in normal OTMB Firmware
   //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------
@@ -1528,7 +1528,7 @@
   reg  [3:0]        alct_gem_srl_adr = 0;
 
   wire [3:0] gem_alct_win_center = {1'b0, match_gem_alct_window[3:1]}; // namely window/2
-  wire alct_delay_forgem = (alct_delay > gem_alct_win_center)? (alct_delay - gem_alct_win_center) : 0;//
+  wire [3:0] alct_delay_forgem   = (alct_delay > gem_alct_win_center)? (alct_delay - gem_alct_win_center) : 4'b0;//
 
   always @(posedge clock) begin
     alct_gem_srl_adr <= alct_delay_forgem-1'b1;
@@ -1819,8 +1819,8 @@
   //first delay GEM signal by match_gem_alct_delay to do GEM-ALCT match
   //Attention:  Only 4 bits delay is used for now!!!!
 
-  wire [7:0]  gemA_pipe_foralct, gemA_foralct_srl;
-  wire [7:0]  gemB_pipe_foralct, gemB_foralct_srl;
+  wire [MXCLUSTER_CHAMBER-1:0]  gemA_pipe_foralct, gemA_foralct_srl;
+  wire [MXCLUSTER_CHAMBER-1:0]  gemB_pipe_foralct, gemB_foralct_srl;
 
   reg  [3:0] gem_srl_adr = 0;
 
@@ -1828,8 +1828,8 @@
   gem_srl_adr <= match_gem_alct_delay-1'b1;
   end
 
-  srl16e_bbl #(8) ugemA (.clock(clock),.ce(1'b1),.adr(gem_srl_adr),.d(gemA_vpf[7:0]),.q(gemA_foralct_srl[7:0])); 
-  srl16e_bbl #(8) ugemB (.clock(clock),.ce(1'b1),.adr(gem_srl_adr),.d(gemB_vpf[7:0]),.q(gemB_foralct_srl[7:0]));
+  srl16e_bbl #(MXCLUSTER_CHAMBER) ugemA (.clock(clock),.ce(1'b1),.adr(gem_srl_adr),.d(gemA_vpf[MXCLUSTER_CHAMBER-1:0]),.q(gemA_foralct_srl[MXCLUSTER_CHAMBER-1:0])); 
+  srl16e_bbl #(MXCLUSTER_CHAMBER) ugemB (.clock(clock),.ce(1'b1),.adr(gem_srl_adr),.d(gemB_vpf[MXCLUSTER_CHAMBER-1:0]),.q(gemB_foralct_srl[MXCLUSTER_CHAMBER-1:0]));
 
   wire gem_ptr_is_0 = (match_gem_alct_delay == 0);               // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
 
@@ -2032,28 +2032,38 @@
   //find out GEM vpf for CLCT-GEM matching 
   wire [7:0] gemA_forclct, gemA_forclct_srl;
   wire [7:0] gemB_forclct, gemB_forclct_srl;
+  wire [7:0] copad_match_srl;
   wire [3:0] gem_final_delay_withalct = gem_alct_match_win_mux_pipe + match_gem_alct_delay + gem_alct_win_center;
   wire [3:0] gem_final_delay_noalct = match_gem_alct_delay + gem_alct_winclosing;
   wire [3:0] gem_final_delay_wincenter = match_gem_alct_delay+gem_alct_win_center;
 
-  wire [3:0] gem_final_delay = alct_pulse ? gem_final_delay_withalct : (gem_usedforalct ? gem_final_delay_wincenter : gem_final_delay_noalct);
+  //wire [3:0] gem_final_delay = alct_pulse ? gem_final_delay_withalct : (gem_usedforalct ? gem_final_delay_wincenter : gem_final_delay_noalct);
+  wire [3:0] gem_final_delay = alct_pulse ? gem_final_delay_withalct : gem_final_delay_noalct;
   //wire [3:0] gem_final_delay = gem_alct_noalct ? gem_final_delay_noalct : gem_final_delay_withalct;
 
 
   wire [3:0] gem_final_adr   = gem_final_delay - 4'b1;
-  srl16e_bbl #(8) ugemApulse_gemclct (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemA_vpf),.q(gemA_forclct_srl));
-  srl16e_bbl #(8) ugemBpulse_gemclct (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_vpf),.q(gemB_forclct_srl));
+  srl16e_bbl #(MXCLUSTER_CHAMBER) ugemApulse_gemclct (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemA_vpf),   .q(gemA_forclct_srl));
+  srl16e_bbl #(MXCLUSTER_CHAMBER) ugemBpulse_gemclct (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_vpf),   .q(gemB_forclct_srl));
+  srl16e_bbl #(MXCLUSTER_CHAMBER) ucopad             (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(copad_match),.q(copad_match_srl));
 
 //------------------------------------------------------------------------------------------------------------------
 //ALCT-CLCT-GEM pulse match, namely match in timing
 //------------------------------------------------------------------------------------------------------------------
-  wire [7:0] gemA_forclct_dly =  (gem_final_delay == 0) ? gemA_vpf : gemA_forclct_srl;
-  wire [7:0] gemB_forclct_dly =  (gem_final_delay == 0) ? gemB_vpf : gemB_forclct_srl;
+  wire [MXCLUSTER_CHAMBER-1:0] gemA_forclct_dly =  (gem_final_delay == 0) ? gemA_vpf : gemA_forclct_srl;
+  wire [MXCLUSTER_CHAMBER-1:0] gemB_forclct_dly =  (gem_final_delay == 0) ? gemB_vpf : gemB_forclct_srl;
+  wire [MXCLUSTER_CHAMBER-1:0] copad_match_dly  =  (gem_final_delay == 0) ? copad_match : copad_match_srl;
 
   //when gem pulse is used for gem-alct match, then we only use it when alct_pulse is valid 
-  wire drop_gem_pusle = gem_usedforalct && !alct_pulse;
-  wire [7:0] gemA_forclct_pipe = drop_gem_pusle ? 8'b0 : gemA_forclct_dly;
-  wire [7:0] gemB_forclct_pipe = drop_gem_pusle ? 8'b0 : gemB_forclct_dly;
+  //wire drop_gem_pusle = gem_usedforalct && !alct_pulse;
+  //wire [7:0] gemA_forclct_pipe = drop_gem_pusle ? 8'b0 : gemA_forclct_dly;
+  //wire [7:0] gemB_forclct_pipe = drop_gem_pusle ? 8'b0 : gemB_forclct_dly;
+  wire keep_gem = (alct_pulse || gem_alct_noalct);
+  assign keep_gem_tp = keep_gem;
+
+  assign gemA_forclct_pipe = gemA_forclct_dly & {MXCLUSTER_CHAMBER{keep_gem}};
+  assign gemB_forclct_pipe = gemB_forclct_dly & {MXCLUSTER_CHAMBER{keep_gem}};
+  assign copad_match_pipe  = copad_match_dly  & {MXCLUSTER_CHAMBER{keep_gem}};
 
   wire gemA_pulse_forclct = |gemA_forclct_pipe;
   wire gemB_pulse_forclct = |gemB_forclct_pipe;
@@ -2174,7 +2184,6 @@
   wire [MXXKYB-1:0]   gemB_cluster_cscxky_mi_pipe [MXCLUSTER_CHAMBER-1:0]; // 
 
 
-  wire [7:0]  copad_match_srl;
   genvar k;                // Table window priorities multipled by windwo position enables
   generate
   for (k=0; k< MXCLUSTER_CHAMBER; k=k+1) begin: gemdatadelay
@@ -2194,7 +2203,6 @@
       srl16e_bbl #(MXXKYB)   ugemBxkyhi   (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_cluster_cscxky_hi[k]), .q(gemB_cluster_cscxky_hi_srl[k]));
 
 
-      srl16e_bbl #(1) ucopad       (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(copad_match[k]),      .q(copad_match_srl[k]));
 
       assign gemA_cluster_pipe[k]            = (gem_final_delay == 0) ? gemA_cluster[k]        : gemA_cluster_srl[k];
       assign gemA_cluster_cscwire_lo_pipe[k] = (gem_final_delay == 0) ? gemA_cluster_cscwire_lo[k] : gemA_cluster_cscwire_lo_srl[k];
@@ -2211,7 +2219,6 @@
       assign gemB_cluster_cscxky_mi_pipe[k]  = (gem_final_delay == 0) ? gemB_cluster_cscxky_mi[k]  : gemB_cluster_cscxky_mi_srl[k];
       assign gemB_cluster_cscxky_hi_pipe[k]  = (gem_final_delay == 0) ? gemB_cluster_cscxky_hi[k]  : gemB_cluster_cscxky_hi_srl[k];
 
-      assign copad_match_pipe[k]             = (gem_final_delay == 0) ? copad_match[k] : copad_match_srl[k];
   end 
   endgenerate 
   
@@ -2368,8 +2375,8 @@
   .tmb_copad_alct_allow      (tmb_copad_alct_allow),       //In gem-csc match, allow ALCT+copad match
   .tmb_copad_clct_allow      (tmb_copad_clct_allow),       //In gem-csc match, allow CLCT+copad match
 
-  .gemA_vpf (gemA_forclct_pipe[7:0]),
-  .gemB_vpf (gemB_forclct_pipe[7:0]),
+  .gemA_vpf (gemA_forclct_pipe[MXCLUSTER_CHAMBER-1:0]),
+  .gemB_vpf (gemB_forclct_pipe[MXCLUSTER_CHAMBER-1:0]),
 
   .gemA_cluster0_wg_lo(gemA_cluster_cscwire_lo_pipe[0][WIREBITS-1:0]),
   .gemA_cluster1_wg_lo(gemA_cluster_cscwire_lo_pipe[1][WIREBITS-1:0]),
@@ -2737,7 +2744,6 @@
   wire keep_clct = trig_pulse && (trig_keep || non_trig_keep);
   wire keep_clct_run3 = trig_pulse_run3 && (trig_keep_run3 || non_trig_keep_run3);
 
-  assign keep_clct_run3_tp = keep_clct_run3;
 
 
   always @(posedge clock) begin

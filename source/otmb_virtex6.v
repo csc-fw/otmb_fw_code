@@ -2317,7 +2317,7 @@ end
   wire [WIREBITS-1:0] gemB_csc_cluster_cscwire_hi[MXCLUSTER_CHAMBER-1:0];
   wire [WIREBITS-1:0] gemA_csc_cluster_cscwire_mi[MXCLUSTER_CHAMBER-1:0];
   wire [WIREBITS-1:0] gemB_csc_cluster_cscwire_mi[MXCLUSTER_CHAMBER-1:0];
-  //Tao, updated to CCLUT algorithm!!!, use 11 bits
+  //Tao, updated to CCLUT algorithm!!!, use 10 bits
   //wire [MXXKYB-1:0] gemA_csc_cluster_me1bxky_lo [MXCLUSTER_CHAMBER-1:0]; // ME1b keyHS from 0-127
   //wire [MXXKYB-1:0] gemB_csc_cluster_me1bxky_lo [MXCLUSTER_CHAMBER-1:0]; // ME1a keyHS from 128-223
   //wire [MXXKYB-1:0] gemA_csc_cluster_me1bxky_hi [MXCLUSTER_CHAMBER-1:0]; // 
@@ -4100,7 +4100,7 @@ wire [15:0] gemB_bxn_counter;
   .fifo_tbins_gem    (fifo_tbins_gem[MXTBIN-1:0]),   // In  Number GEM  FIFO time bins to read out
   .fifo_pretrig_gem  (fifo_pretrig_gem[MXTBIN-1:0]), // In  Number GEM  FIFO time bins before pretrigger
   .gem_zero_suppress (gem_zero_suppress),            // In  GEM zero suppress enable
-  .gem_read_mask   (gem_read_mask [MXGEM-1:0]),       // out  GEM Readout List
+  .gem_read_mask     (gem_read_mask [MXGEM-1:0]),       // out  GEM Readout List
 
 // Miniscope VME Configuration Ports
   .mini_tbins_word   (mini_tbins_word),               // In  Insert tbins and pretrig tbins in 1st word
@@ -4261,7 +4261,7 @@ wire [15:0] gemB_bxn_counter;
   wire gem_foralct_vpf_tp;
   wire gem_forclct_vpf_tp;
   wire gem_alct_window_hasgem_tp;
-  wire keep_clct_run3_tp;
+  wire keep_gem_tp;
   
 
   tmb utmb
@@ -4648,10 +4648,10 @@ wire [15:0] gemB_bxn_counter;
   .clct_vpf_tprt    (clct_vpf_tprt),    // Out  Timing test point
   .clct_window_tprt (clct_window_tprt), // Out  Timing test point
 
-  .keep_clct_run3_tp        (keep_clct_run3_tp), 
   .gem_foralct_vpf_tp       (gem_foralct_vpf_tp),// Out, gem for gem-alct match, from pipeline
   .gem_forclct_vpf_tp       (gem_forclct_vpf_tp),// Out, gem for gem-clct match, from pipeline
   .gem_alct_window_hasgem_tp(gem_alct_window_hasgem_tp),
+  .keep_gem_tp              (keep_gem_tp), 
 
   .tmb_sump      (tmb_sump)            // Out  Unused signals
   );
@@ -4745,7 +4745,7 @@ wire [15:0] gemB_bxn_counter;
     //assign mez_tp[6] = (!set_sw[7] ? bpi_dsbl        :                          link_good[5]);
     //assign mez_tp[5] =   set_sw[8] ? alct_rxd_posneg : (!set_sw[7] ? bpi_rst  : link_good[4]);
     //assign mez_tp[4] = (!set_sw[7] ? bpi_dev         :                          link_good[3]);
-    assign mez_tp[9]  = (alct_gemA_match_pos || alct_gemB_match_pos); //CLCT window for  CLCT-ALCT and CLCT-GEM
+    assign mez_tp[9]  = keep_gem_tp; //CLCT window for  CLCT-ALCT and CLCT-GEM
     assign mez_tp[8]  = gem_alct_window_hasgem_tp;//gem window for gem-ALCT
     assign mez_tp[7]  = alct0_vpf_tprt; // ALCT vpf signal
     //assign mez_tp[6]  = wr_push_xtmb; // CLCT vpf signal

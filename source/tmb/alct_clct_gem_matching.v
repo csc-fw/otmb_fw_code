@@ -43,8 +43,8 @@ module  alct_clct_gem_matching(
   input tmb_copad_alct_allow,
   input tmb_copad_clct_allow,
 
-  input [7:0] gemA_vpf,
-  input [7:0] gemB_vpf,
+  input [MXCLUSTER_CHAMBER-1:0] gemA_vpf,
+  input [MXCLUSTER_CHAMBER-1:0] gemB_vpf,
 
   input [6:0] gemA_cluster0_wg_lo,
   input [6:0] gemA_cluster1_wg_lo,
@@ -154,7 +154,7 @@ module  alct_clct_gem_matching(
   input [9:0] gemB_cluster6_xky_mi,
   input [9:0] gemB_cluster7_xky_mi,
 
-  input [7:0] copad_match, // copad 
+  input [MXCLUSTER_CHAMBER-1:0] copad_match, // copad 
   //input [9:0] copad_cluster0_xky_mi,
   //input [9:0] copad_cluster1_xky_mi,
   //input [9:0] copad_cluster2_xky_mi,
@@ -280,113 +280,113 @@ module  alct_clct_gem_matching(
   wire  drop_lowqclct1 = clct1_lowQ && ((me1a_match_drop_lowqclct && clct1_xky[9]) || (me1b_match_drop_lowqclct && !clct1_xky[9]));
 
   wire [6:0] gemA_cluster_cscwg_lo[MXCLUSTER_CHAMBER-1:0] = {
-      gemA_cluster0_wg_lo,
-      gemA_cluster1_wg_lo,
-      gemA_cluster2_wg_lo,
-      gemA_cluster3_wg_lo,
-      gemA_cluster4_wg_lo,
-      gemA_cluster5_wg_lo,
+      gemA_cluster7_wg_lo,
       gemA_cluster6_wg_lo,
-      gemA_cluster7_wg_lo
+      gemA_cluster5_wg_lo,
+      gemA_cluster4_wg_lo,
+      gemA_cluster3_wg_lo,
+      gemA_cluster2_wg_lo,
+      gemA_cluster1_wg_lo,
+      gemA_cluster0_wg_lo
       };
 
   wire [6:0] gemA_cluster_cscwg_hi[MXCLUSTER_CHAMBER-1:0] = {
-      gemA_cluster0_wg_hi,
-      gemA_cluster1_wg_hi,
-      gemA_cluster2_wg_hi,
-      gemA_cluster3_wg_hi,
-      gemA_cluster4_wg_hi,
-      gemA_cluster5_wg_hi,
+      gemA_cluster7_wg_hi,
       gemA_cluster6_wg_hi,
-      gemA_cluster7_wg_hi
+      gemA_cluster5_wg_hi,
+      gemA_cluster4_wg_hi,
+      gemA_cluster3_wg_hi,
+      gemA_cluster2_wg_hi,
+      gemA_cluster1_wg_hi,
+      gemA_cluster0_wg_hi
       };
 
   wire [9:0] gemA_cluster_cscxky_lo[MXCLUSTER_CHAMBER-1:0] = {
-      gemA_cluster0_xky_lo,
-      gemA_cluster1_xky_lo,
-      gemA_cluster2_xky_lo,
-      gemA_cluster3_xky_lo,
-      gemA_cluster4_xky_lo,
-      gemA_cluster5_xky_lo,
+      gemA_cluster7_xky_lo,
       gemA_cluster6_xky_lo,
-      gemA_cluster7_xky_lo
+      gemA_cluster5_xky_lo,
+      gemA_cluster4_xky_lo,
+      gemA_cluster3_xky_lo,
+      gemA_cluster2_xky_lo,
+      gemA_cluster1_xky_lo,
+      gemA_cluster0_xky_lo
       };
 
   wire [9:0] gemA_cluster_cscxky_mi[MXCLUSTER_CHAMBER-1:0] = {
-      gemA_cluster0_xky_mi,
-      gemA_cluster1_xky_mi,
-      gemA_cluster2_xky_mi,
-      gemA_cluster3_xky_mi,
-      gemA_cluster4_xky_mi,
-      gemA_cluster5_xky_mi,
+      gemA_cluster7_xky_mi,
       gemA_cluster6_xky_mi,
-      gemA_cluster7_xky_mi
+      gemA_cluster5_xky_mi,
+      gemA_cluster4_xky_mi,
+      gemA_cluster3_xky_mi,
+      gemA_cluster2_xky_mi,
+      gemA_cluster1_xky_mi,
+      gemA_cluster0_xky_mi
       };
 
   wire [9:0] gemA_cluster_cscxky_hi[MXCLUSTER_CHAMBER-1:0] = {
-      gemA_cluster0_xky_hi,
-      gemA_cluster1_xky_hi,
-      gemA_cluster2_xky_hi,
-      gemA_cluster3_xky_hi,
-      gemA_cluster4_xky_hi,
-      gemA_cluster5_xky_hi,
+      gemA_cluster7_xky_hi,
       gemA_cluster6_xky_hi,
-      gemA_cluster7_xky_hi
+      gemA_cluster5_xky_hi,
+      gemA_cluster4_xky_hi,
+      gemA_cluster3_xky_hi,
+      gemA_cluster2_xky_hi,
+      gemA_cluster1_xky_hi,
+      gemA_cluster0_xky_hi
       };
 
   wire [6:0] gemB_cluster_cscwg_lo[MXCLUSTER_CHAMBER-1:0] = {
-      gemB_cluster0_wg_lo,
-      gemB_cluster1_wg_lo,
-      gemB_cluster2_wg_lo,
-      gemB_cluster3_wg_lo,
-      gemB_cluster4_wg_lo,
-      gemB_cluster5_wg_lo,
+      gemB_cluster7_wg_lo,
       gemB_cluster6_wg_lo,
-      gemB_cluster7_wg_lo
+      gemB_cluster5_wg_lo,
+      gemB_cluster4_wg_lo,
+      gemB_cluster3_wg_lo,
+      gemB_cluster2_wg_lo,
+      gemB_cluster1_wg_lo,
+      gemB_cluster0_wg_lo
       };
 
   wire [6:0] gemB_cluster_cscwg_hi[MXCLUSTER_CHAMBER-1:0] = {
-      gemB_cluster0_wg_hi,
-      gemB_cluster1_wg_hi,
-      gemB_cluster2_wg_hi,
-      gemB_cluster3_wg_hi,
-      gemB_cluster4_wg_hi,
-      gemB_cluster5_wg_hi,
+      gemB_cluster7_wg_hi,
       gemB_cluster6_wg_hi,
-      gemB_cluster7_wg_hi
+      gemB_cluster5_wg_hi,
+      gemB_cluster4_wg_hi,
+      gemB_cluster3_wg_hi,
+      gemB_cluster2_wg_hi,
+      gemB_cluster1_wg_hi,
+      gemB_cluster0_wg_hi
       };
 
   wire [9:0] gemB_cluster_cscxky_lo[MXCLUSTER_CHAMBER-1:0] = {
-      gemB_cluster0_xky_lo,
-      gemB_cluster1_xky_lo,
-      gemB_cluster2_xky_lo,
-      gemB_cluster3_xky_lo,
-      gemB_cluster4_xky_lo,
-      gemB_cluster5_xky_lo,
+      gemB_cluster7_xky_lo,
       gemB_cluster6_xky_lo,
-      gemB_cluster7_xky_lo
+      gemB_cluster5_xky_lo,
+      gemB_cluster4_xky_lo,
+      gemB_cluster3_xky_lo,
+      gemB_cluster2_xky_lo,
+      gemB_cluster1_xky_lo,
+      gemB_cluster0_xky_lo
       };
 
   wire [9:0] gemB_cluster_cscxky_mi[MXCLUSTER_CHAMBER-1:0] = {
-      gemB_cluster0_xky_mi,
-      gemB_cluster1_xky_mi,
-      gemB_cluster2_xky_mi,
-      gemB_cluster3_xky_mi,
-      gemB_cluster4_xky_mi,
-      gemB_cluster5_xky_mi,
+      gemB_cluster7_xky_mi,
       gemB_cluster6_xky_mi,
-      gemB_cluster7_xky_mi
+      gemB_cluster5_xky_mi,
+      gemB_cluster4_xky_mi,
+      gemB_cluster3_xky_mi,
+      gemB_cluster2_xky_mi,
+      gemB_cluster1_xky_mi,
+      gemB_cluster0_xky_mi
       };
 
   wire [9:0] gemB_cluster_cscxky_hi[MXCLUSTER_CHAMBER-1:0] = {
-      gemB_cluster0_xky_hi,
-      gemB_cluster1_xky_hi,
-      gemB_cluster2_xky_hi,
-      gemB_cluster3_xky_hi,
-      gemB_cluster4_xky_hi,
-      gemB_cluster5_xky_hi,
+      gemB_cluster7_xky_hi,
       gemB_cluster6_xky_hi,
-      gemB_cluster7_xky_hi
+      gemB_cluster5_xky_hi,
+      gemB_cluster4_xky_hi,
+      gemB_cluster3_xky_hi,
+      gemB_cluster2_xky_hi,
+      gemB_cluster1_xky_hi,
+      gemB_cluster0_xky_hi
       };
 
   wire [9:0] copad_cluster_cscxky_mi[MXCLUSTER_CHAMBER-1:0];
