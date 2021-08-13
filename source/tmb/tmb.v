@@ -1931,7 +1931,7 @@
   //tag matched GEM and ALCT match for the gem-ALCT window 
   always @(posedge clock) begin
     if (reset_sr) begin             // Sych reset on resync or not power up
-      gem_alct_match_sr  <= dynamic_zero; // Load a dynamic 0 on reset, mollify xst
+      gem_alct_match_sre  <= dynamic_zero; // Load a dynamic 0 on reset, mollify xst
     end
       gem_alct_match_sre[1]  <= gem_alct_match_sr[0];
       i=1;
