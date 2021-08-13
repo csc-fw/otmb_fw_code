@@ -524,10 +524,6 @@
   hmt_thresh2,
   hmt_thresh3,
 
-  ////LCT injection
-  //lct_inj_hs,
-  //lct_inj_wg,
-  //lct_inj_enable,
 
 // Sequencer Ports: Latched CLCTs + Status
   event_clear_vme,
@@ -1688,7 +1684,6 @@
   parameter ADR_HMT_THRESH3           = 10'h1B2; // threshold3 for HMT
   parameter ADR_HMT_NHITS_SIG         = 10'h1B4;
   parameter ADR_HMT_NHITS_BKG         = 10'h1B6;
-  //parameter ADR_LCT_INJECTION         = 10'h1B8; //LCT injection from configuration
   parameter ADR_V6_GTX0_NOTINTABLE    = 10'h1BA;  // Virtex-6 GTX0 control and status
   parameter ADR_V6_GTX1_NOTINTABLE    = 10'h1BC;  // Virtex-6 GTX0 control and status
   parameter ADR_V6_GTX2_NOTINTABLE    = 10'h1BE;  // Virtex-6 GTX0 control and status
@@ -1732,7 +1727,6 @@
   parameter ADR_GEM_CSC_MATCH_CLUSTER01= 10'h330;
   parameter ADR_GEM_CSC_MATCH_CLUSTER10= 10'h332;
   parameter ADR_GEM_CSC_MATCH_CLUSTER11= 10'h334;
-// 332, 334??
 
   parameter ADR_GEMA_BXN_COUNTER      = 10'h336;
   parameter ADR_GEMB_BXN_COUNTER      = 10'h338;
@@ -2298,10 +2292,6 @@
   output [9:0] hmt_thresh2;
   output [9:0] hmt_thresh3;
 
-  // LCT injection 
-  //output [7:0] lct_inj_hs;
-  //output [6:0] lct_inj_wg;
-  //output       lct_inj_enable;
 
 
 // Sequencer Ports: Latched CLCTs
@@ -4522,7 +4512,6 @@
   ADR_HMT_NHITS_SIG:         data_out <= hmt_nhits_sig_rd;
   ADR_HMT_NHITS_BKG:         data_out <= hmt_nhits_bkg_rd;
 
-  //ADR_LCT_INJECTION:         data_out <= lct_injection_rd;
 
   ADR_GEM_DEBUG_FIFO_CTRL:   data_out <= gem_debug_fifo_ctrl_rd;
   ADR_GEM_DEBUG_FIFO_DATA:   data_out <= gem_debug_fifo_data_rd;
@@ -4539,9 +4528,9 @@
   ADR_GEM_BX0_DELAY:         data_out <= gem_bx0_delay_rd;
   ADR_GEM_CSC_MATCH_CTRL:    data_out <= gem_csc_match_ctrl_rd;
 
-  ADR_GEM_CSC_MATCH_CLUSTER01:data_out <= gem_csc_match_cluster00_rd;
+  ADR_GEM_CSC_MATCH_CLUSTER00:data_out <= gem_csc_match_cluster00_rd;
   ADR_GEM_CSC_MATCH_CLUSTER01:data_out <= gem_csc_match_cluster01_rd;
-  ADR_GEM_CSC_MATCH_CLUSTER11:data_out <= gem_csc_match_cluster10_rd;
+  ADR_GEM_CSC_MATCH_CLUSTER10:data_out <= gem_csc_match_cluster10_rd;
   ADR_GEM_CSC_MATCH_CLUSTER11:data_out <= gem_csc_match_cluster11_rd;
 
   ADR_GEMA_BXN_COUNTER:      data_out <= gemA_bxn_counter_rd;
@@ -8924,22 +8913,6 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign hmt_nhits_bkg_rd[9:0]   = hmt_nhits_trig_bx2345_vme[9:0];
   assign hmt_nhits_bkg_rd[15:10] = 6'b0;
 
-////------------------------------------------------------------------------------------------------------------------
-//// ADR_LCT_INJECTION = 0x1B8  LCT injection for joint test 
-////------------------------------------------------------------------------------------------------------------------
-//
-//  initial begin
-//    lct_injection_wr[7 : 0] = 8'b0; // RW, injected halfstrip
-//    lct_injection_wr[14: 8] = 7'b0; //RW, injected wiregroup
-//    lct_injection_wr[15   ] = 1'b0; //RW, enable injection. defualt=0
-//  end
-//  
-//  assign lct_inj_hs[7:0]      = lct_injection_wr[7:0];
-//  assign lct_inj_wg[6:0]      = lct_injection_wr[14:8];
-//  assign lct_inj_enable       = lct_injection_wr[15];
-//
-//  assign lct_injection_rd[15:0] = lct_injection_wr[15:0];
-
 
 //------------------------------------------------------------------------------------------------------------------
 // GEM_DEBUG_FIFO_CTRL = 0x30C  GEM Raw Hits Readout RAM Simple Controller
@@ -9178,13 +9151,13 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   gem_csc_match_ctrl_wr[ 2]   = 1'b1; // RW GEMCSC match, match without gem is allowed in me1a
   gem_csc_match_ctrl_wr[ 3]   = 1'b0; // RW GEMCSC match, match without gem is allowed in me1b
   gem_csc_match_ctrl_wr[ 4]   = 1'b0; // RW GEMCSC match, match without alct is allowed in me1a
-  gem_csc_match_ctrl_wr[ 5]   = 1'b1; // RW GEMCSC match, match without alct is allowed in me1b
-  gem_csc_match_ctrl_wr[ 6]   = 1'b1; // RW GEMCSC match, match without clct is allowed in me1a
-  gem_csc_match_ctrl_wr[ 7]   = 1'b1; // RW GEMCSC match, match without clct is allowed in me1b
-  gem_csc_match_ctrl_wr[ 8]   = 1'b1; // RW GEMCSC match, promote quality in me1a with good match
-  gem_csc_match_ctrl_wr[ 9]   = 1'b1; // RW GEMCSC match, promote quality in me1b with good match
-  gem_csc_match_ctrl_wr[10]   = 1'b0; // RW GEMCSC match, promote pattern in me1a with good match
-  gem_csc_match_ctrl_wr[11]   = 1'b0; // RW GEMCSC match, promote pattern in me1b with good match
+  gem_csc_match_ctrl_wr[ 5]   = 1'b1; // RW GEMCSC match, drop low Q ALCT/CLCT for matching without GEM 
+  gem_csc_match_ctrl_wr[ 6]   = 1'b1; // RW GEMCSC match, drop low Q ALCT/CLCT for matching without GEM 
+  gem_csc_match_ctrl_wr[ 7]   = 1'b1; // RW GEMCSC match, drop low Q ALCT/CLCT for matching without GEM 
+  gem_csc_match_ctrl_wr[ 8]   = 1'b1; // RW GEMCSC match, not used
+  gem_csc_match_ctrl_wr[ 9]   = 1'b1; // RW GEMCSC match, not used  
+  gem_csc_match_ctrl_wr[10]   = 1'b0; // RW GEMCSC match, allow ALCT+copad
+  gem_csc_match_ctrl_wr[11]   = 1'b0; // RW GEMCSC match, allow CLCT+copad
   gem_csc_match_ctrl_wr[12]   = 1'b0; // RW GEMCSC match, enable GEMA for GEMCSC match without position match
   gem_csc_match_ctrl_wr[13]   = 1'b0; // RW GEMCSC match, enable GEMA for GEMCSC match without position match
   gem_csc_match_ctrl_wr[14]   = 1'b1; // RW GEMCSC bending angle enable 
@@ -9225,12 +9198,6 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 //------------------------------------------------------------------------------------------------------------------
 // GEM_CLUSTERs and COPADs from 0x340 to 0x36e
 //------------------------------------------------------------------------------------------------------------------
-  //dump code
-  //initial begin 
-  //    gemA_cluster0_wr[15:0] <= 0;
-  //    gemB_cluster0_wr[15:0] <= 0;
-  //    gem_copad0_wr[15:0]    <= 0;
-  //end
   wire [15:0]  gemA_bxn_counter_rd;
   wire [15:0]  gemB_bxn_counter_rd;
   assign gemA_bxn_counter_rd[15:0]    = gemA_bxn_counter[15:0];

@@ -1504,8 +1504,8 @@
   //assign alct0_pipe = (alct_ptr_is_0) ? alct0_tmb : alct0_srl;  // First  ALCT after alct pipe delay
   //assign alct1_pipe = (alct_ptr_is_0) ? alct1_tmb : alct1_srl;  // Second ALCT after alct pipe delay
   //assign alcte_pipe = (alct_ptr_is_0) ? alcte_tmb : alcte_srl;  // Second ALCT after alct pipe delay 
-  assign alct0_pipe = usefakealct ? alct0_fake_srl : ((alct_ptr_is_0) ? alct0_tmb : alct0_srl);  // First  ALCT after alct pipe delay
-  assign alct1_pipe = usefakealct ? alct1_fake_srl : ((alct_ptr_is_0) ? alct1_tmb : alct1_srl);  // Second ALCT after alct pipe delay
+  assign alct0_pipe = usefakealct ? (gem_alct_win_center==4'b0 ? alct0_fake : alct0_fake_srl) : ((alct_ptr_is_0) ? alct0_tmb : alct0_srl);  // First  ALCT after alct pipe delay
+  assign alct1_pipe = usefakealct ? (gem_alct_win_center==4'b0 ? alct1_fake : alct1_fake_srl) : ((alct_ptr_is_0) ? alct1_tmb : alct1_srl);  // Second ALCT after alct pipe delay
   assign alcte_pipe = usefakealct ?           2'b0 : ((alct_ptr_is_0) ? alcte_tmb : alcte_srl);  // Second ALCT after alct pipe delay 
 
   wire   alct0_pipe_vpf = alct0_pipe[0];
