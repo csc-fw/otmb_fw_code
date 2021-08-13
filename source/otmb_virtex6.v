@@ -4745,12 +4745,12 @@ wire [15:0] gemB_bxn_counter;
     //assign mez_tp[6] = (!set_sw[7] ? bpi_dsbl        :                          link_good[5]);
     //assign mez_tp[5] =   set_sw[8] ? alct_rxd_posneg : (!set_sw[7] ? bpi_rst  : link_good[4]);
     //assign mez_tp[4] = (!set_sw[7] ? bpi_dev         :                          link_good[3]);
-    assign mez_tp[9]  = keep_clct_run3_tp; //CLCT window for  CLCT-ALCT and CLCT-GEM
+    assign mez_tp[9]  = (alct_gemA_match_pos || alct_gemB_match_pos); //CLCT window for  CLCT-ALCT and CLCT-GEM
     assign mez_tp[8]  = gem_alct_window_hasgem_tp;//gem window for gem-ALCT
     assign mez_tp[7]  = alct0_vpf_tprt; // ALCT vpf signal
     //assign mez_tp[6]  = wr_push_xtmb; // CLCT vpf signal
     assign mez_tp[6]  = clct_window_tprt; // CLCT vpf signal after pipeline 
-    assign mez_tp[5]  = (tmb_trig_pulse && !tmb_trig_keep);
+    assign mez_tp[5]  = (clct_gemA_match_pos || clct_gemB_match_pos);
     assign mez_tp[4]  = gem_forclct_vpf_tp;//pulse width=2BX???? why????
     //assign mez_tp[5]  = (|gemA_csc_cluster_vpf) || (|gemB_csc_cluster_vpf);// gemA or gemB vpf signal
     //assign mez_tp[4]  = |copad_match; // gem copad vpf signal

@@ -1410,8 +1410,8 @@
   reg   [MXFRAME-1:0]  mpc1_frame1_vme = 0;
 
   
-  reg  [31:0]         gemcscmatch_cluster0_vme = 31'hFFFFFFFF;// gem cluster0 from gemcsc match
-  reg  [31:0]         gemcscmatch_cluster1_vme = 31'hFFFFFFFF;// gem cluster1 from gemcsc match
+  reg  [31:0]         gemcscmatch_cluster0_vme = 32'hFFFFFFFF;// gem cluster0 from gemcsc match
+  reg  [31:0]         gemcscmatch_cluster1_vme = 32'hFFFFFFFF;// gem cluster1 from gemcsc match
 
   reg   [7:0] mpc_frame_cnt  = 0;
   wire        mpc_frame_done;
@@ -1904,7 +1904,6 @@
   reg [15:0] gem_alct_tag_sr = 0;
   wire       gem_alct_tag_me;
   wire [3:0] gem_alct_tag_win;
-  //reg [15:0] gemA_alct_match_sr = 0;// record whether gem is used
 
   always @(posedge clock) begin
     if (reset_sr) begin            // Sych reset on resync or not power up
@@ -1921,21 +1920,26 @@
       end  // close while
   end  // close clock
   
- ////register shift, mark whether GEM was used for match for not, Tao 
- // always @(posedge clock) begin
- //   if (reset_sr) begin             // Sych reset on resync or not power up
- //     gemA_alct_match_sr  <= dynamic_zero; // Load a dynamic 0 on reset, mollify xst
- //   end
+  reg  [15:1] gem_alct_match_sre = 0;// record whether gem is used for GEM-ALCT match
+  wire [15:0] gem_alct_match_sr;
+  assign gem_alct_match_sr[0]    = gem_alct_match;
+  assign gem_alct_match_sr[15:1] = gem_alct_match_sre[15:1];
 
- //   i=0;                  // Loop over 15 window positions 0 to 14 
- //   while (i<=14) begin
- //     if (gemA_alct_match ==1 && gemA_alct_tag_win==i && gem_sr_include[i]) gemA_alct_match_sr[i+1] <= 1;
- //     else                  // Otherwise parallel shift all data left
- //       gemA_alct_match_sr[i+1] <= gemA_alct_match_sr[i];
- //     i=i+1;
- //   end  // close while
- // end  // close clock
-  //tag matched GEM
+  wire gem_usedforalct = |(gem_alct_match_sr & gem_sr_include);// if GEM pulse is used for GEM-ALCT match or not
+  
+ ////register shift, mark whether GEM was used for match for not, Tao 
+  //tag matched GEM and ALCT match for the gem-ALCT window 
+  always @(posedge clock) begin
+    if (reset_sr) begin             // Sych reset on resync or not power up
+      gem_alct_match_sr  <= dynamic_zero; // Load a dynamic 0 on reset, mollify xst
+    end
+      gem_alct_match_sre[1]  <= gem_alct_match_sr[0];
+      i=1;
+      while (i <= 14) begin
+          gem_alct_match_sre[i+1]  <= gem_alct_match_sre[i]; //Paralle shift register to left, if vpf=1, then it propagates to next BX
+          i = i+1;
+      end// close while
+  end  // close clock
 
 
 // Find highest priority window position that has a non-tagged gem
@@ -2030,8 +2034,9 @@
   wire [7:0] gemB_forclct, gemB_forclct_srl;
   wire [3:0] gem_final_delay_withalct = gem_alct_match_win_mux_pipe + match_gem_alct_delay + gem_alct_win_center;
   wire [3:0] gem_final_delay_noalct = match_gem_alct_delay + gem_alct_winclosing;
+  wire [3:0] gem_final_delay_wincenter = match_gem_alct_delay+gem_alct_win_center;
 
-  wire [3:0] gem_final_delay = alct_pulse ? gem_final_delay_withalct : gem_final_delay_noalct;
+  wire [3:0] gem_final_delay = alct_pulse ? gem_final_delay_withalct : (gem_usedforalct ? gem_final_delay_wincenter : gem_final_delay_noalct);
   //wire [3:0] gem_final_delay = gem_alct_noalct ? gem_final_delay_noalct : gem_final_delay_withalct;
 
 
@@ -2042,8 +2047,13 @@
 //------------------------------------------------------------------------------------------------------------------
 //ALCT-CLCT-GEM pulse match, namely match in timing
 //------------------------------------------------------------------------------------------------------------------
-  wire [7:0] gemA_forclct_pipe =  (gem_final_delay == 0) ? gemA_vpf : gemA_forclct_srl;
-  wire [7:0] gemB_forclct_pipe =  (gem_final_delay == 0) ? gemB_vpf : gemB_forclct_srl;
+  wire [7:0] gemA_forclct_dly =  (gem_final_delay == 0) ? gemA_vpf : gemA_forclct_srl;
+  wire [7:0] gemB_forclct_dly =  (gem_final_delay == 0) ? gemB_vpf : gemB_forclct_srl;
+
+  //when gem pulse is used for gem-alct match, then we only use it when alct_pulse is valid 
+  wire drop_gem_pusle = gem_usedforalct && !alct_pulse;
+  wire [7:0] gemA_forclct_pipe = drop_gem_pusle ? 8'b0 : gemA_forclct_dly;
+  wire [7:0] gemB_forclct_pipe = drop_gem_pusle ? 8'b0 : gemB_forclct_dly;
 
   wire gemA_pulse_forclct = |gemA_forclct_pipe;
   wire gemB_pulse_forclct = |gemB_forclct_pipe;
@@ -2902,7 +2912,7 @@
 // Output vpf test point signals for timing-in, removed FFs so internal scope will be in real-time
   reg  alct_vpf_tp    = 0;
   reg  clct_vpf_tp    = 0;
-  reg clct_window_tp = 0;
+  reg  clct_window_tp = 0;
 
   assign alct0_vpf_tprt  = alct0_pipe_vpf;  // Real time for internal scope
   assign alct1_vpf_tprt  = alct1_pipe_vpf;
