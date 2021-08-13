@@ -1062,8 +1062,8 @@
   output  [1:0]          mpc_accept_vme;   // MPC accept latched for VME
   output  [1:0]          mpc_reserved_vme; // MPC reserved latched for VME
 
-  output  [15:0]         gemcscmatch_cluster0_vme;// gem cluster0 from gemcsc match
-  output  [15:0]         gemcscmatch_cluster1_vme;// gem cluster1 from gemcsc match
+  output  [31:0]         gemcscmatch_cluster0_vme;// gem cluster0 from gemcsc match
+  output  [31:0]         gemcscmatch_cluster1_vme;// gem cluster1 from gemcsc match
 // MPC Injector
   input             mpc_inject;       // Start MPC test pattern injector, VME
   input             ttc_mpc_inject;   // Start MPC injector, TTC command
@@ -1410,8 +1410,8 @@
   reg   [MXFRAME-1:0]  mpc1_frame1_vme = 0;
 
   
-  reg  [15:0]         gemcscmatch_cluster0_vme = 16'hFFFF;// gem cluster0 from gemcsc match
-  reg  [15:0]         gemcscmatch_cluster1_vme = 16'hFFFF;// gem cluster1 from gemcsc match
+  reg  [31:0]         gemcscmatch_cluster0_vme = 31'hFFFFFFFF;// gem cluster0 from gemcsc match
+  reg  [31:0]         gemcscmatch_cluster1_vme = 31'hFFFFFFFF;// gem cluster1 from gemcsc match
 
   reg   [7:0] mpc_frame_cnt  = 0;
   wire        mpc_frame_done;
@@ -2348,6 +2348,8 @@
   .clct0_nhit (clct0_pipe[3:1]),
   .clct1_nhit (clct1_pipe[3:1]),
 
+  .gem_me1a_match_enable      (gem_me1a_match_enable),
+  .gem_me1b_match_enable      (gem_me1b_match_enable),
   .match_drop_lowqalct        (match_drop_lowqalct), // drop lowQ stub when no GEM      
   .me1a_match_drop_lowqclct   (me1a_match_drop_lowqclct), // drop lowQ stub when no GEM      
   .me1b_match_drop_lowqclct   (me1b_match_drop_lowqclct), // drop lowQ stub when no GEM      
@@ -2893,8 +2895,9 @@
 
   //wire [15:0] gemcscmatch_cluster0  = best_cluster0_vpf_ff ? {best_cluster0_cscxky_ff, best_cluster0_roll_ff, best_cluster0_icluster_ff} : 16'h0; 
   //wire [15:0] gemcscmatch_cluster1  = best_cluster1_vpf_ff ? {best_cluster1_cscxky_ff, best_cluster1_roll_ff, best_cluster1_icluster_ff} : 16'h0; 
-  wire [15:0] gemcscmatch_cluster0  = best_cluster0_vpf_ff ? {best_cluster0_angle_ff, best_cluster0_roll_ff, best_cluster0_icluster_ff} : 16'h0; 
-  wire [15:0] gemcscmatch_cluster1  = best_cluster1_vpf_ff ? {best_cluster1_angle_ff, best_cluster1_roll_ff, best_cluster1_icluster_ff} : 16'h0; 
+  //best_cluster0_cscxky_ff[9:2] halfstrip resolution
+  wire [31:0] gemcscmatch_cluster0  = best_cluster0_vpf_ff ? {best_cluster0_cscxky_ff[9:2], best_cluster0_pad_ff,best_cluster0_angle_ff, best_cluster0_roll_ff, best_cluster0_icluster_ff} : 32'h0; 
+  wire [31:0] gemcscmatch_cluster1  = best_cluster1_vpf_ff ? {best_cluster1_cscxky_ff[9:2], best_cluster1_pad_ff,best_cluster1_angle_ff, best_cluster1_roll_ff, best_cluster1_icluster_ff} : 32'h0; 
 
 // Output vpf test point signals for timing-in, removed FFs so internal scope will be in real-time
   reg  alct_vpf_tp    = 0;
@@ -3372,10 +3375,10 @@
   wire   trig_mpc_rtmb_dly = (mpc_tx_delay_is_0) ? trig_mpc      : trig_mpc_srl;
 
 //parallel delay clusters from GEMCSC match
-  wire  [15:0] gemcscmatch_cluster0_srl, gemcscmatch_cluster1_srl;
-  wire  [15:0] gemcscmatch_cluster0_dly, gemcscmatch_cluster1_dly;
-  srl16e_bbl #(16)      umcluster0  (.clock(clock),.ce(wsrlen),.adr(mpc_tx_delaym1),.d(gemcscmatch_cluster0),.q(gemcscmatch_cluster0_srl ));
-  srl16e_bbl #(16)      umcluster1  (.clock(clock),.ce(wsrlen),.adr(mpc_tx_delaym1),.d(gemcscmatch_cluster1),.q(gemcscmatch_cluster1_srl ));
+  wire  [31:0] gemcscmatch_cluster0_srl, gemcscmatch_cluster1_srl;
+  wire  [31:0] gemcscmatch_cluster0_dly, gemcscmatch_cluster1_dly;
+  srl16e_bbl #(32)      umcluster0  (.clock(clock),.ce(wsrlen),.adr(mpc_tx_delaym1),.d(gemcscmatch_cluster0),.q(gemcscmatch_cluster0_srl ));
+  srl16e_bbl #(32)      umcluster1  (.clock(clock),.ce(wsrlen),.adr(mpc_tx_delaym1),.d(gemcscmatch_cluster1),.q(gemcscmatch_cluster1_srl ));
   assign gemcscmatch_cluster0_dly = (mpc_tx_delay_is_0) ? gemcscmatch_cluster0 : gemcscmatch_cluster0_srl;
   assign gemcscmatch_cluster1_dly = (mpc_tx_delay_is_0) ? gemcscmatch_cluster1 : gemcscmatch_cluster1_srl;
 

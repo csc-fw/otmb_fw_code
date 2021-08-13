@@ -2294,12 +2294,12 @@ end
   //GEM clusters for GEM-CSC mathcing 
   wire [CLSTBITS-1:0] gemA_csc_cluster  [MXCLUSTER_CHAMBER-1:0];
   wire [CLSTBITS-1:0] gemB_csc_cluster  [MXCLUSTER_CHAMBER-1:0];
-  wire [2:0] gemA_csc_cluster_roll      [MXCLUSTER_CHAMBER-1:0];
-  wire [2:0] gemB_csc_cluster_roll      [MXCLUSTER_CHAMBER-1:0];
-  wire [7:0] gemA_csc_cluster_pad       [MXCLUSTER_CHAMBER-1:0];
-  wire [7:0] gemB_csc_cluster_pad       [MXCLUSTER_CHAMBER-1:0];
-  wire [2:0] gemA_csc_cluster_size      [MXCLUSTER_CHAMBER-1:0];
-  wire [2:0] gemB_csc_cluster_size      [MXCLUSTER_CHAMBER-1:0];
+  //wire [2:0] gemA_csc_cluster_roll      [MXCLUSTER_CHAMBER-1:0];
+  //wire [2:0] gemB_csc_cluster_roll      [MXCLUSTER_CHAMBER-1:0];
+  //wire [7:0] gemA_csc_cluster_pad       [MXCLUSTER_CHAMBER-1:0];
+  //wire [7:0] gemB_csc_cluster_pad       [MXCLUSTER_CHAMBER-1:0];
+  //wire [2:0] gemA_csc_cluster_size      [MXCLUSTER_CHAMBER-1:0];
+  //wire [2:0] gemB_csc_cluster_size      [MXCLUSTER_CHAMBER-1:0];
   wire [MXCLUSTER_CHAMBER-1:0]      gemA_csc_cluster_vpf;
   wire [MXCLUSTER_CHAMBER-1:0]      gemB_csc_cluster_vpf;
 
@@ -2338,6 +2338,7 @@ end
   wire [MXXKYB-1:0] gemA_csc_cluster_xky_mi [MXCLUSTER_CHAMBER-1:0]; // 
   wire [MXXKYB-1:0] gemB_csc_cluster_xky_mi [MXCLUSTER_CHAMBER-1:0]; // 
 
+  wire gemA_gemtocsc_dummy, gemB_gemtocsc_dummy;
 
   wire evenchamber = ~csc_id[0];//double check it counts from 0 or 1 in term of even and odd?????
 
@@ -2376,9 +2377,10 @@ end
 
         .csc_cluster0      (gemA_csc_cluster[iclst_csc]),  // Out, aligned gem cluster 
         .csc_cluster0_vpf  (gemA_csc_cluster_vpf[iclst_csc]),// Out, valid or not
-        .csc_cluster0_roll (gemA_csc_cluster_roll[iclst_csc]), // Out, 0-7 
-        .csc_cluster0_pad  (gemA_csc_cluster_pad[iclst_csc]), // Out from 0-191
-        .csc_cluster0_size (gemA_csc_cluster_size[iclst_csc]) // Out from 0-7, 0 means 1 gem pad
+        //.csc_cluster0_roll (gemA_csc_cluster_roll[iclst_csc]), // Out, 0-7 
+        //.csc_cluster0_pad  (gemA_csc_cluster_pad[iclst_csc]), // Out from 0-191
+        //.csc_cluster0_size (gemA_csc_cluster_size[iclst_csc]), // Out from 0-7, 0 means 1 gem pad
+        .cluster_to_cscdummy (gemA_gemtocsc_dummy)
 
       );
 
@@ -2409,9 +2411,10 @@ end
 
         .csc_cluster0      (gemB_csc_cluster[iclst_csc]),  
         .csc_cluster0_vpf  (gemB_csc_cluster_vpf[iclst_csc]),// valid or not
-        .csc_cluster0_roll (gemB_csc_cluster_roll[iclst_csc]), // 0-7 
-        .csc_cluster0_pad  (gemB_csc_cluster_pad[iclst_csc]), // from 0-191
-        .csc_cluster0_size (gemB_csc_cluster_size[iclst_csc]) // from 0-7, 0 means 1 gem pad
+        //.csc_cluster0_roll (gemB_csc_cluster_roll[iclst_csc]), // 0-7 
+        //.csc_cluster0_pad  (gemB_csc_cluster_pad[iclst_csc]), // from 0-191
+        //.csc_cluster0_size (gemB_csc_cluster_size[iclst_csc]), // from 0-7, 0 means 1 gem pad
+        .cluster_to_cscdummy (gemB_gemtocsc_dummy)
 
       );
 
@@ -4248,8 +4251,8 @@ wire [15:0] gemB_bxn_counter;
   wire  [1:0]      mpc_accept_vme;
   wire  [1:0]      mpc_reserved_vme;
 
-  wire  [15:0] gemcscmatch_cluster0_vme;
-  wire  [15:0] gemcscmatch_cluster1_vme;
+  wire  [31:0] gemcscmatch_cluster0_vme;
+  wire  [31:0] gemcscmatch_cluster1_vme;
 
   //GEMCSC match
 
@@ -4618,8 +4621,8 @@ wire [15:0] gemB_bxn_counter;
   .mpc_accept_vme   (mpc_accept_vme[1:0]),          // Out  MPC accept latched for VME
   .mpc_reserved_vme (mpc_reserved_vme[1:0]),        // Out  MPC reserved latched for VME
 
-  .gemcscmatch_cluster0_vme  (gemcscmatch_cluster0_vme[15:0]), // Out, 1st cluster for LCT0 from GEMCSC match
-  .gemcscmatch_cluster1_vme  (gemcscmatch_cluster1_vme[15:0]), // Out, 2nd cluster for LCT1 from GEMCSC match
+  .gemcscmatch_cluster0_vme  (gemcscmatch_cluster0_vme[31:0]), // Out, 1st cluster for LCT0 from GEMCSC match
+  .gemcscmatch_cluster1_vme  (gemcscmatch_cluster1_vme[31:0]), // Out, 2nd cluster for LCT1 from GEMCSC match
 
 // MPC Injector
   .mpc_inject       (mpc_inject),            // In  Start MPC test pattern injector, VME
@@ -5714,8 +5717,8 @@ wire [15:0] gemB_bxn_counter;
       .gemB_match_ignore_position     (gemB_match_ignore_position),             //out GEMCSC match, no position match
       .gemcsc_bend_enable          (gemcsc_bend_enable),         // out enable GEMCSC bending angle for match
 
-      .gemcscmatch_cluster0_vme  (gemcscmatch_cluster0_vme[15:0]), // in, 1st cluster for LCT0 from GEMCSC match
-      .gemcscmatch_cluster1_vme  (gemcscmatch_cluster1_vme[15:0]), // in, 2nd cluster for LCT1 from GEMCSC match
+      .gemcscmatch_cluster0_vme  (gemcscmatch_cluster0_vme[31:0]), // in, 1st cluster for LCT0 from GEMCSC match
+      .gemcscmatch_cluster1_vme  (gemcscmatch_cluster1_vme[31:0]), // in, 2nd cluster for LCT1 from GEMCSC match
 
       // RPC Ports: RAT Control                                                                                      
       .rpc_sync     (rpc_sync),     // Out  Sync mode

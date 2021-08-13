@@ -35,17 +35,11 @@ module cluster_to_cscwirehalfstrip_rom (
         output                    csc_cluster0_me1a,
         output     [13:0]         csc_cluster0,  
         output                    csc_cluster0_vpf,// valid or not
-        output      [2:0]         csc_cluster0_roll, // 0-7 
-        output      [7:0]         csc_cluster0_pad, // from 0-191
-        output      [2:0]         csc_cluster0_size // from 0-7, 0 means 1 gem pad
+        //output      [2:0]         csc_cluster0_roll, // 0-7 
+        //output      [7:0]         csc_cluster0_pad, // from 0-191
+        //output      [2:0]         csc_cluster0_size, // from 0-7, 0 means 1 gem pad
 
-
-	//input      [13:0]         cluster0,  // save block ram resources by doing 2 lookups from each RAM in parallel
-	//input      [13:0]         cluster1, 
-
-	//output [DATABITS-1:0] halfstrip0,
-	//output [DATABITS-1:0] halfstrip1
-       //output                    cluster0_cschs_vpf, // whether a CSC hs could be mapped from gem pad or not, 
+        output  cluster_to_cscdummy
 );
 
 parameter FALLING_EDGE = 0;
@@ -225,9 +219,9 @@ rom_roll_wg #(
 
 reg [13:0]    reg_cluster0;
 reg           reg_cluster0_vpf;// valid or not
-reg [2:0]     reg_cluster0_roll; // 0-7 
-reg [7:0]     reg_cluster0_pad; // from 0-191
-reg [2:0]     reg_cluster0_size; // from 0-7, 0 means 1 gem pad
+//reg [2:0]     reg_cluster0_roll; // 0-7 
+//reg [7:0]     reg_cluster0_pad; // from 0-191
+//reg [2:0]     reg_cluster0_size; // from 0-7, 0 means 1 gem pad
 reg           reg_cluster0_me1a;
 
 
@@ -238,9 +232,9 @@ always @(posedge logic_clock) begin
     //also add cluster_pad, roll, vpf here to align them in timing!!!
     reg_cluster0           <= cluster0;
     reg_cluster0_vpf       <= cluster0_vpf && gem_match_enable && (gem_me1b_match_enable || ((cluster0_roll== 3'd7) && gem_me1a_match_enable));
-    reg_cluster0_roll      <= cluster0_roll;
-    reg_cluster0_pad       <= cluster0_pad;
-    reg_cluster0_size      <= cluster0_size;
+    //reg_cluster0_roll      <= cluster0_roll;
+    //reg_cluster0_pad       <= cluster0_pad;
+    //reg_cluster0_size      <= cluster0_size;
     reg_cluster0_me1a      <= (cluster0_roll== 3'd7) && gem_me1a_match_enable;
 
 end
@@ -256,8 +250,8 @@ assign me1b_xky_real_lo = (me1b_xky_lo < me1b_xky_hi) ? me1b_xky_lo : me1b_xky_h
 assign me1b_xky_real_hi = (me1b_xky_lo > me1b_xky_hi) ? me1b_xky_lo : me1b_xky_hi;
 
 // adding matching window
-assign cluster0_cscwire_lo  = (wire_real_lo > gem_alct_deltawire) ? wire_real_lo-gem_alct_deltawire : 7'd0;
-assign cluster0_cscwire_hi  = (wire_real_hi + gem_alct_deltawire < MAXWIRE) ? wire_real_hi+gem_alct_deltawire : 7'd47;
+assign cluster0_cscwire_lo  = (wire_real_lo > gem_alct_deltawire)             ? (wire_real_lo-gem_alct_deltawire) : 7'd0;
+assign cluster0_cscwire_hi  = ((wire_real_hi + gem_alct_deltawire) < MAXWIRE) ? (wire_real_hi+gem_alct_deltawire) : 7'd47;
 assign cluster0_cscwire_mi = wire_real_lo[WIREBITS-1:1] + wire_real_hi[WIREBITS-1:1] + (wire_real_lo[0] | wire_real_hi[0]);
 
 wire [MXXKYB-1:0]  cluster0_me1axky_lo  = (me1a_xky_real_lo > (MINKEYHSME1A+gem_clct_deltaxky)) ? (me1a_xky_real_lo-gem_clct_deltaxky) : MINKEYHSME1A; 
@@ -278,10 +272,11 @@ assign cluster0_cscxky_mi = (csc_cluster0_me1a) ? cluster0_me1axky_mi : cluster0
 
 assign csc_cluster0       = reg_cluster0;
 assign csc_cluster0_vpf   = reg_cluster0_vpf;// valid or not
-assign csc_cluster0_roll  = reg_cluster0_roll; // 0-7 
-assign csc_cluster0_pad   = reg_cluster0_pad; // from 0-191
-assign csc_cluster0_size  = reg_cluster0_size; // from 0-7, 0 means 1 gem pad
+//assign csc_cluster0_roll  = reg_cluster0_roll; // 0-7 
+//assign csc_cluster0_pad   = reg_cluster0_pad; // from 0-191
+//assign csc_cluster0_size  = reg_cluster0_size; // from 0-7, 0 means 1 gem pad
 assign csc_cluster0_me1a  = reg_cluster0_me1a; // only roll7 is matchd to ME1a, 1 for ME1a, 0 for ME1b
 
+assign cluster_to_cscdummy = 1'b0;
 
 endmodule
