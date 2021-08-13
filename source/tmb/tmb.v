@@ -2896,8 +2896,8 @@
   //wire [15:0] gemcscmatch_cluster0  = best_cluster0_vpf_ff ? {best_cluster0_cscxky_ff, best_cluster0_roll_ff, best_cluster0_icluster_ff} : 16'h0; 
   //wire [15:0] gemcscmatch_cluster1  = best_cluster1_vpf_ff ? {best_cluster1_cscxky_ff, best_cluster1_roll_ff, best_cluster1_icluster_ff} : 16'h0; 
   //best_cluster0_cscxky_ff[9:2] halfstrip resolution
-  wire [31:0] gemcscmatch_cluster0  = best_cluster0_vpf_ff ? {best_cluster0_cscxky_ff[9:2], best_cluster0_pad_ff,best_cluster0_angle_ff, best_cluster0_roll_ff, best_cluster0_icluster_ff} : 32'h0; 
-  wire [31:0] gemcscmatch_cluster1  = best_cluster1_vpf_ff ? {best_cluster1_cscxky_ff[9:2], best_cluster1_pad_ff,best_cluster1_angle_ff, best_cluster1_roll_ff, best_cluster1_icluster_ff} : 32'h0; 
+  wire [31:0] gemcscmatch_cluster0  = best_cluster0_vpf_ff ? {best_cluster0_angle_ff[9:2], best_cluster0_pad_ff,best_cluster0_cscxky_ff, best_cluster0_roll_ff, best_cluster0_icluster_ff} : 32'h0; 
+  wire [31:0] gemcscmatch_cluster1  = best_cluster1_vpf_ff ? {best_cluster1_angle_ff[9:2], best_cluster1_pad_ff,best_cluster1_cscxky_ff, best_cluster1_roll_ff, best_cluster1_icluster_ff} : 32'h0; 
 
 // Output vpf test point signals for timing-in, removed FFs so internal scope will be in real-time
   reg  alct_vpf_tp    = 0;
