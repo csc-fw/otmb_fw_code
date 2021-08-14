@@ -2435,7 +2435,7 @@ end
       wire delayalct_gemA_match_test = alct_vpf_forgem && (|gemA_csc_cluster_vpf);
       wire delayalct_gemB_match_test = alct_vpf_forgem && (|gemB_csc_cluster_vpf);
 
-      wire gemA_vpf_test_srl, gemB_vpf_test_srl
+      wire gemA_vpf_test_srl, gemB_vpf_test_srl;
       srl16e_bit #(8, 256) usrlbitgema (.clock(clock),.adr(alct_delay_forgem),.d( |gemA_csc_cluster_vpf ),.q(gemA_vpf_test_srl);
       srl16e_bit #(8, 256) usrlbitgemb (.clock(clock),.adr(alct_delay_forgem),.d( |gemB_csc_cluster_vpf ),.q(gemB_vpf_test_srl);
 
