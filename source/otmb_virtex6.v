@@ -2428,7 +2428,7 @@ end
       wire [7:0] alct_delay_forgem = match_gem_alct_delay - 8'b1;
       wire alct_vpf_forgem_srl;
 
-      srl16e_bit #(8, 256) usrlbitalct (.clock(clock),.adr(alct_delay_forgem),.d(alct0_tmb[0]),.q(alct_vpf_forgem_srl);
+      srl16e_bit #(8, 256) usrlbitalct (.clock(clock),.adr(alct_delay_forgem),.d(alct0_tmb[0]),.q(alct_vpf_forgem_srl));
 
       wire alct_vpf_forgem = (alct_delay_forgem == 8'b0) ? alct0_tmb[0] : alct_vpf_forgem_srl;
 
@@ -2436,8 +2436,8 @@ end
       wire delayalct_gemB_match_test = alct_vpf_forgem && (|gemB_csc_cluster_vpf);
 
       wire gemA_vpf_test_srl, gemB_vpf_test_srl;
-      srl16e_bit #(8, 256) usrlbitgema (.clock(clock),.adr(alct_delay_forgem),.d( |gemA_csc_cluster_vpf ),.q(gemA_vpf_test_srl);
-      srl16e_bit #(8, 256) usrlbitgemb (.clock(clock),.adr(alct_delay_forgem),.d( |gemB_csc_cluster_vpf ),.q(gemB_vpf_test_srl);
+      srl16e_bit #(8, 256) usrlbitgema (.clock(clock),.adr(alct_delay_forgem),.d( |gemA_csc_cluster_vpf ),.q(gemA_vpf_test_srl));
+      srl16e_bit #(8, 256) usrlbitgemb (.clock(clock),.adr(alct_delay_forgem),.d( |gemB_csc_cluster_vpf ),.q(gemB_vpf_test_srl));
 
       wire gemA_vpf_foralct = (alct_delay_forgem == 8'b0) ? (|gemA_csc_cluster_vpf) : gemA_vpf_test_srl;
       wire gemB_vpf_foralct = (alct_delay_forgem == 8'b0) ? (|gemB_csc_cluster_vpf) : gemB_vpf_test_srl;
