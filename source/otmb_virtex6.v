@@ -2421,6 +2421,35 @@ end
   end
   endgenerate
 
+    //-------------------------------------------------------------------------------------------------------------------
+    // Delay ALCT signal to find ALCT-GEM match
+    //-------------------------------------------------------------------------------------------------------------------
+
+      wire [7:0] alct_delay_forgem = match_gem_alct_delay - 8'b1;
+      wire alct_vpf_forgem_srl;
+
+      srl16e_bit #(8, 256) usrlbitalct (.clock(clock),.adr(alct_delay_forgem),.d(alct0_tmb[0]),.q(alct_vpf_forgem_srl);
+
+      wire alct_vpf_forgem = (alct_delay_forgem == 8'b0) ? alct0_tmb[0] : alct_vpf_forgem_srl;
+
+      wire delayalct_gemA_match_test = alct_vpf_forgem && (|gemA_csc_cluster_vpf);
+      wire delayalct_gemB_match_test = alct_vpf_forgem && (|gemB_csc_cluster_vpf);
+
+      wire gemA_vpf_test_srl, gemB_vpf_test_srl
+      srl16e_bit #(8, 256) usrlbitgema (.clock(clock),.adr(alct_delay_forgem),.d( |gemA_csc_cluster_vpf ),.q(gemA_vpf_test_srl);
+      srl16e_bit #(8, 256) usrlbitgemb (.clock(clock),.adr(alct_delay_forgem),.d( |gemB_csc_cluster_vpf ),.q(gemB_vpf_test_srl);
+
+      wire gemA_vpf_foralct = (alct_delay_forgem == 8'b0) ? (|gemA_csc_cluster_vpf) : gemA_vpf_test_srl;
+      wire gemB_vpf_foralct = (alct_delay_forgem == 8'b0) ? (|gemB_csc_cluster_vpf) : gemB_vpf_test_srl;
+
+      wire alct_delaygemA_match_test = gemA_vpf_foralct && alct0_tmb[0];
+      wire alct_delaygemB_match_test = gemB_vpf_foralct && alct0_tmb[0];
+    //-------------------------------------------------------------------------------------------------------------------
+    // End of Delay ALCT signal to find ALCT-GEM match
+    //-------------------------------------------------------------------------------------------------------------------
+
+
+
 //-------------------------------------------------------------------------------------------------------------------
 // Pattern Finder declarations, common to ME1A+ME1B+ME234
 //-------------------------------------------------------------------------------------------------------------------
@@ -3515,6 +3544,10 @@ end
   .alctclctcopad_swapped     (alctclctcopad_swapped), // in, ALCT/CLCT swapped from ACLT+CLCT+copad match
   .alctclctgem_swapped       (alctclctgem_swapped),   // in, ALCT/CLCT swapped from ACLT+CLCT+gem match
   .clctcopad_swapped         (clctcopad_swapped),          // in, CLCT swapped from CLCT+copad match
+  .delayalct_gemA_match_test (delayalct_gemA_match_test), //In ALCT & GEM match for test
+  .delayalct_gemB_match_test (delayalct_gemB_match_test), //In ALCT & GEM match for test
+  .alct_delaygemA_match_test (alct_delaygemA_match_test), //In ALCT & GEM match for test
+  .alct_delaygemB_match_test (alct_delaygemB_match_test), //In ALCT & GEM match for test
 
   .run3_daq_df   (run3_daq_df),
 // Sequencer MPC Status

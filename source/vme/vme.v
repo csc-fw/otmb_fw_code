@@ -1716,6 +1716,7 @@
   parameter ADR_GEM_CNT_CTRL          = 10'h314;
   parameter ADR_GEM_CNT_RDATA         = 10'h316;
   parameter ADR_GEM_CSC_MATCH_WINDOW  = 10'h318;
+  //0x31a, 0x31c, 0x31e ???
   parameter ADR_GEM_INJ_CTRL          = 10'h320; // 800
   parameter ADR_GEM_INJ_DATA          = 10'h322;
   parameter ADR_GEM_COPAD_CTRL        = 10'h324; // copad matching 
