@@ -926,7 +926,8 @@
 // FF buffer clct_window index for fanout, points to 1st position window is closed 
   
   wire [3:0] clct_window;
-  assign clct_window = (algo2016_clct_to_alct) ? algo2016_window : clct_window_in;
+  //assign clct_window = (algo2016_clct_to_alct) ? algo2016_window : clct_window_in;
+  assign clct_window =  clct_window_in;
   
   reg [3:0] winclosing=0;
 
