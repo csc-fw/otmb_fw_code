@@ -8786,21 +8786,21 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 // Power-up defaults
   initial begin
     // "Old" algorithm switched ON by default:, Tao: test 
+    //algo2016_ctrl_wr[0]   = 1'b1;  // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
+    //algo2016_ctrl_wr[5:1] = 5'd15; // Constant size of the dead time zone
+    //algo2016_ctrl_wr[6]   = 1'b1;  // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
+    //algo2016_ctrl_wr[7]   = 1'b0;  // ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
+    //algo2016_ctrl_wr[8]   = 1'b1;  // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - similar to "old" behavior of CLCT-centric algorithm when ALCTs are droped from further usage
+    //algo2016_ctrl_wr[9]   = 1'b0;  // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
+    //algo2016_ctrl_wr[10]  = 1'b0;  // Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
+    // Algo2016 ON:    
     algo2016_ctrl_wr[0]   = 1'b1;  // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
     algo2016_ctrl_wr[5:1] = 5'd15; // Constant size of the dead time zone
     algo2016_ctrl_wr[6]   = 1'b1;  // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
-    algo2016_ctrl_wr[7]   = 1'b0;  // ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
-    algo2016_ctrl_wr[8]   = 1'b1;  // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - similar to "old" behavior of CLCT-centric algorithm when ALCTs are droped from further usage
-    algo2016_ctrl_wr[9]   = 1'b0;  // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
-    algo2016_ctrl_wr[10]  = 1'b0;  // Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
-    // Algo2016 ON:    
-//    algo2016_ctrl_wr[0]   = 1'b1;  // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
-//    algo2016_ctrl_wr[5:1] = 5'd15; // Constant size of the dead time zone
-//    algo2016_ctrl_wr[6]   = 1'b1;  // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
-//    algo2016_ctrl_wr[7]   = 1'b1;  // ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
-//    algo2016_ctrl_wr[8]   = 1'b0;  // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - similar to "old" behavior of CLCT-centric algorithm when ALCTs are droped from further usage
-//    algo2016_ctrl_wr[9]   = 1'b1;  // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
-//    algo2016_ctrl_wr[10]  = 1'b1;  // Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
+    algo2016_ctrl_wr[7]   = 1'b1;  // ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
+    algo2016_ctrl_wr[8]   = 1'b0;  // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - similar to "old" behavior of CLCT-centric algorithm when ALCTs are droped from further usage
+    algo2016_ctrl_wr[9]   = 1'b1;  // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
+    algo2016_ctrl_wr[10]  = 1'b1;  // Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
   end
   
   assign algo2016_use_dead_time_zone         = algo2016_ctrl_wr[0];   // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
@@ -8839,7 +8839,7 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   initial begin
     run3_format_ctrl_wr[0] = 1'b0;
     run3_format_ctrl_wr[1] = 1'b0; // default, Run3 trigger format upgrade is off
-    run3_format_ctrl_wr[2] = 1'b1; // default, Run3 daq format upgrade is ON
+    run3_format_ctrl_wr[2] = 1'b0; // default, Run3 daq format upgrade is ON
     run3_format_ctrl_wr[15:3] = 13'b0; // NOT used
     //cclut_format_ctrl_wr[1] = 0; //CLCT pattern sorting, 0= use {pat, nhits}, 1={new quality}
     //cclut_format_ctrl_wr[2] = 0; //LCT data format control, 0 = use Run2, 1= use Run3 with GEM-CSC+CCLUT
@@ -9059,7 +9059,7 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 //------------------------------------------------------------------------------------------------------------------
   initial begin
       gem_copad_ctrl_wr[0]      = 1'b1;  //RW,match copad within neighborRoll or not
-      gem_copad_ctrl_wr[ 2:1]   = 2'b0;  //RW, delta roll, NOT used now
+      gem_copad_ctrl_wr[ 2:1]   = 2'b1;  //RW, delta roll, NOT used now
       gem_copad_ctrl_wr[3]      = 1'b1;  //RW, do delta pad match
       gem_copad_ctrl_wr[ 7:4]   = 4'b10; //RW, delta pad, default value = 2 
       gem_copad_ctrl_wr[15:8]   = 8'b0;  // not used
@@ -9103,8 +9103,8 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 //------------------------------------------------------------------------------------------------------------------
   initial begin
       gemA_trg_ctrl_wr[ 3: 0]      = 4'b0;  //RW, NOT USED!! 
-      gemA_trg_ctrl_wr[ 7: 4]      = 4'd3;  //RW, gemA and ALCT match window
-      gemA_trg_ctrl_wr[11: 8]      = 4'd5;  //RW, gemA and CLCT match window
+      gemA_trg_ctrl_wr[ 7: 4]      = 4'd3;  //RW, gemA and ALCT match window, should be half ALCT-CLCT window size,like 3 if ALCT-CLCT win=5, 4 if ALCT_CLCT win=7
+      gemA_trg_ctrl_wr[11: 8]      = 4'd5;  //RW, gemA and CLCT match window, not used now. use the same ALCT-CLCT window size
       gemA_trg_ctrl_wr[   12]      = 1'b0;  //Ronly, gemA and ALCT match
       gemA_trg_ctrl_wr[   13]      = 1'b0;  //R only, gemA and CLCT match 
       gemA_trg_ctrl_wr[15:14]      = 2'b11;  //RW, gemA two fibers enabled or not, for triggering
@@ -9126,7 +9126,7 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 // GEMA_TRG_CTRL = 0x32a GEMB trigger match control control
 //------------------------------------------------------------------------------------------------------------------
   initial begin
-      gemB_trg_ctrl_wr[ 7: 0]      = 8'b0;  //RW,gem and ALCT match trigger delay
+      gemB_trg_ctrl_wr[ 7: 0]      = 8'd1;  //RW,gem and ALCT match trigger delay, default 1BX delay
       gemB_trg_ctrl_wr[11: 8]      = 4'd5;  //RW,gemB and CLCT match window
       gemB_trg_ctrl_wr[   12]      = 1'b0;  //R,gemB and ALCT match
       gemB_trg_ctrl_wr[   13]      = 1'b0;  //R, gemB and CLCT match 
@@ -9149,7 +9149,7 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   initial begin
   gem_csc_match_ctrl_wr[ 0]   = 1'b1; // RW GEMCSC match, enabled in ME1a or not
   gem_csc_match_ctrl_wr[ 1]   = 1'b1; // RW GEMCSC match, enabled in ME1b or not
-  gem_csc_match_ctrl_wr[ 2]   = 1'b1; // RW GEMCSC match, match without gem is allowed in me1a
+  gem_csc_match_ctrl_wr[ 2]   = 1'b0; // RW GEMCSC match, match without gem is allowed in me1a
   gem_csc_match_ctrl_wr[ 3]   = 1'b0; // RW GEMCSC match, match without gem is allowed in me1b
   gem_csc_match_ctrl_wr[ 4]   = 1'b0; // RW GEMCSC match, match without alct is allowed in me1a
   gem_csc_match_ctrl_wr[ 5]   = 1'b1; // RW GEMCSC match, drop low Q ALCT/CLCT for matching without GEM 
@@ -9159,8 +9159,8 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   gem_csc_match_ctrl_wr[ 9]   = 1'b1; // RW GEMCSC match, not used  
   gem_csc_match_ctrl_wr[10]   = 1'b0; // RW GEMCSC match, allow ALCT+copad
   gem_csc_match_ctrl_wr[11]   = 1'b0; // RW GEMCSC match, allow CLCT+copad
-  gem_csc_match_ctrl_wr[12]   = 1'b0; // RW GEMCSC match, enable GEMA for GEMCSC match without position match
-  gem_csc_match_ctrl_wr[13]   = 1'b0; // RW GEMCSC match, enable GEMA for GEMCSC match without position match
+  gem_csc_match_ctrl_wr[12]   = 1'b1; // RW GEMCSC match, enable GEMA for GEMCSC match without position match
+  gem_csc_match_ctrl_wr[13]   = 1'b1; // RW GEMCSC match, enable GEMA for GEMCSC match without position match
   gem_csc_match_ctrl_wr[14]   = 1'b1; // RW GEMCSC bending angle enable 
   gem_csc_match_ctrl_wr[15]   = 1'b1; // NOT used yet
 
