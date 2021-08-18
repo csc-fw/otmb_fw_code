@@ -2243,8 +2243,7 @@
 // GEM-ALCT-CLCT position match part
 //------------------------------------------------------------------------------------------------------------------
 
-  wire gemcsc_match_enable = gem_me1a_match_enable || gem_me1b_match_enable;
-  //wire gemcsc_match_enable = gemA_fiber_enable || gemB_fiber_enable;
+  wire gemcsc_match_enable = (gem_me1a_match_enable || gem_me1b_match_enable) && (|(gemA_fiber_enable | gemB_fiber_enable));
 
   //wire [2:0] alct0_clct0_copad_best_icluster;
   //wire [9:0] alct0_clct0_copad_best_angle;
@@ -2772,7 +2771,7 @@
   alct1_real <= (swapalct_final_pos ? alct0_pipe : alct1_pipe);
   end
 
-
+  //latched position match results, aligned in time with LCT construction 
   reg copyalct0_foralct1_pos_r, copyclct0_forclct1_pos_r;
   reg alct0fromcopad_run3_r, alct1fromcopad_run3_r, clct0fromcopad_run3_r, clct1fromcopad_run3_r;
   reg [6:0] alct0wg_fromcopad_r, alct1wg_fromcopad_r;
@@ -2913,9 +2912,12 @@
 
   //wire [15:0] gemcscmatch_cluster0  = best_cluster0_vpf_ff ? {best_cluster0_cscxky_ff, best_cluster0_roll_ff, best_cluster0_icluster_ff} : 16'h0; 
   //wire [15:0] gemcscmatch_cluster1  = best_cluster1_vpf_ff ? {best_cluster1_cscxky_ff, best_cluster1_roll_ff, best_cluster1_icluster_ff} : 16'h0; 
-  //best_cluster0_cscxky_ff[9:2] halfstrip resolution
-  wire [31:0] gemcscmatch_cluster0  = best_cluster0_vpf_ff ? {best_cluster0_angle_ff[9:2], best_cluster0_pad_ff,best_cluster0_cscxky_ff, best_cluster0_roll_ff, best_cluster0_icluster_ff} : 32'hFFFFFFFF; 
-  wire [31:0] gemcscmatch_cluster1  = best_cluster1_vpf_ff ? {best_cluster1_angle_ff[9:2], best_cluster1_pad_ff,best_cluster1_cscxky_ff, best_cluster1_roll_ff, best_cluster1_icluster_ff} : 32'hFFFFFFFF; 
+
+  //for csc alone, Bend direction, same as pid lsb. and for gemcsc, bend=1 if cscxky>gem_cscxky????
+  wire       best_cluster0_bend = clct0_xky > best_cluster0_cscxky_ff;
+  wire       best_cluster1_bend = clct1_xky > best_cluster1_cscxky_ff;
+  wire [31:0] gemcscmatch_cluster0  = best_cluster0_vpf_ff ? {best_cluster0_bend, best_cluster0_angle_ff[6:0], best_cluster0_pad_ff,best_cluster0_cscxky_ff, best_cluster0_roll_ff, best_cluster0_icluster_ff} : 32'hFFFFFFFF; 
+  wire [31:0] gemcscmatch_cluster1  = best_cluster1_vpf_ff ? {best_cluster1_bend, best_cluster1_angle_ff[6:0], best_cluster1_pad_ff,best_cluster1_cscxky_ff, best_cluster1_roll_ff, best_cluster1_icluster_ff} : 32'hFFFFFFFF; 
 
 // Output vpf test point signals for timing-in, removed FFs so internal scope will be in real-time
   reg  alct_vpf_tp    = 0;
@@ -3136,7 +3138,7 @@
         .alct_clct_match      (alct0_clct0_nogem_match_found_pos), 
         .clct_copad_match     (clct0_copad_match_good), 
         .alct_copad_match     (alct0_copad_match_good),  
-        .gemcsc_bend_enable   (gemcsc_bend_enable),
+        .gemcsc_bend_enable   (gemcsc_bend_enable && gemcsc_match_enable),
         .Q                    (lct0_qlt_run3_pipe[2:0])
     );
 
@@ -3147,7 +3149,7 @@
         .alct_clct_match      (alct1_clct1_nogem_match_found_pos || copyalct0_foralct1_pos || copyclct0_forclct1_pos), //special case: alct or clct is duplicated and by default use them for alct+clct match
         .clct_copad_match     (clct1_copad_match_good), 
         .alct_copad_match     (alct1_copad_match_good),  
-        .gemcsc_bend_enable   (gemcsc_bend_enable),
+        .gemcsc_bend_enable   (gemcsc_bend_enable && gemcsc_match_enable),
         .Q                    (lct1_qlt_run3_pipe[2:0])
     );
 
@@ -3241,6 +3243,7 @@
   //wire [4:0] clct0_bnd_run3 =  alct0fromcopad_run3 ? 4'b0 : (gemcsc_bend_enable ? gemcsc_bnd0[4:0] : clct0_bnd[4:0]);    
   //wire [4:0] clct1_bnd_run3 =  alct1fromcopad_run3 ? 4'b0 : (gemcsc_bend_enable ? gemcsc_bnd1[4:0] : clct1_bnd[4:0]);    
   //should we use bending direction also from GEM-CSC???
+  //gemcsc_bend_enable && gemcsc_match_enable
   wire [4:0] clct0_bnd_run3 = clct0_bnd[4:0];  
   wire [4:0] clct1_bnd_run3 = clct1_bnd[4:0];  
 
