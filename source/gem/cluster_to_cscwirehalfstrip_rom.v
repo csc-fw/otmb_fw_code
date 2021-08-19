@@ -42,7 +42,7 @@ module cluster_to_cscwirehalfstrip_rom (
         output  cluster_to_cscdummy
 );
 
-parameter FALLING_EDGE = 0;
+//parameter FALLING_EDGE = 0;
 
 parameter MXCFEB       = 7;
 
@@ -90,12 +90,13 @@ wire [MXXKYB-1:0] din1 = 0;
 wire [WIREBITS-1:0] din2 = 0;
 
 wire logic_clock;
-generate
-if (FALLING_EDGE)
-  assign logic_clock = ~clock;
-else
-  assign logic_clock = clock;
-endgenerate
+//generate
+//if (FALLING_EDGE)
+//  assign logic_clock = ~clock;
+//else
+//  assign logic_clock = clock;
+//endgenerate
+assign logic_clock = clock;
 
 //ME1a and ME1b seperation is at Eta2.1
 wire [7:0] cluster0_pad_lo;
