@@ -1063,15 +1063,15 @@ module  alct_clct_gem_matching(
   end
 
 
-  wire alct0_clct0_gemA_match_any  = alct0_clct0_gemA_match_r;
-  wire alct0_clct1_gemA_match_any  = alct0_clct1_gemA_match_r;
-  wire alct1_clct0_gemA_match_any  = alct1_clct0_gemA_match_r;
-  wire alct1_clct1_gemA_match_any  = alct1_clct1_gemA_match_r;
+  wire alct0_clct0_gemA_match_any  = alct0_clct0_gemA_match_any_r;
+  wire alct0_clct1_gemA_match_any  = alct0_clct1_gemA_match_any_r;
+  wire alct1_clct0_gemA_match_any  = alct1_clct0_gemA_match_any_r;
+  wire alct1_clct1_gemA_match_any  = alct1_clct1_gemA_match_any_r;
 
-  wire alct0_clct0_gemB_match_any  = alct0_clct0_gemB_match_r;
-  wire alct0_clct1_gemB_match_any  = alct0_clct1_gemB_match_r;
-  wire alct1_clct0_gemB_match_any  = alct1_clct0_gemB_match_r;
-  wire alct1_clct1_gemB_match_any  = alct1_clct1_gemB_match_r;
+  wire alct0_clct0_gemB_match_any  = alct0_clct0_gemB_match_any_r;
+  wire alct0_clct1_gemB_match_any  = alct0_clct1_gemB_match_any_r;
+  wire alct1_clct0_gemB_match_any  = alct1_clct0_gemB_match_any_r;
+  wire alct1_clct1_gemB_match_any  = alct1_clct1_gemB_match_any_r;
 
   assign alct_clct_gemA_match      = alct0_clct0_gemA_match_any || alct0_clct1_gemA_match_any || alct1_clct0_gemA_match_any || alct1_clct1_gemA_match_any;
   assign alct_clct_gemB_match      = alct0_clct0_gemB_match_any || alct0_clct1_gemB_match_any || alct1_clct0_gemB_match_any || alct1_clct1_gemB_match_any;
@@ -1384,8 +1384,8 @@ module  alct_clct_gem_matching(
       clct0_copad_match_ok_any_r <= |clct0_copad_match_ok;
       clct1_copad_match_ok_any_r <= |clct1_copad_match_ok;
   end
-  wire clct0_copad_match_any =  clct0_copad_match_ok_r  && !drop_lowqclct0_r;
-  wire clct1_copad_match_any =  clct1_copad_match_ok_r  && !drop_lowqclct1_r;
+  wire clct0_copad_match_any =  clct0_copad_match_ok_any_r  && !drop_lowqclct0_r;
+  wire clct1_copad_match_any =  clct1_copad_match_ok_any_r  && !drop_lowqclct1_r;
   assign clct0_copad_match_found  = !alct0_vpf && (clct0_copad_match_any || clct1_copad_match_any);
   assign clct1_copad_match_found  = !alct1_vpf && ((swapclct_copad_match || swapclct_gem_match) ? clct0_copad_match_any : clct1_copad_match_any);
   //only case to swap clct0 and clct1 here: both LCTs built from CLCT+copad
