@@ -2854,8 +2854,8 @@
   generate
   for (k=0; k< MXCLUSTER_CHAMBER; k=k+1) begin: gemr
      always @(posedge clock) begin
-          gemA_cluster_pipe_r[k]           <= gemA_cluster_pipe;
-          gemB_cluster_pipe_r[k]           <= gemB_cluster_pipe;
+          gemA_cluster_pipe_r[k]           <= gemA_cluster_pipe[k];
+          gemB_cluster_pipe_r[k]           <= gemB_cluster_pipe[k];
           gemA_cluster_cscxky_mi_pipe_r[k] <= gemA_cluster_cscxky_mi_pipe[k];
           gemB_cluster_cscxky_mi_pipe_r[k] <= gemB_cluster_cscxky_mi_pipe[k];
       end
