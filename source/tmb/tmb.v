@@ -2823,8 +2823,8 @@
   //alct1_real <= (swapalct_final_pos ? alct0_pipe : alct1_pipe);
   end
 
-  assign alct0_real <= swapalct_final_pos ? alct1_real_r : alct0_real_r;
-  assign alct1_real <= swapalct_final_pos ? alct0_real_r : alct1_real_r;
+  assign alct0_real = swapalct_final_pos ? alct1_real_r : alct0_real_r;
+  assign alct1_real = swapalct_final_pos ? alct0_real_r : alct1_real_r;
   //Position matching already had one BX latency
   ////latched position match results, aligned in time with LCT construction 
   //reg copyalct0_foralct1_pos_r, copyclct0_forclct1_pos_r;
@@ -2851,17 +2851,17 @@
   reg [CLSTBITS-1:0] gemB_cluster_pipe_r       [MXCLUSTER_CHAMBER-1:0];
   reg [MXXKYB-1:0]   gemA_cluster_cscxky_mi_pipe_r [MXCLUSTER_CHAMBER-1:0]; // 
   reg [MXXKYB-1:0]   gemB_cluster_cscxky_mi_pipe_r [MXCLUSTER_CHAMBER-1:0]; // 
-  always @(posedge clock) begin
-      generate
-      for (k=0; k< MXCLUSTER_CHAMBER; k=k+1) begin: gemr
+  generate
+  for (k=0; k< MXCLUSTER_CHAMBER; k=k+1) begin: gemr
+     always @(posedge clock) begin
           gemA_cluster_pipe_r[k]           <= gemA_cluster_pipe;
           gemB_cluster_pipe_r[k]           <= gemB_cluster_pipe;
           gemA_cluster_cscxky_mi_pipe_r[k] <= gemA_cluster_cscxky_mi_pipe[k];
           gemB_cluster_cscxky_mi_pipe_r[k] <= gemB_cluster_cscxky_mi_pipe[k];
       end
-      endgenerate
 
   end
+  endgenerate
 
   //selected best clsuters from GEMCSC match
   reg [ 2:0] best_cluster0_icluster_ff   = 3'b0;
