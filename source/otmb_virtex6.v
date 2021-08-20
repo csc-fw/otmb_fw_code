@@ -2076,7 +2076,7 @@
   wire [7:0]  copad_match;
   wire [7:0]  gem_match_upper;
   wire [7:0]  gem_match_lower;
-  wire        gem_any_match;
+  wire        gem_any_match;//any copad
   wire [23:0] gemcopad_active_feb_list;
   reg  [CLSTBITS -1 :0] gem_copad_reg  [MXCLUSTER_CHAMBER-1:0];
   wire [CLSTBITS -1 :0] gem_copad      [MXCLUSTER_CHAMBER-1:0];

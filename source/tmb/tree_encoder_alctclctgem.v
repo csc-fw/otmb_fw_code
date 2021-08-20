@@ -3,6 +3,7 @@
 // sort CLCT-gem bending angle, pick the small one 
 // should add ALCT-CLCT-GEM match
 module  tree_encoder_alctclctgem(
+  input clock,
   input [9:0] win_pri_0 , // bending angle in gem-clct match
   input [9:0] win_pri_1 ,
   input [9:0] win_pri_2 ,
@@ -45,7 +46,8 @@ module  tree_encoder_alctclctgem(
 
   //
   //Line 53: Signal <gem_xky_s1> missing in the sensitivity list is added for synthesis purposes. HDL and post-synthesis simulations may differ as a result.
-  always @(pri_s1[0] or win_s1[0] or gem_xky_s1[0]) begin
+  //always @(pri_s1[0] or win_s1[0] or gem_xky_s1[0]) begin
+  always @(posedge clock) begin
   if      ((pri_s1[3] < pri_s1[2]) &&
       (pri_s1[3] < pri_s1[1]) &&
       (pri_s1[3] < pri_s1[0]))

@@ -1820,8 +1820,10 @@
   //first delay GEM signal by match_gem_alct_delay to do GEM-ALCT match
   //Attention:  Only 4 bits delay is used for now!!!!
 
-  wire [MXCLUSTER_CHAMBER-1:0]  gemA_pipe_foralct, gemA_foralct_srl;
-  wire [MXCLUSTER_CHAMBER-1:0]  gemB_pipe_foralct, gemB_foralct_srl;
+  wire gem_vpf = (|gemA_vpf) || (|gemB_vpf);
+  wire gem_foralct_srl;
+  //wire [MXCLUSTER_CHAMBER-1:0]  gemA_pipe_foralct, gemA_foralct_srl;
+  //wire [MXCLUSTER_CHAMBER-1:0]  gemB_pipe_foralct, gemB_foralct_srl;
 
   reg  [3:0] gem_srl_adr = 0;
 
@@ -1829,20 +1831,22 @@
   gem_srl_adr <= match_gem_alct_delay-1'b1;
   end
 
-  srl16e_bbl #(MXCLUSTER_CHAMBER) ugemA (.clock(clock),.ce(1'b1),.adr(gem_srl_adr),.d(gemA_vpf[MXCLUSTER_CHAMBER-1:0]),.q(gemA_foralct_srl[MXCLUSTER_CHAMBER-1:0])); 
-  srl16e_bbl #(MXCLUSTER_CHAMBER) ugemB (.clock(clock),.ce(1'b1),.adr(gem_srl_adr),.d(gemB_vpf[MXCLUSTER_CHAMBER-1:0]),.q(gemB_foralct_srl[MXCLUSTER_CHAMBER-1:0]));
+  //srl16e_bbl #(MXCLUSTER_CHAMBER) ugemA (.clock(clock),.ce(1'b1),.adr(gem_srl_adr),.d(gemA_vpf[MXCLUSTER_CHAMBER-1:0]),.q(gemA_foralct_srl[MXCLUSTER_CHAMBER-1:0])); 
+  //srl16e_bbl #(MXCLUSTER_CHAMBER) ugemB (.clock(clock),.ce(1'b1),.adr(gem_srl_adr),.d(gemB_vpf[MXCLUSTER_CHAMBER-1:0]),.q(gemB_foralct_srl[MXCLUSTER_CHAMBER-1:0]));
+  srl16e_bbl #(1) ugemalct (.clock(clock),.ce(1'b1),.adr(gem_srl_adr),.d(gem_vpf), .q(gem_foralct_srl));
 
   wire gem_ptr_is_0 = (match_gem_alct_delay == 0);               // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
 
-  assign gemA_pipe_foralct = (gem_ptr_is_0) ? gemA_vpf : gemA_foralct_srl;  // First  GEM after pipe delay
-  assign gemB_pipe_foralct = (gem_ptr_is_0) ? gemB_vpf : gemB_foralct_srl;  // Second GEM after pipe delay
+  //assign gemA_pipe_foralct = (gem_ptr_is_0) ? gemA_vpf : gemA_foralct_srl;  // First  GEM after pipe delay
+  //assign gemB_pipe_foralct = (gem_ptr_is_0) ? gemB_vpf : gemB_foralct_srl;  // Second GEM after pipe delay
   
 
-  wire gemA_pulse_foralct = (|gemA_pipe_foralct);
-  wire gemB_pulse_foralct = (|gemB_pipe_foralct);
+  //wire gemA_pulse_foralct = (|gemA_pipe_foralct);
+  //wire gemB_pulse_foralct = (|gemB_pipe_foralct);
 
   //wire gem_pulse = (|gemA_pipe_foralct || |gemB_pipe_foralct);
-  wire gem_pulse_foralct = (|gemA_pipe_foralct) || (|gemB_pipe_foralct);
+  //wire gem_pulse_foralct = (|gemA_pipe_foralct) || (|gemB_pipe_foralct);
+  wire gem_pulse_foralct = (gem_ptr_is_0) ?  gem_vpf : gem_foralct_srl;
   assign gem_foralct_vpf_tp = gem_pulse_foralct; 
 
   //---------------------------------------------------------------------
@@ -2124,7 +2128,7 @@
   wire clct_keep_ro_run3 = (clct_match && tmb_allow_match_ro) || (clct_noalct &&  tmb_allow_clct_ro && !clct_lost_run3 && !clct_used_run3) || clct_copad_pulse_match;
   wire alct_keep_ro_run3 = (clct_match && tmb_allow_match_ro) || (alct_noclct &&  tmb_allow_alct_ro) || alct_copad_pulse_match;
 
-  wire clct_discard_run3 = (clct_match && !tmb_allow_match) || (clct_noalct && !tmb_allow_clct && !clct0_copad_match_good) || clct_lost_run3 || clct_used_run3;
+  wire clct_discard_run3 = (clct_match && !tmb_allow_match) || (clct_noalct && !tmb_allow_clct && !clct_copad_pulse_match) || clct_lost_run3 || clct_used_run3;
   wire alct_discard_run3 =  alct_pulse && !alct_keep_run3;
 
   wire clct_kept_run3 = (clct_keep_run3 || clct_keep_ro_run3);
@@ -2161,7 +2165,7 @@
   wire [WIREBITS-1:0] gemA_cluster_cscwire_hi_srl[MXCLUSTER_CHAMBER-1:0];
   wire [WIREBITS-1:0] gemB_cluster_cscwire_hi_srl[MXCLUSTER_CHAMBER-1:0];
   wire [WIREBITS-1:0] gemA_cluster_cscwire_mi_srl[MXCLUSTER_CHAMBER-1:0];
-  wire [WIREBITS-1:0] gemB_cluster_cscwire_mi_srl[MXCLUSTER_CHAMBER-1:0];
+  //wire [WIREBITS-1:0] gemB_cluster_cscwire_mi_srl[MXCLUSTER_CHAMBER-1:0];
   wire [MXXKYB-1:0]   gemA_cluster_cscxky_lo_srl [MXCLUSTER_CHAMBER-1:0]; // 
   wire [MXXKYB-1:0]   gemB_cluster_cscxky_lo_srl [MXCLUSTER_CHAMBER-1:0]; // 
   wire [MXXKYB-1:0]   gemA_cluster_cscxky_hi_srl [MXCLUSTER_CHAMBER-1:0]; // 
@@ -2197,7 +2201,7 @@
       srl16e_bbl #(MXXKYB)   ugemAxkyhi   (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemA_cluster_cscxky_hi[k]), .q(gemA_cluster_cscxky_hi_srl[k]));
       srl16e_bbl #(CLSTBITS) ugemBcluster (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_cluster[k]),           .q(gemB_cluster_srl[k]));
       srl16e_bbl #(WIREBITS) ugemBwirelo  (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_cluster_cscwire_lo[k]),.q(gemB_cluster_cscwire_lo_srl[k]));
-      srl16e_bbl #(WIREBITS) ugemBwiremi  (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_cluster_cscwire_mi[k]),.q(gemB_cluster_cscwire_mi_srl[k]));
+      //srl16e_bbl #(WIREBITS) ugemBwiremi  (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_cluster_cscwire_mi[k]),.q(gemB_cluster_cscwire_mi_srl[k]));
       srl16e_bbl #(WIREBITS) ugemBwirehi  (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_cluster_cscwire_hi[k]),.q(gemB_cluster_cscwire_hi_srl[k]));
       srl16e_bbl #(MXXKYB)   ugemBxkylo   (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_cluster_cscxky_lo[k]), .q(gemB_cluster_cscxky_lo_srl[k]));
       srl16e_bbl #(MXXKYB)   ugemBxkymi   (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_cluster_cscxky_mi[k]), .q(gemB_cluster_cscxky_mi_srl[k]));
@@ -2214,7 +2218,7 @@
       assign gemA_cluster_cscxky_hi_pipe[k]  = (gem_final_delay == 0) ? gemA_cluster_cscxky_hi[k]  : gemA_cluster_cscxky_hi_srl[k];
       assign gemB_cluster_pipe[k]            = (gem_final_delay == 0) ? gemB_cluster[k]        : gemB_cluster_srl[k];
       assign gemB_cluster_cscwire_lo_pipe[k] = (gem_final_delay == 0) ? gemB_cluster_cscwire_lo[k] : gemB_cluster_cscwire_lo_srl[k];
-      assign gemB_cluster_cscwire_mi_pipe[k] = (gem_final_delay == 0) ? gemB_cluster_cscwire_mi[k] : gemB_cluster_cscwire_mi_srl[k];
+      //assign gemB_cluster_cscwire_mi_pipe[k] = (gem_final_delay == 0) ? gemB_cluster_cscwire_mi[k] : gemB_cluster_cscwire_mi_srl[k];
       assign gemB_cluster_cscwire_hi_pipe[k] = (gem_final_delay == 0) ? gemB_cluster_cscwire_hi[k] : gemB_cluster_cscwire_hi_srl[k];
       assign gemB_cluster_cscxky_lo_pipe[k]  = (gem_final_delay == 0) ? gemB_cluster_cscxky_lo[k]  : gemB_cluster_cscxky_lo_srl[k];
       assign gemB_cluster_cscxky_mi_pipe[k]  = (gem_final_delay == 0) ? gemB_cluster_cscxky_mi[k]  : gemB_cluster_cscxky_mi_srl[k];
@@ -2242,6 +2246,7 @@
   
 //------------------------------------------------------------------------------------------------------------------
 // GEM-ALCT-CLCT position match part
+// 1BX latency. results is 1Bx later
 //------------------------------------------------------------------------------------------------------------------
 
   wire gemcsc_match_enable = (gem_me1a_match_enable || gem_me1b_match_enable) && (|(gemA_fiber_enable | gemB_fiber_enable));
@@ -2348,6 +2353,8 @@
 
   alct_clct_gem_matching ualct_clct_gem_matching(
     
+  .clock        (clock),
+
   .alct0_vpf    (alct0_pipe_vpf),
   .alct1_vpf    (alct1_pipe_vpf),
 
@@ -2370,10 +2377,10 @@
   .match_drop_lowqalct        (match_drop_lowqalct), // drop lowQ stub when no GEM      
   .me1a_match_drop_lowqclct   (me1a_match_drop_lowqclct), // drop lowQ stub when no GEM      
   .me1b_match_drop_lowqclct   (me1b_match_drop_lowqclct), // drop lowQ stub when no GEM      
-  .gemA_match_ignore_position(gemA_match_ignore_position),
-  .gemB_match_ignore_position(gemB_match_ignore_position),
-  .tmb_copad_alct_allow      (tmb_copad_alct_allow),       //In gem-csc match, allow ALCT+copad match
-  .tmb_copad_clct_allow      (tmb_copad_clct_allow),       //In gem-csc match, allow CLCT+copad match
+  .gemA_match_ignore_position (gemA_match_ignore_position),
+  .gemB_match_ignore_position (gemB_match_ignore_position),
+  .tmb_copad_alct_allow       (tmb_copad_alct_allow),       //In gem-csc match, allow ALCT+copad match
+  .tmb_copad_clct_allow       (tmb_copad_clct_allow),       //In gem-csc match, allow CLCT+copad match
 
   .gemA_vpf (gemA_forclct_pipe[MXCLUSTER_CHAMBER-1:0]),
   .gemB_vpf (gemB_forclct_pipe[MXCLUSTER_CHAMBER-1:0]),
@@ -2622,7 +2629,28 @@
 
   //------------------------------------------------------------------------------------------------------------------
   // Run3 logic with GEMCSC match. if GEM is not enable for match, it should fall back to above logic
+  wire trig_pulse_run3    = clct_match_run3 || (clct_noalct && clct_nocopad && !clct_used_run3) || clct_lost_run3 || alct_only_trig_run3;  // Event pulse, with clct reuse feature
+
+  wire trig_keep_run3     = (clct_keep_run3   || alct_keep_run3);
+  wire non_trig_keep_run3 = (clct_keep_ro_run3 || alct_keep_ro_run3);
+
+  wire alct_only_run3     = (alct_noclct && tmb_allow_alct && !clct_keep_run3) || alct_copad_pulse_match; //alct-only in gem-csc
+  wire wr_push_mux_run3   = (alct_only_run3) ? trig_pulse_run3 : (wr_push_xtmb_pipe  && trig_pulse_run3); 
+
+  wire clct_match_tr_run3  = clct_match_run3  && trig_keep_run3; // ALCT and CLCT matched in time, nontriggering event
+  wire alct_noclct_tr_run3 = alct_noclct && !alct_copad_pulse_match && trig_keep_run3; // Only ALCT triggered, nontriggering event
+  wire clct_noalct_tr_run3 = clct_noalct && clct_nocopad && !clct_used_run3 && trig_keep_run3; // Only CLCT triggered, nontriggering event
+
+  wire clct_match_ro_run3  = clct_match_run3  && non_trig_keep_run3; // ALCT and CLCT matched in time, nontriggering event
+  wire alct_noclct_ro_run3 = alct_noclct && !alct_copad_pulse_match && non_trig_keep_run3; // Only ALCT triggered, nontriggering event
+  wire clct_noalct_ro_run3 = clct_noalct && clct_nocopad && !clct_used_run3 && non_trig_keep_run3; // Only CLCT triggered, nontriggering event
+
+  assign alct_only_trig_run3 = (alct_noclct && !alct_copad_pulse_match && tmb_allow_alct) || (alct_noclct_ro_run3 && tmb_allow_alct_ro);// ALCT-only triggers are allowed
+
+
+  //------------------------------------------------------------------------------------------------------------------
   // Here position is taken into consideration??
+  //following part is already 1Bx after clct0_pipe/clct1_pipe/alct0_pipe/alct1_pipe because 1BX latency from position match
   wire clct0_copad_match_good = clct0_copad_match_found_pos && tmb_copad_clct_allow;
   wire alct0_copad_match_good = alct0_copad_match_found_pos && tmb_copad_alct_allow;
   wire clct1_copad_match_good = clct1_copad_match_found_pos && tmb_copad_clct_allow;
@@ -2631,23 +2659,24 @@
   wire alctclct_match_run3 = (alct0_clct0_copad_match_found_pos || alct0_clct0_gem_match_found_pos || alct0_clct0_nogem_match_found_pos);
   wire alctclct_match_good_run3 = alctclct_match_run3 && tmb_allow_match;
 
-  wire trig_pulse_run3    = alctclct_match_run3 || clct0_copad_match_good || alct0_copad_match_good || (clct_noalct && clct_nocopad && !clct_used_run3) || clct_lost_run3 || alct_only_trig_run3;  // Event pulse , ALCT,CLCT, copad match in timing +positoin, or alct-only+allow, clct-only
+  //wire trig_pulse_run3    = alctclct_match_run3 || clct0_copad_match_good || alct0_copad_match_good || (clct_noalct && clct_nocopad && !clct_used_run3) || clct_lost_run3 || alct_only_trig_run3;  // Event pulse , ALCT,CLCT, copad match in timing, or alct-only+allow, clct-only
 
-  wire trig_keep_run3     = (clct_keep_run3   || alct_keep_run3);
-  wire non_trig_keep_run3 = (clct_keep_ro_run3 || alct_keep_ro_run3);
+  //wire trig_keep_run3     = (clct_keep_run3   || alct_keep_run3);
+  //wire non_trig_keep_run3 = (clct_keep_ro_run3 || alct_keep_ro_run3);
 
-  wire alct_only_run3     = (alct_noclct && tmb_allow_alct && !clct_keep_run3) || alct0_copad_match_good; //alct-only in gem-csc
-  wire wr_push_mux_run3   = (alct_only_run3) ? trig_pulse_run3 : (wr_push_xtmb_pipe  && trig_pulse_run3); 
+  //wire alct_only_run3     = (alct_noclct && tmb_allow_alct && !clct_keep_run3) || alct0_copad_match_good; //alct-only in gem-csc
+  //wire wr_push_mux_run3   = (alct_only_run3) ? trig_pulse_run3 : (wr_push_xtmb_pipe  && trig_pulse_run3); 
 
-  wire clct_match_tr_run3 = (alctclct_match_run3 || clct0_copad_match_good || alct0_copad_match_good)  && trig_keep_run3;//ALCT+CLCT, ALCT+copad, CLCT+copad
-  wire alct_noclct_tr_run3= (alct_noclct && !alct0_copad_match_good) && trig_keep_run3;//ALCT only
-  wire clct_noalct_tr_run3= (clct_noalct && !clct_used_run3 && !clct0_copad_match_good) && trig_keep_run3;//CLCT only
+  //wire clct_match_tr_run3 = (alctclct_match_run3 || clct0_copad_match_good || alct0_copad_match_good)  && trig_keep_run3;//ALCT+CLCT, ALCT+copad, CLCT+copad
+  //wire alct_noclct_tr_run3= (alct_noclct && !alct0_copad_match_good) && trig_keep_run3;//ALCT only
+  //wire clct_noalct_tr_run3= (clct_noalct && !clct_used_run3 && !clct0_copad_match_good) && trig_keep_run3;//CLCT only
 
-  wire clct_match_ro_run3 = (alctclct_match_run3 || clct0_copad_match_good || alct0_copad_match_good) && non_trig_keep_run3;
-  wire alct_noclct_ro_run3= (alct_noclct && !alct0_copad_match_good) && non_trig_keep_run3;
-  wire clct_noalct_ro_run3= (clct_noalct && !clct_used_run3 && !clct0_copad_match_good) && non_trig_keep_run3;
+  //wire clct_match_ro_run3 = (alctclct_match_run3 || clct0_copad_match_good || alct0_copad_match_good) && non_trig_keep_run3;
+  //wire alct_noclct_ro_run3= (alct_noclct && !alct0_copad_match_good) && non_trig_keep_run3;
+  //wire clct_noalct_ro_run3= (clct_noalct && !clct_used_run3 && !clct0_copad_match_good) && non_trig_keep_run3;
 
-  wire alct_only_trig_run3 = alct_only_trig && !alct0_copad_match_good; //ALCT-copad is not found
+  //wire alct_only_trig_run3 = alct_only_trig && !alct0_copad_match_good; //ALCT-copad is not found
+  //------------------------------------------------------------------------------------------------------------------
 
 //--------------------------------------------------------------
 // Latch clct match results for TMB and MPC pathways
@@ -2734,12 +2763,20 @@
   assign tmb_non_trig_keep = tmb_non_trig_keep_ff && !tmb_trig_keep;
   
 // Pipelined CLCTs, aligned in time with trig_pulse
-  reg [MXCLCT-1:0]  clct0_real;
-  reg [MXCLCT-1:0]  clct1_real;
+  //reg [MXCLCT-1:0]   clct0_real;
+  //reg [MXCLCT-1:0]   clct1_real;
+  //reg [MXCCLUTB - 1   : 0] clct0_cclut_real; // new quality
+  //reg [MXCCLUTB - 1   : 0] clct1_cclut_real; // new quality
   reg [MXCLCTC-1:0]  clctc_real;
-  reg [MXCCLUTB - 1   : 0] clct0_cclut_real; // new quality
-  reg [MXCCLUTB - 1   : 0] clct1_cclut_real; // new quality
-  reg [MXHMTB - 1     : 0] hmt_trigger_real;
+  reg [MXCLCT-1:0]   clct0_real_r = 0;
+  reg [MXCLCT-1:0]   clct1_real_r = 0;
+  reg [MXCCLUTB - 1   : 0] clct0_cclut_real_r=0; // new quality
+  reg [MXCCLUTB - 1   : 0] clct1_cclut_real_r=0; // new quality
+  wire [MXCLCT-1:0]   clct0_real;
+  wire [MXCLCT-1:0]   clct1_real;
+  wire [MXCCLUTB - 1   : 0] clct0_cclut_real; // new quality
+  wire [MXCCLUTB - 1   : 0] clct1_cclut_real; // new quality
+  reg [MXHMTB - 1     : 0] hmt_trigger_real=0;
 
   wire keep_clct = trig_pulse && (trig_keep || non_trig_keep);
   wire keep_clct_run3 = trig_pulse_run3 && (trig_keep_run3 || non_trig_keep_run3);
@@ -2753,44 +2790,78 @@
     //clct0_cclut_real   <= clct0_cclut_pipe & {MXCCLUTB {keep_clct}};
     //clct1_cclut_real   <= clct1_cclut_pipe & {MXCCLUTB {keep_clct}};
     //???? keep_clct =>keep_clct_run3???
-    clct0_real <= (swapclct_final_pos ? clct1_pipe : clct0_pipe) & {MXCLCT  {keep_clct_run3}};
-    clct1_real <= (swapclct_final_pos ? clct0_pipe : clct1_pipe) & {MXCLCT  {keep_clct_run3}};
-    clctc_real <= clctc_pipe & {MXCLCTC {keep_clct_run3}};
-    clct0_cclut_real   <= (swapclct_final_pos ? clct1_cclut_pipe : clct0_cclut_pipe)& {MXCCLUTB {keep_clct_run3}};
-    clct1_cclut_real   <= (swapclct_final_pos ? clct0_cclut_pipe : clct1_cclut_pipe)& {MXCCLUTB {keep_clct_run3}};
+    //clct0_real <= (swapclct_final_pos ? clct1_pipe : clct0_pipe) & {MXCLCT  {keep_clct_run3}};
+    //clct1_real <= (swapclct_final_pos ? clct0_pipe : clct1_pipe) & {MXCLCT  {keep_clct_run3}};
+    //clctc_real <= clctc_pipe & {MXCLCTC {keep_clct_run3}};
+    //clct0_cclut_real   <= (swapclct_final_pos ? clct1_cclut_pipe : clct0_cclut_pipe)& {MXCCLUTB {keep_clct_run3}};
+    //clct1_cclut_real   <= (swapclct_final_pos ? clct0_cclut_pipe : clct1_cclut_pipe)& {MXCCLUTB {keep_clct_run3}};
+    clct0_real_r         <=  clct0_pipe & {MXCLCT  {keep_clct_run3}};
+    clct1_real_r         <=  clct1_pipe & {MXCLCT  {keep_clct_run3}};
+    clctc_real           <= clctc_pipe & {MXCLCTC {keep_clct_run3}};
+    clct0_cclut_real_r   <= clct0_cclut_pipe & {MXCCLUTB {keep_clct_run3}};
+    clct1_cclut_real_r   <= clct1_cclut_pipe & {MXCCLUTB {keep_clct_run3}};
     hmt_trigger_real   <= hmt_trigger_pipe;
   end
+ 
+  assign clct0_real         = swapclct_final_pos ? clct1_real_r       : clct0_real_r;
+  assign clct1_real         = swapclct_final_pos ? clct0_real_r       : clct1_real_r;
+  assign clct0_cclut_real   = swapclct_final_pos ? clct1_cclut_real_r : clct0_cclut_real_r;
+  assign clct1_cclut_real   = swapclct_final_pos ? clct0_cclut_real_r : clct1_cclut_real_r;
 
 // Latch pipelined ALCTs, aligned in time with CLCTs because CLCTs are delayed 1bx in the SRLs
-  reg [MXALCT-1:0] alct0_real = 0;
-  reg [MXALCT-1:0] alct1_real = 0;
+  //reg [MXALCT-1:0] alct0_real = 0;
+  //reg [MXALCT-1:0] alct1_real = 0;
+  reg [MXALCT-1:0] alct0_real_r = 0;
+  reg [MXALCT-1:0] alct1_real_r = 0;
+  wire [MXALCT-1:0] alct0_real;
+  wire [MXALCT-1:0] alct1_real;
 
   always @(posedge clock) begin
-  //alct0_real <= alct0_pipe;
-  //alct1_real <= alct1_pipe;
-  alct0_real <= (swapalct_final_pos ? alct1_pipe : alct0_pipe);
-  alct1_real <= (swapalct_final_pos ? alct0_pipe : alct1_pipe);
+  alct0_real_r <= alct0_pipe;
+  alct1_real_r <= alct1_pipe;
+  //alct0_real <= (swapalct_final_pos ? alct1_pipe : alct0_pipe);
+  //alct1_real <= (swapalct_final_pos ? alct0_pipe : alct1_pipe);
   end
 
-  //latched position match results, aligned in time with LCT construction 
-  reg copyalct0_foralct1_pos_r, copyclct0_forclct1_pos_r;
-  reg alct0fromcopad_run3_r, alct1fromcopad_run3_r, clct0fromcopad_run3_r, clct1fromcopad_run3_r;
-  reg [6:0] alct0wg_fromcopad_r, alct1wg_fromcopad_r;
-  reg [9:0] clct0xky_fromcopad_r, clct1xky_fromcopad_r;
-  always @(posedge clock) begin
-      copyalct0_foralct1_pos_r <= copyalct0_foralct1_pos;
-      copyclct0_forclct1_pos_r <= copyclct0_forclct1_pos;
+  assign alct0_real = swapalct_final_pos ? alct1_real_r : alct0_real_r;
+  assign alct1_real = swapalct_final_pos ? alct0_real_r : alct1_real_r;
+  //Position matching already had one BX latency
+  ////latched position match results, aligned in time with LCT construction 
+  //reg copyalct0_foralct1_pos_r, copyclct0_forclct1_pos_r;
+  //reg alct0fromcopad_run3_r, alct1fromcopad_run3_r, clct0fromcopad_run3_r, clct1fromcopad_run3_r;
+  //reg [6:0] alct0wg_fromcopad_r, alct1wg_fromcopad_r;
+  //reg [9:0] clct0xky_fromcopad_r, clct1xky_fromcopad_r;
+  //always @(posedge clock) begin
+  //    copyalct0_foralct1_pos_r <= copyalct0_foralct1_pos;
+  //    copyclct0_forclct1_pos_r <= copyclct0_forclct1_pos;
 
-      alct0fromcopad_run3_r    <= alct0fromcopad_run3;
-      alct1fromcopad_run3_r    <= alct1fromcopad_run3;
-      clct0fromcopad_run3_r    <= clct0fromcopad_run3;
-      clct1fromcopad_run3_r    <= clct1fromcopad_run3;
+  //    alct0fromcopad_run3_r    <= alct0fromcopad_run3;
+  //    alct1fromcopad_run3_r    <= alct1fromcopad_run3;
+  //    clct0fromcopad_run3_r    <= clct0fromcopad_run3;
+  //    clct1fromcopad_run3_r    <= clct1fromcopad_run3;
 
-      alct0wg_fromcopad_r      <= alct0wg_fromcopad;
-      alct1wg_fromcopad_r      <= alct1wg_fromcopad;
-      clct0xky_fromcopad_r     <= clct0xky_fromcopad;
-      clct1xky_fromcopad_r     <= clct1xky_fromcopad;
+  //    alct0wg_fromcopad_r      <= alct0wg_fromcopad;
+  //    alct1wg_fromcopad_r      <= alct1wg_fromcopad;
+  //    clct0xky_fromcopad_r     <= clct0xky_fromcopad;
+  //    clct1xky_fromcopad_r     <= clct1xky_fromcopad;
+  //end
+
+  //latch GEM clusters, aligned with position match results
+  reg [CLSTBITS-1:0] gemA_cluster_pipe_r       [MXCLUSTER_CHAMBER-1:0];
+  reg [CLSTBITS-1:0] gemB_cluster_pipe_r       [MXCLUSTER_CHAMBER-1:0];
+  reg [MXXKYB-1:0]   gemA_cluster_cscxky_mi_pipe_r [MXCLUSTER_CHAMBER-1:0]; // 
+  reg [MXXKYB-1:0]   gemB_cluster_cscxky_mi_pipe_r [MXCLUSTER_CHAMBER-1:0]; // 
+  generate
+  for (k=0; k< MXCLUSTER_CHAMBER; k=k+1) begin: gemr
+     always @(posedge clock) begin
+          gemA_cluster_pipe_r[k]           <= gemA_cluster_pipe[k];
+          gemB_cluster_pipe_r[k]           <= gemB_cluster_pipe[k];
+          gemA_cluster_cscxky_mi_pipe_r[k] <= gemA_cluster_cscxky_mi_pipe[k];
+          gemB_cluster_cscxky_mi_pipe_r[k] <= gemB_cluster_cscxky_mi_pipe[k];
+      end
+
   end
+  endgenerate
 
   //selected best clsuters from GEMCSC match
   reg [ 2:0] best_cluster0_icluster_ff   = 3'b0;
@@ -2805,91 +2876,93 @@
   reg [ 9:0] best_cluster1_cscxky_ff     = 10'b0;
   reg [ 9:0] best_cluster1_angle_ff      = 10'b0;
   reg        best_cluster1_vpf_ff        = 1'b0;
-  always @(posedge clock) begin
+
+  
+  always @(*) begin
       case(best_cluster0_iclst)
           3'd0: begin 
-              best_cluster0_roll_ff   <= best_cluster0_vpf ? (best_cluster0_ingemB ? gemB_cluster_pipe[0][10:8] : gemA_cluster_pipe[0][10:8]) : 3'b0; 
-              best_cluster0_pad_ff    <= best_cluster0_vpf ? (best_cluster0_ingemB ? gemB_cluster_pipe[0][ 7:0] : gemA_cluster_pipe[0][ 7:0]) : 8'hFF; 
-              best_cluster0_cscxky_ff <= best_cluster0_vpf ? (best_cluster0_ingemB ? gemB_cluster_cscxky_mi_pipe[0][9:0] : gemA_cluster_cscxky_mi_pipe[0][9:0]) : 10'h3FF; 
+              best_cluster0_roll_ff   <= best_cluster0_ingemB ?           gemB_cluster_pipe_r[0][10:8] :          gemA_cluster_pipe_r[0][10:8]; 
+              best_cluster0_pad_ff    <= best_cluster0_ingemB ?           gemB_cluster_pipe_r[0][ 7:0] :          gemA_cluster_pipe_r[0][ 7:0]; 
+              best_cluster0_cscxky_ff <= best_cluster0_ingemB ? gemB_cluster_cscxky_mi_pipe_r[0][ 9:0] : gemA_cluster_cscxky_mi_pipe_r[0][9:0]; 
           end
           3'd1: begin 
-              best_cluster0_roll_ff   <= best_cluster0_ingemB ?           gemB_cluster_pipe[1][10:8] :           gemA_cluster_pipe[1][10:8]; 
-              best_cluster0_pad_ff    <= best_cluster0_ingemB ?           gemB_cluster_pipe[1][ 7:0] :           gemA_cluster_pipe[1][ 7:0]; 
-              best_cluster0_cscxky_ff <= best_cluster0_ingemB ? gemB_cluster_cscxky_mi_pipe[1][ 9:0] : gemA_cluster_cscxky_mi_pipe[1][ 9:0];  
+              best_cluster0_roll_ff   <= best_cluster0_ingemB ?           gemB_cluster_pipe_r[1][10:8] :           gemA_cluster_pipe_r[1][10:8]; 
+              best_cluster0_pad_ff    <= best_cluster0_ingemB ?           gemB_cluster_pipe_r[1][ 7:0] :           gemA_cluster_pipe_r[1][ 7:0]; 
+              best_cluster0_cscxky_ff <= best_cluster0_ingemB ? gemB_cluster_cscxky_mi_pipe_r[1][ 9:0] : gemA_cluster_cscxky_mi_pipe_r[1][ 9:0];  
           end
           3'd2: begin 
-              best_cluster0_roll_ff   <= best_cluster0_ingemB ?           gemB_cluster_pipe[2][10:8] :           gemA_cluster_pipe[2][10:8]; 
-              best_cluster0_pad_ff    <= best_cluster0_ingemB ?           gemB_cluster_pipe[2][ 7:0] :           gemA_cluster_pipe[2][ 7:0]; 
-              best_cluster0_cscxky_ff <= best_cluster0_ingemB ? gemB_cluster_cscxky_mi_pipe[2][ 9:0] : gemA_cluster_cscxky_mi_pipe[2][ 9:0];  
+              best_cluster0_roll_ff   <= best_cluster0_ingemB ?           gemB_cluster_pipe_r[2][10:8] :           gemA_cluster_pipe_r[2][10:8]; 
+              best_cluster0_pad_ff    <= best_cluster0_ingemB ?           gemB_cluster_pipe_r[2][ 7:0] :           gemA_cluster_pipe_r[2][ 7:0]; 
+              best_cluster0_cscxky_ff <= best_cluster0_ingemB ? gemB_cluster_cscxky_mi_pipe_r[2][ 9:0] : gemA_cluster_cscxky_mi_pipe_r[2][ 9:0];  
           end
           3'd3: begin 
-              best_cluster0_roll_ff   <= best_cluster0_ingemB ?           gemB_cluster_pipe[3][10:8] :           gemA_cluster_pipe[3][10:8]; 
-              best_cluster0_pad_ff    <= best_cluster0_ingemB ?           gemB_cluster_pipe[3][ 7:0] :           gemA_cluster_pipe[3][ 7:0]; 
-              best_cluster0_cscxky_ff <= best_cluster0_ingemB ? gemB_cluster_cscxky_mi_pipe[3][ 9:0] : gemA_cluster_cscxky_mi_pipe[3][ 9:0];  
+              best_cluster0_roll_ff   <= best_cluster0_ingemB ?           gemB_cluster_pipe_r[3][10:8] :           gemA_cluster_pipe_r[3][10:8]; 
+              best_cluster0_pad_ff    <= best_cluster0_ingemB ?           gemB_cluster_pipe_r[3][ 7:0] :           gemA_cluster_pipe_r[3][ 7:0]; 
+              best_cluster0_cscxky_ff <= best_cluster0_ingemB ? gemB_cluster_cscxky_mi_pipe_r[3][ 9:0] : gemA_cluster_cscxky_mi_pipe_r[3][ 9:0];  
           end
           3'd4: begin 
-              best_cluster0_roll_ff   <= best_cluster0_ingemB ?           gemB_cluster_pipe[4][10:8] :           gemA_cluster_pipe[4][10:8]; 
-              best_cluster0_pad_ff    <= best_cluster0_ingemB ?           gemB_cluster_pipe[4][ 7:0] :           gemA_cluster_pipe[4][ 7:0]; 
-              best_cluster0_cscxky_ff <= best_cluster0_ingemB ? gemB_cluster_cscxky_mi_pipe[4][ 9:0] : gemA_cluster_cscxky_mi_pipe[4][ 9:0];  
+              best_cluster0_roll_ff   <= best_cluster0_ingemB ?           gemB_cluster_pipe_r[4][10:8] :           gemA_cluster_pipe_r[4][10:8]; 
+              best_cluster0_pad_ff    <= best_cluster0_ingemB ?           gemB_cluster_pipe_r[4][ 7:0] :           gemA_cluster_pipe_r[4][ 7:0]; 
+              best_cluster0_cscxky_ff <= best_cluster0_ingemB ? gemB_cluster_cscxky_mi_pipe_r[4][ 9:0] : gemA_cluster_cscxky_mi_pipe_r[4][ 9:0];  
           end
           3'd5: begin 
-              best_cluster0_roll_ff   <= best_cluster0_ingemB ?           gemB_cluster_pipe[5][10:8] :           gemA_cluster_pipe[5][10:8]; 
-              best_cluster0_pad_ff    <= best_cluster0_ingemB ?           gemB_cluster_pipe[5][ 7:0] :           gemA_cluster_pipe[5][ 7:0]; 
-              best_cluster0_cscxky_ff <= best_cluster0_ingemB ? gemB_cluster_cscxky_mi_pipe[5][ 9:0] : gemA_cluster_cscxky_mi_pipe[5][ 9:0];  
+              best_cluster0_roll_ff   <= best_cluster0_ingemB ?           gemB_cluster_pipe_r[5][10:8] :           gemA_cluster_pipe_r[5][10:8]; 
+              best_cluster0_pad_ff    <= best_cluster0_ingemB ?           gemB_cluster_pipe_r[5][ 7:0] :           gemA_cluster_pipe_r[5][ 7:0]; 
+              best_cluster0_cscxky_ff <= best_cluster0_ingemB ? gemB_cluster_cscxky_mi_pipe_r[5][ 9:0] : gemA_cluster_cscxky_mi_pipe_r[5][ 9:0];  
           end
           3'd6: begin 
-              best_cluster0_roll_ff   <= best_cluster0_ingemB ?           gemB_cluster_pipe[6][10:8] :           gemA_cluster_pipe[6][10:8]; 
-              best_cluster0_pad_ff    <= best_cluster0_ingemB ?           gemB_cluster_pipe[6][ 7:0] :           gemA_cluster_pipe[6][ 7:0]; 
-              best_cluster0_cscxky_ff <= best_cluster0_ingemB ? gemB_cluster_cscxky_mi_pipe[6][ 9:0] : gemA_cluster_cscxky_mi_pipe[6][ 9:0];  
+              best_cluster0_roll_ff   <= best_cluster0_ingemB ?           gemB_cluster_pipe_r[6][10:8] :           gemA_cluster_pipe_r[6][10:8]; 
+              best_cluster0_pad_ff    <= best_cluster0_ingemB ?           gemB_cluster_pipe_r[6][ 7:0] :           gemA_cluster_pipe_r[6][ 7:0]; 
+              best_cluster0_cscxky_ff <= best_cluster0_ingemB ? gemB_cluster_cscxky_mi_pipe_r[6][ 9:0] : gemA_cluster_cscxky_mi_pipe_r[6][ 9:0];  
           end
           3'd7: begin 
-              best_cluster0_roll_ff   <= best_cluster0_ingemB ?           gemB_cluster_pipe[7][10:8] :           gemA_cluster_pipe[7][10:8]; 
-              best_cluster0_pad_ff    <= best_cluster0_ingemB ?           gemB_cluster_pipe[7][ 7:0] :           gemA_cluster_pipe[7][ 7:0]; 
-              best_cluster0_cscxky_ff <= best_cluster0_ingemB ? gemB_cluster_cscxky_mi_pipe[7][ 9:0] : gemA_cluster_cscxky_mi_pipe[7][ 9:0];  
+              best_cluster0_roll_ff   <= best_cluster0_ingemB ?           gemB_cluster_pipe_r[7][10:8] :           gemA_cluster_pipe_r[7][10:8]; 
+              best_cluster0_pad_ff    <= best_cluster0_ingemB ?           gemB_cluster_pipe_r[7][ 7:0] :           gemA_cluster_pipe_r[7][ 7:0]; 
+              best_cluster0_cscxky_ff <= best_cluster0_ingemB ? gemB_cluster_cscxky_mi_pipe_r[7][ 9:0] : gemA_cluster_cscxky_mi_pipe_r[7][ 9:0];  
           end
           default : begin best_cluster0_roll_ff <=3'b111; best_cluster0_pad_ff <= 8'hFF; best_cluster0_cscxky_ff <= 10'h3FF; end
       endcase
 
       case(best_cluster1_iclst)
           3'd0: begin 
-              best_cluster1_roll_ff   <= best_cluster1_vpf ? (best_cluster1_ingemB ? gemB_cluster_pipe[0][10:8] : gemA_cluster_pipe[0][10:8]) : 3'b0; 
-              best_cluster1_pad_ff    <= best_cluster1_vpf ? (best_cluster1_ingemB ? gemB_cluster_pipe[0][ 7:0] : gemA_cluster_pipe[0][ 7:0]) : 8'hFF; 
-              best_cluster1_cscxky_ff <= best_cluster1_vpf ? (best_cluster1_ingemB ? gemB_cluster_cscxky_mi_pipe[0][9:0] : gemA_cluster_cscxky_mi_pipe[0][9:0]) : 10'h3FF; 
+              best_cluster1_roll_ff   <= best_cluster1_ingemB ?           gemB_cluster_pipe_r[0][10:8] :           gemA_cluster_pipe_r[0][10:8]; 
+              best_cluster1_pad_ff    <= best_cluster1_ingemB ?           gemB_cluster_pipe_r[0][ 7:0] :           gemA_cluster_pipe_r[0][ 7:0]; 
+              best_cluster1_cscxky_ff <= best_cluster1_ingemB ? gemB_cluster_cscxky_mi_pipe_r[0][ 9:0] : gemA_cluster_cscxky_mi_pipe_r[0][ 9:0]; 
           end
           3'd1: begin 
-              best_cluster1_roll_ff   <= best_cluster1_ingemB ?           gemB_cluster_pipe[1][10:8] :           gemA_cluster_pipe[1][10:8]; 
-              best_cluster1_pad_ff    <= best_cluster1_ingemB ?           gemB_cluster_pipe[1][ 7:0] :           gemA_cluster_pipe[1][ 7:0]; 
-              best_cluster1_cscxky_ff <= best_cluster1_ingemB ? gemB_cluster_cscxky_mi_pipe[1][ 9:0] : gemA_cluster_cscxky_mi_pipe[1][ 9:0];  
+              best_cluster1_roll_ff   <= best_cluster1_ingemB ?           gemB_cluster_pipe_r[1][10:8] :           gemA_cluster_pipe_r[1][10:8]; 
+              best_cluster1_pad_ff    <= best_cluster1_ingemB ?           gemB_cluster_pipe_r[1][ 7:0] :           gemA_cluster_pipe_r[1][ 7:0]; 
+              best_cluster1_cscxky_ff <= best_cluster1_ingemB ? gemB_cluster_cscxky_mi_pipe_r[1][ 9:0] : gemA_cluster_cscxky_mi_pipe_r[1][ 9:0];  
           end
           3'd2: begin 
-              best_cluster1_roll_ff   <= best_cluster1_ingemB ?           gemB_cluster_pipe[2][10:8] :           gemA_cluster_pipe[2][10:8]; 
-              best_cluster1_pad_ff    <= best_cluster1_ingemB ?           gemB_cluster_pipe[2][ 7:0] :           gemA_cluster_pipe[2][ 7:0]; 
-              best_cluster1_cscxky_ff <= best_cluster1_ingemB ? gemB_cluster_cscxky_mi_pipe[2][ 9:0] : gemA_cluster_cscxky_mi_pipe[2][ 9:0];  
+              best_cluster1_roll_ff   <= best_cluster1_ingemB ?           gemB_cluster_pipe_r[2][10:8] :           gemA_cluster_pipe_r[2][10:8]; 
+              best_cluster1_pad_ff    <= best_cluster1_ingemB ?           gemB_cluster_pipe_r[2][ 7:0] :           gemA_cluster_pipe_r[2][ 7:0]; 
+              best_cluster1_cscxky_ff <= best_cluster1_ingemB ? gemB_cluster_cscxky_mi_pipe_r[2][ 9:0] : gemA_cluster_cscxky_mi_pipe_r[2][ 9:0];  
           end
           3'd3: begin 
-              best_cluster1_roll_ff   <= best_cluster1_ingemB ?           gemB_cluster_pipe[3][10:8] :           gemA_cluster_pipe[3][10:8]; 
-              best_cluster1_pad_ff    <= best_cluster1_ingemB ?           gemB_cluster_pipe[3][ 7:0] :           gemA_cluster_pipe[3][ 7:0]; 
-              best_cluster1_cscxky_ff <= best_cluster1_ingemB ? gemB_cluster_cscxky_mi_pipe[3][ 9:0] : gemA_cluster_cscxky_mi_pipe[3][ 9:0];  
+              best_cluster1_roll_ff   <= best_cluster1_ingemB ?           gemB_cluster_pipe_r[3][10:8] :           gemA_cluster_pipe_r[3][10:8]; 
+              best_cluster1_pad_ff    <= best_cluster1_ingemB ?           gemB_cluster_pipe_r[3][ 7:0] :           gemA_cluster_pipe_r[3][ 7:0]; 
+              best_cluster1_cscxky_ff <= best_cluster1_ingemB ? gemB_cluster_cscxky_mi_pipe_r[3][ 9:0] : gemA_cluster_cscxky_mi_pipe_r[3][ 9:0];  
           end
           3'd4: begin 
-              best_cluster1_roll_ff   <= best_cluster1_ingemB ?           gemB_cluster_pipe[4][10:8] :           gemA_cluster_pipe[4][10:8]; 
-              best_cluster1_pad_ff    <= best_cluster1_ingemB ?           gemB_cluster_pipe[4][ 7:0] :           gemA_cluster_pipe[4][ 7:0]; 
-              best_cluster1_cscxky_ff <= best_cluster1_ingemB ? gemB_cluster_cscxky_mi_pipe[4][ 9:0] : gemA_cluster_cscxky_mi_pipe[4][ 9:0];  
+              best_cluster1_roll_ff   <= best_cluster1_ingemB ?           gemB_cluster_pipe_r[4][10:8] :           gemA_cluster_pipe_r[4][10:8]; 
+              best_cluster1_pad_ff    <= best_cluster1_ingemB ?           gemB_cluster_pipe_r[4][ 7:0] :           gemA_cluster_pipe_r[4][ 7:0]; 
+              best_cluster1_cscxky_ff <= best_cluster1_ingemB ? gemB_cluster_cscxky_mi_pipe_r[4][ 9:0] : gemA_cluster_cscxky_mi_pipe_r[4][ 9:0];  
           end
           3'd5: begin 
-              best_cluster1_roll_ff   <= best_cluster1_ingemB ?           gemB_cluster_pipe[5][10:8] :           gemA_cluster_pipe[5][10:8]; 
-              best_cluster1_pad_ff    <= best_cluster1_ingemB ?           gemB_cluster_pipe[5][ 7:0] :           gemA_cluster_pipe[5][ 7:0]; 
-              best_cluster1_cscxky_ff <= best_cluster1_ingemB ? gemB_cluster_cscxky_mi_pipe[5][ 9:0] : gemA_cluster_cscxky_mi_pipe[5][ 9:0];  
+              best_cluster1_roll_ff   <= best_cluster1_ingemB ?           gemB_cluster_pipe_r[5][10:8] :           gemA_cluster_pipe_r[5][10:8]; 
+              best_cluster1_pad_ff    <= best_cluster1_ingemB ?           gemB_cluster_pipe_r[5][ 7:0] :           gemA_cluster_pipe_r[5][ 7:0]; 
+              best_cluster1_cscxky_ff <= best_cluster1_ingemB ? gemB_cluster_cscxky_mi_pipe_r[5][ 9:0] : gemA_cluster_cscxky_mi_pipe_r[5][ 9:0];  
           end
           3'd6: begin 
-              best_cluster1_roll_ff   <= best_cluster1_ingemB ?           gemB_cluster_pipe[6][10:8] :           gemA_cluster_pipe[6][10:8]; 
-              best_cluster1_pad_ff    <= best_cluster1_ingemB ?           gemB_cluster_pipe[6][ 7:0] :           gemA_cluster_pipe[6][ 7:0]; 
-              best_cluster1_cscxky_ff <= best_cluster1_ingemB ? gemB_cluster_cscxky_mi_pipe[6][ 9:0] : gemA_cluster_cscxky_mi_pipe[6][ 9:0];  
+              best_cluster1_roll_ff   <= best_cluster1_ingemB ?           gemB_cluster_pipe_r[6][10:8] :           gemA_cluster_pipe_r[6][10:8]; 
+              best_cluster1_pad_ff    <= best_cluster1_ingemB ?           gemB_cluster_pipe_r[6][ 7:0] :           gemA_cluster_pipe_r[6][ 7:0]; 
+              best_cluster1_cscxky_ff <= best_cluster1_ingemB ? gemB_cluster_cscxky_mi_pipe_r[6][ 9:0] : gemA_cluster_cscxky_mi_pipe_r[6][ 9:0];  
           end
           3'd7: begin 
-              best_cluster1_roll_ff   <= best_cluster1_ingemB ?           gemB_cluster_pipe[7][10:8] :           gemA_cluster_pipe[7][10:8]; 
-              best_cluster1_pad_ff    <= best_cluster1_ingemB ?           gemB_cluster_pipe[7][ 7:0] :           gemA_cluster_pipe[7][ 7:0]; 
-              best_cluster1_cscxky_ff <= best_cluster1_ingemB ? gemB_cluster_cscxky_mi_pipe[7][ 9:0] : gemA_cluster_cscxky_mi_pipe[7][ 9:0];  
+              best_cluster1_roll_ff   <= best_cluster1_ingemB ?           gemB_cluster_pipe_r[7][10:8] :           gemA_cluster_pipe_r[7][10:8]; 
+              best_cluster1_pad_ff    <= best_cluster1_ingemB ?           gemB_cluster_pipe_r[7][ 7:0] :           gemA_cluster_pipe_r[7][ 7:0]; 
+              best_cluster1_cscxky_ff <= best_cluster1_ingemB ? gemB_cluster_cscxky_mi_pipe_r[7][ 9:0] : gemA_cluster_cscxky_mi_pipe_r[7][ 9:0];  
           end
           default : begin best_cluster1_roll_ff <=3'b111; best_cluster1_pad_ff <= 8'hFF; best_cluster1_cscxky_ff <= 10'h3FF; end
       endcase
@@ -2981,8 +3054,10 @@
   wire  tmb_dupe_alct = tmb_one_alct && tmb_two_clct;  // Duplicate alct if there are 2 clcts
   wire  tmb_dupe_clct = tmb_one_clct && tmb_two_alct;  // Duplicate clct if there are 2 alcts
 
-  wire  tmb_dupe_alct_run3 = tmb_dupe_alct && copyalct0_foralct1_pos_r;  // Duplicate alct if there are 2 clcts
-  wire  tmb_dupe_clct_run3 = tmb_dupe_alct && copyclct0_forclct1_pos_r;  // Duplicate clct if there are 2 alcts
+  //wire  tmb_dupe_alct_run3 = tmb_dupe_alct && copyalct0_foralct1_pos_r;  // Duplicate alct if there are 2 clcts
+  //wire  tmb_dupe_clct_run3 = tmb_dupe_alct && copyclct0_forclct1_pos_r;  // Duplicate clct if there are 2 alcts
+  wire  tmb_dupe_alct_run3 = tmb_dupe_alct && copyalct0_foralct1_pos;  // Duplicate alct if there are 2 clcts
+  wire  tmb_dupe_clct_run3 = tmb_dupe_alct && copyclct0_forclct1_pos;  // Duplicate clct if there are 2 alcts
 
 // Duplicate alct and clct
   reg  [MXALCT-1:0]  alct0;
@@ -3125,11 +3200,14 @@
 
 
   
-  wire [2:0]  lct0_qlt_run3_pipe; // new LCT quality defition 
-  wire [2:0]  lct1_qlt_run3_pipe; 
-  //align with latched trigger results
-  reg  [2:0]  lct0_qlt_run3_real; 
-  reg  [2:0]  lct1_qlt_run3_real; 
+  //wire [2:0]  lct0_qlt_run3_pipe; // new LCT quality defition 
+  //wire [2:0]  lct1_qlt_run3_pipe; 
+  ////align with latched trigger results
+  //reg  [2:0]  lct0_qlt_run3_real; 
+  //reg  [2:0]  lct1_qlt_run3_real; 
+
+  wire [2:0] lct0_qlt_run3 ;
+  wire [2:0] lct1_qlt_run3 ;
 
   //Run3 LCT quality
   lct_quality_run3 ulct0qualityrun3
@@ -3140,7 +3218,8 @@
         .clct_copad_match     (clct0_copad_match_good), 
         .alct_copad_match     (alct0_copad_match_good),  
         .gemcsc_bend_enable   (gemcsc_bend_enable && gemcsc_match_enable),
-        .Q                    (lct0_qlt_run3_pipe[2:0])
+        //.Q                    (lct0_qlt_run3_pipe[2:0])
+        .Q                    (lct0_qlt_run3[2:0])
     );
 
   lct_quality_run3 ulct1qualityrun3
@@ -3151,17 +3230,18 @@
         .clct_copad_match     (clct1_copad_match_good), 
         .alct_copad_match     (alct1_copad_match_good),  
         .gemcsc_bend_enable   (gemcsc_bend_enable && gemcsc_match_enable),
-        .Q                    (lct1_qlt_run3_pipe[2:0])
+        //.Q                    (lct1_qlt_run3_pipe[2:0])
+        .Q                    (lct1_qlt_run3[2:0])
     );
 
     //aligned with latched trigger results 
-  always @(posedge clock) begin
-      lct0_qlt_run3_real  <= lct0_qlt_run3_pipe;
-      lct1_qlt_run3_real  <= lct1_qlt_run3_pipe;
-  end
-  
-  wire [2:0] lct0_qlt_run3 = lct0_qlt_run3_real;
-  wire [2:0] lct1_qlt_run3 = lct1_qlt_run3_real;
+  //always @(posedge clock) begin
+  //    lct0_qlt_run3_real  <= lct0_qlt_run3_pipe;
+  //    lct1_qlt_run3_real  <= lct1_qlt_run3_pipe;
+  //end
+  //
+  //wire [2:0] lct0_qlt_run3 = lct0_qlt_run3_real;
+  //wire [2:0] lct1_qlt_run3 = lct1_qlt_run3_real;
   wire   lct0_vpf_run3 = (lct0_qlt_run3[2:0] > 3'b0);
   wire   lct1_vpf_run3 = (lct1_qlt_run3[2:0] > 3'b0);
 
@@ -3237,10 +3317,16 @@
   wire [MXHMTB-1:0]  hmt_trigger_run3 = hmt_trigger_real;
 //Attention!!! add run3 case for alct0fromcopad_run3!!!
 //GEMCSC bending angle is missing!!
-  wire [6:0] alct0_key_run3 =  alct0fromcopad_run3_r ?  alct0wg_fromcopad_r[6:0] : alct0_key[6:0];
-  wire [6:0] alct1_key_run3 =  alct1fromcopad_run3_r ?  alct1wg_fromcopad_r[6:0] : alct1_key[6:0];
-  wire [9:0] clct0_xky_run3 =  clct0fromcopad_run3_r ? clct0xky_fromcopad_r[9:0] : clct0_xky[9:0];
-  wire [9:0] clct1_xky_run3 =  clct1fromcopad_run3_r ? clct1xky_fromcopad_r[9:0] : clct1_xky[9:0];
+  //wire [6:0] alct0_key_run3 =  alct0fromcopad_run3_r ?  alct0wg_fromcopad_r[6:0] : alct0_key[6:0];
+  //wire [6:0] alct1_key_run3 =  alct1fromcopad_run3_r ?  alct1wg_fromcopad_r[6:0] : alct1_key[6:0];
+  //wire [9:0] clct0_xky_run3 =  clct0fromcopad_run3_r ? clct0xky_fromcopad_r[9:0] : clct0_xky[9:0];
+  //wire [9:0] clct1_xky_run3 =  clct1fromcopad_run3_r ? clct1xky_fromcopad_r[9:0] : clct1_xky[9:0];
+  //wire [4:0] clct0_bnd_run3 =  alct0fromcopad_run3_r ? 4'b0 : (gemcsc_bend_enable ? gemcsc_bnd0[4:0] : clct0_bnd[4:0]);    
+  //wire [4:0] clct1_bnd_run3 =  alct1fromcopad_run3_r ? 4'b0 : (gemcsc_bend_enable ? gemcsc_bnd1[4:0] : clct1_bnd[4:0]);    
+  wire [6:0] alct0_key_run3 =  alct0fromcopad_run3 ?  alct0wg_fromcopad[6:0] : alct0_key[6:0];
+  wire [6:0] alct1_key_run3 =  alct1fromcopad_run3 ?  alct1wg_fromcopad[6:0] : alct1_key[6:0];
+  wire [9:0] clct0_xky_run3 =  clct0fromcopad_run3 ? clct0xky_fromcopad[9:0] : clct0_xky[9:0];
+  wire [9:0] clct1_xky_run3 =  clct1fromcopad_run3 ? clct1xky_fromcopad[9:0] : clct1_xky[9:0];
   //wire [4:0] clct0_bnd_run3 =  alct0fromcopad_run3 ? 4'b0 : (gemcsc_bend_enable ? gemcsc_bnd0[4:0] : clct0_bnd[4:0]);    
   //wire [4:0] clct1_bnd_run3 =  alct1fromcopad_run3 ? 4'b0 : (gemcsc_bend_enable ? gemcsc_bnd1[4:0] : clct1_bnd[4:0]);    
   //should we use bending direction also from GEM-CSC???

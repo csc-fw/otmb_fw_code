@@ -143,12 +143,11 @@ module copad (
     //output reg [2:0] cluster6_cnt,
     //output reg [2:0] cluster7_cnt,
 
-    // 8 bit ff'd register of matches found, with respect to the address in gemA
-    output reg [MXCLUSTERS-1:0] match,
-    output reg [MXCLUSTERS-1:0] match_upper,
-    output reg [MXCLUSTERS-1:0] match_lower,
+    output  [MXCLUSTERS-1:0] match,
+    output  [MXCLUSTERS-1:0] match_upper,
+    output  [MXCLUSTERS-1:0] match_lower,
 
-    output reg any_match, // Output: 1 bit, any match was found
+    output  any_match, // Output: 1 bit, any match was found
 
     //output reg [MXFEB-1:0] active_feb_list_copad,  // 24 bit register of active FEBs. Can be used e.g. in GEM only self-trigger
 
@@ -358,10 +357,13 @@ wire [7:0] match_AB_c [MXCLUSTERS-1:0]; // same roll
 wire [7:0] match_AB_u [MXCLUSTERS-1:0]; //upper roll, 
 wire [7:0] match_AB_l [MXCLUSTERS-1:0]; //lower roll
 
-wire [7:0] match_c;
-wire [7:0] match_u;
-wire [7:0] match_l;
+//wire [7:0] match_c;
+//wire [7:0] match_u;
+//wire [7:0] match_l;
 
+reg [7:0] match_c;
+reg [7:0] match_u;
+reg [7:0] match_l;
 
 wire [0:0] gemApad_at_left_edge  [MXCLUSTERS-1:0];
 wire [0:0] gemApad_at_right_edge [MXCLUSTERS-1:0];
@@ -394,9 +396,11 @@ for (iclst=0; iclst<MXCLUSTERS; iclst=iclst+1) begin: clust_match_loop
       
   end 
 
-  assign match_c[iclst] = | match_AB_c[iclst];
-  assign match_u[iclst] = | match_AB_u[iclst];
-  assign match_l[iclst] = | match_AB_l[iclst];
+  always @ (posedge clock) begin
+       match_c[iclst] <= | match_AB_c[iclst];
+       match_u[iclst] <= | match_AB_u[iclst];
+       match_l[iclst] <= | match_AB_l[iclst];
+  end
 
 end
 endgenerate
@@ -405,15 +409,13 @@ wire [7:0] match_full  =   match_c   // full cluster match
                           | ({8{match_neighborRoll}} & match_u )
                           | ({8{match_neighborRoll}} & match_l );
 
-wire any_match_full = (|match_full);
+//wire any_match_full = (|match_full);
 
-always @ (posedge clock) begin
-  any_match            <= any_match_full;
-  match         [7:0]  <= match_full;
-  match_upper   [7:0]  <= match_u;
-  match_lower   [7:0]  <= match_l;
+assign any_match            = (|match_full);
+assign match         [7:0]  = match_full;
+assign match_upper   [7:0]  = match_u;
+assign match_lower   [7:0]  = match_l;
 
-end
 
 
 assign sump =
