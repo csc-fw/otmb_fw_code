@@ -123,10 +123,7 @@
   clock,
   ttc_resync,
 
-  //LCT injection
-  //lct_inj_hs,
-  //lct_inj_wg,
-  //lct_inj_enable,
+  evenchamber, 
 
 // ALCT
   alct0_tmb,
@@ -288,6 +285,7 @@
   gemA_match_ignore_position,
   gemB_match_ignore_position,
   gemcsc_bend_enable,
+  gemcsc_ignore_bend_check,
 
   gemA_forclct_pipe,
   gemB_forclct_pipe,
@@ -698,9 +696,7 @@
   input          clock;      // 40MHz TMB main clock
   input          ttc_resync; // Purge CLCT pipeline
 
-  //input  [7:0] lct_inj_hs;
-  //input  [6:0] lct_inj_wg;
-  //input        lct_inj_enable;
+  input          evenchamber;
 
   wire  [1:0]      tmb_sync_err_en;
 // ALCT
@@ -863,6 +859,7 @@
   input               gemA_match_ignore_position;
   input               gemB_match_ignore_position;
   input               gemcsc_bend_enable;
+  input               gemcsc_ignore_bend_check;
 
   input               gemA_bx0_rx;
   input  [5:0]        gemA_bx0_delay;
@@ -2355,6 +2352,8 @@
     
   .clock        (clock),
 
+  .evenchamber  (evenchamber),
+
   .alct0_vpf    (alct0_pipe_vpf),
   .alct1_vpf    (alct1_pipe_vpf),
 
@@ -2381,6 +2380,7 @@
   .gemB_match_ignore_position (gemB_match_ignore_position),
   .tmb_copad_alct_allow       (tmb_copad_alct_allow),       //In gem-csc match, allow ALCT+copad match
   .tmb_copad_clct_allow       (tmb_copad_clct_allow),       //In gem-csc match, allow CLCT+copad match
+  .gemcsc_ignore_bend_check   (gemcsc_ignore_bend_check),   //In gemcsc amtch, ignore GEMCSC bend check
 
   .gemA_vpf (gemA_forclct_pipe[MXCLUSTER_CHAMBER-1:0]),
   .gemB_vpf (gemB_forclct_pipe[MXCLUSTER_CHAMBER-1:0]),
@@ -3253,6 +3253,24 @@
   .clct1_pid (clct1_pat[2:0]),
   .out_pid   (lct_pid_run3[4:0])
   );
+
+  wire [4:0] gemcsc_bnd0, gemcsc_bnd1;
+  assign gemcsc_bnd0[4] = best_cluster0_bend;
+  assign gemcsc_bnd1[4] = best_cluster1_bend;
+  gemcsc_bending_bits ugemcscbnd0(
+  .gemcsc_bending  (best_cluster0_angle_ff),
+  .even            (evenchamber),
+  .isME1a          (clct0_xky_run3[9]),
+  .bending_bits    (gemcsc_bnd0[3:0])
+  );
+
+
+  gemcsc_bending_bits ugemcscbnd1(
+  .gemcsc_bending  (best_cluster1_angle_ff),
+  .even            (evenchamber),
+  .isME1a          (clct1_xky_run3[9]),
+  .bending_bits    (gemcsc_bnd1[3:0])
+  );
 //------------------------------------------------------------------------------------------------------------------
 // Delay alct and clct bx0 strobes
 //------------------------------------------------------------------------------------------------------------------
@@ -3327,12 +3345,12 @@
   wire [6:0] alct1_key_run3 =  alct1fromcopad_run3 ?  alct1wg_fromcopad[6:0] : alct1_key[6:0];
   wire [9:0] clct0_xky_run3 =  clct0fromcopad_run3 ? clct0xky_fromcopad[9:0] : clct0_xky[9:0];
   wire [9:0] clct1_xky_run3 =  clct1fromcopad_run3 ? clct1xky_fromcopad[9:0] : clct1_xky[9:0];
-  //wire [4:0] clct0_bnd_run3 =  alct0fromcopad_run3 ? 4'b0 : (gemcsc_bend_enable ? gemcsc_bnd0[4:0] : clct0_bnd[4:0]);    
-  //wire [4:0] clct1_bnd_run3 =  alct1fromcopad_run3 ? 4'b0 : (gemcsc_bend_enable ? gemcsc_bnd1[4:0] : clct1_bnd[4:0]);    
+  wire [4:0] clct0_bnd_run3 =  alct0fromcopad_run3 ? 4'b0 : (gemcsc_bend_enable ? gemcsc_bnd0[4:0] : clct0_bnd[4:0]);    
+  wire [4:0] clct1_bnd_run3 =  alct1fromcopad_run3 ? 4'b0 : (gemcsc_bend_enable ? gemcsc_bnd1[4:0] : clct1_bnd[4:0]);    
   //should we use bending direction also from GEM-CSC???
   //gemcsc_bend_enable && gemcsc_match_enable
-  wire [4:0] clct0_bnd_run3 = clct0_bnd[4:0];  
-  wire [4:0] clct1_bnd_run3 = clct1_bnd[4:0];  
+  //wire [4:0] clct0_bnd_run3 = clct0_bnd[4:0];  
+  //wire [4:0] clct1_bnd_run3 = clct1_bnd[4:0];  
 
 
   //GEMCSC algorithm is not ready yet. Use the lct quality with ALCT+CLCT case

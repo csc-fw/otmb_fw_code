@@ -707,6 +707,7 @@
   gemA_match_ignore_position,
   gemB_match_ignore_position,
   gemcsc_bend_enable,
+  gemcsc_ignore_bend_check,
 
   gemcscmatch_cluster0_vme,   // In
   gemcscmatch_cluster1_vme,   // In
@@ -2506,6 +2507,7 @@
   output       gemA_match_ignore_position;
   output       gemB_match_ignore_position;
   output       gemcsc_bend_enable;
+  output       gemcsc_ignore_bend_check;
 
   input [31:0] gemcscmatch_cluster0_vme;   // In
   input [31:0] gemcscmatch_cluster1_vme;   // In
@@ -9162,7 +9164,7 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   gem_csc_match_ctrl_wr[12]   = 1'b1; // RW GEMCSC match, enable GEMA for GEMCSC match without position match
   gem_csc_match_ctrl_wr[13]   = 1'b1; // RW GEMCSC match, enable GEMA for GEMCSC match without position match
   gem_csc_match_ctrl_wr[14]   = 1'b1; // RW GEMCSC bending angle enable 
-  gem_csc_match_ctrl_wr[15]   = 1'b1; // NOT used yet
+  gem_csc_match_ctrl_wr[15]   = 1'b1; // RW GEMCSC match, ignore bending direction check if bending angle is small
 
   end
 
@@ -9183,6 +9185,7 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign gemA_match_ignore_position   = gem_csc_match_ctrl_wr[12];
   assign gemB_match_ignore_position   = gem_csc_match_ctrl_wr[13];
   assign gemcsc_bend_enable           = gem_csc_match_ctrl_wr[14];
+  assign gemcsc_ignore_bend_check     = gem_csc_match_ctrl_wr[15];
 
   assign gem_csc_match_ctrl_rd        = gem_csc_match_ctrl_wr[15:0];
 

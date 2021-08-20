@@ -17,6 +17,8 @@
 module  alct_clct_gem_matching(
   input clock,
     
+  input evenchamber,
+
   input alct0_vpf,
   input alct1_vpf,
 
@@ -44,6 +46,7 @@ module  alct_clct_gem_matching(
   input gemB_match_ignore_position, 
   input tmb_copad_alct_allow,
   input tmb_copad_clct_allow,
+  input gemcsc_ignore_bend_check,
 
   input [MXCLUSTER_CHAMBER-1:0] gemA_vpf,
   input [MXCLUSTER_CHAMBER-1:0] gemB_vpf,
@@ -398,13 +401,18 @@ module  alct_clct_gem_matching(
   wire [MXCLUSTER_CHAMBER-1:0] alct1_gemA_match; 
   wire [MXCLUSTER_CHAMBER-1:0] clct0_gemA_match; 
   wire [MXCLUSTER_CHAMBER-1:0] clct1_gemA_match; 
-  wire [MXCLUSTER_CHAMBER-1:0] clct0_gemA_match_ok; 
-  wire [MXCLUSTER_CHAMBER-1:0] clct1_gemA_match_ok; 
 
   wire [MXCLUSTER_CHAMBER-1:0] alct0_gemB_match; 
   wire [MXCLUSTER_CHAMBER-1:0] alct1_gemB_match; 
   wire [MXCLUSTER_CHAMBER-1:0] clct0_gemB_match; 
   wire [MXCLUSTER_CHAMBER-1:0] clct1_gemB_match; 
+
+  wire [MXCLUSTER_CHAMBER-1:0] clct0_gemA_match_me1abok; 
+  wire [MXCLUSTER_CHAMBER-1:0] clct1_gemA_match_me1abok; 
+  wire [MXCLUSTER_CHAMBER-1:0] clct0_gemB_match_me1abok; 
+  wire [MXCLUSTER_CHAMBER-1:0] clct1_gemB_match_me1abok; 
+  wire [MXCLUSTER_CHAMBER-1:0] clct0_gemA_match_ok; 
+  wire [MXCLUSTER_CHAMBER-1:0] clct1_gemA_match_ok; 
   wire [MXCLUSTER_CHAMBER-1:0] clct0_gemB_match_ok; 
   wire [MXCLUSTER_CHAMBER-1:0] clct1_gemB_match_ok; 
 
@@ -466,8 +474,16 @@ module  alct_clct_gem_matching(
   wire [MXBENDANGLEB-1:0]  alct0_copad_angle [MXCLUSTER_CHAMBER-1:0];
   wire [MXBENDANGLEB-1:0]  alct1_copad_angle [MXCLUSTER_CHAMBER-1:0];
 
-  parameter smallbending = 10'd16; // ignore the sign check for small bending angle
+  //  pT           odd,    even;  ME1A     odd,    even
+  //  10.0         29.9,   13.7;          22.4,    10.3
+  //  15.0         20.1,   9.9;           15.1,    7.4
+  parameter ME1BODD      = 10'd30; // ignore the sign check for small bending angle
+  parameter ME1BEVEN     = 10'd14; // ignore the sign check for small bending angle
+  parameter ME1AODD      = 10'd22; // ignore the sign check for small bending angle
+  parameter ME1AEVEN     = 10'd10; // ignore the sign check for small bending angle
   parameter MAXGEMCSCBND = 10'd1023;// invalid bending 
+  wire [9:0] bending_min_me1a = evenchamber ? ME1AEVEN : ME1AODD;
+  wire [9:0] bending_min_me1b = evenchamber ? ME1BEVEN : ME1BODD;
 
   genvar i;
   generate
@@ -496,21 +512,26 @@ module  alct_clct_gem_matching(
       assign clct1_gemA_ME1b[i]   = !clct0_xky[9] && !gemA_cluster_cscxky_mi[i][9] && gem_me1b_match_enable;
       assign clct1_gemB_ME1b[i]   = !clct0_xky[9] && !gemB_cluster_cscxky_mi[i][9] && gem_me1b_match_enable;
 
-      //ignore bending direction check
-      assign clct0_gemA_match_ok[i] = clct0_gemA_match[i] && (clct0_gemA_ME1a[i] || clct0_gemA_ME1b[i]); 
-      assign clct0_gemB_match_ok[i] = clct0_gemB_match[i] && (clct0_gemB_ME1a[i] || clct0_gemB_ME1b[i]); 
-      assign clct1_gemA_match_ok[i] = clct1_gemA_match[i] && (clct1_gemA_ME1a[i] || clct1_gemA_ME1b[i]); 
-      assign clct1_gemB_match_ok[i] = clct1_gemB_match[i] && (clct1_gemB_ME1a[i] || clct1_gemB_ME1b[i]); 
-      //with bending direction check
-      //assign clct0_gemA_match_ok[i] = clct0_gemA_match[i] && (clct0_gemA_bend[i] == clct0_bend) && (clct0_gemA_ME1a[i] || clct0_gemA_ME1b[i]);
-      //assign clct0_gemB_match_ok[i] = clct0_gemB_match[i] && (clct0_gemB_bend[i] == clct0_bend) && (clct0_gemB_ME1a[i] || clct0_gemB_ME1b[i]);
-      //assign clct1_gemA_match_ok[i] = clct1_gemA_match[i] && (clct1_gemA_bend[i] == clct1_bend) && (clct1_gemA_ME1a[i] || clct1_gemA_ME1b[i]);
-      //assign clct1_gemB_match_ok[i] = clct1_gemB_match[i] && (clct1_gemB_bend[i] == clct1_bend) && (clct1_gemB_ME1a[i] || clct1_gemB_ME1b[i]);
+      assign clct0_gemA_match_me1abok[i] = clct0_gemA_match[i] && (clct0_gemA_ME1a[i] || clct0_gemA_ME1b[i]); 
+      assign clct0_gemB_match_me1abok[i] = clct0_gemB_match[i] && (clct0_gemB_ME1a[i] || clct0_gemB_ME1b[i]); 
+      assign clct1_gemA_match_me1abok[i] = clct1_gemA_match[i] && (clct1_gemA_ME1a[i] || clct1_gemA_ME1b[i]); 
+      assign clct1_gemB_match_me1abok[i] = clct1_gemB_match[i] && (clct1_gemB_ME1a[i] || clct1_gemB_ME1b[i]); 
 
-      assign clct0_gemA_angle[i] = clct0_gemA_match_ok[i] ? (clct0_gemA_bend[i] ? (clct0_xky-gemA_cluster_cscxky_mi[i]) : (gemA_cluster_cscxky_mi[i]-clct0_xky)) : MAXGEMCSCBND; 
-      assign clct0_gemB_angle[i] = clct0_gemB_match_ok[i] ? (clct0_gemB_bend[i] ? (clct0_xky-gemB_cluster_cscxky_mi[i]) : (gemB_cluster_cscxky_mi[i]-clct0_xky)) : MAXGEMCSCBND; 
-      assign clct1_gemA_angle[i] = clct1_gemA_match_ok[i] ? (clct1_gemA_bend[i] ? (clct1_xky-gemA_cluster_cscxky_mi[i]) : (gemA_cluster_cscxky_mi[i]-clct1_xky)) : MAXGEMCSCBND; 
-      assign clct1_gemB_angle[i] = clct1_gemB_match_ok[i] ? (clct1_gemB_bend[i] ? (clct1_xky-gemB_cluster_cscxky_mi[i]) : (gemB_cluster_cscxky_mi[i]-clct1_xky)) : MAXGEMCSCBND; 
+      assign clct0_gemA_angle[i] = clct0_gemA_match_me1abok[i] ? (clct0_gemA_bend[i] ? (clct0_xky-gemA_cluster_cscxky_mi[i]) : (gemA_cluster_cscxky_mi[i]-clct0_xky)) : MAXGEMCSCBND; 
+      assign clct0_gemB_angle[i] = clct0_gemB_match_me1abok[i] ? (clct0_gemB_bend[i] ? (clct0_xky-gemB_cluster_cscxky_mi[i]) : (gemB_cluster_cscxky_mi[i]-clct0_xky)) : MAXGEMCSCBND; 
+      assign clct1_gemA_angle[i] = clct1_gemA_match_me1abok[i] ? (clct1_gemA_bend[i] ? (clct1_xky-gemA_cluster_cscxky_mi[i]) : (gemA_cluster_cscxky_mi[i]-clct1_xky)) : MAXGEMCSCBND; 
+      assign clct1_gemB_angle[i] = clct1_gemB_match_me1abok[i] ? (clct1_gemB_bend[i] ? (clct1_xky-gemB_cluster_cscxky_mi[i]) : (gemB_cluster_cscxky_mi[i]-clct1_xky)) : MAXGEMCSCBND; 
+
+      //ignore bending direction check
+      //assign clct0_gemA_match_ok[i] = clct0_gemA_match[i]  && (clct0_gemA_ME1a[i] || clct0_gemA_ME1b[i]);
+      //assign clct0_gemB_match_ok[i] = clct0_gemB_match[i]  && (clct0_gemB_ME1a[i] || clct0_gemB_ME1b[i]);
+      //assign clct1_gemA_match_ok[i] = clct1_gemA_match[i]  && (clct1_gemA_ME1a[i] || clct1_gemA_ME1b[i]);
+      //assign clct1_gemB_match_ok[i] = clct1_gemB_match[i]  && (clct1_gemB_ME1a[i] || clct1_gemB_ME1b[i]);
+      //with bending direction check
+      assign clct0_gemA_match_ok[i] = clct0_gemA_match_me1abok[i] && (gemcsc_ignore_bend_check || (clct0_gemA_ME1a[i] && bending_min_me1a >= clct0_gemA_angle[i]) || (clct0_gemA_ME1b[i] && bending_min_me1b >= clct0_gemA_angle[i]) || (clct0_gemA_bend[i] == clct0_bend));
+      assign clct0_gemB_match_ok[i] = clct0_gemB_match_me1abok[i] && (gemcsc_ignore_bend_check || (clct0_gemB_ME1a[i] && bending_min_me1a >= clct0_gemB_angle[i]) || (clct0_gemB_ME1b[i] && bending_min_me1b >= clct0_gemB_angle[i]) || (clct0_gemB_bend[i] == clct0_bend));
+      assign clct1_gemA_match_ok[i] = clct1_gemA_match_me1abok[i] && (gemcsc_ignore_bend_check || (clct1_gemA_ME1a[i] && bending_min_me1a >= clct1_gemA_angle[i]) || (clct1_gemA_ME1b[i] && bending_min_me1b >= clct1_gemA_angle[i]) || (clct1_gemA_bend[i] == clct1_bend));
+      assign clct1_gemB_match_ok[i] = clct1_gemB_match_me1abok[i] && (gemcsc_ignore_bend_check || (clct1_gemB_ME1a[i] && bending_min_me1a >= clct1_gemB_angle[i]) || (clct1_gemB_ME1b[i] && bending_min_me1b >= clct1_gemB_angle[i]) || (clct1_gemB_bend[i] == clct1_bend));
       //
       assign copad_cluster_cscxky_mi[i] = copad_match[i] ? gemA_cluster_cscxky_mi[i] : 10'h3FF;//use all 3FF as default csc coordinate for copad 
 

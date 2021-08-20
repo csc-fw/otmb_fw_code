@@ -2813,6 +2813,7 @@ end
    wire        gemA_match_ignore_position;
    wire        gemB_match_ignore_position;
    wire        gemcsc_bend_enable;
+   wire        gemcsc_ignore_bend_check;
 
    wire [7:0]  match_gem_alct_delay;
    wire [3:0]  match_gem_alct_window;
@@ -3236,18 +3237,18 @@ end
   .tmb_allow_clct_ro  (tmb_allow_clct_ro),  // In  Allow CLCT only  readout, non-triggering
   .tmb_allow_match_ro (tmb_allow_match_ro), // In  Allow Match only readout, non-triggering
 
-  .gemcsc_bend_enable     (gemcsc_bend_enable),             //In GEMCSC bending angle enabled
-  .match_gem_alct_delay   (match_gem_alct_delay[7:0]),  //In gem delay for gem-ALCT match
-  .gemA_forclct_pipe      (gemA_forclct_pipe[7:0]),
-  .gemB_forclct_pipe      (gemB_forclct_pipe[7:0]),
-  .copad_match_pipe       (copad_match_pipe [7:0]),
-  .gemA_overflow_pipe     (gemA_overflow_pipe),//  Out, latched for headers
-  .gemB_overflow_pipe     (gemB_overflow_pipe),
-  .gemA_sync_err_pipe     (gemA_sync_err_pipe),
-  .gemB_sync_err_pipe     (gemB_sync_err_pipe),
-  .gems_sync_err_pipe     (gems_sync_err_pipe),
-  .gem_clct_win           (gem_clct_win[3:0]), // In gem location in GEM-CLCT window
-  .alct_gem_win           (alct_gem_win[2:0]), // In gem location in GEM-ALCT window
+  .gemcsc_bend_enable       (gemcsc_bend_enable),             //In GEMCSC bending angle enabled
+  .match_gem_alct_delay      (match_gem_alct_delay[7:0]),  //In gem delay for gem-ALCT match
+  .gemA_forclct_pipe         (gemA_forclct_pipe[7:0]),
+  .gemB_forclct_pipe         (gemB_forclct_pipe[7:0]),
+  .copad_match_pipe          (copad_match_pipe [7:0]),
+  .gemA_overflow_pipe        (gemA_overflow_pipe),//  Out, latched for headers
+  .gemB_overflow_pipe        (gemB_overflow_pipe),
+  .gemA_sync_err_pipe        (gemA_sync_err_pipe),
+  .gemB_sync_err_pipe        (gemB_sync_err_pipe),
+  .gems_sync_err_pipe        (gems_sync_err_pipe),
+  .gem_clct_win              (gem_clct_win[3:0]), // In gem location in GEM-CLCT window
+  .alct_gem_win              (alct_gem_win[2:0]), // In gem location in GEM-ALCT window
 
   .mpc_tx_delay    (mpc_tx_delay[MXMPCDLY-1:0]), // In  MPC transmit delay
   .mpc_sel_ttc_bx0 (mpc_sel_ttc_bx0),            // In  MPC gets ttc_bx0 or bx0_local
@@ -4303,6 +4304,7 @@ wire [15:0] gemB_bxn_counter;
   .clock      (clock),      // In  40MHz TMB main clock
   .ttc_resync (ttc_resync), // In  TTC resync
 
+  .evenchamber  (evenchamber),
 // ALCT
   .alct0_tmb    (alct0_tmb[MXALCT-1:0]), // In  ALCT best muon
   .alct1_tmb    (alct1_tmb[MXALCT-1:0]), // In  ALCT second best muon
@@ -4464,6 +4466,7 @@ wire [15:0] gemB_bxn_counter;
   .gemA_match_ignore_position     (gemA_match_ignore_position),             //In GEMCSC match, no position match
   .gemB_match_ignore_position     (gemB_match_ignore_position),             //In GEMCSC match, no position match
   .gemcsc_bend_enable        (gemcsc_bend_enable),             //In GEMCSC bending angle enabled
+  .gemcsc_ignore_bend_check  (gemcsc_ignore_bend_check),             //In GEMCSC ignore GEMCSC bending direction and CSC bend direction check
 
   .gemA_forclct_pipe      (gemA_forclct_pipe[7:0]),// Out, latched for headers
   .gemB_forclct_pipe      (gemB_forclct_pipe[7:0]),// Out, latched for headers
@@ -5742,6 +5745,7 @@ wire [15:0] gemB_bxn_counter;
       .gemA_match_ignore_position     (gemA_match_ignore_position),             //out GEMCSC match, no position match
       .gemB_match_ignore_position     (gemB_match_ignore_position),             //out GEMCSC match, no position match
       .gemcsc_bend_enable          (gemcsc_bend_enable),         // out enable GEMCSC bending angle for match
+      .gemcsc_ignore_bend_check    (gemcsc_ignore_bend_check),             //In GEMCSC ignore GEMCSC bending direction and CSC bend direction check
 
       .gemcscmatch_cluster0_vme  (gemcscmatch_cluster0_vme[31:0]), // in, 1st cluster for LCT0 from GEMCSC match
       .gemcscmatch_cluster1_vme  (gemcscmatch_cluster1_vme[31:0]), // in, 2nd cluster for LCT1 from GEMCSC match
