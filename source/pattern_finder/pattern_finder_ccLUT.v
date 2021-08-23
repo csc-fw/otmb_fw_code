@@ -2044,10 +2044,10 @@ function [3: 0] run2pid;
       5'd30: pid = 4'd3 ;
       5'd31: pid = 4'd3 ;
   endcase
-  end
 
   run2pid = pid;
 
+  end
 endfunction
 
 
