@@ -96,7 +96,7 @@ module pattern_finder_ccLUT (
   hs_bnd_1st,
   hs_xky_1st,
   hs_car_1st,
-  hs_run2pid_1st;
+  hs_run2pid_1st,
 
   hs_hit_2nd,
   hs_pid_2nd,
@@ -106,7 +106,7 @@ module pattern_finder_ccLUT (
   hs_bnd_2nd,
   hs_xky_2nd,
   hs_car_2nd,
-  hs_run2pid_2nd;
+  hs_run2pid_2nd,
 
   hs_layer_trig,
   hs_nlayers_hit,
@@ -1369,6 +1369,7 @@ module pattern_finder_ccLUT (
   reg [MXBNDB - 1:0] hs_bnd_1st;
   reg [MXPATC - 1:0] hs_car_1st;
   reg [MXXKYB - 1:0] hs_xky_1st;
+  reg [MXPIDB - 1:0] hs_run2pid_1st;
 
   assign hs_hit_1st_dly = hs_pat_1st_dly[MXPATB - 1: MXPIDB];
 
@@ -1790,6 +1791,7 @@ module pattern_finder_ccLUT (
   reg [MXPATC     - 1:0] hs_car_2nd;
   reg [MXXKYB - 1:0]     hs_xky_2nd;
   reg                    hs_bsy_2nd;
+  reg [MXPIDB     - 1:0] hs_run2pid_2nd;
 
   assign hs_hit_s5 = hs_pat_s5[MXPATB - 1: MXPIDB];
   wire blank_2nd    = ((hs_hit_s5 == 0) && (clct_blanking == 1)) || purging;
@@ -1991,9 +1993,10 @@ function [3: 0] run2pid;
       5'd30: pid = 4'd3 ;
       5'd31: pid = 4'd3 ;
   endcase
-  end
 
-  assign run2pid = pid;
+  run2pid = pid;
+
+  end
 
 endfunction
 
