@@ -3258,7 +3258,7 @@
   assign gemcsc_bnd0[4] = best_cluster0_bend;
   assign gemcsc_bnd1[4] = best_cluster1_bend;
   gemcsc_bending_bits ugemcscbnd0(
-  .gemcsc_bending  (best_cluster0_angle_ff),
+  .gemcsc_bending  (best_cluster0_angle_ff[6:0]),
   .even            (evenchamber),
   .isME1a          (clct0_xky_run3[9]),
   .bending_bits    (gemcsc_bnd0[3:0])
@@ -3266,7 +3266,7 @@
 
 
   gemcsc_bending_bits ugemcscbnd1(
-  .gemcsc_bending  (best_cluster1_angle_ff),
+  .gemcsc_bending  (best_cluster1_angle_ff[6:0]),
   .even            (evenchamber),
   .isME1a          (clct1_xky_run3[9]),
   .bending_bits    (gemcsc_bnd1[3:0])
