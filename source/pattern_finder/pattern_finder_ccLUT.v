@@ -98,7 +98,7 @@ module pattern_finder_ccLUT (
   hs_bnd_1st,
   hs_xky_1st,
   hs_car_1st,
-  hs_run2pid_1st;
+  hs_run2pid_1st,
 
   hs_hit_2nd,
   hs_pid_2nd,
@@ -109,7 +109,7 @@ module pattern_finder_ccLUT (
   hs_bnd_2nd,
   hs_xky_2nd,
   hs_car_2nd,
-  hs_run2pid_2nd;
+  hs_run2pid_2nd,
 
   hs_layer_trig,
   hs_nlayers_hit,
