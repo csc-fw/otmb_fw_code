@@ -6318,7 +6318,7 @@ wire [15:0] gemB_bxn_counter;
    // Sump
    assign sump =
      ccb_sump
-   | lut_sump
+  // | lut_sump
    | copad_sump
    | alct_sump
    | rpc_sump
