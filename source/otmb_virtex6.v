@@ -6306,7 +6306,8 @@ wire [15:0] gemB_bxn_counter;
             |       bpi_re
     ;
 
-   wire lut_sump = (|hs_qlt_1st) | (|hs_bnd_1st) | (|hs_xky_1st) | (|hs_qlt_2nd) | (|hs_bnd_2nd) | (|hs_xky_2nd);
+   //wire lut_sump = (|hs_qlt_1st) | (|hs_bnd_1st) | (|hs_xky_1st) | (|hs_qlt_2nd) | (|hs_bnd_2nd) | (|hs_xky_2nd);
+   wire lut_sump = (|hs_bnd_1st) | (|hs_xky_1st) | (|hs_bnd_2nd) | (|hs_xky_2nd);
    // Sump
    assign sump =
      ccb_sump

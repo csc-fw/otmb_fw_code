@@ -2,6 +2,8 @@
 //-------------------------------------------------------------------------------------------------------------------
 //  05/18/2017 Initial
 //  20/07/2020  create one for ccLUT algorithm
+//  for CCLUT: patA => pid4, pat9=> pid3, pat8=>pid2, pat7=>pid1, pat6=>pid0
+//  01/08/2021  results from CCLUT: [4:0] is bending, include 4bit for value, 1bit for L/R; [8:5] is the 4bits for offset
 //-------------------------------------------------------------------------------------------------------------------
   module pattern_lut_ccLUT (
     input                    clock,
@@ -23,7 +25,7 @@
 `include "pattern_params.v"
 
 parameter MXADRB  = 12;
-parameter MXDATB  = 18;
+parameter MXDATB  = 9;//drop the 9 quality bits
 
 wire [MXDATB-1:0]   rd0_patA, rd1_patA,
                     rd0_pat9, rd1_pat9,
@@ -46,7 +48,8 @@ assign rd1_blnk = 0;
 generate
 if (pat_en[A])
 rom #(
-  .ROM_FILE("rom_patA.mem"),
+  //.ROM_FILE("rom_patA.mem"),
+  .ROM_FILE("rom_pat4.mem"),
   .FALLING_EDGE(1'b1),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB)
@@ -65,7 +68,8 @@ endgenerate
 generate
 if (pat_en[9])
 rom #(
-  .ROM_FILE("rom_pat9.mem"),
+  //.ROM_FILE("rom_pat9.mem"),
+  .ROM_FILE("rom_pat3.mem"),
   .FALLING_EDGE(1'b1),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB)
@@ -83,7 +87,8 @@ endgenerate
 generate
 if (pat_en[8])
 rom #(
-  .ROM_FILE("rom_pat8.mem"),
+  //.ROM_FILE("rom_pat8.mem"),
+  .ROM_FILE("rom_pat2.mem"),
   .FALLING_EDGE(1'b1),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB)
@@ -101,7 +106,8 @@ endgenerate
 generate
 if (pat_en[7])
 rom #(
-  .ROM_FILE("rom_pat7.mem"),
+  //.ROM_FILE("rom_pat7.mem"),
+  .ROM_FILE("rom_pat1.mem"),
   .FALLING_EDGE(1'b1),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB)
@@ -119,7 +125,8 @@ endgenerate
 generate
 if (pat_en[6])
 rom #(
-  .ROM_FILE("rom_pat6.mem"),
+  //.ROM_FILE("rom_pat6.mem"),
+  .ROM_FILE("rom_pat0.mem"),
   .FALLING_EDGE(1'b1),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB)
@@ -278,21 +285,32 @@ end
 //  |   15  | 1111     |   2        |   2       |   0     |   0    |
 always @(*) begin
 
-  offs0    <= rd0[17:14];
-  offs1    <= rd1[17:14];
-  
   //key_offs0 <= rd0[17:16] + (rd0[14]&rd0[15]);// real_keyoffs = keyoffs0 -2
   //key_offs1 <= rd1[17:16] + (rd1[14]&rd1[15]);// real_keyoffs = keyoffs1 -2
 
   //subkey_offs0 <= rd0[15:14]+2'b01;// 2bits
   //subkey_offs1 <= rd1[15:14]+2'b01;// 2bits
 
-  bend0    <= rd0[13:9];
-  bend1    <= rd1[13:9];
+  // with 9 bits quality
+  //offs0    <= rd0[17:14];
+  //offs1    <= rd1[17:14];
+  //
 
-  quality0 <= rd0[8:0];
-  quality1 <= rd1[8:0];
+  //bend0    <= rd0[13:9];
+  //bend1    <= rd1[13:9];
 
+  //quality0 <= rd0[8:0];
+  //quality1 <= rd1[8:0];
+
+  // drop 9bits for quality
+  offs0    <= rd0[8:5];
+  offs1    <= rd1[8:5];
+
+  bend0    <= rd0[4:0];
+  bend1    <= rd1[4:0];
+  //dummy
+  quality0 <= 9'b0;
+  quality1 <= 9'b0;
 end
 
 //-------------------------------------------------------------------------------------------------------------------
