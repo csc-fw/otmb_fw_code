@@ -25,6 +25,7 @@
 //  02/11/2013  Remove clock_2x
 //  03/21/2013  Replace adders with ROM, reduces area ratio from 26% to 20%
 //
+//  for CCLUT: patA => pid4, pat9=> pid3, pat8=>pid2, pat7=>pid1, pat6=>pid0
 //------------------------------------------------------------------------------------------------------------------------
 // convention of 12-bits comparator code: [11:0]
 // [1:0] is the first layer and [11:10] is the last layer (layer6)

@@ -46,7 +46,8 @@ assign rd1_blnk = 0;
 generate
 if (pat_en[A])
 rom #(
-  .ROM_FILE("rom_patA.mem"),
+  //.ROM_FILE("rom_patA.mem"),
+  .ROM_FILE("rom_pat4.mem"),
   .FALLING_EDGE(1'b1),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB)
@@ -65,7 +66,8 @@ endgenerate
 generate
 if (pat_en[9])
 rom #(
-  .ROM_FILE("rom_pat9.mem"),
+  //.ROM_FILE("rom_pat9.mem"),
+  .ROM_FILE("rom_pat3.mem"),
   .FALLING_EDGE(1'b1),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB)
@@ -83,7 +85,8 @@ endgenerate
 generate
 if (pat_en[8])
 rom #(
-  .ROM_FILE("rom_pat8.mem"),
+  //.ROM_FILE("rom_pat8.mem"),
+  .ROM_FILE("rom_pat2.mem"),
   .FALLING_EDGE(1'b1),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB)
@@ -101,7 +104,8 @@ endgenerate
 generate
 if (pat_en[7])
 rom #(
-  .ROM_FILE("rom_pat7.mem"),
+  //.ROM_FILE("rom_pat7.mem"),
+  .ROM_FILE("rom_pat1.mem"),
   .FALLING_EDGE(1'b1),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB)
@@ -119,7 +123,8 @@ endgenerate
 generate
 if (pat_en[6])
 rom #(
-  .ROM_FILE("rom_pat6.mem"),
+  //.ROM_FILE("rom_pat6.mem"),
+  .ROM_FILE("rom_pat0.mem"),
   .FALLING_EDGE(1'b1),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB)
@@ -278,20 +283,33 @@ end
 //  |   15  | 1111     |   2        |   2       |   0     |   0    |
 always @(*) begin
 
-  offs0    <= rd0[17:14];
-  offs1    <= rd1[17:14];
-  
   //key_offs0 <= rd0[17:16] + (rd0[14]&rd0[15]);// real_keyoffs = keyoffs0 -2
   //key_offs1 <= rd1[17:16] + (rd1[14]&rd1[15]);// real_keyoffs = keyoffs1 -2
 
   //subkey_offs0 <= rd0[15:14]+2'b01;// 2bits
   //subkey_offs1 <= rd1[15:14]+2'b01;// 2bits
+  //with 9bits quality bits
+  //offs0    <= rd0[17:14];
+  //offs1    <= rd1[17:14];
+  
 
-  bend0    <= rd0[13:9];
-  bend1    <= rd1[13:9];
+  //bend0    <= rd0[13:9];
+  //bend1    <= rd1[13:9];
 
-  quality0 <= rd0[8:0];
-  quality1 <= rd1[8:0];
+  //quality0 <= rd0[8:0];
+  //quality1 <= rd1[8:0];
+
+  //offs0    <= rd0[17:14];
+  //offs1    <= rd1[17:14];
+  
+
+  bend0    <= rd0[4:0];
+  bend1    <= rd1[4:0];
+  offs0    <= rd0[8:5];
+  offs1    <= rd1[8:5];
+
+  quality0 <= 9'b0;
+  quality1 <= 9'b0;
 
 end
 

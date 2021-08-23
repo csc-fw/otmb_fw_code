@@ -1364,12 +1364,12 @@
   // Tao,CCLUT register starts from 10'h19A = 410
   parameter ADR_CLCT0_CC              = 10'h19A;  // Comparator code, for 1st CLCT, readonly
   parameter ADR_CLCT1_CC              = 10'h19C;  // Comparator code, for 2nd CLCT, readonly
-  parameter ADR_CLCT0_QLT             = 10'h19E;  // new Quality
-  parameter ADR_CLCT1_QLT             = 10'h1A0; 
-  parameter ADR_CLCT0_BND             = 10'h1A2;  // new bending
-  parameter ADR_CLCT1_BND             = 10'h1A4; 
-  parameter ADR_CLCT0_XKY             = 10'h1A6; // new position with 1/8 strip precision
-  parameter ADR_CLCT1_XKY             = 10'h1A8; 
+  parameter ADR_CLCT0_BNDXKY          = 10'h19E;  // new bending
+  parameter ADR_CLCT1_BNDXKY          = 10'h1A0; 
+  //parameter ADR_CLCT0_QLT             = 10'h19E;  // new Quality
+  //parameter ADR_CLCT1_QLT             = 10'h1A0; 
+  //parameter ADR_CLCT0_XKY             = 10'h1A6; // new position with 1/8 strip precision
+  //parameter ADR_CLCT1_XKY             = 10'h1A8; 
 
   parameter ADR_RUN3_FORMAT_CTRL      = 10'h1AA; // control for CCLUT, data format
   parameter ADR_HMT_CTRL              = 10'h1AC; // control for HMT
@@ -2865,12 +2865,12 @@
 
   wire [15:0] clct0_cc_rd;
   wire [15:0] clct1_cc_rd;
-  wire [15:0] clct0_qlt_rd;
-  wire [15:0] clct1_qlt_rd;
-  wire [15:0] clct0_bnd_rd;
-  wire [15:0] clct1_bnd_rd;
-  wire [15:0] clct0_xky_rd;
-  wire [15:0] clct1_xky_rd;
+  //wire [15:0] clct0_qlt_rd;
+  //wire [15:0] clct1_qlt_rd;
+  wire [15:0] clct0_bndxky_rd;
+  wire [15:0] clct1_bndxky_rd;
+  //wire [15:0] clct0_xky_rd;
+  //wire [15:0] clct1_xky_rd;
 
   reg  [15:0] run3_format_ctrl_wr;
   wire [15:0] run3_format_ctrl_rd;
@@ -3610,12 +3610,12 @@
   //CCLUT, Tao
   ADR_CLCT0_CC:              data_out <= clct0_cc_rd;
   ADR_CLCT1_CC:              data_out <= clct1_cc_rd;
-  ADR_CLCT0_QLT:             data_out <= clct0_qlt_rd;  // new Quality
-  ADR_CLCT1_QLT:             data_out <= clct1_qlt_rd; 
-  ADR_CLCT0_BND:             data_out <= clct0_bnd_rd;  // new bending
-  ADR_CLCT1_BND:             data_out <= clct1_bnd_rd; 
-  ADR_CLCT0_XKY:             data_out <= clct0_xky_rd; // new position with 1/8 strip precision
-  ADR_CLCT1_XKY:             data_out <= clct1_xky_rd; 
+  ADR_CLCT0_BNDXKY:          data_out <= clct0_bndxky_rd;  // new bending
+  ADR_CLCT1_BNDXKY:          data_out <= clct1_bndxky_rd; 
+  //ADR_CLCT0_QLT:             data_out <= clct0_qlt_rd;  // new Quality
+  //ADR_CLCT1_QLT:             data_out <= clct1_qlt_rd; 
+  //ADR_CLCT0_XKY:             data_out <= clct0_xky_rd; // new position with 1/8 strip precision
+  //ADR_CLCT1_XKY:             data_out <= clct1_xky_rd; 
 
   ADR_RUN3_FORMAT_CTRL:      data_out <= run3_format_ctrl_rd;
   ADR_HMT_CTRL:              data_out <= hmt_ctrl_rd;
@@ -7516,12 +7516,12 @@
 //------------------------------------------------------------------------------------------------------------------
   assign clct0_cc_rd[MXPATC-1:0] = clct0_vme_carry[MXPATC-1:0]; 
   assign clct1_cc_rd[MXPATC-1:0] = clct1_vme_carry[MXPATC-1:0]; 
-  assign clct0_qlt_rd[MXQLTB - 1    : 0] = clct0_vme_qlt[MXQLTB - 1   : 0];
-  assign clct0_bnd_rd[MXBNDB - 1    : 0] = clct0_vme_bnd[MXBNDB - 1   : 0];
-  assign clct0_xky_rd[MXXKYB - 1    : 0] = clct0_vme_xky[MXXKYB - 1   : 0];
-  assign clct1_qlt_rd[MXQLTB - 1    : 0] = clct1_vme_qlt[MXQLTB - 1   : 0];
-  assign clct1_bnd_rd[MXBNDB - 1    : 0] = clct1_vme_bnd[MXBNDB - 1   : 0];
-  assign clct1_xky_rd[MXXKYB - 1    : 0] = clct1_vme_xky[MXXKYB - 1   : 0];
+  //assign clct0_qlt_rd[MXQLTB - 1    : 0] = clct0_vme_qlt[MXQLTB - 1   : 0];
+  //assign clct1_qlt_rd[MXQLTB - 1    : 0] = clct1_vme_qlt[MXQLTB - 1   : 0];
+  assign clct0_bndxky_rd[MXBNDB - 1    : 0]         = clct0_vme_bnd[MXBNDB - 1   : 0];
+  assign clct0_bndxky_rd[MXXKYB - 1+MXBNDB: MXBNDB] = clct0_vme_xky[MXXKYB - 1   : 0];
+  assign clct1_bndxky_rd[MXBNDB - 1    : 0]         = clct1_vme_bnd[MXBNDB - 1   : 0];
+  assign clct1_bndxky_rd[MXXKYB - 1+MXBNDB: MXBNDB] = clct1_vme_xky[MXXKYB - 1   : 0];
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_RUN3_FORMAT_CTRL = 0x1AA  CCLUT
