@@ -1,9 +1,10 @@
 `timescale 1ns / 1ps
 //-------------------------------------------------------------------------------------------------------------------
 // GEMCSC bending angle converted into 4bits value 
+// input gemcsc bending, unit is 1/8 strip. total 7bits
+// output 4bits value
 //-------------------------------------------------------------------------------------------------------------------
-//
-//
+//https://github.com/gem-sw/GEMCode/blob/DisplacedMuonTriggerPtassignment/GEMValidation/interface/Helpers.h
 //const double ME11GEMdPhi[8][3] = {
 //		{-2, 1.0, 1.0},
 //		{5.0,  0.02131422,  0.00907379 },
@@ -24,39 +25,34 @@
 //		{30.0,  0.00369842,  0.00358023 },
 //		{40.0,  0.00369842,  0.00358023 },
 //    };
-module lct_quality (ACC,A,C,A4,C4,P,CPAT,Q);
+// ME1/B 1/8 strip = 2*pi/(36x128x4) = 0.00034089;   ME1/A 1/8 strip = 2*pi/(36*96*4)=0.00045451282
+//  pT  	 odd, 	 even;  ME1A	 odd, 	 even
+//  5.0 	 62.5, 	 26.6;    	46.9, 	 20.0
+//  7.0 	 43.4, 	 19.3;    	32.6, 	 14.5
+//  10.0 	 29.9, 	 13.7;    	22.4, 	 10.3
+//  15.0 	 20.1, 	 9.9;    	15.1, 	 7.4
+//  20.0 	 15.5, 	 8.2;    	11.6, 	 6.1
+//  30.0 	 11.2, 	 6.8;    	8.4, 	 5.1
+//  40.0 	 9.2, 	 6.3;    	6.9, 	 4.7
+// odd: 100, 63, 56, 49, 43, 37, 32, 28, 24, 20,  17, 15, 13, 11,  9
+//even:  46, 30, 27, 25, 23, 20, 18, 16, 14, 12, 10,  8,  6,   5,  4
+//uniform for even and odd: 
+//       60, 56, 52, 48, 44, 40, 36, 32, 28, 24, 20, 16,   12, 8,  4
+module gemcsc_bending_bits (gemcsc_bending, even, isME1a,  bending_bits);
 
 // Ports
-  input  ACC;     // ALCT accelerator muon bit
-  input  A;       // bit: ALCT was found
-  input  C;       // bit: CLCT was found
-  input  A4;      // bit (N_A>=4), where N_A=number of ALCT layers
-  input  C4;      // bit (N_C>=4), where N_C=number of CLCT layers
-  input  [3:0] P; // 4-bit CLCT pattern number that is presently 1 for n-layer triggers, 2-10 for current patterns, 11-15 "for future expansion".
-  input  CPAT;    // bit for cathode .pattern trigger., i.e. (P>=2 && P<=10) at present
-  output [3:0] Q; // 4-bit TMB quality output
+  input [6:0]  gemcsc_bending;
+  input                  even;
+  input                isME1a;
+  output[3:0]    bending_bits;
 
 // Quality-by-quality definition
-  reg [3:0] Q;
+  reg [3:0] out;
+  assign bending_bits = out;
 
   always @* begin
-
-  if      ( !ACC && A4 && C4 && P==10 )          Q=15; // HQ muon, straight
-  else if ( !ACC && A4 && C4 && (P==9 || P==8) ) Q=14; // HQ muon, slight bend
-  else if ( !ACC && A4 && C4 && (P==7 || P==6) ) Q=13; // HQ muon, more
-  else if ( !ACC && A4 && C4 && (P==5 || P==4) ) Q=12; // HQ muon, more
-  else if ( !ACC && A4 && C4 && (P==3 || P==2) ) Q=11; // HQ muon, more
-  //                                              Q=10; // reserved for HQ muons with future patterns
-  //                                              Q=9;  // reserved for HQ muons with future patterns
-  else if (  ACC   &&  A4       &&  C4 && CPAT ) Q=8; // HQ muon, but accel ALCT
-  else if (      A && !A4       &&  C4 && CPAT ) Q=7; // HQ cathode, but marginal anode
-  else if (            A4 &&  C && !C4 && CPAT ) Q=6; // HQ anode, but marginal cathode
-  else if (      A && !A4 &&  C && !C4 && CPAT ) Q=5; // marginal anode and cathode
-  //                                               Q=4; // reserved for LQ muons with 2D information in the future
-  else if (      A        &&  C        && P==1 ) Q=3; // any match but layer CLCT
-  else if (     !A        &&  C                ) Q=2; // some CLCT, no ALCT (unmatched)
-  else if (      A        && !C                ) Q=1; // some ALCT, no CLCT (unmatched)
-  else                                           Q=0; // should never be assigned
+    if (gemcsc_bending[6:2] >= 5'b10000) out <= 4'b1111;
+    else                                 out <= gemcsc_bending[5:2];// namely hs
   end
 
 //-------------------------------------------------------------------------------------------------------------------
