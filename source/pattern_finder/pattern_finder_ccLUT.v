@@ -1403,6 +1403,7 @@ module pattern_finder_ccLUT (
   reg [MXBNDB - 1:0] hs_bnd_1st;
   reg [MXPATC - 1:0] hs_car_1st;
   reg [MXXKYB - 1:0] hs_xky_1st;
+  reg [MXPIDB - 1:0] hs_run2pid_1st;
 
 
   assign hs_hit_1st_dly = hs_pat_1st_dly[MXPATB - 1: MXPIDB];
@@ -1840,6 +1841,7 @@ module pattern_finder_ccLUT (
   reg [MXPATC     - 1:0] hs_car_2nd;
   reg [MXXKYB - 1:0]     hs_xky_2nd;
   reg                    hs_bsy_2nd;
+  reg [MXPIDB     - 1:0] hs_run2pid_2nd;
 
   assign hs_hit_s5 = hs_pat_s5[MXPATB - 1: MXPIDB];
   wire blank_2nd    = ((hs_hit_s5 == 0) && (clct_blanking == 1)) || purging;
