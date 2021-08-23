@@ -2046,7 +2046,7 @@ function [3: 0] run2pid;
   endcase
   end
 
-  assign run2pid = pid;
+  run2pid = pid;
 
 endfunction
 
