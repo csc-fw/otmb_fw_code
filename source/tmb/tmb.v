@@ -1560,6 +1560,7 @@
   assign  mpc1_frame1_run3[15:12] = clct1_bnd_run3[3:0];
 
 
+  //run2 legacy data format
   assign  mpc0_frame0[6:0]   =  alct0_key[6:0];
   assign  mpc0_frame0[10:7]  =  clct0_pat[3:0];
   assign  mpc0_frame0[14:11] =  lct0_quality[3:0];

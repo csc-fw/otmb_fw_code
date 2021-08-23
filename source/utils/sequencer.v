@@ -480,6 +480,7 @@
   hs_bnd_1st,
   hs_xky_1st,
   hs_carry_1st,
+  hs_run2pid_1st,
 
   hs_hit_2nd,
   hs_pid_2nd,
@@ -490,6 +491,7 @@
   hs_bnd_2nd,
   hs_xky_2nd,
   hs_carry_2nd,
+  hs_run2pid_2nd,
 
   hs_layer_trig,
   hs_nlayers_hit,
@@ -780,6 +782,7 @@
   tmb_alctb,
   tmb_alcte,
 
+  run3_trig_df,
   run3_daq_df,
 // MPC Status
   mpc_frame_ff,
@@ -1230,6 +1233,7 @@
   input [MXQLTB     - 1 : 0] hs_qlt_1st; // 1st CLCT pattern lookup quality
   input [MXBNDB     - 1 : 0] hs_bnd_1st; // 1st CLCT pattern lookup bend angle
   input [MXPATC     - 1 : 0] hs_carry_1st; // 1st CLCT pattern lookup comparator-code
+  input  [MXPIDB-1:0]   hs_run2pid_1st;        // 1st CLCT pattern ID
 
   input [MXHITB - 1: 0]  hs_hit_2nd; // 2nd CLCT pattern hits
   input [MXPIDB - 1: 0]  hs_pid_2nd; // 2nd CLCT pattern ID
@@ -1241,6 +1245,7 @@
   input [MXQLTB     - 1 : 0] hs_qlt_2nd; // 1st CLCT pattern lookup quality
   input [MXBNDB     - 1 : 0] hs_bnd_2nd; // 1st CLCT pattern lookup bend angle
   input [MXPATC     - 1 : 0] hs_carry_2nd; // 1st CLCT pattern lookup comparator-code
+  input  [MXPIDB-1:0]   hs_run2pid_2nd;        // 1st CLCT pattern ID
 
   input          hs_layer_trig;      // Layer triggered
   input  [MXHITB-1:0]  hs_nlayers_hit;      // Number of layers hit
@@ -1529,6 +1534,7 @@
   input  [4:0]      tmb_alctb;      // ALCT bxn latched at trigger
   input  [1:0]      tmb_alcte;      // ALCT ecc error syndrome latched at trigger
 
+  input  run3_trig_df;
   input  run3_daq_df;
 
 // MPC Status
@@ -2633,14 +2639,15 @@
 
 // After drift, send CLCT words to TMB, persist 1 cycle only, blank invalid CLCTs unless override
   wire clct0_hit_valid = (hs_hit_1st >= hit_thresh_postdrift);    // CLCT is over hit thresh
-  wire clct0_pid_valid = (hs_pid_1st >= pid_thresh_postdrift);    // CLCT is over pid thresh
+  wire clct0_pid_valid = run3_trig_df ? (hs_pid_1st >= pid_thresh_postdrift) : (hs_run2pid_1st >= pid_thresh_postdrift);    // CLCT is over pid thresh
 
 // JG: this functionality is being removed, 10/25/2017...
 // Algo2016: check if new clct0 key half-strip is outside of dead zone around clct0
 //  wire clct0_key_valid = (hs_key_1st >= hs_key_1st_algo2016 + algo2016_dead_time_zone_size_1st) || (hs_key_1st <= hs_key_1st_algo2016 - algo2016_dead_time_zone_size_1st);
 
   wire clct1_hit_valid = (hs_hit_2nd >= hit_thresh_postdrift);    // CLCT is over hit thresh
-  wire clct1_pid_valid = (hs_pid_2nd >= pid_thresh_postdrift);    // CLCT is over pid thresh
+  wire clct1_pid_valid = run3_trig_df ? (hs_pid_2nd >= pid_thresh_postdrift) : (hs_run2pid_2nd >= pid_thresh_postdrift);    // CLCT is over pid thresh
+  //wire clct1_pid_valid = (hs_pid_2nd >= pid_thresh_postdrift);    // CLCT is over pid thresh
 
 // JG: this functionality is being removed, 10/25/2017...
 // Algo2016: check if new clct1 key half-strip is outside of dead zone around clct1
@@ -2696,7 +2703,7 @@
 
   assign clct0[0]    = clct0_vpf;       // Valid pattern flag
   assign clct0[3:1]  = hs_hit_1st[2:0]; // Hits on pattern 0-6
-  assign clct0[7:4]  = hs_pid_1st[3:0]; // Pattern shape 0-A
+  assign clct0[7:4]  = run3_trig_df ? hs_pid_1st[3:0] : hs_run2pid_1st[3:0]; // Pattern shape 0-A
   assign clct0[15:8] = hs_key_1st[7:0]; // 1/2-strip ID number
 
   assign clct0_qlt[MXQLTB - 1: 0]= hs_qlt_1st[MXQLTB - 1   : 0]; 
@@ -2710,7 +2717,7 @@
 
   assign clct1[0]    = clct1_vpf;       // Valid pattern flag
   assign clct1[3:1]  = hs_hit_2nd[2:0]; // Hits on pattern 0-6
-  assign clct1[7:4]  = hs_pid_2nd[3:0]; // Pattern shape 0-A
+  assign clct1[7:4]  = run3_trig_df ? hs_pid_2nd[3:0] : hs_run2pid_2nd[3:0]; // Pattern shape 0-A
   assign clct1[15:8] = hs_key_2nd[7:0]; // 1/2-strip ID number
 
   assign clcta[5:0]  = hs_layer_or[5:0]; // Layer ORs at pattern finder output
@@ -4198,7 +4205,7 @@
 
 // CLCT Trigger Status
   assign  header22_[8:0]    =  r_trig_source_vec[8:0];    // Trigger source vector
-  assign  header22_[14:9]    =  r_layers_hit[5:0];      // CSC layers hit on layer trigger after drift
+  assign  header22_[14:9]   =  run3_daq_df ? {r_clct1_bnd_xtmb[4], r_clct0_bnd_xtmb[4:0]} : r_layers_hit[5:0];      // CSC layers hit on layer trigger after drift
   assign  header22_[18:15]  =  0;              // DDU+DMB control flags
 
   assign  header23_[4:0]   =  active_feb_mux[4:0];    // Active CFEB list sent to DMB
@@ -4241,12 +4248,12 @@
   assign  header27_[18:15] =  0;              // DDU+DMB control flags
 
 // ALCT Trigger Data
-  assign  header28_[0]    =  r_alct0_valid;        // ALCT0 valid pattern flag
-  assign  header28_[2:1]    =  r_alct0_quality[1:0];    // ALCT0 quality
-  assign  header28_[3]    =  r_alct0_amu;        // ALCT0 accelerator muon flag
-  assign  header28_[10:4]    =  r_alct0_key[6:0];      // ALCT0 key wire group
-  assign  header28_[14:11]  =  r_alct_preClct_win[3:0];  // ALCT active_feb_flag position in pretrig window
-  assign  header28_[18:15]  =  0;              // DDU+DMB control flags
+  assign  header28_[0]     =  r_alct0_valid;        // ALCT0 valid pattern flag
+  assign  header28_[2:1]   =  r_alct0_quality[1:0];    // ALCT0 quality
+  assign  header28_[3]     =  r_alct0_amu;        // ALCT0 accelerator muon flag
+  assign  header28_[10:4]  =  r_alct0_key[6:0];      // ALCT0 key wire group
+  assign  header28_[14:11] =  run3_daq_df ? r_clct1_bnd_xtmb[3:0] : r_alct_preClct_win[3:0];  // ALCT active_feb_flag position in pretrig window
+  assign  header28_[18:15] =  0;              // DDU+DMB control flags
 
   assign  header29_[0]    =  r_alct1_valid;        // ALCT1 valid pattern flag
   assign  header29_[2:1]    =  r_alct1_quality[1:0];    // ALCT1 quality

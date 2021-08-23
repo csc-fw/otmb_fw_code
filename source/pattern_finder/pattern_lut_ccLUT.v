@@ -2,6 +2,8 @@
 //-------------------------------------------------------------------------------------------------------------------
 //  05/18/2017 Initial
 //  20/07/2020  create one for ccLUT algorithm
+//  for CCLUT: patA => pid4, pat9=> pid3, pat8=>pid2, pat7=>pid1, pat6=>pid0
+//  01/08/2021  results from CCLUT: [4:0] is bending, include 4bit for value, 1bit for L/R; [8:5] is the 4bits for offset
 //-------------------------------------------------------------------------------------------------------------------
   module pattern_lut_ccLUT (
     input                    clock,
@@ -23,7 +25,7 @@
 `include "pattern_params.v"
 
 parameter MXADRB  = 12;
-parameter MXDATB  = 18;
+parameter MXDATB  = 9;//drop 9bits for quality
 
 wire [MXDATB-1:0]   rd0_patA, rd1_patA,
                     rd0_pat9, rd1_pat9,
