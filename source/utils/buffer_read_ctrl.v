@@ -289,7 +289,8 @@
 
   parameter READ_ADR_OFFSET      = 11'd6; // Number clocks from first address to pretrigger adr latch, trial 04/22/08
   parameter READ_ADR_OFFSET_RPC  = 11'd0; // Number clocks from first address to pretrigger
-  parameter READ_ADR_OFFSET_GEM  = 11'd6; // Number clocks from first address to pretrigger
+  //parameter READ_ADR_OFFSET_GEM  = 11'd6; // Number clocks from first address to pretrigger
+  parameter READ_ADR_OFFSET_GEM  = 11'd0; // Number clocks from first address to pretrigger.  GEM arrives ~1BX after pretrigger
   parameter READ_ADR_OFFSET_MINI = 11'd0; // Number clocks from first address to pretrigger
 
 // Raw hits RAM parameters
