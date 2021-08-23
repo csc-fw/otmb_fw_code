@@ -4948,7 +4948,7 @@
 
   //Tao, 2020 definition
   assign revcode_vme_new [04:00] = VERSION_MINOR;// 6 bits = Minor version  (minor features, internal fixes, bug fixes, etc).  
-  assign revcode_vme_new [08:05] = VERSION_MAJOR;//5 bits = Major Version (major features which breaks compatibility, requires changes to other board firmware) 
+  assign revcode_vme_new [08:05] = (run3_daq_df) ? VERSION_MAJOR : VERSION_MAJOR+1;//5 bits = Major Version (major features which breaks compatibility, requires changes to other board firmware) 
   //[12:09], 4bits for DAQ format
   //0, old TMB
   //1, Run2 OTMB
@@ -4957,7 +4957,8 @@
   assign revcode_vme_new [12:09] = VERSION_FORMAT;
   assign revcode_vme_new [15:13] = 3'd0;
 
-  assign revcode[14:0] = (run3_daq_df) ? revcode_vme_new[14:0] : revcode_vme[14:0];  // Sequencer format is 15 bits, VME is 16
+  assign revcode[14:0] = (ccLUT_enable) ? revcode_vme_new[14:0] : revcode_vme[14:0];  // Sequencer format is 15 bits, VME is 16
+  //assign revcode[14:0] = revcode_vme_new[14:0];  // Sequencer format is 15 bits, VME is 16
 
 // VME ID Registers, Readonly
   assign version_slot[ 3: 0]  = FIRMWARE_TYPE[3:0]; // Firmware type, C=Normal TMB, D=Debug loopback
@@ -8849,8 +8850,8 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign run3_daq_df  = run3_format_ctrl_wr[2];
 
   assign run3_format_ctrl_rd[0]    = ccLUT_enable;
-  assign run3_format_ctrl_rd[1]    = run3_trig_df;
-  assign run3_format_ctrl_rd[2]    = run3_daq_df;
+  assign run3_format_ctrl_rd[1]    = ccLUT_enable ? run3_trig_df : 1'b0;//only enable it for CCLUT algorithm case
+  assign run3_format_ctrl_rd[2]    = ccLUT_enable ? run3_daq_df  : 1'b0;
   assign run3_format_ctrl_rd[15:3] = run3_format_ctrl_wr[15:3];
 
 

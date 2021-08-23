@@ -2488,6 +2488,7 @@ end
   wire [MXBNDB - 1   : 0] hs_bnd_1st; // new bending 
   wire [MXXKYB-1     : 0] hs_xky_1st; // new position with 1/8 precision
   wire [MXPATC-1     : 0] hs_carry_1st; // CC code 
+  wire [MXPIDB - 1: 0]  hs_run2pid_1st; // 1st CLCT pattern ID
 
   wire  [MXHITB-1:0]  hs_hit_2nd;
   wire  [MXPIDB-1:0]  hs_pid_2nd;
@@ -2499,6 +2500,7 @@ end
   wire [MXBNDB - 1   : 0] hs_bnd_2nd; // new bending 
   wire [MXXKYB-1     : 0] hs_xky_2nd; // new position with 1/8 precision
   wire [MXPATC-1     : 0] hs_carry_2nd; // CC code 
+  wire [MXPIDB - 1: 0]  hs_run2pid_2nd; // 1st CLCT pattern ID
 
   reg reg_ccLUT_enable;
   //enable CCLUT, Tao
@@ -2646,6 +2648,7 @@ end
   .hs_bnd_1st (hs_bnd_1st[MXBNDB - 1   : 0]),
   .hs_xky_1st (hs_xky_1st[MXXKYB-1 : 0]),
   .hs_car_1st (hs_carry_1st[MXPATC-1:0]),
+  .hs_run2pid_1st (hs_run2pid_1st[MXPIDB-1:0]),  // Out  1st CLCT pattern ID
 
   .hs_hit_2nd (hs_hit_2nd[MXHITB-1:0]),  // Out  2nd CLCT pattern hits
   .hs_pid_2nd (hs_pid_2nd[MXPIDB-1:0]),  // Out  2nd CLCT pattern ID
@@ -2656,6 +2659,7 @@ end
   .hs_bnd_2nd (hs_bnd_2nd[MXBNDB - 1   : 0]),
   .hs_xky_2nd (hs_xky_2nd[MXXKYB-1 : 0]),
   .hs_car_2nd (hs_carry_2nd[MXPATC-1:0]),
+  .hs_run2pid_2nd (hs_run2pid_2nd[MXPIDB-1:0]),  // Out  1st CLCT pattern ID
 
   .hs_layer_trig  (hs_layer_trig),              // Out  Layer triggered
   .hs_nlayers_hit (hs_nlayers_hit[MXHITB-1:0]), // Out  Number of layers hit
@@ -3167,6 +3171,7 @@ end
   .hs_bnd_1st (hs_bnd_1st[MXBNDB - 1   : 0]),
   .hs_xky_1st (hs_xky_1st[MXXKYB-1 : 0]),
   .hs_carry_1st (hs_carry_1st[MXPATC-1:0]),
+  .hs_run2pid_1st (hs_run2pid_1st[MXPIDB-1:0]),  // In  1st CLCT pattern ID  
 
   .hs_hit_2nd (hs_hit_2nd[MXHITB-1:0]),  // In  2nd CLCT pattern hits
   .hs_pid_2nd (hs_pid_2nd[MXPIDB-1:0]),  // In  2nd CLCT pattern ID
@@ -3177,6 +3182,7 @@ end
   .hs_bnd_2nd (hs_bnd_2nd[MXBNDB - 1   : 0]),
   .hs_xky_2nd (hs_xky_2nd[MXXKYB-1 : 0]),
   .hs_carry_2nd (hs_carry_2nd[MXPATC-1:0]),
+  .hs_run2pid_2nd (hs_run2pid_2nd[MXPIDB-1:0]),  // In  1st CLCT pattern ID
 
   .hs_layer_trig  (hs_layer_trig),              // In  Layer triggered
   .hs_nlayers_hit (hs_nlayers_hit[MXHITB-1:0]), // In  Number of layers hit
@@ -3550,6 +3556,7 @@ end
   .alct_delaygemA_match_test (alct_delaygemA_match_test), //In ALCT & GEM match for test
   .alct_delaygemB_match_test (alct_delaygemB_match_test), //In ALCT & GEM match for test
 
+  .run3_trig_df  (run3_trig_df),
   .run3_daq_df   (run3_daq_df),
 // Sequencer MPC Status
   .mpc_frame_ff   (mpc_frame_ff),                // In  MPC frame latch strobe
@@ -6307,7 +6314,7 @@ wire [15:0] gemB_bxn_counter;
     ;
 
    //wire lut_sump = (|hs_qlt_1st) | (|hs_bnd_1st) | (|hs_xky_1st) | (|hs_qlt_2nd) | (|hs_bnd_2nd) | (|hs_xky_2nd);
-   wire lut_sump = (|hs_bnd_1st) | (|hs_xky_1st) | (|hs_bnd_2nd) | (|hs_xky_2nd);
+   //wire lut_sump = (|hs_bnd_1st) | (|hs_xky_1st) | (|hs_bnd_2nd) | (|hs_xky_2nd);
    // Sump
    assign sump =
      ccb_sump

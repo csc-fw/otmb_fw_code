@@ -98,6 +98,7 @@ module pattern_finder_ccLUT (
   hs_bnd_1st,
   hs_xky_1st,
   hs_car_1st,
+  hs_run2pid_1st;
 
   hs_hit_2nd,
   hs_pid_2nd,
@@ -108,6 +109,7 @@ module pattern_finder_ccLUT (
   hs_bnd_2nd,
   hs_xky_2nd,
   hs_car_2nd,
+  hs_run2pid_2nd;
 
   hs_layer_trig,
   hs_nlayers_hit,
@@ -242,6 +244,7 @@ module pattern_finder_ccLUT (
   output [MXQLTB     - 1 : 0] hs_qlt_1st; // 1st CLCT pattern lookup quality
   output [MXBNDB     - 1 : 0] hs_bnd_1st; // 1st CLCT pattern lookup bend angle
   output [MXPATC     - 1 : 0] hs_car_1st; // 1st CLCT pattern lookup comparator-code
+  output [MXPIDB - 1: 0]  hs_run2pid_1st; // 1st CLCT pattern ID
 
   output [MXHITB - 1: 0]  hs_hit_2nd; // 2nd CLCT pattern hits
   output [MXPIDB - 1: 0]  hs_pid_2nd; // 2nd CLCT pattern ID
@@ -253,6 +256,7 @@ module pattern_finder_ccLUT (
   output [MXQLTB     - 1 : 0] hs_qlt_2nd; // 1st CLCT pattern lookup quality
   output [MXBNDB     - 1 : 0] hs_bnd_2nd; // 1st CLCT pattern lookup bend angle
   output [MXPATC     - 1 : 0] hs_car_2nd; // 1st CLCT pattern lookup comparator-code
+  output [MXPIDB - 1: 0]  hs_run2pid_2nd; // 1st CLCT pattern ID
 
   output                  hs_layer_trig;  // Layer triggered
   output [MXHITB - 1: 0]  hs_nlayers_hit; // Number of layers hit
@@ -1400,11 +1404,13 @@ module pattern_finder_ccLUT (
   reg [MXPATC - 1:0] hs_car_1st;
   reg [MXXKYB - 1:0] hs_xky_1st;
 
+
   assign hs_hit_1st_dly = hs_pat_1st_dly[MXPATB - 1: MXPIDB];
 
   wire blank_1st    = ((hs_hit_1st_dly == 0) && (clct_blanking == 1)) || purging;
   wire lyr_trig_1st = (hs_layer_latch && layer_trig_en_ff);
 
+  wire [MXPIDB     - 1:0] hs_run2pid_1st_dly = run2pid(hs_bnd_1st_dly);
 
   always @(posedge clock) begin
     if (blank_1st) begin       // blank 1st CLCT
@@ -1415,6 +1421,7 @@ module pattern_finder_ccLUT (
       hs_bnd_1st <= 0;
       hs_car_1st <= 0;
       hs_xky_1st <= 0;
+      hs_run2pid_1st <= 0;
     end
     else if (lyr_trig_1st) begin        // layer-trigger mode
       hs_pid_1st <= 1;                  // Pattern id=1 for layer triggers
@@ -1424,6 +1431,7 @@ module pattern_finder_ccLUT (
       hs_bnd_1st <= 0;
       hs_car_1st <= 0;
       hs_xky_1st <= 0;
+      hs_run2pid_1st <= 0;
     end
     else begin          // else assert final 1st clct
       hs_key_1st <= hs_key_1st_dly;
@@ -1433,6 +1441,7 @@ module pattern_finder_ccLUT (
       hs_bnd_1st <= hs_bnd_1st_dly;
       hs_car_1st <= hs_car_1st_dly;
       hs_xky_1st <= hs_xky_1st_dly;
+      hs_run2pid_1st <= hs_run2pid_1st_dly;
     end
   end
 
@@ -1821,6 +1830,7 @@ module pattern_finder_ccLUT (
     .best_bsy(hs_bsy_s5)
   );
 
+  wire [MXPIDB     - 1:0] hs_run2pid_2nd_s5 = run2pid(hs_bnd_s5);
   // Latch final 2nd CLCT
   reg [MXPIDB     - 1:0] hs_pid_2nd;
   reg [MXHITB     - 1:0] hs_hit_2nd;
@@ -1845,6 +1855,7 @@ module pattern_finder_ccLUT (
       hs_car_2nd <= 0;
       hs_xky_2nd <= 0;
       hs_bsy_2nd <= hs_bsy_s5;
+      hs_run2pid_2nd <= 0;
     end
     else if (lyr_trig_2nd) begin    // layer-trigger mode
       hs_pid_2nd <= 0;
@@ -1855,6 +1866,7 @@ module pattern_finder_ccLUT (
       hs_car_2nd <= 0;
       hs_xky_2nd <= 0;
       hs_bsy_2nd <= hs_bsy_s5;
+      hs_run2pid_2nd <= 0;
     end
     else begin         // else assert final 2nd clct
       hs_pid_2nd <= hs_pat_s5[MXPIDB - 1: 0]-4'd6; //Tao, change pid range 10-6 to 4-0
@@ -1865,6 +1877,7 @@ module pattern_finder_ccLUT (
       hs_bnd_2nd <= hs_bnd_s5;
       hs_car_2nd <= hs_car_s5;
       hs_xky_2nd <= hs_xky_s5;
+      hs_run2pid_2nd <= hs_run2pid_2nd_s5;
     end
   end
 
@@ -1985,6 +1998,53 @@ function [2: 0] count1s;
 
     count1s = rom;
   end
+
+endfunction
+
+//========================
+// LUt to convert run3 bending into run2 pattern id
+function [3: 0] run2pid;
+  input [4: 0] bnd;
+  reg   [3: 0] pid;
+
+  begin
+    case (bnd[4: 0])
+      5'd0 : pid = 4'd10;
+      5'd1 : pid = 4'd10;
+      5'd2 : pid = 4'd10;
+      5'd3 : pid = 4'd8 ;
+      5'd4 : pid = 4'd8 ;
+      5'd5 : pid = 4'd8 ;
+      5'd6 : pid = 4'd6 ;
+      5'd7 : pid = 4'd6 ;
+      5'd8 : pid = 4'd6 ;
+      5'd9 : pid = 4'd4 ;
+      5'd10: pid = 4'd4 ;
+      5'd11: pid = 4'd4 ;
+      5'd12: pid = 4'd2 ;
+      5'd13: pid = 4'd2 ;
+      5'd14: pid = 4'd2 ;
+      5'd15: pid = 4'd2 ;
+      5'd16: pid = 4'd10;
+      5'd17: pid = 4'd10;
+      5'd18: pid = 4'd10;
+      5'd19: pid = 4'd9 ;
+      5'd20: pid = 4'd9 ;
+      5'd21: pid = 4'd9 ;
+      5'd22: pid = 4'd7 ;
+      5'd23: pid = 4'd7 ;
+      5'd24: pid = 4'd7 ;
+      5'd25: pid = 4'd5 ;
+      5'd26: pid = 4'd5 ;
+      5'd27: pid = 4'd5 ;
+      5'd28: pid = 4'd3 ;
+      5'd29: pid = 4'd3 ;
+      5'd30: pid = 4'd3 ;
+      5'd31: pid = 4'd3 ;
+  endcase
+  end
+
+  assign run2pid = pid;
 
 endfunction
 
