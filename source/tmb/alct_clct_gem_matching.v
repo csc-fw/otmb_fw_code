@@ -536,8 +536,8 @@ module  alct_clct_gem_matching(
       //
       assign copad_cluster_cscxky_mi[i] = copad_match[i] ? gemA_cluster_cscxky_mi[i] : 10'h3FF;//use all 3FF as default csc coordinate for copad 
 
-      assign alct0_copad_match[i] = alct0_gemA_match_ok[i] && copad_match[i];
-      assign alct1_copad_match[i] = alct1_gemA_match_ok[i] && copad_match[i];
+      assign alct0_copad_match[i] = alct0_gemA_match[i] && copad_match[i];
+      assign alct1_copad_match[i] = alct1_gemA_match[i] && copad_match[i];
       assign clct0_copad_match[i] = clct0_gemA_match_ok[i] && copad_match[i];
       assign clct1_copad_match[i] = clct1_gemA_match_ok[i] && copad_match[i];
 
