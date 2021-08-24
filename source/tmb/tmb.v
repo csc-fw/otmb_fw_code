@@ -2246,7 +2246,19 @@
 // 1BX latency. results is 1Bx later
 //------------------------------------------------------------------------------------------------------------------
 
-  wire gemcsc_match_enable = (gem_me1a_match_enable || gem_me1b_match_enable) && (|(gemA_fiber_enable | gemB_fiber_enable));
+  reg gem_me1a_match_enable_r = 1'b0;
+  reg gem_me1b_match_enable_r = 1'b0;
+  //reg gemA_fiber_enable_r = 2'b00;
+  //reg gemB_fiber_enable_r = 2'b00;
+  reg gemcsc_match_enable = 1'b0;
+  always @ (posedge clock) begin
+     gemcsc_match_enable <= (gem_me1a_match_enable || gem_me1b_match_enable) && (gemA_fiber_enable || gemB_fiber_enable);
+
+     gem_me1a_match_enable_r <= gem_me1a_match_enable;
+     gem_me1b_match_enable_r <= gem_me1b_match_enable;
+     //gemA_fiber_enable_r  <= gemA_fiber_enable;
+     //gemB_fiber_enable_r  <= gemB_fiber_enable;
+ end
 
   //wire [2:0] alct0_clct0_copad_best_icluster;
   //wire [9:0] alct0_clct0_copad_best_angle;
@@ -2371,8 +2383,8 @@
   .clct0_nhit (clct0_pipe[3:1]),
   .clct1_nhit (clct1_pipe[3:1]),
 
-  .gem_me1a_match_enable      (gem_me1a_match_enable),
-  .gem_me1b_match_enable      (gem_me1b_match_enable),
+  .gem_me1a_match_enable      (gem_me1a_match_enable_r),
+  .gem_me1b_match_enable      (gem_me1b_match_enable_r),
   .match_drop_lowqalct        (match_drop_lowqalct), // drop lowQ stub when no GEM      
   .me1a_match_drop_lowqclct   (me1a_match_drop_lowqclct), // drop lowQ stub when no GEM      
   .me1b_match_drop_lowqclct   (me1b_match_drop_lowqclct), // drop lowQ stub when no GEM      

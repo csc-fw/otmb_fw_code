@@ -1764,7 +1764,10 @@
 
   wire [3:0] gem_fiber_enable = {gemB_fiber_enable, gemA_fiber_enable};
 
-  wire [MXCLUSTER_CHAMBER-1:0] gemA_cluster_enable = {
+  reg  [MXCLUSTER_CHAMBER-1:0] gemA_cluster_enable = 8'b0;
+  reg  [MXCLUSTER_CHAMBER-1:0] gemB_cluster_enable = 8'b0;
+  always @ (posedge clock ) begin
+      gemA_cluster_enable <= {
       gemA_fiber_enable[1],
       gemA_fiber_enable[1],
       gemA_fiber_enable[1],
@@ -1774,7 +1777,7 @@
       gemA_fiber_enable[0],
       gemA_fiber_enable[0]
       };
-  wire [MXCLUSTER_CHAMBER-1:0] gemB_cluster_enable = {
+      gemB_cluster_enable <= {
       gemB_fiber_enable[1],
       gemB_fiber_enable[1],
       gemB_fiber_enable[1],
@@ -1784,6 +1787,7 @@
       gemB_fiber_enable[0],
       gemB_fiber_enable[0]
       };
+  end
 
   wire [9:0]   gem_debug_fifo_adr;    // FIFO RAM read tbin address
   wire [1:0]   gem_debug_fifo_sel;    // FIFO RAM read layer clusters 0-3
