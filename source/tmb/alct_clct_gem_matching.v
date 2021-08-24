@@ -489,14 +489,14 @@ module  alct_clct_gem_matching(
   generate
   for (i=0; i<MXCLUSTER_CHAMBER; i=i+1) begin: gem_csc_match
        //ME1a with CFEB 4, 5,6 while ME1b with CFEB 0, 1,2,3
-      assign clct0_gemA_ME1a[i]   = clct0_xky[9]  && gemA_cluster_cscxky_mi[i][9]  && gem_me1a_match_enable_r;
-      assign clct0_gemB_ME1a[i]   = clct0_xky[9]  && gemB_cluster_cscxky_mi[i][9]  && gem_me1a_match_enable_r;
-      assign clct1_gemA_ME1a[i]   = clct0_xky[9]  && gemA_cluster_cscxky_mi[i][9]  && gem_me1a_match_enable_r;
-      assign clct1_gemB_ME1a[i]   = clct0_xky[9]  && gemB_cluster_cscxky_mi[i][9]  && gem_me1a_match_enable_r;
-      assign clct0_gemA_ME1b[i]   = !clct0_xky[9] && !gemA_cluster_cscxky_mi[i][9] && gem_me1b_match_enable_r;
-      assign clct0_gemB_ME1b[i]   = !clct0_xky[9] && !gemB_cluster_cscxky_mi[i][9] && gem_me1b_match_enable_r;
-      assign clct1_gemA_ME1b[i]   = !clct0_xky[9] && !gemA_cluster_cscxky_mi[i][9] && gem_me1b_match_enable_r;
-      assign clct1_gemB_ME1b[i]   = !clct0_xky[9] && !gemB_cluster_cscxky_mi[i][9] && gem_me1b_match_enable_r;
+      assign clct0_gemA_ME1a[i]   = clct0_xky[9]  && gemA_cluster_cscxky_mi[i][9]  && gem_me1a_match_enable;
+      assign clct0_gemB_ME1a[i]   = clct0_xky[9]  && gemB_cluster_cscxky_mi[i][9]  && gem_me1a_match_enable;
+      assign clct1_gemA_ME1a[i]   = clct0_xky[9]  && gemA_cluster_cscxky_mi[i][9]  && gem_me1a_match_enable;
+      assign clct1_gemB_ME1a[i]   = clct0_xky[9]  && gemB_cluster_cscxky_mi[i][9]  && gem_me1a_match_enable;
+      assign clct0_gemA_ME1b[i]   = !clct0_xky[9] && !gemA_cluster_cscxky_mi[i][9] && gem_me1b_match_enable;
+      assign clct0_gemB_ME1b[i]   = !clct0_xky[9] && !gemB_cluster_cscxky_mi[i][9] && gem_me1b_match_enable;
+      assign clct1_gemA_ME1b[i]   = !clct0_xky[9] && !gemA_cluster_cscxky_mi[i][9] && gem_me1b_match_enable;
+      assign clct1_gemB_ME1b[i]   = !clct0_xky[9] && !gemB_cluster_cscxky_mi[i][9] && gem_me1b_match_enable;
 
       assign clct0_gemA_match_me1ab[i] = (clct0_gemA_ME1a[i] || clct0_gemA_ME1b[i]); 
       assign clct0_gemB_match_me1ab[i] = (clct0_gemB_ME1a[i] || clct0_gemB_ME1b[i]); 
