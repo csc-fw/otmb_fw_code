@@ -1084,7 +1084,7 @@
   parameter MXORBIT    = 30;       // Number orbit counter bits
 
   // ccLUT
-  parameter MXPATC  = 12;                // Pattern Carry Bits
+  parameter MXPATC  = 11;                // Pattern Carry Bits
   parameter MXOFFSB = 4;                 // Quarter-strip bits
   parameter MXQLTB  = 9;                 // Fit quality bits
   parameter MXBNDB  = 5;                 // Bend bits
@@ -7518,6 +7518,8 @@
 //------------------------------------------------------------------------------------------------------------------
   assign clct0_cc_rd[MXPATC-1:0] = clct0_vme_carry[MXPATC-1:0]; 
   assign clct1_cc_rd[MXPATC-1:0] = clct1_vme_carry[MXPATC-1:0]; 
+  assign clct0_cc_rd[11] = 1'b0;
+  assign clct1_cc_rd[11] = 1'b0;//since comparator code is reduced to 11 bits but software is not changed yet
   //assign clct0_qlt_rd[MXQLTB - 1    : 0] = clct0_vme_qlt[MXQLTB - 1   : 0];
   //assign clct1_qlt_rd[MXQLTB - 1    : 0] = clct1_vme_qlt[MXQLTB - 1   : 0];
   assign clct0_bndxky_rd[MXBNDB - 1    : 0]         = clct0_vme_bnd[MXBNDB - 1   : 0];

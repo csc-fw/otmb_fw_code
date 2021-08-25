@@ -24,7 +24,7 @@
 
 `include "pattern_params.v"
 
-parameter MXADRB  = 12;
+parameter MXADRB  = MXPATC;
 parameter MXDATB  = 9;//drop 9bits for quality
 
 wire [MXDATB-1:0]   rd0_patA, rd1_patA,
@@ -237,10 +237,10 @@ always @(*) begin
     16'h8:   rd0 = (pat_en['h8]) ? rd0_pat8 : rd0_blnk;
     16'h7:   rd0 = (pat_en['h7]) ? rd0_pat7 : rd0_blnk;
     16'h6:   rd0 = (pat_en['h6]) ? rd0_pat6 : rd0_blnk;
-    16'h5:   rd0 = (pat_en['h5]) ? rd0_pat5 : rd0_blnk;
-    16'h4:   rd0 = (pat_en['h4]) ? rd0_pat4 : rd0_blnk;
-    16'h3:   rd0 = (pat_en['h3]) ? rd0_pat3 : rd0_blnk;
-    16'h2:   rd0 = (pat_en['h2]) ? rd0_pat2 : rd0_blnk;
+    //16'h5:   rd0 = (pat_en['h5]) ? rd0_pat5 : rd0_blnk;
+    //16'h4:   rd0 = (pat_en['h4]) ? rd0_pat4 : rd0_blnk;
+    //16'h3:   rd0 = (pat_en['h3]) ? rd0_pat3 : rd0_blnk;
+    //16'h2:   rd0 = (pat_en['h2]) ? rd0_pat2 : rd0_blnk;
     default: rd0 =                            rd0_blnk;
   endcase
 
@@ -250,10 +250,10 @@ always @(*) begin
     16'h8:   rd1 = (pat_en['h8]) ? rd1_pat8 : rd1_blnk;
     16'h7:   rd1 = (pat_en['h7]) ? rd1_pat7 : rd1_blnk;
     16'h6:   rd1 = (pat_en['h6]) ? rd1_pat6 : rd1_blnk;
-    16'h5:   rd1 = (pat_en['h5]) ? rd1_pat5 : rd1_blnk;
-    16'h4:   rd1 = (pat_en['h4]) ? rd1_pat4 : rd1_blnk;
-    16'h3:   rd1 = (pat_en['h3]) ? rd1_pat3 : rd1_blnk;
-    16'h2:   rd1 = (pat_en['h2]) ? rd1_pat2 : rd1_blnk;
+    //16'h5:   rd1 = (pat_en['h5]) ? rd1_pat5 : rd1_blnk;
+    //16'h4:   rd1 = (pat_en['h4]) ? rd1_pat4 : rd1_blnk;
+    //16'h3:   rd1 = (pat_en['h3]) ? rd1_pat3 : rd1_blnk;
+    //16'h2:   rd1 = (pat_en['h2]) ? rd1_pat2 : rd1_blnk;
     default: rd1 =                            rd1_blnk;
   endcase
 end

@@ -865,11 +865,11 @@ module pattern_finder_ccLUT (
 `ifdef CSC_TYPE_A
            hs_hit_s0ab[ihs] <= cfeb_en_ff[ihs/MXHS] ? hs_hit[ihs] : 3'b0;
            hs_pid_s0ab[ihs] <= cfeb_en_ff[ihs/MXHS] ? hs_pid[ihs] : 4'b0;
-           hs_carry_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_carry[ihs] : 12'b0;
+           hs_carry_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_carry[ihs] : 11'b0;
 `elsif CSC_TYPE_B
            hs_hit_s0ab[ihs] <= cfeb_en_ff[MXCFEB-1-ihs/MXHS] ? hs_hit[ihs] : 3'b0;
            hs_pid_s0ab[ihs] <= cfeb_en_ff[MXCFEB-1-ihs/MXHS] ? hs_pid[ihs] : 4'b0;
-           hs_carry_s0ab[ihs] <= cfeb_en_ff[MXCFEB-1-(ihs/MXHS)] ? hs_carry[ihs] : 12'b0;
+           hs_carry_s0ab[ihs] <= cfeb_en_ff[MXCFEB-1-(ihs/MXHS)] ? hs_carry[ihs] : 11'b0;
 `endif
       end
     end

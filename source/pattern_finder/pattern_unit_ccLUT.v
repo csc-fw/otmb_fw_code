@@ -61,7 +61,7 @@
 // Hit pattern LUTs for 1 layer: - = don't care, xx= one hit or the other or both
 //------------------------------------------------------------------------------------------------------------------------
 
-  wire [0:2] pat   [MXPID-1:2][0:MXLY-1]; // Ordering 0:LXLY-1 uses 132 LUTs, and fpga usage is 90%, matches ly3 key result
+  wire [0:2] pat   [MXPID-1:MIPID][0:MXLY-1]; // Ordering 0:LXLY-1 uses 132 LUTs, and fpga usage is 90%, matches ly3 key result
 
 // Pattern A                                                                                                                                       0123456789A
   assign pat[A][0] = {3{pat_en[A]}} &  pat_maskA[15+:3] & {                            ly0[4],ly0[5],ly0[6]                              }; // ly0 ----xxx----
@@ -103,41 +103,41 @@
   assign pat[6][4] = {3{pat_en[6]}} &  pat_mask6[3 +:3] & {       ly4[1],ly4[2],ly4[3]                                                   }; // ly4 -xxx---------
   assign pat[6][5] = {3{pat_en[6]}} &  pat_mask6[0 +:3] & {ly5[0],ly5[1],ly5[2]                                                          }; // ly5 xxx----------
 
-  assign pat[5][0] = 3'b000;
-  assign pat[5][1] = 3'b000;
-  assign pat[5][2] = 3'b000;
-  assign pat[5][3] = 3'b000;
-  assign pat[5][4] = 3'b000;
-  assign pat[5][5] = 3'b000;
+  //assign pat[5][0] = 3'b000;
+  //assign pat[5][1] = 3'b000;
+  //assign pat[5][2] = 3'b000;
+  //assign pat[5][3] = 3'b000;
+  //assign pat[5][4] = 3'b000;
+  //assign pat[5][5] = 3'b000;
 
-  assign pat[4][0] = 3'b000;
-  assign pat[4][1] = 3'b000;
-  assign pat[4][2] = 3'b000;
-  assign pat[4][3] = 3'b000;
-  assign pat[4][4] = 3'b000;
-  assign pat[4][5] = 3'b000;
+  //assign pat[4][0] = 3'b000;
+  //assign pat[4][1] = 3'b000;
+  //assign pat[4][2] = 3'b000;
+  //assign pat[4][3] = 3'b000;
+  //assign pat[4][4] = 3'b000;
+  //assign pat[4][5] = 3'b000;
 
-  assign pat[3][0] = 3'b000;
-  assign pat[3][1] = 3'b000;
-  assign pat[3][2] = 3'b000;
-  assign pat[3][3] = 3'b000;
-  assign pat[3][4] = 3'b000;
-  assign pat[3][5] = 3'b000;
+  //assign pat[3][0] = 3'b000;
+  //assign pat[3][1] = 3'b000;
+  //assign pat[3][2] = 3'b000;
+  //assign pat[3][3] = 3'b000;
+  //assign pat[3][4] = 3'b000;
+  //assign pat[3][5] = 3'b000;
 
-  assign pat[2][0] = 3'b000;
-  assign pat[2][1] = 3'b000;
-  assign pat[2][2] = 3'b000;
-  assign pat[2][3] = 3'b000;
-  assign pat[2][4] = 3'b000;
-  assign pat[2][5] = 3'b000;
+  //assign pat[2][0] = 3'b000;
+  //assign pat[2][1] = 3'b000;
+  //assign pat[2][2] = 3'b000;
+  //assign pat[2][3] = 3'b000;
+  //assign pat[2][4] = 3'b000;
+  //assign pat[2][5] = 3'b000;
 
 // Count number of layers hit for each pattern
-  wire [MXHITB-1:0] nhits [MXPID-1:2];
-  wire        [5:0] lyhit [MXPID-1:2];
+  wire [MXHITB-1:0] nhits [MXPID-1:MIPID];
+  wire        [5:0] lyhit [MXPID-1:MIPID];
 
   genvar i;
   generate
-  for (i=2; i<=MXPID-1; i=i+1) begin: gencount
+  for (i=MIPID; i<=MXPID-1; i=i+1) begin: gencount
       assign lyhit[i] = ({|(pat[i][0]),|(pat[i][1]),|(pat[i][2]),|(pat[i][3]),|(pat[i][4]),|(pat[i][5])});
       assign nhits[i] = count1s(lyhit[i]);
   end
@@ -145,20 +145,55 @@
 
 // Generate carry flags for each pattern, each layer
 
-  reg  [MXPATC-1:0] carry [MXPID-1:2];
+  reg  [MXPATC-1:0] carry [MXPID-1:MIPID];
 
   genvar ily;
   genvar ipat;
   generate
-  for (ipat=2; ipat<MXPID; ipat=ipat+1) begin: patloop
-    for (ily=0; ily<6; ily=ily+1) begin: lyloop
-      always @(*) begin
-            if      (pat[ipat][ily][0]) carry [ipat][(ily*2)+:2] = 2'd1;
-            else if (pat[ipat][ily][1]) carry [ipat][(ily*2)+:2] = 2'd2;
-            else if (pat[ipat][ily][2]) carry [ipat][(ily*2)+:2] = 2'd3;
-            else                        carry [ipat][(ily*2)+:2] = 2'd0;
-      end // always
-    end // lyloop
+  for (ipat=MIPID; ipat<MXPID; ipat=ipat+1) begin: patloop
+    //for (ily=0; ily<6; ily=ily+1) begin: lyloop
+    //  always @(*) begin
+    //        if      (pat[ipat][ily][0]) carry [ipat][(ily*2)+:2] = 2'd1;
+    //        else if (pat[ipat][ily][1]) carry [ipat][(ily*2)+:2] = 2'd2;
+    //        else if (pat[ipat][ily][2]) carry [ipat][(ily*2)+:2] = 2'd3;
+    //        else                        carry [ipat][(ily*2)+:2] = 2'd0;
+    //  end // always
+    //end // lyloop
+    always @(*) begin
+        case(pat[ipat][0])//layer0
+            3'b001 : carry [ipat][1:0] = 2'b01;
+            3'b010 : carry [ipat][1:0] = 2'b10;
+            3'b100 : carry [ipat][1:0] = 2'b11;
+            default: carry [ipat][1:0] = 2'b00;
+        endcase
+        case(pat[ipat][1])//layer1
+            3'b001 : carry [ipat][3:2] = 2'b01;
+            3'b010 : carry [ipat][3:2] = 2'b10;
+            3'b100 : carry [ipat][3:2] = 2'b11;
+            default: carry [ipat][3:2] = 2'b00;
+        endcase
+        carry [ipat][4] <= pat[ipat][2][1];//key layer, layer2
+        case(pat[ipat][3])//layer3
+            3'b001 : carry [ipat][6:5] = 2'b01;
+            3'b010 : carry [ipat][6:5] = 2'b10;
+            3'b100 : carry [ipat][6:5] = 2'b11;
+            default: carry [ipat][6:5] = 2'b00;
+        endcase
+        case(pat[ipat][4])//layer4
+            3'b001 : carry [ipat][8:7] = 2'b01;
+            3'b010 : carry [ipat][8:7] = 2'b10;
+            3'b100 : carry [ipat][8:7] = 2'b11;
+            default: carry [ipat][8:7] = 2'b00;
+        endcase
+        case(pat[ipat][5])//layer5
+            3'b001 : carry [ipat][10:9] = 2'b01;
+            3'b010 : carry [ipat][10:9] = 2'b10;
+            3'b100 : carry [ipat][10:9] = 2'b11;
+            default: carry [ipat][10:9] = 2'b00;
+        endcase
+
+    end // always
+
   end // patloop
   endgenerate
 
