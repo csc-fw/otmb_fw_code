@@ -791,7 +791,7 @@ module pattern_finder_ccLUT (
             .ly4 (ly4hs_pad[ihs + 4 + k: ihs - 4 + k]),
             .ly5 (ly5hs_pad[ihs + 5 + k: ihs - 5 + k]),
             .pat_nhits (hs_hit[ihs]),
-            .pat_id (hs_pid[ihs]),
+            .pat_id (hs_pid[ihs]), //pid range 0-4
             .pat_carry (hs_carry[ihs]));
         end
        endgenerate
@@ -1401,7 +1401,7 @@ module pattern_finder_ccLUT (
     end
     else begin          // else assert final 1st clct
       hs_key_1st <= hs_key_1st_dly;
-      hs_pid_1st <= hs_pat_1st_dly[MXPIDB - 1: 0] -4'd6;//change pid range 10-6 into range 4-0
+      hs_pid_1st <= hs_pat_1st_dly[MXPIDB - 1: 0];//change pid range 10-6 into range 4-0
       hs_hit_1st <= hs_pat_1st_dly[MXPATB - 1: MXPIDB];
       hs_qlt_1st <= hs_qlt_1st_dly;
       hs_bnd_1st <= hs_bnd_1st_dly;
@@ -1821,7 +1821,7 @@ module pattern_finder_ccLUT (
       hs_run2pid_2nd <= 0;
     end
     else begin         // else assert final 2nd clct
-      hs_pid_2nd <= hs_pat_s5[MXPIDB - 1: 0]-4'd6;// change pid range 10 to 6 into range 4-0
+      hs_pid_2nd <= hs_pat_s5[MXPIDB - 1: 0];// change pid range 10 to 6 into range 4-0
       hs_hit_2nd <= hs_pat_s5[MXPATB - 1: MXPIDB];
       hs_key_2nd <= hs_key_s5;
       hs_bsy_2nd <= hs_bsy_s5;

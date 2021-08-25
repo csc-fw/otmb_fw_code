@@ -203,45 +203,36 @@
   endgenerate
 
 // Best 1 of 8 Priority Encoder, perfers higher pattern number if hits are equal
-  wire [MXHITB-1:0] nhits_s0 [4:0];
-  wire [MXHITB-1:0] nhits_s1 [2:0];
-  wire [MXHITB-1:0] nhits_s2 [1:0];
-  wire [MXHITB-1:0] nhits_s3 [0:0];
+  wire [MXHITB-1:0] nhits_s0 [2:0];
+  wire [MXHITB-1:0] nhits_s1 [1:0];
+  wire [MXHITB-1:0] nhits_s2 [0:0];
 
-  wire [MXPATC-1:0] carry_s0 [4:0];
-  wire [MXPATC-1:0] carry_s1 [2:0];
-  wire [MXPATC-1:0] carry_s2 [1:0];
-  wire [MXPATC-1:0] carry_s3 [0:0];
+  wire [MXPATC-1:0] carry_s0 [2:0];
+  wire [MXPATC-1:0] carry_s1 [1:0];
+  wire [MXPATC-1:0] carry_s2 [0:0];
 
-  wire [4:0] pid_s0;
-  wire [1:0] pid_s1 [2:0];
-  wire [2:0] pid_s2 [1:0];
-  wire [3:0] pid_s3 [0:0];
-
-// 9 to 5
-  assign {nhits_s0[4],pid_s0[4],carry_s0[4]} =                         {nhits[A],1'b0,carry[A]};
-  assign {nhits_s0[3],pid_s0[3],carry_s0[3]} = (nhits[8] > nhits[9]) ? {nhits[8],1'b0,carry[8]} : {nhits[9],1'b1,carry[9]};
-  assign {nhits_s0[2],pid_s0[2],carry_s0[2]} = (nhits[6] > nhits[7]) ? {nhits[6],1'b0,carry[6]} : {nhits[7],1'b1,carry[7]};
-  assign {nhits_s0[1],pid_s0[1],carry_s0[1]} = (nhits[4] > nhits[5]) ? {nhits[4],1'b0,carry[4]} : {nhits[5],1'b1,carry[5]};
-  assign {nhits_s0[0],pid_s0[0],carry_s0[0]} = (nhits[2] > nhits[3]) ? {nhits[2],1'b0,carry[2]} : {nhits[3],1'b1,carry[3]};
+  wire [2:0] pid_s0;
+  wire [1:0] pid_s1 [1:0];
+  wire [2:0] pid_s2 [0:0];
 
 // 5 to 3
-  assign {nhits_s1[2],pid_s1[2],carry_s1[2]} =                               {nhits_s0[4],{1'b0,pid_s0[4]},carry_s0[4]};
-  assign {nhits_s1[1],pid_s1[1],carry_s1[1]} = (nhits_s0[2] > nhits_s0[3]) ? {nhits_s0[2],{1'b0,pid_s0[2]},carry_s0[2]} : {nhits_s0[3],{1'b1,pid_s0[3]},carry_s0[3]};
-  assign {nhits_s1[0],pid_s1[0],carry_s1[0]} = (nhits_s0[0] > nhits_s0[1]) ? {nhits_s0[0],{1'b0,pid_s0[0]},carry_s0[0]} : {nhits_s0[1],{1'b1,pid_s0[1]},carry_s0[1]};
+  assign {nhits_s0[2],pid_s0[2],carry_s0[2]} =                         {nhits[A],1'b0,carry[A]};
+  assign {nhits_s0[1],pid_s0[1],carry_s0[1]} = (nhits[8] > nhits[9]) ? {nhits[8],1'b0,carry[8]} : {nhits[9],1'b1,carry[9]};
+  assign {nhits_s0[0],pid_s0[0],carry_s0[0]} = (nhits[6] > nhits[7]) ? {nhits[6],1'b0,carry[6]} : {nhits[7],1'b1,carry[7]};
 
 // 3 to 2
-  assign {nhits_s2[1],pid_s2[1],carry_s2[1]} =                               {nhits_s1[2],{1'b0,pid_s1[2]},carry_s1[2]};
-  assign {nhits_s2[0],pid_s2[0],carry_s2[0]} = (nhits_s1[0] > nhits_s1[1]) ? {nhits_s1[0],{1'b0,pid_s1[0]},carry_s1[0]} : {nhits_s1[1],{1'b1,pid_s1[1]},carry_s1[1]};
+  assign {nhits_s1[1],pid_s1[1],carry_s1[1]} =                               {nhits_s0[2],{1'b0,pid_s0[2]},carry_s0[2]};
+  assign {nhits_s1[0],pid_s1[0],carry_s1[0]} = (nhits_s0[0] > nhits_s0[1]) ? {nhits_s0[2],{1'b0,pid_s0[0]},carry_s0[0]} : {nhits_s0[1],{1'b1,pid_s0[1]},carry_s0[1]};
 
 // 2 to 1
-  assign {nhits_s3[0],pid_s3[0],carry_s3[0]} = (nhits_s2[0] > nhits_s2[1]) ? {nhits_s2[0],{1'b0,pid_s2[0]},carry_s2[0]} : {nhits_s2[1],{1'b1,pid_s2[1]},carry_s2[1]};
+  assign {nhits_s2[0],pid_s2[0],carry_s2[0]} = (nhits_s1[0] > nhits_s1[1]) ? {nhits_s1[0],{1'b0,pid_s1[0]},carry_s1[0]} : {nhits_s1[1],{1'b1,pid_s1[1]},carry_s1[1]};
+
 
 // Add 2 to pid to shift to range 2-10
 
-  assign pat_nhits = nhits_s3 [0][MXHITB-1:0];
-  assign pat_id    = pid_s3   [0][MXPIDB-1:0] + 4'd2;
-  assign pat_carry = carry_s3 [0][MXPATC-1:0];
+  assign pat_nhits = nhits_s2 [0][MXHITB-1:0];
+  assign pat_id    = pid_s2   [0][MXPIDB-1:0];
+  assign pat_carry = carry_s2 [0][MXPATC-1:0];
 
 //------------------------------------------------------------------------------------------------------------------------
 //  Prodcedural function to sum number of layers hit into a binary value - ROM version
