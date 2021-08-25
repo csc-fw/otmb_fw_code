@@ -674,13 +674,13 @@
   parameter MXMPCDLY   = 4;  // MPC delay time bits
 
   //CCLUT
-  parameter MXPATC   = 12;                // Pattern Carry Bits
+  parameter MXPATC   = 11;                // Pattern Carry Bits
   parameter MXOFFSB  = 4;                 // Quarter-strip bits
   parameter MXQLTB   = 9;                 // Fit quality bits
   parameter MXBNDB   = 5;                 // Bend bits
   parameter MXXKYB   = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
   //parameter MXCCLUTB = 10+5+9+12;  // New 35bits for CCLUT, new quality, bnd, xky, comparator code 
-  parameter MXCCLUTB = MXPATC+MXQLTB+MXBNDB+MXXKYB;
+  parameter MXCCLUTB = MXPATC+MXBNDB+MXXKYB;
 
   //HMT
   parameter MXHMTB   = 4;
@@ -1551,8 +1551,8 @@
   wire [MXCLCTC-1:0] clctc_pipe, clctc_srl; // Common to CLCT0/1 to TMB
   wire [MXCFEB-1:0]  clctf_pipe, clctf_srl; // Active cfeb list to TMB
 
-  wire [MXCCLUTB-1  : 0]  clct0_cclut_xtmb = {clct0_qlt_xtmb, clct0_bnd_xtmb, clct0_xky_xtmb, clct0_carry_xtmb};
-  wire [MXCCLUTB-1  : 0]  clct1_cclut_xtmb = {clct1_qlt_xtmb, clct1_bnd_xtmb, clct1_xky_xtmb, clct1_carry_xtmb};
+  wire [MXCCLUTB-1  : 0]  clct0_cclut_xtmb = {clct0_bnd_xtmb, clct0_xky_xtmb, clct0_carry_xtmb};
+  wire [MXCCLUTB-1  : 0]  clct1_cclut_xtmb = {clct1_bnd_xtmb, clct1_xky_xtmb, clct1_carry_xtmb};
   wire [MXCCLUTB-1  : 0]  clct0_cclut_pipe, clct0_cclut_srl;
   wire [MXCCLUTB-1  : 0]  clct1_cclut_pipe, clct1_cclut_srl;
 
@@ -1609,8 +1609,8 @@
   wire  [MXXKYB-1     : 0] clct1_xky_pipe; // new position with 1/8 precision
   wire  [MXPATC-1     : 0] clct1_carry_pipe; // CC code 
 
-  assign {clct0_qlt_pipe, clct0_bnd_pipe, clct0_xky_pipe, clct0_carry_pipe} = clct0_cclut_pipe;
-  assign {clct1_qlt_pipe, clct1_bnd_pipe, clct1_xky_pipe, clct1_carry_pipe} = clct1_cclut_pipe;
+  assign {clct0_bnd_pipe, clct0_xky_pipe, clct0_carry_pipe} = clct0_cclut_pipe;
+  assign {clct1_bnd_pipe, clct1_xky_pipe, clct1_carry_pipe} = clct1_cclut_pipe;
 //------------------------------------------------------------------------------------------------------------------
 // Pre-calculate dynamic clct window parameters
 //------------------------------------------------------------------------------------------------------------------
@@ -3173,8 +3173,8 @@
   wire  [MXXKYB-1     : 0] clct1_xky; // new position with 1/8 precision
   wire  [MXPATC-1     : 0] clct1_carry; // CC code 
 
-  assign {clct0_qlt, clct0_bnd, clct0_xky, clct0_carry} = clct0_cclut;
-  assign {clct1_qlt, clct1_bnd, clct1_xky, clct1_carry} = clct1_cclut;
+  assign {clct0_bnd, clct0_xky, clct0_carry} = clct0_cclut;
+  assign {clct1_bnd, clct1_xky, clct1_carry} = clct1_cclut;
   
 
 //------------------------------------------------------------------------------------------------------------------
@@ -3272,20 +3272,19 @@
   wire [4:0] gemcsc_bnd0, gemcsc_bnd1;
   assign gemcsc_bnd0[4] = best_cluster0_bend;
   assign gemcsc_bnd1[4] = best_cluster1_bend;
-  gemcsc_bending_bits ugemcscbnd0(
-  .gemcsc_bending  (best_cluster0_angle_ff[6:0]),
-  .even            (evenchamber),
-  .isME1a          (clct0_xky_run3[9]),
-  .bending_bits    (gemcsc_bnd0[3:0])
+  gemcsc_bending_bits ugemcscbnd(
+  .clock            (clock),
+  .gemcsc_bending0  (best_cluster0_angle_ff[6:0]),
+  .gemcsc_bending1  (best_cluster1_angle_ff[6:0]),
+  .gemcsc_gemB0     (best_cluster0_ingemB),
+  .gemcsc_gemB1     (best_cluster1_ingemB),
+  .isME1a0          (clct0_xky_run3[9]),
+  .isME1a1          (clct1_xky_run3[9]),
+  .even             (evenchamber),
+  .bending_bits0    (gemcsc_bnd1[3:0]),
+  .bending_bits1    (gemcsc_bnd0[3:0])
   );
 
-
-  gemcsc_bending_bits ugemcscbnd1(
-  .gemcsc_bending  (best_cluster1_angle_ff[6:0]),
-  .even            (evenchamber),
-  .isME1a          (clct1_xky_run3[9]),
-  .bending_bits    (gemcsc_bnd1[3:0])
-  );
 //------------------------------------------------------------------------------------------------------------------
 // Delay alct and clct bx0 strobes
 //------------------------------------------------------------------------------------------------------------------

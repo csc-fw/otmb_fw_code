@@ -24,18 +24,18 @@
 
 `include "pattern_params.v"
 
-parameter MXADRB  = 12;
-parameter MXDATB  = 9;//drop the 9 quality bits
+parameter MXADRB  = MXPATC;
+parameter MXDATB  = 9;//drop 9bits for quality
 
 wire [MXDATB-1:0]   rd0_patA, rd1_patA,
                     rd0_pat9, rd1_pat9,
                     rd0_pat8, rd1_pat8,
                     rd0_pat7, rd1_pat7,
                     rd0_pat6, rd1_pat6,
-                    rd0_pat5, rd1_pat5,
-                    rd0_pat4, rd1_pat4,
-                    rd0_pat3, rd1_pat3,
-                    rd0_pat2, rd1_pat2,
+                    //rd0_pat5, rd1_pat5,
+                    //rd0_pat4, rd1_pat4,
+                    //rd0_pat3, rd1_pat3,
+                    //rd0_pat2, rd1_pat2,
                     rd0_blnk, rd1_blnk;
 
 assign rd0_blnk = 0;
@@ -237,10 +237,10 @@ always @(*) begin
     16'h8:   rd0 = (pat_en['h8]) ? rd0_pat8 : rd0_blnk;
     16'h7:   rd0 = (pat_en['h7]) ? rd0_pat7 : rd0_blnk;
     16'h6:   rd0 = (pat_en['h6]) ? rd0_pat6 : rd0_blnk;
-    16'h5:   rd0 = (pat_en['h5]) ? rd0_pat5 : rd0_blnk;
-    16'h4:   rd0 = (pat_en['h4]) ? rd0_pat4 : rd0_blnk;
-    16'h3:   rd0 = (pat_en['h3]) ? rd0_pat3 : rd0_blnk;
-    16'h2:   rd0 = (pat_en['h2]) ? rd0_pat2 : rd0_blnk;
+    //16'h5:   rd0 = (pat_en['h5]) ? rd0_pat5 : rd0_blnk;
+    //16'h4:   rd0 = (pat_en['h4]) ? rd0_pat4 : rd0_blnk;
+    //16'h3:   rd0 = (pat_en['h3]) ? rd0_pat3 : rd0_blnk;
+    //16'h2:   rd0 = (pat_en['h2]) ? rd0_pat2 : rd0_blnk;
     default: rd0 =                            rd0_blnk;
   endcase
 
@@ -250,10 +250,10 @@ always @(*) begin
     16'h8:   rd1 = (pat_en['h8]) ? rd1_pat8 : rd1_blnk;
     16'h7:   rd1 = (pat_en['h7]) ? rd1_pat7 : rd1_blnk;
     16'h6:   rd1 = (pat_en['h6]) ? rd1_pat6 : rd1_blnk;
-    16'h5:   rd1 = (pat_en['h5]) ? rd1_pat5 : rd1_blnk;
-    16'h4:   rd1 = (pat_en['h4]) ? rd1_pat4 : rd1_blnk;
-    16'h3:   rd1 = (pat_en['h3]) ? rd1_pat3 : rd1_blnk;
-    16'h2:   rd1 = (pat_en['h2]) ? rd1_pat2 : rd1_blnk;
+    //16'h5:   rd1 = (pat_en['h5]) ? rd1_pat5 : rd1_blnk;
+    //16'h4:   rd1 = (pat_en['h4]) ? rd1_pat4 : rd1_blnk;
+    //16'h3:   rd1 = (pat_en['h3]) ? rd1_pat3 : rd1_blnk;
+    //16'h2:   rd1 = (pat_en['h2]) ? rd1_pat2 : rd1_blnk;
     default: rd1 =                            rd1_blnk;
   endcase
 end
@@ -290,11 +290,10 @@ always @(*) begin
 
   //subkey_offs0 <= rd0[15:14]+2'b01;// 2bits
   //subkey_offs1 <= rd1[15:14]+2'b01;// 2bits
-
-  // with 9 bits quality
+  //with 9bits quality bits
   //offs0    <= rd0[17:14];
   //offs1    <= rd1[17:14];
-  //
+  
 
   //bend0    <= rd0[13:9];
   //bend1    <= rd1[13:9];
@@ -302,15 +301,18 @@ always @(*) begin
   //quality0 <= rd0[8:0];
   //quality1 <= rd1[8:0];
 
-  // drop 9bits for quality
-  offs0    <= rd0[8:5];
-  offs1    <= rd1[8:5];
+  //offs0    <= rd0[17:14];
+  //offs1    <= rd1[17:14];
+  
 
   bend0    <= rd0[4:0];
   bend1    <= rd1[4:0];
-  //dummy
+  offs0    <= rd0[8:5];
+  offs1    <= rd1[8:5];
+
   quality0 <= 9'b0;
   quality1 <= 9'b0;
+
 end
 
 //-------------------------------------------------------------------------------------------------------------------

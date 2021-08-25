@@ -38,22 +38,92 @@
 //even:  46, 30, 27, 25, 23, 20, 18, 16, 14, 12, 10,  8,  6,   5,  4
 //uniform for even and odd: 
 //       60, 56, 52, 48, 44, 40, 36, 32, 28, 24, 20, 16,   12, 8,  4
-module gemcsc_bending_bits (gemcsc_bending, even, isME1a,  bending_bits);
+module gemcsc_bending_bits (
+    clock, 
+    gemcsc_bending0, 
+    gemcsc_bending1, 
+    gemcsc_gemB0,
+    gemcsc_gemB1,
+    isME1a0, 
+    isME1a1, 
+    even, 
+    bending_bits0, 
+    bending_bits1
+  );
 
 // Ports
-  input [6:0]  gemcsc_bending;
-  input                  even;
-  input                isME1a;
-  output[3:0]    bending_bits;
+  input                  clock;
+  input [6:0]  gemcsc_bending0;
+  input [6:0]  gemcsc_bending1;
+  input           gemcsc_gemB0;
+  input           gemcsc_gemB1;
+  input                isME1a0;
+  input                isME1a1;
+  input                   even;
+  output[3:0]    bending_bits0;
+  output[3:0]    bending_bits1;
 
-// Quality-by-quality definition
-  reg [3:0] out;
-  assign bending_bits = out;
 
-  always @* begin
-    if (gemcsc_bending[6:2] >= 5'b10000) out <= 4'b1111;
-    else                                 out <= gemcsc_bending[5:2];// namely hs
-  end
+  wire [3:0] bending_bit0_odd_A, bending_bit0_odd_B;
+  wire [3:0] bending_bit1_odd_A, bending_bit1_odd_B;
+  wire [3:0] bending_bit0_even_A, bending_bit0_even_B;
+  wire [3:0] bending_bit1_even_A, bending_bit1_even_B;
+  
+rom_gemcsc_slope #(
+  .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME11_odd_GE11_layer1.mem")
+) romme1boddA (
+  .clock(clock),
+  .adr0(gemcsc_bending0),
+  .adr1(gemcsc_bending1),
+  .rd0 (bending_bit0_odd_A),
+  .rd1 (bending_bit1_odd_A)
+);
+
+rom_gemcsc_slope #(
+  .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME11_even_GE11_layer1.mem")
+) romme1bevenA (
+  .clock(clock),
+  .adr0(gemcsc_bending0),
+  .adr1(gemcsc_bending1),
+  .rd0 (bending_bit0_even_A),
+  .rd1 (bending_bit1_even_A)
+);
+
+rom_gemcsc_slope #(
+  .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME11_odd_GE11_layer2.mem")
+) romme1boddB (
+  .clock(clock),
+  .adr0(gemcsc_bending0),
+  .adr1(gemcsc_bending1),
+  .rd0 (bending_bit0_odd_B),
+  .rd1 (bending_bit1_odd_B)
+);
+
+rom_gemcsc_slope #(
+  .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME11_even_GE11_layer2.mem")
+) romme1bevenB (
+  .clock(clock),
+  .adr0(gemcsc_bending0),
+  .adr1(gemcsc_bending1),
+  .rd0 (bending_bit0_even_B),
+  .rd1 (bending_bit1_even_B)
+);
+
+  assign bending_bit0_even = gemB ? bending_bit0_even_B : bending_bit0_even_A;
+  assign bending_bit1_even = gemB ? bending_bit1_even_B : bending_bit1_even_A;
+  assign bending_bit0_odd  = gemB ? bending_bit0_odd_B  : bending_bit0_odd_A;
+  assign bending_bit1_odd  = gemB ? bending_bit1_odd_B  : bending_bit1_odd_A;
+  assign bending_bits0 = even ? bending_bit0_even : bending_bit0_odd;
+  assign bending_bits1 = even ? bending_bit1_even : bending_bit1_odd;
+
+//// Quality-by-quality definition
+//  reg [3:0] out;
+//  assign bending_bits = out;
+//
+//  always @* begin
+//    if (gemcsc_bending[6:2] >= 5'b10000) out <= 4'b1111;
+//    else                                 out <= gemcsc_bending[5:2];// namely hs
+//  end
 
 //-------------------------------------------------------------------------------------------------------------------
 endmodule

@@ -901,23 +901,23 @@ module pattern_finder_ccLUT (
 	if ((ihs/MXHS) > 3) begin // Reverse ME1/1a
            hs_hit_s0ab[ihs] <= cfeb_en_ff[10-(ihs/MXHS)] ? hs_hit[ihs] : 3'b0;
            hs_pid_s0ab[ihs] <= cfeb_en_ff[10-(ihs/MXHS)] ? hs_pid[ihs] : 4'b0;
-           hs_carry_s0ab[ihs] <= cfeb_en_ff[10-(ihs/MXHS)] ? hs_carry[ihs] : 12'b0;
+           hs_carry_s0ab[ihs] <= cfeb_en_ff[10-(ihs/MXHS)] ? hs_carry[ihs] : 11'b0;
 	end
 	else begin
           hs_hit_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_hit[ihs] : 3'b0;
           hs_pid_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_pid[ihs] : 4'b0;
-          hs_carry_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_carry[ihs] : 12'b0;
+          hs_carry_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_carry[ihs] : 11'b0;
 	end 
 `elsif CSC_TYPE_D
 	if ((ihs/MXHS) > 3) begin
            hs_hit_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_hit[ihs] : 3'b0;
            hs_pid_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_pid[ihs] : 4'b0;
-           hs_carry_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_carry[ihs] : 12'b0;
+           hs_carry_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_carry[ihs] : 11'b0;
 	end
 	else begin    // Reverse ME1/1b
           hs_hit_s0ab[ihs] <= cfeb_en_ff[3-(ihs/MXHS)] ? hs_hit[ihs] : 3'b0;
           hs_pid_s0ab[ihs] <= cfeb_en_ff[3-(ihs/MXHS)] ? hs_pid[ihs] : 4'b0;
-          hs_carry_s0ab[ihs] <= cfeb_en_ff[3-(ihs/MXHS)] ? hs_carry[ihs] : 12'b0;
+          hs_carry_s0ab[ihs] <= cfeb_en_ff[3-(ihs/MXHS)] ? hs_carry[ihs] : 11'b0;
 	end 
 `endif
       end
@@ -933,7 +933,7 @@ module pattern_finder_ccLUT (
       always @(posedge clock) begin
         hs_hit_s0[ihs]   <= (algo2016_use_dead_time_zone & hs_dead_drift[ihs]) ? 3'b0  : hs_hit_s0ab[ihs];
         hs_pid_s0[ihs]   <= (algo2016_use_dead_time_zone & hs_dead_drift[ihs]) ? 4'b0  : hs_pid_s0ab[ihs];
-        hs_carry_s0[ihs] <= (algo2016_use_dead_time_zone & hs_dead_drift[ihs]) ? 12'b0 : hs_carry_s0ab[ihs];
+        hs_carry_s0[ihs] <= (algo2016_use_dead_time_zone & hs_dead_drift[ihs]) ? 11'b0 : hs_carry_s0ab[ihs];
       end
     end
   endgenerate
@@ -1139,59 +1139,17 @@ module pattern_finder_ccLUT (
 //     Select the 1st best pattern from 224 Key 1/2-Strips
 //-------------------------------------------------------------------------------------------------------------------
   // Best 7 of 224 1/2-strip patterns
-  wire [MXPATB - 1: 0] hs_pat_s1   [6:0];
-  wire [MXKEYB - 1: 0] hs_key_s1   [6:0]; // partial key for 1 of 32
-  wire [MXPATC-1:0]    hs_carry_s1 [6:0]; //CCLUT, Tao, comparator code
-  wire [MXOFFSB -1:0]  hs_offs_s1  [6:0]; //keyhs offset, CCLUT
-  wire [MXBNDB-1:0]    hs_bend_s1  [6:0]; // bending , CCLUT
-  wire [MXQLTB-1:0]    hs_qlt_s1   [6:0]; // quality, CCLUT
+  wire [MXPATB - 1: 0] hs_pat_s1   [MXCFEB-1:0];
+  wire [MXKEYB - 1: 0] hs_key_s1   [MXCFEB-1:0]; // partial key for 1 of 32
+  wire [MXPATC-1:0]    hs_carry_s1 [MXCFEB-1:0]; //CCLUT, Tao, comparator code
+  wire [MXOFFSB -1:0]  hs_offs_s1  [MXCFEB-1:0]; //keyhs offset, CCLUT
+  wire [MXBNDB-1:0]    hs_bend_s1  [MXCFEB-1:0]; // bending , CCLUT
+  wire [MXQLTB-1:0]    hs_qlt_s1   [MXCFEB-1:0]; // quality, CCLUT
 
-  //genvar i;
-  //generate
-  //  for (i = 0; i <= 6; i = i + 1) begin: hs_gen
-  //    best_1of32 ubest1of32_1st (
-  //      .clock(clock),
-  //      .pat00(hs_pat_s0[i * 32 +  0]),
-  //      .pat01(hs_pat_s0[i * 32 +  1]),
-  //      .pat02(hs_pat_s0[i * 32 +  2]),
-  //      .pat03(hs_pat_s0[i * 32 +  3]),
-  //      .pat04(hs_pat_s0[i * 32 +  4]),
-  //      .pat05(hs_pat_s0[i * 32 +  5]),
-  //      .pat06(hs_pat_s0[i * 32 +  6]),
-  //      .pat07(hs_pat_s0[i * 32 +  7]),
-  //      .pat08(hs_pat_s0[i * 32 +  8]),
-  //      .pat09(hs_pat_s0[i * 32 +  9]),
-  //      .pat10(hs_pat_s0[i * 32 + 10]),
-  //      .pat11(hs_pat_s0[i * 32 + 11]),
-  //      .pat12(hs_pat_s0[i * 32 + 12]),
-  //      .pat13(hs_pat_s0[i * 32 + 13]),
-  //      .pat14(hs_pat_s0[i * 32 + 14]),
-  //      .pat15(hs_pat_s0[i * 32 + 15]),
-  //      .pat16(hs_pat_s0[i * 32 + 16]),
-  //      .pat17(hs_pat_s0[i * 32 + 17]),
-  //      .pat18(hs_pat_s0[i * 32 + 18]),
-  //      .pat19(hs_pat_s0[i * 32 + 19]),
-  //      .pat20(hs_pat_s0[i * 32 + 20]),
-  //      .pat21(hs_pat_s0[i * 32 + 21]),
-  //      .pat22(hs_pat_s0[i * 32 + 22]),
-  //      .pat23(hs_pat_s0[i * 32 + 23]),
-  //      .pat24(hs_pat_s0[i * 32 + 24]),
-  //      .pat25(hs_pat_s0[i * 32 + 25]),
-  //      .pat26(hs_pat_s0[i * 32 + 26]),
-  //      .pat27(hs_pat_s0[i * 32 + 27]),
-  //      .pat28(hs_pat_s0[i * 32 + 28]),
-  //      .pat29(hs_pat_s0[i * 32 + 29]),
-  //      .pat30(hs_pat_s0[i * 32 + 30]),
-  //      .pat31(hs_pat_s0[i * 32 + 31]),
-  //      .best_pat(hs_pat_s1[i]),
-  //      .best_key(hs_key_s1[i])
-  //    );
-  //  end
-  //endgenerate
   //CCLUT, Tao, new 1/32 sorter with comparator code
   genvar i;
   generate
-    for (i = 0; i <= 6; i = i + 1) begin: hs_gen
+    for (i = 0; i <= MXCFEB-1; i = i + 1) begin: hs_gen
       best_1of32_ccLUT ubest1of32_1st (
         .clock(clock),
         .pat00(hs_pat_s0[i * 32 +  0]),
@@ -1276,26 +1234,6 @@ module pattern_finder_ccLUT (
   wire [MXQLTB - 1:0]   hs_qlt_s2;
   wire [MXBNDB - 1:0]   hs_bnd_s2;
   wire [MXPATC - 1:0]   hs_car_s2; //hit carry, comparator code
-  //best_1of7 ubest1of7_1st(
-  //  .pat0(hs_pat_s1[0]),
-  //  .pat1(hs_pat_s1[1]),
-  //  .pat2(hs_pat_s1[2]),
-  //  .pat3(hs_pat_s1[3]),
-  //  .pat4(hs_pat_s1[4]),
-  //  .pat5(hs_pat_s1[5]),
-  //  .pat6(hs_pat_s1[6]),
-
-  //  .key0(hs_key_s1[0]),
-  //  .key1(hs_key_s1[1]),
-  //  .key2(hs_key_s1[2]),
-  //  .key3(hs_key_s1[3]),
-  //  .key4(hs_key_s1[4]),
-  //  .key5(hs_key_s1[5]),
-  //  .key6(hs_key_s1[6]),
-
-  //  .best_pat(hs_pat_s2),
-  //  .best_key(hs_key_s2)
-  //);
   best_1of7_ccLUT #(.PATLUT(PATLUT))
   ubest1of7_1st (
   // pattern inputs
@@ -1436,7 +1374,7 @@ module pattern_finder_ccLUT (
     end
     else begin          // else assert final 1st clct
       hs_key_1st <= hs_key_1st_dly;
-      hs_pid_1st <= hs_pat_1st_dly[MXPIDB - 1: 0]-4'd6; //Tao, change pid range 10-6 to 4-0  
+      hs_pid_1st <= hs_pat_1st_dly[MXPIDB - 1: 0]; 
       hs_hit_1st <= hs_pat_1st_dly[MXPATB - 1: MXPIDB];
       hs_qlt_1st <= hs_qlt_1st_dly;
       hs_bnd_1st <= hs_bnd_1st_dly;
@@ -1631,17 +1569,17 @@ module pattern_finder_ccLUT (
   endgenerate
 
   // Best 7 of 224 1/2-strip patterns
-  wire [MXPATB - 1: 0] hs_pat_s4 [6: 0];
-  wire [MXKEYB - 1: 0] hs_key_s4 [6: 0]; // partial key for 1 of 32
   wire [6: 0]          hs_bsy_s4;
-  wire [MXOFFSB-1:0]   hs_offs_s4  [6:0];//CCLUT, Tao
-  wire [MXBNDB -1:0]   hs_bend_s4  [6:0];
-  wire [MXPATC -1:0]   hs_carry_s4 [6:0];
-  wire [MXQLTB -1:0]   hs_qlt_s4   [6:0];
+  wire [MXPATB - 1: 0] hs_pat_s4   [MXCFEB-1:0];
+  wire [MXKEYB - 1: 0] hs_key_s4   [MXCFEB-1:0]; // partial key for 1 of 32
+  wire [MXOFFSB-1:0]   hs_offs_s4  [MXCFEB-1:0];//CCLUT, Tao
+  wire [MXBNDB -1:0]   hs_bend_s4  [MXCFEB-1:0];
+  wire [MXPATC -1:0]   hs_carry_s4 [MXCFEB-1:0];
+  wire [MXQLTB -1:0]   hs_qlt_s4   [MXCFEB-1:0];
 
   //CCLUT, Tao
   generate
-    for (i = 0; i <= 6; i = i + 1) begin: hs_2nd_gen
+    for (i = 0; i <= MXCFEB-1; i = i + 1) begin: hs_2nd_gen
       best_1of32_busy_ccLUT ubest1of32_2nd (
         .clock(clock),
         .pat00(hs_pat_s3[i * 32 + 0]),
@@ -1729,36 +1667,6 @@ module pattern_finder_ccLUT (
   wire [MXBNDB -1:0]    hs_bnd_s5;
   wire [MXPATC -1:0]    hs_car_s5;
   wire hs_bsy_s5;
-
-  //best_1of7_busy ubest1of7_2nd (
-  //  .pat0(hs_pat_s4[0]),
-  //  .pat1(hs_pat_s4[1]),
-  //  .pat2(hs_pat_s4[2]),
-  //  .pat3(hs_pat_s4[3]),
-  //  .pat4(hs_pat_s4[4]),
-  //  .pat5(hs_pat_s4[5]),
-  //  .pat6(hs_pat_s4[6]),
-
-  //  .key0(hs_key_s4[0]),
-  //  .key1(hs_key_s4[1]),
-  //  .key2(hs_key_s4[2]),
-  //  .key3(hs_key_s4[3]),
-  //  .key4(hs_key_s4[4]),
-  //  .key5(hs_key_s4[5]),
-  //  .key6(hs_key_s4[6]),
-
-  //  .bsy0(hs_bsy_s4[0]),
-  //  .bsy1(hs_bsy_s4[1]),
-  //  .bsy2(hs_bsy_s4[2]),
-  //  .bsy3(hs_bsy_s4[3]),
-  //  .bsy4(hs_bsy_s4[4]),
-  //  .bsy5(hs_bsy_s4[5]),
-  //  .bsy6(hs_bsy_s4[6]),
-
-  //  .best_pat(hs_pat_s5),
-  //  .best_key(hs_key_s5),
-  //  .best_bsy(hs_bsy_s5)
-  //);
 
   // CCLUT, Tao, best_1of7_busy_ccLUT
   best_1of7_busy_ccLUT #(.PATLUT(PATLUT))
@@ -1871,7 +1779,7 @@ module pattern_finder_ccLUT (
       hs_run2pid_2nd <= 0;
     end
     else begin         // else assert final 2nd clct
-      hs_pid_2nd <= hs_pat_s5[MXPIDB - 1: 0]-4'd6; //Tao, change pid range 10-6 to 4-0
+      hs_pid_2nd <= hs_pat_s5[MXPIDB - 1: 0]; 
       hs_hit_2nd <= hs_pat_s5[MXPATB - 1: MXPIDB];
       hs_key_2nd <= hs_key_s5;
       hs_bsy_2nd <= hs_bsy_s5;

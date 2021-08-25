@@ -14,7 +14,7 @@ parameter MXPIDB  = 4;                 // Pattern ID bits
 parameter MXHITB  = 3;                 // Hits on pattern bits
 parameter MXPATB  = MXHITB + MXPIDB;   // Pattern bits
 
-parameter MXPATC  = 12;                // Pattern Carry Bits
+parameter MXPATC  = 11;                // Pattern Carry Bits
 
 //parameter MXSUBKEYBX = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
 parameter MXOFFSB = 4;                 // Quarter-strip bits
@@ -22,6 +22,7 @@ parameter MXQLTB  = 9;                 // Fit quality bits
 parameter MXBNDB  = 5;                 // Bend bits, 4bits for value, 1bit for sign
 
 parameter MXPID   = 11;                // Number of patterns
+parameter MIPID   = 6;
 parameter MXPAT   = 5;                 // Number of patterns
 
 parameter PATLUT = 1;         // 1=use pattern_lut; 0=use traditional pattern finding
