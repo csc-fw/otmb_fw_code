@@ -884,7 +884,7 @@ module pattern_finder_ccLUT (
       always @(posedge clock) begin
         hs_hit_s0[ihs] <= (algo2016_use_dead_time_zone & hs_dead_drift[ihs]) ?    3'b0 : hs_hit_s0ab[ihs];
         hs_pid_s0[ihs] <= (algo2016_use_dead_time_zone & hs_dead_drift[ihs]) ?    4'b0 : hs_pid_s0ab[ihs];
-        hs_carry_s0[ihs] <= (algo2016_use_dead_time_zone & hs_dead_drift[ihs]) ? 12'b0 : hs_carry_s0ab[ihs];
+        hs_carry_s0[ihs] <= (algo2016_use_dead_time_zone & hs_dead_drift[ihs]) ? 11'b0 : hs_carry_s0ab[ihs];
       end
     end
   endgenerate
@@ -1119,10 +1119,10 @@ module pattern_finder_ccLUT (
   // Best 7 of 224 1/2-strip patterns
   wire [MXPATB - 1: 0] hs_pat_s1 [MXCFEB-1 : 0];
   wire [MXKEYB - 1: 0] hs_key_s1 [MXCFEB-1 : 0]; // partial key for 1 of 32
-  wire [MXPATC-1:0]    hs_carry_s1 [6:0]; //CCLUT, Tao, comparator code
-  wire [MXOFFSB -1:0]  hs_offs_s1  [6:0]; //keyhs offset, CCLUT
-  wire [MXBNDB-1:0]    hs_bend_s1  [6:0]; // bending , CCLUT
-  wire [MXQLTB-1:0]    hs_qlt_s1   [6:0]; // quality, CCLUT
+  wire [MXPATC-1:0]    hs_carry_s1 [MXCFEB-1 :0]; //CCLUT, Tao, comparator code
+  wire [MXOFFSB -1:0]  hs_offs_s1  [MXCFEB-1 :0]; //keyhs offset, CCLUT
+  wire [MXBNDB-1:0]    hs_bend_s1  [MXCFEB-1 :0]; // bending , CCLUT
+  wire [MXQLTB-1:0]    hs_qlt_s1   [MXCFEB-1 :0]; // quality, CCLUT
   //genvar i;
   //generate
   //  for (i = 0; i <= MXCFEB-1; i = i + 1) begin: hs_gen
@@ -1599,10 +1599,10 @@ module pattern_finder_ccLUT (
   wire [MXPATB - 1: 0] hs_pat_s4 [MXCFEB - 1: 0];
   wire [MXKEYB - 1: 0] hs_key_s4 [MXCFEB - 1: 0]; // partial key for 1 of 32
   wire [MXCFEB - 1: 0] hs_bsy_s4;
-  wire [MXOFFSB-1:0]   hs_offs_s4  [6:0];//CCLUT, Tao
-  wire [MXBNDB -1:0]   hs_bend_s4  [6:0];
-  wire [MXPATC -1:0]   hs_carry_s4 [6:0];
-  wire [MXQLTB -1:0]   hs_qlt_s4   [6:0];
+  wire [MXOFFSB-1:0]   hs_offs_s4  [MXCFEB - 1:0];//CCLUT, Tao
+  wire [MXBNDB -1:0]   hs_bend_s4  [MXCFEB - 1:0];
+  wire [MXPATC -1:0]   hs_carry_s4 [MXCFEB - 1:0];
+  wire [MXQLTB -1:0]   hs_qlt_s4   [MXCFEB - 1:0];
 
   generate
     for (i = 0; i <= MXCFEB - 1; i = i + 1) begin: hs_2nd_gen

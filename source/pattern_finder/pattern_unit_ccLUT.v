@@ -59,6 +59,11 @@
 // Returns pattern number 2-10 and number of layers hit on that pattern 0-6.
 // Pattern LSB = bend direction
 // Hit pattern LUTs for 1 layer: - = don't care, xx= one hit or the other or both
+// CCLUT: comparator code for each layer except key layer.  HS order in 000 is low->high
+//        000 => 2'b00;  
+//        x00 => 2'b01; 
+//        0x0 => 2'b01; 
+//        00x => 2'b11; 
 //------------------------------------------------------------------------------------------------------------------------
 
   wire [0:2] pat   [MXPID-1:MIPID][0:MXLY-1]; // Ordering 0:LXLY-1 uses 132 LUTs, and fpga usage is 90%, matches ly3 key result
@@ -161,35 +166,35 @@
     //end // lyloop
     always @(*) begin
         case(pat[ipat][0])//layer0
-            3'b001 : carry [ipat][1:0] = 2'b01;
-            3'b010 : carry [ipat][1:0] = 2'b10;
-            3'b100 : carry [ipat][1:0] = 2'b11;
-            default: carry [ipat][1:0] = 2'b00;
+            3'b001 : carry [ipat][1:0] <= 2'b01;
+            3'b010 : carry [ipat][1:0] <= 2'b10;
+            3'b100 : carry [ipat][1:0] <= 2'b11;
+            default: carry [ipat][1:0] <= 2'b00;
         endcase
         case(pat[ipat][1])//layer1
-            3'b001 : carry [ipat][3:2] = 2'b01;
-            3'b010 : carry [ipat][3:2] = 2'b10;
-            3'b100 : carry [ipat][3:2] = 2'b11;
-            default: carry [ipat][3:2] = 2'b00;
+            3'b001 : carry [ipat][3:2] <= 2'b01;
+            3'b010 : carry [ipat][3:2] <= 2'b10;
+            3'b100 : carry [ipat][3:2] <= 2'b11;
+            default: carry [ipat][3:2] <= 2'b00;
         endcase
         carry [ipat][4] <= pat[ipat][2][1];//key layer, layer2
         case(pat[ipat][3])//layer3
-            3'b001 : carry [ipat][6:5] = 2'b01;
-            3'b010 : carry [ipat][6:5] = 2'b10;
-            3'b100 : carry [ipat][6:5] = 2'b11;
-            default: carry [ipat][6:5] = 2'b00;
+            3'b001 : carry [ipat][6:5] <= 2'b01;
+            3'b010 : carry [ipat][6:5] <= 2'b10;
+            3'b100 : carry [ipat][6:5] <= 2'b11;
+            default: carry [ipat][6:5] <= 2'b00;
         endcase
         case(pat[ipat][4])//layer4
-            3'b001 : carry [ipat][8:7] = 2'b01;
-            3'b010 : carry [ipat][8:7] = 2'b10;
-            3'b100 : carry [ipat][8:7] = 2'b11;
-            default: carry [ipat][8:7] = 2'b00;
+            3'b001 : carry [ipat][8:7] <= 2'b01;
+            3'b010 : carry [ipat][8:7] <= 2'b10;
+            3'b100 : carry [ipat][8:7] <= 2'b11;
+            default: carry [ipat][8:7] <= 2'b00;
         endcase
         case(pat[ipat][5])//layer5
-            3'b001 : carry [ipat][10:9] = 2'b01;
-            3'b010 : carry [ipat][10:9] = 2'b10;
-            3'b100 : carry [ipat][10:9] = 2'b11;
-            default: carry [ipat][10:9] = 2'b00;
+            3'b001 : carry [ipat][10:9] <= 2'b01;
+            3'b010 : carry [ipat][10:9] <= 2'b10;
+            3'b100 : carry [ipat][10:9] <= 2'b11;
+            default: carry [ipat][10:9] <= 2'b00;
         endcase
 
     end // always

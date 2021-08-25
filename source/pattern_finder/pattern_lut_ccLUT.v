@@ -32,10 +32,10 @@ wire [MXDATB-1:0]   rd0_patA, rd1_patA,
                     rd0_pat8, rd1_pat8,
                     rd0_pat7, rd1_pat7,
                     rd0_pat6, rd1_pat6,
-                    rd0_pat5, rd1_pat5,
-                    rd0_pat4, rd1_pat4,
-                    rd0_pat3, rd1_pat3,
-                    rd0_pat2, rd1_pat2,
+                    //rd0_pat5, rd1_pat5,
+                    //rd0_pat4, rd1_pat4,
+                    //rd0_pat3, rd1_pat3,
+                    //rd0_pat2, rd1_pat2,
                     rd0_blnk, rd1_blnk;
 
 assign rd0_blnk = 0;
