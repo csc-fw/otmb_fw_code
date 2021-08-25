@@ -222,7 +222,7 @@
 
 // 3 to 2
   assign {nhits_s1[1],pid_s1[1],carry_s1[1]} =                               {nhits_s0[2],{1'b0,pid_s0[2]},carry_s0[2]};
-  assign {nhits_s1[0],pid_s1[0],carry_s1[0]} = (nhits_s0[0] > nhits_s0[1]) ? {nhits_s0[2],{1'b0,pid_s0[0]},carry_s0[0]} : {nhits_s0[1],{1'b1,pid_s0[1]},carry_s0[1]};
+  assign {nhits_s1[0],pid_s1[0],carry_s1[0]} = (nhits_s0[0] > nhits_s0[1]) ? {nhits_s0[1],{1'b0,pid_s0[0]},carry_s0[0]} : {nhits_s0[1],{1'b1,pid_s0[1]},carry_s0[1]};
 
 // 2 to 1
   assign {nhits_s2[0],pid_s2[0],carry_s2[0]} = (nhits_s1[0] > nhits_s1[1]) ? {nhits_s1[0],{1'b0,pid_s1[0]},carry_s1[0]} : {nhits_s1[1],{1'b1,pid_s1[1]},carry_s1[1]};
