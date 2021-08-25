@@ -1803,8 +1803,16 @@
   wire         gem_inj_wen;      // GEM Injector Write Enable
   wire         injector_go_gem;  // Start GEM injector
 
-  wire [4:0]   gem_clct_deltahs;
-  wire [2:0]   gem_alct_deltawire;
+  wire [4:0]   gem_clct_deltahs_odd;
+  wire [4:0]   gem_clct_deltahs_even;
+  wire [2:0]   gem_alct_deltawire_odd;
+  wire [2:0]   gem_alct_deltawire_even;
+  reg  [4:0]   gem_clct_deltahs;
+  reg  [2:0]   gem_alct_deltawire;
+  always @(posedge clock) begin
+      gem_clct_deltahs   = evenchamber ? gem_clct_deltahs_even   : gem_clct_deltahs_odd;
+      gem_alct_deltawire = evenchamber ? gem_clct_deltawire_even : gem_clct_deltawire_odd;
+  end
   
 
   wire       gem_me1a_match_enable;
@@ -5733,8 +5741,10 @@ wire [15:0] gemB_bxn_counter;
       .fifo_pretrig_gem    (fifo_pretrig_gem[MXTBIN-1:0]), // Out  Number GEM FIFO time bins before pretrigger
 
       //GEM-CSC match window, deltahs, deltawire
-      .gem_clct_deltahs          (gem_clct_deltahs[4:0]),               // Out  GEM GEM-CSC match window, deltahs, the final window is deltahs*2+1
-      .gem_alct_deltawire        (gem_alct_deltawire[2:0]),               // Out GEM-CSC match window, deltawire, final window is deltawire*2+1
+      .gem_clct_deltahs_odd      (gem_clct_deltahs_odd[4:0]),               // Out  GEM GEM-CSC match window, deltahs, the final window is deltahs*2+1
+      .gem_clct_deltahs_even     (gem_clct_deltahs_even[4:0]),               // Out  GEM GEM-CSC match window, deltahs, the final window is deltahs*2+1
+      .gem_alct_deltawire_odd    (gem_alct_deltawire_odd[2:0]),               // Out GEM-CSC match window, deltawire, final window is deltawire*2+1
+      .gem_alct_deltawire_even   (gem_alct_deltawire_even[2:0]),               // Out GEM-CSC match window, deltawire, final window is deltawire*2+1
 
       //GEM-CSC match control
       .gem_me1a_match_enable     (gem_me1a_match_enable),       //Out gem-csc match in me1a

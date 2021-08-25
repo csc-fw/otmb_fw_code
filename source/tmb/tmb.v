@@ -2671,6 +2671,9 @@
   wire alctclct_match_run3 = (alct0_clct0_copad_match_found_pos || alct0_clct0_gem_match_found_pos || alct0_clct0_nogem_match_found_pos);
   wire alctclct_match_good_run3 = alctclct_match_run3 && tmb_allow_match;
 
+  wire gemcsc_bending_lct0 = (alct0_clct0_copad_match_found_pos || alct0_clct0_gem_match_found_pos || clct0_copad_match_good || alct0_copad_match_good);
+  wire gemcsc_bending_lct1 = (alct1_clct1_copad_match_found_pos || alct1_clct1_gem_match_found_pos || clct1_copad_match_good || alct1_copad_match_good);
+
   //wire trig_pulse_run3    = alctclct_match_run3 || clct0_copad_match_good || alct0_copad_match_good || (clct_noalct && clct_nocopad && !clct_used_run3) || clct_lost_run3 || alct_only_trig_run3;  // Event pulse , ALCT,CLCT, copad match in timing, or alct-only+allow, clct-only
 
   //wire trig_keep_run3     = (clct_keep_run3   || alct_keep_run3);
@@ -3357,8 +3360,8 @@
   wire [6:0] alct1_key_run3 =  alct1fromcopad_run3 ?  alct1wg_fromcopad[6:0] : alct1_key[6:0];
   wire [9:0] clct0_xky_run3 =  clct0fromcopad_run3 ? clct0xky_fromcopad[9:0] : clct0_xky[9:0];
   wire [9:0] clct1_xky_run3 =  clct1fromcopad_run3 ? clct1xky_fromcopad[9:0] : clct1_xky[9:0];
-  wire [4:0] clct0_bnd_run3 =  alct0fromcopad_run3 ? 4'b0 : (gemcsc_bend_enable ? gemcsc_bnd0[4:0] : clct0_bnd[4:0]);    
-  wire [4:0] clct1_bnd_run3 =  alct1fromcopad_run3 ? 4'b0 : (gemcsc_bend_enable ? gemcsc_bnd1[4:0] : clct1_bnd[4:0]);    
+  wire [4:0] clct0_bnd_run3 =  alct0fromcopad_run3 ? 4'b0 : ((gemcsc_bend_enable && gemcsc_bending_lct0) ? gemcsc_bnd0[4:0] : clct0_bnd[4:0]);    
+  wire [4:0] clct1_bnd_run3 =  alct1fromcopad_run3 ? 4'b0 : ((gemcsc_bend_enable && gemcsc_bending_lct1) ? gemcsc_bnd1[4:0] : clct1_bnd[4:0]);    
   //should we use bending direction also from GEM-CSC???
   //gemcsc_bend_enable && gemcsc_match_enable
   //wire [4:0] clct0_bnd_run3 = clct0_bnd[4:0];  

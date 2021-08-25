@@ -13,8 +13,9 @@
 //
 //2021.08  ignore the consistency check between GEMCSC bending and CLCT bending . may add this later
 // add clock to increase 1BX latency for alct_clct_gem_matching, to optimize the timing constraints
+// one option to optimize the time constraint
 
-module  alct_clct_gem_matching(
+module  alct_clct_gem_matching_TR(
   input clock,
     
   input evenchamber,
@@ -632,7 +633,7 @@ module  alct_clct_gem_matching(
   wire [2:0] alct0_clct0_copad_best_icluster;
   wire [MXBENDANGLEB-1:0] alct0_clct0_copad_best_angle;
   wire [9:0] alct0_clct0_copad_best_cscxky;
-  tree_encoder_alctclctgem ualct0_clct0_copad_match(
+  tree_encoder_alctclctgem_TR ualct0_clct0_copad_match(
       clock,
       alct0_clct0_copad_angle[0],
       alct0_clct0_copad_angle[1],
@@ -660,7 +661,7 @@ module  alct_clct_gem_matching(
   wire [2:0] alct0_clct1_copad_best_icluster;
   wire [MXBENDANGLEB-1:0] alct0_clct1_copad_best_angle;
   wire [9:0] alct0_clct1_copad_best_cscxky;
-  tree_encoder_alctclctgem ualct0_clct1_copad_match(
+  tree_encoder_alctclctgem_TR ualct0_clct1_copad_match(
       clock,
       alct0_clct1_copad_angle[0],
       alct0_clct1_copad_angle[1],
@@ -688,7 +689,7 @@ module  alct_clct_gem_matching(
   wire [2:0] alct1_clct0_copad_best_icluster;
   wire [MXBENDANGLEB-1:0] alct1_clct0_copad_best_angle;
   wire [9:0] alct1_clct0_copad_best_cscxky;
-  tree_encoder_alctclctgem ualct1_clct0_copad_match(
+  tree_encoder_alctclctgem_TR ualct1_clct0_copad_match(
       clock,
       alct1_clct0_copad_angle[0],
       alct1_clct0_copad_angle[1],
@@ -716,7 +717,7 @@ module  alct_clct_gem_matching(
   wire [2:0] alct1_clct1_copad_best_icluster;
   wire [MXBENDANGLEB-1:0] alct1_clct1_copad_best_angle;
   wire [9:0] alct1_clct1_copad_best_cscxky;
-  tree_encoder_alctclctgem ualct1_clct1_copad_match(
+  tree_encoder_alctclctgem_TR ualct1_clct1_copad_match(
       clock,
       alct1_clct1_copad_angle[0],
       alct1_clct1_copad_angle[1],
@@ -854,7 +855,7 @@ module  alct_clct_gem_matching(
   wire [2:0] alct0_clct0_gemA_best_icluster;
   wire [MXBENDANGLEB-1:0] alct0_clct0_gemA_best_angle;
   wire [9:0] alct0_clct0_gemA_best_cscxky;
-  tree_encoder_alctclctgem ualct0_clct0_gemA_match(
+  tree_encoder_alctclctgem_TR ualct0_clct0_gemA_match(
       clock,
       alct0_clct0_gemA_angle[0],
       alct0_clct0_gemA_angle[1],
@@ -883,7 +884,7 @@ module  alct_clct_gem_matching(
   wire [2:0] alct0_clct0_gemB_best_icluster;
   wire [MXBENDANGLEB-1:0] alct0_clct0_gemB_best_angle;
   wire [9:0] alct0_clct0_gemB_best_cscxky;
-  tree_encoder_alctclctgem ualct0_clct0_gemB_match(
+  tree_encoder_alctclctgem_TR ualct0_clct0_gemB_match(
       clock,
       alct0_clct0_gemB_angle[0],
       alct0_clct0_gemB_angle[1],
@@ -911,7 +912,7 @@ module  alct_clct_gem_matching(
   wire [2:0] alct1_clct0_gemA_best_icluster;
   wire [MXBENDANGLEB-1:0] alct1_clct0_gemA_best_angle;
   wire [9:0] alct1_clct0_gemA_best_cscxky;
-  tree_encoder_alctclctgem ualct1_clct0_gemA_match(
+  tree_encoder_alctclctgem_TR ualct1_clct0_gemA_match(
       clock,
       alct1_clct0_gemA_angle[0],
       alct1_clct0_gemA_angle[1],
@@ -940,7 +941,7 @@ module  alct_clct_gem_matching(
   wire [2:0] alct1_clct0_gemB_best_icluster;
   wire [MXBENDANGLEB-1:0] alct1_clct0_gemB_best_angle;
   wire [9:0] alct1_clct0_gemB_best_cscxky;
-  tree_encoder_alctclctgem ualct1_clct0_gemB_match(
+  tree_encoder_alctclctgem_TR ualct1_clct0_gemB_match(
       clock,
       alct1_clct0_gemB_angle[0],
       alct1_clct0_gemB_angle[1],
@@ -969,7 +970,7 @@ module  alct_clct_gem_matching(
   wire [2:0] alct0_clct1_gemA_best_icluster;
   wire [MXBENDANGLEB-1:0] alct0_clct1_gemA_best_angle;
   wire [9:0] alct0_clct1_gemA_best_cscxky;
-  tree_encoder_alctclctgem ualct0_clct1_gemA_match(
+  tree_encoder_alctclctgem_TR ualct0_clct1_gemA_match(
       clock,
       alct0_clct1_gemA_angle[0],
       alct0_clct1_gemA_angle[1],
@@ -998,7 +999,7 @@ module  alct_clct_gem_matching(
   wire [2:0] alct0_clct1_gemB_best_icluster;
   wire [MXBENDANGLEB-1:0] alct0_clct1_gemB_best_angle;
   wire [9:0] alct0_clct1_gemB_best_cscxky;
-  tree_encoder_alctclctgem ualct0_clct1_gemB_match(
+  tree_encoder_alctclctgem_TR ualct0_clct1_gemB_match(
       clock,
       alct0_clct1_gemB_angle[0],
       alct0_clct1_gemB_angle[1],
@@ -1026,7 +1027,7 @@ module  alct_clct_gem_matching(
   wire [2:0] alct1_clct1_gemA_best_icluster;
   wire [MXBENDANGLEB-1:0] alct1_clct1_gemA_best_angle;
   wire [9:0] alct1_clct1_gemA_best_cscxky;
-  tree_encoder_alctclctgem ualct1_clct1_gemA_match(
+  tree_encoder_alctclctgem_TR ualct1_clct1_gemA_match(
       clock,
       alct1_clct1_gemA_angle[0],
       alct1_clct1_gemA_angle[1],
@@ -1055,7 +1056,7 @@ module  alct_clct_gem_matching(
   wire [2:0] alct1_clct1_gemB_best_icluster;
   wire [MXBENDANGLEB-1:0] alct1_clct1_gemB_best_angle;
   wire [9:0] alct1_clct1_gemB_best_cscxky;
-  tree_encoder_alctclctgem ualct1_clct1_gemB_match(
+  tree_encoder_alctclctgem_TR ualct1_clct1_gemB_match(
       clock,
       alct1_clct1_gemB_angle[0],
       alct1_clct1_gemB_angle[1],
@@ -1368,7 +1369,7 @@ module  alct_clct_gem_matching(
   wire [2:0] clct0_copad_best_icluster;
   wire [MXBENDANGLEB-1:0] clct0_copad_best_angle;
   wire [9:0] clct0_copad_best_cscxky;
-  tree_encoder_alctclctgem uclct0_copad_match(
+  tree_encoder_alctclctgem_TR uclct0_copad_match(
       clock,
       clct0_copad_angle[0],
       clct0_copad_angle[1],
@@ -1396,7 +1397,7 @@ module  alct_clct_gem_matching(
   wire [2:0] clct1_copad_best_icluster;
   wire [MXBENDANGLEB-1:0] clct1_copad_best_angle;
   wire [9:0] clct1_copad_best_cscxky;
-  tree_encoder_alctclctgem uclct1_copad_match(
+  tree_encoder_alctclctgem_TR uclct1_copad_match(
       clock,
       clct1_copad_angle[0],
       clct1_copad_angle[1],
@@ -1454,7 +1455,7 @@ module  alct_clct_gem_matching(
   wire [2:0] alct0_copad_best_icluster;
   wire [MXBENDANGLEB-1:0] alct0_copad_best_angle;
   wire [9:0] alct0_copad_best_cscxky;
-  tree_encoder_alctclctgem ualct0_copad_match(
+  tree_encoder_alctclctgem_TR ualct0_copad_match(
       clock,
       alct0_copad_angle[0],
       alct0_copad_angle[1],
@@ -1482,7 +1483,7 @@ module  alct_clct_gem_matching(
   wire [2:0] alct1_copad_best_icluster;
   wire [MXBENDANGLEB-1:0] alct1_copad_best_angle;
   wire [9:0] alct1_copad_best_cscxky;
-  tree_encoder_alctclctgem ualct1_copad_match(
+  tree_encoder_alctclctgem_TR ualct1_copad_match(
       clock,
       alct1_copad_angle[0],
       alct1_copad_angle[1],
