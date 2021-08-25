@@ -213,7 +213,7 @@
 
   wire [2:0] pid_s0;
   wire [1:0] pid_s1 [1:0];
-  wire [2:0] pid_s2 [0:0];
+  wire [MXPIDB-1:0] pid_s2 [0:0];
 
 // 5 to 3
   assign {nhits_s0[2],pid_s0[2],carry_s0[2]} =                         {nhits[A],1'b0,carry[A]};
