@@ -3884,10 +3884,10 @@
   assign xtmb_wdata[42]    =  clct_invp[0];     // CLCT had invalid pattern after drift delay
   assign xtmb_wdata[43]    =  clct_invp[1];     // CLCT had invalid pattern after drift delay
 
-  parameter MXCCLUTB = MXPATC+MXPATC+MXBNDB+MXBNDB+MXXKYB+MXXKYB;
+  parameter MXCCLUTB = MXPATC+MXPATC+MXBNDB+MXBNDB+MXXKYB+MXXKYB+10;
   wire [MXCCLUTB-1:0]  xtmb_cclut_wdata;                // Mapping array
   wire [MXCCLUTB-1:0]  xtmb_cclut_rdata;                // Mapping array
-  assign xtmb_cclut_wdata = {clct1_bnd_xtmb, clct1_xky_xtmb, clct1_carry_xtmb, clct0_bnd_xtmb, clct0_xky_xtmb, clct0_carry_xtmb};
+  assign xtmb_cclut_wdata = {hmt_nhits_trig_bx678_xtmb, clct1_bnd_xtmb, clct1_xky_xtmb, clct1_carry_xtmb, clct0_bnd_xtmb, clct0_xky_xtmb, clct0_carry_xtmb};
 
 // Post-drift+1bx: store CLCT counter in RAM mapping array
   parameter MXXTMB1 = 30;         // Post drift CLCT counter
@@ -4552,7 +4552,8 @@
   wire [MXBNDB - 1   : 0] r_clct1_bnd_xtmb; // new bending 
   wire [MXXKYB-1     : 0] r_clct1_xky_xtmb; // new position with 1/8 precision
   wire [MXPATC-1     : 0] r_clct1_carry_xtmb; // CC code 
-  assign {r_clct1_bnd_xtmb, r_clct1_xky_xtmb, r_clct1_carry_xtmb, r_clct0_bnd_xtmb, r_clct0_xky_xtmb, r_clct0_carry_xtmb}   = xtmb_cclut_rdata;
+  wire [9            : 0] r_hmt_nhits_trig_bx678_xtmb;
+  assign {r_hmt_nhits_trig_bx678_xtmb, r_clct1_bnd_xtmb, r_clct1_xky_xtmb, r_clct1_carry_xtmb, r_clct0_bnd_xtmb, r_clct0_xky_xtmb, r_clct0_carry_xtmb}   = xtmb_cclut_rdata;
 
   wire [5:0] r_layers_hit = r_clcta_xtmb[5:0]; // Layers hit
   wire       r_clct1_busy = r_clcta_xtmb[6];   // CLCT1 busy internal check
@@ -5018,7 +5019,7 @@
   assign  header10_run3_[10: 0]   =  r_clct0_carry_xtmb[MXPATC-1:0]; 
   assign  header10_run3_[11]      =  run3_trig_df;
   assign  header10_run3_[13:12]   =  r_clct0_xky_xtmb[1:0];
-  assign  header10_run3_[14]      =  hmt_nhits_trig_xtmb[0];
+  assign  header10_run3_[14]      =  r_hmt_nhits_trig_bx678_xtmb[0];
   assign  header10_[14:0]   =  run3_daq_df ? header10_run3_[14:0] : r_pretrig_counter[29:15]; // CLCT pre-trigger counter
   assign  header10_[18:15]  =  0;                        // DDU+DMB control flags
 
@@ -5040,9 +5041,9 @@
   assign  header13_[18:15]  =  0;                     // DDU+DMB control flags
 
   assign  header14_run3_[10: 0]   =  r_clct1_carry_xtmb[MXPATC-1:0]; 
-  assign  header14_run3_[11]      = 1'b0;// unused!!!
+  assign  header14_run3_[11]      =  r_hmt_nhits_trig_bx678_xtmb[7];// unused!!!
   assign  header14_run3_[13:12]   =  r_clct1_xky_xtmb[1:0];
-  assign  header14_run3_[14]      =  hmt_nhits_trig_xtmb[1];
+  assign  header14_run3_[14]      =  r_hmt_nhits_trig_bx678_xtmb[1];
   assign  header14_[14:0]   =  run3_daq_df ? header14_run3_[14:0] : r_trig_counter[29:15]; // TMB trigger counter
   assign  header14_[18:15]  =  0;                     // DDU+DMB control flags
 
@@ -5146,7 +5147,7 @@
   assign  header29_[14]     =  hs_layer_trig;        // Layer-mode trigger
   assign  header29_[18:15]  =  0;                    // DDU+DMB control flags
 
-  assign  header30_[4:0]    =  run3_daq_df ? hmt_nhits_trig_xtmb[6:2] : r_alct_bxn[4:0];         // ALCT0/1 bxn
+  assign  header30_[4:0]    =  run3_daq_df ? r_hmt_nhits_trig_bx678_xtmb[6:2] : r_alct_bxn[4:0];         // ALCT0/1 bxn
   assign  header30_[6:5]    =  r_alct_ecc_err[1:0];     // ALCT trigger path ECC error code
   assign  header30_[11:7]   =  cfeb_badbits_found[4:0]; // CFEB[n] has at least 1 bad bit
   assign  header30_[12]     =  cfeb_badbits_blocked;    // A CFEB had bad bits that were blocked
