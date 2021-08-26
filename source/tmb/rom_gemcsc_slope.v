@@ -45,7 +45,7 @@ end
 //----------------------------------------------------------------------------------------------------------------------
 
 //always @(posedge logic_clock) begin
-always @(posedge *) begin
+always @(*) begin
   if (we)      rom[adr0[MXADRB-1:0]]<=din;  // dummy write to help Xilinx infer a dual port block RAM
 
   rd_data0 <= (adr0 >= ROMLENGTH) ? 4'hF : rom[adr0[MXADRB-1:0]];

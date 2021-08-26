@@ -85,7 +85,7 @@ rom_gemcsc_slope #(
 );
 
 rom_gemcsc_slope #(
-  .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME11_even_GE11_layer1.mem")
+  .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME11_even_GE11_layer1.mem"),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB),
   .ROMLENGTH(43)
@@ -98,7 +98,7 @@ rom_gemcsc_slope #(
 );
 
 rom_gemcsc_slope #(
-  .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME11_odd_GE11_layer2.mem")
+  .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME11_odd_GE11_layer2.mem"),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB),
   .ROMLENGTH(59)
@@ -111,7 +111,7 @@ rom_gemcsc_slope #(
 );
 
 rom_gemcsc_slope #(
-  .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME11_even_GE11_layer2.mem")
+  .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME11_even_GE11_layer2.mem"),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB),
   .ROMLENGTH(39)
