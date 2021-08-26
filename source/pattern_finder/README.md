@@ -21,7 +21,8 @@
 | [17:14]  | position offset |
 
 ### CCLUT v2: 11bits comparator code and 9bits output from LUT
-* Convention for 12-bits comparator code
+* Convention for 11-bits comparator code
+
 |  field   | layer |
 |----------|-------|
 |  [1:0]   |   1   |
