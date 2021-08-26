@@ -697,7 +697,8 @@ module pattern_finder_ccLUT (
 // CCLUT v2 version:
 	wire [MXHSX-1+5+k:-5+k]  ly0hs_pad;
 	wire [MXHSX-1+4+k:-4+k]  ly1hs_pad;
-	wire [MXHSX-1+0+k:-0+k]  ly2hs_pad;
+///	wire [MXHSX-1+2+k:-2+k]  ly2hs_pad;//CCLUTv1
+	wire [MXHSX-1+0+k:-0+k]  ly2hs_pad;//CCLUTv2
 	wire [MXHSX-1+2+k:-2+k]  ly3hs_pad;
 	wire [MXHSX-1+4+k:-4+k]  ly4hs_pad;
 	wire [MXHSX-1+5+k:-5+k]  ly5hs_pad;
@@ -706,7 +707,8 @@ module pattern_finder_ccLUT (
 // Pad 0s beyond csc edges: whole CSC
 	assign ly0hs_pad = {5'b00000, ly0hs[MXHSX-1+j:j],              5'b00000};
 	assign ly1hs_pad = {4'b0000,  ly1hs[MXHSX-1+j:j], ly1hs[-1+j], 3'b000  };
-	assign ly2hs_pad = {          ly2hs[MXHSX-1+j:j]                       };
+///	assign ly2hs_pad = {2'b00,    ly2hs[MXHSX-1+j:j],              2'b00   };//CCLUTv1
+	assign ly2hs_pad = {          ly2hs[MXHSX-1+j:j]                       };//CCLUTv2
 	assign ly3hs_pad = {2'b00,    ly3hs[MXHSX-1+j:j], ly3hs[-1+j], 1'b0    };
 	assign ly4hs_pad = {4'b0000,  ly4hs[MXHSX-1+j:j],              4'b0000 };
 	assign ly5hs_pad = {5'b00000, ly5hs[MXHSX-1+j:j], ly5hs[-1+j], 4'b0000 };
@@ -714,39 +716,13 @@ module pattern_finder_ccLUT (
 `else
 	assign ly0hs_pad = {5'b00000, me234_ly0hs[MXHSX-1:0], 5'b00000};
 	assign ly1hs_pad = {4'b0000,  me234_ly1hs[MXHSX-1:0], 4'b0000 };
-	assign ly2hs_pad = {          me234_ly2hs[MXHSX-1:0]          };
+///	assign ly2hs_pad = {2'b00,    me234_ly2hs[MXHSX-1:0], 2'b00   };//CCLUTv1
+	assign ly2hs_pad = {          me234_ly2hs[MXHSX-1:0]          };//CCLUTv2
 	assign ly3hs_pad = {2'b00,    me234_ly3hs[MXHSX-1:0], 2'b00   };
 	assign ly4hs_pad = {4'b0000,  me234_ly4hs[MXHSX-1:0], 4'b0000 };
 	assign ly5hs_pad = {5'b00000, me234_ly5hs[MXHSX-1:0], 5'b00000};
 `endif
 
-///
-//-------------------------------------------------------------------------------------------------------------------
-// CCLUT v1 version:
-///	wire [MXHSX-1+5+k:-5+k]  ly0hs_pad;
-///	wire [MXHSX-1+4+k:-4+k]  ly1hs_pad;
-///	wire [MXHSX-1+2+k:-2+k]  ly2hs_pad;
-///	wire [MXHSX-1+2+k:-2+k]  ly3hs_pad;
-///	wire [MXHSX-1+4+k:-4+k]  ly4hs_pad;
-///	wire [MXHSX-1+5+k:-5+k]  ly5hs_pad;
-///
-///`ifdef STAGGER_HS_CSC
-///// Pad 0s beyond csc edges: whole CSC
-///	assign ly0hs_pad = {5'b00000, ly0hs[MXHSX-1+j:j],              5'b00000};
-///	assign ly1hs_pad = {4'b0000,  ly1hs[MXHSX-1+j:j], ly1hs[-1+j], 3'b000  };
-///	assign ly2hs_pad = {2'b00,    ly2hs[MXHSX-1+j:j],              2'b00   };
-///	assign ly3hs_pad = {2'b00,    ly3hs[MXHSX-1+j:j], ly3hs[-1+j], 1'b0    };
-///	assign ly4hs_pad = {4'b0000,  ly4hs[MXHSX-1+j:j],              4'b0000 };
-///	assign ly5hs_pad = {5'b00000, ly5hs[MXHSX-1+j:j], ly5hs[-1+j], 4'b0000 };
-///
-///`else
-///	assign ly0hs_pad = {5'b00000, me234_ly0hs[MXHSX-1:0], 5'b00000};
-///	assign ly1hs_pad = {4'b0000,  me234_ly1hs[MXHSX-1:0], 4'b0000 };
-///	assign ly2hs_pad = {2'b00,    me234_ly2hs[MXHSX-1:0], 2'b00   };
-///	assign ly3hs_pad = {2'b00,    me234_ly3hs[MXHSX-1:0], 2'b00   };
-///	assign ly4hs_pad = {4'b0000,  me234_ly4hs[MXHSX-1:0], 4'b0000 };
-///	assign ly5hs_pad = {5'b00000, me234_ly5hs[MXHSX-1:0], 5'b00000};
-///`endif
 // Find pattern hits for each 1/2-strip key
 	wire [MXHITB-1:0] hs_hit [MXHSX-1:0];
 	wire [MXPIDB-1:0] hs_pid [MXHSX-1:0];
