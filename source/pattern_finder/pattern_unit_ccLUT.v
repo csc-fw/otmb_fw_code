@@ -150,9 +150,10 @@
 
 // Generate carry flags for each pattern, each layer
 
-  reg  [MXPATC-1:0] carry [MXPID-1:MIPID];
+  //reg  [MXPATC-1:0] carry [MXPID-1:MIPID];
+  wire  [MXPATC-1:0] carry [MXPID-1:MIPID];
 
-  genvar ily;
+  //genvar ily;
   genvar ipat;
   generate
   for (ipat=MIPID; ipat<MXPID; ipat=ipat+1) begin: patloop
@@ -164,40 +165,21 @@
     //        else                        carry [ipat][(ily*2)+:2] = 2'd0;
     //  end // always
     //end // lyloop
-    always @(*) begin
-        case(pat[ipat][0])//layer0
-            3'b001 : carry [ipat][1:0] <= 2'b01;
-            3'b010 : carry [ipat][1:0] <= 2'b10;
-            3'b100 : carry [ipat][1:0] <= 2'b11;
-            default: carry [ipat][1:0] <= 2'b00;
-        endcase
-        case(pat[ipat][1])//layer1
-            3'b001 : carry [ipat][3:2] <= 2'b01;
-            3'b010 : carry [ipat][3:2] <= 2'b10;
-            3'b100 : carry [ipat][3:2] <= 2'b11;
-            default: carry [ipat][3:2] <= 2'b00;
-        endcase
-        carry [ipat][4] <= pat[ipat][2][1];//key layer, layer2
-        case(pat[ipat][3])//layer3
-            3'b001 : carry [ipat][6:5] <= 2'b01;
-            3'b010 : carry [ipat][6:5] <= 2'b10;
-            3'b100 : carry [ipat][6:5] <= 2'b11;
-            default: carry [ipat][6:5] <= 2'b00;
-        endcase
-        case(pat[ipat][4])//layer4
-            3'b001 : carry [ipat][8:7] <= 2'b01;
-            3'b010 : carry [ipat][8:7] <= 2'b10;
-            3'b100 : carry [ipat][8:7] <= 2'b11;
-            default: carry [ipat][8:7] <= 2'b00;
-        endcase
-        case(pat[ipat][5])//layer5
-            3'b001 : carry [ipat][10:9] <= 2'b01;
-            3'b010 : carry [ipat][10:9] <= 2'b10;
-            3'b100 : carry [ipat][10:9] <= 2'b11;
-            default: carry [ipat][10:9] <= 2'b00;
-        endcase
+    //special case: xx0=2'b01, x0x = 2'b01, 0xx = 2'b11
+    //always @(*) begin
+    assign carry [ipat][0]  = pat[ipat][0][0] || pat[ipat][0][2];
+    assign carry [ipat][1]  =(pat[ipat][0][1] || pat[ipat][0][2]) && !pat[ipat][0][0];
+    assign carry [ipat][2]  = pat[ipat][1][0] || pat[ipat][1][2];
+    assign carry [ipat][3]  =(pat[ipat][1][1] || pat[ipat][1][2]) && !pat[ipat][1][0];
+    assign carry [ipat][4]  = pat[ipat][2][1];
+    assign carry [ipat][5]  = pat[ipat][3][0] || pat[ipat][3][2];
+    assign carry [ipat][6]  =(pat[ipat][3][1] || pat[ipat][3][2]) && !pat[ipat][3][0];
+    assign carry [ipat][7]  = pat[ipat][4][0] || pat[ipat][4][2];
+    assign carry [ipat][8]  =(pat[ipat][4][1] || pat[ipat][4][2]) && !pat[ipat][4][0];
+    assign carry [ipat][9]  = pat[ipat][5][0] || pat[ipat][5][2];
+    assign carry [ipat][10] =(pat[ipat][5][1] || pat[ipat][5][2]) && !pat[ipat][5][0];
 
-    end // always
+    //end // always
 
   end // patloop
   endgenerate
