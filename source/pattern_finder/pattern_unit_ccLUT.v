@@ -66,47 +66,47 @@
 //        00x => 2'b11; 
 //------------------------------------------------------------------------------------------------------------------------
 
-  wire [0:2] pat   [MXPID-1:MIPID][0:MXLY-1]; // Ordering 0:LXLY-1 uses 132 LUTs, and fpga usage is 90%, matches ly3 key result
+  wire [0:2] pat   [MXPID:MIPID][0:MXLY-1]; // Ordering 0:LXLY-1 uses 132 LUTs, and fpga usage is 90%, matches ly3 key result
 
-// Pattern A                                                                                                                                       0123456789A
-  assign pat[A][0] = {3{pat_en[A]}} &  pat_maskA[15+:3] & {                            ly0[4],ly0[5],ly0[6]                              }; // ly0 ----xxx----
-  assign pat[A][1] = {3{pat_en[A]}} &  pat_maskA[12+:3] & {                            ly1[4],ly1[5],ly1[6]                              }; // ly1 ----xxx----
-  assign pat[A][2] = {3{pat_en[A]}} &  pat_maskA[9 +:3] & {                            ly2[4],ly2[5],ly2[6]                              }; // ly2 ----xkx----
-  assign pat[A][3] = {3{pat_en[A]}} &  pat_maskA[6 +:3] & {                            ly3[4],ly3[5],ly3[6]                              }; // ly3 ----xxx----
-  assign pat[A][4] = {3{pat_en[A]}} &  pat_maskA[3 +:3] & {                            ly4[4],ly4[5],ly4[6]                              }; // ly4 ----xxx----
-  assign pat[A][5] = {3{pat_en[A]}} &  pat_maskA[0 +:3] & {                            ly5[4],ly5[5],ly5[6]                              }; // ly5 ----xxx----
+// Pattern 4                                                                                                                                       0123456789A
+  assign pat[4][0] = {                            ly0[4],ly0[5],ly0[6]                              }; // ly0 ----xxx----
+  assign pat[4][1] = {                            ly1[4],ly1[5],ly1[6]                              }; // ly1 ----xxx----
+  assign pat[4][2] = {                            ly2[4],ly2[5],ly2[6]                              }; // ly2 ----xkx----
+  assign pat[4][3] = {                            ly3[4],ly3[5],ly3[6]                              }; // ly3 ----xxx----
+  assign pat[4][4] = {                            ly4[4],ly4[5],ly4[6]                              }; // ly4 ----xxx----
+  assign pat[4][5] = {                            ly5[4],ly5[5],ly5[6]                              }; // ly5 ----xxx----
 
-// Pattern 9                                                                                                                                        0123456789ABC
-  assign pat[9][0] = {3{pat_en[9]}} &  pat_mask9[15+:3] & {              ly0[2],ly0[3],ly0[4]                                            } ; // ly0 --xxx------
-  assign pat[9][1] = {3{pat_en[9]}} &  pat_mask9[12+:3] & {                     ly1[3],ly1[4],ly1[5]                                     } ; // ly1 ---xxx-----
-  assign pat[9][2] = {3{pat_en[9]}} &  pat_mask9[9 +:3] & {                            ly2[4],ly2[5],ly2[6]                              } ; // ly2 ----xkx----
-  assign pat[9][3] = {3{pat_en[9]}} &  pat_mask9[6 +:3] & {                            ly3[4],ly3[5],ly3[6]                              } ; // ly3 ----xxx----
-  assign pat[9][4] = {3{pat_en[9]}} &  pat_mask9[3 +:3] & {                                   ly4[5],ly4[6],ly4[7]                       } ; // ly4 -----xxx---
-  assign pat[9][5] = {3{pat_en[9]}} &  pat_mask9[0 +:3] & {                                          ly5[6],ly5[7],ly5[8]                } ; // ly5 ------xxx--
+// Pattern 3                                                                                                   0123456789ABC
+  assign pat[3][0] = {              ly0[2],ly0[3],ly0[4]                                            } ; // ly0 --xxx------
+  assign pat[3][1] = {                     ly1[3],ly1[4],ly1[5]                                     } ; // ly1 ---xxx-----
+  assign pat[3][2] = {                            ly2[4],ly2[5],ly2[6]                              } ; // ly2 ----xkx----
+  assign pat[3][3] = {                            ly3[4],ly3[5],ly3[6]                              } ; // ly3 ----xxx----
+  assign pat[3][4] = {                                   ly4[5],ly4[6],ly4[7]                       } ; // ly4 -----xxx---
+  assign pat[3][5] = {                                          ly5[6],ly5[7],ly5[8]                } ; // ly5 ------xxx--
 
-// Pattern 8                                                                                                                                       0123456789A
-  assign pat[8][0] = {3{pat_en[8]}} &  pat_mask8[15+:3] & {                                          ly0[6],ly0[7],ly0[8]                }; // ly0 ------xxx--
-  assign pat[8][1] = {3{pat_en[8]}} &  pat_mask8[12+:3] & {                                   ly1[5],ly1[6],ly1[7]                       }; // ly1 -----xxx---
-  assign pat[8][2] = {3{pat_en[8]}} &  pat_mask8[9 +:3] & {                            ly2[4],ly2[5],ly2[6]                              }; // ly2 ----xkx----
-  assign pat[8][3] = {3{pat_en[8]}} &  pat_mask8[6 +:3] & {                            ly3[4],ly3[5],ly3[6]                              }; // ly3 ----xxx----
-  assign pat[8][4] = {3{pat_en[8]}} &  pat_mask8[3 +:3] & {                     ly4[3],ly4[4],ly4[5]                                     }; // ly4 ---xxx-----
-  assign pat[8][5] = {3{pat_en[8]}} &  pat_mask8[0 +:3] & {              ly5[2],ly5[3],ly5[4]                                            }; // ly5 --xxx------
+// Pattern 2                                                                                                  0123456789A
+  assign pat[2][0] = {                                          ly0[6],ly0[7],ly0[8]                }; // ly0 ------xxx--
+  assign pat[2][1] = {                                   ly1[5],ly1[6],ly1[7]                       }; // ly1 -----xxx---
+  assign pat[2][2] = {                            ly2[4],ly2[5],ly2[6]                              }; // ly2 ----xkx----
+  assign pat[2][3] = {                            ly3[4],ly3[5],ly3[6]                              }; // ly3 ----xxx----
+  assign pat[2][4] = {                     ly4[3],ly4[4],ly4[5]                                     }; // ly4 ---xxx-----
+  assign pat[2][5] = {              ly5[2],ly5[3],ly5[4]                                            }; // ly5 --xxx------
 
-// Pattern 7                                                                                                                                       0123456789ABC
-  assign pat[7][0] = {3{pat_en[7]}} &  pat_mask7[15+:3] & {ly0[0],ly0[1],ly0[2]                                                          }; // ly0 xxx--------
-  assign pat[7][1] = {3{pat_en[7]}} &  pat_mask7[12+:3] & {       ly1[1],ly1[2],ly1[3]                                                   }; // ly1 -xxx-------
-  assign pat[7][2] = {3{pat_en[7]}} &  pat_mask7[9 +:3] & {                     ly2[3],ly2[4],ly2[5]                                     }; // ly2 ---xxk-----
-  assign pat[7][3] = {3{pat_en[7]}} &  pat_mask7[6 +:3] & {                                   ly3[5],ly3[6],ly3[7]                       }; // ly3 -----xxx---
-  assign pat[7][4] = {3{pat_en[7]}} &  pat_mask7[3 +:3] & {                                                 ly4[7],ly4[8],ly4[9]         }; // ly4 -------xxx-
-  assign pat[7][5] = {3{pat_en[7]}} &  pat_mask7[0 +:3] & {                                                        ly5[8],ly5[9],ly5[A]  }; // ly5 --------xxx
+// Pattern 1                                                                                                  0123456789ABC
+  assign pat[1][0] = {ly0[0],ly0[1],ly0[2]                                                          }; // ly0 xxx--------
+  assign pat[1][1] = {       ly1[1],ly1[2],ly1[3]                                                   }; // ly1 -xxx-------
+  assign pat[1][2] = {                     ly2[3],ly2[4],ly2[5]                                     }; // ly2 ---xxk-----
+  assign pat[1][3] = {                                   ly3[5],ly3[6],ly3[7]                       }; // ly3 -----xxx---
+  assign pat[1][4] = {                                                 ly4[7],ly4[8],ly4[9]         }; // ly4 -------xxx-
+  assign pat[1][5] = {                                                        ly5[8],ly5[9],ly5[A]  }; // ly5 --------xxx
 
-// Pattern 6                                                                                                                                       0123456789ABC
-  assign pat[6][0] = {3{pat_en[6]}} &  pat_mask6[15+:3] & {                                                        ly0[8],ly0[9],ly0[A]  }; // ly0 --------xxx--
-  assign pat[6][1] = {3{pat_en[6]}} &  pat_mask6[12+:3] & {                                                 ly1[7],ly1[8],ly1[9]         }; // ly1 -------xxx---
-  assign pat[6][2] = {3{pat_en[6]}} &  pat_mask6[9 +:3] & {                                   ly2[5],ly2[6],ly2[7]                       }; // ly2 -----kxx-----
-  assign pat[6][3] = {3{pat_en[6]}} &  pat_mask6[6 +:3] & {                     ly3[3],ly3[4],ly3[5]                                     }; // ly3 ---xxx-------
-  assign pat[6][4] = {3{pat_en[6]}} &  pat_mask6[3 +:3] & {       ly4[1],ly4[2],ly4[3]                                                   }; // ly4 -xxx---------
-  assign pat[6][5] = {3{pat_en[6]}} &  pat_mask6[0 +:3] & {ly5[0],ly5[1],ly5[2]                                                          }; // ly5 xxx----------
+// Pattern 0                                                                                                  0123456789ABC
+  assign pat[0][0] = {                                                        ly0[8],ly0[9],ly0[A]  }; // ly0 --------xxx--
+  assign pat[0][1] = {                                                 ly1[7],ly1[8],ly1[9]         }; // ly1 -------xxx---
+  assign pat[0][2] = {                                   ly2[5],ly2[6],ly2[7]                       }; // ly2 -----kxx-----
+  assign pat[0][3] = {                     ly3[3],ly3[4],ly3[5]                                     }; // ly3 ---xxx-------
+  assign pat[0][4] = {       ly4[1],ly4[2],ly4[3]                                                   }; // ly4 -xxx---------
+  assign pat[0][5] = {ly5[0],ly5[1],ly5[2]                                                          }; // ly5 xxx----------
 
   //assign pat[5][0] = 3'b000;
   //assign pat[5][1] = 3'b000;
@@ -137,12 +137,12 @@
   //assign pat[2][5] = 3'b000;
 
 // Count number of layers hit for each pattern
-  wire [MXHITB-1:0] nhits [MXPID-1:MIPID];
-  wire        [5:0] lyhit [MXPID-1:MIPID];
+  wire [MXHITB-1:0] nhits [MXPID:MIPID];
+  wire        [5:0] lyhit [MXPID:MIPID];
 
   genvar i;
   generate
-  for (i=MIPID; i<=MXPID-1; i=i+1) begin: gencount
+  for (i=MIPID; i<=MXPID; i=i+1) begin: gencount
       assign lyhit[i] = ({|(pat[i][0]),|(pat[i][1]),|(pat[i][2]),|(pat[i][3]),|(pat[i][4]),|(pat[i][5])});
       assign nhits[i] = count1s(lyhit[i]);
   end
@@ -150,13 +150,13 @@
 
 // Generate carry flags for each pattern, each layer
 
-  //reg  [MXPATC-1:0] carry [MXPID-1:MIPID];
-  wire  [MXPATC-1:0] carry [MXPID-1:MIPID];
+  //reg  [MXPATC-1:0] carry [MXPID:MIPID];
+  wire  [MXPATC-1:0] carry [MXPID:MIPID];
 
   //genvar ily;
   genvar ipat;
   generate
-  for (ipat=MIPID; ipat<MXPID; ipat=ipat+1) begin: patloop
+  for (ipat=MIPID; ipat<=MXPID; ipat=ipat+1) begin: patloop
     //for (ily=0; ily<6; ily=ily+1) begin: lyloop
     //  always @(*) begin
     //        if      (pat[ipat][ily][0]) carry [ipat][(ily*2)+:2] = 2'd1;

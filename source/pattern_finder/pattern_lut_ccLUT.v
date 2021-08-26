@@ -27,15 +27,11 @@
 parameter MXADRB  = MXPATC;
 parameter MXDATB  = 9;//drop 9bits for quality
 
-wire [MXDATB-1:0]   rd0_patA, rd1_patA,
-                    rd0_pat9, rd1_pat9,
-                    rd0_pat8, rd1_pat8,
-                    rd0_pat7, rd1_pat7,
-                    rd0_pat6, rd1_pat6,
-                    //rd0_pat5, rd1_pat5,
-                    //rd0_pat4, rd1_pat4,
-                    //rd0_pat3, rd1_pat3,
-                    //rd0_pat2, rd1_pat2,
+wire [MXDATB-1:0]   rd0_pat4, rd1_pat4,
+                    rd0_pat3, rd1_pat3,
+                    rd0_pat2, rd1_pat2,
+                    rd0_pat1, rd1_pat1,
+                    rd0_pat0, rd1_pat0,
                     rd0_blnk, rd1_blnk;
 
 assign rd0_blnk = 0;
@@ -45,8 +41,6 @@ assign rd1_blnk = 0;
 // ROMS
 //----------------------------------------------------------------------------------------------------------------------
 
-generate
-if (pat_en[A])
 rom #(
   //.ROM_FILE("rom_patA.mem"),
   .ROM_FILE("rom_pat4.mem"),
@@ -58,15 +52,10 @@ romA (
   .clock(clock),
   .adr0(carry00),
   .adr1(carry01),
-  .rd0 (rd0_patA),
-  .rd1 (rd1_patA)
+  .rd0 (rd0_pat4),
+  .rd1 (rd1_pat4)
 );
-else
-  assign rd0_pat10 = 0;
-endgenerate
 
-generate
-if (pat_en[9])
 rom #(
   //.ROM_FILE("rom_pat9.mem"),
   .ROM_FILE("rom_pat3.mem"),
@@ -77,15 +66,10 @@ rom #(
   .clock(clock),
   .adr0(carry00),
   .adr1(carry01),
-  .rd0 (rd0_pat9),
-  .rd1 (rd1_pat9)
+  .rd0 (rd0_pat3),
+  .rd1 (rd1_pat3)
 );
-else
-  assign rd0_pat9 = 0;
-endgenerate
 
-generate
-if (pat_en[8])
 rom #(
   //.ROM_FILE("rom_pat8.mem"),
   .ROM_FILE("rom_pat2.mem"),
@@ -96,15 +80,10 @@ rom #(
   .clock(clock),
   .adr0(carry00),
   .adr1(carry01),
-  .rd0 (rd0_pat8),
-  .rd1 (rd1_pat8)
+  .rd0 (rd0_pat2),
+  .rd1 (rd1_pat2)
 );
-else
-  assign rd0_pat8 = 0;
-endgenerate
 
-generate
-if (pat_en[7])
 rom #(
   //.ROM_FILE("rom_pat7.mem"),
   .ROM_FILE("rom_pat1.mem"),
@@ -115,15 +94,10 @@ rom #(
   .clock(clock),
   .adr0(carry00),
   .adr1(carry01),
-  .rd0 (rd0_pat7),
-  .rd1 (rd1_pat7)
+  .rd0 (rd0_pat1),
+  .rd1 (rd1_pat1)
 );
-else
-  assign rd0_pat7 = 0;
-endgenerate
 
-generate
-if (pat_en[6])
 rom #(
   //.ROM_FILE("rom_pat6.mem"),
   .ROM_FILE("rom_pat0.mem"),
@@ -134,84 +108,9 @@ rom #(
   .clock(clock),
   .adr0(carry00),
   .adr1(carry01),
-  .rd0 (rd0_pat6),
-  .rd1 (rd1_pat6)
+  .rd0 (rd0_pat0),
+  .rd1 (rd1_pat0)
 );
-else
-  assign rd0_pat6 = 0;
-endgenerate
-
-//generate
-//if (pat_en[5])
-//rom #(
-//  .ROM_FILE("../source/pattern_finder/rom_pat5.mem"),
-//  .FALLING_EDGE(1'b1),
-//  .MXADRB(MXADRB),
-//  .MXDATB(MXDATB)
-//) rom5 (
-//  .clock(clock),
-//  .adr0(carry00),
-//  .adr1(carry01),
-//  .rd0 (rd0_pat5),
-//  .rd1 (rd1_pat5)
-//);
-//else
-//  assign rd0_pat5 = 0;
-//endgenerate
-//
-//generate
-//if (pat_en[4])
-//rom #(
-//  .ROM_FILE("../source/pattern_finder/rom_pat4.mem"),
-//  .FALLING_EDGE(1'b1),
-//  .MXADRB(MXADRB),
-//  .MXDATB(MXDATB)
-//) rom4 (
-//  .clock(clock),
-//  .adr0(carry00),
-//  .adr1(carry01),
-//  .rd0 (rd0_pat4),
-//  .rd1 (rd1_pat4)
-//);
-//else
-//  assign rd0_pat4 = 0;
-//endgenerate
-//
-//generate
-//if (pat_en[3])
-//rom #(
-//  .ROM_FILE("../source/pattern_finder/rom_pat3.mem"),
-//  .FALLING_EDGE(1'b1),
-//  .MXADRB(MXADRB),
-//  .MXDATB(MXDATB)
-//) rom3 (
-//  .clock(clock),
-//  .adr0(carry00),
-//  .adr1(carry01),
-//  .rd0 (rd0_pat3),
-//  .rd1 (rd1_pat3)
-//);
-//else
-//  assign rd0_pat3 = 0;
-//endgenerate
-//
-//generate
-//if (pat_en[2])
-//  rom #(
-//.ROM_FILE("../source/pattern_finder/rom_pat2.mem"),
-//.FALLING_EDGE(1'b1),
-//  .MXADRB(MXADRB),
-//  .MXDATB(MXDATB)
-//) rom2 (
-//  .clock(clock),
-//  .adr0(carry00),
-//  .adr1(carry01),
-//  .rd0 (rd0_pat2),
-//  .rd1 (rd1_pat2)
-//);
-//else
-//  assign rd0_pat2 = 0;
-//endgenerate
 
 //----------------------------------------------------------------------------------------------------------------------
 //
@@ -232,29 +131,21 @@ reg [MXDATB-1:0] rd0, rd1;
 
 always @(*) begin
   case (hs_pid00)
-    16'hA:   rd0 = (pat_en['hA]) ? rd0_patA : rd0_blnk;
-    16'h9:   rd0 = (pat_en['h9]) ? rd0_pat9 : rd0_blnk;
-    16'h8:   rd0 = (pat_en['h8]) ? rd0_pat8 : rd0_blnk;
-    16'h7:   rd0 = (pat_en['h7]) ? rd0_pat7 : rd0_blnk;
-    16'h6:   rd0 = (pat_en['h6]) ? rd0_pat6 : rd0_blnk;
-    //16'h5:   rd0 = (pat_en['h5]) ? rd0_pat5 : rd0_blnk;
-    //16'h4:   rd0 = (pat_en['h4]) ? rd0_pat4 : rd0_blnk;
-    //16'h3:   rd0 = (pat_en['h3]) ? rd0_pat3 : rd0_blnk;
-    //16'h2:   rd0 = (pat_en['h2]) ? rd0_pat2 : rd0_blnk;
-    default: rd0 =                            rd0_blnk;
+    4'h4:   rd0 = rd0_pat4;
+    4'h3:   rd0 = rd0_pat3;
+    4'h2:   rd0 = rd0_pat2;
+    4'h1:   rd0 = rd0_pat1;
+    4'h0:   rd0 = rd0_pat0;
+    default: rd0 = rd0_blnk;
   endcase
 
   case (hs_pid01)
-    16'hA:   rd1 = (pat_en['hA]) ? rd1_patA : rd1_blnk;
-    16'h9:   rd1 = (pat_en['h9]) ? rd1_pat9 : rd1_blnk;
-    16'h8:   rd1 = (pat_en['h8]) ? rd1_pat8 : rd1_blnk;
-    16'h7:   rd1 = (pat_en['h7]) ? rd1_pat7 : rd1_blnk;
-    16'h6:   rd1 = (pat_en['h6]) ? rd1_pat6 : rd1_blnk;
-    //16'h5:   rd1 = (pat_en['h5]) ? rd1_pat5 : rd1_blnk;
-    //16'h4:   rd1 = (pat_en['h4]) ? rd1_pat4 : rd1_blnk;
-    //16'h3:   rd1 = (pat_en['h3]) ? rd1_pat3 : rd1_blnk;
-    //16'h2:   rd1 = (pat_en['h2]) ? rd1_pat2 : rd1_blnk;
-    default: rd1 =                            rd1_blnk;
+    4'h4:   rd1 = rd1_pat4;
+    4'h3:   rd1 = rd1_pat3;
+    4'h2:   rd1 = rd1_pat2;
+    4'h1:   rd1 = rd1_pat1;
+    4'h0:   rd1 = rd1_pat0;
+    default: rd1 = rd1_blnk;
   endcase
 end
 
