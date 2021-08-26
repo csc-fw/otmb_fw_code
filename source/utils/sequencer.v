@@ -4335,10 +4335,11 @@
   //assign  header40_[5:4]    =  perr_cfeb_ff[6:5];      // Hdr27 CFEB RAM parity error, latched
   //assign  header40_[7:6]    =  cfeb_badbits_found[6:5];  // Hdr30 CFEB[n] has at least 1 bad bit
   //assign  header40_[9:8]    =  cfeb_en[6:5];        // Hdr35 CFEBs enabled for triggering
-  assign  header40_[11]    =  (MXCFEB==5);        // TMB has 7 DCFEBs so hdr40_[10:1] are active
-  //assign  header40_[12]    =  r_trig_source_vec[9];    // Pre-trigger was ME1A only, not used for ME234
-  assign  header40_[13]    =  r_trig_source_vec[10];    // Pre-trigger was ME1B only
+  assign  header40_[9:0]   = 10'b0;
   assign  header40_[10]    =  buf_fence_cnt_is_peak;    // Current fence is peak number of fences in RAM
+  assign  header40_[11]    =  (MXCFEB==5);        // TMB has 7 DCFEBs so hdr40_[10:1] are active
+  assign  header40_[12]    =  r_trig_source_vec[9];    // Pre-trigger was ME1A only, not used for ME234
+  assign  header40_[13]    =  r_trig_source_vec[10];    // Pre-trigger was ME1B only
   assign  header40_[14]    =  r_tmb_trig_pulse;      // TMB trig pulse coincident with rtmb_push
   assign  header40_[18:15]  =  0;              // DDU+DMB control flags
 
