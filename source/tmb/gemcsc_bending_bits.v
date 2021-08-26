@@ -70,6 +70,8 @@ parameter MXDATB       = 4;
   wire [3:0] bending_bit1_odd_A, bending_bit1_odd_B;
   wire [3:0] bending_bit0_even_A, bending_bit0_even_B;
   wire [3:0] bending_bit1_even_A, bending_bit1_even_B;
+  wire [3:0] bending_bit0_even, bending_bit0_odd;
+  wire [3:0] bending_bit1_even, bending_bit1_odd;
   
 rom_gemcsc_slope #(
   .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME11_odd_GE11_layer1.mem"),
