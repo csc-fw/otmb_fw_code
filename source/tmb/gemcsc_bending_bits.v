@@ -51,6 +51,8 @@ module gemcsc_bending_bits (
     bending_bits1
   );
 
+parameter MXADRB       = 7;
+parameter MXDATB       = 4;
 // Ports
   input                  clock;
   input [6:0]  gemcsc_bending0;
@@ -70,7 +72,10 @@ module gemcsc_bending_bits (
   wire [3:0] bending_bit1_even_A, bending_bit1_even_B;
   
 rom_gemcsc_slope #(
-  .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME11_odd_GE11_layer1.mem")
+  .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME11_odd_GE11_layer1.mem"),
+  .MXADRB(MXADRB),
+  .MXDATB(MXDATB),
+  .ROMLENGTH(65)
 ) romme1boddA (
   .clock(clock),
   .adr0(gemcsc_bending0),
@@ -81,6 +86,9 @@ rom_gemcsc_slope #(
 
 rom_gemcsc_slope #(
   .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME11_even_GE11_layer1.mem")
+  .MXADRB(MXADRB),
+  .MXDATB(MXDATB),
+  .ROMLENGTH(43)
 ) romme1bevenA (
   .clock(clock),
   .adr0(gemcsc_bending0),
@@ -91,6 +99,9 @@ rom_gemcsc_slope #(
 
 rom_gemcsc_slope #(
   .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME11_odd_GE11_layer2.mem")
+  .MXADRB(MXADRB),
+  .MXDATB(MXDATB),
+  .ROMLENGTH(59)
 ) romme1boddB (
   .clock(clock),
   .adr0(gemcsc_bending0),
@@ -101,6 +112,9 @@ rom_gemcsc_slope #(
 
 rom_gemcsc_slope #(
   .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME11_even_GE11_layer2.mem")
+  .MXADRB(MXADRB),
+  .MXDATB(MXDATB),
+  .ROMLENGTH(39)
 ) romme1bevenB (
   .clock(clock),
   .adr0(gemcsc_bending0),

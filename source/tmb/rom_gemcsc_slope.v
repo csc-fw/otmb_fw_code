@@ -48,8 +48,8 @@ end
 always @(posedge *) begin
   if (we)      rom[adr0[MXADRB-1:0]]<=din;  // dummy write to help Xilinx infer a dual port block RAM
 
-  rd_data0 <= rom[adr0[MXADRB-1:0]];
-  rd_data1 <= rom[adr1[MXADRB-1:0]];
+  rd_data0 <= (adr0 >= ROMLENGTH) ? 4'hF : rom[adr0[MXADRB-1:0]];
+  rd_data1 <= (adr0 >= ROMLENGTH) ? 4'hF : rom[adr1[MXADRB-1:0]];
 end
 
 assign rd0 = rd_data0[MXDATB-1:0];
