@@ -734,50 +734,19 @@ module pattern_finder_ccLUT (
   parameter MXHSXB = 128;  // Last hs +1 on ME1B
 
   //-------------------------------------------------------------------------------------------------------------------
-  // CCLUT v1 version:
-  //wire [MXHSXA - 1 + 5 + k: MXHSXB - 5 + k] ly0hs_pad_me1a; // JG, better to use MXKEYX here rather than MXHSXA
-  //wire [MXHSXA - 1 + 4 + k: MXHSXB - 4 + k] ly1hs_pad_me1a;
-  //wire [MXHSXA - 1 + 2 + k: MXHSXB - 2 + k] ly2hs_pad_me1a; // 228:133
-  //wire [MXHSXA - 1 + 2 + k: MXHSXB - 2 + k] ly3hs_pad_me1a;
-  //wire [MXHSXA - 1 + 4 + k: MXHSXB - 4 + k] ly4hs_pad_me1a;
-  //wire [MXHSXA - 1 + 5 + k: MXHSXB - 5 + k] ly5hs_pad_me1a;
-
-  //wire [MXHSXB - 1 + 5 + k: 0 - 5 + k] ly0hs_pad_me1b;
-  //wire [MXHSXB - 1 + 4 + k: 0 - 4 + k] ly1hs_pad_me1b;
-  //wire [MXHSXB - 1 + 2 + k: 0 - 2 + k] ly2hs_pad_me1b; // 132:5
-  //wire [MXHSXB - 1 + 2 + k: 0 - 2 + k] ly3hs_pad_me1b;
-  //wire [MXHSXB - 1 + 4 + k: 0 - 4 + k] ly4hs_pad_me1b;
-  //wire [MXHSXB - 1 + 5 + k: 0 - 5 + k] ly5hs_pad_me1b;
-
-  //// Pad 0s beyond CSC edges ME1A hs128-223, isolate it from ME1B
-  //assign ly0hs_pad_me1a = { 5'b00000, ly0hs[223: 128], 5'b00000 }; // JG, later use MXKEYX-1:MXHSXB here.
-  //assign ly1hs_pad_me1a = {  4'b0000, ly1hs[223: 128], 4'b0000  }; // JG, MXHSXB=128 here... for non-ME1/1 upgrades use MXHSXB=0
-  //assign ly2hs_pad_me1a = {    2'b00, ly2hs[223: 128], 2'b00    }; // MXKEYX is based on nCFEB, so that auto-corrects for upgrades
-  //assign ly3hs_pad_me1a = {    2'b00, ly3hs[223: 128], 2'b00    };
-  //assign ly4hs_pad_me1a = {  4'b0000, ly4hs[223: 128], 4'b0000  };
-  //assign ly5hs_pad_me1a = { 5'b00000, ly5hs[223: 128], 5'b00000 };
-
-  //// Pad 0s beyond CSC edges ME1B hs0-127, isolate it from ME1A
-  //assign ly0hs_pad_me1b = { 5'b00000, ly0hs[127: 0], 5'b00000 };
-  //assign ly1hs_pad_me1b = {  4'b0000, ly1hs[127: 0], 4'b0000  };
-  //assign ly2hs_pad_me1b = {    2'b00, ly2hs[127: 0], 2'b00    };
-  //assign ly3hs_pad_me1b = {    2'b00, ly3hs[127: 0], 2'b00    };
-  //assign ly4hs_pad_me1b = {  4'b0000, ly4hs[127: 0], 4'b0000  };
-  //assign ly5hs_pad_me1b = { 5'b00000, ly5hs[127: 0], 5'b00000 };
-
-
-  //-------------------------------------------------------------------------------------------------------------------
   // CCLUT v2 version:
   wire [MXHSXA - 1 + 5 + k: MXHSXB - 5 + k] ly0hs_pad_me1a; // JG, better to use MXKEYX here rather than MXHSXA
   wire [MXHSXA - 1 + 4 + k: MXHSXB - 4 + k] ly1hs_pad_me1a;
-  wire [MXHSXA - 1 + 0 + k: MXHSXB - 0 + k] ly2hs_pad_me1a; // 228:133
+//wire [MXHSXA - 1 + 2 + k: MXHSXB - 2 + k] ly2hs_pad_me1a; // 228:133, CCLUTv1
+  wire [MXHSXA - 1 + 0 + k: MXHSXB - 0 + k] ly2hs_pad_me1a; // 228:133, CCLUTv2
   wire [MXHSXA - 1 + 2 + k: MXHSXB - 2 + k] ly3hs_pad_me1a;
   wire [MXHSXA - 1 + 4 + k: MXHSXB - 4 + k] ly4hs_pad_me1a;
   wire [MXHSXA - 1 + 5 + k: MXHSXB - 5 + k] ly5hs_pad_me1a;
 
   wire [MXHSXB - 1 + 5 + k: 0 - 5 + k] ly0hs_pad_me1b;
   wire [MXHSXB - 1 + 4 + k: 0 - 4 + k] ly1hs_pad_me1b;
-  wire [MXHSXB - 1 + 0 + k: 0 - 0 + k] ly2hs_pad_me1b; // 132:5
+//wire [MXHSXB - 1 + 2 + k: 0 - 2 + k] ly2hs_pad_me1b; // 132:5, CCLUTv1
+  wire [MXHSXB - 1 + 0 + k: 0 - 0 + k] ly2hs_pad_me1b; // 132:5, CCLUTv2
   wire [MXHSXB - 1 + 2 + k: 0 - 2 + k] ly3hs_pad_me1b;
   wire [MXHSXB - 1 + 4 + k: 0 - 4 + k] ly4hs_pad_me1b;
   wire [MXHSXB - 1 + 5 + k: 0 - 5 + k] ly5hs_pad_me1b;
@@ -785,7 +754,8 @@ module pattern_finder_ccLUT (
   // Pad 0s beyond CSC edges ME1A hs128-223, isolate it from ME1B
   assign ly0hs_pad_me1a = { 5'b00000, ly0hs[223: 128], 5'b00000 }; // JG, later use MXKEYX-1:MXHSXB here.
   assign ly1hs_pad_me1a = {  4'b0000, ly1hs[223: 128], 4'b0000  }; // JG, MXHSXB=128 here... for non-ME1/1 upgrades use MXHSXB=0
-  assign ly2hs_pad_me1a = {           ly2hs[223: 128]           }; // MXKEYX is based on nCFEB, so that auto-corrects for upgrades
+//assign ly2hs_pad_me1a = {    2'b00, ly2hs[223: 128], 2'b00    }; // CCLUTv1, MXKEYX is based on nCFEB, so that auto-corrects for upgrades
+  assign ly2hs_pad_me1a = {           ly2hs[223: 128]           }; // CCLUTv2, MXKEYX is based on nCFEB, so that auto-corrects for upgrades
   assign ly3hs_pad_me1a = {    2'b00, ly3hs[223: 128], 2'b00    };
   assign ly4hs_pad_me1a = {  4'b0000, ly4hs[223: 128], 4'b0000  };
   assign ly5hs_pad_me1a = { 5'b00000, ly5hs[223: 128], 5'b00000 };
@@ -793,7 +763,8 @@ module pattern_finder_ccLUT (
   // Pad 0s beyond CSC edges ME1B hs0-127, isolate it from ME1A
   assign ly0hs_pad_me1b = { 5'b00000, ly0hs[127: 0], 5'b00000 };
   assign ly1hs_pad_me1b = {  4'b0000, ly1hs[127: 0], 4'b0000  };
-  assign ly2hs_pad_me1b = {           ly2hs[127: 0]           };
+//assign ly2hs_pad_me1b = {    2'b00, ly2hs[127: 0], 2'b00    }; //CCLUTv1
+  assign ly2hs_pad_me1b = {           ly2hs[127: 0]           };// CCLUTv2
   assign ly3hs_pad_me1b = {    2'b00, ly3hs[127: 0], 2'b00    };
   assign ly4hs_pad_me1b = {  4'b0000, ly4hs[127: 0], 4'b0000  };
   assign ly5hs_pad_me1b = { 5'b00000, ly5hs[127: 0], 5'b00000 };
