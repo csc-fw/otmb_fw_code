@@ -7509,23 +7509,23 @@
 //------------------------------------------------------------------------------------------------------------------
 // ADR_CLCT0_CC= 0x19A    1st CLCT Comparator Code
 // ADR_CLCT1_CC= 0x19C    2nd CLCT Comparator Code
-// ADR_CLCT0_QLT= 0x19E    1st CLCT new quality
-// ADR_CLCT1_QLT= 0x1A0    2nd CLCT new quality
-// ADR_CLCT0_BND= 0x1A2    1st CLCT new bnd
-// ADR_CLCT1_BND= 0x1A4    2nd CLCT new bnd
-// ADR_CLCT0_XKY= 0x1A6    1st CLCT new position
-// ADR_CLCT1_XKY= 0x1A8    2nd CLCT new position
+// ADR_CLCT0_BNDXKY= 0x19E    1st CLCT new bnd+XKY
+// ADR_CLCT1_BNDXKY= 0x1A0    2nd CLCT new bnd+XKY
 //------------------------------------------------------------------------------------------------------------------
   assign clct0_cc_rd[MXPATC-1:0] = clct0_vme_carry[MXPATC-1:0]; 
   assign clct1_cc_rd[MXPATC-1:0] = clct1_vme_carry[MXPATC-1:0]; 
   assign clct0_cc_rd[11] = 1'b0;
   assign clct1_cc_rd[11] = 1'b0;//since comparator code is reduced to 11 bits but software is not changed yet
+  assign clct0_cc_rd[15:12]  = 4'b0;
+  assign clct1_cc_rd[15:12]  = 4'b0;
   //assign clct0_qlt_rd[MXQLTB - 1    : 0] = clct0_vme_qlt[MXQLTB - 1   : 0];
   //assign clct1_qlt_rd[MXQLTB - 1    : 0] = clct1_vme_qlt[MXQLTB - 1   : 0];
   assign clct0_bndxky_rd[MXBNDB - 1    : 0]         = clct0_vme_bnd[MXBNDB - 1   : 0];
   assign clct0_bndxky_rd[MXXKYB - 1+MXBNDB: MXBNDB] = clct0_vme_xky[MXXKYB - 1   : 0];
   assign clct1_bndxky_rd[MXBNDB - 1    : 0]         = clct1_vme_bnd[MXBNDB - 1   : 0];
   assign clct1_bndxky_rd[MXXKYB - 1+MXBNDB: MXBNDB] = clct1_vme_xky[MXXKYB - 1   : 0];
+  assign clct0_bndxky_rd[15] = 1'b0;
+  assign clct1_bndxky_rd[15] = 1'b0;
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_RUN3_FORMAT_CTRL = 0x1AA  CCLUT

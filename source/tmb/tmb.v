@@ -445,7 +445,7 @@
   parameter MXQLTB  = 9;                 // Fit quality bits
   parameter MXBNDB  = 5;                 // Bend bits
   parameter MXXKYB = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
-  parameter MXCCLUTB = MXPATC+MXBNDB+MXXKYB;
+  parameter MXCCLUTB = MXBNDB+MXXKYB;
  
   //HMT
   parameter MXHMTB   = 4;
@@ -867,8 +867,8 @@
   wire [MXCLCTC-1:0] clctc_pipe, clctc_srl; // Common to CLCT0/1 to TMB
   wire [MXCFEB-1:0]  clctf_pipe, clctf_srl; // Active cfeb list to TMB
   
-  wire [MXCCLUTB-1  : 0]  clct0_cclut_xtmb = {clct0_bnd_xtmb, clct0_xky_xtmb, clct0_carry_xtmb};
-  wire [MXCCLUTB-1  : 0]  clct1_cclut_xtmb = {clct1_bnd_xtmb, clct1_xky_xtmb, clct1_carry_xtmb};
+  wire [MXCCLUTB-1  : 0]  clct0_cclut_xtmb = {clct0_bnd_xtmb, clct0_xky_xtmb};
+  wire [MXCCLUTB-1  : 0]  clct1_cclut_xtmb = {clct1_bnd_xtmb, clct1_xky_xtmb};
   wire [MXCCLUTB-1  : 0]  clct0_cclut_pipe, clct0_cclut_srl;
   wire [MXCCLUTB-1  : 0]  clct1_cclut_pipe, clct1_cclut_srl;
 
@@ -917,8 +917,8 @@
   wire  [MXXKYB-1     : 0] clct1_xky_pipe; // new position with 1/8 precision
   wire  [MXPATC-1     : 0] clct1_carry_pipe; // CC code
 
-  assign {clct0_bnd_pipe, clct0_xky_pipe, clct0_carry_pipe} = clct0_cclut_pipe;
-  assign {clct1_bnd_pipe, clct1_xky_pipe, clct1_carry_pipe} = clct1_cclut_pipe;
+  assign {clct0_bnd_pipe, clct0_xky_pipe} = clct0_cclut_pipe;
+  assign {clct1_bnd_pipe, clct1_xky_pipe} = clct1_cclut_pipe;
 
 //------------------------------------------------------------------------------------------------------------------
 // Pre-calculate dynamic clct window parameters
