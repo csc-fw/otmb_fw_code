@@ -636,9 +636,9 @@ module pattern_finder_ccLUT (
 // ly4[ 9:1]  xxxxkxxxx     4+1+4 = 9
 // ly5[10:0] xxxxxkxxxxx    5+1+5 =11
 //
-//                               22222222 22222
-//                               11112222 22222
-//       hs  54321 01234567      67890123 45678
+//                               11111111 11111
+//                               55555555 66666
+//       hs  54321 01234567      23456789 01234
 // ly0[10:0] 00000|aaaaaaaa......bbbbbbbb|00000
 // ly1[ 7:3]    00|aaaaaaaa......bbbbbbbb|00
 // ly2[ 5:5]      |aaaaaaaa......bbbbbbbb|
@@ -646,16 +646,18 @@ module pattern_finder_ccLUT (
 // ly4[ 9:1]  0000|aaaaaaaa......bbbbbbbb|0000
 // ly5[10:0] 00000|aaaaaaaa......bbbbbbbb|00000
 //-------------------------------------------------------------------------------------------------------------------
-// v2 version:
+// CCLUT v1 version:
 //        hs 0123456789ABC
 // ly0[10:0] xxxxxkxxxx     5+1+5 = 11
-// ly1[ 7:3]  xxxxkxxx      4+1+4 = 9
-// ly2[ 5:5]    xxkxx       2+1+2 = 5
+// ly1[ 9:1]  xxxxkxxx      4+1+4 = 9
+// ly2[ 7:3]    xxkxx       2+1+2 = 5
 // ly3[ 7:3]    xxkxx       2+1+2 = 5
 // ly4[ 9:1]  xxxxkxxxxx    4+1+4 = 9
 // ly5[10:0] xxxxxkxxxxxx   5+1+5 = 11
 //
-//       hs  654321 01234567      67890123 456789
+//                                11111111 11111
+//                                55555555 66666
+//       hs  654321 01234567      23456789 01234 
 // ly0[10:0]  00000|aaaaaaaa......bbbbbbbb|00000
 // ly1[ 7:3]   0000|aaaaaaaa......bbbbbbbb|0000
 // ly2[ 5:5]     00|aaaaaaaa......bbbbbbbb|00
@@ -664,6 +666,24 @@ module pattern_finder_ccLUT (
 // ly5[10:0]  00000|aaaaaaaa......bbbbbbbb|00000
 
 
+// CCLUT v2 version: with 11bits comparator code
+//        hs 0123456789ABC
+// ly0[10:0] xxxxxkxxxx     5+1+5 = 11
+// ly1[ 7:3]  xxxxkxxx      4+1+4 = 9
+// ly2[ 5:5]      k         0+1+0 = 1
+// ly3[ 7:3]    xxkxx       2+1+2 = 5
+// ly4[ 9:1]  xxxxkxxxxx    4+1+4 = 9
+// ly5[10:0] xxxxxkxxxxxx   5+1+5 = 11
+//
+//                                11111111 11111
+//                                55555555 66666
+//       hs  654321 01234567      23456789 01234
+// ly0[10:0]  00000|aaaaaaaa......bbbbbbbb|00000
+// ly1[ 7:3]   0000|aaaaaaaa......bbbbbbbb|0000
+// ly2[ 5:5]       |aaaaaaaa......bbbbbbbb|
+// ly3[ 7:3]     00|aaaaaaaa......bbbbbbbb|00
+// ly4[ 9:1]   0000|aaaaaaaa......bbbbbbbb|0000
+// ly5[10:0]  00000|aaaaaaaa......bbbbbbbb|00000
 
 //
 //-------------------------------------------------------------------------------------------------------------------
@@ -673,9 +693,11 @@ module pattern_finder_ccLUT (
 // Create hs arrays with 0s padded at left and right csc edges
 	parameter k=5;		// Shift negative array indexes positive
 
+//-------------------------------------------------------------------------------------------------------------------
+// CCLUT v2 version:
 	wire [MXHSX-1+5+k:-5+k]  ly0hs_pad;
 	wire [MXHSX-1+4+k:-4+k]  ly1hs_pad;
-	wire [MXHSX-1+2+k:-2+k]  ly2hs_pad;
+	wire [MXHSX-1+0+k:-0+k]  ly2hs_pad;
 	wire [MXHSX-1+2+k:-2+k]  ly3hs_pad;
 	wire [MXHSX-1+4+k:-4+k]  ly4hs_pad;
 	wire [MXHSX-1+5+k:-5+k]  ly5hs_pad;
@@ -684,7 +706,7 @@ module pattern_finder_ccLUT (
 // Pad 0s beyond csc edges: whole CSC
 	assign ly0hs_pad = {5'b00000, ly0hs[MXHSX-1+j:j],              5'b00000};
 	assign ly1hs_pad = {4'b0000,  ly1hs[MXHSX-1+j:j], ly1hs[-1+j], 3'b000  };
-	assign ly2hs_pad = {2'b00,    ly2hs[MXHSX-1+j:j],              2'b00   };
+	assign ly2hs_pad = {          ly2hs[MXHSX-1+j:j]                       };
 	assign ly3hs_pad = {2'b00,    ly3hs[MXHSX-1+j:j], ly3hs[-1+j], 1'b0    };
 	assign ly4hs_pad = {4'b0000,  ly4hs[MXHSX-1+j:j],              4'b0000 };
 	assign ly5hs_pad = {5'b00000, ly5hs[MXHSX-1+j:j], ly5hs[-1+j], 4'b0000 };
@@ -692,12 +714,39 @@ module pattern_finder_ccLUT (
 `else
 	assign ly0hs_pad = {5'b00000, me234_ly0hs[MXHSX-1:0], 5'b00000};
 	assign ly1hs_pad = {4'b0000,  me234_ly1hs[MXHSX-1:0], 4'b0000 };
-	assign ly2hs_pad = {2'b00,    me234_ly2hs[MXHSX-1:0], 2'b00   };
+	assign ly2hs_pad = {          me234_ly2hs[MXHSX-1:0]          };
 	assign ly3hs_pad = {2'b00,    me234_ly3hs[MXHSX-1:0], 2'b00   };
 	assign ly4hs_pad = {4'b0000,  me234_ly4hs[MXHSX-1:0], 4'b0000 };
 	assign ly5hs_pad = {5'b00000, me234_ly5hs[MXHSX-1:0], 5'b00000};
 `endif
 
+///
+//-------------------------------------------------------------------------------------------------------------------
+// CCLUT v1 version:
+///	wire [MXHSX-1+5+k:-5+k]  ly0hs_pad;
+///	wire [MXHSX-1+4+k:-4+k]  ly1hs_pad;
+///	wire [MXHSX-1+2+k:-2+k]  ly2hs_pad;
+///	wire [MXHSX-1+2+k:-2+k]  ly3hs_pad;
+///	wire [MXHSX-1+4+k:-4+k]  ly4hs_pad;
+///	wire [MXHSX-1+5+k:-5+k]  ly5hs_pad;
+///
+///`ifdef STAGGER_HS_CSC
+///// Pad 0s beyond csc edges: whole CSC
+///	assign ly0hs_pad = {5'b00000, ly0hs[MXHSX-1+j:j],              5'b00000};
+///	assign ly1hs_pad = {4'b0000,  ly1hs[MXHSX-1+j:j], ly1hs[-1+j], 3'b000  };
+///	assign ly2hs_pad = {2'b00,    ly2hs[MXHSX-1+j:j],              2'b00   };
+///	assign ly3hs_pad = {2'b00,    ly3hs[MXHSX-1+j:j], ly3hs[-1+j], 1'b0    };
+///	assign ly4hs_pad = {4'b0000,  ly4hs[MXHSX-1+j:j],              4'b0000 };
+///	assign ly5hs_pad = {5'b00000, ly5hs[MXHSX-1+j:j], ly5hs[-1+j], 4'b0000 };
+///
+///`else
+///	assign ly0hs_pad = {5'b00000, me234_ly0hs[MXHSX-1:0], 5'b00000};
+///	assign ly1hs_pad = {4'b0000,  me234_ly1hs[MXHSX-1:0], 4'b0000 };
+///	assign ly2hs_pad = {2'b00,    me234_ly2hs[MXHSX-1:0], 2'b00   };
+///	assign ly3hs_pad = {2'b00,    me234_ly3hs[MXHSX-1:0], 2'b00   };
+///	assign ly4hs_pad = {4'b0000,  me234_ly4hs[MXHSX-1:0], 4'b0000 };
+///	assign ly5hs_pad = {5'b00000, me234_ly5hs[MXHSX-1:0], 5'b00000};
+///`endif
 // Find pattern hits for each 1/2-strip key
 	wire [MXHITB-1:0] hs_hit [MXHSX-1:0];
 	wire [MXPIDB-1:0] hs_pid [MXHSX-1:0];
@@ -708,7 +757,8 @@ module pattern_finder_ccLUT (
 	    pattern_unit_ccLUT upat (
 	    .ly0 (ly0hs_pad[ihs + 5 + k: ihs - 5 + k]),
 	    .ly1 (ly1hs_pad[ihs + 4 + k: ihs - 4 + k]),
-	    .ly2 (ly2hs_pad[ihs + 2 + k: ihs - 2 + k]),	//key on ly2
+          //.ly2 (ly2hs_pad[ihs + 2 + k: ihs - 2 + k]),	//key on ly2, CCLUT v1
+	    .ly2 (ly2hs_pad[ihs + 0 + k: ihs - 0 + k]),	//key on ly2, CCLUT v2
             .ly3 (ly3hs_pad[ihs + 2 + k: ihs - 2 + k]),
             .ly4 (ly4hs_pad[ihs + 4 + k: ihs - 4 + k]),
             .ly5 (ly5hs_pad[ihs + 5 + k: ihs - 5 + k]),
@@ -722,11 +772,11 @@ module pattern_finder_ccLUT (
 //`ifdef STAGGER_HS_CSC
 //// Pad 0s beyond csc edges: whole CSC
 //	assign ly0hs_pad = {5'b00000, ly0hs[MXHSX-1+j:j],              5'b00000};
-//	assign ly1hs_pad = {2'b00,    ly1hs[MXHSX-1+j:j], ly1hs[-1+j], 1'b0};
-//	assign ly2hs_pad = {          ly2hs[MXHSX-1+j:j]};
-//	assign ly3hs_pad = {2'b00,    ly3hs[MXHSX-1+j:j], ly3hs[-1+j], 1'b0};
-//	assign ly4hs_pad = {4'b0000,  ly4hs[MXHSX-1+j:j],              4'b0000};
-//	assign ly5hs_pad = {5'b00000, ly5hs[MXHSX-1+j:j], ly5hs[-1+j], 4'b0000};
+//	assign ly1hs_pad = {2'b00,    ly1hs[MXHSX-1+j:j], ly1hs[-1+j], 1'b0    };
+//	assign ly2hs_pad = {          ly2hs[MXHSX-1+j:j]                       };
+//	assign ly3hs_pad = {2'b00,    ly3hs[MXHSX-1+j:j], ly3hs[-1+j], 1'b0    };
+//	assign ly4hs_pad = {4'b0000,  ly4hs[MXHSX-1+j:j],              4'b0000 };
+//	assign ly5hs_pad = {5'b00000, ly5hs[MXHSX-1+j:j], ly5hs[-1+j], 4'b0000 };
 //
 //`else
 //	assign ly0hs_pad = {5'b00000, me234_ly0hs[MXHSX-1:0], 5'b00000};
@@ -747,11 +797,11 @@ module pattern_finder_ccLUT (
 //	    .ly0 (ly0hs_pad[ihs + 5 + k: ihs - 5 + k]),
 //	    .ly1 (ly1hs_pad[ihs + 2 + k: ihs - 2 + k]),
 //	    .ly2 (ly2hs_pad[ihs + 0 + k: ihs - 0 + k]),	//key on ly2
-//            .ly3 (ly3hs_pad[ihs + 2 + k: ihs - 2 + k]),
-//            .ly4 (ly4hs_pad[ihs + 4 + k: ihs - 4 + k]),
-//            .ly5 (ly5hs_pad[ihs + 5 + k: ihs - 5 + k]),
-//            .pat_nhits (hs_hit[ihs]),
-//            .pat_id (hs_pid[ihs]));
+//          .ly3 (ly3hs_pad[ihs + 2 + k: ihs - 2 + k]),
+//          .ly4 (ly4hs_pad[ihs + 4 + k: ihs - 4 + k]),
+//          .ly5 (ly5hs_pad[ihs + 5 + k: ihs - 5 + k]),
+//          .pat_nhits (hs_hit[ihs]),
+//          .pat_id (hs_pid[ihs]));
 //        end
 //       endgenerate
 

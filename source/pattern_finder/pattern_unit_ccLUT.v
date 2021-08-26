@@ -36,7 +36,7 @@
 //CCLUT, v2
   input [10:0] ly0, //  2,3,4,5, 6, 7,8,9,10
   input [ 9:1] ly1, //   3,4,5,6,7,8,9
-  input [ 7:3] ly2, // 5,6,7 Key layer 2
+  input [ 5:5] ly2, // 5,6,7 Key layer 2
   input [ 7:3] ly3,   
   input [ 9:1] ly4, //  1,2,3,4,5, 6, 7,8,9,10,11
   input [10:0] ly5, // 1/2-strips 1 layer 1 cell
@@ -71,7 +71,7 @@
 // Pattern 4                                                                                                                                       0123456789A
   assign pat[4][0] = {                            ly0[4],ly0[5],ly0[6]                              }; // ly0 ----xxx----
   assign pat[4][1] = {                            ly1[4],ly1[5],ly1[6]                              }; // ly1 ----xxx----
-  assign pat[4][2] = {                            ly2[4],ly2[5],ly2[6]                              }; // ly2 ----xkx----
+  assign pat[4][2] = {                              1'b0,ly2[5],1'b0                                }; // ly2 -----k-----
   assign pat[4][3] = {                            ly3[4],ly3[5],ly3[6]                              }; // ly3 ----xxx----
   assign pat[4][4] = {                            ly4[4],ly4[5],ly4[6]                              }; // ly4 ----xxx----
   assign pat[4][5] = {                            ly5[4],ly5[5],ly5[6]                              }; // ly5 ----xxx----
@@ -79,7 +79,7 @@
 // Pattern 3                                                                                                   0123456789ABC
   assign pat[3][0] = {              ly0[2],ly0[3],ly0[4]                                            } ; // ly0 --xxx------
   assign pat[3][1] = {                     ly1[3],ly1[4],ly1[5]                                     } ; // ly1 ---xxx-----
-  assign pat[3][2] = {                            ly2[4],ly2[5],ly2[6]                              } ; // ly2 ----xkx----
+  assign pat[3][2] = {                              1'b0,ly2[5],1'b0                                } ; // ly2 -----k-----
   assign pat[3][3] = {                            ly3[4],ly3[5],ly3[6]                              } ; // ly3 ----xxx----
   assign pat[3][4] = {                                   ly4[5],ly4[6],ly4[7]                       } ; // ly4 -----xxx---
   assign pat[3][5] = {                                          ly5[6],ly5[7],ly5[8]                } ; // ly5 ------xxx--
@@ -87,7 +87,7 @@
 // Pattern 2                                                                                                  0123456789A
   assign pat[2][0] = {                                          ly0[6],ly0[7],ly0[8]                }; // ly0 ------xxx--
   assign pat[2][1] = {                                   ly1[5],ly1[6],ly1[7]                       }; // ly1 -----xxx---
-  assign pat[2][2] = {                            ly2[4],ly2[5],ly2[6]                              }; // ly2 ----xkx----
+  assign pat[2][2] = {                              1'b0,ly2[5],1'b0                                }; // ly2 -----k----
   assign pat[2][3] = {                            ly3[4],ly3[5],ly3[6]                              }; // ly3 ----xxx----
   assign pat[2][4] = {                     ly4[3],ly4[4],ly4[5]                                     }; // ly4 ---xxx-----
   assign pat[2][5] = {              ly5[2],ly5[3],ly5[4]                                            }; // ly5 --xxx------
@@ -95,7 +95,7 @@
 // Pattern 1                                                                                                  0123456789ABC
   assign pat[1][0] = {ly0[0],ly0[1],ly0[2]                                                          }; // ly0 xxx--------
   assign pat[1][1] = {       ly1[1],ly1[2],ly1[3]                                                   }; // ly1 -xxx-------
-  assign pat[1][2] = {                     ly2[3],ly2[4],ly2[5]                                     }; // ly2 ---xxk-----
+  assign pat[1][2] = {                       1'b0, 1'b0, ly2[5]                                     }; // ly2 -----k-----
   assign pat[1][3] = {                                   ly3[5],ly3[6],ly3[7]                       }; // ly3 -----xxx---
   assign pat[1][4] = {                                                 ly4[7],ly4[8],ly4[9]         }; // ly4 -------xxx-
   assign pat[1][5] = {                                                        ly5[8],ly5[9],ly5[A]  }; // ly5 --------xxx
@@ -103,7 +103,7 @@
 // Pattern 0                                                                                                  0123456789ABC
   assign pat[0][0] = {                                                        ly0[8],ly0[9],ly0[A]  }; // ly0 --------xxx--
   assign pat[0][1] = {                                                 ly1[7],ly1[8],ly1[9]         }; // ly1 -------xxx---
-  assign pat[0][2] = {                                   ly2[5],ly2[6],ly2[7]                       }; // ly2 -----kxx-----
+  assign pat[0][2] = {                                   ly2[5], 1'b0, 1'b0                         }; // ly2 -----kxx-----
   assign pat[0][3] = {                     ly3[3],ly3[4],ly3[5]                                     }; // ly3 ---xxx-------
   assign pat[0][4] = {       ly4[1],ly4[2],ly4[3]                                                   }; // ly4 -xxx---------
   assign pat[0][5] = {ly5[0],ly5[1],ly5[2]                                                          }; // ly5 xxx----------
@@ -171,7 +171,7 @@
     assign carry [ipat][1]  =(pat[ipat][0][1] || pat[ipat][0][2]) && !pat[ipat][0][0];
     assign carry [ipat][2]  = pat[ipat][1][0] || pat[ipat][1][2];
     assign carry [ipat][3]  =(pat[ipat][1][1] || pat[ipat][1][2]) && !pat[ipat][1][0];
-    assign carry [ipat][4]  = pat[ipat][2][1];
+    assign carry [ipat][4]  =|pat[ipat][2];
     assign carry [ipat][5]  = pat[ipat][3][0] || pat[ipat][3][2];
     assign carry [ipat][6]  =(pat[ipat][3][1] || pat[ipat][3][2]) && !pat[ipat][3][0];
     assign carry [ipat][7]  = pat[ipat][4][0] || pat[ipat][4][2];

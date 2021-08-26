@@ -3065,11 +3065,11 @@
   assign xtmb_wdata[42]    =  clct_invp[0];     // CLCT had invalid pattern after drift delay
   assign xtmb_wdata[43]    =  clct_invp[1];     // CLCT had invalid pattern after drift delay
 
-  parameter MXCCLUTB = MXPATC+MXPATC+MXBNDB+MXBNDB+MXXKYB+MXXKYB;
+  parameter MXCCLUTB = MXPATC+MXPATC+MXBNDB+MXBNDB+MXXKYB+MXXKYB+10;
   wire [MXCCLUTB-1:0]  xtmb_cclut_wdata;                // Mapping array
   wire [MXCCLUTB-1:0]  xtmb_cclut_rdata;                // Mapping array
   //assign xtmb_cclut_wdata = {clct1_qlt_xtmb, clct1_bnd_xtmb, clct1_xky_xtmb, clct1_carry_xtmb, clct0_qlt_xtmb, clct0_bnd_xtmb, clct0_xky_xtmb, clct0_carry_xtmb};
-  assign xtmb_cclut_wdata = {clct1_bnd_xtmb, clct1_xky_xtmb, clct1_carry_xtmb, clct0_bnd_xtmb, clct0_xky_xtmb, clct0_carry_xtmb};
+  assign xtmb_cclut_wdata = {hmt_nhits_trig_bx678_xtmb, clct1_bnd_xtmb, clct1_xky_xtmb, clct1_carry_xtmb, clct0_bnd_xtmb, clct0_xky_xtmb, clct0_carry_xtmb};
 
 // Post-drift+1bx: store CLCT counter in RAM mapping array
   parameter MXXTMB1 = 30;         // Post drift CLCT counter
@@ -3713,8 +3713,9 @@
   wire [MXBNDB - 1   : 0] r_clct1_bnd_xtmb; // new bending
   wire [MXXKYB-1     : 0] r_clct1_xky_xtmb; // new position with 1/8 precision
   wire [MXPATC-1     : 0] r_clct1_carry_xtmb; // CC code
+  wire [9:0] r_hmt_nhits_trig_bx678_xtmb;
   //assign {r_clct1_qlt_xtmb, r_clct1_bnd_xtmb, r_clct1_xky_xtmb, r_clct1_carry_xtmb, r_clct0_qlt_xtmb, r_clct0_bnd_xtmb, r_clct0_xky_xtmb, r_clct0_carry_xtmb}   = xtmb_cclut_rdata;
-  assign {r_clct1_bnd_xtmb, r_clct1_xky_xtmb, r_clct1_carry_xtmb, r_clct0_bnd_xtmb, r_clct0_xky_xtmb, r_clct0_carry_xtmb}   = xtmb_cclut_rdata;
+  assign {r_hmt_nhits_trig_bx678_xtmb, r_clct1_bnd_xtmb, r_clct1_xky_xtmb, r_clct1_carry_xtmb, r_clct0_bnd_xtmb, r_clct0_xky_xtmb, r_clct0_carry_xtmb}   = xtmb_cclut_rdata;
 
   wire [5:0] r_layers_hit = r_clcta_xtmb[5:0]; // Layers hit
   wire       r_clct1_busy = r_clcta_xtmb[6];   // CLCT1 busy internal check
@@ -4098,99 +4099,99 @@
   wire [2:0] ddu_code = 3'b101;                // DDU code for TMB/ALCT
 
 // First 4 header words must conform to DDU specification
-  assign  header00_[11:0]    =  12'hB0C;          // Beginning of Cathode record marker
+  assign  header00_[11:0]   =  12'hB0C;          // Beginning of Cathode record marker
   assign  header00_[14:12]  =  ddu_code[2:0];        // DDU code for TMB/ALCT
-  assign  header00_[15]    =  1;              // DDU special
-  assign  header00_[16]    =  0;              // DMB last
-  assign  header00_[17]    =  1;              // DMB dav, dmbs copy is generated earlier at l1a
-  assign  header00_[18]    =  0;              // DMB /wr
+  assign  header00_[15]     =  1;              // DDU special
+  assign  header00_[16]     =  0;              // DMB last
+  assign  header00_[17]     =  1;              // DMB dav, dmbs copy is generated earlier at l1a
+  assign  header00_[18]     =  0;              // DMB /wr
 
-  assign  header01_[11:0]    =  r_l1a_bxn_win[11:0];     // BXN pushed on L1A stack at L1A arrival
+  assign  header01_[11:0]   =  r_l1a_bxn_win[11:0];     // BXN pushed on L1A stack at L1A arrival
   assign  header01_[14:12]  =  ddu_code[2:0];        // DDU code for TMB/ALCT
-  assign  header01_[15]    =  1;              // DDU special
+  assign  header01_[15]     =  1;              // DDU special
   assign  header01_[18:16]  =  0;              // DMB control flags
 
-  assign  header02_[11:0]    =  r_l1a_cnt_win[11:0];    // L1As received and pushed on L1A stack
+  assign  header02_[11:0]   =  r_l1a_cnt_win[11:0];    // L1As received and pushed on L1A stack
   assign  header02_[14:12]  =  ddu_code[2:0];        // DDU code for TMB/ALCT
-  assign  header02_[15]    =  1;              // DDU special
+  assign  header02_[15]     =  1;              // DDU special
   assign  header02_[18:16]  =  0;              // DMB control flags
 
-  assign  header03_[11:0]    =  readout_counter[11:0];    // Readout counter
+  assign  header03_[11:0]   =  readout_counter[11:0];    // Readout counter
   assign  header03_[14:12]  =  ddu_code[2:0];        // DDU code for TMB/ALCT
-  assign  header03_[15]    =  1;              // DDU special
+  assign  header03_[15]     =  1;              // DDU special
   assign  header03_[18:16]  =  0;              // DMB control flags
 
 // Next 4 words for short header mode
   assign  header04_[4:0]    =  board_id[4:0];        // TMB module ID number = VME slot
   assign  header04_[8:5]    =  csc_id[3:0];        // Chamber ID number
-  assign  header04_[12:9]    =  run_id[3:0];        // Run info
-  assign  header04_[13]    =  buf_q_ovf_err;        // Fence queue overflow error
-  assign  header04_[14]    =  sync_err_hdr;        // BXN sync error
+  assign  header04_[12:9]   =  run_id[3:0];        // Run info
+  assign  header04_[13]     =  buf_q_ovf_err;        // Fence queue overflow error
+  assign  header04_[14]     =  sync_err_hdr;        // BXN sync error
   assign  header04_[18:15]  =  0;              // DDU+DMB control flags
 
   assign  header05_[5:0]    =  r_nheaders[5:0];      // Number of header words
   assign  header05_[8:6]    =  fifo_mode[2:0];        // Trigger type and fifo mode
-  assign  header05_[10:9]    =  readout_type[1:0];      // Readout type: dump,nodump, full header, short header
+  assign  header05_[10:9]   =  readout_type[1:0];      // Readout type: dump,nodump, full header, short header
   assign  header05_[12:11]  =  l1a_type[1:0];        // L1A Pop type code: buffers, no buffers, clct/alct_only
-  assign  header05_[13]    =  r_has_buf;          // Event has clct and rpc buffer data
-  assign  header05_[14]    =  buf_stalled_hdr;      // Raw hits buffer was full at pretrigger
+  assign  header05_[13]     =  r_has_buf;          // Event has clct and rpc buffer data
+  assign  header05_[14]     =  buf_stalled_hdr;      // Raw hits buffer was full at pretrigger
   assign  header05_[18:15]  =  0;              // DDU+DMB control flags
 
-  assign  header06_[14:0]    =  bd_status[14:0];      // Board status summary
+  assign  header06_[14:0]   =  bd_status[14:0];      // Board status summary
   assign  header06_[18:15]  =  0;              // DDU+DMB control flags
 
-  assign  header07_[14:0]    =  revcode[14:0];        // Firmware version date code
+  assign  header07_[14:0]   =  revcode[14:0];        // Firmware version date code
   assign  header07_[18:15]  =  0;              // DDU+DMB control flags
 
 // Full Header-mode words 8-to-EOB: Event Counters
-  assign  header08_[11:0]    =  r_bxn_counter[11:0];    // CLCT Bunch Crossing number at pre-trig, 0-3563
-  assign  header08_[12]    =  r_tmb_clct0_discard;    // TMB discarded clct0 from ME1A
-  assign  header08_[13]    =  r_tmb_clct1_discard;    // TMB discarded clct1 from ME1A
-  assign  header08_[14]    =  clock_lock_lost_err;    // Main DLL lost lock
+  assign  header08_[11:0]   =  r_bxn_counter[11:0];    // CLCT Bunch Crossing number at pre-trig, 0-3563
+  assign  header08_[12]     =  r_tmb_clct0_discard;    // TMB discarded clct0 from ME1A
+  assign  header08_[13]     =  r_tmb_clct1_discard;    // TMB discarded clct1 from ME1A
+  assign  header08_[14]     =  clock_lock_lost_err;    // Main DLL lost lock
   assign  header08_[18:15]  =  0;              // DDU+DMB control flags
 
-  assign  header09_[14:0]    =  r_pretrig_counter[14:0];  // CLCT pre-trigger counter, stop on ovf
+  assign  header09_[14:0]   =  r_pretrig_counter[14:0];  // CLCT pre-trigger counter, stop on ovf
   assign  header09_[18:15]  =  0;              // DDU+DMB control flags
 
   //assign  header10_[14:0]    =  r_pretrig_counter[29:15];  // CLCT pre-trigger counter
   assign  header10_run3_[10: 0]   =  r_clct0_carry_xtmb[MXPATC-1:0];
   assign  header10_run3_[11]      =  run3_trig_df;
   assign  header10_run3_[13:12]   =  r_clct0_xky_xtmb[1:0];
-  assign  header10_run3_[14]      =  hmt_nhits_trig_xtmb[0];
+  assign  header10_run3_[14]      =  r_hmt_nhits_trig_bx678_xtmb[0];
   assign  header10_[14:0]   =  run3_daq_df ? header10_run3_[14:0] : r_pretrig_counter[29:15]; // CLCT pre-trigger counter
   assign  header10_[18:15]  =  0;              // DDU+DMB control flags
 
-  assign  header11_[14:0]    =  r_clct_counter[14:0];    // CLCT post-drift counter, stop on ovf
+  assign  header11_[14:0]   =  r_clct_counter[14:0];    // CLCT post-drift counter, stop on ovf
   assign  header11_[18:15]  =  0;              // DDU+DMB control flags
-  assign  header12_[14:0]    =  r_clct_counter[29:15];    // CLCT post-drift counter
+  assign  header12_[14:0]   =  r_clct_counter[29:15];    // CLCT post-drift counter
   assign  header12_[18:15]  =  0;
 
-  assign  header13_[14:0]    =  r_trig_counter[14:0];    // TMB trigger counter, stop on ovf
+  assign  header13_[14:0]   =  r_trig_counter[14:0];    // TMB trigger counter, stop on ovf
   assign  header13_[18:15]  =  0;              // DDU+DMB control flags
   //assign  header14_[14:0]    =  r_trig_counter[29:15];    // TMB trigger counter
   assign  header14_run3_[10: 0]   =  r_clct1_carry_xtmb[MXPATC-1:0];
   assign  header14_run3_[11]      =  1'b0;//????
   assign  header14_run3_[13:12]   =  r_clct1_xky_xtmb[1:0];
-  assign  header14_run3_[14]      =  hmt_nhits_trig_xtmb[1];
+  assign  header14_run3_[14]      =  r_hmt_nhits_trig_bx678_xtmb[1];
   assign  header14_[14:0]   =  run3_daq_df ? header14_run3_[14:0] : r_trig_counter[29:15]; // TMB trigger counter
   assign  header14_[18:15]  =  0;              // DDU+DMB control flags
 
-  assign  header15_[14:0]    =  r_alct_counter[14:0];    // Counts ALCTs received from ALCT board, stop on ovf
+  assign  header15_[14:0]   =  r_alct_counter[14:0];    // Counts ALCTs received from ALCT board, stop on ovf
   assign  header15_[18:15]  =  0;              // DDU+DMB control flags
-  assign  header16_[14:0]    =  r_alct_counter[29:15];
+  assign  header16_[14:0]   =  r_alct_counter[29:15];
   assign  header16_[18:15]  =  0;              // DDU+DMB control flags
 
-  assign  header17_[14:0]    =  r_orbit_counter[14:0];    // BX0s since last hard reset, stop on ovf
+  assign  header17_[14:0]   =  r_orbit_counter[14:0];    // BX0s since last hard reset, stop on ovf
   assign  header17_[18:15]  =  0;              // DDU+DMB control flags
-  assign  header18_[14:0]    =  r_orbit_counter[29:15];    // BX0s since last hard reset
+  assign  header18_[14:0]   =  r_orbit_counter[29:15];    // BX0s since last hard reset
   assign  header18_[18:15]  =  0;              // DDU+DMB control flags
   
 // CLCT Raw Hits Size
   assign  header19_[2:0]    =  r_ncfebs[2:0];        // Number of CFEBs read out
   assign  header19_[7:3]    =  r_fifo_tbins_cfeb[4:0];    // Number of time bins per CFEB in dump
-  assign  header19_[12:8]    =  fifo_pretrig_cfeb[4:0];    // # Time bins before pretrigger;
-  assign  header19_[13]    =  scp_auto;          // Readout includes logic analyzer scope data
-  assign  header19_[14]    =  mini_read_enable;      // Readout includes minicope data
+  assign  header19_[12:8]   =  fifo_pretrig_cfeb[4:0];    // # Time bins before pretrigger;
+  assign  header19_[13]     =  scp_auto;          // Readout includes logic analyzer scope data
+  assign  header19_[14]     =  mini_read_enable;      // Readout includes minicope data
   assign  header19_[18:15]  =  0;              // DDU+DMB control flags
 
 // CLCT Configuration
@@ -4198,7 +4199,7 @@
   assign  header20_[6:3]    =  pid_thresh_pretrig[3:0];  // Pattern shape ID pre-trigger threshold
   assign  header20_[9:7]    =  hit_thresh_postdrift[2:0];  // Hits on pattern  post-drift  threshold
   assign  header20_[13:10]  =  pid_thresh_postdrift[3:0];  // Pattern shape ID post-drift  threshold
-  assign  header20_[14]    =  stagger_hs_csc;        // CSC Staggering ON
+  assign  header20_[14]     =  stagger_hs_csc;        // CSC Staggering ON
   assign  header20_[18:15]  =  0;              // DDU+DMB control flags
 
   assign  header21_[3:0]   = triad_persist[3:0];        // CLCT Triad persistence
@@ -4212,88 +4213,88 @@
   assign  header22_[14:9]   =  run3_daq_df ? {r_clct1_bnd_xtmb[4], r_clct0_bnd_xtmb[4:0]} : r_layers_hit[5:0];      // CSC layers hit on layer trigger after drift
   assign  header22_[18:15]  =  0;              // DDU+DMB control flags
 
-  assign  header23_[4:0]   =  active_feb_mux[4:0];    // Active CFEB list sent to DMB
-  assign  header23_[9:5]   =  r_cfebs_read[4:0];      // CFEBs read out for this event
-  assign  header23_[13:10] =  r_l1a_match_win[3:0];    // Position of l1a in window
-  assign  header23_[14]    =  active_feb_src;        // Active CFEB list source, 0=pretrig, 1=tmb match
-  assign  header23_[18:15] =  0;              // DDU+DMB control flags
+  assign  header23_[4:0]    =  active_feb_mux[4:0];    // Active CFEB list sent to DMB
+  assign  header23_[9:5]    =  r_cfebs_read[4:0];      // CFEBs read out for this event
+  assign  header23_[13:10]  =  r_l1a_match_win[3:0];    // Position of l1a in window
+  assign  header23_[14]     =  active_feb_src;        // Active CFEB list source, 0=pretrig, 1=tmb match
+  assign  header23_[18:15]  =  0;              // DDU+DMB control flags
 
 // CLCT+ALCT Match Status
-  assign  header24_[0]     = r_tmb_match;          // ALCT and CLCT matched in time, pushed on L1A stack
-  assign  header24_[1]     = r_tmb_alct_only;      // Only ALCT triggered, pushed on L1a stack
-  assign  header24_[2]     = r_tmb_clct_only;      // Only CLCT triggered, pushed on L1A stack
-  assign  header24_[6:3]   = r_tmb_match_win[3:0]; // Location of alct in clct window, pushed on L1A stack
-  assign  header24_[7]     = r_tmb_no_alct;        // No ALCT
-  assign  header24_[8]     = r_tmb_one_alct;       // One ALCT
-  assign  header24_[9]     = r_tmb_one_clct;       // One CLCT
-  assign  header24_[10]    = r_tmb_two_alct;       // Two ALCTs
-  assign  header24_[11]    = r_tmb_two_clct;       // Two CLCTs
-  assign  header24_[12]    = r_tmb_dupe_alct;      // ALCT0 copied into ALCT1 to make 2nd LCT
-  assign  header24_[13]    = r_tmb_dupe_clct;      // CLCT0 copied into CLCT1 to make 2nd LCT
-  assign  header24_[14]    = r_tmb_rank_err;       // LCT1 has higher quality than LCT0
-  assign  header24_[18:15] = 0;                    // DDU+DMB control flags
+  assign  header24_[0]      = r_tmb_match;          // ALCT and CLCT matched in time, pushed on L1A stack
+  assign  header24_[1]      = r_tmb_alct_only;      // Only ALCT triggered, pushed on L1a stack
+  assign  header24_[2]      = r_tmb_clct_only;      // Only CLCT triggered, pushed on L1A stack
+  assign  header24_[6:3]    = r_tmb_match_win[3:0]; // Location of alct in clct window, pushed on L1A stack
+  assign  header24_[7]      = r_tmb_no_alct;        // No ALCT
+  assign  header24_[8]      = r_tmb_one_alct;       // One ALCT
+  assign  header24_[9]      = r_tmb_one_clct;       // One CLCT
+  assign  header24_[10]     = r_tmb_two_alct;       // Two ALCTs
+  assign  header24_[11]     = r_tmb_two_clct;       // Two CLCTs
+  assign  header24_[12]     = r_tmb_dupe_alct;      // ALCT0 copied into ALCT1 to make 2nd LCT
+  assign  header24_[13]     = r_tmb_dupe_clct;      // CLCT0 copied into CLCT1 to make 2nd LCT
+  assign  header24_[14]     = r_tmb_rank_err;       // LCT1 has higher quality than LCT0
+  assign  header24_[18:15]  = 0;                    // DDU+DMB control flags
 
 // CLCT Trigger Data
-  assign  header25_[14:0]  = r_clct0_xtmb[14:0]; // CLCT0 after drift lsbs
-  assign  header25_[18:15] = 0;                  // DDU+DMB control flags
+  assign  header25_[14:0]   = r_clct0_xtmb[14:0]; // CLCT0 after drift lsbs
+  assign  header25_[18:15]  = 0;                  // DDU+DMB control flags
 
-  assign  header26_[14:0]  = r_clct1_xtmb[14:0]; // CLCT1 after drift lsbs
-  assign  header26_[18:15] = 0;                  // DDU+DMB control flags
+  assign  header26_[14:0]   = r_clct1_xtmb[14:0]; // CLCT1 after drift lsbs
+  assign  header26_[18:15]  = 0;                  // DDU+DMB control flags
 
-  assign  header27_[0]     =  r_clct0_xtmb[15];      // CLCT0 after drift msbs
-  assign  header27_[1]     =  r_clct1_xtmb[15];      // CLCT1 after drift msbs
-  assign  header27_[4:2]   =  r_clctc_xtmb[2:0];      // CLCT0/1 common after drift msbs
-  assign  header27_[5]     =  r_clct0_invp;        // CLCT0 had invalid pattern after drift delay
-  assign  header27_[6]     =  r_clct1_invp;        // CLCT1 had invalid pattern after drift delay
-  assign  header27_[7]     =  r_clct1_busy;        // 2nd CLCT busy, logic error indicator
-  assign  header27_[12:8]  =  perr_cfeb_ff[4:0];      // CFEB RAM parity error, latched
-  assign  header27_[13]    =  perr_rpc_ff | perr_mini_ff; // RPC  or Minicope RAM parity error, latched
-  assign  header27_[14]    =  perr_ff;          // Parity error summary,  latched
-  assign  header27_[18:15] =  0;              // DDU+DMB control flags
+  assign  header27_[0]      =  r_clct0_xtmb[15];      // CLCT0 after drift msbs
+  assign  header27_[1]      =  r_clct1_xtmb[15];      // CLCT1 after drift msbs
+  assign  header27_[4:2]    =  r_clctc_xtmb[2:0];      // CLCT0/1 common after drift msbs
+  assign  header27_[5]      =  r_clct0_invp;        // CLCT0 had invalid pattern after drift delay
+  assign  header27_[6]      =  r_clct1_invp;        // CLCT1 had invalid pattern after drift delay
+  assign  header27_[7]      =  r_clct1_busy;        // 2nd CLCT busy, logic error indicator
+  assign  header27_[12:8]   =  perr_cfeb_ff[4:0];      // CFEB RAM parity error, latched
+  assign  header27_[13]     =  perr_rpc_ff | perr_mini_ff; // RPC  or Minicope RAM parity error, latched
+  assign  header27_[14]     =  perr_ff;          // Parity error summary,  latched
+  assign  header27_[18:15]  =  0;              // DDU+DMB control flags
 
 // ALCT Trigger Data
-  assign  header28_[0]     =  r_alct0_valid;        // ALCT0 valid pattern flag
-  assign  header28_[2:1]   =  r_alct0_quality[1:0];    // ALCT0 quality
-  assign  header28_[3]     =  r_alct0_amu;        // ALCT0 accelerator muon flag
-  assign  header28_[10:4]  =  r_alct0_key[6:0];      // ALCT0 key wire group
-  assign  header28_[14:11] =  run3_daq_df ? r_clct1_bnd_xtmb[3:0] : r_alct_preClct_win[3:0];  // ALCT active_feb_flag position in pretrig window
-  assign  header28_[18:15] =  0;              // DDU+DMB control flags
+  assign  header28_[0]      =  r_alct0_valid;        // ALCT0 valid pattern flag
+  assign  header28_[2:1]    =  r_alct0_quality[1:0];    // ALCT0 quality
+  assign  header28_[3]      =  r_alct0_amu;        // ALCT0 accelerator muon flag
+  assign  header28_[10:4]   =  r_alct0_key[6:0];      // ALCT0 key wire group
+  assign  header28_[14:11]  =  run3_daq_df ? r_clct1_bnd_xtmb[3:0] : r_alct_preClct_win[3:0];  // ALCT active_feb_flag position in pretrig window
+  assign  header28_[18:15]  =  0;              // DDU+DMB control flags
 
-  assign  header29_[0]    =  r_alct1_valid;        // ALCT1 valid pattern flag
+  assign  header29_[0]      =  r_alct1_valid;        // ALCT1 valid pattern flag
   assign  header29_[2:1]    =  r_alct1_quality[1:0];    // ALCT1 quality
-  assign  header29_[3]    =  r_alct1_amu;        // ALCT1 accelerator muon flag
-  assign  header29_[10:4]    =  r_alct1_key[6:0];      // ALCT1 key wire group
+  assign  header29_[3]      =  r_alct1_amu;        // ALCT1 accelerator muon flag
+  assign  header29_[10:4]   =  r_alct1_key[6:0];      // ALCT1 key wire group
   assign  header29_[12:11]  =  drift_delay[1:0];      // CLCT drift delay
-  assign  header29_[13]    =  bcb_read_enable;      // Enable blocked bits in readout
-  assign  header29_[14]    =  hs_layer_trig;        // Layer-mode trigger
+  assign  header29_[13]     =  bcb_read_enable;      // Enable blocked bits in readout
+  assign  header29_[14]     =  hs_layer_trig;        // Layer-mode trigger
   assign  header29_[18:15]  =  0;              // DDU+DMB control flags
 
   //assign  header30_[4:0]    =  r_alct_bxn[4:0];      // ALCT0/1 bxn
-  assign  header30_[4:0]    =  run3_daq_df ? hmt_nhits_trig_xtmb[6:2] : r_alct_bxn[4:0];         // ALCT0/1 bxn
+  assign  header30_[4:0]    =  run3_daq_df ? r_hmt_nhits_trig_bx678_xtmb[6:2] : r_alct_bxn[4:0];         // ALCT0/1 bxn
   assign  header30_[6:5]    =  r_alct_ecc_err[1:0];    // ALCT trigger path ECC error code
-  assign  header30_[11:7]    =  cfeb_badbits_found[4:0];  // CFEB[n] has at least 1 bad bit
-  assign  header30_[12]    =  cfeb_badbits_blocked;    // A CFEB had bad bits that were blocked
-  assign  header30_[13]    =  alct_cfg_done;        // ALCT FPGA configuration done
-  assign  header30_[14]    =  bx0_match;          // ALCT bx0 and CLCT bx0 match
+  assign  header30_[11:7]   =  cfeb_badbits_found[4:0];  // CFEB[n] has at least 1 bad bit
+  assign  header30_[12]     =  cfeb_badbits_blocked;    // A CFEB had bad bits that were blocked
+  assign  header30_[13]     =  alct_cfg_done;        // ALCT FPGA configuration done
+  assign  header30_[14]     =  bx0_match;          // ALCT bx0 and CLCT bx0 match
   assign  header30_[18:15]  =  0;              // DDU+DMB control flags
 
 // MPC Frames
-  assign  header31_[14:0]    =  r_mpc0_frame0_ff[14:0];    // MPC muon 0 frame 0 LSBs
+  assign  header31_[14:0]   =  r_mpc0_frame0_ff[14:0];    // MPC muon 0 frame 0 LSBs
   assign  header31_[18:15]  =  0;              // DDU+DMB control flags
 
-  assign  header32_[14:0]    =  r_mpc0_frame1_ff[14:0];    // MPC muon 0 frame 1 LSBs
+  assign  header32_[14:0]   =  r_mpc0_frame1_ff[14:0];    // MPC muon 0 frame 1 LSBs
   assign  header32_[18:15]  =  0;              // DDU+DMB control flags
 
-  assign  header33_[14:0]    =  r_mpc1_frame0_ff[14:0];    // MPC muon 1 frame 0 LSBs
+  assign  header33_[14:0]   =  r_mpc1_frame0_ff[14:0];    // MPC muon 1 frame 0 LSBs
   assign  header33_[18:15]  =  0;              // DDU+DMB control flags
 
-  assign  header34_[14:0]    =  r_mpc1_frame1_ff[14:0];    // MPC muon 1 frame 1 LSBs
+  assign  header34_[14:0]   =  r_mpc1_frame1_ff[14:0];    // MPC muon 1 frame 1 LSBs
   assign  header34_[18:15]  =  0;              // DDU+DMB control flags
 
-  assign  header35_[0]    =  r_mpc0_frame0_ff[15];    // MPC muon 0 frame 0 MSB
-  assign  header35_[1]    =  r_mpc0_frame1_ff[15];    // MPC muon 0 frame 1 MSB
-  assign  header35_[2]    =  r_mpc1_frame0_ff[15];    // MPC muon 1 frame 0 MSB
-  assign  header35_[3]    =  r_mpc1_frame1_ff[15];    // MPC muon 1 frame 1 MSB
+  assign  header35_[0]      =  r_mpc0_frame0_ff[15];    // MPC muon 0 frame 0 MSB
+  assign  header35_[1]      =  r_mpc0_frame1_ff[15];    // MPC muon 0 frame 1 MSB
+  assign  header35_[2]      =  r_mpc1_frame0_ff[15];    // MPC muon 1 frame 0 MSB
+  assign  header35_[3]      =  r_mpc1_frame1_ff[15];    // MPC muon 1 frame 1 MSB
   assign  header35_[7:4]    =  mpc_tx_delay[3:0];      // MPC transmit delay
   assign  header35_[9:8]    =  r_mpc_accept[1:0];      // MPC muon accept response
   assign  header35_[14:10]  =  cfeb_en[4:0];        // CFEBs enabled for triggering
@@ -4302,31 +4303,31 @@
 // RPC Configuration
   assign  header36_[1:0]    =  rd_list_rpc[1:0];      // RPCs included in read out
   assign  header36_[3:2]    =  r_nrpcs_read[1:0];      // Number of RPCs in readout, 0,1,2, 0 if head-only event
-  assign  header36_[4]    =  rpc_read_enable;      // RPC readout enabled
+  assign  header36_[4]      =  rpc_read_enable;      // RPC readout enabled
   assign  header36_[9:5]    =  fifo_tbins_rpc[4:0];    // Number RPC FIFO time bins to read out
   assign  header36_[14:10]  =  fifo_pretrig_rpc[4:0];    // Number RPC FIFO time bins before pretrigger
   assign  header36_[18:15]  =  0;              // DDU+DMB control flags
 
 // Buffer Status
-  assign  header37_[10:0]    =  r_wr_buf_adr[10:0];      // Buffer RAM write address at pretrigger
-  assign  header37_[11]    =  r_wr_buf_ready;        // Write buffer was ready at pretrig
-  assign  header37_[12]    =  wr_buf_ready;        // Write buffer ready now
-  assign  header37_[13]    =  buf_q_full;          // All raw hits ram in use, ram writing must stop
-  assign  header37_[14]    =  buf_q_empty;        // No fences remain on buffer stack
+  assign  header37_[10:0]   =  r_wr_buf_adr[10:0];      // Buffer RAM write address at pretrigger
+  assign  header37_[11]     =  r_wr_buf_ready;        // Write buffer was ready at pretrig
+  assign  header37_[12]     =  wr_buf_ready;        // Write buffer ready now
+  assign  header37_[13]     =  buf_q_full;          // All raw hits ram in use, ram writing must stop
+  assign  header37_[14]     =  buf_q_empty;        // No fences remain on buffer stack
   assign  header37_[18:15]  =  0;              // DDU+DMB control flags
 
-  assign  header38_[10:0]    =  r_buf_fence_dist[10:0];    // Distance to 1st fence address at pretrigger
-  assign  header38_[11]    =  buf_q_ovf_err;        // Tried to push when stack full
-  assign  header38_[12]    =  buf_q_udf_err;        // Tried to pop when stack empty
-  assign  header38_[13]    =  buf_q_adr_err;        // Fence adr popped from stack doesnt match rls adr
-  assign  header38_[14]    =  buf_stalled_once;      // Buffer write pointer hit a fence and stalled
+  assign  header38_[10:0]   =  r_buf_fence_dist[10:0];    // Distance to 1st fence address at pretrigger
+  assign  header38_[11]     =  buf_q_ovf_err;        // Tried to push when stack full
+  assign  header38_[12]     =  buf_q_udf_err;        // Tried to pop when stack empty
+  assign  header38_[13]     =  buf_q_adr_err;        // Fence adr popped from stack doesnt match rls adr
+  assign  header38_[14]     =  buf_stalled_once;      // Buffer write pointer hit a fence and stalled
   assign  header38_[18:15]  =  0;              // DDU+DMB control flags
 
 // Spare Frames
-  assign  header39_[11:0]    =  buf_fence_cnt[11:0];    // Number of fences in fence RAM currently
-  assign  header39_[12]    =  reverse_hs_csc;        // 1=Reverse staggered CSC, non-me1
-  assign  header39_[13]    =  reverse_hs_me1a;      // 1=ME1A hstrip order reversed
-  assign  header39_[14]    =  reverse_hs_me1b;      // 1=ME1B hstrip order reversed
+  assign  header39_[11:0]   =  buf_fence_cnt[11:0];    // Number of fences in fence RAM currently
+  assign  header39_[12]     =  reverse_hs_csc;        // 1=Reverse staggered CSC, non-me1
+  assign  header39_[13]     =  reverse_hs_me1a;      // 1=ME1A hstrip order reversed
+  assign  header39_[14]     =  reverse_hs_me1b;      // 1=ME1B hstrip order reversed
   assign  header39_[18:15]  =  0;              // DDU+DMB control flags
 
   //Tao, ME1/1->MEX/1, no needed for ME234
@@ -4335,27 +4336,27 @@
   //assign  header40_[5:4]    =  perr_cfeb_ff[6:5];      // Hdr27 CFEB RAM parity error, latched
   //assign  header40_[7:6]    =  cfeb_badbits_found[6:5];  // Hdr30 CFEB[n] has at least 1 bad bit
   //assign  header40_[9:8]    =  cfeb_en[6:5];        // Hdr35 CFEBs enabled for triggering
-  assign  header40_[9:0]   = 10'b0;
-  assign  header40_[10]    =  buf_fence_cnt_is_peak;    // Current fence is peak number of fences in RAM
-  assign  header40_[11]    =  (MXCFEB==5);        // TMB has 7 DCFEBs so hdr40_[10:1] are active
-  assign  header40_[12]    =  r_trig_source_vec[9];    // Pre-trigger was ME1A only, not used for ME234
-  assign  header40_[13]    =  r_trig_source_vec[10];    // Pre-trigger was ME1B only
-  assign  header40_[14]    =  r_tmb_trig_pulse;      // TMB trig pulse coincident with rtmb_push
+  assign  header40_[9:0]    = 10'b0;
+  assign  header40_[10]     =  buf_fence_cnt_is_peak;    // Current fence is peak number of fences in RAM
+  assign  header40_[11]     =  (MXCFEB==5);        // TMB has 7 DCFEBs so hdr40_[10:1] are active
+  assign  header40_[12]     =  r_trig_source_vec[9];    // Pre-trigger was ME1A only, not used for ME234
+  assign  header40_[13]     =  r_trig_source_vec[10];    // Pre-trigger was ME1B only
+  assign  header40_[14]     =  r_tmb_trig_pulse;      // TMB trig pulse coincident with rtmb_push
   assign  header40_[18:15]  =  0;              // DDU+DMB control flags
 
-  assign  header41_[0]    =  tmb_allow_alct;        // Allow ALCT-only  tmb-matching trigger
-  assign  header41_[1]    =  tmb_allow_clct;        // Allow CLCT-only  tmb-matching trigger
-  assign  header41_[2]    =  tmb_allow_match;      // Allow Match-only tmb-matching trigger
-  assign  header41_[3]    =  tmb_allow_alct_ro;      // Allow ALCT-only  tmb-matching readout only
-  assign  header41_[4]    =  tmb_allow_clct_ro;      // Allow CLCT-only  tmb-matching readout only
-  assign  header41_[5]    =  tmb_allow_match_ro;      // Allow Match-only tmb-matching readout only
-  assign  header41_[6]    =  r_tmb_alct_only_ro;      // Only ALCT triggered, non-triggering readout
-  assign  header41_[7]    =  r_tmb_clct_only_ro;      // Only CLCT triggered, non-triggering readout
-  assign  header41_[8]    =  r_tmb_match_ro;        // ALCT and CLCT matched in time, non-triggering readout
-  assign  header41_[9]    =  r_tmb_trig_keep;      // Triggering readout event
-  assign  header41_[10]    =  r_tmb_non_trig_keep;    // Non-triggering readout event
+  assign  header41_[0]      =  tmb_allow_alct;        // Allow ALCT-only  tmb-matching trigger
+  assign  header41_[1]      =  tmb_allow_clct;        // Allow CLCT-only  tmb-matching trigger
+  assign  header41_[2]      =  tmb_allow_match;      // Allow Match-only tmb-matching trigger
+  assign  header41_[3]      =  tmb_allow_alct_ro;      // Allow ALCT-only  tmb-matching readout only
+  assign  header41_[4]      =  tmb_allow_clct_ro;      // Allow CLCT-only  tmb-matching readout only
+  assign  header41_[5]      =  tmb_allow_match_ro;      // Allow Match-only tmb-matching readout only
+  assign  header41_[6]      =  r_tmb_alct_only_ro;      // Only ALCT triggered, non-triggering readout
+  assign  header41_[7]      =  r_tmb_clct_only_ro;      // Only CLCT triggered, non-triggering readout
+  assign  header41_[8]      =  r_tmb_match_ro;        // ALCT and CLCT matched in time, non-triggering readout
+  assign  header41_[9]      =  r_tmb_trig_keep;      // Triggering readout event
+  assign  header41_[10]     =  r_tmb_non_trig_keep;    // Non-triggering readout event
   assign  header41_[13:11]  =  lyr_thresh_pretrig[2:0];  // Layer pre-trigger threshold
-  assign  header41_[14]    =  layer_trig_en;        // Layer trigger mode enabled
+  assign  header41_[14]     =  layer_trig_en;        // Layer trigger mode enabled
   assign  header41_[18:15]  =  0;              // DDU+DMB control flags
 
 // Store header in parallel shifter
@@ -4371,16 +4372,16 @@
   end
   else
   if (read_sm == xdmb) begin            
-  header_bbl[0]  <=  header00_;
-  header_bbl[1]  <=  header01_;
-  header_bbl[2]  <=  header02_;
-  header_bbl[3]  <=  header03_;
-  header_bbl[4]  <=  header04_;
-  header_bbl[5]  <=  header05_;
-  header_bbl[6]  <=  header06_;
-  header_bbl[7]  <=  header07_;
-  header_bbl[8]  <=  header08_;
-  header_bbl[9]  <=  header09_;
+  header_bbl[0]   <=  header00_;
+  header_bbl[1]   <=  header01_;
+  header_bbl[2]   <=  header02_;
+  header_bbl[3]   <=  header03_;
+  header_bbl[4]   <=  header04_;
+  header_bbl[5]   <=  header05_;
+  header_bbl[6]   <=  header06_;
+  header_bbl[7]   <=  header07_;
+  header_bbl[8]   <=  header08_;
+  header_bbl[9]   <=  header09_;
   header_bbl[10]  <=  header10_;
   header_bbl[11]  <=  header11_;
   header_bbl[12]  <=  header12_;
