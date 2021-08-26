@@ -195,7 +195,7 @@
 
   wire [2:0] pid_s0;
   wire [1:0] pid_s1 [1:0];
-  wire [MXPIDB-1:0] pid_s2 [0:0];
+  wire [2:0] pid_s2 [0:0];
 
 // 5 to 3
   assign {nhits_s0[2],pid_s0[2],carry_s0[2]} =                         {nhits[A],1'b0,carry[A]};
@@ -204,7 +204,7 @@
 
 // 3 to 2
   assign {nhits_s1[1],pid_s1[1],carry_s1[1]} =                               {nhits_s0[2],{1'b0,pid_s0[2]},carry_s0[2]};
-  assign {nhits_s1[0],pid_s1[0],carry_s1[0]} = (nhits_s0[0] > nhits_s0[1]) ? {nhits_s0[1],{1'b0,pid_s0[0]},carry_s0[0]} : {nhits_s0[1],{1'b1,pid_s0[1]},carry_s0[1]};
+  assign {nhits_s1[0],pid_s1[0],carry_s1[0]} = (nhits_s0[0] > nhits_s0[1]) ? {nhits_s0[0],{1'b0,pid_s0[0]},carry_s0[0]} : {nhits_s0[1],{1'b1,pid_s0[1]},carry_s0[1]};
 
 // 2 to 1
   assign {nhits_s2[0],pid_s2[0],carry_s2[0]} = (nhits_s1[0] > nhits_s1[1]) ? {nhits_s1[0],{1'b0,pid_s1[0]},carry_s1[0]} : {nhits_s1[1],{1'b1,pid_s1[1]},carry_s1[1]};
@@ -213,7 +213,7 @@
 // Add 2 to pid to shift to range 2-10
 
   assign pat_nhits = nhits_s2 [0][MXHITB-1:0];
-  assign pat_id    = pid_s2   [0][MXPIDB-1:0];
+  assign pat_id    = {1'b0, pid_s2   [0][2:0]};//pat id range 0-4. but use 4bits due to Run2 legacy
   assign pat_carry = carry_s2 [0][MXPATC-1:0];
 
 //------------------------------------------------------------------------------------------------------------------------
