@@ -123,10 +123,10 @@ rom_gemcsc_slope #(
   .rd1 (bending_bit1_even_B)
 );
 
-  assign bending_bit0_even = gemB ? bending_bit0_even_B : bending_bit0_even_A;
-  assign bending_bit1_even = gemB ? bending_bit1_even_B : bending_bit1_even_A;
-  assign bending_bit0_odd  = gemB ? bending_bit0_odd_B  : bending_bit0_odd_A;
-  assign bending_bit1_odd  = gemB ? bending_bit1_odd_B  : bending_bit1_odd_A;
+  assign bending_bit0_even = gemcsc_gemB0 ? bending_bit0_even_B : bending_bit0_even_A;
+  assign bending_bit1_even = gemcsc_gemB1 ? bending_bit1_even_B : bending_bit1_even_A;
+  assign bending_bit0_odd  = gemcsc_gemB0 ? bending_bit0_odd_B  : bending_bit0_odd_A;
+  assign bending_bit1_odd  = gemcsc_gemB1 ? bending_bit1_odd_B  : bending_bit1_odd_A;
   assign bending_bits0 = even ? bending_bit0_even : bending_bit0_odd;
   assign bending_bits1 = even ? bending_bit1_even : bending_bit1_odd;
 
