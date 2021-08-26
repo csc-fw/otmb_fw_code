@@ -52,7 +52,7 @@
 //------------------------------------------------------------------------------------------------------------------------
 
 `include "pattern_params.v"
-`include "pattern_mask_ccLUT.v"
+//`include "pattern_mask_ccLUT.v"
 
 //------------------------------------------------------------------------------------------------------------------------
 // Finds best 1-of-9 1/2-strip patterns for 1 key 1/2-strip
@@ -198,9 +198,9 @@
   wire [2:0] pid_s2 [0:0];
 
 // 5 to 3
-  assign {nhits_s0[2],pid_s0[2],carry_s0[2]} =                         {nhits[A],1'b0,carry[A]};
-  assign {nhits_s0[1],pid_s0[1],carry_s0[1]} = (nhits[8] > nhits[9]) ? {nhits[8],1'b0,carry[8]} : {nhits[9],1'b1,carry[9]};
-  assign {nhits_s0[0],pid_s0[0],carry_s0[0]} = (nhits[6] > nhits[7]) ? {nhits[6],1'b0,carry[6]} : {nhits[7],1'b1,carry[7]};
+  assign {nhits_s0[2],pid_s0[2],carry_s0[2]} =                         {nhits[4],1'b0,carry[4]};
+  assign {nhits_s0[1],pid_s0[1],carry_s0[1]} = (nhits[2] > nhits[3]) ? {nhits[2],1'b0,carry[2]} : {nhits[3],1'b1,carry[3]};
+  assign {nhits_s0[0],pid_s0[0],carry_s0[0]} = (nhits[0] > nhits[1]) ? {nhits[0],1'b0,carry[0]} : {nhits[1],1'b1,carry[1]};
 
 // 3 to 2
   assign {nhits_s1[1],pid_s1[1],carry_s1[1]} =                               {nhits_s0[2],{1'b0,pid_s0[2]},carry_s0[2]};

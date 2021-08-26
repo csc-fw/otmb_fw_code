@@ -5197,7 +5197,7 @@
 
   // Run3 format change
   //assign  header36_ [18:0]     = (gem_read_enable) ? header36_gem_ : header36_rpc_;
-  assign  header36_ [18:0]     = (run3_daq_df) ? header36_gem_ : header36_rpc_;
+  assign  header36_ [18:0]  = (run3_daq_df) ? header36_gem_ : header36_rpc_;
 
 // Buffer Status
 
