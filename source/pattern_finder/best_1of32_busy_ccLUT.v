@@ -103,10 +103,10 @@
   assign {pat_s1[0],key_s1[0],bsy_s1[0],carry_s1[0]} = (pat_s0[ 1][6:1] > pat_s0[ 0][6:1] | bsy_s0[ 0]) & !bsy_s0[ 1] ? {pat_s0[ 1],{1'b1,key_s0[ 1]},bsy_s0[ 1],carry_s0[ 1]} : {pat_s0[ 0],{1'b0,key_s0[ 0]},bsy_s0[ 0],carry_s0[ 0]};
 
 // Stage 2: Best 4 of 8
-  assign {pat_s2[3],key_s2[3],bsy_s2[3],carry_s2[3]} = (pat_s1[7][6:0] > pat_s1[6][6:0] | bsy_s1[6]) & !bsy_s1[7] ? {pat_s1[7],{1'b1,key_s1[7]},bsy_s1[7],carry_s1[7]} : {pat_s1[6],{1'b0,key_s1[6]},bsy_s1[6],carry_s1[6]};
-  assign {pat_s2[2],key_s2[2],bsy_s2[2],carry_s2[2]} = (pat_s1[5][6:0] > pat_s1[4][6:0] | bsy_s1[4]) & !bsy_s1[5] ? {pat_s1[5],{1'b1,key_s1[5]},bsy_s1[5],carry_s1[5]} : {pat_s1[4],{1'b0,key_s1[4]},bsy_s1[4],carry_s1[4]};
-  assign {pat_s2[1],key_s2[1],bsy_s2[1],carry_s2[1]} = (pat_s1[3][6:0] > pat_s1[2][6:0] | bsy_s1[2]) & !bsy_s1[3] ? {pat_s1[3],{1'b1,key_s1[3]},bsy_s1[3],carry_s1[3]} : {pat_s1[2],{1'b0,key_s1[2]},bsy_s1[2],carry_s1[2]};
-  assign {pat_s2[0],key_s2[0],bsy_s2[0],carry_s2[0]} = (pat_s1[1][6:0] > pat_s1[0][6:0] | bsy_s1[0]) & !bsy_s1[1] ? {pat_s1[1],{1'b1,key_s1[1]},bsy_s1[1],carry_s1[1]} : {pat_s1[0],{1'b0,key_s1[0]},bsy_s1[0],carry_s1[0]};
+  assign {pat_s2[3],key_s2[3],bsy_s2[3],carry_s2[3]} = (pat_s1[7][6:1] > pat_s1[6][6:1] | bsy_s1[6]) & !bsy_s1[7] ? {pat_s1[7],{1'b1,key_s1[7]},bsy_s1[7],carry_s1[7]} : {pat_s1[6],{1'b0,key_s1[6]},bsy_s1[6],carry_s1[6]};
+  assign {pat_s2[2],key_s2[2],bsy_s2[2],carry_s2[2]} = (pat_s1[5][6:1] > pat_s1[4][6:1] | bsy_s1[4]) & !bsy_s1[5] ? {pat_s1[5],{1'b1,key_s1[5]},bsy_s1[5],carry_s1[5]} : {pat_s1[4],{1'b0,key_s1[4]},bsy_s1[4],carry_s1[4]};
+  assign {pat_s2[1],key_s2[1],bsy_s2[1],carry_s2[1]} = (pat_s1[3][6:1] > pat_s1[2][6:1] | bsy_s1[2]) & !bsy_s1[3] ? {pat_s1[3],{1'b1,key_s1[3]},bsy_s1[3],carry_s1[3]} : {pat_s1[2],{1'b0,key_s1[2]},bsy_s1[2],carry_s1[2]};
+  assign {pat_s2[0],key_s2[0],bsy_s2[0],carry_s2[0]} = (pat_s1[1][6:1] > pat_s1[0][6:1] | bsy_s1[0]) & !bsy_s1[1] ? {pat_s1[1],{1'b1,key_s1[1]},bsy_s1[1],carry_s1[1]} : {pat_s1[0],{1'b0,key_s1[0]},bsy_s1[0],carry_s1[0]};
 
 // Stage 3: Best 2 of 4, pipeline latch
   always @(posedge clock) begin
