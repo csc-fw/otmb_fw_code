@@ -1811,7 +1811,7 @@
   reg  [2:0]   gem_alct_deltawire;
   always @(posedge clock) begin
       gem_clct_deltahs   = evenchamber ? gem_clct_deltahs_even   : gem_clct_deltahs_odd;
-      gem_alct_deltawire = evenchamber ? gem_clct_deltawire_even : gem_clct_deltawire_odd;
+      gem_alct_deltawire = evenchamber ? gem_alct_deltawire_even : gem_alct_deltawire_odd;
   end
   
 
