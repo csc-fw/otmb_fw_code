@@ -638,62 +638,6 @@ module pattern_finder_ccLUT (
     layer_or_s0[5] = | {|cfeb6_ly5hs&cfeb_en_ff[6], |cfeb5_ly5hs&cfeb_en_ff[5], |cfeb4_ly5hs&cfeb_en_ff[4], |cfeb3_ly5hs&cfeb_en_ff[3], |cfeb2_ly5hs&cfeb_en_ff[2], |cfeb1_ly5hs&cfeb_en_ff[1], |cfeb0_ly5hs&cfeb_en_ff[0]};
   end
 
-// sum number of layers hit on each hs
-  //// each cfeb hit counter, 32x6, 8bits
-  //move HMT to otmb_virtex6.v
-  //wire [7:0] nhits_cfeb0;
-  //wire [7:0] nhits_cfeb1;
-  //wire [7:0] nhits_cfeb2;
-  //wire [7:0] nhits_cfeb3;
-  //wire [7:0] nhits_cfeb4;
-  //wire [7:0] nhits_cfeb5;
-  //wire [7:0] nhits_cfeb6;
-
-  //count1s32 cfeb0_hitcount(cfeb0_ly0hs, cfeb0_ly1hs, cfeb0_ly2hs, cfeb0_ly3hs, cfeb0_ly4hs, cfeb0_ly5hs, nhits_cfeb0, clock, cfeb_en_ff[0]);
-  //count1s32 cfeb1_hitcount(cfeb1_ly0hs, cfeb1_ly1hs, cfeb1_ly2hs, cfeb1_ly3hs, cfeb1_ly4hs, cfeb1_ly5hs, nhits_cfeb1, clock, cfeb_en_ff[1]);
-  //count1s32 cfeb2_hitcount(cfeb2_ly0hs, cfeb2_ly1hs, cfeb2_ly2hs, cfeb2_ly3hs, cfeb2_ly4hs, cfeb2_ly5hs, nhits_cfeb2, clock, cfeb_en_ff[2]);
-  //count1s32 cfeb3_hitcount(cfeb3_ly0hs, cfeb3_ly1hs, cfeb3_ly2hs, cfeb3_ly3hs, cfeb3_ly4hs, cfeb3_ly5hs, nhits_cfeb3, clock, cfeb_en_ff[3]);
-  //count1s32 cfeb4_hitcount(cfeb4_ly0hs, cfeb4_ly1hs, cfeb4_ly2hs, cfeb4_ly3hs, cfeb4_ly4hs, cfeb4_ly5hs, nhits_cfeb4, clock, cfeb_en_ff[4]);
-  //count1s32 cfeb5_hitcount(cfeb5_ly0hs, cfeb5_ly1hs, cfeb5_ly2hs, cfeb5_ly3hs, cfeb5_ly4hs, cfeb5_ly5hs, nhits_cfeb5, clock, cfeb_en_ff[5]);
-  //count1s32 cfeb6_hitcount(cfeb6_ly0hs, cfeb6_ly1hs, cfeb6_ly2hs, cfeb6_ly3hs, cfeb6_ly4hs, cfeb6_ly5hs, nhits_cfeb6, clock, cfeb_en_ff[6]);
-
-  //reg  [9:0] nhits_me1a;
-  //reg  [9:0] nhits_me1b;
-  //reg  [9:0] nhits_all;
-  //wire [9:0] nhits_trig_s0;
-  //wire [9:0] nhits_trig_pre;
-  //wire [9:0] nhits_trig_dly;
-
-  //always @(posedge clock) begin
-  //    nhits_all  <= nhits_cfeb0 + nhits_cfeb1 + nhits_cfeb2 + nhits_cfeb3 + nhits_cfeb4 + nhits_cfeb5 + nhits_cfeb6;
-  //    nhits_me1a <= nhits_cfeb4 + nhits_cfeb5 + nhits_cfeb6;
-  //    nhits_me1b <= nhits_cfeb0 + nhits_cfeb1 + nhits_cfeb2 + nhits_cfeb3;
-  //end
-  //assign nhits_trig_s0[9:0] = hmt_me1a_enable ? nhits_all[9:0] : nhits_me1b[9:0];
-
-  //reg [9:0] nhits_trig_s0_srl [7:0];//array 8x10bits
-
-  //always @(posedge clock) begin
-  //    nhits_trig_s0_srl[0] <= nhits_trig_s0_srl[1];
-  //    nhits_trig_s0_srl[1] <= nhits_trig_s0_srl[2];
-  //    nhits_trig_s0_srl[2] <= nhits_trig_s0_srl[3];
-  //    nhits_trig_s0_srl[3] <= nhits_trig_s0_srl[4];
-  //    nhits_trig_s0_srl[4] <= nhits_trig_s0_srl[5];
-  //    nhits_trig_s0_srl[5] <= nhits_trig_s0_srl[6];
-  //    nhits_trig_s0_srl[6] <= nhits_trig_s0_srl[7];
-  //    nhits_trig_s0_srl[7] <= nhits_trig_s0;
-  //end
-
-  //wire [11:0] nhits_trig_s0_bx2345_tmp = nhits_trig_s0_srl[7] + nhits_trig_s0_srl[6] + nhits_trig_s0_srl[5];
-  //wire [11:0] nhits_trig_s0_bx678_tmp = nhits_trig_s0_srl[4] + nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] + nhits_trig_s0_srl[1];
-
-  //wire [9:0] nhits_trig_s0_bx2345 = (nhits_trig_s0_bx2345_tmp[11:10] > 0 ) ? 10'h3FF : nhits_trig_s0_bx2345_tmp[9:0];//cutoff at [9:0]
-  //wire [9:0] nhits_trig_s0_bx678  = (nhits_trig_s0_bx678_tmp[11:10] > 0 ) ? 10'h3FF : nhits_trig_s0_bx678_tmp[9:0];
-
-  //wire [9:0] nhits_trig_pre_bx2345;
-  //wire [9:0] nhits_trig_dly_bx2345;
-  //wire [9:0] nhits_trig_pre_bx678;
-  //wire [9:0] nhits_trig_dly_bx678;
 
   // Sum number of layers hit into a binary pattern number
   wire [MXHITB - 1: 0] nlayers_hit_s0;
@@ -707,9 +651,6 @@ module pattern_finder_ccLUT (
   srl16e_bbl #(1)      udlya0 ( .clock(clock), .ce(1'b1), .adr(dlya), .d(layer_trig_s0 ), .q(cfeb_layer_trig ) );
   srl16e_bbl #(MXHITB) udlya1 ( .clock(clock), .ce(1'b1), .adr(dlya), .d(nlayers_hit_s0), .q(cfeb_nlayers_hit) );
   srl16e_bbl #(MXLY)   udlya2 ( .clock(clock), .ce(1'b1), .adr(dlya), .d(layer_or_s0   ), .q(cfeb_layer_or   ) );
-  //srl16e_bbl #(10)   udnhits( .clock(clock), .ce(1'b1), .adr(dlya), .d(nhits_trig_s0   ), .q(nhits_trig_pre   ) );
-  //srl16e_bbl #(10)   udnhits678( .clock(clock), .ce(1'b1), .adr(dlya), .d(nhits_trig_s0_bx678   ), .q(nhits_trig_pre_bx678   ) );
-  //srl16e_bbl #(10)   udnhits2345( .clock(clock), .ce(1'b1), .adr(dlya), .d(nhits_trig_s0_bx2345  ), .q(nhits_trig_pre_bx2345   ) );
 
   // Delay 4bx to latch in time with 1st and 2nd clct, need to FF these again to align
   wire [MXLY - 1: 0]   hs_layer_or_dly;
@@ -720,10 +661,6 @@ module pattern_finder_ccLUT (
   srl16e_bbl #(MXHITB) udlyb1 ( .clock(clock), .ce(1'b1), .adr(dlyb), .d(nlayers_hit_s0), .q(hs_nlayers_hit_dly) );
   srl16e_bbl #(1)      udlyb2 ( .clock(clock), .ce(1'b1), .adr(dlyb), .d(layer_trig_s0 ), .q(hs_layer_trig_dly ) );
   srl16e_bbl #(MXLY)   udlyb3 ( .clock(clock), .ce(1'b1), .adr(dlyb), .d(layer_or_s0   ), .q(hs_layer_or_dly   ) );
-  //srl16e_bbl #(10)    udnhits2( .clock(clock), .ce(1'b1), .adr(dlya), .d(nhits_trig_s0 ), .q(nhits_trig_dly    ) );
-  //delay is 1bx less
-  //srl16e_bbl #(10)    udnhitsbx678( .clock(clock), .ce(1'b1), .adr(dlya-4'd1), .d(nhits_trig_s0_bx678  ), .q(nhits_trig_dly_bx678    ) );
-  //srl16e_bbl #(10)    udnhitsbx2345( .clock(clock), .ce(1'b1), .adr(dlya-4'd1), .d(nhits_trig_s0_bx2345 ), .q(nhits_trig_dly_bx2345    ) );
 
 //-------------------------------------------------------------------------------------------------------------------
 // Stage 4D: 1/2-Strip Pattern Finder

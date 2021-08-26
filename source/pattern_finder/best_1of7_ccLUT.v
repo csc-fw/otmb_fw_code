@@ -39,13 +39,13 @@ reg [MXOFFSB-1:0] best_offs;
 
 // Choose bits to sort on, either sortable pattern or post-fit quality
 
-  wire [5:0] sort_key0 = (PATLUT && SORT_ON_PATLUT) ? qlt0 : pat0[6:1];
-  wire [5:0] sort_key1 = (PATLUT && SORT_ON_PATLUT) ? qlt1 : pat1[6:1];
-  wire [5:0] sort_key2 = (PATLUT && SORT_ON_PATLUT) ? qlt2 : pat2[6:1];
-  wire [5:0] sort_key3 = (PATLUT && SORT_ON_PATLUT) ? qlt3 : pat3[6:1];
-  wire [5:0] sort_key4 = (PATLUT && SORT_ON_PATLUT) ? qlt4 : pat4[6:1];
-  wire [5:0] sort_key5 = (PATLUT && SORT_ON_PATLUT) ? qlt5 : pat5[6:1];
-  wire [5:0] sort_key6 = (PATLUT && SORT_ON_PATLUT) ? qlt6 : pat6[6:1];
+  wire [MXPATB  - 1:0] sort_key0 = pat0[MXPATB  - 1:0];
+  wire [MXPATB  - 1:0] sort_key1 = pat1[MXPATB  - 1:0];
+  wire [MXPATB  - 1:0] sort_key2 = pat2[MXPATB  - 1:0];
+  wire [MXPATB  - 1:0] sort_key3 = pat3[MXPATB  - 1:0];
+  wire [MXPATB  - 1:0] sort_key4 = pat4[MXPATB  - 1:0];
+  wire [MXPATB  - 1:0] sort_key5 = pat5[MXPATB  - 1:0];
+  wire [MXPATB  - 1:0] sort_key6 = pat6[MXPATB  - 1:0];
 
 // Stage 3: Best 1 of 7
 
