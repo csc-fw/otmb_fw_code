@@ -9,7 +9,7 @@ module rom (
 //----------------------------------------------------------------------------------------------------------------------
 
 parameter FALLING_EDGE = 0;
-parameter MXADRB       = 12;
+parameter MXADRB       = 11;
 parameter MXDATB       = 9;
 parameter ROMLENGTH    = 1 << MXADRB;
 parameter ROM_FILE     = "../source/pattern_finder/default.dat";

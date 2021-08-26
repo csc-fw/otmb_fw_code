@@ -908,14 +908,14 @@
   assign wr_push_xtmb_pipe  = (clct_ptr_is_0) ? wr_push_xtmb  : wr_push_xtmb_srl;
   assign wr_avail_xtmb_pipe = (clct_ptr_is_0) ? wr_avail_xtmb : wr_avail_xtmb_srl;
 
-  wire  [MXQLTB - 1   : 0] clct0_qlt_pipe; // new quality
   wire  [MXBNDB - 1   : 0] clct0_bnd_pipe; // new bending
   wire  [MXXKYB-1     : 0] clct0_xky_pipe; // new position with 1/8 precision
-  wire  [MXPATC-1     : 0] clct0_carry_pipe; // CC code
-  wire  [MXQLTB - 1   : 0] clct1_qlt_pipe; // new quality
+  //wire  [MXQLTB - 1   : 0] clct0_qlt_pipe; // new quality
+  //wire  [MXPATC-1     : 0] clct0_carry_pipe; // CC code
+  //wire  [MXQLTB - 1   : 0] clct1_qlt_pipe; // new quality
+  //wire  [MXPATC-1     : 0] clct1_carry_pipe; // CC code
   wire  [MXBNDB - 1   : 0] clct1_bnd_pipe; // new bending
   wire  [MXXKYB-1     : 0] clct1_xky_pipe; // new position with 1/8 precision
-  wire  [MXPATC-1     : 0] clct1_carry_pipe; // CC code
 
   assign {clct0_bnd_pipe, clct0_xky_pipe} = clct0_cclut_pipe;
   assign {clct1_bnd_pipe, clct1_xky_pipe} = clct1_cclut_pipe;
@@ -1408,14 +1408,14 @@
   wire [4:0] clct1_key     = clct1[12:8];  // 1/2-strip ID number
   wire [2:0] clct1_cfeb    = clct1[15:13]; // Key CFEB ID
 
-  wire  [MXQLTB - 1   : 0] clct0_qlt; // new quality
+  //wire  [MXQLTB - 1   : 0] clct0_qlt; // new quality
   wire  [MXBNDB - 1   : 0] clct0_bnd; // new bending
   wire  [MXXKYB-1     : 0] clct0_xky; // new position with 1/8 precision
-  wire  [MXPATC-1     : 0] clct0_carry; // CC code
-  wire  [MXQLTB - 1   : 0] clct1_qlt; // new quality
+  //wire  [MXPATC-1     : 0] clct0_carry; // CC code
+  //wire  [MXQLTB - 1   : 0] clct1_qlt; // new quality
   wire  [MXBNDB - 1   : 0] clct1_bnd; // new bending
   wire  [MXXKYB-1     : 0] clct1_xky; // new position with 1/8 precision
-  wire  [MXPATC-1     : 0] clct1_carry; // CC code
+  //wire  [MXPATC-1     : 0] clct1_carry; // CC code
 
   assign {clct0_bnd, clct0_xky, clct0_carry} = clct0_cclut;
   assign {clct1_bnd, clct1_xky, clct1_carry} = clct1_cclut;
