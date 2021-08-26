@@ -2492,7 +2492,8 @@
 
   output [4:0] gem_clct_deltahs_odd;
   output [4:0] gem_clct_deltahs_even;
-  output [2:0] gem_alct_deltawire;
+  output [2:0] gem_alct_deltawire_odd;
+  output [2:0] gem_alct_deltawire_even;
   //output       gem_clct_enable;
   //output       gem_alct_enable;
 
@@ -9020,15 +9021,16 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   gem_csc_window_wr[ 4: 0]   = 5'd16; // RW GEM CSC match window in strip direction
   gem_csc_window_wr[ 7: 5]   = 3'd1;// RW GEM CSC match window in wire direction
   gem_csc_window_wr[12: 8]   = 5'd10; //RW enable GEM-CLCT match
-  gem_csc_window_wr[15:13]   = 3'b0; //RW enable GEM-ALCT match
+  gem_csc_window_wr[15:13]   = 3'b1; //RW enable GEM-ALCT match
 
   end
 
   assign gem_clct_deltahs_odd[4:0]      = gem_csc_window_wr[ 4:0];//
-  assign gem_alct_deltawire_odd[2:0]    = gem_csc_window_wr[ 7:5];//8bits
+  assign gem_alct_deltawire_odd[2:0]    = gem_csc_window_wr[ 7:5];//3bits
   //assign gem_clct_deltahs_even[4:0]     = gem_csc_window_wr[12:8];//
+  //assign gem_alct_deltawire_even[2:0]   = gem_csc_window_wr[15:13];//3bits
   assign gem_clct_deltahs_even[4:0]     = gem_csc_window_wr[4:0];//right now use the same for even and odd
-  assign gem_alct_deltawire_even[2:0]   = gem_csc_window_wr[ 7:5];//8bits
+  assign gem_alct_deltawire_even[2:0]   = gem_csc_window_wr[ 7:5];//3bits
 
 
   assign gem_csc_window_rd [15:0] = gem_csc_window_wr [15:0]; // Readback
