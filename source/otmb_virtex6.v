@@ -1337,20 +1337,20 @@
   assign hmt_trigger_bx2345[1] = (hmt_nhits_trig_bx2345 >= hmt_thresh2) || (hmt_nhits_trig_bx2345 >= hmt_thresh3);
   assign hmt_trigger = {hmt_trigger_bx2345, hmt_trigger_bx678};
 
-  //reg  [9:0] nhits_me1a;
-  reg  [9:0] nhits_me1b;
-  reg  [9:0] nhits_all;
+  ////reg  [9:0] nhits_me1a;
+  ////reg  [9:0] nhits_me1b;
+  ////reg  [9:0] nhits_all;
 
-  always @(posedge clock) begin
-      nhits_all  <= cfeb_nhits[0] + cfeb_nhits[1] + cfeb_nhits[2] + cfeb_nhits[3] + cfeb_nhits[4] + cfeb_nhits[5] + cfeb_nhits[6];
-      //nhits_me1a <= cfeb_nhits[4] + cfeb_nhits[5] + cfeb_nhits[6];
-      nhits_me1b <= cfeb_nhits[0] + cfeb_nhits[1] + cfeb_nhits[2] + cfeb_nhits[3];
-  end
+  //always @(posedge clock) begin
+  //    nhits_all  <= cfeb_nhits[0] + cfeb_nhits[1] + cfeb_nhits[2] + cfeb_nhits[3] + cfeb_nhits[4] + cfeb_nhits[5] + cfeb_nhits[6];
+  //    //nhits_me1a <= cfeb_nhits[4] + cfeb_nhits[5] + cfeb_nhits[6];
+  //    nhits_me1b <= cfeb_nhits[0] + cfeb_nhits[1] + cfeb_nhits[2] + cfeb_nhits[3];
+  //end
 
-  wire [9:0] nhits_trig_s0;
-  assign nhits_trig_s0[9:0] = hmt_me1a_enable ? nhits_all[9:0] : nhits_me1b[9:0];
+  //wire [9:0] nhits_trig_s0;
+  //assign nhits_trig_s0[9:0] = hmt_me1a_enable ? nhits_all[9:0] : nhits_me1b[9:0];
 
-  reg [9:0] nhits_trig_s0_srl [7:1];//array 7x10bits
+  reg [9:0] nhits_trig_s0_srl [7:0];//array 7x10bits
 
   always @(posedge clock) begin
       nhits_trig_s0_srl[7] <= nhits_trig_s0_srl[6];
@@ -1359,29 +1359,31 @@
       nhits_trig_s0_srl[4] <= nhits_trig_s0_srl[3];
       nhits_trig_s0_srl[3] <= nhits_trig_s0_srl[2];
       nhits_trig_s0_srl[2] <= nhits_trig_s0_srl[1];
-      nhits_trig_s0_srl[1] <= nhits_trig_s0;
+      nhits_trig_s0_srl[1] <= nhits_trig_s0_srl[0];
+      nhits_trig_s0_srl[0] <= hmt_me1a_enable ? (cfeb_nhits[0] + cfeb_nhits[1] + cfeb_nhits[2] + cfeb_nhits[3] + cfeb_nhits[4] + cfeb_nhits[5] + cfeb_nhits[6]) : (cfeb_nhits[0] + cfeb_nhits[1] + cfeb_nhits[2] + cfeb_nhits[3]);
   end
 
   //signal: over 3BX;   control region: over 4BX 
-  wire [11:0] nhits_trig_s0_bx678_tmp  = nhits_trig_s0_srl[7] + nhits_trig_s0_srl[6] + nhits_trig_s0_srl[5];
-  wire [11:0] nhits_trig_s0_bx2345_tmp = nhits_trig_s0_srl[4] + nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] + nhits_trig_s0_srl[1];
+  wire [11:0] nhits_trig_s0_bx678_tmp  = nhits_trig_s0_srl[2] + nhits_trig_s0_srl[1] + nhits_trig_s0_srl[0];
+  wire [11:0] nhits_trig_s0_bx2345_tmp = nhits_trig_s0_srl[6] + nhits_trig_s0_srl[5] + nhits_trig_s0_srl[4] + nhits_trig_s0_srl[3];
 
-  wire [9:0] nhits_trig_s0_bx7    = nhits_trig_s0_srl[6];
+  
+  wire [9:0] nhits_trig_s0_bx7    = nhits_trig_s0_srl[1];
   wire [9:0] nhits_trig_s0_bx2345 = (nhits_trig_s0_bx2345_tmp[11:10] > 0 ) ? 10'h3FF : nhits_trig_s0_bx2345_tmp[9:0];//cutoff at [9:0]
   wire [9:0] nhits_trig_s0_bx678  = (nhits_trig_s0_bx678_tmp[11:10] > 0 ) ? 10'h3FF : nhits_trig_s0_bx678_tmp[9:0];
 
-  //hits to build CLCT is counted at nhits_trig_s0_srl[5]
-  parameter hmt_dly = 4'd0; //delay HMT trigger to CLCT VPF BX
+  //hits to build CLCT is counted at nhits_trig_s0_srl[6]
+  parameter hmt_dly_const = 4'd5; //delay HMT trigger to CLCT VPF BX
   wire [9:0] nhits_trig_dly_bx2345;
   wire [9:0] nhits_trig_dly_bx678;
   wire [9:0] nhits_trig_dly_bx7;
-  srl16e_bbl #(10)    udnhitsbx7   ( .clock(clock), .ce(1'b1), .adr(hmt_dly), .d(nhits_trig_s0_bx7    ), .q(nhits_trig_dly_bx7      ) );
-  srl16e_bbl #(10)    udnhitsbx678 ( .clock(clock), .ce(1'b1), .adr(hmt_dly), .d(nhits_trig_s0_bx678  ), .q(nhits_trig_dly_bx678    ) );
-  srl16e_bbl #(10)    udnhitsbx2345( .clock(clock), .ce(1'b1), .adr(hmt_dly), .d(nhits_trig_s0_bx2345 ), .q(nhits_trig_dly_bx2345   ) );
+  srl16e_bbl #(10)    udnhitsbx7   ( .clock(clock), .ce(1'b1), .adr(hmt_dly_const), .d(nhits_trig_s0_bx7    ), .q(nhits_trig_dly_bx7      ) );
+  srl16e_bbl #(10)    udnhitsbx678 ( .clock(clock), .ce(1'b1), .adr(hmt_dly_const), .d(nhits_trig_s0_bx678  ), .q(nhits_trig_dly_bx678    ) );
+  srl16e_bbl #(10)    udnhitsbx2345( .clock(clock), .ce(1'b1), .adr(hmt_dly_const), .d(nhits_trig_s0_bx2345 ), .q(nhits_trig_dly_bx2345   ) );
 
-  assign  hmt_nhits_trig        = (hmt_dly == 4'd0) ? nhits_trig_s0_bx7[9:0]    : nhits_trig_dly_bx7[9:0];
-  assign  hmt_nhits_trig_bx678  = (hmt_dly == 4'd0) ? nhits_trig_s0_bx678[9:0]  : nhits_trig_dly_bx678[9:0];
-  assign  hmt_nhits_trig_bx2345 = (hmt_dly == 4'd0) ? nhits_trig_s0_bx2345[9:0] : nhits_trig_dly_bx2345[9:0];
+  assign  hmt_nhits_trig        = (hmt_dly_const == 4'd0) ? nhits_trig_s0_bx7[9:0]    : nhits_trig_dly_bx7[9:0];
+  assign  hmt_nhits_trig_bx678  = (hmt_dly_const == 4'd0) ? nhits_trig_s0_bx678[9:0]  : nhits_trig_dly_bx678[9:0];
+  assign  hmt_nhits_trig_bx2345 = (hmt_dly_const == 4'd0) ? nhits_trig_s0_bx2345[9:0] : nhits_trig_dly_bx2345[9:0];
 
 // Status Ports
   wire  [MXCFEB-1:0]  demux_tp_1st;
@@ -4796,17 +4798,18 @@ wire [15:0] gemB_bxn_counter;
     //assign mez_tp[6] = (!set_sw[7] ? bpi_dsbl        :                          link_good[5]);
     //assign mez_tp[5] =   set_sw[8] ? alct_rxd_posneg : (!set_sw[7] ? bpi_rst  : link_good[4]);
     //assign mez_tp[4] = (!set_sw[7] ? bpi_dev         :                          link_good[3]);
+    
+    // for debuging GEMCSC OTMB firmware, go back to above setting for normal OTMB firmware 
     assign mez_tp[9]  = keep_gem_tp; //CLCT window for  CLCT-ALCT and CLCT-GEM
     assign mez_tp[8]  = gem_alct_window_hasgem_tp;//gem window for gem-ALCT
     assign mez_tp[7]  = alct0_vpf_tprt; // ALCT vpf signal
     //assign mez_tp[6]  = wr_push_xtmb; // CLCT vpf signal
     assign mez_tp[6]  = clct_window_tprt; // CLCT vpf signal after pipeline 
-    assign mez_tp[5]  = (clct_gemA_match_pos || clct_gemB_match_pos);
+    assign mez_tp[5]  = hmt_nhits_trig_bx678 >= hmt_nhits_trig_bx2345+10'h3;
     assign mez_tp[4]  = gem_forclct_vpf_tp;//pulse width=2BX???? why????
     //assign mez_tp[5]  = (|gemA_csc_cluster_vpf) || (|gemB_csc_cluster_vpf);// gemA or gemB vpf signal
     //assign mez_tp[4]  = |copad_match; // gem copad vpf signal
-    //assign mez_tp[4]  = hmt_nhits_trig_bx678 >= hmt_nhits_trig_bx2345+10'h3; // gem copad vpf signal
-//    assign mez_tp[MXCFEB:4] = link_good[MXCFEB-1:3];
+
 //    reg  [3:1]  testled_r;
 //    assign mez_tp[3] = link_good[2] || ((set_sw == 2'b01) && clock_alct_txd);
 //    assign mez_tp[2] = link_good[1] || ((set_sw == 2'b01) && clock_alct_rxd);
