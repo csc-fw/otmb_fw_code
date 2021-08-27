@@ -1,3 +1,5 @@
+
+### CCLUT v1: 12bits comparator code and 18bits output from LUT
 * Convention for 12-bits comparator code
 
 |  field   | layer |
@@ -18,6 +20,25 @@
 | [13]     | slope sign      |
 | [17:14]  | position offset |
 
+### CCLUT v2: 11bits comparator code and 9bits output from LUT
+* Convention for 11-bits comparator code
+
+|  field   | layer |
+|----------|-------|
+|  [1:0]   |   1   |
+|  [3:2]   |   2   |
+|  [4:4]   |   3   |
+|  [6:5]   |   4   |
+|  [8:7]   |   5   |
+|  [10:9]  |   6   |
+
+* Convention of LUT output:  9bits
+
+|  field   |  name           |
+|----------|-----------------|
+| [3:0]    | abs slope       |
+| [4]      | slope sign      |
+| [8:5]    | position offset |
 
 * Convention for 4-bit position offset word:
 
@@ -42,56 +63,56 @@
 
 * Convention of LUT for FW and patterns 
 
-pattern A, also it is pattern 4 in CMSSW   
+pattern 4   
 | ly  | 0123456789A | 
 |-----|-------------|
 | ly0 | ----xxx---- | 
 | ly1 | ----xxx---- | 
-| ly2 | ----xkx---- | 
+| ly2 | -----k----- | 
 | ly3 | ----xxx---- | 
 | ly4 | ----xxx---- | 
 | ly5 | ----xxx---- | 
 
-pattern 9, also it is pattern 3 in CMSSW   
+pattern 3   
 | ly  | 0123456789A | 
 |-----|-------------|
 | ly0 | --xxx------ | 
 | ly1 | ---xxx----- | 
-| ly2 | ----xkx---- | 
+| ly2 | -----k----- | 
 | ly3 | ----xxx---- | 
 | ly4 | -----xxx--- | 
 | ly5 | ------xxx-- | 
 
-pattern 8 , also it is pattern 2 in CMSSW   
+pattern 2    
 |     | 0123456789A |
 |-----|-------------|
 | ly0 | ------xxx-- |
 | ly1 | -----xxx--- |
-| ly2 | ----xkx---- |
+| ly2 | -----k----- |
 | ly3 | ----xxx---- |
 | ly4 | ---xxx----- |
 | ly5 | --xxx------ |
 
-pattern 7, , also it is pattern 1 in CMSSW   
+pattern 1   
 |     | 0123456789A | 
 |-----|-------------|
 | ly0 | xxx-------- | 
 | ly1 | -xxx------- | 
-| ly2 | ---xxk----- | 
+| ly2 | -----k----- | 
 | ly3 | -----xxx--- | 
 | ly4 | -------xxx- | 
 | ly5 | --------xxx | 
 
-pattern 6, also it is pattern 0 in CMSSW
+pattern 0
 |     | 0123456789ABC | 
 |-----|---------------|
 | ly0 | --------xxx-- |
 | ly1 | -------xxx--- |
-| ly2 | -----kxx----- |
+| ly2 | -----k------- |
 | ly3 | ---xxx------- |
 | ly4 | -xxx--------- |
 | ly5 | xxx---------- |
 
 
-rom_patA.mem is the LUT for the straight pattern A and the index is the comparator code and value in mem file is the 18bits output, similar for other patterns
 
+The most LUT files(rom_pat[4-0].mem etc) are taken from https://github.com/cms-data/L1Trigger-CSCTriggerPrimitives
