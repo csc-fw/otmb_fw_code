@@ -8833,12 +8833,16 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign clct1_cc_rd[MXPATC-1:0]         = clct1_vme_carry[MXPATC-1:0]; 
   assign clct0_cc_rd[11] = 1'b0;
   assign clct1_cc_rd[11] = 1'b0;//unused.  the comparator code is reduced to 11bits
+  assign clct0_cc_rd[15:12]  = 4'b0;
+  assign clct1_cc_rd[15:12]  = 4'b0;
   //assign clct0_qlt_rd[MXQLTB - 1    : 0] = clct0_vme_qlt[MXQLTB - 1   : 0];
   //assign clct1_qlt_rd[MXQLTB - 1    : 0] = clct1_vme_qlt[MXQLTB - 1   : 0];
   assign clct0_bndxky_rd[MXBNDB - 1       : 0]      = clct0_vme_bnd[MXBNDB - 1   : 0];
   assign clct0_bndxky_rd[MXXKYB - 1+MXBNDB: MXBNDB] = clct0_vme_xky[MXXKYB - 1   : 0];
   assign clct1_bndxky_rd[MXBNDB - 1       : 0]      = clct1_vme_bnd[MXBNDB - 1   : 0];
   assign clct1_bndxky_rd[MXXKYB - 1+MXBNDB: MXBNDB] = clct1_vme_xky[MXXKYB - 1   : 0];
+  assign clct0_bndxky_rd[15] = 1'b0;
+  assign clct1_bndxky_rd[15] = 1'b0;
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_RUN3_FORMAT_CTRL = 0x1AA  CCLUT

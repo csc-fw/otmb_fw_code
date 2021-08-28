@@ -400,6 +400,7 @@
   read_sm_xdmb,
 
 // GEM
+  gem_enable,
   gem_any_match,
   copad_match,
   gemA_sync_err,
@@ -913,6 +914,7 @@
   //clct_copad_noalct,
 
 
+  ccLUT_enable, 
   run3_trig_df,
   run3_daq_df,
 // MPC Status
@@ -1428,6 +1430,7 @@
   output         read_sm_xdmb;    // TMB sequencer starting a readout
 
 // GEM
+  input          gem_enable;
   input          gem_any_match; // GEM co-pad match was found
   input [7:0]    copad_match;     // GEM co-pad match was found
   input          gemA_sync_err; // GEM A has sync error
@@ -1926,6 +1929,7 @@
   input             alct_delaygemB_match_test;
 // MPC Status
 
+  input  ccLUT_enable;
   input  run3_trig_df;
   input  run3_daq_df;
 // MPC Status
@@ -3199,11 +3203,11 @@
 
 // After drift, send CLCT words to TMB, persist 1 cycle only, blank invalid CLCTs unless override
   wire clct0_hit_valid = (hs_hit_1st >= hit_thresh_postdrift);    // CLCT is over hit thresh
-  wire clct0_pid_valid = run3_trig_df ? (hs_pid_1st >= pid_thresh_postdrift) : (hs_run2pid_1st >= pid_thresh_postdrift);
+  wire clct0_pid_valid = (ccLUT_enable && !run3_trig_df) ? (hs_run2pid_1st >= pid_thresh_postdrift) : (hs_pid_1st >= pid_thresh_postdrift);
   //wire clct0_pid_valid = (hs_pid_1st >= pid_thresh_postdrift);    // CLCT is over pid thresh
 
   wire clct1_hit_valid = (hs_hit_2nd >= hit_thresh_postdrift);    // CLCT is over hit thresh
-  wire clct1_pid_valid = run3_trig_df ? (hs_pid_2nd >= pid_thresh_postdrift) : (hs_run2pid_2nd >= pid_thresh_postdrift);
+  wire clct1_pid_valid = (ccLUT_enable && !run3_trig_df) ? (hs_run2pid_2nd >= pid_thresh_postdrift) : (hs_pid_2nd >= pid_thresh_postdrift);
   //wire clct1_pid_valid = (hs_pid_2nd >= pid_thresh_postdrift);    // CLCT is over pid thresh
 
   wire clct0_really_valid = (clct0_hit_valid && clct0_pid_valid);    // CLCT is over thresh and not external
@@ -3241,7 +3245,7 @@
 
   assign clct0[0]    = clct0_vpf;       // Valid pattern flag
   assign clct0[3:1]  = hs_hit_1st[2:0]; // Hits on pattern 0-6
-  assign clct0[7:4]  = run3_trig_df ? hs_pid_1st[3:0] : hs_run2pid_1st[3:0]; // Pattern shape 0-A
+  assign clct0[7:4]  = (ccLUT_enable && !run3_trig_df) ? hs_run2pid_1st[3:0] : hs_pid_1st[3:0]; // Pattern shape 0-A
   assign clct0[15:8] = hs_key_1st[7:0]; // 1/2-strip ID number
 
   assign clct0_qlt[MXQLTB - 1: 0]= hs_qlt_1st[MXQLTB - 1   : 0]; 
@@ -3255,7 +3259,7 @@
 
   assign clct1[0]    = clct1_vpf;       // Valid pattern flag
   assign clct1[3:1]  = hs_hit_2nd[2:0]; // Hits on pattern 0-6
-  assign clct1[7:4]  = run3_trig_df ? hs_pid_2nd[3:0] : hs_run2pid_2nd[3:0]; // Pattern shape 0-A
+  assign clct1[7:4]  = (ccLUT_enable && !run3_trig_df) ? hs_run2pid_2nd[3:0] : hs_pid_2nd[3:0]; // Pattern shape 0-A
   assign clct1[15:8] = hs_key_2nd[7:0]; // 1/2-strip ID number
 
   assign clcta[5:0]  = hs_layer_or[5:0]; // Layer ORs at pattern finder output
@@ -5041,7 +5045,7 @@
   assign  header13_[18:15]  =  0;                     // DDU+DMB control flags
 
   assign  header14_run3_[10: 0]   =  r_clct1_carry_xtmb[MXPATC-1:0]; 
-  assign  header14_run3_[11]      =  r_hmt_nhits_trig_bx678_xtmb[7];// unused!!!
+  assign  header14_run3_[11]      =  gem_enable;// unused!!!
   assign  header14_run3_[13:12]   =  r_clct1_xky_xtmb[1:0];
   assign  header14_run3_[14]      =  r_hmt_nhits_trig_bx678_xtmb[1];
   assign  header14_[14:0]   =  run3_daq_df ? header14_run3_[14:0] : r_trig_counter[29:15]; // TMB trigger counter

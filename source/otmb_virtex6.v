@@ -1753,6 +1753,7 @@
   wire [1:0]  gemB_fiber_enable;
 
   wire [3:0] gem_fiber_enable = {gemB_fiber_enable, gemA_fiber_enable};
+  wire gem_enable = |gem_fiber_enable;
 
   reg  [MXCLUSTER_CHAMBER-1:0] gemA_cluster_enable = 8'b0;
   reg  [MXCLUSTER_CHAMBER-1:0] gemB_cluster_enable = 8'b0;
@@ -3519,6 +3520,7 @@ end
   .tmb_alcte (tmb_alcte[1:0]),  // In  ALCT ecc error syndrome latched at trigger
 
        //GEM-CSC match output, time_only
+  .gem_enable           (gem_enable),
   .gemA_alct_match      (gemA_alct_match), // In Gem alct/clct match in timing only 
   .gemB_alct_match      (gemB_alct_match), // In Gem alct/clct match in timing only
   .gemA_clct_match      (gemA_clct_match), // In Gem alct/clct match in timing only
@@ -3558,8 +3560,9 @@ end
   .alct_delaygemA_match_test (alct_delaygemA_match_test), //In ALCT & GEM match for test
   .alct_delaygemB_match_test (alct_delaygemB_match_test), //In ALCT & GEM match for test
 
-  .run3_trig_df  (run3_trig_df),
-  .run3_daq_df   (run3_daq_df),
+  .ccLUT_enable  (ccLUT_enable),//In enabe CCLUT   
+  .run3_trig_df  (run3_trig_df), //In
+  .run3_daq_df   (run3_daq_df), // In
 // Sequencer MPC Status
   .mpc_frame_ff   (mpc_frame_ff),                // In  MPC frame latch strobe
   .mpc0_frame0_ff (mpc0_frame0_ff[MXFRAME-1:0]), // In  MPC best muon 1st frame
