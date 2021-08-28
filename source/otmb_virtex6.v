@@ -214,7 +214,7 @@
   parameter MXPIDB    =  4;        // Pattern ID bits
   parameter MXHITB    =  3;        // Hits on pattern bits
   parameter MXPATB    =  3+4;      // Pattern bits
-   parameter MXXKYB   = 10;
+  parameter MXXKYB   = 10;
     //CCLUT
   //parameter MXSUBKEYBX = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
   parameter MXPATC   = 11;                // Pattern Carry Bits
@@ -1477,6 +1477,8 @@
    assign hs_bnd_2nd[MXBNDB - 1   : 0] = 0;
    assign hs_xky_2nd[MXXKYB - 1   : 0] = 0;
    assign hs_carry_2nd[MXPATC - 1 : 0] = 0;
+   assign hs_run2pid_1st[MXPIDB-1:0]   = hs_pid_1st;
+   assign hs_run2pid_2nd[MXPIDB-1:0]   = hs_pid_2nd;
   `endif
 
   wire                hs_layer_trig;  // Layer triggered
@@ -2314,6 +2316,7 @@
   .tmb_alctb (tmb_alctb[4:0]),  // In  ALCT bxn latched at trigger
   .tmb_alcte (tmb_alcte[1:0]),  // In  ALCT ecc error syndrome latched at trigger
 
+  .ccLUT_enable  (ccLUT_enable),//In enabe CCLUT
   .run3_trig_df  (run3_trig_df), //In enable run3 trigger format
   .run3_daq_df   (run3_daq_df), //In enable run3 daq format
 

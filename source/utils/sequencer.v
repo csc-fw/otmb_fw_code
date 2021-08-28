@@ -782,6 +782,7 @@
   tmb_alctb,
   tmb_alcte,
 
+  ccLUT_enable,
   run3_trig_df,
   run3_daq_df,
 // MPC Status
@@ -1534,6 +1535,7 @@
   input  [4:0]      tmb_alctb;      // ALCT bxn latched at trigger
   input  [1:0]      tmb_alcte;      // ALCT ecc error syndrome latched at trigger
 
+  input  ccLUT_enable;
   input  run3_trig_df;
   input  run3_daq_df;
 
@@ -2639,14 +2641,14 @@
 
 // After drift, send CLCT words to TMB, persist 1 cycle only, blank invalid CLCTs unless override
   wire clct0_hit_valid = (hs_hit_1st >= hit_thresh_postdrift);    // CLCT is over hit thresh
-  wire clct0_pid_valid = run3_trig_df ? (hs_pid_1st >= pid_thresh_postdrift) : (hs_run2pid_1st >= pid_thresh_postdrift);    // CLCT is over pid thresh
+  wire clct0_pid_valid = (ccLUT_enable && !run3_trig_df) ? (hs_run2pid_1st >= pid_thresh_postdrift) : (hs_pid_1st >= pid_thresh_postdrift);
 
 // JG: this functionality is being removed, 10/25/2017...
 // Algo2016: check if new clct0 key half-strip is outside of dead zone around clct0
 //  wire clct0_key_valid = (hs_key_1st >= hs_key_1st_algo2016 + algo2016_dead_time_zone_size_1st) || (hs_key_1st <= hs_key_1st_algo2016 - algo2016_dead_time_zone_size_1st);
 
   wire clct1_hit_valid = (hs_hit_2nd >= hit_thresh_postdrift);    // CLCT is over hit thresh
-  wire clct1_pid_valid = run3_trig_df ? (hs_pid_2nd >= pid_thresh_postdrift) : (hs_run2pid_2nd >= pid_thresh_postdrift);    // CLCT is over pid thresh
+  wire clct1_pid_valid = (ccLUT_enable && !run3_trig_df) ? (hs_run2pid_2nd >= pid_thresh_postdrift) : (hs_pid_2nd >= pid_thresh_postdrift);
   //wire clct1_pid_valid = (hs_pid_2nd >= pid_thresh_postdrift);    // CLCT is over pid thresh
 
 // JG: this functionality is being removed, 10/25/2017...
@@ -2703,7 +2705,7 @@
 
   assign clct0[0]    = clct0_vpf;       // Valid pattern flag
   assign clct0[3:1]  = hs_hit_1st[2:0]; // Hits on pattern 0-6
-  assign clct0[7:4]  = run3_trig_df ? hs_pid_1st[3:0] : hs_run2pid_1st[3:0]; // Pattern shape 0-A
+  assign clct0[7:4]  = (ccLUT_enable && !run3_trig_df) ?  hs_run2pid_1st[3:0] : hs_pid_1st[3:0]; // Pattern shape 0-A
   assign clct0[15:8] = hs_key_1st[7:0]; // 1/2-strip ID number
 
   assign clct0_qlt[MXQLTB - 1: 0]= hs_qlt_1st[MXQLTB - 1   : 0]; 
@@ -2717,7 +2719,7 @@
 
   assign clct1[0]    = clct1_vpf;       // Valid pattern flag
   assign clct1[3:1]  = hs_hit_2nd[2:0]; // Hits on pattern 0-6
-  assign clct1[7:4]  = run3_trig_df ? hs_pid_2nd[3:0] : hs_run2pid_2nd[3:0]; // Pattern shape 0-A
+  assign clct1[7:4]  = (ccLUT_enable && !run3_trig_df) ?  hs_run2pid_2nd[3:0] : hs_pid_2nd[3:0]; // Pattern shape 0-A
   assign clct1[15:8] = hs_key_2nd[7:0]; // 1/2-strip ID number
 
   assign clcta[5:0]  = hs_layer_or[5:0]; // Layer ORs at pattern finder output
