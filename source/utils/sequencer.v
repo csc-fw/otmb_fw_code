@@ -578,7 +578,6 @@
 // JG: this functionality is being removed, 10/25/2017...
   algo2016_dead_time_zone_size,
   algo2016_use_dynamic_dead_time_zone,
-  ccLUT_enable,
 
   tmb_allow_alct,
   tmb_allow_clct,
@@ -1602,7 +1601,6 @@
   input  [3:0] clct_window; // CLCT match window width
   input  [3:0] algo2016_clct_window;  // CLCT match window width (for ALCT-centric 2016 algorithm)
   input        algo2016_clct_to_alct; // ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
-  input ccLUT_enable;
 
   input tmb_allow_alct;  // Allow ALCT only
   input tmb_allow_clct;  // Allow CLCT only
