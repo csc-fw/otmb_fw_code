@@ -821,6 +821,8 @@
   //Tao, 7DCFEB->5DCFEB
   //active_cfeb5_event_counter,      // CFEB5 active flag sent to DMB
   //active_cfeb6_event_counter,      // CFEB6 active flag sent to DMB
+  bx0_match_counter,
+
   hmt_counter0,
   hmt_counter1,
   hmt_counter2,
@@ -2217,6 +2219,8 @@
   input  [MXCNTVME-1:0] active_cfeb4_event_counter;      // CFEB4 active flag sent to DMB
   //input  [MXCNTVME-1:0] active_cfeb5_event_counter;      // CFEB5 active flag sent to DMB
   //input  [MXCNTVME-1:0] active_cfeb6_event_counter;      // CFEB6 active flag sent to DMB
+  input  [MXCNTVME-1:0] bx0_match_counter;
+
   input  [MXCNTVME-1:0]  hmt_counter0;
   input  [MXCNTVME-1:0]  hmt_counter1;
   input  [MXCNTVME-1:0]  hmt_counter2;
@@ -6360,7 +6364,7 @@
 // ADR_CNT_RDATA=0xD2  Trigger/Readout Counter Data Register                                                          
 //------------------------------------------------------------------------------------------------------------------
 // Remap 1D counters to 2D, because XST does not support 2D ports
-  parameter MXCNT = 95 + 10;                     // Number of counters, last counter id is mxcnt-1
+  parameter MXCNT = 96 + 10;                     // Number of counters, last counter id is mxcnt-1
   reg  [MXCNTVME-1:0] cnt_snap [MXCNT-1:0]; // Event counter snapshot 2D
   wire [MXCNTVME-1:0] cnt      [MXCNT-1:0]; // Event counter 2D map
 
@@ -6484,17 +6488,18 @@
   assign cnt[92]  = active_cfebs_event_counter;      // Any CFEB active flag sent to DMB
   assign cnt[93]  = seq_pretrig_counter;       // consecutive Pre-trigger counter (equential, 1 bx apart)
   assign cnt[94]  = almostseq_pretrig_counter; // Pre-triggers-2bx-apart counter
+  assign cnt[95]  = bx0_match_counter;    // ALCT-CLCT bx0 match
 
-  assign cnt[95]  = hmt_counter0;
-  assign cnt[96]  = hmt_counter1;
-  assign cnt[97]  = hmt_counter2;
-  assign cnt[98]  = hmt_counter3;
-  assign cnt[99]  = hmt_counter4;
-  assign cnt[100] = hmt_counter5;
-  assign cnt[101] = hmt_counter6;
-  assign cnt[102] = hmt_counter7;
-  assign cnt[103] = hmt_counter8;
-  assign cnt[104] = hmt_counter9;
+  assign cnt[96]  = hmt_counter0;
+  assign cnt[97]  = hmt_counter1;
+  assign cnt[98]  = hmt_counter2;
+  assign cnt[99]  = hmt_counter3;
+  assign cnt[100] = hmt_counter4;
+  assign cnt[101] = hmt_counter5;
+  assign cnt[102] = hmt_counter6;
+  assign cnt[103] = hmt_counter7;
+  assign cnt[104] = hmt_counter8;
+  assign cnt[105] = hmt_counter9;
   
 // Virtex-6 GTX Optical Receiver Error Counters
 //  assign cnt[81]  = gtx_rx_err_count0;  // Error count on this fiber channel

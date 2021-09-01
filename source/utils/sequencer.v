@@ -943,6 +943,8 @@
   //Tao, ME1/1->MEX/1
   //active_cfeb5_event_counter,      // CFEB5 active flag sent to DMB
   //active_cfeb6_event_counter,      // CFEB6 active flag sent to DMB
+ 
+  bx0_match_counter,
 
   hmt_counter0,
   hmt_counter1,
@@ -1713,6 +1715,8 @@
   //output  [MXCNTVME-1:0] active_cfeb5_event_counter;      // CFEB5 active flag sent to DMB
   //output  [MXCNTVME-1:0] active_cfeb6_event_counter;      // CFEB6 active flag sent to DMB
 
+  output  [MXCNTVME-1:0] bx0_match_counter; // ALCT-CLCT BX0 match counter
+
   output  [MXCNTVME-1:0]  hmt_counter0;
   output  [MXCNTVME-1:0]  hmt_counter1;
   output  [MXCNTVME-1:0]  hmt_counter2;
@@ -2286,6 +2290,15 @@
     else if (rocnt_en     ) readout_counter = readout_counter+1'b1;
   end
 
+  reg  [MXCNTVME-1:0] bx0_match_counter = 0; 
+  wire bx0_match_cnt_reset = vme_cnt_reset;
+  wire bx0_match_cnt_en = bx0_match2;
+
+  always @(posedge clock) begin
+    if (bx0_match_cnt_reset)  bx0_match_counter = 0;
+    else if (bx0_match_cnt_en)  bx0_match_counter = bx0_match_counter + 1'b1;
+  end
+
 //------------------------------------------------------------------------------------------------------------------
 // Trigger Source Section
 //
@@ -2608,19 +2621,13 @@
   
 
   assign active_feb_flag_pre = clct_push_pretrig;
-  assign active_feb_list_pre = active_feb_s0[MXCFEB-1:0] & {MXCFEB{active_feb_flag_pre}};
+  assign active_feb_list_pre = (active_feb_s0[MXCFEB-1:0] & {MXCFEB{active_feb_flag_pre}}) | active_feb_list_hmt;
 
   assign active_feb_flag_tmb = tmb_trig_write;
   assign active_feb_list_tmb = tmb_aff_list & {MXCFEB{active_feb_flag_tmb}};
 
-  //assign active_feb_flag = (active_feb_src) ? active_feb_flag_tmb : active_feb_flag_pre;
-  //assign active_feb_list = (active_feb_src) ? active_feb_list_tmb : active_feb_list_pre;
-
-  wire active_feb_flag_run2 = (active_feb_src) ? active_feb_flag_tmb : active_feb_flag_pre;
-  wire [MXCFEB-1:0] active_feb_list_run2 = (active_feb_src) ? active_feb_list_tmb : active_feb_list_pre;
-
-  assign active_feb_flag = active_feb_flag_run2 || hmt_fired_pretrigger;
-  assign active_feb_list = active_feb_list_run2 | active_feb_list_hmt;
+  assign active_feb_flag = (active_feb_src) ? active_feb_flag_tmb : active_feb_flag_pre;
+  assign active_feb_list = (active_feb_src) ? active_feb_list_tmb : active_feb_list_pre;
 
 // Delay TMB active feb list 1bx so it can share tmb+1bx RAM
   reg [MXCFEB-1:0] tmb_aff_list_ff = 0;
@@ -3478,9 +3485,6 @@
 
 // Push event address into 16-stage SRL shifter
   wire [MXBADR-1+1:0] xl1a_wdata;
-
-  assign active_feb_flag = active_feb_flag_run2 || hmt_fired_pretrigger;
-  assign active_feb_list = active_feb_list_run2 | active_feb_list_hmt;
   wire [MXBADR-1+1:0] xl1a_rdata;
   reg  [MXL1WIND-1:0] winclosed=3;
 
@@ -3833,9 +3837,6 @@
   wire       r_tmb_one_clct  =  rtmb_rdata[9];     // One CLCT
   wire       r_tmb_two_alct  =  rtmb_rdata[10];    // Two ALCTs
   wire       r_tmb_two_clct  =  rtmb_rdata[11];    // Two CLCTs
-
-  assign active_feb_flag = active_feb_flag_run2 || hmt_fired_pretrigger;
-  assign active_feb_list = active_feb_list_run2 | active_feb_list_hmt;
   wire       r_tmb_dupe_alct =  rtmb_rdata[12];    // ALCT0 copied into ALCT1 to make 2nd LCT
   wire       r_tmb_dupe_clct =  rtmb_rdata[13];    // CLCT0 copied into CLCT1 to make 2nd LCT
   wire       r_tmb_rank_err  =  rtmb_rdata[14];    // LCT1 has higher quality than LCT0

@@ -1237,7 +1237,7 @@
 
     tmb_match_win        <= match_win_2;   // Location of alct in clct window
     tmb_match_pri        <= clct_pri_best; // Priority of clct that matched
-    tmb_aff_list         <= clctf_pipe;    // Active feb pipe
+    tmb_aff_list         <= clctf_pipe | ({MXCFEB{hmt_fired_tmb}});    // Active feb pipe
 
     tmb_alct_discard     <= alct_discard;  // ALCT was not used for LCT
     tmb_clct_discard     <= clct_discard;  // CLCT was not used for LCT

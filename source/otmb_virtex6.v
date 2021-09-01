@@ -895,6 +895,7 @@
   //Tao, 7DCFEB->5DCFEB
   //wire  [MXCNTVME-1:0] active_cfeb5_event_counter;      // CFEB5 active flag sent to DMB
   //wire  [MXCNTVME-1:0] active_cfeb6_event_counter;      // CFEB6 active flag sent to DMB
+  wire  [MXCNTVME-1:0] bx0_match_counter;
   wire  [MXCNTVME-1:0]  hmt_counter0;
   wire  [MXCNTVME-1:0]  hmt_counter1;
   wire  [MXCNTVME-1:0]  hmt_counter2;
@@ -2481,6 +2482,7 @@
   //Tao, 7DCFEB->5DCFEB
   //.active_cfeb5_event_counter      (active_cfeb5_event_counter[MXCNTVME-1:0]),      // Out
   //.active_cfeb6_event_counter      (active_cfeb6_event_counter[MXCNTVME-1:0]),      // Out
+  .bx0_match_counter (bx0_match_counter), // Out ALCT-CLCT BX0 match
   .hmt_counter0  (hmt_counter0[MXCNTVME-1:0]),  // Out
   .hmt_counter1  (hmt_counter1[MXCNTVME-1:0]),  // Out
   .hmt_counter2  (hmt_counter2[MXCNTVME-1:0]),  // Out
@@ -4139,16 +4141,17 @@
   //Tao, 7DCFEB->5DCFEB
       //.active_cfeb5_event_counter      (active_cfeb5_event_counter[MXCNTVME-1:0]),      // In
       //.active_cfeb6_event_counter      (active_cfeb6_event_counter[MXCNTVME-1:0]),      // In
-      .hmt_counter0  (hmt_counter0[MXCNTVME-1:0]),  // Out
-      .hmt_counter1  (hmt_counter1[MXCNTVME-1:0]),  // Out
-      .hmt_counter2  (hmt_counter2[MXCNTVME-1:0]),  // Out
-      .hmt_counter3  (hmt_counter3[MXCNTVME-1:0]),  // Out
-      .hmt_counter4  (hmt_counter4[MXCNTVME-1:0]),  // Out
-      .hmt_counter5  (hmt_counter5[MXCNTVME-1:0]),  // Out
-      .hmt_counter6  (hmt_counter6[MXCNTVME-1:0]),  // Out
-      .hmt_counter7  (hmt_counter7[MXCNTVME-1:0]),  // Out
-      .hmt_counter8  (hmt_counter8[MXCNTVME-1:0]),  // Out
-      .hmt_counter9  (hmt_counter9[MXCNTVME-1:0]),  // Out
+      .bx0_match_counter (bx0_match_counter), // In ALCT-CLCT BX0 match
+      .hmt_counter0  (hmt_counter0[MXCNTVME-1:0]),  //In 
+      .hmt_counter1  (hmt_counter1[MXCNTVME-1:0]),  //In 
+      .hmt_counter2  (hmt_counter2[MXCNTVME-1:0]),  //In 
+      .hmt_counter3  (hmt_counter3[MXCNTVME-1:0]),  //In 
+      .hmt_counter4  (hmt_counter4[MXCNTVME-1:0]),  //In 
+      .hmt_counter5  (hmt_counter5[MXCNTVME-1:0]),  //In 
+      .hmt_counter6  (hmt_counter6[MXCNTVME-1:0]),  //In 
+      .hmt_counter7  (hmt_counter7[MXCNTVME-1:0]),  //In 
+      .hmt_counter8  (hmt_counter8[MXCNTVME-1:0]),  //In 
+      .hmt_counter9  (hmt_counter9[MXCNTVME-1:0]),  //In 
       
       // CSC Orientation Ports
       .csc_type        (csc_type[3:0]),   // In  Firmware compile type
