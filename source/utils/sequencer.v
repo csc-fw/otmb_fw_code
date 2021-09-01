@@ -2976,9 +2976,9 @@
     cnt_en[64]  <= sync_err_cnt_en;           // STAT  TTC sync errors
     cnt_en[65]  <= perr_pulse;                // STAT Raw hits RAM parity errors
 
-    hmt_cnt_en[0]  <= hmt_trigger[1:0] = 2'b01; // hmt over threshold1
-    hmt_cnt_en[1]  <= hmt_trigger[1:0] = 2'b10; // hmt over threshold2
-    hmt_cnt_en[2]  <= hmt_trigger[1:0] = 2'b11; // hmt over threshold3
+    hmt_cnt_en[0]  <= hmt_trigger[1:0] == 2'b01; // hmt over threshold1
+    hmt_cnt_en[1]  <= hmt_trigger[1:0] == 2'b10; // hmt over threshold2
+    hmt_cnt_en[2]  <= hmt_trigger[1:0] == 2'b11; // hmt over threshold3
     hmt_cnt_en[3]  <= hmt_fired_pretrigger && clct_pretrig;// hmt && preCLCT
     hmt_cnt_en[4]  <= hmt_fired_trigger    && clct_push_xtmb && clct0_vpf;// hmt && CLCT
     hmt_cnt_en[5]  <= hmt_fired_tmb_ff     && tmb_match; // hmt && LCT vpf
@@ -3003,6 +3003,7 @@
     for (j=0; j<=MXHMTCNT; j=j+1) begin: genhmtnof
       assign hmt_cnt_nof[j] = (hmt_cnt[j] < cnt_fullscale);    // 1=counter j not overflowed
     end
+  endgenerate
 
   wire cnt_any_ovf_clct = !(&cnt_nof);        // 1 or more counters overflowed
 
