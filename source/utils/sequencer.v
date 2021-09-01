@@ -3527,8 +3527,8 @@
     end
   endgenerate
   generate
-    for (j=0; j<MXHMTCNT; j=j+1) begin: gennof
-      assign cnt_nof[j] = (cnt[j] < cnt_fullscale);    // 1=counter j not overflowed
+    for (j=0; j<MXHMTCNT; j=j+1) begin: genhmtnof
+      assign hmt_cnt_nof[j] = (hmt_cnt[j] < cnt_fullscale);    // 1=counter j not overflowed
     end
   endgenerate
 
