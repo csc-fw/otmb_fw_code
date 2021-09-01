@@ -537,8 +537,13 @@
 
   alct_delay,
   clct_window,
+// Algo2016: configuration
   algo2016_clct_window,
   algo2016_clct_to_alct,
+  algo2016_use_dead_time_zone,
+// JG: this functionality is being removed, 10/25/2017...
+  algo2016_dead_time_zone_size,
+  algo2016_use_dynamic_dead_time_zone,
 
   tmb_allow_alct,
   tmb_allow_clct,
@@ -964,11 +969,6 @@
   deb_buf_push_data,
   deb_buf_pop_data,
 
-// Algo2016: configuration
-  algo2016_use_dead_time_zone,
-// JG: this functionality is being removed, 10/25/2017...
-  algo2016_dead_time_zone_size,
-  algo2016_use_dynamic_dead_time_zone,
 // Sump
   sequencer_sump
 
@@ -1307,8 +1307,13 @@
 
   input [3:0] alct_delay;            // Delay ALCT for CLCT match window
   input [3:0] clct_window;           // CLCT match window width (for CLCT-centric "old" algorithm)
+// Algo2016: configuration
   input [3:0] algo2016_clct_window;  // CLCT match window width (for ALCT-centric 2016 algorithm)
   input       algo2016_clct_to_alct; // ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
+  input       algo2016_use_dead_time_zone;         // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
+// JG: this functionality is being removed, 10/25/2017...
+  input [4:0] algo2016_dead_time_zone_size;        // Constant size of the dead time zone
+  input       algo2016_use_dynamic_dead_time_zone; // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
 
   input tmb_allow_alct;  // Allow ALCT only 
   input tmb_allow_clct;  // Allow CLCT only
@@ -1732,11 +1737,6 @@
   output  [MXBDATA-1:0]  deb_buf_push_data;    // Queue push data at last push
   output  [MXBDATA-1:0]  deb_buf_pop_data;    // Queue pop  data at last pop
 
-// Algo2016: configuration
-  input       algo2016_use_dead_time_zone;         // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
-// JG: this functionality is being removed, 10/25/2017...
-  input [4:0] algo2016_dead_time_zone_size;        // Constant size of the dead time zone
-  input       algo2016_use_dynamic_dead_time_zone; // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
 
 // Sump
   output          sequencer_sump;      // Unused signals
@@ -2898,7 +2898,7 @@
   reg [MXCNTVME-1:0] cnt [MXCNT:MNCNT]; // TMB counter array, counters[6:0] are in alct.v
   reg [MXCNT:MNCNT]  cnt_en = 0;        // Counter increment enables
 
-  parameter MXHMTCNT    = 6;
+  parameter MXHMTCNT    = 10;
   reg [MXCNTVME-1:0] hmt_cnt [MXHMTCNT-1:0];
   reg [MXHMTCNT-1:0] hmt_cnt_en = 0;//6 HMT counters
 
@@ -2991,7 +2991,7 @@
 // Counter overflow disable
   wire [MXCNTVME-1:0] cnt_fullscale = {MXCNTVME{1'b1}};
   wire [MXCNT:MNCNT]  cnt_nof;
-  wire [MXCNT:MNCNT]  hmt_cnt_nof;
+  wire [MXHMTCNT-1:0]  hmt_cnt_nof;
 
   genvar j;
   generate
@@ -3000,7 +3000,7 @@
     end
   endgenerate
   generate
-    for (j=0; j<=MXHMTCNT; j=j+1) begin: genhmtnof
+    for (j=0; j<MXHMTCNT; j=j+1) begin: genhmtnof
       assign hmt_cnt_nof[j] = (hmt_cnt[j] < cnt_fullscale);    // 1=counter j not overflowed
     end
   endgenerate
@@ -3034,7 +3034,7 @@
   endgenerate
 
   generate
-    for (j=0; j<=MXHMTCNT; j=j+1) begin: genhmtcnt
+    for (j=0; j<MXHMTCNT; j=j+1) begin: genhmtcnt
       always @(posedge clock) begin
         if (vme_cnt_reset) begin
           if (!(j==RESYNCCNT_ID && ttc_resync)) // Don't let ttc_resync clear the resync counter, eh

@@ -1170,7 +1170,7 @@
   wire [9:0] hmt_nhits_trig;
   wire [9:0] hmt_nhits_trig_bx678;
   wire [9:0] hmt_nhits_trig_bx2345;
-  wire [1:0] hmt_trigger_bx7; // HMT trigger results 
+  //wire [1:0] hmt_trigger_bx7; // HMT trigger results 
   wire [1:0] hmt_trigger_bx678; // HMT trigger results 
   wire [1:0] hmt_trigger_bx2345; // HMT trigger results 
   wire [9:0] hmt_thresh1, hmt_thresh2, hmt_thresh3;
@@ -1180,8 +1180,8 @@
   wire tmb_allow_hmt;
   wire tmb_allow_hmt_ro;
 
-  assign hmt_trigger_bx7[0] = (hmt_nhits_trig >= hmt_thresh1) || (hmt_nhits_trig >= hmt_thresh3);
-  assign hmt_trigger_bx7[1] = (hmt_nhits_trig >= hmt_thresh2) || (hmt_nhits_trig >= hmt_thresh3);
+  //assign hmt_trigger_bx7[0] = (hmt_nhits_trig >= hmt_thresh1) || (hmt_nhits_trig >= hmt_thresh3);
+  //assign hmt_trigger_bx7[1] = (hmt_nhits_trig >= hmt_thresh2) || (hmt_nhits_trig >= hmt_thresh3);
   assign hmt_trigger_bx678[0] = (hmt_nhits_trig_bx678 >= hmt_thresh1) || (hmt_nhits_trig_bx678 >= hmt_thresh3);
   assign hmt_trigger_bx678[1] = (hmt_nhits_trig_bx678 >= hmt_thresh2) || (hmt_nhits_trig_bx678 >= hmt_thresh3);
   assign hmt_trigger_bx2345[0] = (hmt_nhits_trig_bx2345 >= hmt_thresh1) || (hmt_nhits_trig_bx2345 >= hmt_thresh3);
@@ -2086,7 +2086,9 @@
   .clct_wr_continuous (clct_wr_continuous),            // In  1=allow continuous header buffer writing for invalid triggers
 
   .alct_delay            (alct_delay[3:0]),       // In Delay ALCT for CLCT match window
-  .clct_window        (clct_window[3:0]),      // In CLCT match window width (for CLCT-centric "old" algorithm)
+  .clct_window           (clct_window[3:0]),      // In CLCT match window width (for CLCT-centric "old" algorithm)
+  .algo2016_clct_window  (algo2016_window[3:0]),  // In CLCT match window width (for ALCT-centric 2016 algorithm)
+  .algo2016_clct_to_alct (algo2016_clct_to_alct), // In use clct-centric or alct-centric, not used
    
   .algo2016_use_dead_time_zone         (algo2016_use_dead_time_zone),         // In Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
   .algo2016_dead_time_zone_size        (algo2016_dead_time_zone_size[4:0]),   // In Constant size of the dead time zone
@@ -2314,8 +2316,9 @@
   .tmb_clct0_discard (tmb_clct0_discard),        // In  CLCT0 was not used for LCT because from ME1A
   .tmb_clct1_discard (tmb_clct1_discard),        // In  CLCT1 was not used for LCT because from ME1A
   .tmb_aff_list      (tmb_aff_list[MXCFEB-1:0]), // In  Active CFEBs for CLCT used in TMB match
-  .tmb_pulse_hmt_only(tmb_pulse_hmt_only),       // Out tmb pulse is from HMT
-  .tmb_keep_hmt_only (tmb_keep_hmt_only),        // Out tmb pulse is from HMT
+  .hmt_fired_tmb_ff  (hmt_fired_tmb_ff),         // In  hmt fired tmb
+  .tmb_pulse_hmt_only(tmb_pulse_hmt_only),       // In tmb pulse is from HMT
+  .tmb_keep_hmt_only (tmb_keep_hmt_only),        // In tmb pulse is from HMT
 
   .tmb_match_ro     (tmb_match_ro),     // In  ALCT and CLCT matched in time, non-triggering readout
   .tmb_alct_only_ro (tmb_alct_only_ro), // In  Only ALCT triggered, non-triggering readout
@@ -2955,8 +2958,9 @@
   .tmb_clct0_discard (tmb_clct0_discard),        // Out  CLCT0 was not used for LCT because from ME1A
   .tmb_clct1_discard (tmb_clct1_discard),        // Out  CLCT1 was not used for LCT because from ME1A
   .tmb_aff_list      (tmb_aff_list[MXCFEB-1:0]), // Out  Active CFEBs for CLCT used in TMB match
+  .hmt_fired_tmb_ff  (hmt_fired_tmb_ff),         // Out  hmt fired tmb
   .tmb_pulse_hmt_only(tmb_pulse_hmt_only),       // Out tmb pulse is from HMT
-  .tmb_keep_hmt_only (tmb_keep_hmt_only),        // Out tmb pulse is from HMT
+  .tmb_keep_hmt_only (tmb_keep_hmt_only),        // Out tmb keep is from HMT
 
   .tmb_match_ro     (tmb_match_ro),     // Out  ALCT and CLCT matched in time, non-triggering readout
   .tmb_alct_only_ro (tmb_alct_only_ro), // Out  Only ALCT triggered, non-triggering readout
