@@ -523,7 +523,9 @@
   hmt_thresh1,
   hmt_thresh2,
   hmt_thresh3,
-
+  cfeb_allow_hmt_ro,
+  tmb_allow_hmt,
+  tmb_allow_hmt_ro,
 
 // Sequencer Ports: Latched CLCTs + Status
   event_clear_vme,
@@ -913,6 +915,16 @@
   active_cfeb6_event_counter,      // CFEB6 active flag sent to DMB
 
   bx0_match_counter, // ALCT-CLCT BX0 match counter
+  hmt_counter0,
+  hmt_counter1,
+  hmt_counter2,
+  hmt_counter3,
+  hmt_counter4,
+  hmt_counter5,
+  hmt_counter6,
+  hmt_counter7,
+  hmt_counter8,
+  hmt_counter9,
 
   gem_counter0,
   gem_counter1,
@@ -2298,7 +2310,9 @@
   output [9:0] hmt_thresh1;
   output [9:0] hmt_thresh2;
   output [9:0] hmt_thresh3;
-
+  output       cfeb_allow_hmt_ro;
+  output       tmb_allow_hmt;
+  output       tmb_allow_hmt_ro;
 
 
 // Sequencer Ports: Latched CLCTs
@@ -2652,6 +2666,17 @@
   input  [MXCNTVME-1:0]  event_counter63;
   input  [MXCNTVME-1:0]  event_counter64;
   input  [MXCNTVME-1:0]  event_counter65;
+
+  input  [MXCNTVME-1:0]  hmt_counter0;
+  input  [MXCNTVME-1:0]  hmt_counter1;
+  input  [MXCNTVME-1:0]  hmt_counter2;
+  input  [MXCNTVME-1:0]  hmt_counter3;
+  input  [MXCNTVME-1:0]  hmt_counter4;
+  input  [MXCNTVME-1:0]  hmt_counter5;
+  input  [MXCNTVME-1:0]  hmt_counter6;
+  input  [MXCNTVME-1:0]  hmt_counter7;
+  input  [MXCNTVME-1:0]  hmt_counter8;
+  input  [MXCNTVME-1:0]  hmt_counter9;
 
 // GEM Counters
   input  [MXCNTVME-1:0]  gem_counter0;
@@ -7335,7 +7360,7 @@
 // ADR_CNT_RDATA=0xD2  Trigger/Readout Counter Data Register
 //------------------------------------------------------------------------------------------------------------------
 // Remap 1D counters to 2D, because XST does not support 2D ports
-  parameter MXCNT = 96;                     // Number of counters, last counter id is mxcnt-1
+  parameter MXCNT = 96 + 10;                     // Number of counters, last counter id is mxcnt-1
   reg  [MXCNTVME-1:0] cnt_snap [MXCNT-1:0]; // Event counter snapshot 2D
   wire [MXCNTVME-1:0] cnt      [MXCNT-1:0]; // Event counter 2D map
 
@@ -7456,6 +7481,17 @@
   assign cnt[93]  = seq_pretrig_counter;       // consecutive Pre-trigger counter (equential, 1 bx apart)
   assign cnt[94]  = almostseq_pretrig_counter; // Pre-triggers-2bx-apart counter
   assign cnt[95]  = bx0_match_counter;    // ALCT-CLCT bx0 match
+
+  assign cnt[96]  = hmt_counter0;
+  assign cnt[97]  = hmt_counter1;
+  assign cnt[98]  = hmt_counter2;
+  assign cnt[99]  = hmt_counter3;
+  assign cnt[100] = hmt_counter4;
+  assign cnt[101] = hmt_counter5;
+  assign cnt[102] = hmt_counter6;
+  assign cnt[103] = hmt_counter7;
+  assign cnt[104] = hmt_counter8;
+  assign cnt[105] = hmt_counter9;
 
 // Virtex-6 GTX Optical Receiver Error Counters
 //  assign cnt[81]  = gtx_rx_err_count0;  // Error count on this fiber channel
@@ -8870,10 +8906,10 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 //------------------------------------------------------------------------------------------------------------------
 
   initial begin
-    hmt_ctrl_wr[0] = 1'b1; // RW, enable the HMT or not
-    hmt_ctrl_wr[1] = 1'b1; //RW, enable ME1a or not
-    hmt_ctrl_wr[11:2] = 10'b0; //R only nhits for trigger 
-    hmt_ctrl_wr[13:12] = 2'b0; // result of over threshold, reserved
+    hmt_ctrl_wr[0]     = 1'b1; // RW, enable the HMT or not
+    hmt_ctrl_wr[1]     = 1'b1; //RW, enable ME1a or not
+    hmt_ctrl_wr[11:2]  = 10'b0; //R only nhits for trigger 
+    hmt_ctrl_wr[15:12] = 4'b0; // result of over threshold, reserved
   end
   assign hmt_enable  = hmt_ctrl_wr[0];
   assign hmt_me1a_enable = hmt_ctrl_wr[1];
@@ -8884,6 +8920,7 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign hmt_ctrl_rd[1] = hmt_me1a_enable;
   assign hmt_ctrl_rd[11:2] = hmt_nhits_trig_vme[9:0];
   assign hmt_ctrl_rd[15:12]= hmt_trigger_vme[MXHMTB-1:0];  //reserved for HMT results 
+
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_HMT_THRESH1 = 0x1AE  HMT thresh
@@ -8898,7 +8935,10 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
     hmt_thresh1_wr[10]    = 1'b0; // pass threshold or not 
     hmt_thresh2_wr[10]    = 1'b0; // pass threshold or not 
     hmt_thresh3_wr[10]    = 1'b0; // pass threshold or not 
-    hmt_thresh1_wr[15:11] = 5'b0; // not used
+    hmt_thresh1_wr[11]  = 1'b0; // read cfeb when hmt is fired
+    hmt_thresh1_wr[12]  = 1'b0; // fire trigger when hmt is fired
+    hmt_thresh1_wr[13]  = 1'b0; // readout TMB when hmt is fired
+    hmt_thresh1_wr[15:14]  = 2'b0; // not used
     hmt_thresh2_wr[15:11] = 5'b0; // not used
     hmt_thresh3_wr[15:11] = 5'b0; // not used
   end 
@@ -8906,6 +8946,9 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign hmt_thresh1[9:0]  = hmt_thresh1_wr[9:0];
   assign hmt_thresh2[9:0]  = hmt_thresh2_wr[9:0];
   assign hmt_thresh3[9:0]  = hmt_thresh3_wr[9:0];
+  assign cfeb_allow_hmt_ro = hmt_thresh1_wr[11];
+  assign tmb_allow_hmt     = hmt_thresh1_wr[12];
+  assign tmb_allow_hmt_ro  = hmt_thresh1_wr[13];
 
   assign hmt_thresh1_rd[9:0] =  hmt_thresh1_wr[9:0];
   assign hmt_thresh2_rd[9:0] =  hmt_thresh2_wr[9:0];
@@ -8913,9 +8956,9 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign hmt_thresh1_rd[10]  = (hmt_nhits_trig_vme > hmt_thresh1);
   assign hmt_thresh2_rd[10]  = (hmt_nhits_trig_vme > hmt_thresh2);
   assign hmt_thresh3_rd[10]  = (hmt_nhits_trig_vme > hmt_thresh3);
-  assign hmt_thresh1_rd[15:11] = 5'b0;
-  assign hmt_thresh2_rd[15:11] = 5'b0;
-  assign hmt_thresh3_rd[15:11] = 5'b0;
+  assign hmt_thresh1_rd[15:11] = hmt_thresh1_wr[15:11];
+  assign hmt_thresh2_rd[15:11] = hmt_thresh2_wr[15:11];
+  assign hmt_thresh3_rd[15:11] = hmt_thresh3_wr[15:11];
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_HMT_NHITS_SIG=0x1B4  Nhits for HMT in bx678, Signal

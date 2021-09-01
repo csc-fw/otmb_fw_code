@@ -934,6 +934,17 @@
 
   wire  [MXCNTVME-1:0] bx0_match_counter; // Out ALCT-CLCT BX0 match
 
+  wire  [MXCNTVME-1:0]  hmt_counter0;
+  wire  [MXCNTVME-1:0]  hmt_counter1;
+  wire  [MXCNTVME-1:0]  hmt_counter2;
+  wire  [MXCNTVME-1:0]  hmt_counter3;
+  wire  [MXCNTVME-1:0]  hmt_counter4;
+  wire  [MXCNTVME-1:0]  hmt_counter5;
+  wire  [MXCNTVME-1:0]  hmt_counter6;
+  wire  [MXCNTVME-1:0]  hmt_counter7;
+  wire  [MXCNTVME-1:0]  hmt_counter8;
+  wire  [MXCNTVME-1:0]  hmt_counter9;
+
 // GEM Counters
   wire  [MXCNTVME-1:0]  gem_counter0;
   wire  [MXCNTVME-1:0]  gem_counter1;
@@ -1321,16 +1332,22 @@
   //wire  [9:0]         allcfeb_nhits = cfeb_nhits[0] + cfeb_nhits[1] + cfeb_nhits[2] + cfeb_nhits[3] + cfeb_nhits[4] + cfeb_nhits[5] + cfeb_nhits[6];
   wire  hmt_enable;
   wire  hmt_me1a_enable;
+
+  wire cfeb_allow_hmt_ro;
+  wire tmb_allow_hmt;
+  wire tmb_allow_hmt_ro;
+  
   wire [9:0] hmt_nhits_trig;
   wire [9:0] hmt_nhits_trig_bx678;
   wire [9:0] hmt_nhits_trig_bx2345;
-  wire [1:0] hmt_trigger_bx7; // HMT trigger results 
+  //wire [1:0] hmt_trigger_bx7; // HMT trigger results 
   wire [1:0] hmt_trigger_bx678; // HMT trigger results 
   wire [1:0] hmt_trigger_bx2345; // HMT trigger results 
   wire [9:0] hmt_thresh1, hmt_thresh2, hmt_thresh3;
   wire [MXHMTB-1:0] hmt_trigger ;
-  assign hmt_trigger_bx7[0] = (hmt_nhits_trig >= hmt_thresh1) || (hmt_nhits_trig >= hmt_thresh3);
-  assign hmt_trigger_bx7[1] = (hmt_nhits_trig >= hmt_thresh2) || (hmt_nhits_trig >= hmt_thresh3);
+
+  //assign hmt_trigger_bx7[0] = (hmt_nhits_trig >= hmt_thresh1) || (hmt_nhits_trig >= hmt_thresh3);
+  //assign hmt_trigger_bx7[1] = (hmt_nhits_trig >= hmt_thresh2) || (hmt_nhits_trig >= hmt_thresh3);
   assign hmt_trigger_bx678[0] = (hmt_nhits_trig_bx678 >= hmt_thresh1) || (hmt_nhits_trig_bx678 >= hmt_thresh3);
   assign hmt_trigger_bx678[1] = (hmt_nhits_trig_bx678 >= hmt_thresh2) || (hmt_nhits_trig_bx678 >= hmt_thresh3);
   assign hmt_trigger_bx2345[0] = (hmt_nhits_trig_bx2345 >= hmt_thresh1) || (hmt_nhits_trig_bx2345 >= hmt_thresh3);
@@ -1361,7 +1378,8 @@
   wire [9:0] nhits_trig_s0_bx678  = (nhits_trig_s0_bx678_tmp[11:10] > 0 ) ? 10'h3FF : nhits_trig_s0_bx678_tmp[9:0];
 
   //hits to build CLCT is counted at nhits_trig_s0_srl[7], with CLCT_drift delay=2BX
-  parameter hmt_dly_const = 4'd6; //delay HMT trigger to CLCT VPF BX
+  //parameter hmt_dly_const = 4'd6; //delay HMT trigger to CLCT VPF BX
+  parameter hmt_dly_const = 4'd1; //delay HMT trigger to preCLCT BX
   wire [9:0] nhits_trig_dly_bx2345;
   wire [9:0] nhits_trig_dly_bx678;
   wire [9:0] nhits_trig_dly_bx7;
@@ -2522,12 +2540,12 @@ end
   //CCLUT is off
   `ifndef CCLUT
    assign hs_qlt_1st[MXQLTB - 1   : 0] = 0;
-   assign hs_bnd_1st[MXBNDB - 1   : 0] = 0;
-   assign hs_xky_1st[MXXKYB - 1   : 0] = 0;
+   assign hs_bnd_1st[MXBNDB - 1   : 0] = hs_pid_1st;
+   assign hs_xky_1st[MXXKYB - 1   : 0] = {hs_hit_1st, 2'b10};
    assign hs_carry_1st[MXPATC - 1 : 0] = 0;
    assign hs_qlt_2nd[MXQLTB - 1   : 0] = 0;
-   assign hs_bnd_2nd[MXBNDB - 1   : 0] = 0;
-   assign hs_xky_2nd[MXXKYB - 1   : 0] = 0;
+   assign hs_bnd_2nd[MXBNDB - 1   : 0] = hs_pid_2nd;
+   assign hs_xky_2nd[MXXKYB - 1   : 0] = {hs_hit_2nd, 2'b10};
    assign hs_carry_2nd[MXPATC - 1 : 0] = 0;
    assign hs_run2pid_1st[MXPIDB-1:0]   = hs_pid_1st;
    assign hs_run2pid_2nd[MXPIDB-1:0]   = hs_pid_2nd;
@@ -3247,6 +3265,10 @@ end
   .tmb_allow_clct_ro  (tmb_allow_clct_ro),  // In  Allow CLCT only  readout, non-triggering
   .tmb_allow_match_ro (tmb_allow_match_ro), // In  Allow Match only readout, non-triggering
 
+  .hmt_fired_tmb_ff  (hmt_fired_tmb_ff),         // In  hmt fired tmb
+  .tmb_pulse_hmt_only(tmb_pulse_hmt_only),       // In tmb pulse is from HMT
+  .tmb_keep_hmt_only (tmb_keep_hmt_only),        // In tmb pulse is from HMT
+
   .gemcsc_bend_enable       (gemcsc_bend_enable),             //In GEMCSC bending angle enabled
   .match_gem_alct_delay      (match_gem_alct_delay[7:0]),  //In gem delay for gem-ALCT match
   .gemA_forclct_pipe         (gemA_forclct_pipe[7:0]),
@@ -3291,6 +3313,7 @@ end
   .seq_trigger     (seq_trigger),           // Out  Sequencer requests L1A from CCB
   .sequencer_state (sequencer_state[11:0]), // Out  Sequencer state for vme
 
+  .cfeb_allow_hmt_ro         (cfeb_allow_hmt_ro),// In fire the "pretrigger" when hmt is fired
   .hmt_nhits_trig_vme        (hmt_nhits_trig_vme[9:0]),// Out HMT nhits for trigger
   .hmt_nhits_trig_bx678_vme  (hmt_nhits_trig_bx678_vme[9:0]),// Out HMT nhits for trigger
   .hmt_nhits_trig_bx2345_vme (hmt_nhits_trig_bx2345_vme[9:0]),// Out HMT nhits for trigger
@@ -3500,7 +3523,10 @@ end
   .tmb_clct0_discard (tmb_clct0_discard),        // In  CLCT0 was not used for LCT because from ME1A
   .tmb_clct1_discard (tmb_clct1_discard),        // In  CLCT1 was not used for LCT because from ME1A
   .tmb_aff_list      (tmb_aff_list[MXCFEB-1:0]), // In  Active CFEBs for CLCT used in TMB match
-
+  .hmt_fired_tmb_ff  (hmt_fired_tmb_ff),         // In  hmt fired tmb
+  .tmb_pulse_hmt_only(tmb_pulse_hmt_only),       // In tmb pulse is from HMT
+  .tmb_keep_hmt_only (tmb_keep_hmt_only),        // In tmb keep is from HMT
+ 
   .tmb_match_ro     (tmb_match_ro),     // In  ALCT and CLCT matched in time, non-triggering readout
   .tmb_alct_only_ro (tmb_alct_only_ro), // In  Only ALCT triggered, non-triggering readout
   .tmb_clct_only_ro (tmb_clct_only_ro), // In  Only CLCT triggered, non-triggering readout
@@ -3698,6 +3724,17 @@ end
   .active_cfeb6_event_counter      (active_cfeb6_event_counter[MXCNTVME-1:0]),      // Out
 
   .bx0_match_counter (bx0_match_counter), // Out ALCT-CLCT BX0 match
+
+  .hmt_counter0  (hmt_counter0[MXCNTVME-1:0]),  // Out
+  .hmt_counter1  (hmt_counter1[MXCNTVME-1:0]),  // Out
+  .hmt_counter2  (hmt_counter2[MXCNTVME-1:0]),  // Out
+  .hmt_counter3  (hmt_counter3[MXCNTVME-1:0]),  // Out
+  .hmt_counter4  (hmt_counter4[MXCNTVME-1:0]),  // Out
+  .hmt_counter5  (hmt_counter5[MXCNTVME-1:0]),  // Out
+  .hmt_counter6  (hmt_counter6[MXCNTVME-1:0]),  // Out
+  .hmt_counter7  (hmt_counter7[MXCNTVME-1:0]),  // Out
+  .hmt_counter8  (hmt_counter8[MXCNTVME-1:0]),  // Out
+  .hmt_counter9  (hmt_counter9[MXCNTVME-1:0]),  // Out
 
 // Sequencer Header Counters
   .hdr_clear_on_resync (hdr_clear_on_resync),           // In  Clear header counters on ttc_resync
@@ -4539,6 +4576,9 @@ wire [15:0] gemB_bxn_counter;
   .tmb_clct0_discard (tmb_clct0_discard),        // Out  CLCT0 was not used for LCT because from ME1A
   .tmb_clct1_discard (tmb_clct1_discard),        // Out  CLCT1 was not used for LCT because from ME1A
   .tmb_aff_list      (tmb_aff_list[MXCFEB-1:0]), // Out  Active CFEBs for CLCT used in TMB match
+  .hmt_fired_tmb_ff  (hmt_fired_tmb_ff),         // Out  hmt fired tmb
+  .tmb_pulse_hmt_only(tmb_pulse_hmt_only),       // Out tmb pulse is from HMT
+  .tmb_keep_hmt_only (tmb_keep_hmt_only),        // Out tmb keep is from HMT
 
   .tmb_match_ro     (tmb_match_ro),     // Out  ALCT and CLCT matched in time, non-triggering readout
   .tmb_alct_only_ro (tmb_alct_only_ro), // Out  Only ALCT triggered, non-triggering readout
@@ -4591,7 +4631,8 @@ wire [15:0] gemB_bxn_counter;
   .alctclctgem_swapped       (alctclctgem_swapped),   // out, ALCT/CLCT swapped from ACLT+CLCT+gem match
   .clctcopad_swapped         (clctcopad_swapped),          // out, CLCT swapped from CLCT+copad match
 
-  .run3_trig_df   (run3_trig_df),
+  .run3_trig_df   (run3_trig_df),  //In  enable Run3 trigger data format
+  .run3_daq_df   (run3_daq_df), //In enable run3 daq format
 // MPC Status
   .mpc_frame_ff   (mpc_frame_ff),                // Out  MPC frame latch strobe
   .mpc0_frame0_ff (mpc0_frame0_ff[MXFRAME-1:0]), // Out  MPC best muon 1st frame
@@ -4624,6 +4665,9 @@ wire [15:0] gemB_bxn_counter;
   .tmb_allow_alct_ro  (tmb_allow_alct_ro),  // In  Allow ALCT only  readout, non-triggering
   .tmb_allow_clct_ro  (tmb_allow_clct_ro),  // In  Allow CLCT only  readout, non-triggering
   .tmb_allow_match_ro (tmb_allow_match_ro), // In  Allow Match only readout, non-triggering
+  //HMT
+  .tmb_allow_hmt      (tmb_allow_hmt),    // In trigger when hmt is fired
+  .tmb_allow_hmt_ro   (tmb_allow_hmt_ro), // In read tmb when hmt is fired
   
   .algo2016_drop_used_clcts(algo2016_drop_used_clcts),             // In Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - drop used CLCTs
   .algo2016_cross_bx_algorithm(algo2016_cross_bx_algorithm),       // In LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
@@ -5490,6 +5534,9 @@ wire [15:0] gemB_bxn_counter;
       .hmt_thresh1        (hmt_thresh1[9:0]), // out, loose HMT thresh
       .hmt_thresh2        (hmt_thresh2[9:0]), // out, loose HMT thresh
       .hmt_thresh3        (hmt_thresh3[9:0]), // out, loose HMT thresh
+      .cfeb_allow_hmt_ro  (cfeb_allow_hmt_ro), //Out read out CFEB when hmt is fired
+      .tmb_allow_hmt      (tmb_allow_hmt),    // Out trigger when hmt is fired
+      .tmb_allow_hmt_ro   (tmb_allow_hmt_ro), // Out read tmb when hmt is fired
 
       // Sequencer Ports: Latched CLCTs + Status
       .event_clear_vme   (event_clear_vme),         // Out  Event clear for vme diagnostic registers
@@ -5918,7 +5965,18 @@ wire [15:0] gemB_bxn_counter;
       .active_cfeb5_event_counter      (active_cfeb5_event_counter[MXCNTVME-1:0]),      // In
       .active_cfeb6_event_counter      (active_cfeb6_event_counter[MXCNTVME-1:0]),      // In
 
-      .bx0_match_counter (bx0_match_counter), // Out ALCT-CLCT BX0 match
+      .bx0_match_counter (bx0_match_counter), // IN ALCT-CLCT BX0 match
+
+      .hmt_counter0  (hmt_counter0[MXCNTVME-1:0]),  //In 
+      .hmt_counter1  (hmt_counter1[MXCNTVME-1:0]),  //In 
+      .hmt_counter2  (hmt_counter2[MXCNTVME-1:0]),  //In 
+      .hmt_counter3  (hmt_counter3[MXCNTVME-1:0]),  //In 
+      .hmt_counter4  (hmt_counter4[MXCNTVME-1:0]),  //In 
+      .hmt_counter5  (hmt_counter5[MXCNTVME-1:0]),  //In 
+      .hmt_counter6  (hmt_counter6[MXCNTVME-1:0]),  //In 
+      .hmt_counter7  (hmt_counter7[MXCNTVME-1:0]),  //In 
+      .hmt_counter8  (hmt_counter8[MXCNTVME-1:0]),  //In 
+      .hmt_counter9  (hmt_counter9[MXCNTVME-1:0]),  //In 
       
       // GEM Trigger/Readout Counter Ports
       .gem_cnt_all_reset    (gem_cnt_all_reset),     // Out  Trigger/Readout counter reset

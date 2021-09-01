@@ -500,6 +500,7 @@
   cfeb_layer_or,
   cfeb_nlayers_hit,
 //HMT results
+  cfeb_allow_hmt_ro,
   hmt_nhits_trig,
   hmt_nhits_trig_bx678,
   hmt_nhits_trig_bx2345,
@@ -841,6 +842,9 @@
   tmb_clct0_discard,
   tmb_clct1_discard,
   tmb_aff_list,
+  hmt_fired_tmb_ff,
+  tmb_pulse_hmt_only,
+  tmb_keep_hmt_only,
 
   tmb_alct_only_ro,
   tmb_clct_only_ro,
@@ -1066,6 +1070,17 @@
   active_cfeb6_event_counter,      // CFEB6 active flag sent to DMB
 
   bx0_match_counter, 
+
+  hmt_counter0,
+  hmt_counter1,
+  hmt_counter2,
+  hmt_counter3,
+  hmt_counter4,
+  hmt_counter5,
+  hmt_counter6,
+  hmt_counter7,
+  hmt_counter8,
+  hmt_counter9,
 
 // GEM Trigger/Readout Counter Ports
   gem_cnt_all_reset,
@@ -1528,6 +1543,7 @@
   input  [MXLY-1:0]    cfeb_layer_or;      // OR of hstrips on each layer at pre-trigger
   input  [MXHITB-1:0]  cfeb_nlayers_hit;    // Number of CSC layers hit
 
+  input                 cfeb_allow_hmt_ro;//fire pretrigger for hmt
   input  [9:0]         hmt_nhits_trig; // HMT results 
   input  [9:0]         hmt_nhits_trig_bx678; // HMT results 
   input  [9:0]         hmt_nhits_trig_bx2345; // HMT results 
@@ -1601,6 +1617,11 @@
   input  [3:0] clct_window; // CLCT match window width
   input  [3:0] algo2016_clct_window;  // CLCT match window width (for ALCT-centric 2016 algorithm)
   input        algo2016_clct_to_alct; // ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
+// Algo2016: configuration
+  input       algo2016_use_dead_time_zone;         // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
+// JG: this functionality is being removed, 10/25/2017...
+  input [4:0] algo2016_dead_time_zone_size;        // Constant size of the dead time zone
+  input       algo2016_use_dynamic_dead_time_zone; // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
 
   input tmb_allow_alct;  // Allow ALCT only
   input tmb_allow_clct;  // Allow CLCT only
@@ -1864,6 +1885,9 @@
   input          tmb_clct0_discard;  // CLCT0 was discarded from ME1A
   input          tmb_clct1_discard;  // CLCT1 was discarded from ME1A
   input  [MXCFEB-1:0]  tmb_aff_list;    // Active CFEBs for CLCT used in TMB match
+  input              hmt_fired_tmb_ff; // hmt fired in tmb
+  input              tmb_pulse_hmt_only; // tmb pulse is from HMT
+  input              tmb_keep_hmt_only; // tmb pulse is from HMT
 
   input          tmb_match_ro;    // ALCT and CLCT matched in time, non-triggering reaodut
   input          tmb_alct_only_ro;  // Only ALCT triggered, non-triggering reaodut
@@ -2080,6 +2104,17 @@
 
   output  [MXCNTVME-1:0] bx0_match_counter; // ALCT-CLCT BX0 match counter
 
+  output  [MXCNTVME-1:0]  hmt_counter0;
+  output  [MXCNTVME-1:0]  hmt_counter1;
+  output  [MXCNTVME-1:0]  hmt_counter2;
+  output  [MXCNTVME-1:0]  hmt_counter3;
+  output  [MXCNTVME-1:0]  hmt_counter4;
+  output  [MXCNTVME-1:0]  hmt_counter5;
+  output  [MXCNTVME-1:0]  hmt_counter6;
+  output  [MXCNTVME-1:0]  hmt_counter7;
+  output  [MXCNTVME-1:0]  hmt_counter8;
+  output  [MXCNTVME-1:0]  hmt_counter9;
+
 // Trigger/Readout Counter Ports
   input  gem_cnt_all_reset;    // Trigger/Readout counter reset
   input  gem_cnt_stop_on_ovf;  // Stop all counters if any overflows
@@ -2229,11 +2264,6 @@
   output  [MXBDATA-1:0]  deb_buf_push_data;    // Queue push data at last push
   output  [MXBDATA-1:0]  deb_buf_pop_data;    // Queue pop  data at last pop
   
-// Algo2016: configuration
-  input       algo2016_use_dead_time_zone;         // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
-// JG: this functionality is being removed, 10/25/2017...
-  input [4:0] algo2016_dead_time_zone_size;        // Constant size of the dead time zone
-  input       algo2016_use_dynamic_dead_time_zone; // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
 
   //to test GEM BC0 
   output reg [15:0] gemA_bxn_counter;
@@ -3134,8 +3164,11 @@
   wire              active_feb_flag_tmb; // Active FEB flag to DMB at tmb match time
   wire              active_feb_flag;     // Active FEB flag selection
 
+  wire hmt_fired_pretrigger = (|hmt_trigger[1:0]) && cfeb_allow_hmt_ro;//fired all cfebs when hmt is fired
+  wire [MXCFEB-1:0] active_feb_list_hmt = {MXCFEB{hmt_fired_pretrigger}};
+
   assign active_feb_flag_pre = clct_push_pretrig;
-  assign active_feb_list_pre = active_feb_s0[MXCFEB-1:0] & {MXCFEB{active_feb_flag_pre}};
+  assign active_feb_list_pre = (active_feb_s0[MXCFEB-1:0] & {MXCFEB{active_feb_flag_pre}}) | active_feb_list_hmt;//from pretrigger
 
   assign active_feb_flag_tmb = tmb_trig_write;
   assign active_feb_list_tmb = tmb_aff_list & {MXCFEB{active_feb_flag_tmb}};
@@ -3154,10 +3187,10 @@
 // Pre-trigger Pipeline
 // Pushes CLCT pretrigger data into pipeline to wait for pattern finder and drift delay
 //------------------------------------------------------------------------------------------------------------------
-  wire [9:0]         hmt_nhits_trig, hmt_nhits_trig_xtmb;
-  wire [9:0]         hmt_nhits_trig_bx678, hmt_nhits_trig_bx678_xtmb;
-  wire [9:0]         hmt_nhits_trig_bx2345, hmt_nhits_trig_bx2345_xtmb;
-  wire [MXHMTB-1:0]  hmt_trigger, hmt_trigger_xtmb;
+  wire [9:0]         hmt_nhits_trig_xtmb;
+  wire [9:0]         hmt_nhits_trig_bx678_xtmb;
+  wire [9:0]         hmt_nhits_trig_bx2345_xtmb;
+  wire [MXHMTB-1:0]  hmt_trigger_xtmb;
 
 // On pretrigger push buffer address and bxn into the pre-trigger pipeline
   parameter PATTERN_FINDER_LATENCY = 2;  // Tuned 4/22/08
@@ -3167,8 +3200,10 @@
   wire [MXPTRID-1:0] pretrig_data;
   wire [MXPTRID-1:0] postdrift_data;
 
-  //wire [9:0] postdrift_hmt_nhits_trig;
-  //wire [1:0] postdrift_hmt_trigger;
+  wire [9:0] postdrift_hmt_nhits_trig;
+  wire [9:0] postdrift_hmt_nhits_trig_bx678;
+  wire [9:0] postdrift_hmt_nhits_trig_bx2345;
+  wire [MXHMTB-1:0] postdrift_hmt_trigger;
 
   assign pretrig_data[0]     = clct_push_pretrig;        // Pre-trigger flag alias active_feb_flag
   assign pretrig_data[11:1]  = wr_buf_adr[MXBADR-1:0];   // Buffer address at pre-trigger
@@ -3181,8 +3216,10 @@
 
   srl16e_bbl #(MXPTRID) usrldrift (.clock(clock),.ce(1'b1),.adr(postdrift_adr),.d(pretrig_data),.q(postdrift_data));
 
-  //srl16e_bbl #(10) usrldrift_nhit (.clock(clock),.ce(1'b1),.adr(postdrift_adr),.d(hmt_nhits_trig),.q(postdrift_hmt_nhits_trig));
-  //srl16e_bbl #(2) usrldrift_trigger (.clock(clock),.ce(1'b1),.adr(postdrift_adr),.d(hmt_trigger),.q(postdrift_hmt_trigger));
+  srl16e_bbl #(10)      usrldrift_nhit     (.clock(clock),.ce(1'b1),.adr(postdrift_adr),.d(hmt_nhits_trig),.q(postdrift_hmt_nhits_trig));
+  srl16e_bbl #(10)      usrldrift_nhit678  (.clock(clock),.ce(1'b1),.adr(postdrift_adr),.d(hmt_nhits_trig_bx678),.q(postdrift_hmt_nhits_trig_bx678));
+  srl16e_bbl #(10)      usrldrift_nhit2345 (.clock(clock),.ce(1'b1),.adr(postdrift_adr),.d(hmt_nhits_trig_bx2345),.q(postdrift_hmt_nhits_trig_bx2345));
+  srl16e_bbl #(MXHMTB)  usrldrift_trigger  (.clock(clock),.ce(1'b1),.adr(postdrift_adr),.d(hmt_trigger),.q(postdrift_hmt_trigger));
 
 // Extract pre-trigger data after drift delay, compensated for pattern-finder latency + programmable drift delay
   wire              clct_pop_xtmb        = postdrift_data[0];     // CLCT postdrift flag aka active_feb_flag
@@ -3192,12 +3229,11 @@
   wire              trig_source_ext_xtmb = postdrift_data[15];    // Trigger source was not CLCT pattern
   wire [MXCFEB-1:0] aff_list_xtmb        = postdrift_data[22:16]; // Active feb list
 
-  assign hmt_nhits_trig_xtmb[9:0]        = hmt_nhits_trig[9:0]; //only valid if at least one CLCT is found
-  assign hmt_nhits_trig_bx678_xtmb[9:0]  = hmt_nhits_trig_bx678[9:0]; //only valid if at least one CLCT is found
-  assign hmt_nhits_trig_bx2345_xtmb[9:0] = hmt_nhits_trig_bx2345[9:0]; //only valid if at least one CLCT is found
-  assign hmt_trigger_xtmb[MXHMTB-1:0]    = hmt_trigger[MXHMTB-1:0]   ; //only valid if at least one CLCT is found
-  //assign hmt_nhits_trig_xtmb[9:0] = postdrift_hmt_nhits_trig[9:0] ;// do not require valid clct 
-  //assign hmt_trigger_xtmb[1:0]    = postdrift_hmt_trigger[1:0] ;   // do not require valid clct 
+  assign hmt_nhits_trig_xtmb[9:0]        = postdrift_hmt_nhits_trig[9:0]; //only valid if at least one CLCT is found
+  assign hmt_nhits_trig_bx678_xtmb[9:0]  = postdrift_hmt_nhits_trig_bx678[9:0]; //only valid if at least one CLCT is found
+  assign hmt_nhits_trig_bx2345_xtmb[9:0] = postdrift_hmt_nhits_trig_bx2345[9:0]; //only valid if at least one CLCT is found
+  assign hmt_trigger_xtmb[MXHMTB-1:0]    = postdrift_hmt_trigger[MXHMTB-1:0]   ; //only valid if at least one CLCT is found
+  wire   hmt_fired_trigger               = (|hmt_trigger_xtmb[1:0]);
 
 // After drift, send CLCT words to TMB, persist 1 cycle only, blank invalid CLCTs unless override
   wire clct0_hit_valid = (hs_hit_1st >= hit_thresh_postdrift);    // CLCT is over hit thresh
@@ -3395,6 +3431,10 @@
   reg [MXCNTVME-1:0] cnt [MXCNT:MNCNT]; // TMB counter array, counters[6:0] are in alct.v
   reg [MXCNT:MNCNT]  cnt_en = 0;        // Counter increment enables
 
+  parameter MXHMTCNT    = 10;
+  reg [MXCNTVME-1:0] hmt_cnt [MXHMTCNT-1:0];
+  reg [MXHMTCNT-1:0] hmt_cnt_en = 0;//10 HMT counters
+
 // Counter enable strobes
   always @(posedge clock) begin
     cnt_en[13]  <= clct_pretrig;                 // CLCT pretrigger is on any cfeb
@@ -3463,15 +3503,31 @@
     cnt_en[64]  <= sync_err_cnt_en;           // STAT  TTC sync errors
     cnt_en[65]  <= perr_pulse;                // STAT Raw hits RAM parity errors
 
+    hmt_cnt_en[0]  <= hmt_trigger[1:0] == 2'b01; // hmt over threshold1
+    hmt_cnt_en[1]  <= hmt_trigger[1:0] == 2'b10; // hmt over threshold2
+    hmt_cnt_en[2]  <= hmt_trigger[1:0] == 2'b11; // hmt over threshold3
+    hmt_cnt_en[3]  <= hmt_fired_pretrigger && clct_pretrig;// hmt && preCLCT
+    hmt_cnt_en[4]  <= hmt_fired_trigger    && clct_push_xtmb && clct0_vpf;// hmt && CLCT
+    hmt_cnt_en[5]  <= hmt_fired_tmb_ff     && tmb_match; // hmt && LCT vpf
+    hmt_cnt_en[6]  <= tmb_pulse_hmt_only; // tmb trigger pulse from hmt
+    hmt_cnt_en[7]  <= tmb_keep_hmt_only;  // tmb trigger keep from hmt
+    hmt_cnt_en[8]  <= (|hmt_trigger[1:0])  && (hmt_trigger[3:2] == 2'b00);// fire signal but not background region
+    hmt_cnt_en[9]  <= (|hmt_trigger[1:0])  && (|hmt_trigger[3:2]);// fire both signal and background region
   end
 
 // Counter overflow disable
   wire [MXCNTVME-1:0] cnt_fullscale = {MXCNTVME{1'b1}};
   wire [MXCNT:MNCNT]  cnt_nof;
+  wire [MXHMTCNT: 0]  hmt_cnt_nof;
 
   genvar j;
   generate
     for (j=MNCNT; j<=MXCNT; j=j+1) begin: gennof
+      assign cnt_nof[j] = (cnt[j] < cnt_fullscale);    // 1=counter j not overflowed
+    end
+  endgenerate
+  generate
+    for (j=0; j<MXHMTCNT; j=j+1) begin: gennof
       assign cnt_nof[j] = (cnt[j] < cnt_fullscale);    // 1=counter j not overflowed
     end
   endgenerate
@@ -3502,6 +3558,20 @@
         end
       end
     end
+  endgenerate
+
+  generate
+    for (j=0; j<MXHMTCNT; j=j+1) begin: genhmtcnt
+      always @(posedge clock) begin
+        if (vme_cnt_reset) begin
+          if (!(j==RESYNCCNT_ID && ttc_resync)) // Don't let ttc_resync clear the resync counter, eh
+            hmt_cnt[j] = cnt_fatzero;               // Clear counter j
+        end
+        else if (cnt_en_all) begin
+          if (hmt_cnt_en[j] && hmt_cnt_nof[j]) hmt_cnt[j] = hmt_cnt[j]+1'b1;  // Increment counter j if it has not overflowed
+        end
+      end //end always
+    end //end genhmtcnt
   endgenerate
 
 // Map 2D counter array to 1D for io ports
@@ -3558,6 +3628,17 @@
   assign event_counter63  = cnt[63];
   assign event_counter64  = cnt[64];
   assign event_counter65  = cnt[65];
+  assign hmt_counter0     = hmt_cnt[0];
+  assign hmt_counter1     = hmt_cnt[1];
+  assign hmt_counter2     = hmt_cnt[2];
+  assign hmt_counter3     = hmt_cnt[3];
+  assign hmt_counter4     = hmt_cnt[4];
+  assign hmt_counter5     = hmt_cnt[5];
+  assign hmt_counter6     = hmt_cnt[6];
+  assign hmt_counter7     = hmt_cnt[7];
+  assign hmt_counter8     = hmt_cnt[8];
+  assign hmt_counter9     = hmt_cnt[9];
+
 
 //------------------------------------------------------------------------------------------------------------------
 // GEM VME Counter Section
