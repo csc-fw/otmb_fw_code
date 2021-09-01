@@ -250,6 +250,7 @@
   alct_bx0_enable,
   bx0_vpf_test,
   bx0_match,
+  bx0_match2,
 
   mpc_rx_delay,
   mpc_tx_delay,
@@ -590,6 +591,7 @@
   input       alct_bx0_enable; // Enable using alct bx0, else copy clct bx0
   input       bx0_vpf_test;    // Sets clct_bx0=lct0_vpf for bx0 alignment tests
   output      bx0_match;       // ALCT bx0 and CLCT bx0 match in time
+  output      bx0_match2;
 
   input  [MXMPCDLY-1:0]  mpc_rx_delay;    // Wait for MPC accept
   input  [MXMPCDLY-1:0]  mpc_tx_delay;    // Delay LCT to MPC
@@ -1543,6 +1545,7 @@
   wire clct_bx0 = (clct_bxdly_is_0) ? clct_bx0_src : clct_bx0_srl;
 
   reg bx0_match=0;
+  assign bx0_match2      = alct_bx0 & clct_bx0;
   always @(posedge clock) begin
     if      (ttc_resync) bx0_match <= 0;
     else if (clct_bx0  ) bx0_match <= alct_bx0; // alct_bx0 and clct_bx0 match in time

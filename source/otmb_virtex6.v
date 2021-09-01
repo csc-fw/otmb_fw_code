@@ -2303,6 +2303,7 @@
 
   .bx0_xmpc   (bx0_xmpc),  // Out  bx0 to tmb aligned with clct0/1
   .bx0_match  (bx0_match), // In  ALCT bx0 and CLCT bx0 match in time
+  .bx0_match2 (bx0_match2), // In  ALCT bx0 and CLCT bx0 match in time
 
   .tmb_trig_pulse    (tmb_trig_pulse),           // In  ALCT or CLCT or both triggered
   .tmb_trig_keep     (tmb_trig_keep),            // In  ALCT or CLCT or both triggered, and trigger is allowed
@@ -3033,6 +3034,7 @@
   .alct_bx0_enable (alct_bx0_enable),     // In  Enable using alct bx0, else copy clct bx0
   .bx0_vpf_test    (bx0_vpf_test),        // In  Sets clct_bx0=lct0_vpf for bx0 alignment tests
   .bx0_match       (bx0_match),           // Out  ALCT bx0 and CLCT bx0 match in time
+  .bx0_match2 (bx0_match2), // Out  ALCT bx0 and CLCT bx0 match in time
 
   .mpc_rx_delay        (mpc_rx_delay[MXMPCDLY-1:0]), // In  MPC response delay
   .mpc_tx_delay        (mpc_tx_delay[MXMPCDLY-1:0]), // In  MPC transmit delay

@@ -754,6 +754,7 @@
 
   bx0_xmpc,
   bx0_match,
+  bx0_match2,
 
   tmb_trig_pulse,
   tmb_trig_keep,
@@ -1524,6 +1525,7 @@
 
   output bx0_xmpc;  // bx0 to mpc
   input  bx0_match; // ALCT bx0 and CLCT bx0 match in time
+  input  bx0_match2; // ALCT bx0 and CLCT bx0 match in time
 
   input              tmb_trig_pulse;    // TMB Triggered on ALCT or CLCT or both
   input              tmb_trig_keep;     // ALCT or CLCT or both triggered, and trigger is allowed
