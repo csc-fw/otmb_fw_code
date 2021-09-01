@@ -178,6 +178,10 @@
   tmb_clct1_discard,
   tmb_aff_list,
 
+  hmt_fired_tmb_ff,
+  tmb_pulse_hmt_only,
+  tmb_keep_hmt_only,
+
   tmb_match_ro,
   tmb_alct_only_ro,
   tmb_clct_only_ro,
@@ -198,6 +202,7 @@
   tmb_alcte,
 
   run3_trig_df, // input, flag of run3 data format upgrade  
+  run3_daq_df, // input, flag of run3 data format upgrade  
 // MPC Status
   mpc_frame_ff,
   mpc0_frame0_ff,
@@ -230,6 +235,9 @@
   tmb_allow_alct_ro,
   tmb_allow_clct_ro,
   tmb_allow_match_ro,
+
+  tmb_allow_hmt,
+  tmb_allow_hmt_ro,
 
   algo2016_drop_used_clcts,
   algo2016_cross_bx_algorithm,
@@ -511,6 +519,9 @@
   output              tmb_clct0_discard; // CLCT0 was discarded from ME1A
   output              tmb_clct1_discard; // CLCT1 was discarded from ME1A
   output [MXCFEB-1:0] tmb_aff_list;      // Active CFEBs for CLCT used in TMB match
+  output              hmt_fired_tmb_ff;
+  output              tmb_pulse_hmt_only;
+  output              tmb_keep_hmt_only;
 
   output          tmb_match_ro;     // ALCT and CLCT matched in time, non-triggering readout
   output          tmb_alct_only_ro; // Only ALCT triggered, non-triggering readout
@@ -757,6 +768,7 @@
 //  Run3 data format
 //------------------------------------------------------------------------------------------------------------------
   input run3_trig_df; // flag of run3 trigger data format
+  input run3_daq_df; // flag of run3 trigger data format
 
 `ifdef DEBUG_MPC
   output          mpc_debug_mode;    // Prevents accidental compile with debug_mpc turned on
@@ -1174,6 +1186,10 @@
 
   assign alct_only_trig = (alct_noclct && tmb_allow_alct) || (alct_noclct_ro && tmb_allow_alct_ro);// ALCT-only triggers are allowed
 
+
+  wire hmt_fired_tmb   = (|hmt_trigger_pipe[1:0]) && tmb_allow_hmt    && run3_trig_df;
+  wire hmt_readout_tmb = (|hmt_trigger_pipe[1:0]) && tmb_allow_hmt_ro && run3_daq_df;
+
 // Latch clct match results for TMB and MPC pathways
   reg tmb_trig_pulse       = 0;
   reg tmb_trig_keep_ff     = 0;
@@ -1195,10 +1211,18 @@
   reg [ 4:0] tmb_alctb = 0; // ALCT bxn latched at trigger
   reg [ 1:0] tmb_alcte = 0; // ALCT ecc latched at trigger
 
+  reg hmt_fired_tmb_ff = 0;
+  reg tmb_pulse_hmt_only = 0;
+  reg tmb_keep_hmt_only = 0;
+
   always @(posedge clock) begin
-    tmb_trig_pulse       <= trig_pulse;    // ALCT or CLCT or both triggered
-    tmb_trig_keep_ff     <= trig_keep;     // ALCT or CLCT or both triggered, and trigger is allowed
-    tmb_non_trig_keep_ff <= non_trig_keep; // Event did not trigger but is kept for readout
+    hmt_fired_tmb_ff     <= hmt_fired_tmb;
+    tmb_pulse_hmt_only   <= hmt_fired_tmb && !trig_pulse;
+    tmb_keep_hmt_only    <= hmt_fired_tmb && !trig_keep;
+
+    tmb_trig_pulse       <= trig_pulse || hmt_fired_tmb;    // ALCT or CLCT or both triggered
+    tmb_trig_keep_ff     <= trig_keep  || hmt_fired_tmb;     // ALCT or CLCT or both triggered, and trigger is allowed
+    tmb_non_trig_keep_ff <= non_trig_keep || hmt_readout_tmb; // Event did not trigger but is kept for readout
 
     tmb_match            <= clct_match_tr  && tmb_allow_match; // ALCT and CLCT matched in time
     tmb_alct_only        <= alct_noclct_tr && tmb_allow_alct;  // Only ALCT triggered
@@ -1597,8 +1621,8 @@
   //wire trig_mpc0 = trig_mpc && lct0_vpf && !kill_clct0;  // LCT 0 is valid, send to mpc
   //wire trig_mpc1 = trig_mpc && lct1_vpf && !kill_clct1;  // LCT 1 is valid, send to mpc
 
-  wire trig_mpc0 = run3_trig_df ? (trig_mpc && lct0_vpf_run3 && !kill_clct0): (trig_mpc && lct0_vpf && !kill_clct0);  // LCT 0 is valid, send to mpc
-  wire trig_mpc1 = run3_trig_df ? (trig_mpc && lct1_vpf_run3 && !kill_clct0): (trig_mpc && lct1_vpf && !kill_clct1);  // LCT 1 is valid, send to mpc
+  wire trig_mpc0 = run3_trig_df ? (trig_mpc && (hmt_fired_tmb_ff || (lct0_vpf_run3 && !kill_clct0))): (trig_mpc && lct0_vpf && !kill_clct0);  // LCT 0 is valid, send to mpc
+  wire trig_mpc1 = run3_trig_df ? (trig_mpc && (hmt_fired_tmb_ff || (lct1_vpf_run3 && !kill_clct1))): (trig_mpc && lct1_vpf && !kill_clct1);  // LCT 1 is valid, send to mpc
 
   assign mpc0_frame0_pulse = (trig_mpc0) ? (run3_trig_df ? mpc0_frame0_run3 : mpc0_frame0) : 16'h0;
   assign mpc0_frame1_pulse = (trig_mpc0) ? (run3_trig_df ? mpc0_frame1_run3 : mpc0_frame1) : 16'h0;
