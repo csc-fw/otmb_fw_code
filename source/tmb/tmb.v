@@ -576,6 +576,9 @@
   input tmb_allow_clct_ro;  // Allow CLCT only  readout, non-triggering
   input tmb_allow_match_ro; // Allow Match only readout, non-triggering
   
+  input tmb_allow_hmt;
+  input tmb_allow_hmt_ro;
+
   input algo2016_drop_used_clcts;       // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - drop used CLCTs
   input algo2016_cross_bx_algorithm;    // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
   input algo2016_clct_use_corrected_bx; // Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits NOT YET IMPLEMENTED:
