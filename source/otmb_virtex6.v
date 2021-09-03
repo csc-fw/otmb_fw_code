@@ -1366,9 +1366,9 @@
   wire [9:0] nhits_trig_s0_bx678  = nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] + nhits_trig_s0_srl[1];
   wire [9:0] nhits_trig_s0_bx2345 = nhits_trig_s0_srl[7] + nhits_trig_s0_srl[6] + nhits_trig_s0_srl[5] + nhits_trig_s0_srl[4];
   //peak conditio: nhits_trig_s0_bx678 >= nhits_trig_s0_bx789 && nhits_trig_s0_bx678 >= nhits_trig_s0_bx89A
-  wire nhits_trig_s0_bx678_789 = (nhits_trig_s0_srl[3] > nhits_trig_s0_srl[0]) || (nhits_trig_s0_srl[3] == nhits_trig_s0_srl[0] &&  nhits_trig_s0_srl[2]> nhits_trig_s0_srl[1]);_
-  wire nhits_trig_s0_bx678_78A = (nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] >  nhits_trig_s0_srl[0] + nhits_chamber) || (nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] ==  nhits_trig_s0_srl[0] + nhits_chamber && nhits_trig_s0_srl[2] > nhits_trig_s0_srl[0]);
-  wire nhits_trig_s0_bx678_peak = nhits_trig_s0_bx678_789 && nhits_trig_s0_bx678_78A;
+  wire nhits_compare_s0_bx678_789 = (nhits_trig_s0_srl[3] > nhits_trig_s0_srl[0]) || (nhits_trig_s0_srl[3] == nhits_trig_s0_srl[0] &&  nhits_trig_s0_srl[2]> nhits_trig_s0_srl[1]);
+  wire nhits_compare_s0_bx678_78A = (nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] >  nhits_trig_s0_srl[0] + nhits_chamber) || (nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] ==  nhits_trig_s0_srl[0] + nhits_chamber && nhits_trig_s0_srl[2] > nhits_trig_s0_srl[0]);
+  wire nhits_trig_s0_bx678_peak = nhits_compare_s0_bx678_789 && nhits_compare_s0_bx678_89A;
   
   //hits to build CLCT is counted at nhits_trig_s0_srl[7], with CLCT_drift delay=2BX
   //parameter hmt_dly_const = 4'd6; //delay HMT trigger to CLCT VPF BX
