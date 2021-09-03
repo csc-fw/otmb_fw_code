@@ -1159,7 +1159,7 @@
   wire  [MXHS-1:0]    cfeb_ly4hs [MXCFEB-1:0];    // Decoded 1/2-strip pulses
   wire  [MXHS-1:0]    cfeb_ly5hs [MXCFEB-1:0];    // Decoded 1/2-strip pulses
 
-  wire  [9:0]         cfeb_nhits [MXCFEB-1:0];
+  wire  [5:0]         cfeb_nhits [MXCFEB-1:0];
 
   //=====================================================
   // HMT trigger 
@@ -1168,28 +1168,21 @@
   //wire  [9:0]         allcfeb_nhits = cfeb_nhits[0] + cfeb_nhits[1] + cfeb_nhits[2] + cfeb_nhits[3] + cfeb_nhits[4] + cfeb_nhits[5] + cfeb_nhits[6];
   wire  hmt_enable;
   wire  hmt_me1a_enable;
-  wire [9:0] hmt_nhits_trig;
-  wire [9:0] hmt_nhits_trig_bx678;
-  wire [9:0] hmt_nhits_trig_bx2345;
-  //wire [1:0] hmt_trigger_bx7; // HMT trigger results 
-  wire [1:0] hmt_trigger_bx678; // HMT trigger results 
-  wire [1:0] hmt_trigger_bx2345; // HMT trigger results 
-  wire [9:0] hmt_thresh1, hmt_thresh2, hmt_thresh3;
-  wire [MXHMTB-1:0] hmt_trigger ;
 
   wire cfeb_allow_hmt_ro;
   wire tmb_allow_hmt;
   wire tmb_allow_hmt_ro;
 
-  //assign hmt_trigger_bx7[0] = (hmt_nhits_trig >= hmt_thresh1) || (hmt_nhits_trig >= hmt_thresh3);
-  //assign hmt_trigger_bx7[1] = (hmt_nhits_trig >= hmt_thresh2) || (hmt_nhits_trig >= hmt_thresh3);
-  assign hmt_trigger_bx678[0] = (hmt_nhits_trig_bx678 >= hmt_thresh1) || (hmt_nhits_trig_bx678 >= hmt_thresh3);
-  assign hmt_trigger_bx678[1] = (hmt_nhits_trig_bx678 >= hmt_thresh2) || (hmt_nhits_trig_bx678 >= hmt_thresh3);
-  assign hmt_trigger_bx2345[0] = (hmt_nhits_trig_bx2345 >= hmt_thresh1) || (hmt_nhits_trig_bx2345 >= hmt_thresh3);
-  assign hmt_trigger_bx2345[1] = (hmt_nhits_trig_bx2345 >= hmt_thresh2) || (hmt_nhits_trig_bx2345 >= hmt_thresh3);
-  assign hmt_trigger = {hmt_trigger_bx2345, hmt_trigger_bx678};
+  wire [9:0] hmt_nhits_trig;
+  wire [9:0] hmt_nhits_trig_bx678;
+  wire [9:0] hmt_nhits_trig_bx2345;
+  wire [1:0] hmt_trigger_bx678; // HMT trigger results 
+  wire [1:0] hmt_trigger_bx2345; // HMT trigger results 
+  wire [9:0] hmt_thresh1, hmt_thresh2, hmt_thresh3;
+  wire [MXHMTB-1:0] hmt_trigger ;
 
-  reg [9:0] nhits_trig_s0_srl [6:0];//array 7x10bits
+  wire [9:0] nhits_chamber = cfeb_nhits[0] + cfeb_nhits[1] + cfeb_nhits[2] + cfeb_nhits[3] + cfeb_nhits[4];
+  reg [9:0] nhits_trig_s0_srl [7:0];//array 8x10bits
 
   always @(posedge clock) begin
       //nhits_trig_s0_srl[7] <= nhits_trig_s0_srl[6];
@@ -1203,27 +1196,46 @@
   end
 
   //signal: over 3BX;   control region: over 4BX 
-  wire [11:0] nhits_trig_s0_bx678_tmp  =  nhits_trig_s0_srl[2] + nhits_trig_s0_srl[1] + nhits_trig_s0_srl[0];
-  wire [11:0] nhits_trig_s0_bx2345_tmp =  nhits_trig_s0_srl[6] + nhits_trig_s0_srl[5] + nhits_trig_s0_srl[4] + nhits_trig_s0_srl[3];
 
   wire [9:0] nhits_trig_s0_bx7    = nhits_trig_s0_srl[1];//center one
-  wire [9:0] nhits_trig_s0_bx2345 = (nhits_trig_s0_bx2345_tmp[11:10] > 0 ) ? 10'h3FF : nhits_trig_s0_bx2345_tmp[9:0];//cutoff at [9:0]
-  wire [9:0] nhits_trig_s0_bx678  = (nhits_trig_s0_bx678_tmp[11:10] > 0 ) ? 10'h3FF : nhits_trig_s0_bx678_tmp[9:0];
+  wire [9:0] nhits_trig_s0_bx678  = nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] + nhits_trig_s0_srl[1];
+  wire [9:0] nhits_trig_s0_bx2345 = nhits_trig_s0_srl[7] + nhits_trig_s0_srl[6] + nhits_trig_s0_srl[5] + nhits_trig_s0_srl[4];
+  //peak conditio: nhits_trig_s0_bx678 >= nhits_trig_s0_bx789 && nhits_trig_s0_bx678 >= nhits_trig_s0_bx89A
+  wire nhits_trig_s0_bx678_789 = (nhits_trig_s0_srl[3] > nhits_trig_s0_srl[0]) || (nhits_trig_s0_srl[3] == nhits_trig_s0_srl[0] &&  nhits_trig_s0_srl[2]> nhits_trig_s0_srl[1]);_
+  wire nhits_trig_s0_bx678_78A = (nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] >  nhits_trig_s0_srl[0] + nhits_chamber) || (nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] ==  nhits_trig_s0_srl[0] + nhits_chamber && nhits_trig_s0_srl[2] > nhits_trig_s0_srl[0]);
+  wire nhits_trig_s0_bx678_peak = nhits_trig_s0_bx678_789 && nhits_trig_s0_bx678_78A;
 
   //hits to build CLCT is counted at nhits_trig_s0_srl[7], with CLCT_drift delay=2BX
   //preCLCT to CLCT: 5BX with CLCT_drift delay=2BX. so hmt to pretrigger:=1BX
   //parameter hmt_dly_const = 4'd6; //delay HMT trigger to CLCT VPF BX
-  parameter hmt_dly_const = 4'd1; //delay HMT trigger to preCLCT BX
+  //parameter hmt_dly_const = 4'd1; //delay HMT trigger to preCLCT BX, old setting
+  parameter hmt_dly_const = 4'd0; //delay HMT trigger to preCLCT BX. nhits_trig_s0_srl[2] is synchronized with pretrigger
   wire [9:0] nhits_trig_dly_bx2345;
   wire [9:0] nhits_trig_dly_bx678;
   wire [9:0] nhits_trig_dly_bx7;
-  srl16e_bbl #(10)    udnhitsbx7   ( .clock(clock), .ce(1'b1), .adr(hmt_dly_const-4'd1), .d(nhits_trig_s0_bx7    ), .q(nhits_trig_dly_bx7      ) );
-  srl16e_bbl #(10)    udnhitsbx678 ( .clock(clock), .ce(1'b1), .adr(hmt_dly_const-4'd1), .d(nhits_trig_s0_bx678  ), .q(nhits_trig_dly_bx678    ) );
-  srl16e_bbl #(10)    udnhitsbx2345( .clock(clock), .ce(1'b1), .adr(hmt_dly_const-4'd1), .d(nhits_trig_s0_bx2345 ), .q(nhits_trig_dly_bx2345   ) );
+  wire nhits_trig_dly_bx678_peak;
+  srl16e_bbl #(1)     udbx678peak  ( .clock(clock), .ce(1'b1), .adr(hmt_dly_const-4'd1), .d(nhits_trig_s0_bx678_peak), .q(nhits_trig_dly_bx678_peak ));
+  srl16e_bbl #(10)    udnhitsbx7   ( .clock(clock), .ce(1'b1), .adr(hmt_dly_const-4'd1), .d(nhits_trig_s0_bx7    ), .q(nhits_trig_dly_bx7      ));
+  srl16e_bbl #(10)    udnhitsbx678 ( .clock(clock), .ce(1'b1), .adr(hmt_dly_const-4'd1), .d(nhits_trig_s0_bx678  ), .q(nhits_trig_dly_bx678    ));
+  srl16e_bbl #(10)    udnhitsbx2345( .clock(clock), .ce(1'b1), .adr(hmt_dly_const-4'd1), .d(nhits_trig_s0_bx2345 ), .q(nhits_trig_dly_bx2345   ));
 
+  wire    nhits_bx678_peak      = (hmt_dly_const == 4'd0) ? nhits_trig_s0_bx678_peak  : nhits_trig_dly_bx678_peak;
   assign  hmt_nhits_trig        = (hmt_dly_const == 4'd0) ? nhits_trig_s0_bx7[9:0]    : nhits_trig_dly_bx7[9:0];
   assign  hmt_nhits_trig_bx678  = (hmt_dly_const == 4'd0) ? nhits_trig_s0_bx678[9:0]  : nhits_trig_dly_bx678[9:0];
   assign  hmt_nhits_trig_bx2345 = (hmt_dly_const == 4'd0) ? nhits_trig_s0_bx2345[9:0] : nhits_trig_dly_bx2345[9:0];
+
+  assign hmt_trigger_bx678[0]  = ((hmt_nhits_trig_bx678  >= hmt_thresh1) || (hmt_nhits_trig_bx678  >= hmt_thresh3)) & nhits_bx678_peak & (~|hmt_fired_ff);
+  assign hmt_trigger_bx678[1]  = ((hmt_nhits_trig_bx678  >= hmt_thresh2) || (hmt_nhits_trig_bx678  >= hmt_thresh3)) & nhits_bx678_peak & (~|hmt_fired_ff);
+  assign hmt_trigger_bx2345[0] = ((hmt_nhits_trig_bx2345 >= hmt_thresh1) || (hmt_nhits_trig_bx2345 >= hmt_thresh3)) & (~|hmt_fired_ff);
+  assign hmt_trigger_bx2345[1] = ((hmt_nhits_trig_bx2345 >= hmt_thresh2) || (hmt_nhits_trig_bx2345 >= hmt_thresh3)) & (~|hmt_fired_ff);
+  assign hmt_trigger = hmt_enable ? {hmt_trigger_bx2345, hmt_trigger_bx678} : 4'b0;
+  wire   hmt_fired   = |hmt_trigger_bx678[1:0];
+
+  reg [1:0] hmt_fired_ff = 2'b00;//dead time for 2BX 
+  always @(posedge clock) begin
+      hmt_fired_ff[0] <= hmt_fired;
+      hmt_fired_ff[1] <= hmt_fired_ff[0];
+  end
 
 // Status Ports
   wire  [MXCFEB-1:0]  demux_tp_1st;

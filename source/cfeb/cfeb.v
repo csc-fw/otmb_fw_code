@@ -313,7 +313,7 @@
   output [MXHS-1:0] ly3hs;
   output [MXHS-1:0] ly4hs;
   output [MXHS-1:0] ly5hs;
-  output [9:0] nhits_per_cfeb;
+  output [5:0] nhits_per_cfeb;
 
 // CFEB data received on optical link = OR of all 48 bits for a given CFEB
   output gtx_rx_data_bits_or;
@@ -859,7 +859,7 @@
 
   assign triad_skip = (|tskip[0]) | (|tskip[1]) | (|tskip[2]) | (|tskip[3]) | (|tskip[4]) | (|tskip[5]);
 
-  reg [9:0] nhits_s0 = 10'b0;
+  reg [5:0] nhits_s0 = 6'b0;
   always  @(posedge clock) begin
       nhits_s0       <= hs_fired[0][0] + hs_fired[0][1] + hs_fired[0][1] + hs_fired[0][2] + hs_fired[0][3] + hs_fired[0][4] + hs_fired[0][5] + hs_fired[0][6] + hs_fired[0][7] + 
                         hs_fired[1][0] + hs_fired[1][1] + hs_fired[1][1] + hs_fired[1][2] + hs_fired[1][3] + hs_fired[1][4] + hs_fired[1][5] + hs_fired[1][6] + hs_fired[1][7] + 
