@@ -1363,12 +1363,8 @@
 
   wire [9:0] nhits_trig_s0_bx7    = nhits_trig_s0_srl[1];
   //signal: over 3BX;   control region: over 4BX 
-  //wire [9:0] nhits_trig_s0_bx89A  = nhits_trig_s0_srl[1] + nhits_trig_s0_srl[0] + nhits_chamber;
-  //wire [9:0] nhits_trig_s0_bx789  = nhits_trig_s0_srl[2] + nhits_trig_s0_srl[1] + nhits_trig_s0_srl[0];
   wire [9:0] nhits_trig_s0_bx678  = nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] + nhits_trig_s0_srl[1];
   wire [9:0] nhits_trig_s0_bx2345 = nhits_trig_s0_srl[7] + nhits_trig_s0_srl[6] + nhits_trig_s0_srl[5] + nhits_trig_s0_srl[4];
-  //wire [9:0] nhits_trig_s0_bx678  = nhits_trig_s0_srl[2] + nhits_trig_s0_srl[1] + nhits_trig_s0_srl[0];
-  //wire [9:0] nhits_trig_s0_bx2345 = nhits_trig_s0_srl[6] + nhits_trig_s0_srl[5] + nhits_trig_s0_srl[4] + nhits_trig_s0_srl[3];
   //peak conditio: nhits_trig_s0_bx678 >= nhits_trig_s0_bx789 && nhits_trig_s0_bx678 >= nhits_trig_s0_bx89A
   wire nhits_trig_s0_bx678_789 = (nhits_trig_s0_srl[3] > nhits_trig_s0_srl[0]) || (nhits_trig_s0_srl[3] == nhits_trig_s0_srl[0] &&  nhits_trig_s0_srl[2]> nhits_trig_s0_srl[1]);_
   wire nhits_trig_s0_bx678_78A = (nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] >  nhits_trig_s0_srl[0] + nhits_chamber) || (nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] ==  nhits_trig_s0_srl[0] + nhits_chamber && nhits_trig_s0_srl[2] > nhits_trig_s0_srl[0]);
@@ -1377,6 +1373,8 @@
   //hits to build CLCT is counted at nhits_trig_s0_srl[7], with CLCT_drift delay=2BX
   //parameter hmt_dly_const = 4'd6; //delay HMT trigger to CLCT VPF BX
   //parameter hmt_dly_const = 4'd1; //delay HMT trigger to preCLCT BX, nhits_trig_s0_srl[2] for pretrigger
+  //wire [9:0] nhits_trig_s0_bx678  = nhits_trig_s0_srl[2] + nhits_trig_s0_srl[1] + nhits_trig_s0_srl[0];
+  //wire [9:0] nhits_trig_s0_bx2345 = nhits_trig_s0_srl[6] + nhits_trig_s0_srl[5] + nhits_trig_s0_srl[4] + nhits_trig_s0_srl[3];
   parameter hmt_dly_const = 4'd0; //delay HMT trigger to preCLCT BX
   wire [9:0] nhits_trig_dly_bx2345;
   wire [9:0] nhits_trig_dly_bx678;
