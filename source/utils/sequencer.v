@@ -1887,7 +1887,7 @@
   input  [MXCFEB-1:0]  tmb_aff_list;    // Active CFEBs for CLCT used in TMB match
   input              hmt_fired_tmb_ff; // hmt fired in tmb
   input              tmb_pulse_hmt_only; // tmb pulse is from HMT
-  input              tmb_keep_hmt_only; // tmb pulse is from HMT
+  input              tmb_keep_hmt_only; // tmb keep is from HMT
 
   input          tmb_match_ro;    // ALCT and CLCT matched in time, non-triggering reaodut
   input          tmb_alct_only_ro;  // Only ALCT triggered, non-triggering reaodut
@@ -3402,6 +3402,9 @@
 // TMB response, variable tmb latency depends on when alct arrived in clct window
   wire discard_tmbreject  = (tmb_trig_pulse && !tmb_trig_keep); // TMB could not match clct to alct
 
+  wire tmb_trig_pulse_mu = tmb_trig_pulse && !tmb_pulse_hmt_only;
+  wire tmb_trig_keep_mu  = tmb_trig_keep  && !tmb_keep_hmt_only;
+
 //------------------------------------------------------------------------------------------------------------------
 // Event Discard Counter and TMB Response Failure Section
 //------------------------------------------------------------------------------------------------------------------
@@ -3460,13 +3463,14 @@
     cnt_en[29]  <= clct_push_xtmb && clct0_vpf;  // CLCT CLCT0 sent to TMB matching
     cnt_en[30]  <= clct_push_xtmb && clct1_vpf;  // CLCT CLCT1 sent to TMB matching
 
-    cnt_en[31]  <= tmb_trig_pulse && tmb_trig_keep;     // TMB  TMB matching accepted a match, alct-only, or clct-only event
+    //cnt_en[31]  <= tmb_trig_pulse && tmb_trig_keep;     // TMB  TMB matching accepted a match, alct-only, or clct-only event
+    cnt_en[31]  <= tmb_trig_pulse_mu && tmb_trig_keep_mu;     // TMB  TMB matching accepted a match, alct-only, or clct-only event
     cnt_en[32]  <= tmb_trig_write && tmb_match;         // TMB  CLCT*ALCT matched trigger
     cnt_en[33]  <= tmb_trig_write && tmb_alct_only;     // TMB  ALCT-only trigger
     cnt_en[34]  <= tmb_trig_write && tmb_clct_only;     // TMB  CLCT-only trigger
 
     cnt_en[35]  <= discard_tmbreject_cnt_en;            // TMB  TMB matching rejected event
-    cnt_en[36]  <= tmb_trig_pulse && tmb_non_trig_keep; // TMB  TMB matching rejected event, but keep for readout anyway
+    cnt_en[36]  <= tmb_trig_pulse_mu && tmb_non_trig_keep; // TMB  TMB matching rejected event, but keep for readout anyway
     cnt_en[37]  <= tmb_trig_write && tmb_alct_discard;  // TMB  TMB matching discarded an ALCT pair
     cnt_en[38]  <= tmb_trig_write && tmb_clct_discard;  // TMB  TMB matching discarded a  CLCT pair
     cnt_en[39]  <= tmb_trig_write && tmb_clct0_discard; // TMB  TMB matching discarded CLCT0 from ME1A
