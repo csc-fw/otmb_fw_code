@@ -1323,7 +1323,7 @@
   wire  [MXHS-1:0]    cfeb_ly4hs [MXCFEB-1:0];    // Decoded 1/2-strip pulses
   wire  [MXHS-1:0]    cfeb_ly5hs [MXCFEB-1:0];    // Decoded 1/2-strip pulses
 
-  wire  [9:0]         cfeb_nhits [MXCFEB-1:0];
+  wire  [5:0]         cfeb_nhits [MXCFEB-1:0];
 
   //=====================================================
   // HMT trigger 
@@ -1352,7 +1352,7 @@
   assign hmt_trigger_bx678[1] = (hmt_nhits_trig_bx678 >= hmt_thresh2) || (hmt_nhits_trig_bx678 >= hmt_thresh3);
   assign hmt_trigger_bx2345[0] = (hmt_nhits_trig_bx2345 >= hmt_thresh1) || (hmt_nhits_trig_bx2345 >= hmt_thresh3);
   assign hmt_trigger_bx2345[1] = (hmt_nhits_trig_bx2345 >= hmt_thresh2) || (hmt_nhits_trig_bx2345 >= hmt_thresh3);
-  assign hmt_trigger = {hmt_trigger_bx2345, hmt_trigger_bx678};
+  assign hmt_trigger = hmt_enable ? {hmt_trigger_bx2345, hmt_trigger_bx678} : 4'b0;
 
 
   reg [9:0] nhits_trig_s0_srl [6:0];//array 7x10bits

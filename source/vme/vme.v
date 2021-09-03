@@ -4977,7 +4977,7 @@
 
   //Tao, 2020 definition
   assign revcode_vme_new [04:00] = VERSION_MINOR;// 6 bits = Minor version  (minor features, internal fixes, bug fixes, etc).  
-  assign revcode_vme_new [08:05] = (run3_daq_df) ? VERSION_MAJOR : VERSION_MAJOR+1;//5 bits = Major Version (major features which breaks compatibility, requires changes to other board firmware) 
+  assign revcode_vme_new [08:05] = (run3_daq_df) ? VERSION_MAJOR : VERSION_MAJOR+4'b0001;//5 bits = Major Version (major features which breaks compatibility, requires changes to other board firmware) 
   //[12:09], 4bits for DAQ format
   //0, old TMB
   //1, Run2 OTMB

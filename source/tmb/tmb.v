@@ -3307,8 +3307,8 @@
   .isME1a0          (clct0_xky_run3[9]),
   .isME1a1          (clct1_xky_run3[9]),
   .even             (evenchamber),
-  .bending_bits0    (gemcsc_bnd1[3:0]),
-  .bending_bits1    (gemcsc_bnd0[3:0])
+  .bending_bits0    (gemcsc_bnd0[3:0]),
+  .bending_bits1    (gemcsc_bnd1[3:0])
   );
 
 //------------------------------------------------------------------------------------------------------------------
