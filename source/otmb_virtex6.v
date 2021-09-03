@@ -3265,9 +3265,6 @@ end
   .tmb_allow_clct_ro  (tmb_allow_clct_ro),  // In  Allow CLCT only  readout, non-triggering
   .tmb_allow_match_ro (tmb_allow_match_ro), // In  Allow Match only readout, non-triggering
 
-  .hmt_fired_tmb_ff  (hmt_fired_tmb_ff),         // In  hmt fired tmb
-  .tmb_pulse_hmt_only(tmb_pulse_hmt_only),       // In tmb pulse is from HMT
-  .tmb_keep_hmt_only (tmb_keep_hmt_only),        // In tmb pulse is from HMT
 
   .gemcsc_bend_enable       (gemcsc_bend_enable),             //In GEMCSC bending angle enabled
   .match_gem_alct_delay      (match_gem_alct_delay[7:0]),  //In gem delay for gem-ALCT match
