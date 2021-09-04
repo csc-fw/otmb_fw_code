@@ -287,16 +287,16 @@
   gemcsc_bend_enable,
   gemcsc_ignore_bend_check,
 
-  gemA_forclct_pipe,
-  gemB_forclct_pipe,
-  copad_match_pipe,
-  gemA_overflow_pipe,
-  gemB_overflow_pipe,
-  gemA_sync_err_pipe,
-  gemB_sync_err_pipe,
-  gems_sync_err_pipe,
-  gem_clct_win,
-  alct_gem_win,
+  gemA_forclct_real,
+  gemB_forclct_real,
+   copad_match_real,
+  gemA_overflow_real,
+  gemB_overflow_real,
+  gemA_sync_err_real,
+  gemB_sync_err_real,
+  gems_sync_err_real,
+  tmb_gem_clct_win,
+  tmb_alct_gem_win,
 
 
 // TMB-Sequencer Pipelines
@@ -405,6 +405,14 @@
   alctclctgem_swapped,
   clctcopad_swapped,
 
+  lct0_nogem,
+  lct0_with_gemA,
+  lct0_with_gemB,
+  lct0_with_copad,
+  lct1_nogem,
+  lct1_with_gemA,
+  lct1_with_gemB,
+  lct1_with_copad,
 
   //select clusters for GEMCSC match
   //gemcscmatch_cluster0_vpf,
@@ -880,16 +888,16 @@
   output              gemB_bx0_match;
   output              gemB_bx0_match2;
 
-  output  [7:0]       gemA_forclct_pipe;
-  output  [7:0]       gemB_forclct_pipe;
-  output  [7:0]       copad_match_pipe ;
-  output              gemA_overflow_pipe;
-  output              gemB_overflow_pipe;
-  output              gemA_sync_err_pipe;
-  output              gemB_sync_err_pipe;
-  output              gems_sync_err_pipe;
-  output  [3:0]       gem_clct_win;
-  output  [3:0]       alct_gem_win;
+  output  [7:0]       gemA_forclct_real;
+  output  [7:0]       gemB_forclct_real;
+  output  [7:0]       copad_match_real ;
+  output              gemA_overflow_real;
+  output              gemB_overflow_real;
+  output              gemA_sync_err_real;
+  output              gemB_sync_err_real;
+  output              gems_sync_err_real;
+  output  [3:0]       tmb_gem_clct_win;
+  output  [3:0]       tmb_alct_gem_win;
 
 
 
@@ -995,6 +1003,15 @@
   output             alctclctcopad_swapped;
   output             alctclctgem_swapped;
   output             clctcopad_swapped;
+
+  output             lct0_nogem;
+  output             lct0_with_gemA;
+  output             lct0_with_gemB;
+  output             lct0_with_copad;
+  output             lct1_nogem;
+  output             lct1_with_gemA;
+  output             lct1_with_gemB;
+  output             lct1_with_copad;
 
   //output             gemcscmatch_cluster0_vpf;
   //output             gemcscmatch_cluster0_iclst;
@@ -1586,8 +1603,6 @@
   srl16e_bbl #(MXCCLUTB ) uclct1cclut (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(clct1_cclut_xtmb),.q(clct1_cclut_srl));
   srl16e_bbl #(MXHMTB   ) uhmt        (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(hmt_trigger_xtmb),.q(hmt_trigger_srl));
 
-
-
   srl16e_bbl #(MXBADR) utwadr   (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(wr_adr_xtmb  ),.q(wr_adr_xtmb_srl  ));
   srl16e_bbl #(1)      utwpush  (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(wr_push_xtmb ),.q(wr_push_xtmb_srl ));
   srl16e_bbl #(1)      utwavail (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(wr_avail_xtmb),.q(wr_avail_xtmb_srl));
@@ -2040,7 +2055,7 @@
   
   wire [3:0] gem_alct_match_win_mux_pipe = gem_extra_delay_forclct_is_0 ? gem_alct_match_win_mux : gem_alct_match_win_mux_srl;
 
-  assign  alct_gem_win = gem_alct_match_win_mux_pipe[2:0];
+  wire [2:0] alct_gem_win = gem_alct_match_win_mux_pipe[2:0];
 
 //------------------------------------------------------------------------------------------------------------------
 // Push GEM data into a 1bx to 16bx pipeline delay to do GEM-CLCT match
@@ -2077,9 +2092,9 @@
   wire keep_gem = (alct_pulse || gem_alct_noalct);
   assign keep_gem_tp = keep_gem;
 
-  assign gemA_forclct_pipe = gemA_forclct_dly & {MXCLUSTER_CHAMBER{keep_gem}};
-  assign gemB_forclct_pipe = gemB_forclct_dly & {MXCLUSTER_CHAMBER{keep_gem}};
-  assign copad_match_pipe  = copad_match_dly  & {MXCLUSTER_CHAMBER{keep_gem}};
+  wire [MXCLUSTER_CHAMBER-1:0] gemA_forclct_pipe = gemA_forclct_dly & {MXCLUSTER_CHAMBER{keep_gem}};
+  wire [MXCLUSTER_CHAMBER-1:0] gemB_forclct_pipe = gemB_forclct_dly & {MXCLUSTER_CHAMBER{keep_gem}};
+  wire [MXCLUSTER_CHAMBER-1:0] copad_match_pipe  = copad_match_dly  & {MXCLUSTER_CHAMBER{keep_gem}};
 
   wire gemA_pulse_forclct = |gemA_forclct_pipe;
   wire gemB_pulse_forclct = |gemB_forclct_pipe;
@@ -2162,7 +2177,7 @@
   assign match_win_mux_run3 = (clct_noalct && clct_nocopad) ? winclosing         : clct_tag_win;   
   assign match_win_run3     = (clct_kept_run3             ) ? match_win_mux_run3 : clct_win_center;
   assign clct_srl_ptr = match_win_run3;
-  assign gem_clct_win = (clct_kept_run3) ? match_win_run3 : 4'b1111; //
+  wire [3:0] gem_clct_win = (clct_kept_run3) ? match_win_run3 : 4'b1111; //
 
 //------------------------------------------------------------------------------------------------------------------
 //  delay GEM data for GEM-CSC position match
@@ -2249,11 +2264,11 @@
       srl16e_bbl #(1) ugemAsyncerr        (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemA_sync_err),      .q(gemA_sync_err_srl));
       srl16e_bbl #(1) ugemBsyncerr        (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_sync_err),      .q(gemB_sync_err_srl));
       srl16e_bbl #(1) ugemssyncerr        (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gems_sync_err),      .q(gems_sync_err_srl));
-  assign gemA_overflow_pipe = (gem_final_delay == 0) ? gemA_overflow : gemA_overflow_srl;
-  assign gemB_overflow_pipe = (gem_final_delay == 0) ? gemB_overflow : gemB_overflow_srl;
-  assign gemA_sync_err_pipe = (gem_final_delay == 0) ? gemA_sync_err : gemA_sync_err_srl;
-  assign gemB_sync_err_pipe = (gem_final_delay == 0) ? gemB_sync_err : gemB_sync_err_srl;
-  assign gems_sync_err_pipe = (gem_final_delay == 0) ? gems_sync_err : gems_sync_err_srl;
+  wire gemA_overflow_pipe = (gem_final_delay == 0) ? gemA_overflow : gemA_overflow_srl;
+  wire gemB_overflow_pipe = (gem_final_delay == 0) ? gemB_overflow : gemB_overflow_srl;
+  wire gemA_sync_err_pipe = (gem_final_delay == 0) ? gemA_sync_err : gemA_sync_err_srl;
+  wire gemB_sync_err_pipe = (gem_final_delay == 0) ? gemB_sync_err : gemB_sync_err_srl;
+  wire gems_sync_err_pipe = (gem_final_delay == 0) ? gems_sync_err : gems_sync_err_srl;
   
 //------------------------------------------------------------------------------------------------------------------
 // GEM-ALCT-CLCT position match part
@@ -2741,8 +2756,8 @@
   always @(posedge clock) begin
     //HMT part
     hmt_fired_tmb_ff     <= hmt_fired_tmb;
-    tmb_pulse_hmt_only   <= hmt_fired_tmb && !trig_pulse;
-    tmb_keep_hmt_only    <= hmt_fired_tmb && !trig_keep;
+    tmb_pulse_hmt_only   <= hmt_fired_tmb && !trig_pulse_run3;
+    tmb_keep_hmt_only    <= hmt_fired_tmb && !trig_keep_run3;
 
     //tmb_trig_pulse       <= trig_pulse;    // ALCT or CLCT or both triggered
     //tmb_trig_keep_ff     <= trig_keep;     // ALCT or CLCT or both triggered, and trigger is allowed
@@ -2787,6 +2802,8 @@
     wr_avail_rtmb        <= wr_avail_xtmb_pipe; // Buffer available at TMB matching time
     wr_push_rtmb         <= wr_push_mux_run3;        // Buffer write strobe at TMB matching time
 
+    tmb_gem_clct_win     <= gem_clct_win;
+    tmb_alct_gem_win     <= alct_gem_win;
 
     //GEM part:gemA_alct_match_win_mux_pipe
     //Attention!!
@@ -2866,6 +2883,18 @@
 
   assign alct0_real = swapalct_final_pos ? alct1_real_r : alct0_real_r;
   assign alct1_real = swapalct_final_pos ? alct0_real_r : alct1_real_r;
+
+  //Latch gem part as tmb match results
+  always @(posedge clock) begin
+   gemA_forclct_real  <= gemA_forclct_pipe;
+   gemB_forclct_real  <= gemB_forclct_pipe;
+   copad_match_real   <= copad_match_pipe;
+   gemA_overflow_real <= gemA_overflow_pipe;
+   gemB_overflow_real <= gemB_overflow_pipe;
+   gemA_sync_err_real <= gemA_sync_err_pipe;
+   gemB_sync_err_real <= gemB_sync_err_pipe;
+   gems_sync_err_real <= gems_sync_err_pipe;
+  end
   //Position matching already had one BX latency
   ////latched position match results, aligned in time with LCT construction 
   //reg copyalct0_foralct1_pos_r, copyclct0_forclct1_pos_r;
@@ -2886,6 +2915,16 @@
   //    clct0xky_fromcopad_r     <= clct0xky_fromcopad;
   //    clct1xky_fromcopad_r     <= clct1xky_fromcopad;
   //end
+
+  //TMB match results for headers
+  assign     lct0_with_copad = alct0_clct0_copad_match_found_pos;
+  assign     lct1_with_copad = alct1_clct1_copad_match_found_pos;
+  assign     lct0_nogem      = alct0_clct0_nogem_match_found_pos;
+  assign     lct1_nogem      = alct1_clct1_nogem_match_found_pos || copyalct0_foralct1_pos || copyclct0_forclct1_pos;
+  assign     lct0_with_gemA  = alct0_clct0_gem_match_found_pos && !best_cluster0_ingemB; 
+  assign     lct1_with_gemA  = alct1_clct1_gem_match_found_pos && !best_cluster1_ingemB; 
+  assign     lct0_with_gemB  = alct0_clct0_gem_match_found_pos &&  best_cluster0_ingemB; 
+  assign     lct1_with_gemB  = alct1_clct1_gem_match_found_pos &&  best_cluster1_ingemB; 
 
   //latch GEM clusters, aligned with position match results
   reg [CLSTBITS-1:0] gemA_cluster_pipe_r       [MXCLUSTER_CHAMBER-1:0];

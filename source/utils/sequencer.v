@@ -590,16 +590,16 @@
 
   gemcsc_bend_enable, 
   match_gem_alct_delay,
-  gemA_forclct_pipe,
-  gemB_forclct_pipe,
-  copad_match_pipe,
-  gemA_overflow_pipe,
-  gemB_overflow_pipe,
-  gemA_sync_err_pipe,
-  gemB_sync_err_pipe,
-  gems_sync_err_pipe,
-  gem_clct_win,
-  alct_gem_win,
+  gemA_forclct_real,
+  gemB_forclct_real,
+   copad_match_real,
+  gemA_overflow_real,
+  gemB_overflow_real,
+  gemA_sync_err_real,
+  gemB_sync_err_real,
+  gems_sync_err_real,
+  tmb_gem_clct_win,
+  tmb_alct_gem_win,
 
   mpc_tx_delay,
   mpc_sel_ttc_bx0,
@@ -906,16 +906,15 @@
   delayalct_gemB_match_test,
   alct_delaygemA_match_test,
   alct_delaygemB_match_test,
-  //gemA_alct_clct_match,
-  //gemB_alct_clct_match,
-  //alct_gem,
-  //clct_gem,
-  //alct_clct_gem,
-  //clct_gem_noalct,
-  //alct_gem_noclct,
-  //alct_copad_noclct,
-  //clct_copad_noalct,
 
+  lct0_nogem,
+  lct0_with_gemA,
+  lct0_with_gemB,
+  lct0_with_copad,
+  lct1_nogem,
+  lct1_with_gemA,
+  lct1_with_gemB,
+  lct1_with_copad,
 
   ccLUT_enable, 
   run3_trig_df,
@@ -1633,16 +1632,16 @@
 
   input       gemcsc_bend_enable;
   input [7:0] match_gem_alct_delay;
-  input [7:0] gemA_forclct_pipe;
-  input [7:0] gemB_forclct_pipe;
-  input [7:0] copad_match_pipe ;
-  input       gemA_overflow_pipe;
-  input       gemB_overflow_pipe;
-  input       gemA_sync_err_pipe;
-  input       gemB_sync_err_pipe;
-  input       gems_sync_err_pipe;
-  input [3:0] gem_clct_win;
-  input [2:0] alct_gem_win;
+  input [7:0] gemA_forclct_real;
+  input [7:0] gemB_forclct_real;
+  input [7:0]  copad_match_real;
+  input       gemA_overflow_real;
+  input       gemB_overflow_real;
+  input       gemA_sync_err_real;
+  input       gemB_sync_err_real;
+  input       gems_sync_err_real;
+  input [3:0] tmb_gem_clct_win;
+  input [2:0] tmb_alct_gem_win;
 
   input  [MXMPCDLY-1:0] mpc_tx_delay;    // Delay LCT to MPC
   input                 mpc_sel_ttc_bx0; // MPC gets ttc_bx0 or bx0_local
@@ -1949,6 +1948,16 @@
   input             delayalct_gemB_match_test;
   input             alct_delaygemA_match_test;
   input             alct_delaygemB_match_test;
+
+  input             lct0_nogem;
+  input             lct0_with_gemA;
+  input             lct0_with_gemB;
+  input             lct0_with_copad;
+  input             lct1_nogem;
+  input             lct1_with_gemA;
+  input             lct1_with_gemB;
+  input             lct1_with_copad;
+
 // MPC Status
 
   input  ccLUT_enable;
@@ -3984,7 +3993,8 @@
   assign xtmb1_wdata[29:0]  =  clct_counter[29:0];      // CLCTs sent to TMB section
 
 // TMB match: store TMB match results in RAM mapping array
-  parameter MXRTMB = 23;        // TMB match data bits
+  //parameter MXRTMB = 23;        // TMB match data bits
+  parameter MXRTMB = 31;        // TMB match data bits
   wire [MXRTMB-1:0] rtmb_wdata; // Mapping array
   wire [MXRTMB-1:0] rtmb_rdata; // Mapping array
 
@@ -4011,6 +4021,15 @@
   assign rtmb_wdata[20]  =  tmb_non_trig_keep; // TMB said keep non-triggering event
   assign rtmb_wdata[21]  =  tmb_clct0_discard; // TMB discarded clct0 from ME1A
   assign rtmb_wdata[22]  =  tmb_clct1_discard; // TMB discarded clct1 from ME1A
+  
+  assign rtmb_wdata[23]  =  lct0_nogem;
+  assign rtmb_wdata[24]  =  lct0_with_gemA;
+  assign rtmb_wdata[25]  =  lct0_with_gemB;
+  assign rtmb_wdata[26]  =  lct0_with_copad;
+  assign rtmb_wdata[27]  =  lct1_nogem;
+  assign rtmb_wdata[28]  =  lct1_with_gemA;
+  assign rtmb_wdata[29]  =  lct1_with_gemB;
+  assign rtmb_wdata[30]  =  lct1_with_copad;
 
 // TMB match: store ALCTs sent to MPC in RAM mapping array, arrives same bx as tmb match result
   parameter MXALCTD = 11+11+5+2; // ALCT transmit frame data bits, 2alcts + bxn + tmb stats
@@ -4025,16 +4044,16 @@
   parameter MXGEMD = 8*3+5+4+3;//  gem data from gem-csc match
   wire [MXGEMD-1 : 0] gem_wdata;
   wire [MXGEMD-1 : 0] gem_rdata;
-  assign  gem_wdata[ 7: 0]  = gemA_forclct_pipe[7:0]; 
-  assign  gem_wdata[15: 8]  = gemB_forclct_pipe[7:0]; 
-  assign  gem_wdata[23:16]  = copad_match_pipe[7:0]; 
-  assign  gem_wdata[   24]  = gemA_overflow_pipe; 
-  assign  gem_wdata[   25]  = gemB_overflow_pipe; 
-  assign  gem_wdata[   26]  = gemA_sync_err_pipe; 
-  assign  gem_wdata[   27]  = gemB_sync_err_pipe; 
-  assign  gem_wdata[   28]  = gems_sync_err_pipe; 
-  assign  gem_wdata[32:29]  = gem_clct_win; 
-  assign  gem_wdata[35:33]  = alct_gem_win; 
+  assign  gem_wdata[ 7: 0]  = gemA_forclct_real[7:0]; 
+  assign  gem_wdata[15: 8]  = gemB_forclct_real[7:0]; 
+  assign  gem_wdata[23:16]  =  copad_match_real[7:0]; 
+  assign  gem_wdata[   24]  = gemA_overflow_real; 
+  assign  gem_wdata[   25]  = gemB_overflow_real; 
+  assign  gem_wdata[   26]  = gemA_sync_err_real; 
+  assign  gem_wdata[   27]  = gemB_sync_err_real; 
+  assign  gem_wdata[   28]  = gems_sync_err_real; 
+  assign  gem_wdata[32:29]  = tmb_gem_clct_win; 
+  assign  gem_wdata[35:33]  = tmb_alct_gem_win; 
 
 
 // TMB match+1bx: store TMB match results in RAM mapping array, 1bx later to give it time to count current event
@@ -4674,6 +4693,15 @@
   wire    r_tmb_clct0_discard = rtmb_rdata[21]; // TMB discarded clct0 from ME1A
   wire    r_tmb_clct1_discard = rtmb_rdata[22]; // TMB discarded clct1 from ME1A
 
+  wire    r_lct0_nogem        = rtmb_rdata[23]; // TMB LCT without gem match
+  wire    r_lct0_with_gemA    = rtmb_rdata[24]; // TMB LCT with gem match
+  wire    r_lct0_with_gemB    = rtmb_rdata[25]; // TMB LCT with gem match
+  wire    r_lct0_with_copad   = rtmb_rdata[26]; // TMB LCT with gem match
+  wire    r_lct1_nogem        = rtmb_rdata[27]; // TMB LCT without gem match
+  wire    r_lct1_with_gemA    = rtmb_rdata[28]; // TMB LCT with gem match
+  wire    r_lct1_with_gemB    = rtmb_rdata[29]; // TMB LCT with gem match
+  wire    r_lct1_with_copad   = rtmb_rdata[30]; // TMB LCT with gem match
+
 // Unpack ALCT + extra TMB trigger data from RAM mapping array
   wire [10:0] r_tmb_alct0 = alct_rdata[10:0];  // ALCT0
   wire [10:0] r_tmb_alct1 = alct_rdata[21:11]; // ALCT1
@@ -4694,14 +4722,14 @@
   wire  [1:0]  r_alct_ecc_err = r_tmb_alcte[1:0]; // ALCT ecc error syndrome code
 
   //unpacked GEM data 
-  wire [7:0] r_gemA_forclct_pipe  = gem_rdata[ 7: 0];
-  wire [7:0] r_gemB_forclct_pipe  = gem_rdata[15: 8];
-  wire [7:0] r_copad_match_pipe   = gem_rdata[23:16];
-  wire       r_gemA_overflow_pipe = gem_rdata[   24];
-  wire       r_gemB_overflow_pipe = gem_rdata[   25];
-  wire       r_gemA_sync_err_pipe = gem_rdata[   26];
-  wire       r_gemB_sync_err_pipe = gem_rdata[   27];
-  wire       r_gems_sync_err_pipe = gem_rdata[   28];
+  wire [7:0] r_gemA_forclct_real  = gem_rdata[ 7: 0];
+  wire [7:0] r_gemB_forclct_real  = gem_rdata[15: 8];
+  wire [7:0] r_copad_match_real   = gem_rdata[23:16];
+  wire       r_gemA_overflow_real = gem_rdata[   24];
+  wire       r_gemB_overflow_real = gem_rdata[   25];
+  wire       r_gemA_sync_err_real = gem_rdata[   26];
+  wire       r_gemB_sync_err_real = gem_rdata[   27];
+  wire       r_gems_sync_err_real = gem_rdata[   28];
   wire [3:0] r_gem_clct_win       = gem_rdata[32:29];
   wire [2:0] r_alct_gem_win       = gem_rdata[35:33];
 
@@ -5113,14 +5141,22 @@
   assign  header11_[14:0]   =  r_clct_counter[14:0];  // CLCT post-drift counter, stop on ovf
   assign  header11_[18:15]  =  0;                     // DDU+DMB control flags
 
-  assign  header12_run3_[7:0] = r_copad_match_pipe[7:0];//Attention: should be delayed to sync with CLCT signal!!
-  assign  header12_run3_[  8] = |r_gemA_forclct_pipe;
-  assign  header12_run3_[  9] = |r_gemB_forclct_pipe;
-  assign  header12_run3_[ 10] = r_gemA_overflow_pipe;
-  assign  header12_run3_[ 11] = r_gemB_overflow_pipe;
-  assign  header12_run3_[ 12] = r_gemA_sync_err_pipe;
-  assign  header12_run3_[ 13] = r_gemB_sync_err_pipe;
-  assign  header12_run3_[ 14] = r_gems_sync_err_pipe;
+  //assign  header12_run3_[7:0] = r_copad_match_real[7:0];//Attention: should be delayed to sync with tmb match results signal!!
+  assign  header12_run3_[  0] = r_lct0_nogem;
+  assign  header12_run3_[  1] = r_lct0_with_gemA;
+  assign  header12_run3_[  2] = r_lct0_with_gemB;
+  assign  header12_run3_[  3] = r_lct0_with_copad;
+  assign  header12_run3_[  4] = r_lct1_nogem;
+  assign  header12_run3_[  5] = r_lct1_with_gemA;
+  assign  header12_run3_[  6] = r_lct1_with_gemB;
+  assign  header12_run3_[  7] = r_lct1_with_copad;
+  assign  header12_run3_[  8] = |r_gemA_forclct_real;
+  assign  header12_run3_[  9] = |r_gemB_forclct_real;
+  assign  header12_run3_[ 10] = r_gemA_overflow_real;
+  assign  header12_run3_[ 11] = r_gemB_overflow_real;
+  assign  header12_run3_[ 12] = r_gemA_sync_err_real;
+  assign  header12_run3_[ 13] = r_gemB_sync_err_real;
+  assign  header12_run3_[ 14] = r_gems_sync_err_real;
   assign  header12_[14:0]   =  run3_daq_df ? header12_run3_[14:0] : r_clct_counter[29:15]; // CLCT post-drift counter
   assign  header12_[18:15]  =  0;
 
@@ -5137,7 +5173,8 @@
   assign  header15_[14:0]   =  r_alct_counter[14:0];  // Counts ALCTs received from ALCT board, stop on ovf
   assign  header15_[18:15]  =  0;                     // DDU+DMB control flags
 
-  assign  header16_run3_[7 : 0]   =  match_gem_alct_delay[7:0]; //at the BX with LCT construction
+  assign  header16_run3_[3 : 0]   =  r_copad_match_real[0]+r_copad_match_real[1]+r_copad_match_real[2]+r_copad_match_real[3]+r_copad_match_real[4]+r_copad_match_real[5]+r_copad_match_real[6]+r_copad_match_real[7];
+  assign  header16_run3_[7 : 4]   =  match_gem_alct_delay[3:0]; //at the BX with LCT construction
   assign  header16_run3_[11: 8]   =  r_gem_clct_win[3:0];
   assign  header16_run3_[14:12]   =  r_alct_gem_win[2:0];
   assign  header16_[14:0]   =  run3_daq_df ? header16_run3_[14:0] : r_alct_counter[29:15]; // Counts ALCTs received from ALCT board, stop on ovf
@@ -5327,6 +5364,7 @@
   assign  header40_[14]     =  r_tmb_trig_pulse;        // TMB trig pulse coincident with rtmb_push
   assign  header40_[18:15]  =  0;                       // DDU+DMB control flags
 
+//6bits for configuration. may reuse 6bits later
   assign  header41_[0]      =  tmb_allow_alct;          // Allow ALCT-only  tmb-matching trigger
   assign  header41_[1]      =  tmb_allow_clct;          // Allow CLCT-only  tmb-matching trigger
   assign  header41_[2]      =  tmb_allow_match;         // Allow Match-only tmb-matching trigger

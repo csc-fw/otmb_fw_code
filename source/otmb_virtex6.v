@@ -1783,7 +1783,7 @@
   wire [1:0]  gemB_fiber_enable;
 
   wire [3:0] gem_fiber_enable = {gemB_fiber_enable, gemA_fiber_enable};
-  wire gem_enable = |gem_fiber_enable;
+  wire gem_enable = (|gem_fiber_enable) && (gem_me1a_match_enable || gem_me1b_match_enable);
 
   reg  [MXCLUSTER_CHAMBER-1:0] gemA_cluster_enable = 8'b0;
   reg  [MXCLUSTER_CHAMBER-1:0] gemB_cluster_enable = 8'b0;
@@ -2857,11 +2857,11 @@ end
    wire [7:0]  match_gem_alct_delay;
    wire [3:0]  match_gem_alct_window;
    wire [3:0]  match_gem_clct_window;
-   wire [7:0]  gemA_forclct_pipe;
-   wire [7:0]  gemB_forclct_pipe;
-   wire [7:0]  copad_match_pipe;
-   wire [3:0]  gem_clct_win;
-   wire [3:0]  alct_gem_win;
+   wire [7:0]  gemA_forclct_real;
+   wire [7:0]  gemB_forclct_real;
+   wire [7:0]   copad_match_real;
+   wire [3:0]  tmb_gem_clct_win;
+   wire [3:0]  tmb_alct_gem_win;
 
    wire [MXBADR-1:0]      wr_adr_xtmb; // Buffer write address to TMB
    wire [MXBADR-1:0]      wr_adr_rtmb; // Buffer write address at TMB matching time
@@ -3280,16 +3280,16 @@ end
 
   .gemcsc_bend_enable       (gemcsc_bend_enable),             //In GEMCSC bending angle enabled
   .match_gem_alct_delay      (match_gem_alct_delay[7:0]),  //In gem delay for gem-ALCT match
-  .gemA_forclct_pipe         (gemA_forclct_pipe[7:0]),
-  .gemB_forclct_pipe         (gemB_forclct_pipe[7:0]),
-  .copad_match_pipe          (copad_match_pipe [7:0]),
-  .gemA_overflow_pipe        (gemA_overflow_pipe),//  Out, latched for headers
-  .gemB_overflow_pipe        (gemB_overflow_pipe),
-  .gemA_sync_err_pipe        (gemA_sync_err_pipe),
-  .gemB_sync_err_pipe        (gemB_sync_err_pipe),
-  .gems_sync_err_pipe        (gems_sync_err_pipe),
-  .gem_clct_win              (gem_clct_win[3:0]), // In gem location in GEM-CLCT window
-  .alct_gem_win              (alct_gem_win[2:0]), // In gem location in GEM-ALCT window
+  .gemA_forclct_real         (gemA_forclct_real[7:0]),
+  .gemB_forclct_real         (gemB_forclct_real[7:0]),
+  .copad_match_real          ( copad_match_real[7:0]),
+  .gemA_overflow_pipe        (gemA_overflow_real),//  IN, latched for headers
+  .gemB_overflow_pipe        (gemB_overflow_real),
+  .gemA_sync_err_pipe        (gemA_sync_err_real),
+  .gemB_sync_err_pipe        (gemB_sync_err_real),
+  .gems_sync_err_pipe        (gems_sync_err_real),
+  .tmb_gem_clct_win          (tmb_gem_clct_win[3:0]), // In gem location in GEM-CLCT window
+  .tmb_alct_gem_win          (tmb_alct_gem_win[2:0]), // In gem location in GEM-ALCT window
 
   .mpc_tx_delay    (mpc_tx_delay[MXMPCDLY-1:0]), // In  MPC transmit delay
   .mpc_sel_ttc_bx0 (mpc_sel_ttc_bx0),            // In  MPC gets ttc_bx0 or bx0_local
@@ -3595,6 +3595,15 @@ end
   .delayalct_gemB_match_test (delayalct_gemB_match_test), //In ALCT & GEM match for test
   .alct_delaygemA_match_test (alct_delaygemA_match_test), //In ALCT & GEM match for test
   .alct_delaygemB_match_test (alct_delaygemB_match_test), //In ALCT & GEM match for test
+
+  .lct0_nogem        (lct0_nogem),     //In LCT0 without gem match found
+  .lct0_with_gemA    (lct0_with_gemA), //In LCT0 with gem match 
+  .lct0_with_gemB    (lct0_with_gemB), //In LCT0 with gem match
+  .lct0_with_copad   (lct0_with_copad) //In LCT0 with gem match,
+  .lct1_nogem        (lct1_nogem),     //In LCT1 without gem match found
+  .lct1_with_gemA    (lct1_with_gemB), //In LCT1 with gem match
+  .lct1_with_gemB    (lct1_with_gemB), //In LCT1 with gem match
+  .lct1_with_copad   (lct1_with_copad) //In LCT1 with gem match,
 
   .ccLUT_enable  (ccLUT_enable),//In enabe CCLUT   
   .run3_trig_df  (run3_trig_df), //In
@@ -4527,16 +4536,16 @@ wire [15:0] gemB_bxn_counter;
   .gemcsc_bend_enable        (gemcsc_bend_enable),             //In GEMCSC bending angle enabled
   .gemcsc_ignore_bend_check  (gemcsc_ignore_bend_check),             //In GEMCSC ignore GEMCSC bending direction and CSC bend direction check
 
-  .gemA_forclct_pipe      (gemA_forclct_pipe[7:0]),// Out, latched for headers
-  .gemB_forclct_pipe      (gemB_forclct_pipe[7:0]),// Out, latched for headers
-  .copad_match_pipe       (copad_match_pipe [7:0]),// Out, latched for headers
-  .gemA_overflow_pipe     (gemA_overflow_pipe),//  Out, latched for headers
-  .gemB_overflow_pipe     (gemB_overflow_pipe),// Out, latched for headers
-  .gemA_sync_err_pipe     (gemA_sync_err_pipe),// Out, latched for headers
-  .gemB_sync_err_pipe     (gemB_sync_err_pipe),// Out, latched for headers
-  .gems_sync_err_pipe     (gems_sync_err_pipe),// Out, latched for headers
-  .gem_clct_win           (gem_clct_win[3:0]), // out gem location in GEM-CLCT window, similar for alct location in ALCT-CLCT window 
-  .alct_gem_win           (alct_gem_win[3:0]), // out ALCT location in GEM-ALCT window
+  .gemA_forclct_real         (gemA_forclct_real[7:0]),
+  .gemB_forclct_real         (gemB_forclct_real[7:0]),
+  .copad_match_real          ( copad_match_real[7:0]),
+  .gemA_overflow_pipe        (gemA_overflow_real),//  Out, latched for headers
+  .gemB_overflow_pipe        (gemB_overflow_real),
+  .gemA_sync_err_pipe        (gemA_sync_err_real),
+  .gemB_sync_err_pipe        (gemB_sync_err_real),
+  .gems_sync_err_pipe        (gems_sync_err_real),
+  .tmb_gem_clct_win          (tmb_gem_clct_win[3:0]), // In gem location in GEM-CLCT window
+  .tmb_alct_gem_win          (tmb_alct_gem_win[2:0]), // In gem location in GEM-ALCT window
 
 
 // TMB-Sequencer Pipelines
@@ -4639,6 +4648,15 @@ wire [15:0] gemB_bxn_counter;
   .alctclctcopad_swapped     (alctclctcopad_swapped), // out, ALCT/CLCT swapped from ACLT+CLCT+copad match
   .alctclctgem_swapped       (alctclctgem_swapped),   // out, ALCT/CLCT swapped from ACLT+CLCT+gem match
   .clctcopad_swapped         (clctcopad_swapped),          // out, CLCT swapped from CLCT+copad match
+
+  .lct0_nogem        (lct0_nogem),     //Out LCT0 without gem match found
+  .lct0_with_gemA    (lct0_with_gemA), //Out LCT0 with gem match 
+  .lct0_with_gemB    (lct0_with_gemB), //Out LCT0 with gem match
+  .lct0_with_copad   (lct0_with_copad) //Out LCT0 with gem match,
+  .lct1_nogem        (lct1_nogem),     //Out LCT1 without gem match found
+  .lct1_with_gemA    (lct1_with_gemB), //Out LCT1 with gem match
+  .lct1_with_gemB    (lct1_with_gemB), //Out LCT1 with gem match
+  .lct1_with_copad   (lct1_with_copad) //Out LCT1 with gem match,
 
   .run3_trig_df   (run3_trig_df),  //In  enable Run3 trigger data format
   .run3_daq_df   (run3_daq_df), //In enable run3 daq format
