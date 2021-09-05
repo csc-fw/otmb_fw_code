@@ -2752,7 +2752,10 @@
   reg [10:0]  tmb_alct1    = 0; // ALCT second best muon latched at trigger
   reg [ 4:0]  tmb_alctb    = 0; // ALCT bxn latched at trigger
   reg [ 1:0]  tmb_alcte    = 0; // ALCT ecc latched at trigger
-
+  
+  reg [ 3:0]  tmb_gem_clct_win =0;
+  reg [ 2:0]  tmb_alct_gem_win =0; 
+  
   always @(posedge clock) begin
     //HMT part
     hmt_fired_tmb_ff     <= hmt_fired_tmb;
@@ -2805,8 +2808,7 @@
     tmb_gem_clct_win     <= gem_clct_win;
     tmb_alct_gem_win     <= alct_gem_win;
 
-    //GEM part:gemA_alct_match_win_mux_pipe
-    //Attention!!
+    
   end
 
 // Had to wait for kill signal to go valid
@@ -2884,6 +2886,14 @@
   assign alct0_real = swapalct_final_pos ? alct1_real_r : alct0_real_r;
   assign alct1_real = swapalct_final_pos ? alct0_real_r : alct1_real_r;
 
+  reg  [7:0]       gemA_forclct_real = 8'b0;
+  reg  [7:0]       gemB_forclct_real = 8'b0;
+  reg  [7:0]       copad_match_real  = 8'b0;
+  reg              gemA_overflow_real = 1'b0;
+  reg              gemB_overflow_real = 1'b0;
+  reg              gemA_sync_err_real = 1'b0;
+  reg              gemB_sync_err_real = 1'b0;
+  reg              gems_sync_err_real = 1'b0;
   //Latch gem part as tmb match results
   always @(posedge clock) begin
    gemA_forclct_real  <= gemA_forclct_pipe;

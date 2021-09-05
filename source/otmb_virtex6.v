@@ -1367,7 +1367,7 @@
   wire [9:0] nhits_trig_s0_bx2345 = nhits_trig_s0_srl[7] + nhits_trig_s0_srl[6] + nhits_trig_s0_srl[5] + nhits_trig_s0_srl[4];
   //peak conditio: nhits_trig_s0_bx678 >= nhits_trig_s0_bx789 && nhits_trig_s0_bx678 >= nhits_trig_s0_bx89A
   wire nhits_compare_s0_bx678_789 = (nhits_trig_s0_srl[3] > nhits_trig_s0_srl[0]) || (nhits_trig_s0_srl[3] == nhits_trig_s0_srl[0] &&  nhits_trig_s0_srl[2]> nhits_trig_s0_srl[1]);
-  wire nhits_compare_s0_bx678_78A = (nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] >  nhits_trig_s0_srl[0] + nhits_chamber) || (nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] ==  nhits_trig_s0_srl[0] + nhits_chamber && nhits_trig_s0_srl[2] > nhits_trig_s0_srl[0]);
+  wire nhits_compare_s0_bx678_89A = (nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] >  nhits_trig_s0_srl[0] + nhits_chamber) || (nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] ==  nhits_trig_s0_srl[0] + nhits_chamber && nhits_trig_s0_srl[2] > nhits_trig_s0_srl[0]);
   wire nhits_trig_s0_bx678_peak = nhits_compare_s0_bx678_789 && nhits_compare_s0_bx678_89A;
   
   //hits to build CLCT is counted at nhits_trig_s0_srl[7], with CLCT_drift delay=2BX
@@ -3283,11 +3283,11 @@ end
   .gemA_forclct_real         (gemA_forclct_real[7:0]),
   .gemB_forclct_real         (gemB_forclct_real[7:0]),
   .copad_match_real          ( copad_match_real[7:0]),
-  .gemA_overflow_pipe        (gemA_overflow_real),//  IN, latched for headers
-  .gemB_overflow_pipe        (gemB_overflow_real),
-  .gemA_sync_err_pipe        (gemA_sync_err_real),
-  .gemB_sync_err_pipe        (gemB_sync_err_real),
-  .gems_sync_err_pipe        (gems_sync_err_real),
+  .gemA_overflow_real        (gemA_overflow_real),//  IN, latched for headers
+  .gemB_overflow_real        (gemB_overflow_real),
+  .gemA_sync_err_real        (gemA_sync_err_real),
+  .gemB_sync_err_real        (gemB_sync_err_real),
+  .gems_sync_err_real        (gems_sync_err_real),
   .tmb_gem_clct_win          (tmb_gem_clct_win[3:0]), // In gem location in GEM-CLCT window
   .tmb_alct_gem_win          (tmb_alct_gem_win[2:0]), // In gem location in GEM-ALCT window
 
@@ -3599,11 +3599,11 @@ end
   .lct0_nogem        (lct0_nogem),     //In LCT0 without gem match found
   .lct0_with_gemA    (lct0_with_gemA), //In LCT0 with gem match 
   .lct0_with_gemB    (lct0_with_gemB), //In LCT0 with gem match
-  .lct0_with_copad   (lct0_with_copad) //In LCT0 with gem match,
+  .lct0_with_copad   (lct0_with_copad), //In LCT0 with gem match,
   .lct1_nogem        (lct1_nogem),     //In LCT1 without gem match found
-  .lct1_with_gemA    (lct1_with_gemB), //In LCT1 with gem match
+  .lct1_with_gemA    (lct1_with_gemA), //In LCT1 with gem match
   .lct1_with_gemB    (lct1_with_gemB), //In LCT1 with gem match
-  .lct1_with_copad   (lct1_with_copad) //In LCT1 with gem match,
+  .lct1_with_copad   (lct1_with_copad), //In LCT1 with gem match,
 
   .ccLUT_enable  (ccLUT_enable),//In enabe CCLUT   
   .run3_trig_df  (run3_trig_df), //In
@@ -4539,11 +4539,11 @@ wire [15:0] gemB_bxn_counter;
   .gemA_forclct_real         (gemA_forclct_real[7:0]),
   .gemB_forclct_real         (gemB_forclct_real[7:0]),
   .copad_match_real          ( copad_match_real[7:0]),
-  .gemA_overflow_pipe        (gemA_overflow_real),//  Out, latched for headers
-  .gemB_overflow_pipe        (gemB_overflow_real),
-  .gemA_sync_err_pipe        (gemA_sync_err_real),
-  .gemB_sync_err_pipe        (gemB_sync_err_real),
-  .gems_sync_err_pipe        (gems_sync_err_real),
+  .gemA_overflow_real        (gemA_overflow_real),//  Out, latched for headers
+  .gemB_overflow_real        (gemB_overflow_real),
+  .gemA_sync_err_real        (gemA_sync_err_real),
+  .gemB_sync_err_real        (gemB_sync_err_real),
+  .gems_sync_err_real        (gems_sync_err_real),
   .tmb_gem_clct_win          (tmb_gem_clct_win[3:0]), // In gem location in GEM-CLCT window
   .tmb_alct_gem_win          (tmb_alct_gem_win[2:0]), // In gem location in GEM-ALCT window
 
@@ -4652,11 +4652,11 @@ wire [15:0] gemB_bxn_counter;
   .lct0_nogem        (lct0_nogem),     //Out LCT0 without gem match found
   .lct0_with_gemA    (lct0_with_gemA), //Out LCT0 with gem match 
   .lct0_with_gemB    (lct0_with_gemB), //Out LCT0 with gem match
-  .lct0_with_copad   (lct0_with_copad) //Out LCT0 with gem match,
+  .lct0_with_copad   (lct0_with_copad), //Out LCT0 with gem match,
   .lct1_nogem        (lct1_nogem),     //Out LCT1 without gem match found
-  .lct1_with_gemA    (lct1_with_gemB), //Out LCT1 with gem match
+  .lct1_with_gemA    (lct1_with_gemA), //Out LCT1 with gem match
   .lct1_with_gemB    (lct1_with_gemB), //Out LCT1 with gem match
-  .lct1_with_copad   (lct1_with_copad) //Out LCT1 with gem match,
+  .lct1_with_copad   (lct1_with_copad), //Out LCT1 with gem match,
 
   .run3_trig_df   (run3_trig_df),  //In  enable Run3 trigger data format
   .run3_daq_df   (run3_daq_df), //In enable run3 daq format
