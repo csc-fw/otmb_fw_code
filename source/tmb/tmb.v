@@ -3335,12 +3335,15 @@
   wire   lct0_vpf_run3 = (lct0_qlt_run3[2:0] > 3'b0);
   wire   lct1_vpf_run3 = (lct1_qlt_run3[2:0] > 3'b0);
 
+  wire [2:0] clct0_pat_gemcsc = clct0fromcopad_run3 ? 3'd4 : clct0_pat;
+  wire [2:0] clct1_pat_gemcsc = clct1fromcopad_run3 ? 3'd4 : clct1_pat;
+
   wire [4:0] lct_pid_run3;
   patid_5bits upid5bit(
   .lct0_vpf  (lct0_vpf_run3),
-  .clct0_pid (clct0_pat[2:0]),
+  .clct0_pid (clct0_pat_gemcsc[2:0]),
   .lct1_vpf  (lct1_vpf_run3),
-  .clct1_pid (clct1_pat[2:0]),
+  .clct1_pid (clct1_pat_gemcsc[2:0]),
   .out_pid   (lct_pid_run3[4:0])
   );
 
@@ -3441,10 +3444,6 @@
   //wire [4:0] clct0_bnd_run3 = clct0_bnd[4:0];  
   //wire [4:0] clct1_bnd_run3 = clct1_bnd[4:0];  
 
-
-  //GEMCSC algorithm is not ready yet. Use the lct quality with ALCT+CLCT case
-  //assign lct0_qlt_run3 = (alct0_valid && clct0_valid) ? 3'b011 : 0;
-  //assign lct1_qlt_run3 = (alct1_valid && clct1_valid) ? 3'b011 : 0;
 
   //real LCT for Run3
   assign  mpc0_frame0_run3[6:0]   = alct0_key_run3[6:0];
