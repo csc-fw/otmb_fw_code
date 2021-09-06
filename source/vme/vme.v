@@ -3996,7 +3996,8 @@
   assign id_reg0_rd = version_slot[15:0];
   assign id_reg1_rd = MONTHDAY[15:0];
   assign id_reg2_rd = YEAR[15:0];
-  assign id_reg3_rd = revcode_vme[15:0];
+  //assign id_reg3_rd = revcode_vme[15:0];
+  assign id_reg3_rd = {1'b0, revcode[14:0]};
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_VME_STATUS=08  VME Bus Status Register, Readonly
