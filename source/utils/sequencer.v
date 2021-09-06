@@ -4733,6 +4733,8 @@
   wire [3:0] r_gem_clct_win       = gem_rdata[32:29];
   wire [2:0] r_alct_gem_win       = gem_rdata[35:33];
 
+  wire [3:0] r_num_copad = count1sof7(r_copad_match_real[6:0]) + r_copad_match_real[7];
+
 // Unpack TMB match results from RAM mapping array that was delayed 1bx
   wire [29:0]  r_trig_counter = rtmb1_rdata[29:0];  // TMB trigger counter
   wire [6:0]  r_tmb_aff_list  = rtmb1_rdata[36:30]; // Active cfeb list at TMB match, saves 1 ram
@@ -5173,7 +5175,7 @@
   assign  header15_[14:0]   =  r_alct_counter[14:0];  // Counts ALCTs received from ALCT board, stop on ovf
   assign  header15_[18:15]  =  0;                     // DDU+DMB control flags
 
-  assign  header16_run3_[3 : 0]   =  r_copad_match_real[0]+r_copad_match_real[1]+r_copad_match_real[2]+r_copad_match_real[3]+r_copad_match_real[4]+r_copad_match_real[5]+r_copad_match_real[6]+r_copad_match_real[7];
+  assign  header16_run3_[3 : 0]   =  r_num_copad[3:0];
   assign  header16_run3_[7 : 4]   =  match_gem_alct_delay[3:0]; //at the BX with LCT construction
   assign  header16_run3_[11: 8]   =  r_gem_clct_win[3:0];
   assign  header16_run3_[14:12]   =  r_alct_gem_win[2:0];
