@@ -849,6 +849,41 @@
   end
 
 //------------------------------------------------------------------------------------------------------------------
+// Generate fake ALCT with key WG 20 and 30 for TAMU test stand
+//------------------------------------------------------------------------------------------------------------------
+  wire [MXALCT-1:0] alct0_fake, alct1_fake;
+  wire [MXALCT-1:0] alct0_fake_srl, alct1_fake_srl;
+  reg   alct0_fake_vpf = 1'b0;
+  reg   alct1_fake_vpf = 1'b0;
+  always @(posedge clock) begin
+     alct0_fake_vpf <= clct0_xtmb[0];
+     alct1_fake_vpf <= clct1_xtmb[0];
+  end
+  assign alct0_fake[   0]   = alct0_fake_vpf;
+  assign alct0_fake[02:1]   = 2'b11;
+  assign alct0_fake[   3]   = 1'b0;
+  assign alct0_fake[10:4]   = alct0_fake_vpf ? 7'd20 : 7'b0;
+  assign alct0_fake[15:11]  = 4'b0;
+
+  assign alct1_fake[   0]   = alct1_fake_vpf;
+  assign alct1_fake[02:1]   = 2'b10;
+  assign alct1_fake[   3]   = 1'b0;
+  assign alct1_fake[10:4]   = alct1_fake_vpf ? 7'd30 : 7'b0;
+  assign alct1_fake[15:11]  = 4'b0;
+
+  reg [3:0] fakealct_srl_adr = 0;
+  always @(posedge clock) begin
+  fakealct_srl_adr <= gem_alct_win_center-1'b1;
+  end
+
+  srl16e_bbl #(MXALCT) ualct0fake (.clock(clock),.ce(1'b1),.adr(fakealct_srl_adr),.d(alct0_fake),.q(alct0_fake_srl));
+  srl16e_bbl #(MXALCT) ualct1fake (.clock(clock),.ce(1'b1),.adr(fakealct_srl_adr),.d(alct1_fake),.q(alct1_fake_srl));
+
+  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  //Attention!! disable this for OTMB at b904 and P5!!!!
+  wire usefakealct = algo2016_clct_to_alct; //1'b1; // should be false in normal OTMB Firmware
+  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//------------------------------------------------------------------------------------------------------------------
 // Push ALCT data into a 1bx to 16bx pipeline delay to compensate for CLCT processing time
 //------------------------------------------------------------------------------------------------------------------
   wire [MXALCT-1:0] alct0_pipe, alct0_srl;
@@ -1446,8 +1481,8 @@
   wire  [MXXKYB-1     : 0] clct1_xky; // new position with 1/8 precision
   //wire  [MXPATC-1     : 0] clct1_carry; // CC code
 
-  assign {clct0_bnd, clct0_xky, clct0_carry} = clct0_cclut;
-  assign {clct1_bnd, clct1_xky, clct1_carry} = clct1_cclut;
+  assign {clct0_bnd, clct0_xky} = clct0_cclut;
+  assign {clct1_bnd, clct1_xky} = clct1_cclut;
 
 //------------------------------------------------------------------------------------------------------------------
 // LCT Quality
