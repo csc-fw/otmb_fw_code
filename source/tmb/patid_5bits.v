@@ -16,7 +16,8 @@ module  patid_5bits(lct0_vpf,clct0_pid,lct1_vpf,clct1_pid, out_pid);
   always @* begin
 
   if (lct0_vpf && !lct1_vpf)                out_pid = clct0_pid;
-  else if (lct0_vpf && lct1_vpf)            out_pid = clct1_pid * 5 + clct0_pid + 5'd5;
+  //else if (lct0_vpf && lct1_vpf)            out_pid = clct1_pid*5 + clct0_pid + 5'd5;
+  else if (lct0_vpf && lct1_vpf)            out_pid = {clct1_pid,2'b00} + clct1_pid + clct0_pid + 5'd5;
   else if (!lct0_vpf && lct1_vpf)           out_pid = 5'b11110;
   else                                      out_pid = 5'b11111;
   end

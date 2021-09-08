@@ -2861,7 +2861,7 @@ end
    wire [7:0]  gemB_forclct_real;
    wire [7:0]   copad_match_real;
    wire [3:0]  tmb_gem_clct_win;
-   wire [3:0]  tmb_alct_gem_win;
+   wire [2:0]  tmb_alct_gem_win;
 
    wire [MXBADR-1:0]      wr_adr_xtmb; // Buffer write address to TMB
    wire [MXBADR-1:0]      wr_adr_rtmb; // Buffer write address at TMB matching time

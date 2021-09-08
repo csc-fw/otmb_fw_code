@@ -897,7 +897,7 @@
   output              gemB_sync_err_real;
   output              gems_sync_err_real;
   output  [3:0]       tmb_gem_clct_win;
-  output  [3:0]       tmb_alct_gem_win;
+  output  [2:0]       tmb_alct_gem_win;
 
 
 
