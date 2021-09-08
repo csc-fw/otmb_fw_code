@@ -1473,6 +1473,7 @@
 // Push ALCT data into a 1bx to 16bx pipeline delay to compensate for CLCT processing time
 //------------------------------------------------------------------------------------------------------------------
 
+`ifdef FAKE_ALCT
 //------------------------------------------------------------------------------------------------------------------
 // Generate fake ALCT with key WG 20 and 30 for TAMU test stand
 //------------------------------------------------------------------------------------------------------------------
@@ -1508,6 +1509,7 @@
   //Attention!! disable this for OTMB at b904 and P5!!!!
   wire usefakealct = gem_me1a_match_nogem; //1'b1; // should be false in normal OTMB Firmware
   //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+`endif
 //------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------
   
@@ -1528,13 +1530,20 @@
 
   wire alct_ptr_is_0 = (alct_delay == 0);               // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
 
+`ifdef FAKE_ALCT
   //Generate fake ALCT for TAMU test stand!
-  //assign alct0_pipe = (alct_ptr_is_0) ? alct0_tmb : alct0_srl;  // First  ALCT after alct pipe delay
-  //assign alct1_pipe = (alct_ptr_is_0) ? alct1_tmb : alct1_srl;  // Second ALCT after alct pipe delay
-  //assign alcte_pipe = (alct_ptr_is_0) ? alcte_tmb : alcte_srl;  // Second ALCT after alct pipe delay 
   assign alct0_pipe = usefakealct ? (gem_alct_win_center==4'b0 ? alct0_fake : alct0_fake_srl) : ((alct_ptr_is_0) ? alct0_tmb : alct0_srl);  // First  ALCT after alct pipe delay
   assign alct1_pipe = usefakealct ? (gem_alct_win_center==4'b0 ? alct1_fake : alct1_fake_srl) : ((alct_ptr_is_0) ? alct1_tmb : alct1_srl);  // Second ALCT after alct pipe delay
   assign alcte_pipe = usefakealct ?           2'b0 : ((alct_ptr_is_0) ? alcte_tmb : alcte_srl);  // Second ALCT after alct pipe delay 
+  wire   alct0_gem_pipe_vpf = usefakealct ? alct0_fake[0] : alct0_gem_pipe[0];
+  wire   alct1_gem_pipe_vpf = usefakealct ? alct1_fake[1] : alct1_gem_pipe[1];
+`else
+  assign alct0_pipe = (alct_ptr_is_0) ? alct0_tmb : alct0_srl;  // First  ALCT after alct pipe delay
+  assign alct1_pipe = (alct_ptr_is_0) ? alct1_tmb : alct1_srl;  // Second ALCT after alct pipe delay
+  assign alcte_pipe = (alct_ptr_is_0) ? alcte_tmb : alcte_srl;  // Second ALCT after alct pipe delay 
+  wire   alct0_gem_pipe_vpf = alct0_gem_pipe[0];
+  wire   alct1_gem_pipe_vpf = alct1_gem_pipe[1];
+`endif
 
   wire   alct0_pipe_vpf = alct0_pipe[0];
   wire   alct1_pipe_vpf = alct1_pipe[0];
@@ -1570,9 +1579,6 @@
 
   assign alct0_gem_pipe = (alct_gem_ptr_is_0) ? alct0_tmb : alct0_gem_srl;  // First  ALCT after alct pipe delay
   assign alct1_gem_pipe = (alct_gem_ptr_is_0) ? alct1_tmb : alct1_gem_srl;  // Second ALCT after alct pipe delay
-
-  wire   alct0_gem_pipe_vpf = usefakealct ? alct0_fake[0] : alct0_gem_pipe[0];
-  wire   alct1_gem_pipe_vpf = usefakealct ? alct1_fake[1] : alct1_gem_pipe[1];
 
 //------------------------------------------------------------------------------------------------------------------
 // Push CLCT data into a 1bx to 16bx pipeline delay to wait for an alct-clct match
