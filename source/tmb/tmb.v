@@ -848,6 +848,7 @@
     mpc_set <= (!powerup_ff || !mpc_oe || sync_err_blanks_mpc);
   end
 
+`ifdef FAKE_ALCT
 //------------------------------------------------------------------------------------------------------------------
 // Generate fake ALCT with key WG 20 and 30 for TAMU test stand
 //------------------------------------------------------------------------------------------------------------------
@@ -873,7 +874,7 @@
 
   reg [3:0] fakealct_srl_adr = 0;
   always @(posedge clock) begin
-  fakealct_srl_adr <= gem_alct_win_center-1'b1;
+  fakealct_srl_adr <= clct_win_center-1'b1;
   end
 
   srl16e_bbl #(MXALCT) ualct0fake (.clock(clock),.ce(1'b1),.adr(fakealct_srl_adr),.d(alct0_fake),.q(alct0_fake_srl));
@@ -883,6 +884,7 @@
   //Attention!! disable this for OTMB at b904 and P5!!!!
   wire usefakealct = algo2016_clct_to_alct; //1'b1; // should be false in normal OTMB Firmware
   //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+`endif
 //------------------------------------------------------------------------------------------------------------------
 // Push ALCT data into a 1bx to 16bx pipeline delay to compensate for CLCT processing time
 //------------------------------------------------------------------------------------------------------------------
@@ -904,9 +906,16 @@
 
   wire alct_ptr_is_0 = (alct_delay == 0); // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
 
+`ifdef FAKE_ALCT
+  //Generate fake ALCT for TAMU test stand!
+  assign alct0_pipe = usefakealct ? (clct_win_center==4'b0 ? alct0_fake : alct0_fake_srl) : ((alct_ptr_is_0) ? alct0_tmb : alct0_srl);  // First  ALCT after alct pipe delay
+  assign alct1_pipe = usefakealct ? (clct_win_center==4'b0 ? alct1_fake : alct1_fake_srl) : ((alct_ptr_is_0) ? alct1_tmb : alct1_srl);  // Second ALCT after alct pipe delay
+  assign alcte_pipe = usefakealct ?                                                  2'b0 : ((alct_ptr_is_0) ? alcte_tmb : alcte_srl);  // Second ALCT after alct pipe delay   
+`else
   assign alct0_pipe = (alct_ptr_is_0) ? alct0_tmb : alct0_srl;  // First  ALCT after alct pipe delay
   assign alct1_pipe = (alct_ptr_is_0) ? alct1_tmb : alct1_srl;  // Second ALCT after alct pipe delay
-  assign alcte_pipe = (alct_ptr_is_0) ? alcte_tmb : alcte_srl;  // ALCT ecc syndrome code after clct pipe delay
+  assign alcte_pipe = (alct_ptr_is_0) ? alcte_tmb : alcte_srl;  // Second ALCT after alct pipe delay 
+`endif
 
   wire   alct0_pipe_vpf = alct0_pipe[0];
   wire   alct1_pipe_vpf = alct1_pipe[0];
