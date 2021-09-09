@@ -808,6 +808,7 @@
 // TMB LCT Match
   //hmt_nhits_trig_xtmb,
   hmt_trigger_xtmb,
+  hmt_clct_match, 
   
   clct0_xtmb,
   clct1_xtmb,
@@ -1849,6 +1850,7 @@
 // TMB LCT Match
   //output  [9:0]          hmt_nhits_trig_xtmb;
   output  [MXHMTB-1:0]   hmt_trigger_xtmb; // HMT nhits passing thresholds
+  output                 hmt_clct_match;
   output  [MXCLCT-1:0]   clct0_xtmb; // 1st CLCT to TMB
   output  [MXCLCT-1:0]   clct1_xtmb; // 2nd CLCT to TMB
   output  [MXCLCTC-1:0]  clctc_xtmb; // Common to CLCT0/1 to TMB
@@ -3262,6 +3264,8 @@
   assign clct0_vpf = clct0_valid && clct_pop_xtmb;
   assign clct1_vpf = clct1_valid && clct_pop_xtmb;
 
+  assign hmt_clct_match = hmt_fired_trigger    && clct_push_xtmb && clct0_vpf;
+
 // Construct CLCTs for sending to TMB matching. These are node names only
 
 
@@ -3520,7 +3524,7 @@
     hmt_cnt_en[1]  <= hmt_trigger[1:0] == 2'b10; // hmt over threshold2
     hmt_cnt_en[2]  <= hmt_trigger[1:0] == 2'b11; // hmt over threshold3
     hmt_cnt_en[3]  <= hmt_fired_pretrigger && clct_pretrig;// hmt && preCLCT
-    hmt_cnt_en[4]  <= hmt_fired_trigger    && clct_push_xtmb && clct0_vpf;// hmt && CLCT
+    hmt_cnt_en[4]  <= hmt_clct_match;// hmt && CLCT
     hmt_cnt_en[5]  <= hmt_fired_tmb_ff     && tmb_match; // hmt && LCT vpf
     hmt_cnt_en[6]  <= tmb_pulse_hmt_only; // tmb trigger pulse from hmt
     hmt_cnt_en[7]  <= tmb_keep_hmt_only;  // tmb trigger keep from hmt

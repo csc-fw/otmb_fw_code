@@ -33,8 +33,9 @@
 
 
 // Conditional compile flags: Enable only one CSC_TYPE
-//  `define CSC_TYPE_D  04'hD // Reversed ME1B: ME1B   chambers facing away from IR. ME1B hs = reversed, ME1A hs =!reversed
-   `define CSC_TYPE_C  04'hC // Normal   ME1B: ME1B   chambers facing toward IR.    ME1B hs =!reversed, ME1A hs = reversed
+//  `define CSC_TYPE_D  04'hD // Reversed ME1B: ME1B   chambers facing away from IR. ME1B hs = reversed, ME1A hs =!reversed. Negative endcap at P5
+    `define CSC_TYPE_C  04'hC // Normal   ME1B: ME1B   chambers facing toward IR.    ME1B hs =!reversed, ME1A hs = reversed. Positive endcap at P5
+    //Type A is for non-ME1/1, both two endcaps
 
 // Revision log
 //  02/08/2013  Initial Virtex-6 specific

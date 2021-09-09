@@ -1361,7 +1361,7 @@
       nhits_trig_s0_srl[0] <= nhits_chamber;
   end
 
-  wire [9:0] nhits_trig_s0_bx7    = nhits_trig_s0_srl[1];
+  wire [9:0] nhits_trig_s0_bx7    = nhits_trig_s0_srl[2];
   //signal: over 3BX;   control region: over 4BX 
   wire [9:0] nhits_trig_s0_bx678  = nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] + nhits_trig_s0_srl[1];
   wire [9:0] nhits_trig_s0_bx2345 = nhits_trig_s0_srl[7] + nhits_trig_s0_srl[6] + nhits_trig_s0_srl[5] + nhits_trig_s0_srl[4];
@@ -2828,6 +2828,7 @@ end
    //wire [9:0]             hmt_nhits_trig_xtmb;
    wire [MXHMTB-1:0]             hmt_trigger_xtmb;
    wire [MXHMTB-1:0]             hmt_trigger_vme;
+   wire hmt_clct_match;
 
    wire [MXCLCT-1:0]      clct0_xtmb;
    wire [MXCLCT-1:0]      clct1_xtmb;
@@ -3499,6 +3500,7 @@ end
 // Sequencer TMB LCT Match results
   //.hmt_nhits_trig_xtmb (hmt_nhits_trig_xtmb[9:0]),// Out HMT nhits for trigger
   .hmt_trigger_xtmb    (hmt_trigger_xtmb[MXHMTB-1:0]),// Out HMT nhits for trigger
+  .hmt_clct_match      (hmt_clct_match),// out
   .clct0_xtmb (clct0_xtmb[MXCLCT-1:0]),  // Out  First  CLCT
   .clct1_xtmb (clct1_xtmb[MXCLCT-1:0]),  // Out  Second CLCT
   .clctc_xtmb (clctc_xtmb[MXCLCTC-1:0]), // Out  Common to CLCT0/1 to TMB
@@ -4566,7 +4568,8 @@ wire [15:0] gemB_bxn_counter;
 
 // Sequencer
   //.hmt_nhits_trig_xtmb (hmt_nhits_trig_xtmb[9:0]),// In HMT nhits for trigger
-  .hmt_trigger_xtmb    (hmt_trigger_xtmb[MXHMTB-1:0]),// Out HMT nhits for trigger
+  .hmt_trigger_xtmb    (hmt_trigger_xtmb[MXHMTB-1:0]),// In HMT nhits for trigger
+  .hmt_clct_match      (hmt_clct_match),// in
   .clct0_xtmb (clct0_xtmb[MXCLCT-1:0]),  // In  First  CLCT
   .clct1_xtmb (clct1_xtmb[MXCLCT-1:0]),  // In  Second CLCT
   .clctc_xtmb (clctc_xtmb[MXCLCTC-1:0]), // In  Common to CLCT0/1 to TMB
