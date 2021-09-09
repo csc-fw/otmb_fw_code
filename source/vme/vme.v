@@ -7622,9 +7622,9 @@
 //------------------------------------------------------------------------------------------------------------------
 
   initial begin
-    hmt_thresh1_wr[9:0] = 10'd90; // RW, enable the HMT thresh1
-    hmt_thresh2_wr[9:0] = 10'd95; // RW, enable the HMT thresh1
-    hmt_thresh3_wr[9:0] = 10'd100; // RW, enable the HMT thresh1
+    hmt_thresh1_wr[9:0] = 10'd35; // RW, enable the HMT thresh1
+    hmt_thresh2_wr[9:0] = 10'd35; // RW, enable the HMT thresh1
+    hmt_thresh3_wr[9:0] = 10'd35; // RW, enable the HMT thresh1
     hmt_thresh1_wr[10]  = 1'b0; // pass threshold or not 
     hmt_thresh2_wr[10]  = 1'b0; // pass threshold or not 
     hmt_thresh3_wr[10]  = 1'b0; // pass threshold or not 

@@ -22,15 +22,15 @@
 
    // version_format is control by gem_enable, ccLUT_enable
   `define VERSION_FORMAT       04'h2   // [12:09]; 0=TMB standard, 1=OTMB Standard, 2=CCLUT, 3=GEM+CCLUT
-  `define VERSION_MAJOR        04'h0   // [08:05];5 bits = Major Version (major features which breaks compatibility, requires c    hanges to other board firmware)
+  `define VERSION_MAJOR        04'h0   // [08:05];5 bits = Major Version (major features which breaks compatibility, requires changes to other board firmware)
   `define VERSION_MINOR        05'h0   // [04:00];6 bits = Minor version  (minor features, internal fixes, bug fixes, etc).
 
   `define CCLUT                01'h1  // 1=turn on CCLUT
 // Conditional compile flags: Enable only one CSC_TYPE
-    `define CSC_TYPE_A			04'hA		// Normal   CSC:  Normal chambers facing toward IR
-//`define CSC_TYPE_B			04'hB		// Normal   CSC:  Normal chambers facing toward IR
-//  `define CSC_TYPE_C  04'hC // Normal   ME1B: ME1B   chambers facing toward IR.    ME1B hs =!reversed, ME1A hs = reversed
-//  `define CSC_TYPE_D  04'hD    // Reversed ME1B: ME1B   chambers facing away from IR. ME1B hs = reversed, ME1A hs =!reversed
+    `define CSC_TYPE_A			04'hA		// Normal   CSC:  Normal chambers facing toward IR. All non-ME11 chambers at P5
+//`define CSC_TYPE_B			04'hB		// Normal   CSC:  Normal chambers facing toward IR. Not used anywhere
+//  `define CSC_TYPE_C  04'hC // Normal   ME1B: ME1B   chambers facing toward IR.    ME1B hs =!reversed, ME1A hs = reversed. plus ME11
+//  `define CSC_TYPE_D  04'hD    // Reversed ME1B: ME1B   chambers facing away from IR. ME1B hs = reversed, ME1A hs =!reversed. Minus ME11
 
 // Revision log
 //  02/08/2013  Initial Virtex-6 specific

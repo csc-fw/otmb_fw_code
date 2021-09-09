@@ -738,6 +738,7 @@
 // TMB LCT Match
   //hmt_nhits_trig_xtmb,
   hmt_trigger_xtmb,
+  hmt_clct_match,
   
   clct0_xtmb,
   clct1_xtmb,
@@ -1509,6 +1510,7 @@
 // TMB LCT Match
   //output  [9:0]          hmt_nhits_trig_xtmb;
   output  [MXHMTB-1:0]          hmt_trigger_xtmb;
+  output                 hmt_clct_match;
   output  [MXCLCT-1:0]   clct0_xtmb; // 1st CLCT to TMB
   output  [MXCLCT-1:0]   clct1_xtmb; // 2nd CLCT to TMB
   output  [MXCLCTC-1:0]  clctc_xtmb; // Common to CLCT0/1 to TMB
@@ -2718,6 +2720,7 @@
   assign clct0_vpf = clct0_valid && clct_pop_xtmb;
   assign clct1_vpf = clct1_valid && clct_pop_xtmb;
 
+  assign hmt_clct_match = hmt_fired_trigger    && clct_push_xtmb && clct0_vpf;
 // JG: this functionality is being removed, 10/25/2017...
 // Algo2016: latch key half-strips for valid clct0 and clct1
 /*  reg [MXKEYBX-1:0] hs_key_1st_algo2016;
@@ -2994,7 +2997,7 @@
     hmt_cnt_en[1]  <= hmt_trigger[1:0] == 2'b10; // hmt over threshold2
     hmt_cnt_en[2]  <= hmt_trigger[1:0] == 2'b11; // hmt over threshold3
     hmt_cnt_en[3]  <= hmt_fired_pretrigger && clct_pretrig;// hmt && preCLCT
-    hmt_cnt_en[4]  <= hmt_fired_trigger    && clct_push_xtmb && clct0_vpf;// hmt && CLCT
+    hmt_cnt_en[4]  <= hmt_clct_match;// hmt && CLCT
     hmt_cnt_en[5]  <= hmt_fired_tmb_ff     && tmb_match; // hmt && LCT vpf
     hmt_cnt_en[6]  <= tmb_pulse_hmt_only; // tmb trigger pulse from hmt
     hmt_cnt_en[7]  <= tmb_keep_hmt_only;  // tmb trigger keep from hmt
@@ -3826,6 +3829,7 @@
   wire [9:0] r_hmt_nhits_trig_bx678_xtmb;
   //assign {r_clct1_qlt_xtmb, r_clct1_bnd_xtmb, r_clct1_xky_xtmb, r_clct1_carry_xtmb, r_clct0_qlt_xtmb, r_clct0_bnd_xtmb, r_clct0_xky_xtmb, r_clct0_carry_xtmb}   = xtmb_cclut_rdata;
   assign {r_hmt_nhits_trig_bx678_xtmb, r_clct1_bnd_xtmb, r_clct1_xky_xtmb, r_clct1_carry_xtmb, r_clct0_bnd_xtmb, r_clct0_xky_xtmb, r_clct0_carry_xtmb}   = xtmb_cclut_rdata;
+  wire [6:0] r_hmt_nhits_trig_bx678_xtmb_header =  (r_hmt_nhits_trig_bx678_xtmb>=10'h80) ? 7'h7F : r_hmt_nhits_trig_bx678_xtmb[6:0];
 
   wire [5:0] r_layers_hit = r_clcta_xtmb[5:0]; // Layers hit
   wire       r_clct1_busy = r_clcta_xtmb[6];   // CLCT1 busy internal check
@@ -4267,7 +4271,7 @@
   assign  header10_run3_[10: 0]   =  r_clct0_carry_xtmb[MXPATC-1:0];
   assign  header10_run3_[11]      =  run3_trig_df;
   assign  header10_run3_[13:12]   =  r_clct0_xky_xtmb[1:0];
-  assign  header10_run3_[14]      =  r_hmt_nhits_trig_bx678_xtmb[0];
+  assign  header10_run3_[14]      =  r_hmt_nhits_trig_bx678_xtmb_header[0];
   assign  header10_[14:0]   =  run3_daq_df ? header10_run3_[14:0] : r_pretrig_counter[29:15]; // CLCT pre-trigger counter
   assign  header10_[18:15]  =  0;              // DDU+DMB control flags
 
@@ -4282,7 +4286,7 @@
   assign  header14_run3_[10: 0]   =  r_clct1_carry_xtmb[MXPATC-1:0];
   assign  header14_run3_[11]      =  1'b0;//????
   assign  header14_run3_[13:12]   =  r_clct1_xky_xtmb[1:0];
-  assign  header14_run3_[14]      =  r_hmt_nhits_trig_bx678_xtmb[1];
+  assign  header14_run3_[14]      =  r_hmt_nhits_trig_bx678_xtmb_header[1];
   assign  header14_[14:0]   =  run3_daq_df ? header14_run3_[14:0] : r_trig_counter[29:15]; // TMB trigger counter
   assign  header14_[18:15]  =  0;              // DDU+DMB control flags
 
@@ -4380,7 +4384,7 @@
   assign  header29_[18:15]  =  0;              // DDU+DMB control flags
 
   //assign  header30_[4:0]    =  r_alct_bxn[4:0];      // ALCT0/1 bxn
-  assign  header30_[4:0]    =  run3_daq_df ? r_hmt_nhits_trig_bx678_xtmb[6:2] : r_alct_bxn[4:0];         // ALCT0/1 bxn
+  assign  header30_[4:0]    =  run3_daq_df ? r_hmt_nhits_trig_bx678_xtmb_header[6:2] : r_alct_bxn[4:0];         // ALCT0/1 bxn
   assign  header30_[6:5]    =  r_alct_ecc_err[1:0];    // ALCT trigger path ECC error code
   assign  header30_[11:7]   =  cfeb_badbits_found[4:0];  // CFEB[n] has at least 1 bad bit
   assign  header30_[12]     =  cfeb_badbits_blocked;    // A CFEB had bad bits that were blocked

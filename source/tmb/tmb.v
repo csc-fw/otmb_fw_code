@@ -148,6 +148,7 @@
 // Sequencer
   //hmt_nhits_trig_xtmb,
   hmt_trigger_xtmb,
+  hmt_clct_match,
   clct0_xtmb,
   clct1_xtmb,
   clctc_xtmb,
@@ -492,6 +493,7 @@
 // Sequencer
   //input [9:0]  hmt_nhits_trig_xtmb;
   input [MXHMTB-1:0]  hmt_trigger_xtmb;
+  input               hmt_clct_match;
   input [MXCLCT-1:0]  clct0_xtmb; // First  CLCT
   input [MXCLCT-1:0]  clct1_xtmb; // Second CLCT
   input [MXCLCTC-1:0] clctc_xtmb; // Common to CLCT0/1 to TMB
@@ -856,9 +858,12 @@
   wire [MXALCT-1:0] alct0_fake_srl, alct1_fake_srl;
   reg   alct0_fake_vpf = 1'b0;
   reg   alct1_fake_vpf = 1'b0;
+
+  reg [3:0] fakealct_srl_adr = 0;
   always @(posedge clock) begin
      alct0_fake_vpf <= clct0_xtmb[0];
      alct1_fake_vpf <= clct1_xtmb[0];
+     fakealct_srl_adr <= clct_win_center-2'b10+clctc_xtmb;
   end
   assign alct0_fake[   0]   = alct0_fake_vpf;
   assign alct0_fake[02:1]   = 2'b11;
@@ -872,13 +877,8 @@
   assign alct1_fake[10:4]   = alct1_fake_vpf ? 7'd30 : 7'b0;
   assign alct1_fake[15:11]  = 4'b0;
 
-  reg [3:0] fakealct_srl_adr = 0;
-  always @(posedge clock) begin
-  fakealct_srl_adr <= clct_win_center-1'b1;
-  end
-
-  srl16e_bbl #(MXALCT) ualct0fake (.clock(clock),.ce(1'b1),.adr(fakealct_srl_adr),.d(alct0_fake),.q(alct0_fake_srl));
-  srl16e_bbl #(MXALCT) ualct1fake (.clock(clock),.ce(1'b1),.adr(fakealct_srl_adr),.d(alct1_fake),.q(alct1_fake_srl));
+  srl16e_bbl #(MXALCT) ualct0fake (.clock(clock),.ce(1'b1),.adr(fakealct_srl_adr-1'b1),.d(alct0_fake),.q(alct0_fake_srl));
+  srl16e_bbl #(MXALCT) ualct1fake (.clock(clock),.ce(1'b1),.adr(fakealct_srl_adr-1'b1),.d(alct1_fake),.q(alct1_fake_srl));
 
   //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   //Attention!! disable this for OTMB at b904 and P5!!!!
@@ -908,8 +908,8 @@
 
 `ifdef FAKE_ALCT
   //Generate fake ALCT for TAMU test stand!
-  assign alct0_pipe = usefakealct ? (clct_win_center==4'b0 ? alct0_fake : alct0_fake_srl) : ((alct_ptr_is_0) ? alct0_tmb : alct0_srl);  // First  ALCT after alct pipe delay
-  assign alct1_pipe = usefakealct ? (clct_win_center==4'b0 ? alct1_fake : alct1_fake_srl) : ((alct_ptr_is_0) ? alct1_tmb : alct1_srl);  // Second ALCT after alct pipe delay
+  assign alct0_pipe = usefakealct ? (fakealct_srl_adr==4'b0 ? alct0_fake : alct0_fake_srl) : ((alct_ptr_is_0) ? alct0_tmb : alct0_srl);  // First  ALCT after alct pipe delay
+  assign alct1_pipe = usefakealct ? (fakealct_srl_adr==4'b0 ? alct1_fake : alct1_fake_srl) : ((alct_ptr_is_0) ? alct1_tmb : alct1_srl);  // Second ALCT after alct pipe delay
   assign alcte_pipe = usefakealct ?                                                  2'b0 : ((alct_ptr_is_0) ? alcte_tmb : alcte_srl);  // Second ALCT after alct pipe delay   
 `else
   assign alct0_pipe = (alct_ptr_is_0) ? alct0_tmb : alct0_srl;  // First  ALCT after alct pipe delay
@@ -934,6 +934,7 @@
   wire [MXCCLUTB-1  : 0]  clct1_cclut_pipe, clct1_cclut_srl;
 
   wire [MXHMTB-1    :0] hmt_trigger_pipe,hmt_trigger_srl;
+  wire hmt_clct_match_pipe, hmt_clct_match_srl;
 
   wire [MXBADR-1:0]  wr_adr_xtmb_pipe,   wr_adr_xtmb_srl;  // Buffer write address after clct pipeline delay
   wire               wr_push_xtmb_pipe,  wr_push_xtmb_srl;
@@ -954,6 +955,7 @@
   srl16e_bbl #(MXCCLUTB ) uclct0cclut (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(clct0_cclut_xtmb),.q(clct0_cclut_srl));
   srl16e_bbl #(MXCCLUTB ) uclct1cclut (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(clct1_cclut_xtmb),.q(clct1_cclut_srl));
   srl16e_bbl #(MXHMTB   ) uhmt        (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(hmt_trigger_xtmb),.q(hmt_trigger_srl));
+  srl16e_bbl #(1)         uhmtclct    (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(hmt_clct_match  ),.q(hmt_clct_match_srl));
 
   wire clct_ptr_is_0 = (clct_srl_ptr == 0);             // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
 
@@ -964,6 +966,7 @@
   assign clct0_cclut_pipe   = (clct_ptr_is_0) ? clct0_cclut_xtmb : clct0_cclut_srl;
   assign clct1_cclut_pipe   = (clct_ptr_is_0) ? clct1_cclut_xtmb : clct1_cclut_srl;
   assign hmt_trigger_pipe   = (clct_ptr_is_0) ? hmt_trigger_xtmb : hmt_trigger_srl;
+  assign hmt_clct_match_pipe= (clct_ptr_is_0) ? hmt_clct_match   : hmt_clct_match_srl;
 
   assign wr_adr_xtmb_pipe   = (clct_ptr_is_0) ? wr_adr_xtmb   : wr_adr_xtmb_srl;  // Buffer write address after clct pipeline delay
   assign wr_push_xtmb_pipe  = (clct_ptr_is_0) ? wr_push_xtmb  : wr_push_xtmb_srl;
@@ -1235,9 +1238,9 @@
 
   assign alct_only_trig = (alct_noclct && tmb_allow_alct) || (alct_noclct_ro && tmb_allow_alct_ro);// ALCT-only triggers are allowed
 
-
-  wire hmt_fired_tmb   = (|hmt_trigger_pipe[1:0]) && tmb_allow_hmt    && run3_trig_df;
-  wire hmt_readout_tmb = (|hmt_trigger_pipe[1:0]) && tmb_allow_hmt_ro && run3_daq_df;
+  wire hmt_keep        = (hmt_clct_match_pipe && clct_kept) || !hmt_clct_match_pipe ;
+  wire hmt_fired_tmb   = hmt_keep && (|hmt_trigger_pipe[1:0]) && tmb_allow_hmt    && run3_trig_df;
+  wire hmt_readout_tmb = hmt_keep && (|hmt_trigger_pipe[1:0]) && tmb_allow_hmt_ro && run3_daq_df && !tmb_allow_hmt;
 
 // Latch clct match results for TMB and MPC pathways
   reg tmb_trig_pulse       = 0;
