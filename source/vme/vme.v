@@ -2267,7 +2267,7 @@
 // Sequencer Ports: CLCT Processing
   input  [11:0]      sequencer_state; // Sequencer State machine
   input              scint_veto_vme;  // Scintillator veto for FAST Sites
-  input              seq_trigger_nodeadtime,// nodead time for seq trigger
+  output              seq_trigger_nodeadtime;// nodead time for seq trigger
   assign  seq_trigger_nodeadtime = 1'b0;
 
   output  [MXDRIFT-1:0] drift_delay;          // CSC Drift delay clocks

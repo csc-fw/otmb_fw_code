@@ -1506,7 +1506,7 @@
 
   //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   //Attention!! disable this for OTMB at b904 and P5!!!!
-  wire usefakealct = gem_me1a_match_nogem; //1'b1; // should be false in normal OTMB Firmware
+  wire usefakealct = algo2016_clct_to_alct;//1'b1; // should be false in normal OTMB Firmware
   //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 `endif
 //------------------------------------------------------------------------------------------------------------------
