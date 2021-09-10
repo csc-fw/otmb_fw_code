@@ -1346,6 +1346,16 @@
   wire [9:0] hmt_thresh1, hmt_thresh2, hmt_thresh3;
   wire [MXHMTB-1:0] hmt_trigger ;
 
+  wire [5:0] hmt_aff_thresh = 6'd3;
+  wire [MXCFEB-1 : 0] hmt_active_feb_s0;
+
+  assign hmt_active_feb_s0[0] = cfeb_nhits[0] >= hmt_aff_thresh;
+  assign hmt_active_feb_s0[1] = cfeb_nhits[1] >= hmt_aff_thresh;
+  assign hmt_active_feb_s0[2] = cfeb_nhits[2] >= hmt_aff_thresh;
+  assign hmt_active_feb_s0[3] = cfeb_nhits[3] >= hmt_aff_thresh;
+  assign hmt_active_feb_s0[4] = cfeb_nhits[4] >= hmt_aff_thresh;
+  assign hmt_active_feb_s0[5] = cfeb_nhits[5] >= hmt_aff_thresh;
+  assign hmt_active_feb_s0[6] = cfeb_nhits[6] >= hmt_aff_thresh;
 
   wire [9:0] nhits_chamber = hmt_me1a_enable ? (cfeb_nhits[0] + cfeb_nhits[1] + cfeb_nhits[2] + cfeb_nhits[3] + cfeb_nhits[4] + cfeb_nhits[5] + cfeb_nhits[6]) : (cfeb_nhits[0] + cfeb_nhits[1] + cfeb_nhits[2] + cfeb_nhits[3]);
   reg [9:0] nhits_trig_s0_srl [7:0];//array 8x10bits
@@ -1403,6 +1413,9 @@
       hmt_fired_ff[1] <= hmt_fired_ff[0];
   end
 
+  wire [MXCFEB-1 : 0] hmt_active_feb;
+  srl16e_bbl #(MXCFEB)     udhmtaff  ( .clock(clock), .ce(1'b1), .adr(hmt_dly_const-4'd1+4'd3), .d(hmt_active_feb_s0), .q(hmt_active_feb ));
+  
 // Status Ports
   wire  [MXCFEB-1:0]  demux_tp_1st;
   wire  [MXCFEB-1:0]  demux_tp_2nd;
@@ -3197,6 +3210,7 @@ end
   .hmt_nhits_trig_bx678      (hmt_nhits_trig_bx678[9:0]),//In
   .hmt_nhits_trig_bx2345     (hmt_nhits_trig_bx2345[9:0]), //In
   .hmt_trigger         (hmt_trigger[MXHMTB-1:0]), // In HMT trigger results
+  .hmt_active_feb      (hmt_active_feb[MXCFEB-1:0]), // In AFF from HMT
 
 // Sequencer Pattern Finder CLCT results
   .hs_hit_1st (hs_hit_1st[MXHITB-1:0]),  // In  1st CLCT pattern hits
@@ -3322,6 +3336,7 @@ end
 
   .seq_trigger     (seq_trigger),           // Out  Sequencer requests L1A from CCB
   .sequencer_state (sequencer_state[11:0]), // Out  Sequencer state for vme
+  .seq_trigger_nodeadtime (seq_trigger_nodeadtime),  //In no dead time for seq-trigger
 
   .cfeb_allow_hmt_ro         (cfeb_allow_hmt_ro),// In fire the "pretrigger" when hmt is fired
   .hmt_nhits_trig_vme        (hmt_nhits_trig_vme[9:0]),// Out HMT nhits for trigger
@@ -5528,6 +5543,7 @@ wire [15:0] gemB_bxn_counter;
       .pid_thresh_postdrift (pid_thresh_postdrift[MXPIDB-1:0]), // Out  Minimum pattern ID   for a valid pattern
       .pretrig_halt         (pretrig_halt),                     // Out  Pretrigger and halt until unhalt arrives
       .scint_veto_clr       (scint_veto_clr),                   // Out  Clear scintillator veto ff
+      .seq_trigger_nodeadtime (seq_trigger_nodeadtime),  //Out no dead time for seq-trigger
 
       .fifo_mode         (fifo_mode[MXFMODE-1:0]),        // Out  FIFO Mode 0=no dump,1=full,2=local,3=sync
       .fifo_tbins_cfeb   (fifo_tbins_cfeb[MXTBIN-1:0]),   // Out  Number CFEB FIFO time bins to read out
