@@ -584,6 +584,7 @@
 
   seq_trigger,
   sequencer_state,
+  seq_trigger_nodeadtime,
   
   hmt_nhits_trig_vme,
   hmt_nhits_trig_bx678_vme,
