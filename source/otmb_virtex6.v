@@ -1181,6 +1181,15 @@
   wire [9:0] hmt_thresh1, hmt_thresh2, hmt_thresh3;
   wire [MXHMTB-1:0] hmt_trigger ;
 
+  wire [5:0] hmt_aff_thresh = 6'd3;
+  wire [MXCFEB-1:0] hmt_active_feb_s0;
+
+  assign hmt_active_feb_s0[0] = cfeb_nhits[0] >= hmt_aff_thresh;
+  assign hmt_active_feb_s0[1] = cfeb_nhits[1] >= hmt_aff_thresh;
+  assign hmt_active_feb_s0[2] = cfeb_nhits[2] >= hmt_aff_thresh;
+  assign hmt_active_feb_s0[3] = cfeb_nhits[3] >= hmt_aff_thresh;
+  assign hmt_active_feb_s0[4] = cfeb_nhits[4] >= hmt_aff_thresh;
+
   wire [9:0] nhits_chamber = cfeb_nhits[0] + cfeb_nhits[1] + cfeb_nhits[2] + cfeb_nhits[3] + cfeb_nhits[4];
   reg [9:0] nhits_trig_s0_srl [7:0];//array 8x10bits
 
@@ -1236,6 +1245,9 @@
       hmt_fired_ff[0] <= hmt_fired;
       hmt_fired_ff[1] <= hmt_fired_ff[0];
   end
+
+  wire [MXCFEB-1 : 0] hmt_active_feb;
+  srl16e_bbl #(MXCFEB)     udhmtaff  ( .clock(clock), .ce(1'b1), .adr(hmt_dly_const-4'd1+4'd3), .d(hmt_active_feb_s0), .q(hmt_active_feb ));
 
 // Status Ports
   wire  [MXCFEB-1:0]  demux_tp_1st;

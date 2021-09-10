@@ -470,6 +470,7 @@
   hmt_nhits_trig_bx678,
   hmt_nhits_trig_bx2345,
   hmt_trigger,
+  hmt_active_feb, 
 
 // Pattern Finder CLCT results
  
@@ -1246,6 +1247,8 @@
   input  [9:0]          hmt_nhits_trig_bx678; // HMT results
   input  [9:0]          hmt_nhits_trig_bx2345; // HMT results
   input  [MXHMTB-1:0]   hmt_trigger; // HMT nhits passing thresholds
+  input  [MXCFEB-1:0]   hmt_active_feb;
+
   input  [MXHITB-1:0]   hs_hit_1st;        // 1st CLCT pattern hits
   input  [MXPIDB-1:0]   hs_pid_1st;        // 1st CLCT pattern ID
   input  [MXKEYBX-1:0]  hs_key_1st;        // 1st CLCT key 1/2-strip
@@ -2621,7 +2624,7 @@
   wire              active_feb_flag;     // Active FEB flag selection
 
   wire hmt_fired_pretrigger = (|hmt_trigger[1:0]) && cfeb_allow_hmt_ro;//fired all cfebs when hmt is fired  
-  wire [MXCFEB-1:0] active_feb_list_hmt = {MXCFEB{hmt_fired_pretrigger}};
+  wire [MXCFEB-1:0] active_feb_list_hmt = {MXCFEB{hmt_fired_pretrigger}} & hmt_active_feb;
   
 
   assign active_feb_flag_pre = clct_push_pretrig;
