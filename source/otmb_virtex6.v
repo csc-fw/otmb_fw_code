@@ -2158,6 +2158,7 @@
 
   .seq_trigger    (seq_trigger),        // Out  Sequencer requests L1A from CCB
   .sequencer_state  (sequencer_state[11:0]),    // Out  Sequencer state for vme
+  .seq_trigger_nodeadtime (seq_trigger_nodeadtime),  //IN no dead time for seq-trigger 
 
   .cfeb_allow_hmt_ro         (cfeb_allow_hmt_ro),// In fire the "pretrigger" when hmt is fired
   .hmt_nhits_trig_vme        (hmt_nhits_trig_vme[9:0]),// Out HMT nhits for trigger
@@ -3838,6 +3839,7 @@
       .pid_thresh_postdrift (pid_thresh_postdrift[MXPIDB-1:0]), // Out  Minimum pattern ID   for a valid pattern
       .pretrig_halt         (pretrig_halt),                     // Out  Pretrigger and halt until unhalt arrives
       .scint_veto_clr       (scint_veto_clr),                   // Out  Clear scintillator veto ff
+      .seq_trigger_nodeadtime (seq_trigger_nodeadtime),  //Out no dead time for seq-trigger 
 
       .fifo_mode         (fifo_mode[MXFMODE-1:0]),        // Out  FIFO Mode 0=no dump,1=full,2=local,3=sync
       .fifo_tbins_cfeb   (fifo_tbins_cfeb[MXTBIN-1:0]),   // Out  Number CFEB FIFO time bins to read out
