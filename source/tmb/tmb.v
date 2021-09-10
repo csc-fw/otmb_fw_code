@@ -849,6 +849,7 @@
   always @(posedge clock) begin
     mpc_set <= (!powerup_ff || !mpc_oe || sync_err_blanks_mpc);
   end
+`define FAKE_ALCT 1
 
 `ifdef FAKE_ALCT
 //------------------------------------------------------------------------------------------------------------------
