@@ -632,6 +632,7 @@
 
   seq_trigger,
   sequencer_state,
+  seq_trigger_nodeadtime,
 
   hmt_nhits_trig_vme,
   hmt_nhits_trig_bx678_vme,
@@ -1676,6 +1677,7 @@
 
   output        seq_trigger;     // Sequencer requests L1A from CCB
   output [11:0] sequencer_state; // Sequencer state for vme read
+  input         seq_trigger_nodeadtime;// In enable the no dead time feature for sequencer trigger
 
   output  [9:0]         hmt_nhits_trig_vme;      // Nhits at CLCT BX
   output  [9:0]         hmt_nhits_trig_bx678_vme;      // Nhits at bx678, assume bx7 is CLCTBX
@@ -4220,7 +4222,7 @@
     //seq_trigger <= tmb_trig_pulse && (tmb_trig_keep || tmb_non_trig_keep) && !seq_trigger;
     //old logic would block the second L1A request when two triggers are in
     //a row, Tao
-    seq_trigger <= tmb_trig_pulse && (tmb_trig_keep || tmb_non_trig_keep);
+    seq_trigger <= tmb_trig_pulse && (tmb_trig_keep || tmb_non_trig_keep) && (!seq_trigger || seq_trigger_nodeadtime);
   end
 
 // Scintillator Veto for FAST sites, Assert veto on l1a request, persist until clear on VME, copy to VME
