@@ -489,6 +489,7 @@
   pid_thresh_postdrift,
   pretrig_halt,
   scint_veto_clr,
+  seq_trigger_nodeadtime,
 
   fifo_mode,
   fifo_tbins_cfeb,
@@ -1884,6 +1885,8 @@
 // Sequencer Ports: CLCT Processing
   input  [11:0]      sequencer_state;    // Sequencer State machine
   input          scint_veto_vme;      // Scintillator veto for FAST Sites
+  output         seq_trigger_nodeadtime;
+  assign  seq_trigger_nodeadtime = 1'b0;
 
   output  [MXDRIFT-1:0]  drift_delay;      // CSC Drift delay clocks
   output  [MXHITB-1:0]  hit_thresh_postdrift;  // Minimum pattern hits for a valid pattern
