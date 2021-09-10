@@ -505,6 +505,7 @@
   hmt_nhits_trig_bx678,
   hmt_nhits_trig_bx2345,
   hmt_trigger,
+  hmt_active_feb,
 
 // Pattern Finder CLCT results
  
@@ -1548,6 +1549,7 @@
   input  [9:0]         hmt_nhits_trig_bx678; // HMT results 
   input  [9:0]         hmt_nhits_trig_bx2345; // HMT results 
   input  [MXHMTB-1:0]  hmt_trigger; // HMT nhits passing thresholds
+  input  [MXCFEB-1:0]  hmt_active_feb;
 // Pattern Finder CLCT results
   input  [MXHITB-1:0]  hs_hit_1st;        // 1st CLCT pattern hits
   input  [MXPIDB-1:0]  hs_pid_1st;        // 1st CLCT pattern ID
@@ -3176,7 +3178,7 @@
   wire              active_feb_flag;     // Active FEB flag selection
 
   wire hmt_fired_pretrigger = (|hmt_trigger[1:0]) && cfeb_allow_hmt_ro;//fired all cfebs when hmt is fired
-  wire [MXCFEB-1:0] active_feb_list_hmt = {MXCFEB{hmt_fired_pretrigger}};
+  wire [MXCFEB-1:0] active_feb_list_hmt = {MXCFEB{hmt_fired_pretrigger}} & hmt_active_feb;
 
   assign active_feb_flag_pre = clct_push_pretrig;
   assign active_feb_list_pre = (active_feb_s0[MXCFEB-1:0] & {MXCFEB{active_feb_flag_pre}}) | active_feb_list_hmt;//from pretrigger
@@ -5345,13 +5347,6 @@
   assign  header38_[14]     =  buf_stalled_once;       // Buffer write pointer hit a fence and stalled
   assign  header38_[18:15]  =  0;                      // DDU+DMB control flags
 
-// Spare Frames
-  //GEM-CSC match and GEM configuration 
-  //assign  header39_run3_[0]   =  r_clct0_bnd_xtmb[3]; 
-  //assign  header39_run3_[1]   =  r_clct1_bnd_xtmb[3]; 
-  //assign  header39_run3_[3:2] =  r_clct0_xky_xtmb[1:0];
-  //assign  header39_run3_[5:4] =  r_clct1_xky_xtmb[1:0];
-  //assign  header39_[11:0]   =  run3_daq_df ? header39_run3_[11:0] : buf_fence_cnt[11:0]; // Number of fences in fence RAM currently
   assign  header39_[11:0]   =  buf_fence_cnt[11:0]; // Number of fences in fence RAM currently
   assign  header39_[12]     =  reverse_hs_csc;      // 1=Reverse staggered CSC, non-me1
   assign  header39_[13]     =  reverse_hs_me1a;     // 1=ME1A hstrip order reversed
