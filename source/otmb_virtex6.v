@@ -2056,6 +2056,7 @@
   .hmt_nhits_trig_bx678      (hmt_nhits_trig_bx678[9:0]),//In
   .hmt_nhits_trig_bx2345     (hmt_nhits_trig_bx2345[9:0]), //In
   .hmt_trigger         (hmt_trigger[MXHMTB-1:0]), // In HMT trigger results
+  .hmt_active_feb      (hmt_active_feb), //In
 
 // Sequencer Pattern Finder CLCT results
   .hs_hit_1st (hs_hit_1st[MXHITB-1:0]),  // In  1st CLCT pattern hits
