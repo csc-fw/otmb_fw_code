@@ -129,6 +129,19 @@
   alct_bx0_rx,
   alct_ecc_err,
 
+  //out for hmt
+  alct_vpf_pipe,
+  hmt_anode,
+  clct_vpf_pipe, 
+
+  hmt_nhits_bx7,//tmb match bx cathode hmt
+  hmt_nhits_bx678,
+  hmt_nhits_bx2345,
+  hmt_cathode_pipe, // tmb match bx
+
+  hmt_trigger_tmb, 
+  hmt_trigger_tmb_ro,
+
 // TMB-Sequencer Pipelines
   wr_adr_xtmb,
   wr_adr_rtmb,
@@ -146,9 +159,6 @@
   wr_avail_rmpc,
 
 // Sequencer
-  //hmt_nhits_trig_xtmb,
-  hmt_trigger_xtmb,
-  hmt_clct_match,
   clct0_xtmb,
   clct1_xtmb,
   clctc_xtmb,
@@ -180,6 +190,7 @@
   tmb_aff_list,
 
   hmt_fired_tmb_ff,
+  hmt_readout_tmb_ff,
   tmb_pulse_hmt_only,
   tmb_keep_hmt_only,
 
@@ -237,9 +248,6 @@
   tmb_allow_clct_ro,
   tmb_allow_match_ro,
 
-  tmb_allow_hmt,
-  tmb_allow_hmt_ro,
-
   algo2016_drop_used_clcts,
   algo2016_cross_bx_algorithm,
   algo2016_clct_use_corrected_bx,
@@ -262,6 +270,11 @@
 
 // VME Status
   event_clear_vme,
+  hmt_nhits_bx7_vme,                                                                                                                                                               
+  hmt_nhits_bx678_vme,
+  hmt_nhits_bx2345_vme,
+  hmt_cathode_vme,
+
   mpc_frame_vme,
   mpc0_frame0_vme,
   mpc0_frame1_vme,
@@ -459,6 +472,7 @@
  
   //HMT
   parameter MXHMTB   = 4;
+  parameter NHMTHITB   = 10;
 
 //------------------------------------------------------------------------------------------------------------------
 //Ports
@@ -473,6 +487,18 @@
   input [1:0]        alct_ecc_err; // ALCT ecc syndrome code
   input              alct_bx0_rx;  // ALCT bx0 received
   
+   //hmt
+  output alct_vpf_pipe; // alct vpf for hmt-alct match
+  output [MXHMTB-1:0] hmt_anode;// anode hmt bits
+  output clct_vpf_pipe; // alct vpf for hmt-alct match
+
+  input [NHMTHITB-1:0]   hmt_nhits_bx7;//CLCT bx
+  input [NHMTHITB-1:0]   hmt_nhits_bx678;
+  input [NHMTHITB-1:0]   hmt_nhits_bx2345;
+  input [MXHMTB-1:0]     hmt_cathode_pipe; // tmb match bx
+
+  input  hmt_trigger_tmb;   // hmt bits for trigger
+  input  hmt_trigger_tmb_ro;// hmt bits for readout only
 
 // TMB-Sequencer Pipelines
   input  [MXBADR-1:0] wr_adr_xtmb; // Buffer write address after drift time
@@ -491,9 +517,6 @@
   output wr_avail_rmpc; // Buffer available at MPC received
 
 // Sequencer
-  //input [9:0]  hmt_nhits_trig_xtmb;
-  input [MXHMTB-1:0]  hmt_trigger_xtmb;
-  input               hmt_clct_match;
   input [MXCLCT-1:0]  clct0_xtmb; // First  CLCT
   input [MXCLCT-1:0]  clct1_xtmb; // Second CLCT
   input [MXCLCTC-1:0] clctc_xtmb; // Common to CLCT0/1 to TMB
@@ -523,6 +546,7 @@
   output              tmb_clct1_discard; // CLCT1 was discarded from ME1A
   output [MXCFEB-1:0] tmb_aff_list;      // Active CFEBs for CLCT used in TMB match
   output              hmt_fired_tmb_ff;
+  output              hmt_readout_tmb_ff;
   output              tmb_pulse_hmt_only;
   output              tmb_keep_hmt_only;
 
@@ -579,9 +603,6 @@
   input tmb_allow_clct_ro;  // Allow CLCT only  readout, non-triggering
   input tmb_allow_match_ro; // Allow Match only readout, non-triggering
   
-  input tmb_allow_hmt;
-  input tmb_allow_hmt_ro;
-
   input algo2016_drop_used_clcts;       // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - drop used CLCTs
   input algo2016_cross_bx_algorithm;    // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
   input algo2016_clct_use_corrected_bx; // Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits NOT YET IMPLEMENTED:
@@ -604,6 +625,12 @@
 
 // VME Status
   input          event_clear_vme;  // Event clear for aff,clct,mpc vme diagnostic registers
+
+  output [NHMTHITB-1:0]   hmt_nhits_bx7_vme;//CLCT bx
+  output [NHMTHITB-1:0]   hmt_nhits_bx678_vme;
+  output [NHMTHITB-1:0]   hmt_nhits_bx2345_vme;
+  output [MXHMTB-1:0]     hmt_cathode_vme; // tmb match bx
+
   output          mpc_frame_vme;    // MPC frame latch
   output  [MXFRAME-1:0]  mpc0_frame0_vme;  // MPC best muon 1st frame
   output  [MXFRAME-1:0]  mpc0_frame1_vme;  // MPC best buon 2nd frame
@@ -921,6 +948,16 @@
   wire   alct0_pipe_vpf = alct0_pipe[0];
   wire   alct1_pipe_vpf = alct1_pipe[0];
 
+  assign alct_vpf_pipe  = alct0_pipe_vpf || alct1_pipe_vpf;
+
+  reg [1:0] hmt_anode_pipe [2:0];
+  always @(posedge clock) begin
+      hmt_anode_pipe[0] <= run3_alct_df ? alct0_pipe[13:12] : 2'b00;
+      hmt_anode_pipe[1] <= hmt_anode_pipe[0] ;
+      hmt_anode_pipe[2] <= hmt_anode_pipe[1] ;
+  end
+
+  assign hmt_anode = {hmt_anode_pipe[2][1:0], alct0_pipe[13:12]};
 //------------------------------------------------------------------------------------------------------------------
 // Push CLCT data into a 1bx to 16bx pipeline delay to wait for an alct match
 //------------------------------------------------------------------------------------------------------------------
@@ -934,8 +971,6 @@
   wire [MXCCLUTB-1  : 0]  clct0_cclut_pipe, clct0_cclut_srl;
   wire [MXCCLUTB-1  : 0]  clct1_cclut_pipe, clct1_cclut_srl;
 
-  wire [MXHMTB-1    :0] hmt_trigger_pipe,hmt_trigger_srl;
-  wire hmt_clct_match_pipe, hmt_clct_match_srl;
 
   wire [MXBADR-1:0]  wr_adr_xtmb_pipe,   wr_adr_xtmb_srl;  // Buffer write address after clct pipeline delay
   wire               wr_push_xtmb_pipe,  wr_push_xtmb_srl;
@@ -955,8 +990,6 @@
   //register shift for CCLUT
   srl16e_bbl #(MXCCLUTB ) uclct0cclut (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(clct0_cclut_xtmb),.q(clct0_cclut_srl));
   srl16e_bbl #(MXCCLUTB ) uclct1cclut (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(clct1_cclut_xtmb),.q(clct1_cclut_srl));
-  srl16e_bbl #(MXHMTB   ) uhmt        (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(hmt_trigger_xtmb),.q(hmt_trigger_srl));
-  srl16e_bbl #(1)         uhmtclct    (.clock(clock),.ce(1'b1),.adr(clct_srl_adr),.d(hmt_clct_match  ),.q(hmt_clct_match_srl));
 
   wire clct_ptr_is_0 = (clct_srl_ptr == 0);             // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
 
@@ -966,12 +999,12 @@
   assign clctf_pipe = (clct_ptr_is_0) ? clctf_xtmb : clctf_srl;  // Active cfeb list  after clct pipe delay
   assign clct0_cclut_pipe   = (clct_ptr_is_0) ? clct0_cclut_xtmb : clct0_cclut_srl;
   assign clct1_cclut_pipe   = (clct_ptr_is_0) ? clct1_cclut_xtmb : clct1_cclut_srl;
-  assign hmt_trigger_pipe   = (clct_ptr_is_0) ? hmt_trigger_xtmb : hmt_trigger_srl;
-  assign hmt_clct_match_pipe= (clct_ptr_is_0) ? hmt_clct_match   : hmt_clct_match_srl;
 
   assign wr_adr_xtmb_pipe   = (clct_ptr_is_0) ? wr_adr_xtmb   : wr_adr_xtmb_srl;  // Buffer write address after clct pipeline delay
   assign wr_push_xtmb_pipe  = (clct_ptr_is_0) ? wr_push_xtmb  : wr_push_xtmb_srl;
   assign wr_avail_xtmb_pipe = (clct_ptr_is_0) ? wr_avail_xtmb : wr_avail_xtmb_srl;
+
+  assign clct_vpf_pipe  = clct0_pipe[0] || clct1_pipe[0];
 
   wire  [MXBNDB - 1   : 0] clct0_bnd_pipe; // new bending
   wire  [MXXKYB-1     : 0] clct0_xky_pipe; // new position with 1/8 precision
@@ -1111,59 +1144,31 @@
     end
   endgenerate
 
-  wire [0:0] win_s0  [7:0];        // Tree encoder Finds best 4 of 16 window positions
-  wire [1:0] win_s1  [3:0];
+  // Tree encoder Finds best 4 of 16 window positions
+  wire [3:0] clct_win_best;
+  wire [3:0] clct_pri_best;
 
-  wire [3:0] pri_s0  [7:0];
-  wire [3:0] pri_s1  [3:0];
+  tree_encoder utree_encoder_clct(
+      .win_pri_0    (win_pri[ 0]),
+      .win_pri_1    (win_pri[ 1]),
+      .win_pri_2    (win_pri[ 2]),
+      .win_pri_3    (win_pri[ 3]),
+      .win_pri_4    (win_pri[ 4]),
+      .win_pri_5    (win_pri[ 5]),
+      .win_pri_6    (win_pri[ 6]),
+      .win_pri_7    (win_pri[ 7]),
+      .win_pri_8    (win_pri[ 8]),
+      .win_pri_9    (win_pri[ 9]),
+      .win_pri_10   (win_pri[10]),
+      .win_pri_11   (win_pri[11]),
+      .win_pri_12   (win_pri[12]),
+      .win_pri_13   (win_pri[13]),
+      .win_pri_14   (win_pri[14]),
+      .win_pri_15   (win_pri[15]),
 
-  assign {pri_s0[7],win_s0[7]} = (win_pri[15] > win_pri[14]) ? {win_pri[15],1'b1} : {win_pri[14],1'b0};
-  assign {pri_s0[6],win_s0[6]} = (win_pri[13] > win_pri[12]) ? {win_pri[13],1'b1} : {win_pri[12],1'b0};
-  assign {pri_s0[5],win_s0[5]} = (win_pri[11] > win_pri[10]) ? {win_pri[11],1'b1} : {win_pri[10],1'b0};
-  assign {pri_s0[4],win_s0[4]} = (win_pri[ 9] > win_pri[ 8]) ? {win_pri[ 9],1'b1} : {win_pri[ 8],1'b0};
-  assign {pri_s0[3],win_s0[3]} = (win_pri[ 7] > win_pri[ 6]) ? {win_pri[ 7],1'b1} : {win_pri[ 6],1'b0};
-  assign {pri_s0[2],win_s0[2]} = (win_pri[ 5] > win_pri[ 4]) ? {win_pri[ 5],1'b1} : {win_pri[ 4],1'b0};
-  assign {pri_s0[1],win_s0[1]} = (win_pri[ 3] > win_pri[ 2]) ? {win_pri[ 3],1'b1} : {win_pri[ 2],1'b0};
-  assign {pri_s0[0],win_s0[0]} = (win_pri[ 1] > win_pri[ 0]) ? {win_pri[ 1],1'b1} : {win_pri[ 0],1'b0};
-
-  assign {pri_s1[3],win_s1[3]} = (pri_s0[7] > pri_s0[6]) ? {pri_s0[7],{1'b1,win_s0[7]}} : {pri_s0[6],{1'b0,win_s0[6]}};
-  assign {pri_s1[2],win_s1[2]} = (pri_s0[5] > pri_s0[4]) ? {pri_s0[5],{1'b1,win_s0[5]}} : {pri_s0[4],{1'b0,win_s0[4]}};
-  assign {pri_s1[1],win_s1[1]} = (pri_s0[3] > pri_s0[2]) ? {pri_s0[3],{1'b1,win_s0[3]}} : {pri_s0[2],{1'b0,win_s0[2]}};
-  assign {pri_s1[0],win_s1[0]} = (pri_s0[1] > pri_s0[0]) ? {pri_s0[1],{1'b1,win_s0[1]}} : {pri_s0[0],{1'b0,win_s0[0]}};
-
-  reg  [3:0] win_s2 [0:0];          // Parallel encoder finds best 1-of-4 window positions
-  reg  [3:0] pri_s2 [0:0];
-
-  always @(pri_s1[0] or win_s1[0]) begin
-  if      ((pri_s1[3] > pri_s1[2]) &&
-      (pri_s1[3] > pri_s1[1]) &&
-      (pri_s1[3] > pri_s1[0]))
-      begin
-      pri_s2[0]  = pri_s1[3];
-      win_s2[0]  = {2'd3,win_s1[3]};
-      end
-
-  else if((pri_s1[2] > pri_s1[1]) &&
-      (pri_s1[2] > pri_s1[0]))
-      begin
-      pri_s2[0]  = pri_s1[2];
-      win_s2[0]  = {2'd2,win_s1[2]};
-      end
-
-  else if(pri_s1[1] > pri_s1[0])
-      begin
-      pri_s2[0]  = pri_s1[1];
-      win_s2[0]  = {2'd1,win_s1[1]};
-      end
-  else
-      begin
-      pri_s2[0]  = pri_s1[0];
-      win_s2[0]  = {2'd0,win_s1[0]};
-      end
-  end
-
-  wire [3:0] clct_win_best = win_s2[0];
-  wire [3:0] clct_pri_best = pri_s2[0];
+      .win_best     (clct_win_best),
+      .pri_best     (clct_pri_best)
+        );
 
 // CLCT window width is generated by a pulse propagating down the enabled clct_sr stages  
   wire clct_window_open    = |(clct_vpf_sr & clct_sr_include);
@@ -1239,9 +1244,8 @@
 
   assign alct_only_trig = (alct_noclct && tmb_allow_alct) || (alct_noclct_ro && tmb_allow_alct_ro);// ALCT-only triggers are allowed
 
-  wire hmt_keep        = (hmt_clct_match_pipe && clct_kept) || !hmt_clct_match_pipe ;
-  wire hmt_fired_tmb   = hmt_keep && (|hmt_trigger_pipe[1:0]) && tmb_allow_hmt    && run3_trig_df;
-  wire hmt_readout_tmb = hmt_keep && (|hmt_trigger_pipe[1:0]) && tmb_allow_hmt_ro && run3_daq_df && !tmb_allow_hmt;
+  wire hmt_fired_tmb   = (|hmt_trigger_tmb[1:0]) && run3_trig_df;
+  wire hmt_readout_tmb = (|hmt_trigger_tmb_ro[1:0]) && run3_daq_df;
 
 // Latch clct match results for TMB and MPC pathways
   reg tmb_trig_pulse       = 0;
@@ -1270,6 +1274,7 @@
 
   always @(posedge clock) begin
     hmt_fired_tmb_ff     <= hmt_fired_tmb;
+    hmt_readout_tmb_ff   <= hmt_readout_tmb;
     tmb_pulse_hmt_only   <= hmt_fired_tmb && !trig_pulse;
     tmb_keep_hmt_only    <= hmt_fired_tmb && !trig_keep;
 
@@ -1691,6 +1696,28 @@
 // TMB is supposed to rank LCTs, but doesn't yet
   assign tmb_rank_err = (lct0_quality[3:0] * lct0_vpf) < (lct1_quality[3:0] * lct1_vpf);
 
+  reg [NHMTHITB-1:0]   hmt_nhits_bx7_ff=0;//CLCT bx
+  reg [NHMTHITB-1:0]   hmt_nhits_bx678_ff=0;
+  reg [NHMTHITB-1:0]   hmt_nhits_bx2345_ff=0;
+  reg [MXHMTB-1:0]     hmt_cathode_ff=0; // tmb match bx
+  always @(posedge clock) begin
+    hmt_nhits_bx7_ff    <= hmt_nhits_bx7;
+    hmt_nhits_bx678_ff  <= hmt_nhits_bx678;
+    hmt_nhits_bx2345_ff <= hmt_nhits_bx2345;
+    hmt_cathode_ff      <= hmt_cathode_pipe;
+    if (event_clear_vme) begin
+        hmt_nhits_bx7_vme    <= 0;
+        hmt_nhits_bx678_vme  <= 0;
+        hmt_nhits_bx2345_vme <= 0;
+        hmt_cathode_vme      <= 0;
+    end
+    else if (trig_mpc || mpc0_frame0_pulse[15]) begin
+        hmt_nhits_bx7_vme    <= hmt_nhits_bx7_ff;
+        hmt_nhits_bx678_vme  <= hmt_nhits_bx678_ff;
+        hmt_nhits_bx2345_vme <= hmt_nhits_bx2345_ff;
+        hmt_cathode_vme      <= hmt_cathode_ff;
+    end
+  end
 //-------------------------------------------------------------------------------------------------------------------
 // MPC Transmitter Section
 //-------------------------------------------------------------------------------------------------------------------
