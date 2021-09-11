@@ -1169,8 +1169,8 @@
   //wire  [9:0]         allcfeb_nhits = cfeb_nhits[0] + cfeb_nhits[1] + cfeb_nhits[2] + cfeb_nhits[3] + cfeb_nhits[4] + cfeb_nhits[5] + cfeb_nhits[6];
   reg [1:0] hmt_reset_ff = 2'b00;
   always @(posedge clock) begin
-    hmt_reset_ff[0] <= (global_reset || ttc_resync) || fmm_trig_stop;
-    hmt_reset_ff[1] <= hmt_reset_ff[0];
+    hmt_reset_ff[0] <= (global_reset || ttc_resync);
+    hmt_reset_ff[1] <= hmt_reset_ff[0] || fmm_trig_stop;
   end
 
   wire hmt_reset = |hmt_reset_ff;
