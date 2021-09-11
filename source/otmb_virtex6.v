@@ -1669,6 +1669,8 @@
   wire  hmt_allow_cathode_ro;
   wire  hmt_allow_anode_ro;
   wire  hmt_allow_match_ro;
+  wire  hmt_anode_bkg_check;
+  wire  hmt_cathode_bkg_check;
 
   wire [NHMTHITB-1:0] hmt_nhits_bx7;
   wire [NHMTHITB-1:0] hmt_nhits_bx678;
@@ -1730,6 +1732,8 @@
   .hmt_allow_cathode_ro(hmt_allow_cathode_ro),//In hmt allow to readout on cathode
   .hmt_allow_anode_ro  (hmt_allow_anode_ro),//In hmt allow to readout on anode
   .hmt_allow_match_ro  (hmt_allow_match_ro),//In hmt allow to readout on match
+  .hmt_anode_bkg_check  (hmt_anode_bkg_check),//In hmt fired shoudl check anode bg lower than threshold
+  .hmt_cathode_bkg_check(hmt_cathode_bkg_check),//In hmt fired shoudl check cathode bg lower than threshold
   // sequencer port
   .hmt_fired_pretrig   (hmt_fired_pretrig),//out, hmt fired preCLCT bx
   .hmt_active_cfeb     (hmt_active_cfeb[MXCFEB-1:0]),//Out hmt active cfeb flags
@@ -3935,6 +3939,8 @@
       .hmt_allow_cathode_ro(hmt_allow_cathode_ro), //Out hmt allow to readout on cathode
       .hmt_allow_anode_ro  (hmt_allow_anode_ro),   //Out hmt allow to readout on anode
       .hmt_allow_match_ro  (hmt_allow_match_ro),   //Out hmt allow to readout on match
+      .hmt_anode_bkg_check  (hmt_anode_bkg_check), //Out hmt fired shoudl check anode bg lower than threshold
+      .hmt_cathode_bkg_check(hmt_cathode_bkg_check),//Out hmt fired shoudl check cathode bg lower than threshold
 
       // Sequencer Ports: Latched CLCTs + Status
       .event_clear_vme    (event_clear_vme),          // Out  Event clear for vme diagnostic registers

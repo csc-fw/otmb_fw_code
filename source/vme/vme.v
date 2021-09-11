@@ -538,6 +538,8 @@
   hmt_allow_anode_ro   ,
   hmt_allow_cathode_ro ,
   hmt_allow_match_ro   ,
+  hmt_anode_bkg_check  ,
+  hmt_cathode_bkg_check,
 
 // Sequencer Ports: Latched CLCTs + Status
   event_clear_vme,
@@ -7700,7 +7702,8 @@
     hmt_thresh3_wr[   11] = 1'b0; //  RW, hmt allow to readout on anode hmt
     hmt_thresh3_wr[   12] = 1'b0; //  RW, hmt allow to readout on cathode hmt
     hmt_thresh3_wr[   13] = 1'b0; //  RW, hmt allow to readout on match hmt
-    hmt_thresh3_wr[15:14] = 2'b0; //  not used
+    hmt_thresh3_wr[   14] = 1'b0; //  RW, hmt anode out-time counter low than threshold to fire hmt
+    hmt_thresh3_wr[   15] = 1'b0; //  RW, hmt cathode out-time counter lower than threshold to fire hmt
   end 
 
   assign hmt_thresh1[7:0]  = hmt_thresh1_wr[7:0];
@@ -7719,6 +7722,8 @@
   assign hmt_allow_anode_ro   = hmt_thresh3_wr[11];
   assign hmt_allow_cathode_ro = hmt_thresh3_wr[12];
   assign hmt_allow_match_ro   = hmt_thresh3_wr[13];
+  assign hmt_anode_bkg_check  = hmt_thresh3_wr[14];
+  assign hmt_cathode_bkg_check= hmt_thresh3_wr[15];
 
   assign hmt_thresh1_rd[15:0] = hmt_thresh1_wr[15:0];
   assign hmt_thresh2_rd[15:0] = hmt_thresh2_wr[15:0];
