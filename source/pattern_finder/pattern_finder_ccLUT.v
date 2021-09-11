@@ -1612,8 +1612,8 @@ module pattern_finder_ccLUT (
     .clock(clock),
 
     // Sortable pattern inputs
-    .pat00(hs_pat_s1[i]),
-    .pat01(hs_pat_s4[i]),
+    .pat00(hs_pat_s1[i][MXPIDB-1:0]),
+    .pat01(hs_pat_s4[i][MXPIDB-1:0]),
 
     // Carried half-strip bits
     .carry00(hs_carry_s1[i]),

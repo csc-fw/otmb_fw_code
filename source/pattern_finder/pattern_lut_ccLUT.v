@@ -8,7 +8,7 @@
   module pattern_lut_ccLUT (
     input                    clock,
 
-    input      [MXPATB-1:0]  pat00, pat01,
+    input      [MXPIDB-1:0:0]  pat00, pat01,
 
     input      [MXPATC-1:0]  carry00, carry01,
 
