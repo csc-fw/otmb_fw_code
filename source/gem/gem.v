@@ -634,7 +634,7 @@ parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
         .RSTRAMB       (1'b0),                                         // 1-bit B port set/reset input
         .RSTREGB       (1'b0),                                         // 1-bit B port register set/reset input
         .CLKBWRCLK     (clock),                                        // 1-bit B port clock/Write clock input
-        .ADDRBWRADDR   ({fifo_radr[10:0],3'hF}),                       // 14-bit B port address/Write address input 18b->[13:4]
+        .ADDRBWRADDR   ({fifo_radr[10:0],3'h7}),                       // 14-bit B port address/Write address input 9b->[13:3]
         .DIBDI         (),                                             // 16-bit B port data/MSB data input
         .DIPBDIP       (),                                             // 2-bit B port parity/MSB parity input
         .DOBDO         ({db[iclst][8:0],fifo_rdata_clst[iclst][6:0]}), // 16-bit B port data/MSB data output
@@ -672,7 +672,7 @@ parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
         .RSTRAMB       (1'b0),                                          // 1-bit B port set/reset input
         .RSTREGB       (1'b0),                                          // 1-bit B port register set/reset input
         .CLKBWRCLK     (clock),                                         // 1-bit B port clock/Write clock input
-        .ADDRBWRADDR   ({fifo_radr[10:0],3'hF}),                        // 14-bit B port address/Write address input 18b->[13:4]
+        .ADDRBWRADDR   ({fifo_radr[10:0],3'h7}),                        // 14-bit B port address/Write address input 9b->[13:3]
         .DIBDI         (),                                              // 16-bit B port data/MSB data input
         .DIPBDIP       (),                                              // 2-bit B port parity/MSB parity input
         .DOBDO         ({db[iclst][8:0],fifo_rdata_clst[iclst][13:7]}), // 16-bit B port data/MSB data output

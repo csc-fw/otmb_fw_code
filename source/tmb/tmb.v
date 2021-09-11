@@ -2734,7 +2734,7 @@
 // Latch clct match results for TMB and MPC pathways
 //--------------------------------------------------------------
  // a better version: do hmt-ALCT match 
-  wire hmt_keep        = (hmt_clct_match_pipe && clct_kept) || !hmt_clct_match_pipe;
+  wire hmt_keep        = (hmt_clct_match_pipe && clct_kept_run3) || !hmt_clct_match_pipe;
   wire hmt_fired_tmb   = hmt_keep && (|hmt_trigger_pipe[1:0]) && tmb_allow_hmt    && run3_trig_df;
   wire hmt_readout_tmb = hmt_keep && (|hmt_trigger_pipe[1:0]) && tmb_allow_hmt_ro && run3_daq_df && !tmb_allow_hmt;
 
@@ -3154,9 +3154,9 @@
   wire  tmb_dupe_clct = tmb_one_clct && tmb_two_alct;  // Duplicate clct if there are 2 alcts
 
   //wire  tmb_dupe_alct_run3 = tmb_dupe_alct && copyalct0_foralct1_pos_r;  // Duplicate alct if there are 2 clcts
-  //wire  tmb_dupe_clct_run3 = tmb_dupe_alct && copyclct0_forclct1_pos_r;  // Duplicate clct if there are 2 alcts
+  //wire  tmb_dupe_clct_run3 = tmb_dupe_clct && copyclct0_forclct1_pos_r;  // Duplicate clct if there are 2 alcts
   wire  tmb_dupe_alct_run3 = tmb_dupe_alct && copyalct0_foralct1_pos;  // Duplicate alct if there are 2 clcts
-  wire  tmb_dupe_clct_run3 = tmb_dupe_alct && copyclct0_forclct1_pos;  // Duplicate clct if there are 2 alcts
+  wire  tmb_dupe_clct_run3 = tmb_dupe_clct && copyclct0_forclct1_pos;  // Duplicate clct if there are 2 alcts
 
 // Duplicate alct and clct
   reg  [MXALCT-1:0]  alct0;

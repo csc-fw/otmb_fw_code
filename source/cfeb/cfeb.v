@@ -780,7 +780,7 @@
   .RSTRAMB      (1'b0),                //  1-bit B port set/reset input
   .RSTREGB      (1'b0),                //  1-bit B port register set/reset input
   .CLKBWRCLK      (clock),              //  1-bit B port clock/Write clock input
-  .ADDRBWRADDR    ({fifo_radr[10:0],3'hF}),      // 14-bit B port address/Write address input 18b->[13:4]
+  .ADDRBWRADDR    ({fifo_radr[10:0],3'h7}),      // 14-bit B port address/Write address input 18b->[13:4]
   .DIBDI        (),                  // 16-bit B port data/MSB data input
   .DIPBDIP      (),                  //  2-bit B port parity/MSB parity input
   .DOBDO        ({db[ily][7:0],fifo_rdata_ly[ily]}),// 16-bit B port data/MSB data output

@@ -955,10 +955,10 @@
     2'h2:  {gem_id,gem_rawhits} <= {2'b0, 1'b1, gem_tbin_cnt_dly[3:0], 2'd0, gem_fiber_cnt_dly[1:0], 2'd0, gem_sel_dly[1:0]}; // from gemB, fiber0
     2'h3:  {gem_id,gem_rawhits} <= {2'b0, 1'b1, gem_tbin_cnt_dly[3:0], 2'd0, gem_fiber_cnt_dly[1:0], 2'd0, gem_sel_dly[1:0]}; // from gemB, fiber1
    `else
-    2'h0:  {gem_id,gem_rawhits} <= gem_read_mask[0] ? {1'b0, fifo0_rdata_gem[RAM_WIDTH_GEM-1:0]} : 15'h3FF; // from gemA, fiber0
-    2'h1:  {gem_id,gem_rawhits} <= gem_read_mask[1] ? {1'b0, fifo1_rdata_gem[RAM_WIDTH_GEM-1:0]} : 15'h3FF; // from gemA, fiber1
-    2'h2:  {gem_id,gem_rawhits} <= gem_read_mask[2] ? {1'b1, fifo2_rdata_gem[RAM_WIDTH_GEM-1:0]} : 15'h7FF; // from gemB, fiber0
-    2'h3:  {gem_id,gem_rawhits} <= gem_read_mask[3] ? {1'b1, fifo3_rdata_gem[RAM_WIDTH_GEM-1:0]} : 15'h7FF; // from gemB, fiber1
+    2'h0:  {gem_id,gem_rawhits} <= gem_read_mask[0] ? {1'b0, fifo0_rdata_gem[RAM_WIDTH_GEM-1:0]} : 15'h3FFF; // from gemA, fiber0
+    2'h1:  {gem_id,gem_rawhits} <= gem_read_mask[1] ? {1'b0, fifo1_rdata_gem[RAM_WIDTH_GEM-1:0]} : 15'h3FFF; // from gemA, fiber1
+    2'h2:  {gem_id,gem_rawhits} <= gem_read_mask[2] ? {1'b1, fifo2_rdata_gem[RAM_WIDTH_GEM-1:0]} : 15'h7FFF; // from gemB, fiber0
+    2'h3:  {gem_id,gem_rawhits} <= gem_read_mask[3] ? {1'b1, fifo3_rdata_gem[RAM_WIDTH_GEM-1:0]} : 15'h7FFF; // from gemB, fiber1
    `endif
   endcase
   end

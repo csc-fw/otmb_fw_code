@@ -679,6 +679,8 @@
   wire  [MXMPCRX-1:0]  _mpc_rx;          // Received by ccb GTL chip, passed to TMB section
   wire  [MXBXN-1:0]    lhc_cycle;
 
+  wire fmm_trig_stop;
+
 // CCB Local
   wire  alct_vpf_tp;
   wire  clct_vpf_tp;
@@ -1330,6 +1332,14 @@
   //=====================================================
   // number of hits for ME1/1, 7 DCFEBs
   //wire  [9:0]         allcfeb_nhits = cfeb_nhits[0] + cfeb_nhits[1] + cfeb_nhits[2] + cfeb_nhits[3] + cfeb_nhits[4] + cfeb_nhits[5] + cfeb_nhits[6];
+  reg [1:0] hmt_reset_ff = 2'b00;
+  always @(posedge clock) begin
+    hmt_reset_ff[0] <= (global_reset || ttc_resync) || fmm_trig_stop;
+    hmt_reset_ff[1] <= hmt_reset_ff[0];
+  end
+
+  wire hmt_reset = |hmt_reset_ff;
+
   wire  hmt_enable;
   wire  hmt_me1a_enable;
 
@@ -1400,10 +1410,10 @@
   assign  hmt_nhits_trig_bx678  = (hmt_dly_const == 4'd0) ? nhits_trig_s0_bx678[9:0]  : nhits_trig_dly_bx678[9:0];
   assign  hmt_nhits_trig_bx2345 = (hmt_dly_const == 4'd0) ? nhits_trig_s0_bx2345[9:0] : nhits_trig_dly_bx2345[9:0];
 
-  assign hmt_trigger_bx678[0]  = ((hmt_nhits_trig_bx678  >= hmt_thresh1) || (hmt_nhits_trig_bx678  >= hmt_thresh3)) & nhits_bx678_peak & (~|hmt_fired_ff);
-  assign hmt_trigger_bx678[1]  = ((hmt_nhits_trig_bx678  >= hmt_thresh2) || (hmt_nhits_trig_bx678  >= hmt_thresh3)) & nhits_bx678_peak & (~|hmt_fired_ff);
-  assign hmt_trigger_bx2345[0] = ((hmt_nhits_trig_bx2345 >= hmt_thresh1) || (hmt_nhits_trig_bx2345 >= hmt_thresh3)) & (~|hmt_fired_ff);
-  assign hmt_trigger_bx2345[1] = ((hmt_nhits_trig_bx2345 >= hmt_thresh2) || (hmt_nhits_trig_bx2345 >= hmt_thresh3)) & (~|hmt_fired_ff);
+  assign hmt_trigger_bx678[0]  = ((hmt_nhits_trig_bx678  >= hmt_thresh1) || (hmt_nhits_trig_bx678  >= hmt_thresh3)) & nhits_bx678_peak & (~|hmt_fired_ff) & (~hmt_reset);
+  assign hmt_trigger_bx678[1]  = ((hmt_nhits_trig_bx678  >= hmt_thresh2) || (hmt_nhits_trig_bx678  >= hmt_thresh3)) & nhits_bx678_peak & (~|hmt_fired_ff) & (~hmt_reset);
+  assign hmt_trigger_bx2345[0] = ((hmt_nhits_trig_bx2345 >= hmt_thresh1) || (hmt_nhits_trig_bx2345 >= hmt_thresh3)) & (~|hmt_fired_ff) & (~hmt_reset);
+  assign hmt_trigger_bx2345[1] = ((hmt_nhits_trig_bx2345 >= hmt_thresh2) || (hmt_nhits_trig_bx2345 >= hmt_thresh3)) & (~|hmt_fired_ff) & (~hmt_reset);
   assign hmt_trigger = hmt_enable ? {hmt_trigger_bx2345, hmt_trigger_bx678} : 4'b0;
   wire   hmt_fired   = |hmt_trigger_bx678[1:0];
 
