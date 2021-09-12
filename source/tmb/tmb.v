@@ -2798,6 +2798,7 @@
   always @(posedge clock) begin
     //HMT part
     hmt_fired_tmb_ff     <= hmt_fired_tmb;
+    hmt_readout_tmb_ff   <= hmt_readout_tmb;
     tmb_pulse_hmt_only   <= hmt_fired_tmb && !trig_pulse_run3;
     tmb_keep_hmt_only    <= hmt_fired_tmb && !trig_keep_run3;
 
