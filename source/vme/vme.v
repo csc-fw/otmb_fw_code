@@ -2268,7 +2268,6 @@
   input  [11:0]      sequencer_state; // Sequencer State machine
   input              scint_veto_vme;  // Scintillator veto for FAST Sites
   output              seq_trigger_nodeadtime;// nodead time for seq trigger
-  assign  seq_trigger_nodeadtime = 1'b0;
 
   output  [MXDRIFT-1:0] drift_delay;          // CSC Drift delay clocks
   output  [MXHITB-1:0]  hit_thresh_postdrift; // Minimum pattern hits for a valid pattern
@@ -8846,6 +8845,7 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
     algo2016_ctrl_wr[8]   = 1'b0;  // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - similar to "old" behavior of CLCT-centric algorithm when ALCTs are droped from further usage
     algo2016_ctrl_wr[9]   = 1'b1;  // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
     algo2016_ctrl_wr[10]  = 1'b1;  // Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
+    algo2016_ctrl_wr[11]  = 1'b0;  
   end
   
   assign algo2016_use_dead_time_zone         = algo2016_ctrl_wr[0];   // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
@@ -8855,6 +8855,7 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   assign algo2016_drop_used_clcts            = algo2016_ctrl_wr[8];   // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - drop used CLCTs
   assign algo2016_cross_bx_algorithm         = algo2016_ctrl_wr[9];   // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
   assign algo2016_clct_use_corrected_bx      = algo2016_ctrl_wr[10];  // Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
+  assign seq_trigger_nodeadtime              = algo2016_ctrl_wr[11];  //allow seq trigger two in a row, new CMS trigger rule
 
   assign algo2016_ctrl_rd[15:0] = algo2016_ctrl_wr[15:0];
 

@@ -19,7 +19,6 @@
   input  [MXPATB  - 1:0]  pat0   , pat1   , pat2   , pat3   , pat4   , pat5   , pat6   ,
   input  [MXKEYB  - 1:0]  key0   , key1   , key2   , key3   , key4   , key5   , key6   ,
   input  [MXOFFSB - 1:0]  offs0  , offs1  , offs2  , offs3  , offs4  , offs5  , offs6  ,
-  input  [MXQLTB  - 1:0]  qlt0   , qlt1   , qlt2   , qlt3   , qlt4   , qlt5   , qlt6   ,
   input  [MXBNDB  - 1:0]  bend0  , bend1  , bend2  , bend3  , bend4  , bend5  , bend6  ,
   input  [MXPATC  - 1:0]  carry0 , carry1 , carry2 , carry3 , carry4 , carry5 , carry6 ,
 
@@ -27,8 +26,7 @@
   output reg [MXKEYBX - 1:0] best_key,
   output reg [MXBNDB  - 1:0] best_bend,
   output reg [MXPATC  - 1:0] best_carry,
-  output reg [MXXKYB  - 1:0] best_subkey,
-  output reg [MXQLTB  - 1:0] best_qlt
+  output reg [MXXKYB  - 1:0] best_subkey
   );
 
 // Constants
@@ -58,7 +56,6 @@ reg [MXOFFSB-1:0] best_offs;
           (sort_key6 > sort_key0))
       begin
       best_pat   = pat6;
-      best_qlt   = qlt6;
       best_bend  = bend6;
       best_carry = carry6;
       best_offs  = offs6;
@@ -73,7 +70,6 @@ reg [MXOFFSB-1:0] best_offs;
           (sort_key5 > sort_key0))
       begin
       best_pat   = pat5;
-      best_qlt   = qlt5;
       best_bend  = bend5;
       best_carry = carry5;
       best_offs  = offs5;
@@ -87,7 +83,6 @@ reg [MXOFFSB-1:0] best_offs;
           (sort_key4 > sort_key0))
       begin
       best_pat   = pat4;
-      best_qlt   = qlt4;
       best_bend  = bend4;
       best_carry = carry4;
       best_offs  = offs4;
@@ -100,7 +95,6 @@ reg [MXOFFSB-1:0] best_offs;
           (sort_key3 > sort_key0))
       begin
       best_pat   = pat3;
-      best_qlt   = qlt3;
       best_bend  = bend3;
       best_carry = carry3;
       best_offs  = offs3;
@@ -112,7 +106,6 @@ reg [MXOFFSB-1:0] best_offs;
           (sort_key2 > sort_key0))
       begin
       best_pat   = pat2;
-      best_qlt   = qlt2;
       best_bend  = bend2;
       best_carry = carry2;
       best_offs  = offs2;
@@ -123,7 +116,6 @@ reg [MXOFFSB-1:0] best_offs;
   else if(sort_key1 > sort_key0)
       begin
       best_pat   = pat1;
-      best_qlt   = qlt1;
       best_bend  = bend1;
       best_carry = carry1;
       best_offs  = offs1;
@@ -134,7 +126,6 @@ reg [MXOFFSB-1:0] best_offs;
   else
       begin
       best_pat   = pat0;
-      best_qlt   = qlt0;
       best_bend  = bend0;
       best_carry = carry0;
       best_offs  = offs0;

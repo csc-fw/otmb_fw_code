@@ -324,11 +324,9 @@
   clctc_xtmb,
   clctf_xtmb,
   //ccLUT
-  clct0_qlt_xtmb,
   clct0_bnd_xtmb,
   clct0_xky_xtmb,
   clct0_carry_xtmb, // Out  First  CLCT
-  clct1_qlt_xtmb,
   clct1_bnd_xtmb,
   clct1_xky_xtmb,
   clct1_carry_xtmb, // Out  Second CLCT
@@ -692,7 +690,6 @@
   //CCLUT
   parameter MXPATC   = 11;                // Pattern Carry Bits
   parameter MXOFFSB  = 4;                 // Quarter-strip bits
-  parameter MXQLTB   = 9;                 // Fit quality bits
   parameter MXBNDB   = 5;                 // Bend bits
   parameter MXXKYB   = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
   //parameter MXCCLUTB = 10+5+9+12;  // New 35bits for CCLUT, new quality, bnd, xky, comparator code 
@@ -928,11 +925,9 @@
   input  [MXCFEB-1:0]  clctf_xtmb; // Active feb list to TMB
   input                bx0_xmpc;   // bx0 to mpc
 
-  input [MXQLTB - 1   : 0] clct0_qlt_xtmb; // new quality
   input [MXBNDB - 1   : 0] clct0_bnd_xtmb; // new bending 
   input [MXXKYB-1     : 0] clct0_xky_xtmb; // new position with 1/8 precision
   input [MXPATC-1     : 0] clct0_carry_xtmb; // CC code 
-  input [MXQLTB - 1   : 0] clct1_qlt_xtmb; // new quality
   input [MXBNDB - 1   : 0] clct1_bnd_xtmb; // new bending 
   input [MXXKYB-1     : 0] clct1_xky_xtmb; // new position with 1/8 precision
   input [MXPATC-1     : 0] clct1_carry_xtmb; // CC code 
@@ -1637,11 +1632,9 @@
   wire   kill_clct0_pipe  = clct0_cfeb456_pipe && kill_me1a_clcts;  // Delete CLCT0 from ME1A
   wire   kill_clct1_pipe  = clct1_cfeb456_pipe && kill_me1a_clcts;  // Delete CLCT1 from ME1A
 
-  //wire  [MXQLTB - 1   : 0] clct0_qlt_pipe; // new quality
   //wire  [MXPATC-1     : 0] clct0_carry_pipe; // CC code 
   wire  [MXBNDB - 1   : 0] clct0_bnd_pipe; // new bending 
   wire  [MXXKYB-1     : 0] clct0_xky_pipe; // new position with 1/8 precision
-  //wire  [MXQLTB - 1   : 0] clct1_qlt_pipe; // new quality
   //wire  [MXPATC-1     : 0] clct1_carry_pipe; // CC code 
   wire  [MXBNDB - 1   : 0] clct1_bnd_pipe; // new bending 
   wire  [MXXKYB-1     : 0] clct1_xky_pipe; // new position with 1/8 precision
@@ -2640,7 +2633,7 @@
   .best_cluster1_vpf              (best_cluster1_vpf),
   .best_cluster1_angle            (best_cluster1_angle),
 
-  .gemcsc_match_dummy             (gemcsc_match_dummy)
+  .alctclctgem_match_sump         (alctclctgem_match_sump)
   );
 
 
@@ -3247,12 +3240,9 @@
   wire  [4:0]  clct1_key   = clct1[12:8];  // 1/2-strip ID number
   wire  [2:0]  clct1_cfeb  = clct1[15:13]; // Key CFEB ID
 
-  // clct0_cclut_xtmb = {clct0_qlt_xtmb, clct0_bnd_xtmb, clct0_xky_xtmb, clct0_carry_xtmb};
-  //wire  [MXQLTB - 1   : 0] clct0_qlt; // new quality
   wire  [MXBNDB - 1   : 0] clct0_bnd; // new bending 
   wire  [MXXKYB-1     : 0] clct0_xky; // new position with 1/8 precision
   //wire  [MXPATC-1     : 0] clct0_carry; // CC code 
-  //wire  [MXQLTB - 1   : 0] clct1_qlt; // new quality
   wire  [MXBNDB - 1   : 0] clct1_bnd; // new bending 
   wire  [MXXKYB-1     : 0] clct1_xky; // new position with 1/8 precision
   //wire  [MXPATC-1     : 0] clct1_carry; // CC code 
@@ -3978,7 +3968,16 @@
 //------------------------------------------------------------------------------------------------------------------
 // Sump
 //------------------------------------------------------------------------------------------------------------------
-  assign tmb_sump =
+  assign tmb_sump = 
+   alctclctgem_match_sump |
+  (|gemB_cluster_cscwire_mi[0] ) |
+  (|gemB_cluster_cscwire_mi[1] ) |
+  (|gemB_cluster_cscwire_mi[2] ) |
+  (|gemB_cluster_cscwire_mi[3] ) |
+  (|gemB_cluster_cscwire_mi[4] ) |
+  (|gemB_cluster_cscwire_mi[5] ) |
+  (|gemB_cluster_cscwire_mi[6] ) |
+  (|gemB_cluster_cscwire_mi[7] ) |
   (|injdum0)        |
   (|injdum1)        |
   (|mpcacc_rdata[15:4])  |

@@ -15,8 +15,7 @@
     output reg [MXOFFSB -1:0]  offs0, offs1,
     //output reg [MXKEYOFFSB -1:0]  key_offs0, key_offs1,
     //output reg [MXSUBKEYOFFSB -1:0]  subkey_offs0, subkey_offs1,
-    output reg [MXBNDB-1:0]  bend0, bend1,
-    output reg [MXQLTB-1:0]  quality0, quality1
+    output reg [MXBNDB-1:0]  bend0, bend1
 
   );
 
@@ -200,9 +199,6 @@ always @(*) begin
   bend1    <= rd1[4:0];
   offs0    <= rd0[8:5];
   offs1    <= rd1[8:5];
-
-  quality0 <= 9'b0;
-  quality1 <= 9'b0;
 
 end
 

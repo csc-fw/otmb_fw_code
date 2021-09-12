@@ -513,7 +513,6 @@
   hs_pid_1st,
   hs_key_1st,
 
-  hs_qlt_1st,
   hs_bnd_1st,
   hs_xky_1st,
   hs_carry_1st,
@@ -524,7 +523,6 @@
   hs_key_2nd,
   hs_bsy_2nd,
 
-  hs_qlt_2nd,
   hs_bnd_2nd,
   hs_xky_2nd,
   hs_carry_2nd,
@@ -649,11 +647,9 @@
   bxn_clct_vme,
   bxn_l1a_vme,
   
-  clct0_vme_qlt,
   clct0_vme_bnd,
   clct0_vme_xky,
   clct0_vme_carry,
-  clct1_vme_qlt,
   clct1_vme_bnd,
   clct1_vme_xky,
   clct1_vme_carry,
@@ -816,11 +812,9 @@
   clct1_xtmb,
   clctc_xtmb,
   clctf_xtmb,
-  clct0_qlt_xtmb,
   clct0_bnd_xtmb,
   clct0_xky_xtmb,
   clct0_carry_xtmb, // Out  First  CLCT
-  clct1_qlt_xtmb,
   clct1_bnd_xtmb,
   clct1_xky_xtmb,
   clct1_carry_xtmb, // Out  Second CLCT
@@ -1416,7 +1410,6 @@
   //CCLUT
   parameter MXPATC  = 11;                // Pattern Carry Bits
   parameter MXOFFSB = 4;                 // Quarter-strip bits
-  parameter MXQLTB  = 9;                 // Fit quality bits
   parameter MXBNDB  = 5;                 // Bend bits
   parameter MXXKYB = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
 
@@ -1558,7 +1551,6 @@
 
 //Tao CCLUT pattern
   input [MXXKYB     - 1 : 0] hs_xky_1st; // 1st CLCT key 1/8-strip
-  input [MXQLTB     - 1 : 0] hs_qlt_1st; // 1st CLCT pattern lookup quality
   input [MXBNDB     - 1 : 0] hs_bnd_1st; // 1st CLCT pattern lookup bend angle
   input [MXPATC     - 1 : 0] hs_carry_1st; // 1st CLCT pattern lookup comparator-code
   input  [MXPIDB-1:0]   hs_run2pid_1st;        // 1st CLCT pattern ID
@@ -1570,7 +1562,6 @@
 
 //Tao CCLUT pattern
   input [MXXKYB     - 1 : 0] hs_xky_2nd; // 1st CLCT key 1/8-strip     
-  input [MXQLTB     - 1 : 0] hs_qlt_2nd; // 1st CLCT pattern lookup quality
   input [MXBNDB     - 1 : 0] hs_bnd_2nd; // 1st CLCT pattern lookup bend angle
   input [MXPATC     - 1 : 0] hs_carry_2nd; // 1st CLCT pattern lookup comparator-code
   input  [MXPIDB-1:0]   hs_run2pid_2nd;
@@ -1695,10 +1686,8 @@
 
   output  [MXPATC-1:0]   clct0_vme_carry;         // First  CLCT
   output  [MXPATC-1:0]   clct1_vme_carry;         // Second CLCT
-  output  [MXQLTB - 1   : 0] clct0_vme_qlt = 0; // new quality
   output  [MXBNDB - 1   : 0] clct0_vme_bnd = 0; // new bending 
   output  [MXXKYB-1     : 0] clct0_vme_xky = 0; // new position with 1/8 precision
-  output  [MXQLTB - 1   : 0] clct1_vme_qlt = 0; // new quality
   output  [MXBNDB - 1   : 0] clct1_vme_bnd = 0; // new bending 
   output  [MXXKYB-1     : 0] clct1_vme_xky = 0; // new position with 1/8 precision
 
@@ -1860,11 +1849,9 @@
   output  [MXCLCTC-1:0]  clctc_xtmb; // Common to CLCT0/1 to TMB
   output  [MXCFEB-1:0]   clctf_xtmb; // Active cfeb list to TMB
 
-  output [MXQLTB - 1   : 0] clct0_qlt_xtmb; // new quality
   output [MXBNDB - 1   : 0] clct0_bnd_xtmb; // new bending 
   output [MXXKYB-1     : 0] clct0_xky_xtmb; // new position with 1/8 precision
   output [MXPATC-1     : 0] clct0_carry_xtmb; // CC code 
-  output [MXQLTB - 1   : 0] clct1_qlt_xtmb; // new quality
   output [MXBNDB - 1   : 0] clct1_bnd_xtmb; // new bending 
   output [MXXKYB-1     : 0] clct1_xky_xtmb; // new position with 1/8 precision
   output [MXPATC-1     : 0] clct1_carry_xtmb; // CC code 
@@ -3281,16 +3268,12 @@
 
   wire [MXPATC-1:0] clct0_carry, clct0_carry_xtmb;
   wire [MXPATC-1:0] clct1_carry, clct1_carry_xtmb;
-  wire [MXQLTB - 1   : 0] clct0_qlt; // new quality
   wire [MXBNDB - 1   : 0] clct0_bnd; // new bending 
   wire [MXXKYB-1     : 0] clct0_xky; // new position with 1/8 precision
-  wire [MXQLTB - 1   : 0] clct1_qlt; // new quality
   wire [MXBNDB - 1   : 0] clct1_bnd; // new bending 
   wire [MXXKYB-1     : 0] clct1_xky; // new position with 1/8 precision
-  wire [MXQLTB - 1   : 0] clct0_qlt_xtmb; // new quality
   wire [MXBNDB - 1   : 0] clct0_bnd_xtmb; // new bending 
   wire [MXXKYB-1     : 0] clct0_xky_xtmb; // new position with 1/8 precision
-  wire [MXQLTB - 1   : 0] clct1_qlt_xtmb; // new quality
   wire [MXBNDB - 1   : 0] clct1_bnd_xtmb; // new bending 
   wire [MXXKYB-1     : 0] clct1_xky_xtmb; // new position with 1/8 precision
 
@@ -3299,11 +3282,9 @@
   assign clct0[7:4]  = (ccLUT_enable && !run3_trig_df) ? hs_run2pid_1st[3:0] : hs_pid_1st[3:0]; // Pattern shape 0-A
   assign clct0[15:8] = hs_key_1st[7:0]; // 1/2-strip ID number
 
-  assign clct0_qlt[MXQLTB - 1: 0]= hs_qlt_1st[MXQLTB - 1   : 0]; 
   assign clct0_bnd[MXBNDB - 1: 0]= hs_bnd_1st[MXBNDB - 1   : 0]; 
   assign clct0_xky[MXXKYB - 1: 0]= hs_xky_1st[MXXKYB - 1   : 0]; 
   assign clct0_carry[MXPATC-1:0] = hs_carry_1st[MXPATC-1:0];
-  assign clct1_qlt[MXQLTB - 1: 0]= hs_qlt_2nd[MXQLTB - 1   : 0]; 
   assign clct1_bnd[MXBNDB - 1: 0]= hs_bnd_2nd[MXBNDB - 1   : 0]; 
   assign clct1_xky[MXXKYB - 1: 0]= hs_xky_2nd[MXXKYB - 1   : 0]; 
   assign clct1_carry[MXPATC-1:0] = hs_carry_2nd[MXPATC-1:0];
@@ -3333,11 +3314,9 @@
   assign clctf_xtmb = clctf & {MXCFEB {!clct0_blanking}};
   
   assign clct0_carry_xtmb = clct0_carry & {MXPATC {!clct0_blanking}};
-  assign clct0_qlt_xtmb   = clct0_qlt & {MXQLTB {!clct0_blanking}};
   assign clct0_bnd_xtmb   = clct0_bnd & {MXBNDB {!clct0_blanking}};
   assign clct0_xky_xtmb   = clct0_xky & {MXXKYB {!clct0_blanking}};
   assign clct1_carry_xtmb = clct1_carry & {MXPATC {!clct1_blanking}};
-  assign clct1_qlt_xtmb   = clct1_qlt & {MXQLTB {!clct1_blanking}};
   assign clct1_bnd_xtmb   = clct1_bnd & {MXBNDB {!clct1_blanking}};
   assign clct1_xky_xtmb   = clct1_xky & {MXXKYB {!clct1_blanking}};
 
@@ -3352,10 +3331,8 @@
   reg [MXCFEB-1:0]  clctf_vme=0;
   reg [MXPATC-1:0]  clct0_vme_carry=0;         // First  CLCT CC
   reg [MXPATC-1:0]  clct1_vme_carry=0;         // Second CLCT CC
-  reg [MXQLTB - 1   : 0] clct0_vme_qlt = 0; // new quality
   reg [MXBNDB - 1   : 0] clct0_vme_bnd = 0; // new bending 
   reg [MXXKYB-1     : 0] clct0_vme_xky = 0; // new position with 1/8 precision
-  reg [MXQLTB - 1   : 0] clct1_vme_qlt = 0; // new quality
   reg [MXBNDB - 1   : 0] clct1_vme_bnd = 0; // new bending 
   reg [MXXKYB-1     : 0] clct1_vme_xky = 0; // new position with 1/8 precision
 
@@ -3369,10 +3346,8 @@
       clctf_vme <= 0;
       clct0_vme_carry <= 0;
       clct1_vme_carry <= 0;
-      clct0_vme_qlt   <= 0;
       clct0_vme_bnd   <= 0;
       clct0_vme_xky   <= 0;
-      clct1_vme_qlt   <= 0;
       clct1_vme_bnd   <= 0;
       clct1_vme_xky   <= 0;
       hmt_nhits_trig_vme <= 0;
@@ -3388,10 +3363,8 @@
       clctf_vme <= clctf_xtmb;
       clct0_vme_carry <= clct0_carry_xtmb;
       clct1_vme_carry <= clct1_carry_xtmb;
-      clct0_vme_qlt   <= clct0_qlt_xtmb;
       clct0_vme_bnd   <= clct0_bnd_xtmb;
       clct0_vme_xky   <= clct0_xky_xtmb;
-      clct1_vme_qlt   <= clct1_qlt_xtmb;
       clct1_vme_bnd   <= clct1_bnd_xtmb;
       clct1_vme_xky   <= clct1_xky_xtmb;
       // should latch hmt in other case ?? may consider the trigger result of hmt_nhits_trig
@@ -4658,11 +4631,9 @@
   wire        r_clct0_invp = xtmb_rdata[42];    // CLCT0 had invalid pattern after drift delay
   wire        r_clct1_invp = xtmb_rdata[43];    // CLCT1 had invalid pattern after drift delay
 
-  wire [MXQLTB - 1   : 0] r_clct0_qlt_xtmb; // new quality
   wire [MXBNDB - 1   : 0] r_clct0_bnd_xtmb; // new bending 
   wire [MXXKYB-1     : 0] r_clct0_xky_xtmb; // new position with 1/8 precision
   wire [MXPATC-1     : 0] r_clct0_carry_xtmb; // CC code 
-  wire [MXQLTB - 1   : 0] r_clct1_qlt_xtmb; // new quality
   wire [MXBNDB - 1   : 0] r_clct1_bnd_xtmb; // new bending 
   wire [MXXKYB-1     : 0] r_clct1_xky_xtmb; // new position with 1/8 precision
   wire [MXPATC-1     : 0] r_clct1_carry_xtmb; // CC code 
