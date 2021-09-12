@@ -164,11 +164,9 @@
   clctc_xtmb,
   clctf_xtmb,
   //ccLUT
-  clct0_qlt_xtmb,
   clct0_bnd_xtmb,
   clct0_xky_xtmb,
   clct0_carry_xtmb, // Out  First  CLCT
-  clct1_qlt_xtmb,
   clct1_bnd_xtmb,
   clct1_xky_xtmb,
   clct1_carry_xtmb, // Out  Second CLCT
@@ -213,8 +211,11 @@
   tmb_alctb,
   tmb_alcte,
 
+  hmt_nhits_bx678_ff,
+
   run3_trig_df, // input, flag of run3 data format upgrade  
   run3_daq_df, // input, flag of run3 data format upgrade  
+  run3_alct_df,
 // MPC Status
   mpc_frame_ff,
   mpc0_frame0_ff,
@@ -497,8 +498,8 @@
   input [NHMTHITB-1:0]   hmt_nhits_bx2345;
   input [MXHMTB-1:0]     hmt_cathode_pipe; // tmb match bx
 
-  input  hmt_trigger_tmb;   // hmt bits for trigger
-  input  hmt_trigger_tmb_ro;// hmt bits for readout only
+  input [MXHMTB - 1:0] hmt_trigger_tmb;   // hmt bits for trigger
+  input [MXHMTB - 1:0] hmt_trigger_tmb_ro;// hmt bits for readout only
 
 // TMB-Sequencer Pipelines
   input  [MXBADR-1:0] wr_adr_xtmb; // Buffer write address after drift time
@@ -523,11 +524,9 @@
   input [MXCFEB-1:0]  clctf_xtmb; // Active feb list to TMB
   input               bx0_xmpc;   // bx0 to mpc
 
-  input [MXQLTB - 1   : 0] clct0_qlt_xtmb; // new quality
   input [MXBNDB - 1   : 0] clct0_bnd_xtmb; // new bending 
   input [MXXKYB-1     : 0] clct0_xky_xtmb; // new position with 1/8 precision
   input [MXPATC-1     : 0] clct0_carry_xtmb; // CC code 
-  input [MXQLTB - 1   : 0] clct1_qlt_xtmb; // new quality
   input [MXBNDB - 1   : 0] clct1_bnd_xtmb; // new bending 
   input [MXXKYB-1     : 0] clct1_xky_xtmb; // new position with 1/8 precision
   input [MXPATC-1     : 0] clct1_carry_xtmb; // CC code 
@@ -569,6 +568,7 @@
   output  [4:0]      tmb_alctb;      // ALCT bxn latched at trigger
   output  [1:0]      tmb_alcte;      // ALCT ecc error syndrome latched at trigger
 
+  output [NHMTHITB-1:0] hmt_nhits_bx678_ff;
 // MPC Status
   output          mpc_frame_ff;    // MPC frame latch
   output  [MXFRAME-1:0]  mpc0_frame0_ff;    // MPC best muon 1st frame
@@ -803,6 +803,7 @@
 //------------------------------------------------------------------------------------------------------------------
   input run3_trig_df; // flag of run3 trigger data format
   input run3_daq_df; // flag of run3 trigger data format
+  input run3_alct_df; // flag of run3 alct data format
 
 `ifdef DEBUG_MPC
   output          mpc_debug_mode;    // Prevents accidental compile with debug_mpc turned on
@@ -1006,17 +1007,16 @@
 
   assign clct_vpf_pipe  = clct0_pipe[0] || clct1_pipe[0];
 
-  wire  [MXBNDB - 1   : 0] clct0_bnd_pipe; // new bending
-  wire  [MXXKYB-1     : 0] clct0_xky_pipe; // new position with 1/8 precision
-  //wire  [MXQLTB - 1   : 0] clct0_qlt_pipe; // new quality
-  //wire  [MXPATC-1     : 0] clct0_carry_pipe; // CC code
-  //wire  [MXQLTB - 1   : 0] clct1_qlt_pipe; // new quality
-  //wire  [MXPATC-1     : 0] clct1_carry_pipe; // CC code
-  wire  [MXBNDB - 1   : 0] clct1_bnd_pipe; // new bending
-  wire  [MXXKYB-1     : 0] clct1_xky_pipe; // new position with 1/8 precision
+  //for GEMSCC
+  //wire  [MXBNDB - 1   : 0] clct0_bnd_pipe; // new bending
+  //wire  [MXXKYB-1     : 0] clct0_xky_pipe; // new position with 1/8 precision
+  ////wire  [MXPATC-1     : 0] clct0_carry_pipe; // CC code
+  ////wire  [MXPATC-1     : 0] clct1_carry_pipe; // CC code
+  //wire  [MXBNDB - 1   : 0] clct1_bnd_pipe; // new bending
+  //wire  [MXXKYB-1     : 0] clct1_xky_pipe; // new position with 1/8 precision
 
-  assign {clct0_bnd_pipe, clct0_xky_pipe} = clct0_cclut_pipe;
-  assign {clct1_bnd_pipe, clct1_xky_pipe} = clct1_cclut_pipe;
+  //assign {clct0_bnd_pipe, clct0_xky_pipe} = clct0_cclut_pipe;
+  //assign {clct1_bnd_pipe, clct1_xky_pipe} = clct1_cclut_pipe;
 
 //------------------------------------------------------------------------------------------------------------------
 // Pre-calculate dynamic clct window parameters
@@ -1269,6 +1269,7 @@
   reg [ 1:0] tmb_alcte = 0; // ALCT ecc latched at trigger
 
   reg hmt_fired_tmb_ff = 0;
+  reg hmt_readout_tmb_ff = 0;
   reg tmb_pulse_hmt_only = 0;
   reg tmb_keep_hmt_only = 0;
 
@@ -1334,7 +1335,7 @@
     clctc_real <= clctc_pipe & {MXCLCTC {keep_clct}};
     clct0_cclut_real   <= clct0_cclut_pipe & {MXCCLUTB {keep_clct}};
     clct1_cclut_real   <= clct1_cclut_pipe & {MXCCLUTB {keep_clct}};
-    hmt_trigger_real   <= hmt_trigger_pipe;
+    hmt_trigger_real   <= hmt_trigger_tmb;
   end
 
 // Latch pipelined ALCTs, aligned in time with CLCTs because CLCTs are delayed 1bx in the SRLs
@@ -1490,11 +1491,9 @@
   wire [4:0] clct1_key     = clct1[12:8];  // 1/2-strip ID number
   wire [2:0] clct1_cfeb    = clct1[15:13]; // Key CFEB ID
 
-  //wire  [MXQLTB - 1   : 0] clct0_qlt; // new quality
   wire  [MXBNDB - 1   : 0] clct0_bnd; // new bending
   wire  [MXXKYB-1     : 0] clct0_xky; // new position with 1/8 precision
   //wire  [MXPATC-1     : 0] clct0_carry; // CC code
-  //wire  [MXQLTB - 1   : 0] clct1_qlt; // new quality
   wire  [MXBNDB - 1   : 0] clct1_bnd; // new bending
   wire  [MXXKYB-1     : 0] clct1_xky; // new position with 1/8 precision
   //wire  [MXPATC-1     : 0] clct1_carry; // CC code
@@ -1700,6 +1699,10 @@
   reg [NHMTHITB-1:0]   hmt_nhits_bx678_ff=0;
   reg [NHMTHITB-1:0]   hmt_nhits_bx2345_ff=0;
   reg [MXHMTB-1:0]     hmt_cathode_ff=0; // tmb match bx
+  reg [NHMTHITB-1:0]   hmt_nhits_bx7_vme=0;//CLCT bx
+  reg [NHMTHITB-1:0]   hmt_nhits_bx678_vme=0;
+  reg [NHMTHITB-1:0]   hmt_nhits_bx2345_vme=0;
+  reg [MXHMTB-1:0]     hmt_cathode_vme=0; // tmb match bx
   always @(posedge clock) begin
     hmt_nhits_bx7_ff    <= hmt_nhits_bx7;
     hmt_nhits_bx678_ff  <= hmt_nhits_bx678;

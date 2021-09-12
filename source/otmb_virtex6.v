@@ -276,7 +276,9 @@
   parameter MXORBIT    =  30;        // Number orbit counter bits
   parameter MXL1ARX    =  12;        // Number L1As received counter bits
 
-   parameter MXHMTB     =  4;// bits for HMT
+  parameter MXHMTB     =  4;// bits for HMT
+  parameter NHITCFEBB  =  6;
+  parameter NHMTHITB   = 10;
 
 //-------------------------------------------------------------------------------------------------------------------
 // I/O Port Declarations
@@ -907,8 +909,18 @@
   wire  [MXCNTVME-1:0]  hmt_counter7;
   wire  [MXCNTVME-1:0]  hmt_counter8;
   wire  [MXCNTVME-1:0]  hmt_counter9;
-  wire  [MXCNTVME-1:0]  hmt_trigger_counter,
-  wire  [MXCNTVME-1:0]  hmt_readout_counter,
+  wire  [MXCNTVME-1:0]  hmt_counter10;
+  wire  [MXCNTVME-1:0]  hmt_counter11;
+  wire  [MXCNTVME-1:0]  hmt_counter12;
+  wire  [MXCNTVME-1:0]  hmt_counter13;
+  wire  [MXCNTVME-1:0]  hmt_counter14;
+  wire  [MXCNTVME-1:0]  hmt_counter15;
+  wire  [MXCNTVME-1:0]  hmt_counter16;
+  wire  [MXCNTVME-1:0]  hmt_counter17;
+  wire  [MXCNTVME-1:0]  hmt_counter18;
+  wire  [MXCNTVME-1:0]  hmt_counter19;
+  wire  [MXCNTVME-1:0]  hmt_trigger_counter;
+  wire  [MXCNTVME-1:0]  hmt_readout_counter;
 
 // CFEB injector RAM map 2D arrays into 1D for ALCT
   wire  [MXCFEB-1:0]  inj_ramout_pulse;
@@ -1162,7 +1174,7 @@
   wire  [MXHS-1:0]    cfeb_ly4hs [MXCFEB-1:0];    // Decoded 1/2-strip pulses
   wire  [MXHS-1:0]    cfeb_ly5hs [MXCFEB-1:0];    // Decoded 1/2-strip pulses
 
-  wire  [5:0]         cfeb_nhits [MXCFEB-1:0];
+  wire  [NHITCFEBB-1:0]     cfeb_nhits [MXCFEB-1:0];
 
 // Status Ports
   wire  [MXCFEB-1:0]  demux_tp_1st;
@@ -1313,7 +1325,7 @@
   .ly4hs          (cfeb_ly4hs[icfeb][MXHS-1:0]),    // Out  Decoded 1/2-strip pulses
   .ly5hs          (cfeb_ly5hs[icfeb][MXHS-1:0]),    // Out  Decoded 1/2-strip pulses
 
-  .nhits_per_cfeb (cfeb_nhits[icfeb]),   // Out nhits for one cfeb
+  .nhits_per_cfeb (cfeb_nhits[icfeb][NHITCFEBB-1:0]),   // Out nhits for one cfeb
 
 // CFEB data received on optical link
   .gtx_rx_data_bits_or (gtx_rx_data_bits_or[icfeb]), // Out  CFEB data received on optical link = OR of all 48 bits for a given CFEB
@@ -1393,7 +1405,6 @@
   wire  [MXKEYBX-1:0] hs_key_1st;
 
   // 1st pattern lookup results, ccLUT,Tao
-  wire [MXQLTB - 1   : 0] hs_qlt_1st; // new quality
   wire [MXBNDB - 1   : 0] hs_bnd_1st; // new bending 
   wire [MXXKYB-1     : 0] hs_xky_1st; // new position with 1/8 precision
   wire [MXPATC-1     : 0] hs_carry_1st; // CC code 
@@ -1405,7 +1416,6 @@
   wire                hs_bsy_2nd;
 
   // 2nd pattern lookup results, ccLUT,Tao
-  wire [MXQLTB - 1   : 0] hs_qlt_2nd; // new quality
   wire [MXBNDB - 1   : 0] hs_bnd_2nd; // new bending 
   wire [MXXKYB-1     : 0] hs_xky_2nd; // new position with 1/8 precision
   wire [MXPATC-1     : 0] hs_carry_2nd; // CC code 
@@ -1423,14 +1433,13 @@
    assign ccLUT_enable = reg_ccLUT_enable;
    wire run3_trig_df; // Run3 trigger data format
    wire run3_daq_df;// Run3 daq data format
+   wire run3_alct_df;// Run3 ALCT data format
 
   //CCLUT is off
   `ifndef CCLUT
-   assign hs_qlt_1st[MXQLTB - 1   : 0] = 0;
    assign hs_bnd_1st[MXBNDB - 1   : 0] = hs_pid_1st;
    assign hs_xky_1st[MXXKYB - 1   : 0] = {hs_hit_1st, 2'b10};
    assign hs_carry_1st[MXPATC - 1 : 0] = 0;
-   assign hs_qlt_2nd[MXQLTB - 1   : 0] = 0;
    assign hs_bnd_2nd[MXBNDB - 1   : 0] = hs_pid_2nd;
    assign hs_xky_2nd[MXXKYB - 1   : 0] = {hs_hit_2nd, 2'b10};
    assign hs_carry_2nd[MXPATC - 1 : 0] = 0;
@@ -1535,7 +1544,6 @@
   .hs_pid_1st (hs_pid_1st[MXPIDB-1:0]),  // Out  1st CLCT pattern ID
   .hs_key_1st (hs_key_1st[MXKEYBX-1:0]), // Out  1st CLCT key 1/2-strip
 
-  .hs_qlt_1st (hs_qlt_1st[MXQLTB - 1   : 0]),
   .hs_bnd_1st (hs_bnd_1st[MXBNDB - 1   : 0]),
   .hs_xky_1st (hs_xky_1st[MXXKYB-1 : 0]),
   .hs_car_1st (hs_carry_1st[MXPATC-1:0]),
@@ -1546,7 +1554,6 @@
   .hs_key_2nd (hs_key_2nd[MXKEYBX-1:0]), // Out  2nd CLCT key 1/2-strip
   .hs_bsy_2nd (hs_bsy_2nd),              // Out  2nd CLCT busy, logic error indicator
 
-  .hs_qlt_2nd (hs_qlt_2nd[MXQLTB - 1   : 0]),
   .hs_bnd_2nd (hs_bnd_2nd[MXBNDB - 1   : 0]),
   .hs_xky_2nd (hs_xky_2nd[MXXKYB-1 : 0]),
   .hs_car_2nd (hs_carry_2nd[MXPATC-1:0]),
@@ -1672,6 +1679,7 @@
   wire  hmt_anode_bkg_check;
   wire  hmt_cathode_bkg_check;
 
+  wire [NHMTHITB-1:0] hmt_nhits_bx678_ff; //for header
   wire [NHMTHITB-1:0] hmt_nhits_bx7;
   wire [NHMTHITB-1:0] hmt_nhits_bx678;
   wire [NHMTHITB-1:0] hmt_nhits_bx2345;
@@ -1679,6 +1687,7 @@
 
   wire [6:0] hmt_aff_thresh;
   wire [MXCFEB-1:0] hmt_active_feb;
+  wire hmt_pretrig_match;
 
   wire [3:0]  hmt_delay;
   wire [3:0]  hmt_alct_win_size;
@@ -1716,7 +1725,7 @@
   .hmt_aff_thresh(hmt_aff_thresh[6:0]),//In hmt thresh for active cfeb flag
 
   .hmt_delay          (hmt_delay[3:0]), // In hmt delay for matching
-  .hmt_alct_win_sizeo (hmt_alct_win_sizeo[3:0),//In hmt-alct match window size
+  .hmt_alct_win_size  (hmt_alct_win_size[3:0]),//In hmt-alct match window size
   .hmt_match_win      (hmt_match_win[3:0]),// In alct location in hmt window size
   //tmb port: input
   .alct_vpf_pipe     (alct_vpf_pipe),//In ALCT vpf after alct delay
@@ -1726,6 +1735,7 @@
   .clct_vpf_pipe    (clct_vpf_pipe),//In CLCT vpf after delay
 
   // vme port: input
+  .cfeb_allow_hmt_ro  (cfeb_allow_hmt_ro), //Out read out CFEB when hmt is fired
   .hmt_allow_cathode   (hmt_allow_cathode),//In hmt allow to trigger on cathode 
   .hmt_allow_anode     (hmt_allow_anode),//In hmt allow to trigger on anode
   .hmt_allow_match     (hmt_allow_match),//In hmt allow to trigger on canode X anode match
@@ -1735,8 +1745,9 @@
   .hmt_anode_bkg_check  (hmt_anode_bkg_check),//In hmt fired shoudl check anode bg lower than threshold
   .hmt_cathode_bkg_check(hmt_cathode_bkg_check),//In hmt fired shoudl check cathode bg lower than threshold
   // sequencer port
-  .hmt_fired_pretrig   (hmt_fired_pretrig),//out, hmt fired preCLCT bx
-  .hmt_active_cfeb     (hmt_active_cfeb[MXCFEB-1:0]),//Out hmt active cfeb flags
+  //.hmt_fired_pretrig   (hmt_fired_pretrig),//out, hmt fired preCLCT bx
+  .hmt_active_feb      (hmt_active_feb[MXCFEB-1:0]),//Out hmt active cfeb flags
+  .hmt_pretrig_match   (hmt_pretrig_match),//out hmt & preCLCT
 
   //tmb port
   .hmt_nhits_bx7       (hmt_nhits_bx7     [NHMTHITB-1:0]),//Out hmt nhits for central bx
@@ -1744,15 +1755,15 @@
   .hmt_nhits_bx2345    (hmt_nhits_bx2345  [NHMTHITB-1:0]),//Out hmt nhits for out-time
   .hmt_cathode_pipe    (hmt_cathode[MXHMTB-1:0]), //Out hmt bits in cathod 
   
-  .hmt_cathode_fired     (hmt_cathode_fired),// Out 
-  .hmt_anode_fired       (hmt_anode_fired),// Out 
+  //.hmt_cathode_fired     (hmt_cathode_fired),// Out 
+  //.hmt_anode_fired       (hmt_anode_fired),// Out 
   .hmt_anode_alct_match  (hmt_anode_alct_match),//Out
   .hmt_cathode_alct_match(hmt_cathode_alct_match),// Out 
   .hmt_cathode_clct_match(hmt_cathode_clct_match),// Out 
   .hmt_cathode_lct_match (hmt_cathode_lct_match),// Out
   
   .hmt_fired_cathode_only (hmt_fired_cathode_only),//Out hmt is fired for cathode only
-  .hmt_fired_anoode_only  (hmt_fired_anoode_only),//Out hmt is fired for anode only
+  .hmt_fired_anode_only   (hmt_fired_anode_only),//Out hmt is fired for anode only
   .hmt_fired_match        (hmt_fired_match),//Out hmt is fired for match
   .hmt_fired_or           (hmt_fired_or),//Out hmt is fired for match
 
@@ -1777,11 +1788,9 @@
   wire  [MXCLCTC-1:0]  clctc_xtmb;        // Common to CLCT0/1 to TMB
   wire  [MXCFEB-1:0]  clctf_xtmb;        // Active cfeb list to TMB
 
-  wire [MXQLTB - 1   : 0] clct0_qlt_xtmb; // new quality
   wire [MXBNDB - 1   : 0] clct0_bnd_xtmb; // new bending 
   wire [MXXKYB-1     : 0] clct0_xky_xtmb; // new position with 1/8 precision
   wire [MXPATC-1     : 0] clct0_carry_xtmb; // CC code 
-  wire [MXQLTB - 1   : 0] clct1_qlt_xtmb; // new quality
   wire [MXBNDB - 1   : 0] clct1_bnd_xtmb; // new bending 
   wire [MXXKYB-1     : 0] clct1_xky_xtmb; // new position with 1/8 precision
   wire [MXPATC-1     : 0] clct1_carry_xtmb; // CC code 
@@ -1843,11 +1852,9 @@
   wire  [MXCLCTC-1:0]  clctc_vme;
   wire  [MXCFEB-1:0]  clctf_vme;
 
-  wire [MXQLTB - 1   : 0] clct0_vme_qlt; // new quality
   wire [MXBNDB - 1   : 0] clct0_vme_bnd; // new bending 
   wire [MXXKYB-1     : 0] clct0_vme_xky; // new position with 1/8 precision
   wire [MXPATC-1:0]       clct0_vme_carry;
-  wire [MXQLTB - 1   : 0] clct1_vme_qlt; // new quality
   wire [MXBNDB - 1   : 0] clct1_vme_bnd; // new bending 
   wire [MXXKYB-1     : 0] clct1_vme_xky; // new position with 1/8 precision
   wire [MXPATC-1:0]       clct1_vme_carry;
@@ -2061,16 +2068,16 @@
   .cfeb_layer_or    (cfeb_layer_or[MXLY-1:0]),      // In  OR of hstrips on each layer
   .cfeb_nlayers_hit (cfeb_nlayers_hit[MXHITB-1:0]), // In  Number of CSC layers hit
 
-  //Sequencer HMT results 
-  .hmt_fired_pretrig   (hmt_fired_pretrig),//out, hmt fired preCLCT bx
-  .hmt_active_cfeb     (hmt_active_cfeb[MXCFEB-1:0]),//Out hmt active cfeb flags
+  //Sequencer HMT results, pretrigger level 
+  //.hmt_fired_pretrig   (hmt_fired_pretrig),//In, hmt fired preCLCT bx
+  .hmt_active_feb      (hmt_active_feb[MXCFEB-1:0]),//In hmt active cfeb flags
+  .hmt_pretrig_match   (hmt_pretrig_match),//In hmt & preCLCT
 
 // Sequencer Pattern Finder CLCT results
   .hs_hit_1st (hs_hit_1st[MXHITB-1:0]),  // In  1st CLCT pattern hits
   .hs_pid_1st (hs_pid_1st[MXPIDB-1:0]),  // In  1st CLCT pattern ID
   .hs_key_1st (hs_key_1st[MXKEYBX-1:0]), // In  1st CLCT key 1/2-strip
 
-  .hs_qlt_1st (hs_qlt_1st[MXQLTB - 1   : 0]),
   .hs_bnd_1st (hs_bnd_1st[MXBNDB - 1   : 0]),
   .hs_xky_1st (hs_xky_1st[MXXKYB-1 : 0]),
   .hs_carry_1st (hs_carry_1st[MXPATC-1:0]),
@@ -2081,7 +2088,6 @@
   .hs_key_2nd (hs_key_2nd[MXKEYBX-1:0]), // In  2nd CLCT key 1/2-strip
   .hs_bsy_2nd (hs_bsy_2nd),              // In  2nd CLCT busy, logic error indicator
 
-  .hs_qlt_2nd (hs_qlt_2nd[MXQLTB - 1   : 0]),
   .hs_bnd_2nd (hs_bnd_2nd[MXBNDB - 1   : 0]),
   .hs_xky_2nd (hs_xky_2nd[MXXKYB-1 : 0]),
   .hs_carry_2nd (hs_carry_2nd[MXPATC-1:0]),
@@ -2187,11 +2193,9 @@
   .bxn_clct_vme    (bxn_clct_vme[MXBXN-1:0]),    // Out  CLCT BXN at pre-trigger
   .bxn_l1a_vme    (bxn_l1a_vme[MXBXN-1:0]),    // Out  CLCT BXN at L1A
 
-  .clct0_vme_qlt   (clct0_vme_qlt[MXQLTB - 1   : 0]), // Out, clct0 new quality
   .clct0_vme_bnd   (clct0_vme_bnd[MXBNDB - 1   : 0]), // Out, clct0 new bending 
   .clct0_vme_xky   (clct0_vme_xky[MXXKYB-1 : 0]),     // Out, clct0 new position with 1/8 strip resolution
   .clct0_vme_carry (clct0_vme_carry[MXPATC-1   : 0]), // Out ,clct0 comparator code
-  .clct1_vme_qlt   (clct1_vme_qlt[MXQLTB - 1   : 0]), // out
   .clct1_vme_bnd   (clct1_vme_bnd[MXBNDB - 1   : 0]),  // out 
   .clct1_vme_xky   (clct1_vme_xky[MXXKYB-1 : 0]),     // out
   .clct1_vme_carry (clct1_vme_carry[MXPATC-1   : 0]),  // out
@@ -2323,18 +2327,18 @@
   .wr_avail_xmpc    (wr_avail_xmpc),      // In  Buffer available at MPC xmit to sequencer
   .wr_avail_rmpc    (wr_avail_rmpc),      // In  Buffer available at MPC received
 
-  //Sequencer HMT
+  //Sequencer HMT, hmt-alct-clct match 
   .hmt_anode        (hmt_anode[MXHMTB-1:0]),// Out HMT nhits for trigger
   .hmt_cathode      (hmt_cathode[MXHMTB-1:0]),// Out HMT nhits for trigger
-  .hmt_cathode_fired     (hmt_cathode_fired),// In
-  .hmt_anode_fired       (hmt_anode_fired),// In 
+  //.hmt_cathode_fired     (hmt_cathode_fired),// In
+  //.hmt_anode_fired       (hmt_anode_fired),// In 
   .hmt_anode_alct_match  (hmt_anode_alct_match), //In
   .hmt_cathode_alct_match(hmt_cathode_alct_match),// In 
   .hmt_cathode_clct_match(hmt_cathode_clct_match),// In 
   .hmt_cathode_lct_match (hmt_cathode_lct_match),// In
 
   .hmt_fired_cathode_only (hmt_fired_cathode_only),//In hmt is fired for cathode only
-  .hmt_fired_anoode_only  (hmt_fired_anoode_only),//In hmt is fired for anode only
+  .hmt_fired_anode_only   (hmt_fired_anode_only),//In hmt is fired for anode only
   .hmt_fired_match        (hmt_fired_match),//In hmt is fired for match
   .hmt_fired_or           (hmt_fired_or),//In hmt is fired for match
 
@@ -2343,11 +2347,9 @@
   .clct1_xtmb (clct1_xtmb[MXCLCT-1:0]),  // Out  Second CLCT
   .clctc_xtmb (clctc_xtmb[MXCLCTC-1:0]), // Out  Common to CLCT0/1 to TMB
   .clctf_xtmb (clctf_xtmb[MXCFEB-1:0]),  // Out  Active cfeb list to TMB
-  .clct0_qlt_xtmb   (clct0_qlt_xtmb[MXQLTB - 1   : 0]),
   .clct0_bnd_xtmb   (clct0_bnd_xtmb[MXBNDB - 1   : 0]),
   .clct0_xky_xtmb   (clct0_xky_xtmb[MXXKYB-1 : 0]),
   .clct0_carry_xtmb (clct0_carry_xtmb[MXPATC-1:0]),  // Out  First  CLCT
-  .clct1_qlt_xtmb   (clct1_qlt_xtmb[MXQLTB - 1   : 0]),
   .clct1_bnd_xtmb   (clct1_bnd_xtmb[MXBNDB - 1   : 0]),
   .clct1_xky_xtmb   (clct1_xky_xtmb[MXXKYB-1 : 0]),
   .clct1_carry_xtmb (clct1_carry_xtmb[MXPATC-1:0]),  // Out  Second CLCT
@@ -2392,6 +2394,7 @@
   .tmb_alct1 (tmb_alct1[10:0]), // In  ALCT second best muon latched at trigger
   .tmb_alctb (tmb_alctb[4:0]),  // In  ALCT bxn latched at trigger
   .tmb_alcte (tmb_alcte[1:0]),  // In  ALCT ecc error syndrome latched at trigger
+  .hmt_nhits_bx678_ff (hmt_nhits_bx678_ff[NHMTHITB-1:0]), // In hmt nhits for header
 
   .ccLUT_enable  (ccLUT_enable),//In enabe CCLUT
   .run3_trig_df  (run3_trig_df), //In enable run3 trigger format
@@ -2979,7 +2982,7 @@
   .alct_ecc_err (alct_ecc_err[1:0]),     // In  ALCT ecc syndrome code
 
   .alct_vpf_pipe (alct_vpf_pipe), //Out alct vpf after delay_
-  .hmt_anode_    (hmt_anode[MXHMTB-1:0]), //Out alct vpf after delay_
+  .hmt_anode     (hmt_anode[MXHMTB-1:0]), //Out alct vpf after delay_
   .clct_vpf_pipe (clct_vpf_pipe), //Out alct vpf after delay_
 
   //hmt port
@@ -3009,11 +3012,9 @@
   .clct1_xtmb (clct1_xtmb[MXCLCT-1:0]),  // In  Second CLCT
   .clctc_xtmb (clctc_xtmb[MXCLCTC-1:0]), // In  Common to CLCT0/1 to TMB
   .clctf_xtmb (clctf_xtmb[MXCFEB-1:0]),  // In  Active cfeb list to TMB
-  .clct0_qlt_xtmb   (clct0_qlt_xtmb[MXQLTB - 1   : 0]), //In
   .clct0_bnd_xtmb   (clct0_bnd_xtmb[MXBNDB - 1   : 0]), //In
   .clct0_xky_xtmb   (clct0_xky_xtmb[MXXKYB-1 : 0]),    //In
   .clct0_carry_xtmb (clct0_carry_xtmb[MXPATC-1:0]),  // In  First  CLCT
-  .clct1_qlt_xtmb   (clct1_qlt_xtmb[MXQLTB - 1   : 0]),   //In
   .clct1_bnd_xtmb   (clct1_bnd_xtmb[MXBNDB - 1   : 0]),  // In
   .clct1_xky_xtmb   (clct1_xky_xtmb[MXXKYB-1 : 0]),   // In 
   .clct1_carry_xtmb (clct1_carry_xtmb[MXPATC-1:0]),  // In  Second CLCT
@@ -3056,9 +3057,11 @@
   .tmb_alct1 (tmb_alct1[10:0]), // Out  ALCT second best muon latched at trigger
   .tmb_alctb (tmb_alctb[4:0]),  // Out  ALCT bxn latched at trigger
   .tmb_alcte (tmb_alcte[1:0]),  // Out  ALCT ecc error syndrome latched at trigger
+  .hmt_nhits_bx678_ff (hmt_nhits_bx678_ff[NHMTHITB-1:0]), // Out hmt nhits for header
 
   .run3_trig_df   (run3_trig_df),//enable run3 trigger format
   .run3_daq_df   (run3_daq_df), //In enable run3 daq format
+  .run3_alct_df  (run3_alct_df), //In enable run3 ALCT format
 
 // MPC Status
   .mpc_frame_ff    (mpc_frame_ff),          // Out  MPC frame latch strobe
@@ -3095,9 +3098,7 @@
   .tmb_allow_alct_ro  (tmb_allow_alct_ro),  // In  Allow ALCT only  readout, non-triggering
   .tmb_allow_clct_ro  (tmb_allow_clct_ro),  // In  Allow CLCT only  readout, non-triggering
   .tmb_allow_match_ro (tmb_allow_match_ro), // In  Allow Match only readout, non-triggering
-  //HMT
-  .tmb_allow_hmt      (tmb_allow_hmt),    // In trigger when hmt is fired
-  .tmb_allow_hmt_ro   (tmb_allow_hmt_ro), // In read tmb when hmt is fired
+ 
   
   .algo2016_drop_used_clcts(algo2016_drop_used_clcts),             // In Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - drop used CLCTs
   .algo2016_cross_bx_algorithm(algo2016_cross_bx_algorithm),       // In LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
@@ -3731,6 +3732,7 @@
       .ccLUT_enable       (ccLUT_enable),  // In
       .run3_trig_df       (run3_trig_df), // output, enable run3 trigger format or not                                                                             
       .run3_daq_df        (run3_daq_df),  // output, enable run3 daq format or not
+      .run3_alct_df       (run3_alct_df), // Out enable run3 ALCT format
 
       // CFEB Ports: Hot Channel Mask
       .cfeb0_ly0_hcm      (cfeb_ly0_hcm[0][MXDS-1:0]),  // Out  1=enable DiStrip
@@ -3926,13 +3928,13 @@
       .hmt_nhits_bx678_vme  (hmt_nhits_bx678_vme [NHMTHITB-1:0]),//In  HMT nhits for trigger
       .hmt_nhits_bx2345_vme (hmt_nhits_bx2345_vme[NHMTHITB-1:0]),//In  HMT nhits for trigger
       .hmt_cathode_vme           (hmt_cathode_vme[MXHMTB-1:0]), // In HMT trigger results, cathode
-      .hmt_thresh1        (hmt_thresh1[9:0]),    // Out  loose HMT thresh
-      .hmt_thresh2        (hmt_thresh2[9:0]),    // Out  median HMT thresh
-      .hmt_thresh3        (hmt_thresh3[9:0]),    // Out  tight HMT thresh
-      .hmt_aff_thresh     (hmt_aff_thresh),    //Out hmt thresh
+      .hmt_thresh1        (hmt_thresh1[7:0]),    // Out  loose HMT thresh
+      .hmt_thresh2        (hmt_thresh2[7:0]),    // Out  median HMT thresh
+      .hmt_thresh3        (hmt_thresh3[7:0]),    // Out  tight HMT thresh
+      .hmt_aff_thresh      (hmt_aff_thresh[6:0]),    //Out hmt thresh
       .cfeb_allow_hmt_ro  (cfeb_allow_hmt_ro), //Out read out CFEB when hmt is fired
       .hmt_delay          (hmt_delay[3:0]),        //Out hmt delay for matching
-      .hmt_alct_win_size  (hmt_alct_win_sizeo[3:0),//Out hmt-alct match window size
+      .hmt_alct_win_size  (hmt_alct_win_size[3:0]),//Out hmt-alct match window size
       .hmt_allow_cathode   (hmt_allow_cathode),//Out hmt allow to trigger on cathode 
       .hmt_allow_anode     (hmt_allow_anode),  //Out hmt allow to trigger on anode
       .hmt_allow_match     (hmt_allow_match),  //Out hmt allow to trigger on canode X anode match
@@ -3956,11 +3958,9 @@
       .clct_bx0_sync_err    (clct_bx0_sync_err),        // In  Sync error: BXN counter==0 did not match bx0
 
       //CCLUT, Tao 
-      .clct0_vme_qlt   (clct0_vme_qlt[MXQLTB - 1   : 0]), // In clct0 new quality
       .clct0_vme_bnd   (clct0_vme_bnd[MXBNDB - 1   : 0]), // In clct0 new bending 
       .clct0_vme_xky   (clct0_vme_xky[MXXKYB-1 : 0]),     // In clct0 new key position with 1/8 strip resolution
       .clct0_vme_carry (clct0_vme_carry[MXPATC-1   : 0]), // In clct0 Comparator code
-      .clct1_vme_qlt   (clct1_vme_qlt[MXQLTB - 1   : 0]), // In
       .clct1_vme_bnd   (clct1_vme_bnd[MXBNDB - 1   : 0]), // In 
       .clct1_vme_xky   (clct1_vme_xky[MXXKYB-1 : 0]),    // IN 
       .clct1_vme_carry (clct1_vme_carry[MXPATC-1   : 0]),  // in

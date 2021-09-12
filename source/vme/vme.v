@@ -554,11 +554,9 @@
   nlayers_hit_vme,
   clct_bx0_sync_err,
 
-  clct0_vme_qlt,
   clct0_vme_bnd,
   clct0_vme_xky,
   clct0_vme_carry,
-  clct1_vme_qlt,
   clct1_vme_bnd,
   clct1_vme_xky,
   clct1_vme_carry,
@@ -1911,7 +1909,6 @@
   input  [11:0]      sequencer_state;    // Sequencer State machine
   input          scint_veto_vme;      // Scintillator veto for FAST Sites
   output         seq_trigger_nodeadtime;
-  assign  seq_trigger_nodeadtime = 1'b0;
 
   output  [MXDRIFT-1:0]  drift_delay;      // CSC Drift delay clocks
   output  [MXHITB-1:0]  hit_thresh_postdrift;  // Minimum pattern hits for a valid pattern
@@ -1964,6 +1961,9 @@
   output       hmt_allow_anode_ro   ;
   output       hmt_allow_cathode_ro ;
   output       hmt_allow_match_ro   ;
+  output       hmt_anode_bkg_check;  
+  output       hmt_cathode_bkg_check;
+  
 
 // Sequencer Ports: Latched CLCTs
   output          event_clear_vme;    // Event clear for aff,clct,mpc vme diagnostic registers
@@ -1977,10 +1977,8 @@
   input  [10:0]      trig_source_vme;    // Trigger source readback
   input  [2:0]      nlayers_hit_vme;    // Number layers hit on layer trigger
   input          clct_bx0_sync_err;    // Sync error: BXN counter==0 did not match bx0
-  input  [MXQLTB - 1   : 0] clct0_vme_qlt; // new quality
   input  [MXBNDB - 1   : 0] clct0_vme_bnd; // new bending 
   input  [MXXKYB-1     : 0] clct0_vme_xky; // new position with 1/8 precision
-  input  [MXQLTB - 1   : 0] clct1_vme_qlt; // new quality
   input  [MXBNDB - 1   : 0] clct1_vme_bnd; // new bending 
   input  [MXXKYB-1     : 0] clct1_vme_xky; // new position with 1/8 precision
   input  [MXPATC-1     : 0] clct0_vme_carry;         // First  CLCT
@@ -2276,8 +2274,8 @@
   input  [MXCNTVME-1:0]  hmt_counter17;
   input  [MXCNTVME-1:0]  hmt_counter18;
   input  [MXCNTVME-1:0]  hmt_counter19;
-  input  [MXCNTVME-1:0]  hmt_trigger_counter,
-  input  [MXCNTVME-1:0]  hmt_readout_counter,
+  input  [MXCNTVME-1:0]  hmt_trigger_counter;
+  input  [MXCNTVME-1:0]  hmt_readout_counter;
 
 // CSC Orientation Ports
   input  [3:0] csc_type;        // Firmware compile type
@@ -2942,8 +2940,6 @@
 
   wire [15:0] clct0_cc_rd;
   wire [15:0] clct1_cc_rd;
-  //wire [15:0] clct0_qlt_rd;
-  //wire [15:0] clct1_qlt_rd;
   wire [15:0] clct0_bndxky_rd;
   wire [15:0] clct1_bndxky_rd;
   //wire [15:0] clct0_xky_rd;
@@ -3689,8 +3685,6 @@
   ADR_CLCT1_CC:              data_out <= clct1_cc_rd;
   ADR_CLCT0_BNDXKY:          data_out <= clct0_bndxky_rd;  // new bending
   ADR_CLCT1_BNDXKY:          data_out <= clct1_bndxky_rd; 
-  //ADR_CLCT0_QLT:             data_out <= clct0_qlt_rd;  // new Quality
-  //ADR_CLCT1_QLT:             data_out <= clct1_qlt_rd; 
   //ADR_CLCT0_XKY:             data_out <= clct0_xky_rd; // new position with 1/8 strip precision
   //ADR_CLCT1_XKY:             data_out <= clct1_xky_rd; 
 
@@ -6384,7 +6378,7 @@
     cnt_ctrl_wr[15]   = 0; // RW  Parity error reset
   end
 
-  wire [6:0] cnt_select;
+  wire [6:0] cnt_select; //MX allow counter is 127
   wire       cnt_snapshot;
   wire       cnt_all_reset_vme;
   wire       cnt_clear_on_resync;
@@ -6412,6 +6406,7 @@
 // ADR_CNT_RDATA=0xD2  Trigger/Readout Counter Data Register                                                          
 //------------------------------------------------------------------------------------------------------------------
 // Remap 1D counters to 2D, because XST does not support 2D ports
+// MAX allowed counter is 127
   parameter MXHMTCNT = 20;
   parameter MXCNT = 98 + MXHMTCNT;                     // Number of counters, last counter id is mxcnt-1
   reg  [MXCNTVME-1:0] cnt_snap [MXCNT-1:0]; // Event counter snapshot 2D
@@ -6552,7 +6547,7 @@
   assign cnt[106] = hmt_counter10;
   assign cnt[107] = hmt_counter11;
   assign cnt[108] = hmt_counter12;
-  assign cnt[119] = hmt_counter13;
+  assign cnt[109] = hmt_counter13;
   assign cnt[110] = hmt_counter14;
   assign cnt[111] = hmt_counter15;
   assign cnt[112] = hmt_counter16;
@@ -7602,6 +7597,7 @@
     algo2016_ctrl_wr[8]   = 1'b0;  // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - similar to "old" behavior of CLCT-centric algorithm when ALCTs are droped from further usage
     algo2016_ctrl_wr[9]   = 1'b1;  // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
     algo2016_ctrl_wr[10]  = 1'b0;  // not used!!!
+    algo2016_ctrl_wr[11]  = 1'b0;  // allow seq trigger in a row
   end
   
   assign algo2016_use_dead_time_zone         = algo2016_ctrl_wr[0];   // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
@@ -7611,6 +7607,7 @@
   assign algo2016_drop_used_clcts            = algo2016_ctrl_wr[8];   // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - drop used CLCTs
   assign algo2016_cross_bx_algorithm         = algo2016_ctrl_wr[9];   // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
   assign algo2016_clct_use_corrected_bx      = algo2016_ctrl_wr[10];  // Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
+  assign seq_trigger_nodeadtime              = algo2016_ctrl_wr[11];// allow two seq trigger in a row
 
   assign algo2016_ctrl_rd[15:0] = algo2016_ctrl_wr[15:0];
 
@@ -7626,8 +7623,6 @@
   assign clct1_cc_rd[11] = 1'b0;//since comparator code is reduced to 11 bits but software is not changed yet
   assign clct0_cc_rd[15:12]  = 4'b0;
   assign clct1_cc_rd[15:12]  = 4'b0;
-  //assign clct0_qlt_rd[MXQLTB - 1    : 0] = clct0_vme_qlt[MXQLTB - 1   : 0];
-  //assign clct1_qlt_rd[MXQLTB - 1    : 0] = clct1_vme_qlt[MXQLTB - 1   : 0];
   assign clct0_bndxky_rd[MXBNDB - 1    : 0]         = clct0_vme_bnd[MXBNDB - 1   : 0];
   assign clct0_bndxky_rd[MXXKYB - 1+MXBNDB: MXBNDB] = clct0_vme_xky[MXXKYB - 1   : 0];
   assign clct1_bndxky_rd[MXBNDB - 1    : 0]         = clct1_vme_bnd[MXBNDB - 1   : 0];
@@ -7676,7 +7671,7 @@
 
   assign hmt_ctrl_rd[0] = hmt_enable;
   assign hmt_ctrl_rd[1] = hmt_me1a_enable;
-  assign hmt_ctrl_rd[11: 2] = hmt_nhits_vme[9:0];
+  assign hmt_ctrl_rd[11: 2] = hmt_nhits_bx7_vme[9:0];
   assign hmt_ctrl_rd[15:12] = hmt_cathode_vme[MXHMTB-1:0];  //reserved for HMT results
 
 //------------------------------------------------------------------------------------------------------------------

@@ -465,21 +465,22 @@
   cfeb_nlayers_hit,
 
 //HMT results
-  hmt_fired_pretrig,
+  //hmt_fired_pretrig,
   hmt_active_feb, 
+  hmt_pretrig_match,
 
   hmt_anode,
   hmt_cathode, 
 
-  hmt_cathode_fired     , 
-  hmt_anode_fired       , 
+  //hmt_cathode_fired     , 
+  //hmt_anode_fired       , 
   hmt_anode_alct_match  ,
   hmt_cathode_alct_match, 
   hmt_cathode_clct_match, 
   hmt_cathode_lct_match ,
  
   hmt_fired_cathode_only,
-  hmt_fired_anoode_only,
+  hmt_fired_anode_only,
   hmt_fired_match,
   hmt_fired_or,
 
@@ -490,7 +491,6 @@
   hs_pid_1st,
   hs_key_1st,
 
-  hs_qlt_1st,
   hs_bnd_1st,
   hs_xky_1st,
   hs_carry_1st,
@@ -501,7 +501,6 @@
   hs_key_2nd,
   hs_bsy_2nd,
 
-  hs_qlt_2nd,
   hs_bnd_2nd,
   hs_xky_2nd,
   hs_carry_2nd,
@@ -609,11 +608,9 @@
   bxn_clct_vme,
   bxn_l1a_vme,
   
-  clct0_vme_qlt,
   clct0_vme_bnd,
   clct0_vme_xky,
   clct0_vme_carry,
-  clct1_vme_qlt,
   clct1_vme_bnd,
   clct1_vme_xky,
   clct1_vme_carry,
@@ -750,11 +747,9 @@
   clct1_xtmb,
   clctc_xtmb,
   clctf_xtmb,
-  clct0_qlt_xtmb,
   clct0_bnd_xtmb,
   clct0_xky_xtmb,
   clct0_carry_xtmb, // Out  First  CLCT
-  clct1_qlt_xtmb,
   clct1_bnd_xtmb,
   clct1_xky_xtmb,
   clct1_carry_xtmb, // Out  Second CLCT
@@ -799,6 +794,7 @@
   tmb_alct1,
   tmb_alctb,
   tmb_alcte,
+  hmt_nhits_bx678_ff,
 
   ccLUT_enable,
   run3_trig_df,
@@ -1261,15 +1257,16 @@
   input  [MXLY-1:0]    cfeb_layer_or;      // OR of hstrips on each layer at pre-trigger
   input  [MXHITB-1:0]  cfeb_nlayers_hit;    // Number of CSC layers hit
   
-// Pattern Finder CLCT results
-  input                 hmt_fired_pretrig;//hmt fired at pretrigger bx
+// HMT results
+  //input                 hmt_fired_pretrig;//hmt fired at pretrigger bx
   input  [MXCFEB-1:0]   hmt_active_feb;
+  input                 hmt_pretrig_match;
 
   input [MXHMTB-1:0]     hmt_anode; // tmb match bx
   input [MXHMTB-1:0]     hmt_cathode; // tmb match bx
 
-  input hmt_cathode_fired     ; 
-  input hmt_anode_fired       ; 
+  //input hmt_cathode_fired     ; 
+  //input hmt_anode_fired       ; 
   input hmt_anode_alct_match  ;
   input hmt_cathode_alct_match; 
   input hmt_cathode_clct_match; 
@@ -1285,7 +1282,6 @@
   input  [MXKEYBX-1:0]  hs_key_1st;        // 1st CLCT key 1/2-strip
 //Tao CCLUT pattern
   input [MXXKYB     - 1 : 0] hs_xky_1st; // 1st CLCT key 1/8-strip
-  input [MXQLTB     - 1 : 0] hs_qlt_1st; // 1st CLCT pattern lookup quality
   input [MXBNDB     - 1 : 0] hs_bnd_1st; // 1st CLCT pattern lookup bend angle
   input [MXPATC     - 1 : 0] hs_carry_1st; // 1st CLCT pattern lookup comparator-code
   input  [MXPIDB-1:0]   hs_run2pid_1st;        // 1st CLCT pattern ID
@@ -1297,7 +1293,6 @@
 
 //Tao CCLUT pattern
   input [MXXKYB     - 1 : 0] hs_xky_2nd; // 1st CLCT key 1/8-strip     
-  input [MXQLTB     - 1 : 0] hs_qlt_2nd; // 1st CLCT pattern lookup quality
   input [MXBNDB     - 1 : 0] hs_bnd_2nd; // 1st CLCT pattern lookup bend angle
   input [MXPATC     - 1 : 0] hs_carry_2nd; // 1st CLCT pattern lookup comparator-code
   input  [MXPIDB-1:0]   hs_run2pid_2nd;        // 1st CLCT pattern ID
@@ -1405,10 +1400,8 @@
 
   output  [MXPATC-1:0]   clct0_vme_carry;         // First  CLCT
   output  [MXPATC-1:0]   clct1_vme_carry;         // Second CLCT
-  output  [MXQLTB - 1   : 0] clct0_vme_qlt = 0; // new quality
   output  [MXBNDB - 1   : 0] clct0_vme_bnd = 0; // new bending 
   output  [MXXKYB-1     : 0] clct0_vme_xky = 0; // new position with 1/8 precision
-  output  [MXQLTB - 1   : 0] clct1_vme_qlt = 0; // new quality
   output  [MXBNDB - 1   : 0] clct1_vme_bnd = 0; // new bending 
   output  [MXXKYB-1     : 0] clct1_vme_xky = 0; // new position with 1/8 precision
 
@@ -1544,11 +1537,9 @@
   output  [MXCLCTC-1:0]  clctc_xtmb; // Common to CLCT0/1 to TMB
   output  [MXCFEB-1:0]   clctf_xtmb; // Active cfeb list to TMB
 
-  output [MXQLTB - 1   : 0] clct0_qlt_xtmb; // new quality
   output [MXBNDB - 1   : 0] clct0_bnd_xtmb; // new bending 
   output [MXXKYB-1     : 0] clct0_xky_xtmb; // new position with 1/8 precision
   output [MXPATC-1     : 0] clct0_carry_xtmb; // CC code 
-  output [MXQLTB - 1   : 0] clct1_qlt_xtmb; // new quality
   output [MXBNDB - 1   : 0] clct1_bnd_xtmb; // new bending 
   output [MXXKYB-1     : 0] clct1_xky_xtmb; // new position with 1/8 precision
   output [MXPATC-1     : 0] clct1_carry_xtmb; // CC code 
@@ -1593,6 +1584,7 @@
   input  [10:0]      tmb_alct1;      // ALCT second best muon latched at trigger
   input  [4:0]      tmb_alctb;      // ALCT bxn latched at trigger
   input  [1:0]      tmb_alcte;      // ALCT ecc error syndrome latched at trigger
+  input [NHMTHITB-1:0] hmt_nhits_bx678_ff;// hmt nhits in-time
 
   input  ccLUT_enable;
   input  run3_trig_df;
@@ -2357,9 +2349,9 @@
   wire hmt_ro_cnt_en      = hmt_readout_tmb_ff && !hmt_ro_cnt_ovf;
 
   always @(posedge clock) begin
-    if      (hmt_trig_cnt_reset) hmt_trigger_counter = 0;
+    if      (hmt_cnt_reset) hmt_trigger_counter = 0;
     else if (hmt_trig_cnt_en   ) hmt_trigger_counter = hmt_trigger_counter+1'b1;
-    if      (hmt_ro_cnt_reset)   hmt_readout_counter = 0;
+    if      (hmt_cnt_reset)   hmt_readout_counter = 0;
     else if (hmt_ro_cnt_en   )   hmt_readout_counter = hmt_readout_counter+1'b1;
   end
 //------------------------------------------------------------------------------------------------------------------
@@ -2681,7 +2673,7 @@
 
 
   assign active_feb_flag_pre = clct_push_pretrig;
-  assign active_feb_list_pre = (active_feb_s0[MXCFEB-1:0] & {MXCFEB{active_feb_flag_pre}}) | hmt_active_cfeb;
+  assign active_feb_list_pre = (active_feb_s0[MXCFEB-1:0] & {MXCFEB{active_feb_flag_pre}}) | hmt_active_feb;
 
   assign active_feb_flag_tmb = tmb_trig_write;
   assign active_feb_list_tmb = tmb_aff_list & {MXCFEB{active_feb_flag_tmb}};
@@ -2778,16 +2770,12 @@
 
   wire [MXPATC-1:0] clct0_carry, clct0_carry_xtmb;
   wire [MXPATC-1:0] clct1_carry, clct1_carry_xtmb;
-  wire [MXQLTB - 1   : 0] clct0_qlt; // new quality
   wire [MXBNDB - 1   : 0] clct0_bnd; // new bending 
   wire [MXXKYB-1     : 0] clct0_xky; // new position with 1/8 precision
-  wire [MXQLTB - 1   : 0] clct1_qlt; // new quality
   wire [MXBNDB - 1   : 0] clct1_bnd; // new bending 
   wire [MXXKYB-1     : 0] clct1_xky; // new position with 1/8 precision
-  wire [MXQLTB - 1   : 0] clct0_qlt_xtmb; // new quality
   wire [MXBNDB - 1   : 0] clct0_bnd_xtmb; // new bending 
   wire [MXXKYB-1     : 0] clct0_xky_xtmb; // new position with 1/8 precision
-  wire [MXQLTB - 1   : 0] clct1_qlt_xtmb; // new quality
   wire [MXBNDB - 1   : 0] clct1_bnd_xtmb; // new bending 
   wire [MXXKYB-1     : 0] clct1_xky_xtmb; // new position with 1/8 precision
 
@@ -2796,11 +2784,9 @@
   assign clct0[7:4]  = (ccLUT_enable && !run3_trig_df) ?  hs_run2pid_1st[3:0] : hs_pid_1st[3:0]; // Pattern shape 0-A
   assign clct0[15:8] = hs_key_1st[7:0]; // 1/2-strip ID number
 
-  assign clct0_qlt[MXQLTB - 1: 0]= hs_qlt_1st[MXQLTB - 1   : 0]; 
   assign clct0_bnd[MXBNDB - 1: 0]= hs_bnd_1st[MXBNDB - 1   : 0]; 
   assign clct0_xky[MXXKYB - 1: 0]= hs_xky_1st[MXXKYB - 1   : 0]; 
   assign clct0_carry[MXPATC-1:0] = hs_carry_1st[MXPATC-1:0];
-  assign clct1_qlt[MXQLTB - 1: 0]= hs_qlt_2nd[MXQLTB - 1   : 0]; 
   assign clct1_bnd[MXBNDB - 1: 0]= hs_bnd_2nd[MXBNDB - 1   : 0]; 
   assign clct1_xky[MXXKYB - 1: 0]= hs_xky_2nd[MXXKYB - 1   : 0]; 
   assign clct1_carry[MXPATC-1:0] = hs_carry_2nd[MXPATC-1:0];
@@ -2830,11 +2816,9 @@
   assign clctf_xtmb = clctf & {MXCFEB {!clct0_blanking}};
   
   assign clct0_carry_xtmb = clct0_carry & {MXPATC {!clct0_blanking}};
-  assign clct0_qlt_xtmb   = clct0_qlt & {MXQLTB {!clct0_blanking}};
   assign clct0_bnd_xtmb   = clct0_bnd & {MXBNDB {!clct0_blanking}};
   assign clct0_xky_xtmb   = clct0_xky & {MXXKYB {!clct0_blanking}};
   assign clct1_carry_xtmb = clct1_carry & {MXPATC {!clct1_blanking}};
-  assign clct1_qlt_xtmb   = clct1_qlt & {MXQLTB {!clct1_blanking}};
   assign clct1_bnd_xtmb   = clct1_bnd & {MXBNDB {!clct1_blanking}};
   assign clct1_xky_xtmb   = clct1_xky & {MXXKYB {!clct1_blanking}};
 
@@ -2845,10 +2829,8 @@
   reg [MXCFEB-1:0]  clctf_vme=0;
   reg [MXPATC-1:0]  clct0_vme_carry=0;         // First  CLCT CC
   reg [MXPATC-1:0]  clct1_vme_carry=0;         // Second CLCT CC
-  reg [MXQLTB - 1   : 0] clct0_vme_qlt = 0; // new quality
   reg [MXBNDB - 1   : 0] clct0_vme_bnd = 0; // new bending 
   reg [MXXKYB-1     : 0] clct0_vme_xky = 0; // new position with 1/8 precision
-  reg [MXQLTB - 1   : 0] clct1_vme_qlt = 0; // new quality
   reg [MXBNDB - 1   : 0] clct1_vme_bnd = 0; // new bending 
   reg [MXXKYB-1     : 0] clct1_vme_xky = 0; // new position with 1/8 precision
 
@@ -2862,10 +2844,8 @@
       clctf_vme <= 0;
       clct0_vme_carry <= 0;
       clct1_vme_carry <= 0;
-      clct0_vme_qlt   <= 0;
       clct0_vme_bnd   <= 0;
       clct0_vme_xky   <= 0;
-      clct1_vme_qlt   <= 0;
       clct1_vme_bnd   <= 0;
       clct1_vme_xky   <= 0;
     end
@@ -2876,10 +2856,8 @@
       clctf_vme <= clctf_xtmb;
       clct0_vme_carry <= clct0_carry_xtmb;
       clct1_vme_carry <= clct1_carry_xtmb;
-      clct0_vme_qlt   <= clct0_qlt_xtmb;
       clct0_vme_bnd   <= clct0_bnd_xtmb;
       clct0_vme_xky   <= clct0_xky_xtmb;
-      clct1_vme_qlt   <= clct1_qlt_xtmb;
       clct1_vme_bnd   <= clct1_bnd_xtmb;
       clct1_vme_xky   <= clct1_xky_xtmb;
     end
@@ -3021,7 +2999,7 @@
     hmt_cnt_en[5]  <= hmt_cathode[1:0] == 2'b10; // hmt over threshold2
     hmt_cnt_en[6]  <= hmt_cathode[1:0] == 2'b11; // hmt over threshold3
     hmt_cnt_en[7]  <= hmt_anode_alct_match;// hmt anode and alct match
-    hmt_cnt_en[8]  <= hmt_fired_pretrig && clct_pretrig;// hmt && preCLCT
+    hmt_cnt_en[8]  <= hmt_pretrig_match;// hmt && preCLCT
     hmt_cnt_en[9]  <= hmt_cathode_clct_match;// hmt && CLCT
     hmt_cnt_en[10] <= hmt_cathode_alct_match;// hmt && ALCT
     hmt_cnt_en[11] <= hmt_cathode_lct_match; // hmt && LCT vpf
@@ -3215,11 +3193,10 @@
   assign xtmb_wdata[42]    =  clct_invp[0];     // CLCT had invalid pattern after drift delay
   assign xtmb_wdata[43]    =  clct_invp[1];     // CLCT had invalid pattern after drift delay
 
-  parameter MXCCLUTB = MXPATC+MXPATC+MXBNDB+MXBNDB+MXXKYB+MXXKYB+10;
+  parameter MXCCLUTB = MXPATC+MXPATC+MXBNDB+MXBNDB+MXXKYB+MXXKYB;
   wire [MXCCLUTB-1:0]  xtmb_cclut_wdata;                // Mapping array
   wire [MXCCLUTB-1:0]  xtmb_cclut_rdata;                // Mapping array
-  //assign xtmb_cclut_wdata = {clct1_qlt_xtmb, clct1_bnd_xtmb, clct1_xky_xtmb, clct1_carry_xtmb, clct0_qlt_xtmb, clct0_bnd_xtmb, clct0_xky_xtmb, clct0_carry_xtmb};
-  assign xtmb_cclut_wdata = {hmt_nhits_trig_bx678_xtmb, clct1_bnd_xtmb, clct1_xky_xtmb, clct1_carry_xtmb, clct0_bnd_xtmb, clct0_xky_xtmb, clct0_carry_xtmb};
+  assign xtmb_cclut_wdata = {clct1_bnd_xtmb, clct1_xky_xtmb, clct1_carry_xtmb, clct0_bnd_xtmb, clct0_xky_xtmb, clct0_carry_xtmb};
 
 // Post-drift+1bx: store CLCT counter in RAM mapping array
   parameter MXXTMB1 = 30;         // Post drift CLCT counter
@@ -3229,7 +3206,7 @@
   assign xtmb1_wdata[29:0]  =  clct_counter[29:0];      // CLCTs sent to TMB section
 
 // TMB match: store TMB match results in RAM mapping array
-  parameter MXRTMB = 23;        // TMB match data bits
+  parameter MXRTMB = 23 + NHMTHITB;        // TMB match data bits
   wire [MXRTMB-1:0] rtmb_wdata; // Mapping array
   wire [MXRTMB-1:0] rtmb_rdata; // Mapping array
 
@@ -3256,6 +3233,8 @@
   assign rtmb_wdata[20]  =  tmb_non_trig_keep; // TMB said keep non-triggering event
   assign rtmb_wdata[21]  =  tmb_clct0_discard; // TMB discarded clct0 from ME1A
   assign rtmb_wdata[22]  =  tmb_clct1_discard; // TMB discarded clct1 from ME1A
+
+  assign rtmb_wdata[32:23] = hmt_nhits_bx678_ff[NHMTHITB-1:0];
 
 // TMB match: store ALCTs sent to MPC in RAM mapping array, arrives same bx as tmb match result
   parameter MXALCTD = 11+11+5+2; // ALCT transmit frame data bits, 2alcts + bxn + tmb stats
@@ -3422,7 +3401,7 @@
     //seq_trigger <= tmb_trig_pulse && (tmb_trig_keep || tmb_non_trig_keep) && !seq_trigger;
     //old logic would block the second L1A request when two triggers are in
     //a row, Tao
-    seq_trigger <= tmb_trig_pulse && (tmb_trig_keep || tmb_non_trig_keep) && (!seq_trigger || seq_trigger_nodeadtime);
+    seq_trigger <= tmb_trig_pulse && (tmb_trig_keep || tmb_non_trig_keep) && (!seq_trigger || seq_trigger_nodeadtime) && !fmm_trig_stop;
   end
 
 // Scintillator Veto for FAST sites, Assert veto on l1a request, persist until clear on VME, copy to VME
@@ -3858,18 +3837,13 @@
   wire        r_clct0_invp = xtmb_rdata[42];    // CLCT0 had invalid pattern after drift delay
   wire        r_clct1_invp = xtmb_rdata[43];    // CLCT1 had invalid pattern after drift delay
 
-  wire [MXQLTB - 1   : 0] r_clct0_qlt_xtmb; // new quality
   wire [MXBNDB - 1   : 0] r_clct0_bnd_xtmb; // new bending
   wire [MXXKYB-1     : 0] r_clct0_xky_xtmb; // new position with 1/8 precision
   wire [MXPATC-1     : 0] r_clct0_carry_xtmb; // CC code
-  wire [MXQLTB - 1   : 0] r_clct1_qlt_xtmb; // new quality
   wire [MXBNDB - 1   : 0] r_clct1_bnd_xtmb; // new bending
   wire [MXXKYB-1     : 0] r_clct1_xky_xtmb; // new position with 1/8 precision
   wire [MXPATC-1     : 0] r_clct1_carry_xtmb; // CC code
-  wire [9:0] r_hmt_nhits_trig_bx678_xtmb;
-  //assign {r_clct1_qlt_xtmb, r_clct1_bnd_xtmb, r_clct1_xky_xtmb, r_clct1_carry_xtmb, r_clct0_qlt_xtmb, r_clct0_bnd_xtmb, r_clct0_xky_xtmb, r_clct0_carry_xtmb}   = xtmb_cclut_rdata;
-  assign {r_hmt_nhits_trig_bx678_xtmb, r_clct1_bnd_xtmb, r_clct1_xky_xtmb, r_clct1_carry_xtmb, r_clct0_bnd_xtmb, r_clct0_xky_xtmb, r_clct0_carry_xtmb}   = xtmb_cclut_rdata;
-  wire [6:0] r_hmt_nhits_trig_bx678_xtmb_header =  (r_hmt_nhits_trig_bx678_xtmb>=10'h80) ? 7'h7F : r_hmt_nhits_trig_bx678_xtmb[6:0];
+  assign {r_clct1_bnd_xtmb, r_clct1_xky_xtmb, r_clct1_carry_xtmb, r_clct0_bnd_xtmb, r_clct0_xky_xtmb, r_clct0_carry_xtmb}   = xtmb_cclut_rdata;
 
   wire [5:0] r_layers_hit = r_clcta_xtmb[5:0]; // Layers hit
   wire       r_clct1_busy = r_clcta_xtmb[6];   // CLCT1 busy internal check
@@ -3902,6 +3876,10 @@
 
   wire       r_tmb_clct0_discard = rtmb_rdata[21]; // TMB discarded clct0 from ME1A
   wire       r_tmb_clct1_discard = rtmb_rdata[22]; // TMB discarded clct1 from ME1A
+
+  wire [NHMTHITB-1:0] r_hmt_nhits_bx678 = rtmb_rdata[23+NHMTHITB-1:23];
+  wire [6:0] r_hmt_nhits_trig_bx678_xtmb_header =  (r_hmt_nhits_bx678>=10'h80) ? 7'h7F : r_hmt_nhits_bx678[6:0];
+
 
 // Unpack ALCT + extra TMB trigger data from RAM mapping array
   wire [10:0]  r_tmb_alct0      =  alct_rdata[10:0];  // ALCT0

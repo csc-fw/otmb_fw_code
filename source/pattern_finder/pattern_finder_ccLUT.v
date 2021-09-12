@@ -92,7 +92,6 @@ module pattern_finder_ccLUT (
   hs_hit_1st,
   hs_pid_1st,
   hs_key_1st,
-  hs_qlt_1st,
   hs_bnd_1st,
   hs_xky_1st,
   hs_car_1st,
@@ -102,7 +101,6 @@ module pattern_finder_ccLUT (
   hs_pid_2nd,
   hs_key_2nd,
   hs_bsy_2nd,
-  hs_qlt_2nd,
   hs_bnd_2nd,
   hs_xky_2nd,
   hs_car_2nd,
@@ -237,7 +235,6 @@ module pattern_finder_ccLUT (
   output [MXKEYBX - 1: 0] hs_key_1st; // 1st CLCT key 1/2-strip
 //Tao CCLUT pattern
   output [MXXKYB     - 1 : 0] hs_xky_1st; // 1st CLCT key 1/8-strip
-  output [MXQLTB     - 1 : 0] hs_qlt_1st; // 1st CLCT pattern lookup quality
   output [MXBNDB     - 1 : 0] hs_bnd_1st; // 1st CLCT pattern lookup bend angle
   output [MXPATC     - 1 : 0] hs_car_1st; // 1st CLCT pattern lookup comparator-code
   output [MXPIDB - 1: 0]  hs_run2pid_1st; // 1st CLCT pattern ID
@@ -248,7 +245,6 @@ module pattern_finder_ccLUT (
   output                  hs_bsy_2nd; // 2nd CLCT busy, logic error indicator
 //Tao CCLUT pattern
   output [MXXKYB     - 1 : 0] hs_xky_2nd; // 1st CLCT key 1/8-strip     
-  output [MXQLTB     - 1 : 0] hs_qlt_2nd; // 1st CLCT pattern lookup quality
   output [MXBNDB     - 1 : 0] hs_bnd_2nd; // 1st CLCT pattern lookup bend angle
   output [MXPATC     - 1 : 0] hs_car_2nd; // 1st CLCT pattern lookup comparator-code
   output [MXPIDB - 1: 0]  hs_run2pid_2nd; // 1st CLCT pattern ID
@@ -986,16 +982,17 @@ module pattern_finder_ccLUT (
 //     Select the 1st best pattern from 224 Key 1/2-Strips
 //-------------------------------------------------------------------------------------------------------------------
   // Best 7 of 224 1/2-strip patterns
+  wire [MXPATB - 1: 0] hs_pat_s1_tmp [MXCFEB-1 : 0];
   wire [MXPATB - 1: 0] hs_pat_s1 [MXCFEB-1 : 0];
   wire [MXKEYB - 1: 0] hs_key_s1 [MXCFEB-1 : 0]; // partial key for 1 of 32
   wire [MXPATC-1:0]    hs_carry_s1 [MXCFEB-1 :0]; //CCLUT, Tao, comparator code
   wire [MXOFFSB -1:0]  hs_offs_s1  [MXCFEB-1 :0]; //keyhs offset, CCLUT
   wire [MXBNDB-1:0]    hs_bend_s1  [MXCFEB-1 :0]; // bending , CCLUT
-  wire [MXQLTB-1:0]    hs_qlt_s1   [MXCFEB-1 :0]; // quality, CCLUT
   //CCLUT, Tao, new 1/32 sorter with comparator code
   genvar i;
   generate
     for (i = 0; i <= MXCFEB-1; i = i + 1) begin: hs_gen
+      assign hs_pat_s1[i] = hs_pat_s1_tmp[i]-4'd6;// subtract pattern id by 4 to revert patid back to 0-4
       best_1of32_ccLUT ubest1of32_1st (
         .clock(clock),
         .pat00(hs_pat_s0[i * 32 +  0]),
@@ -1064,7 +1061,7 @@ module pattern_finder_ccLUT (
         .carry30(hs_carry_s0[i * 32 + 30]),
         .carry31(hs_carry_s0[i * 32 + 31]),
         // Outputs
-        .best_pat   (hs_pat_s1[i]),
+        .best_pat   (hs_pat_s1_tmp[i]),
         .best_key   (hs_key_s1[i]),
         .best_carry (hs_carry_s1[i])
       );
@@ -1077,7 +1074,6 @@ module pattern_finder_ccLUT (
   wire [MXPATB - 1: 0]  hs_pat_s2;
   wire [MXKEYBX - 1: 0] hs_key_s2;  // full key for 1 of 224
   wire [MXXKYB - 1:0]   hs_xky_s2; // CCLUT, Tao
-  wire [MXQLTB - 1:0]   hs_qlt_s2;
   wire [MXBNDB - 1:0]   hs_bnd_s2;
   wire [MXPATC - 1:0]   hs_car_s2; //hit carry, comparator code
 
@@ -1108,11 +1104,6 @@ module pattern_finder_ccLUT (
     .offs3(hs_offs_s1[3]),
     .offs4(hs_offs_s1[4]),
   // quality inputs from fit lut
-    .qlt0(hs_qlt_s1[0]),
-    .qlt1(hs_qlt_s1[1]),
-    .qlt2(hs_qlt_s1[2]),
-    .qlt3(hs_qlt_s1[3]),
-    .qlt4(hs_qlt_s1[4]),
   // bend inputs from fit lut
     .bend0(hs_bend_s1[0]),
     .bend1(hs_bend_s1[1]),
@@ -1124,7 +1115,6 @@ module pattern_finder_ccLUT (
     .best_key (hs_key_s2),
   // best fit result
     .best_subkey (hs_xky_s2),
-    .best_qlt    (hs_qlt_s2),
     .best_carry  (hs_car_s2),
     .best_bend   (hs_bnd_s2)
   );
@@ -1132,7 +1122,6 @@ module pattern_finder_ccLUT (
   // Latch final hs pattern data for 1st CLCT
   reg [MXPATB - 1:0] hs_pat_1st_nodly;
   reg [MXKEYBX- 1:0] hs_key_1st_nodly;
-  reg [MXQLTB - 1:0] hs_qlt_1st_nodly; // CCLUT, Tao
   reg [MXBNDB - 1:0] hs_bnd_1st_nodly;
   reg [MXPATC - 1:0] hs_car_1st_nodly;
   reg [MXXKYB - 1:0] hs_xky_1st_nodly;
@@ -1143,7 +1132,6 @@ module pattern_finder_ccLUT (
     hs_xky_1st_nodly <= hs_xky_s2;//CCLUT, Tao
     hs_bnd_1st_nodly <= hs_bnd_s2;
     hs_car_1st_nodly <= hs_car_s2;
-    hs_qlt_1st_nodly <= hs_qlt_s2;
   end
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -1152,7 +1140,6 @@ module pattern_finder_ccLUT (
   wire [MXPATB - 1: 0]  hs_pat_1st_dly;
   wire [MXKEYBX - 1: 0] hs_key_1st_dly;
   wire [MXHITB - 1: 0]  hs_hit_1st_dly;
-  wire [MXQLTB -1:0] hs_qlt_1st_dly;//CCLUT, Tao
   wire [MXBNDB -1:0] hs_bnd_1st_dly;
   wire [MXPATC -1:0] hs_car_1st_dly;
   wire [MXXKYB -1:0] hs_xky_1st_dly;
@@ -1162,20 +1149,18 @@ module pattern_finder_ccLUT (
   srl16e_bbl #(MXPATB ) upatbbl (.clock(clock), .ce(1'b1), .adr(cdly), .d(hs_pat_1st_nodly), .q(hs_pat_1st_dly));
   srl16e_bbl #(MXKEYBX) ukeybbl (.clock(clock), .ce(1'b1), .adr(cdly), .d(hs_key_1st_nodly), .q(hs_key_1st_dly));
   //CCLUT, Tao
-  srl16e_bbl #(MXQLTB) uqltbbl (.clock(clock), .ce(1'b1), .adr(cdly), .d(hs_qlt_1st_nodly), .q(hs_qlt_1st_dly));
   srl16e_bbl #(MXBNDB) ubndbbl (.clock(clock), .ce(1'b1), .adr(cdly), .d(hs_bnd_1st_nodly), .q(hs_bnd_1st_dly));
   srl16e_bbl #(MXPATC) ucarbbl (.clock(clock), .ce(1'b1), .adr(cdly), .d(hs_car_1st_nodly), .q(hs_car_1st_dly));
   srl16e_bbl #(MXXKYB) uxkybbl (.clock(clock), .ce(1'b1), .adr(cdly), .d(hs_xky_1st_nodly), .q(hs_xky_1st_dly));
 
   // Final 1st CLCT flipflop
-  reg [MXPIDB - 1:0] hs_pid_1st;
-  reg [MXHITB - 1:0] hs_hit_1st;
-  reg [MXKEYBX- 1:0] hs_key_1st;
-  reg [MXQLTB - 1:0] hs_qlt_1st;//CCLUT, Tao
-  reg [MXBNDB - 1:0] hs_bnd_1st;
-  reg [MXPATC - 1:0] hs_car_1st;
-  reg [MXXKYB - 1:0] hs_xky_1st;
-  reg [MXPIDB - 1:0] hs_run2pid_1st;
+  reg [MXPIDB - 1:0] hs_pid_1st = 0;
+  reg [MXHITB - 1:0] hs_hit_1st = 0;
+  reg [MXKEYBX- 1:0] hs_key_1st = 0;
+  reg [MXBNDB - 1:0] hs_bnd_1st = 0;
+  reg [MXPATC - 1:0] hs_car_1st = 0;
+  reg [MXXKYB - 1:0] hs_xky_1st = 0;
+  reg [MXPIDB - 1:0] hs_run2pid_1st=0;
 
   assign hs_hit_1st_dly = hs_pat_1st_dly[MXPATB - 1: MXPIDB];
 
@@ -1189,7 +1174,6 @@ module pattern_finder_ccLUT (
       hs_pid_1st <= 0;
       hs_hit_1st <= 0;
       hs_key_1st <= 0;
-      hs_qlt_1st <= 0;
       hs_bnd_1st <= 0;
       hs_car_1st <= 0;
       hs_xky_1st <= 0;
@@ -1199,7 +1183,6 @@ module pattern_finder_ccLUT (
       hs_pid_1st <= 1;                  // Pattern id=1 for layer triggers
       hs_hit_1st <= hs_nlayers_hit_dly; // Insert number of layers hit
       hs_key_1st <= 0;                  // Dummy key
-      hs_qlt_1st <= 0;
       hs_bnd_1st <= 0;
       hs_car_1st <= 0;
       hs_xky_1st <= 0;
@@ -1209,7 +1192,6 @@ module pattern_finder_ccLUT (
       hs_key_1st <= hs_key_1st_dly;
       hs_pid_1st <= hs_pat_1st_dly[MXPIDB - 1: 0];//change pid range 10-6 into range 4-0
       hs_hit_1st <= hs_pat_1st_dly[MXPATB - 1: MXPIDB];
-      hs_qlt_1st <= hs_qlt_1st_dly;
       hs_bnd_1st <= hs_bnd_1st_dly;
       hs_car_1st <= hs_car_1st_dly;
       hs_xky_1st <= hs_xky_1st_dly;
@@ -1394,16 +1376,17 @@ module pattern_finder_ccLUT (
   endgenerate
 
   // Best 5 of 224 1/2-strip patterns
+  wire [MXPATB - 1: 0] hs_pat_s4_tmp [MXCFEB - 1: 0];
   wire [MXPATB - 1: 0] hs_pat_s4 [MXCFEB - 1: 0];
   wire [MXKEYB - 1: 0] hs_key_s4 [MXCFEB - 1: 0]; // partial key for 1 of 32
   wire [MXCFEB - 1: 0] hs_bsy_s4;
   wire [MXOFFSB-1:0]   hs_offs_s4  [MXCFEB - 1:0];//CCLUT, Tao
   wire [MXBNDB -1:0]   hs_bend_s4  [MXCFEB - 1:0];
   wire [MXPATC -1:0]   hs_carry_s4 [MXCFEB - 1:0];
-  wire [MXQLTB -1:0]   hs_qlt_s4   [MXCFEB - 1:0];
 
   generate
     for (i = 0; i <= MXCFEB - 1; i = i + 1) begin: hs_2nd_gen
+      assign hs_pat_s4[i] = hs_pat_s4_tmp[i]-4'd6;// subtract pattern id by 4 to revert patid back to 0-4
       best_1of32_busy_ccLUT ubest1of32_2nd (
         .clock(clock),
         .pat00(hs_pat_s3[i * 32 + 0]),
@@ -1472,7 +1455,7 @@ module pattern_finder_ccLUT (
         .carry30(hs_carry_s3[i * 32 + 30]),
         .carry31(hs_carry_s3[i * 32 + 31]),
         // Outputs
-        .best_pat   (hs_pat_s4[i]),
+        .best_pat   (hs_pat_s4_tmp[i]),
         .best_key   (hs_key_s4[i]),
         .best_carry (hs_carry_s4[i]),
         // Busy flags
@@ -1487,7 +1470,6 @@ module pattern_finder_ccLUT (
   wire [MXKEYBX - 1: 0] hs_key_s5;  // full key for 1 of 160
   wire [MXHITB - 1: 0]  hs_hit_s5;
   wire [MXXKYB -1:0]    hs_xky_s5; // CCLUT, Tao
-  wire [MXQLTB -1:0]    hs_qlt_s5;
   wire [MXBNDB -1:0]    hs_bnd_s5;
   wire [MXPATC -1:0]    hs_car_s5;
   wire hs_bsy_s5;
@@ -1519,12 +1501,6 @@ module pattern_finder_ccLUT (
     .offs2(hs_offs_s4[2]),
     .offs3(hs_offs_s4[3]),
     .offs4(hs_offs_s4[4]),
-  // quality inputs from fit lut
-    .qlt0(hs_qlt_s4[0]),
-    .qlt1(hs_qlt_s4[1]),
-    .qlt2(hs_qlt_s4[2]),
-    .qlt3(hs_qlt_s4[3]),
-    .qlt4(hs_qlt_s4[4]),
   // bend inputs from fit lut
     .bend0(hs_bend_s4[0]),
     .bend1(hs_bend_s4[1]),
@@ -1542,7 +1518,6 @@ module pattern_finder_ccLUT (
     .best_key(hs_key_s5),
   // best fit result
     .best_subkey(hs_xky_s5),
-    .best_qlt   (hs_qlt_s5),
     .best_bend  (hs_bnd_s5),
     .best_carry (hs_car_s5),
   // busy flags
@@ -1554,7 +1529,6 @@ module pattern_finder_ccLUT (
   reg [MXPIDB     - 1:0] hs_pid_2nd;
   reg [MXHITB     - 1:0] hs_hit_2nd;
   reg [MXKEYBX    - 1:0] hs_key_2nd;
-  reg [MXQLTB     - 1:0] hs_qlt_2nd;
   reg [MXBNDB     - 1:0] hs_bnd_2nd;
   reg [MXPATC     - 1:0] hs_car_2nd;
   reg [MXXKYB - 1:0]     hs_xky_2nd;
@@ -1570,7 +1544,6 @@ module pattern_finder_ccLUT (
       hs_pid_2nd <= 0;
       hs_hit_2nd <= 0;
       hs_key_2nd <= 0;
-      hs_qlt_2nd <= 0;
       hs_bnd_2nd <= 0;
       hs_car_2nd <= 0;
       hs_xky_2nd <= 0;
@@ -1581,7 +1554,6 @@ module pattern_finder_ccLUT (
       hs_pid_2nd <= 0;
       hs_hit_2nd <= 0;
       hs_key_2nd <= 0;
-      hs_qlt_2nd <= 0;
       hs_bnd_2nd <= 0;
       hs_car_2nd <= 0;
       hs_xky_2nd <= 0;
@@ -1593,7 +1565,6 @@ module pattern_finder_ccLUT (
       hs_hit_2nd <= hs_pat_s5[MXPATB - 1: MXPIDB];
       hs_key_2nd <= hs_key_s5;
       hs_bsy_2nd <= hs_bsy_s5;
-      hs_qlt_2nd <= hs_qlt_s5;
       hs_bnd_2nd <= hs_bnd_s5;
       hs_car_2nd <= hs_car_s5;
       hs_xky_2nd <= hs_xky_s5;
@@ -1625,11 +1596,8 @@ module pattern_finder_ccLUT (
 
     // LUT Bend angle output
     .bend0(hs_bend_s1[i]),
-    .bend1(hs_bend_s4[i]),
+    .bend1(hs_bend_s4[i])
 
-    // LUT Quality Output
-    .quality0(hs_qlt_s1[i]),
-    .quality1(hs_qlt_s4[i])
   );
   end
   endgenerate

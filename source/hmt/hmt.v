@@ -43,23 +43,24 @@
   hmt_anode_bkg_check  ,
   hmt_cathode_bkg_check,
 
-  hmt_fired_pretrig,//preCLCT bx
-  hmt_active_cfeb,
+  //hmt_fired_pretrig,//preCLCT bx
+  hmt_active_feb,
+  hmt_pretrig_match,
 
   hmt_nhits_bx7,//tmb match bx cathode hmt
   hmt_nhits_bx678,
   hmt_nhits_bx2345,
   hmt_cathode_pipe, // tmb match bx
 
-  hmt_cathode_fired     , 
-  hmt_anode_fired       , 
+  //hmt_cathode_fired     , 
+  //hmt_anode_fired       , 
   hmt_anode_alct_match  ,
   hmt_cathode_alct_match, 
   hmt_cathode_clct_match, 
   hmt_cathode_lct_match ,
  
   hmt_fired_cathode_only,
-  hmt_fired_anoode_only,
+  hmt_fired_anode_only,
   hmt_fired_match,
   hmt_fired_or,
   
@@ -71,16 +72,17 @@
 
 
    parameter MXHMTB     =  4;// bits for HMT
-   parameter NHITCFEBB  =  6;
    parameter MXCFEB     =  5;
+   parameter NHITCFEBB  =  6;
    parameter NHMTHITB   = 10;
 
 
   input  clock;
-  input  ttc_resync,
-  input  global_reset, 
+  input  ttc_resync;
+  input  global_reset; 
 
-  input  fmm_trig_stop,
+  input  fmm_trig_stop;
+  input  bx0_vpf_test;
   
   input  [NHITCFEBB-1: 0] nhit_cfeb0;
   input  [NHITCFEBB-1: 0] nhit_cfeb1;
@@ -102,8 +104,9 @@
   input [MXHMTB-1:0] hmt_anode;
 
   input  clct_pretrig;
-  input  clct_vpf_xtmb;
+  input  clct_vpf_pipe;
 
+  input cfeb_allow_hmt_ro;
   input hmt_allow_cathode;
   input hmt_allow_anode;
   input hmt_allow_match;
@@ -113,8 +116,9 @@
   input hmt_anode_bkg_check ;
   input hmt_cathode_bkg_check;
   
-  output  hmt_fired_pretrig;//preCLCT bx
-  output [MXCFEB-1  :0]   hmt_active_cfeb;
+  //output  hmt_fired_pretrig;//preCLCT bx
+  output [MXCFEB-1  :0]   hmt_active_feb;
+  output  hmt_pretrig_match;
 
   //output [MXHMTB-1:0]     hmt_cathode_xtmb; //CLCT bx
 
@@ -123,8 +127,9 @@
   output [NHMTHITB-1:0]   hmt_nhits_bx2345;
   output [MXHMTB-1:0]     hmt_cathode_pipe; // tmb match bx
 
-  output hmt_cathode_fired     ; 
-  output hmt_anode_fired       ; 
+  wire hmt_cathode_fired     ; 
+  wire hmt_anode_fired       ; 
+  output hmt_anode_alct_match  ;
   output hmt_cathode_alct_match; 
   output hmt_cathode_clct_match; 
   output hmt_cathode_lct_match ;
@@ -139,6 +144,19 @@
   output hmt_sump;
 
   assign hmt_anode_fired        = (|hmt_anode[1:0]) && (!hmt_anode_bkg_check || (~|hmt_anode[3:2]));
+
+  wire [3:0]  pdly = 1;      // Power-up reset delay
+  wire powerup_q;
+  reg   powerup_ff  = 0;
+
+  SRL16E upowerup (.CLK(clock),.CE(~powerup_q),.D(1'b1),.A0(pdly[0]),.A1(pdly[1]),.A2(pdly[2]),.A3(pdly[3]),.Q(powerup_q));
+
+  always @(posedge clock) begin
+  powerup_ff <= powerup_q;
+  end
+
+  wire powerup_n = ~powerup_ff;  // shifts timing from LUT to FF
+  wire reset_sr  = ttc_resync | powerup_n;
 
   reg [1:0] hmt_reset_ff = 2'b00;
   always @(posedge clock) begin
@@ -182,11 +200,11 @@
   wire hmt_bit1_s0 = ((nhits_trig_s0_bx678 >= hmt_thresh2) || (nhits_trig_s0_bx678 >= hmt_thresh3)) & nhits_trig_s0_bx678_peak &  (~|hmt_fired_s0_ff) & (~hmt_reset);
   wire hmt_bit2_s0 = ((nhits_trig_s0_bx2345 >= hmt_thresh1) || (nhits_trig_s0_bx2345 >= hmt_thresh3)) &  (~|hmt_fired_s0_ff) & (~hmt_reset);
   wire hmt_bit3_s0 = ((nhits_trig_s0_bx2345 >= hmt_thresh2) || (nhits_trig_s0_bx2345 >= hmt_thresh3)) &  (~|hmt_fired_s0_ff) & (~hmt_reset);
-  wire [MXHMTB-1:0] hmt_trigger_s0 = hmt_enable ? {hmt_bit3_s0, hmt_bit2_s0, hmt_bit1_s0, hmt_bit0_s0} : 4'b0;
+  wire [MXHMTB-1:0] hmt_cathode_s0 = hmt_enable ? {hmt_bit3_s0, hmt_bit2_s0, hmt_bit1_s0, hmt_bit0_s0} : 4'b0;
 
   wire   hmt_fired_bg_s0  = (hmt_bit2_s0 || hmt_bit3_s0);
-  wire   hmt_fired_sig_s0 = (hmt_bit0_s0 || hmt_bit1_s0;
-  wire   hmt_fired_s0 = hmt_fired_sig_s0 && (!hmt_cathode_bkg_check || !hmt_fired_bg_s0)
+  wire   hmt_fired_sig_s0 = (hmt_bit0_s0 || hmt_bit1_s0);
+  wire   hmt_fired_s0 = hmt_fired_sig_s0 && (!hmt_cathode_bkg_check || !hmt_fired_bg_s0);
 
   reg [1:0] hmt_fired_s0_ff = 2'b00;//dead time for 2BX 
   always @(posedge clock) begin
@@ -206,13 +224,13 @@
 
   wire [MXCFEB-1  :0]  active_cfeb_s1; 
   srl16e_bbl #(1)       uhmtfiredpre  ( .clock(clock), .ce(1'b1), .adr(hmt_dly_const-4'd1), .d(hmt_fired_s0),   .q(hmt_fired_s1_srl));
-  srl16e_bbl #(MXCFEB)  uhmtaffpre    ( .clock(clock), .ce(1'b1), .adr(delay_hmt_aff_adr),  .d(active_cfeb_s1), .q(active_cfeb_s1));
+  srl16e_bbl #(MXCFEB)  uhmtaffpre    ( .clock(clock), .ce(1'b1), .adr(delay_hmt_aff_adr),  .d(active_cfeb_s0), .q(active_cfeb_s1));
 
   wire hmt_fired_s1 = (hmt_dly_const == 4'd0) ? hmt_fired_s0 : hmt_fired_s1_srl;
-  assign hmt_fired_pretrigger = hmt_fired_s1;
-  assign hmt_active_cfeb      = active_cfeb_s1;
+  //assign hmt_fired_pretrig = hmt_fired_s1;
+  assign hmt_active_feb    = active_cfeb_s1 & {MXCFEB{cfeb_allow_hmt_ro & hmt_fired_s1}};
 
-  wire hmt_pretrigger_match   = hmt_fired_pretrigger && clct_pretrig;
+  assign hmt_pretrig_match   = hmt_fired_s1 && clct_pretrig;
 
 //------------------------------------------------------------------------------------------------------------------
 //  Delay HMT to post-drift 
@@ -234,9 +252,11 @@
 //------------------------------------------------------------------------------------------------------------------
 // FF buffer hmt_window index for fanout, points to 1st position window is closed 
   reg [3:0] winclosing=0;
+  reg [3:0] hmt_window = 0;
 
   always @(posedge clock) begin
   winclosing <= hmt_alct_win_size-1'b1;
+  hmt_window <= hmt_alct_win_size;
   end
 
   wire dynamic_zero = bx0_vpf_test;      // Dynamic zero to mollify xst for certain FF inits
@@ -384,11 +404,11 @@
 
 
   // Pointer to SRL delayed HMT signals
-  assign hmt_srl_ptr   = hmt_match_win;
+  wire [3:0] hmt_srl_ptr   = hmt_match_win;
   wire hmt_ptr_is_0 = hmt_srl_ptr == 4'b0;
   wire [3:0]  hmt_srl_adr = hmt_srl_ptr-1'b1;
   wire [MXHMTB-1    :0] hmt_cathode_srl;
-  srl16e_bbl #(MXHMTB   ) uhmt        (.clock(clock),.ce(1'b1),.adr(hmt_srl_adr),.d(hmt_cathode_xtmb),.q(chmt_cathode_srl));
+  srl16e_bbl #(MXHMTB   ) uhmt        (.clock(clock),.ce(1'b1),.adr(hmt_srl_adr),.d(hmt_cathode_xtmb),.q(hmt_cathode_srl));
   assign hmt_cathode_pipe   = (hmt_ptr_is_0) ? hmt_cathode_xtmb : hmt_cathode_srl;
 
   assign hmt_cathode_fired      = (|hmt_cathode_pipe[1:0]) && (!hmt_cathode_bkg_check || (~|hmt_cathode_pipe[3:2]));
@@ -426,6 +446,7 @@
   assign  hmt_nhits_bx2345 = (hmt_final_delay == 4'd0) ? nhits_trig_s0_bx2345[9:0] : nhits_trig_dly_bx2345[9:0];
 
 
+  assign hmt_sump = |hmt_pri_best;
 //-------------------------------------------------------------------------------------------------------------------
   endmodule
 //-------------------------------------------------------------------------------------------------------------------

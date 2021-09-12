@@ -213,7 +213,7 @@
 // Add 2 to pid to shift to range 2-10
 
   assign pat_nhits = nhits_s2 [0][MXHITB-1:0];
-  assign pat_id    = {1'b0, pid_s2   [0][2:0]};//pat id range 0-4. but use 4bits due to Run2 legacy
+  assign pat_id    = pid_s2   [0][2:0] + 4'd6;//pat id range 0-4. but use 4bits due to Run2 legacy. So add 6 here to make ISE happy
   assign pat_carry = carry_s2 [0][MXPATC-1:0];
 
 //------------------------------------------------------------------------------------------------------------------------
