@@ -1655,15 +1655,15 @@ assign alctclctgem_match_sump =
     (|alct0_clct0_copad_best_cscxky) |
     (|alct0_clct1_copad_best_cscxky) |
     (|alct1_clct0_copad_best_cscxky) |
-    (|alct0_clct1_copad_best_cscxky) |
+    (|alct1_clct1_copad_best_cscxky) |
     (|alct0_clct0_gemA_best_cscxky) |
     (|alct0_clct1_gemA_best_cscxky) |
     (|alct1_clct0_gemA_best_cscxky) |
-    (|alct0_clct1_gemA_best_cscxky) |
+    (|alct1_clct1_gemA_best_cscxky) |
     (|alct0_clct0_gemB_best_cscxky) |
     (|alct0_clct1_gemB_best_cscxky) |
     (|alct1_clct0_gemB_best_cscxky) |
-    (|alct0_clct1_gemB_best_cscxky) |
+    (|alct1_clct1_gemB_best_cscxky) |
     (|clct0_copad_best_cscxky)  |
     (|clct1_copad_best_cscxky) ;
 

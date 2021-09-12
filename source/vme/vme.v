@@ -541,11 +541,9 @@
   nlayers_hit_vme,
   clct_bx0_sync_err,
 
-  clct0_vme_qlt,
   clct0_vme_bnd,
   clct0_vme_xky,
   clct0_vme_carry,
-  clct1_vme_qlt,
   clct1_vme_bnd,
   clct1_vme_xky,
   clct1_vme_carry,
@@ -2329,10 +2327,8 @@
   input  [10:0]         trig_source_vme;   // Trigger source readback
   input  [2:0]          nlayers_hit_vme;   // Number layers hit on layer trigger
   input                 clct_bx0_sync_err; // Sync error: BXN counter==0 did not match bx0
-  input  [MXQLTB - 1   : 0] clct0_vme_qlt; // new quality
   input  [MXBNDB - 1   : 0] clct0_vme_bnd; // new bending 
   input  [MXXKYB-1     : 0] clct0_vme_xky; // new position with 1/8 precision
-  input  [MXQLTB - 1   : 0] clct1_vme_qlt; // new quality
   input  [MXBNDB - 1   : 0] clct1_vme_bnd; // new bending 
   input  [MXXKYB-1     : 0] clct1_vme_xky; // new position with 1/8 precision
   input  [MXPATC-1     : 0] clct0_vme_carry;         // First  CLCT
@@ -3610,8 +3606,6 @@
 
   wire [15:0] clct0_cc_rd;
   wire [15:0] clct1_cc_rd;
-  //wire [15:0] clct0_qlt_rd;
-  //wire [15:0] clct1_qlt_rd;
   wire [15:0] clct0_bndxky_rd;
   wire [15:0] clct1_bndxky_rd;
 
