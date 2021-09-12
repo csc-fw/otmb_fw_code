@@ -1595,10 +1595,10 @@
   wire [13:0] gem_cluster2 [MXGEM-1:0]; // cluster2 in GEM coordinates (0-191 for pad num)
   wire [13:0] gem_cluster3 [MXGEM-1:0]; // cluster3 in GEM coordinates (0-191 for pad num)
 
-  wire [ 4:0] gem_cluster0_feb  [MXGEM-1:0]; // VFAT number 
-  wire [ 4:0] gem_cluster1_feb  [MXGEM-1:0]; // VFAT number 
-  wire [ 4:0] gem_cluster2_feb  [MXGEM-1:0]; // VFAT number 
-  wire [ 4:0] gem_cluster3_feb  [MXGEM-1:0]; // VFAT number 
+  //wire [ 4:0] gem_cluster0_feb  [MXGEM-1:0]; // VFAT number 
+  //wire [ 4:0] gem_cluster1_feb  [MXGEM-1:0]; // VFAT number 
+  //wire [ 4:0] gem_cluster2_feb  [MXGEM-1:0]; // VFAT number 
+  //wire [ 4:0] gem_cluster3_feb  [MXGEM-1:0]; // VFAT number 
 
   wire [ 2:0] gem_cluster0_roll [MXGEM-1:0]; // roll  number
   wire [ 2:0] gem_cluster1_roll [MXGEM-1:0]; // roll  number
@@ -1956,10 +1956,10 @@
   .cluster2 (gem_cluster2[igem]), // Out GEM Cluster
   .cluster3 (gem_cluster3[igem]), // Out GEM Cluster
   //VFAT number
-  .cluster0_feb (gem_cluster0_feb[igem]),//Out GEM vfat
-  .cluster1_feb (gem_cluster1_feb[igem]),//Out GEM vfat
-  .cluster2_feb (gem_cluster2_feb[igem]),
-  .cluster3_feb (gem_cluster3_feb[igem]),
+  //.cluster0_feb (gem_cluster0_feb[igem]),//Out GEM vfat
+  //.cluster1_feb (gem_cluster1_feb[igem]),//Out GEM vfat
+  //.cluster2_feb (gem_cluster2_feb[igem]),
+  //.cluster3_feb (gem_cluster3_feb[igem]),
 
   .cluster0_roll (gem_cluster0_roll[igem]),//Out eta partition number 
   .cluster1_roll (gem_cluster1_roll[igem]),
@@ -2308,7 +2308,8 @@ end
   wire [MXXKYB-1:0] gemA_csc_cluster_xky_mi [MXCLUSTER_CHAMBER-1:0]; // 
   wire [MXXKYB-1:0] gemB_csc_cluster_xky_mi [MXCLUSTER_CHAMBER-1:0]; // 
 
-  wire gemA_gemtocsc_dummy, gemB_gemtocsc_dummy;
+  wire [MXCLUSTER_CHAMBER-1:0] gemA_gemtocsc_dummy;
+  wire [MXCLUSTER_CHAMBER-1:0] gemB_gemtocsc_dummy;
 
   wire evenchamber = ~csc_id[0];//double check it counts from 0 or 1 in term of even and odd?????
 
@@ -2350,7 +2351,7 @@ end
         //.csc_cluster0_roll (gemA_csc_cluster_roll[iclst_csc]), // Out, 0-7 
         //.csc_cluster0_pad  (gemA_csc_cluster_pad[iclst_csc]), // Out from 0-191
         //.csc_cluster0_size (gemA_csc_cluster_size[iclst_csc]), // Out from 0-7, 0 means 1 gem pad
-        .cluster_to_cscdummy (gemA_gemtocsc_dummy)
+        .cluster_to_cscdummy (gemA_gemtocsc_dummy[iclst])
 
       );
 
@@ -2384,13 +2385,14 @@ end
         //.csc_cluster0_roll (gemB_csc_cluster_roll[iclst_csc]), // 0-7 
         //.csc_cluster0_pad  (gemB_csc_cluster_pad[iclst_csc]), // from 0-191
         //.csc_cluster0_size (gemB_csc_cluster_size[iclst_csc]), // from 0-7, 0 means 1 gem pad
-        .cluster_to_cscdummy (gemB_gemtocsc_dummy)
+        .cluster_to_cscdummy (gemB_gemtocsc_dummy[iclst])
 
       );
 
   end
   endgenerate
 
+   wire gemtocsc_sump = (|gemA_gemtocsc_dummy) | (|gemB_gemtocsc_dummy) ;
     //-------------------------------------------------------------------------------------------------------------------
     // Delay ALCT signal to find ALCT-GEM match
     //-------------------------------------------------------------------------------------------------------------------
@@ -3387,7 +3389,7 @@ end
 
 // Sequencer GEM VME Configuration Ports
   .gem_read_enable   (gem_read_enable),              // In  1 Enable GEM Readout
-  .gem_exists        (gem_exists [MXGEM-1:0]),       // In  GEM Existence List
+  //.gem_exists        (gem_exists [MXGEM-1:0]),       // In  GEM Existence List
   .gem_read_mask     (gem_read_mask [MXGEM-1:0]),       // In  GEM Readout List
   .gem_zero_suppress (gem_zero_suppress),            // In  1 Enable GEM Readout
   .fifo_tbins_gem    (fifo_tbins_gem[MXTBIN-1:0]),   // In  Number GEM FIFO time bins to read out
@@ -5869,7 +5871,7 @@ wire [15:0] gemB_bxn_counter;
 
       // GEM VME Configuration Ports
       .gem_read_enable     (gem_read_enable),              // Out  1 = Enable GEM Readout
-      .gem_exists          (gem_exists[MXGEM-1:0]),        // In   GEM existence flags
+      //.gem_exists          (gem_exists[MXGEM-1:0]),        // In   GEM existence flags
       .gem_read_mask       (gem_read_mask[MXGEM-1:0]),        // Out  GEM enable flags
       .gem_zero_suppress   (gem_zero_suppress),            // Out  1 = Enable GEM Readout Zero-suppression
       .fifo_tbins_gem      (fifo_tbins_gem[MXTBIN-1:0]),   // Out  Number GEM FIFO time bins to read out

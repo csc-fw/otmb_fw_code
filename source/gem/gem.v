@@ -174,10 +174,10 @@ module gem (
     output [13:0] cluster2, // cluster2 in GEM coordinates (0-1535)
     output [13:0] cluster3, // cluster3 in GEM coordinates (0-1535)
 
-    output [ 4:0] cluster0_feb,
-    output [ 4:0] cluster1_feb,
-    output [ 4:0] cluster2_feb,
-    output [ 4:0] cluster3_feb,
+    //output [ 4:0] cluster0_feb,
+    //output [ 4:0] cluster1_feb,
+    //output [ 4:0] cluster2_feb,
+    //output [ 4:0] cluster3_feb,
 
     output [ 2:0] cluster0_roll,// eta partition number 
     output [ 2:0] cluster1_roll,
@@ -831,10 +831,10 @@ parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
   //assign  cluster3_pad  = cluster_pad[3];
 
   //V2 gem trigger format 
-  assign  cluster0_feb  = feb[0];
-  assign  cluster1_feb  = feb[1];
-  assign  cluster2_feb  = feb[2];
-  assign  cluster3_feb  = feb[3];
+  //assign  cluster0_feb  = feb[0];
+  //assign  cluster1_feb  = feb[1];
+  //assign  cluster2_feb  = feb[2];
+  //assign  cluster3_feb  = feb[3];
   assign  cluster0_roll = roll[0];
   assign  cluster1_roll = roll[1];
   assign  cluster2_roll = roll[2];

@@ -687,7 +687,7 @@
 
 // GEM VME Configuration Ports
   gem_read_enable,
-  gem_exists,
+  //gem_exists,
   gem_read_mask,
   gem_zero_suppress,
   fifo_tbins_gem,
@@ -2507,7 +2507,7 @@
 
 // GEM VME Configuration Ports
   output              gem_read_enable;   // Out  1 Enable GEM Readout
-  input  [3:0]        gem_exists;        // In   1 GEM Exists Read only
+  //input  [3:0]        gem_exists;        // In   1 GEM Exists Read only
   output [3:0]        gem_read_mask;        // Out  1 GEM Enabled for readout!!
   output              gem_zero_suppress; // Out  1 Enable GEM Readout Zero-suppression
   output [MXTBIN-1:0] fifo_tbins_gem;    // Out  Number GEM FIFO time bins to read out

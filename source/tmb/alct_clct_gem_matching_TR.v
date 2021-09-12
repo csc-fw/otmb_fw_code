@@ -266,7 +266,7 @@ module  alct_clct_gem_matching_TR(
   output       best_cluster1_vpf,
   output [9:0] best_cluster1_angle,
 
-  output       gemcsc_match_dummy
+  output       alctclctgem_match_sump
   );
 
   parameter MXCLUSTER_CHAMBER       = 8; // Num GEM clusters  per Chamber
@@ -1574,7 +1574,6 @@ module  alct_clct_gem_matching_TR(
       gemA_cluster7_wg_mi_r <= gemA_cluster7_wg_mi;
   end
 
-  assign  gemcsc_match_dummy = 1'b1;
 
   assign alct0wg_fromcopad = wgfromGEMcluster(
       clct0_copad_best_icluster
@@ -1662,7 +1661,21 @@ endfunction
 //  end
 //
 //endfunction
-
+assign alctclctgem_match_sump = 
+    (|alct0_clct0_copad_best_cscxky) |
+    (|alct0_clct1_copad_best_cscxky) |
+    (|alct1_clct0_copad_best_cscxky) |
+    (|alct1_clct1_copad_best_cscxky) |
+    (|alct0_clct0_gemA_best_cscxky) |
+    (|alct0_clct1_gemA_best_cscxky) |
+    (|alct1_clct0_gemA_best_cscxky) |
+    (|alct1_clct1_gemA_best_cscxky) |
+    (|alct0_clct0_gemB_best_cscxky) |
+    (|alct0_clct1_gemB_best_cscxky) |
+    (|alct1_clct0_gemB_best_cscxky) |
+    (|alct1_clct1_gemB_best_cscxky) |
+    (|clct0_copad_best_cscxky)  |
+    (|clct1_copad_best_cscxky) ;
 
 
 //-------------------------------------------------------------------------------------------------------------------

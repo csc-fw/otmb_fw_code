@@ -4032,6 +4032,9 @@
 //------------------------------------------------------------------------------------------------------------------
   assign tmb_sump = 
    alctclctgem_match_sump |
+  (|match_gem_clct_window ) |
+  (|algo2016_window) |
+  algo2016_clct_use_corrected_bx |
   (|gemB_cluster_cscwire_mi[0] ) |
   (|gemB_cluster_cscwire_mi[1] ) |
   (|gemB_cluster_cscwire_mi[2] ) |

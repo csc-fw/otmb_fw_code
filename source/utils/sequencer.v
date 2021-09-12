@@ -666,7 +666,7 @@
   fifo_pretrig_rpc,
 
 // GEM VME Configuration
-  gem_exists,
+  //gem_exists,
   gem_read_mask,
   gem_read_enable,
   gem_zero_suppress,
@@ -1723,7 +1723,7 @@
   input  [MXTBIN-1:0]  fifo_pretrig_rpc; // Number RPC FIFO time bins before pretrigger
 
 // GEM VME Configuration Ports
-  input  [MXGEM-1:0]   gem_exists;        // GEM Existence list
+  //input  [MXGEM-1:0]   gem_exists;        // GEM Existence list
   input  [MXGEM-1:0]   gem_read_mask;        // GEM Readout list
   input                gem_read_enable;   // 1 Enable GEM Readout
   input                gem_zero_suppress; // 1 Enable GEM Readout Zero-suppression
@@ -6322,6 +6322,7 @@
 //-------------------------------------------------------------------------------------------------------------------
 // Sump unused signals
 //-------------------------------------------------------------------------------------------------------------------
+  wire gemcsc_sump = alct_gem_pulse | clct_gem_pulse | alct_clct_gem_pulse | alct_gem_noclct_pulse | clct_gem_noalct_pulse;
   wire clct_sump =
   cfeb_first_frame | cfeb_last_frame |
   rpc_first_frame  | rpc_last_frame  |
