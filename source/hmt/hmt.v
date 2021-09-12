@@ -40,8 +40,7 @@
   hmt_allow_cathode_ro,
   hmt_allow_anode_ro,
   hmt_allow_match_ro,
-  hmt_anode_bkg_check  ,
-  hmt_cathode_bkg_check,
+  hmt_outtime_check  ,
 
   //hmt_fired_pretrig,//preCLCT bx
   hmt_active_feb,
@@ -113,8 +112,7 @@
   input hmt_allow_cathode_ro;
   input hmt_allow_anode_ro;
   input hmt_allow_match_ro;
-  input hmt_anode_bkg_check ;
-  input hmt_cathode_bkg_check;
+  input hmt_outtime_check ;
   
   //output  hmt_fired_pretrig;//preCLCT bx
   output [MXCFEB-1  :0]   hmt_active_feb;
@@ -143,7 +141,7 @@
   output [MXHMTB-1:0] hmt_trigger_tmb_ro;// results aligned with ALCT vpf
   output hmt_sump;
 
-  assign hmt_anode_fired        = (|hmt_anode[1:0]) && (!hmt_anode_bkg_check || (~|hmt_anode[3:2]));
+  assign hmt_anode_fired        = (|hmt_anode[1:0]) && (!hmt_outtime_check || (~|hmt_anode[3:2]));
 
   wire [3:0]  pdly = 1;      // Power-up reset delay
   wire powerup_q;
@@ -204,7 +202,7 @@
 
   wire   hmt_fired_bg_s0  = (hmt_bit2_s0 || hmt_bit3_s0);
   wire   hmt_fired_sig_s0 = (hmt_bit0_s0 || hmt_bit1_s0);
-  wire   hmt_fired_s0 = hmt_fired_sig_s0 && (!hmt_cathode_bkg_check || !hmt_fired_bg_s0);
+  wire   hmt_fired_s0 = hmt_fired_sig_s0 && (!hmt_outtime_check || !hmt_fired_bg_s0);
 
   reg [1:0] hmt_fired_s0_ff = 2'b00;//dead time for 2BX 
   always @(posedge clock) begin
@@ -245,7 +243,7 @@
   srl16e_bbl #(MXHMTB)      udhmttrig    ( .clock(clock), .ce(1'b1), .adr(hmt_postdrift_delay-4'd1), .d(hmt_cathode_s0    ),    .q(hmt_cathode_dly      ));
   wire [MXHMTB-1  :0] hmt_cathode_xtmb      = (hmt_postdrift_delay == 4'd0) ? hmt_cathode_s0            : hmt_cathode_dly;
 
-  wire hmt_fired_xtmb = (|hmt_cathode_xtmb[1:0]) && (!hmt_cathode_bkg_check || (~|hmt_cathode_xtmb[3:2]));
+  wire hmt_fired_xtmb = (|hmt_cathode_xtmb[1:0]) && (!hmt_outtime_check || (~|hmt_cathode_xtmb[3:2]));
 
 //------------------------------------------------------------------------------------------------------------------
 //  HMT-ALCT match
@@ -411,7 +409,7 @@
   srl16e_bbl #(MXHMTB   ) uhmt        (.clock(clock),.ce(1'b1),.adr(hmt_srl_adr),.d(hmt_cathode_xtmb),.q(hmt_cathode_srl));
   assign hmt_cathode_pipe   = (hmt_ptr_is_0) ? hmt_cathode_xtmb : hmt_cathode_srl;
 
-  assign hmt_cathode_fired      = (|hmt_cathode_pipe[1:0]) && (!hmt_cathode_bkg_check || (~|hmt_cathode_pipe[3:2]));
+  assign hmt_cathode_fired      = (|hmt_cathode_pipe[1:0]) && (!hmt_outtime_check || (~|hmt_cathode_pipe[3:2]));
   assign hmt_anode_alct_match   = hmt_anode_fired && alct_vpf_pipe;
   assign hmt_cathode_alct_match = hmt_cathode_fired && alct_vpf_pipe;
   assign hmt_cathode_clct_match = hmt_cathode_fired && clct_vpf_pipe;

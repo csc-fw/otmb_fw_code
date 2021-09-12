@@ -139,6 +139,7 @@
   hmt_nhits_bx2345,
   hmt_cathode_pipe, // tmb match bx
 
+  hmt_outtime_check,
   hmt_trigger_tmb, 
   hmt_trigger_tmb_ro,
 
@@ -498,6 +499,7 @@
   input [NHMTHITB-1:0]   hmt_nhits_bx2345;
   input [MXHMTB-1:0]     hmt_cathode_pipe; // tmb match bx
 
+  input                hmt_outtime_check;
   input [MXHMTB - 1:0] hmt_trigger_tmb;   // hmt bits for trigger
   input [MXHMTB - 1:0] hmt_trigger_tmb_ro;// hmt bits for readout only
 
@@ -1244,8 +1246,8 @@
 
   assign alct_only_trig = (alct_noclct && tmb_allow_alct) || (alct_noclct_ro && tmb_allow_alct_ro);// ALCT-only triggers are allowed
 
-  wire hmt_fired_tmb   = (|hmt_trigger_tmb[1:0]) && run3_trig_df;
-  wire hmt_readout_tmb = (|hmt_trigger_tmb_ro[1:0]) && run3_daq_df;
+  wire hmt_fired_tmb   = (|hmt_trigger_tmb   [1:0]) && (!hmt_outtime_check || !(|hmt_trigger_tmb   [3:2]))&& run3_trig_df;
+  wire hmt_readout_tmb = (|hmt_trigger_tmb_ro[1:0]) && (!hmt_outtime_check || !(|hmt_trigger_tmb_ro[3:2]))&& run3_daq_df;
 
 // Latch clct match results for TMB and MPC pathways
   reg tmb_trig_pulse       = 0;

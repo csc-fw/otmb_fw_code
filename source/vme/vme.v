@@ -538,8 +538,7 @@
   hmt_allow_anode_ro   ,
   hmt_allow_cathode_ro ,
   hmt_allow_match_ro   ,
-  hmt_anode_bkg_check  ,
-  hmt_cathode_bkg_check,
+  hmt_outtime_check  ,
 
 // Sequencer Ports: Latched CLCTs + Status
   event_clear_vme,
@@ -1961,8 +1960,7 @@
   output       hmt_allow_anode_ro   ;
   output       hmt_allow_cathode_ro ;
   output       hmt_allow_match_ro   ;
-  output       hmt_anode_bkg_check;  
-  output       hmt_cathode_bkg_check;
+  output       hmt_outtime_check;  
   
 
 // Sequencer Ports: Latched CLCTs
@@ -7717,8 +7715,7 @@
   assign hmt_allow_anode_ro   = hmt_thresh3_wr[11];
   assign hmt_allow_cathode_ro = hmt_thresh3_wr[12];
   assign hmt_allow_match_ro   = hmt_thresh3_wr[13];
-  assign hmt_anode_bkg_check  = hmt_thresh3_wr[14];
-  assign hmt_cathode_bkg_check= hmt_thresh3_wr[15];
+  assign hmt_outtime_check    = hmt_thresh3_wr[14];
 
   assign hmt_thresh1_rd[15:0] = hmt_thresh1_wr[15:0];
   assign hmt_thresh2_rd[15:0] = hmt_thresh2_wr[15:0];

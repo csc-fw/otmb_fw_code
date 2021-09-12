@@ -1676,8 +1676,7 @@
   wire  hmt_allow_cathode_ro;
   wire  hmt_allow_anode_ro;
   wire  hmt_allow_match_ro;
-  wire  hmt_anode_bkg_check;
-  wire  hmt_cathode_bkg_check;
+  wire  hmt_outtime_check;
 
   wire [NHMTHITB-1:0] hmt_nhits_bx678_ff; //for header
   wire [NHMTHITB-1:0] hmt_nhits_bx7;
@@ -1742,8 +1741,7 @@
   .hmt_allow_cathode_ro(hmt_allow_cathode_ro),//In hmt allow to readout on cathode
   .hmt_allow_anode_ro  (hmt_allow_anode_ro),//In hmt allow to readout on anode
   .hmt_allow_match_ro  (hmt_allow_match_ro),//In hmt allow to readout on match
-  .hmt_anode_bkg_check  (hmt_anode_bkg_check),//In hmt fired shoudl check anode bg lower than threshold
-  .hmt_cathode_bkg_check(hmt_cathode_bkg_check),//In hmt fired shoudl check cathode bg lower than threshold
+  .hmt_outtime_check   (hmt_outtime_check),//In hmt fired shoudl check anode bg lower than threshold
   // sequencer port
   //.hmt_fired_pretrig   (hmt_fired_pretrig),//out, hmt fired preCLCT bx
   .hmt_active_feb      (hmt_active_feb[MXCFEB-1:0]),//Out hmt active cfeb flags
@@ -3087,6 +3085,7 @@
   .algo2016_window       (algo2016_window[3:0]),  // In CLCT match window width (for ALCT-centric 2016 algorithm)
   .algo2016_clct_to_alct (algo2016_clct_to_alct), // In ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
 
+  .hmt_outtime_check   (hmt_outtime_check),//In hmt fired shoudl check anode bg lower than threshold
   .hmt_trigger_tmb    (hmt_trigger_tmb[MXHMTB-1:0]),//  In results aligned with ALCT vpf latched for ALCT-CLCT match
   .hmt_trigger_tmb_ro (hmt_trigger_tmb_ro[MXHMTB-1:0]),//In results aligned with ALCT vpf latched for ALCT-CLCT match
 
@@ -3941,8 +3940,7 @@
       .hmt_allow_cathode_ro(hmt_allow_cathode_ro), //Out hmt allow to readout on cathode
       .hmt_allow_anode_ro  (hmt_allow_anode_ro),   //Out hmt allow to readout on anode
       .hmt_allow_match_ro  (hmt_allow_match_ro),   //Out hmt allow to readout on match
-      .hmt_anode_bkg_check  (hmt_anode_bkg_check), //Out hmt fired shoudl check anode bg lower than threshold
-      .hmt_cathode_bkg_check(hmt_cathode_bkg_check),//Out hmt fired shoudl check cathode bg lower than threshold
+      .hmt_outtime_check   (hmt_outtime_check),//In hmt fired shoudl check anode bg lower than threshold
 
       // Sequencer Ports: Latched CLCTs + Status
       .event_clear_vme    (event_clear_vme),          // Out  Event clear for vme diagnostic registers
