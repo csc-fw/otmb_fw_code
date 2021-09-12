@@ -324,6 +324,7 @@
   ccLUT_enable,
   run3_trig_df,
   run3_daq_df,
+  run3_alct_df,
 
 // CFEB Ports: Hot Channel Mask
   cfeb0_ly0_hcm,
@@ -516,17 +517,24 @@
   //HMT part
   hmt_enable,
   hmt_me1a_enable, 
-  hmt_nhits_trig_vme,
-  hmt_nhits_trig_bx678_vme,
-  hmt_nhits_trig_bx2345_vme,
-  hmt_trigger_vme,
+  hmt_nhits_vme,
+  hmt_nhits_bx678_vme,
+  hmt_nhits_bx2345_vme,
+  hmt_cathode_vme,
 //output
   hmt_thresh1,
   hmt_thresh2,
   hmt_thresh3,
   cfeb_allow_hmt_ro,
-  tmb_allow_hmt,
-  tmb_allow_hmt_ro,
+  hmt_delay        ,
+  hmt_alct_win_size,
+  hmt_allow_anode      ,
+  hmt_allow_cathode    ,
+  hmt_allow_match      ,
+  hmt_allow_anode_ro   ,
+  hmt_allow_cathode_ro ,
+  hmt_allow_match_ro   ,
+  hmt_outtime_check, 
 
 // Sequencer Ports: Latched CLCTs + Status
   event_clear_vme,
@@ -924,6 +932,19 @@
   hmt_counter7,
   hmt_counter8,
   hmt_counter9,
+  hmt_counter10,
+  hmt_counter11,
+  hmt_counter12,
+  hmt_counter13,
+  hmt_counter14,
+  hmt_counter15,
+  hmt_counter16,
+  hmt_counter17,
+  hmt_counter18,
+  hmt_counter19,
+
+  hmt_trigger_counter,
+  hmt_readout_counter,
 
   gem_counter0,
   gem_counter1,
@@ -1409,6 +1430,7 @@
   parameter MXBNDB  = 5;                 // Bend bits
   parameter MXXKYB  = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
   parameter MXHMTB  = 4; // max HMT bits
+  parameter NHMTHITB   = 10;
 //------------------------------------------------------------------------------------------------------------------
 // VME Addresses
 //------------------------------------------------------------------------------------------------------------------
@@ -2108,6 +2130,7 @@
   input ccLUT_enable; // In 
   output run3_trig_df;
   output run3_daq_df;
+  output run3_alct_df;
 
 // CFEB Ports: Hot Channel Mask
   output  [MXDS-1:0]    cfeb0_ly0_hcm;      // 1=enable DiStrip
@@ -2302,17 +2325,25 @@
   //HMT part
   output hmt_enable; 
   output hmt_me1a_enable; 
-  input [9:0] hmt_nhits_trig_vme;
-  input [9:0] hmt_nhits_trig_bx678_vme;
-  input [9:0] hmt_nhits_trig_bx2345_vme;
-  input [MXHMTB-1:0] hmt_trigger_vme;
+  input [NHMTHITB-1:0] hmt_nhits_bx7_vme;
+  input [NHMTHITB-1:0] hmt_nhits_bx678_vme;
+  input [NHMTHITB-1:0] hmt_nhits_bx2345_vme;
+  input [MXHMTB-1:0] hmt_cathode_vme;
 
-  output [9:0] hmt_thresh1;
-  output [9:0] hmt_thresh2;
-  output [9:0] hmt_thresh3;
+  output [7:0] hmt_thresh1;
+  output [7:0] hmt_thresh2;
+  output [7:0] hmt_thresh3;
   output       cfeb_allow_hmt_ro;
-  output       tmb_allow_hmt;
-  output       tmb_allow_hmt_ro;
+  output [6:0] hmt_aff_thresh   ;
+  output [3:0] hmt_delay        ;
+  output [3:0] hmt_alct_win_size;
+  output       hmt_allow_anode      ;
+  output       hmt_allow_cathode    ;
+  output       hmt_allow_match      ;
+  output       hmt_allow_anode_ro   ;
+  output       hmt_allow_cathode_ro ;
+  output       hmt_allow_match_ro   ;
+  output       hmt_outtime_check;
 
 
 // Sequencer Ports: Latched CLCTs
@@ -2675,6 +2706,18 @@
   input  [MXCNTVME-1:0]  hmt_counter7;
   input  [MXCNTVME-1:0]  hmt_counter8;
   input  [MXCNTVME-1:0]  hmt_counter9;
+  input  [MXCNTVME-1:0]  hmt_counter10;
+  input  [MXCNTVME-1:0]  hmt_counter11;
+  input  [MXCNTVME-1:0]  hmt_counter12;
+  input  [MXCNTVME-1:0]  hmt_counter13;
+  input  [MXCNTVME-1:0]  hmt_counter14;
+  input  [MXCNTVME-1:0]  hmt_counter15;
+  input  [MXCNTVME-1:0]  hmt_counter16;
+  input  [MXCNTVME-1:0]  hmt_counter17;
+  input  [MXCNTVME-1:0]  hmt_counter18;
+  input  [MXCNTVME-1:0]  hmt_counter19;
+  input  [MXCNTVME-1:0]  hmt_trigger_counter;
+  input  [MXCNTVME-1:0]  hmt_readout_counter;
 
 // GEM Counters
   input  [MXCNTVME-1:0]  gem_counter0;
@@ -7328,7 +7371,7 @@
     cnt_ctrl_wr[15]   = 0; // RW  Parity error reset
   end
 
-  wire [6:0] cnt_select;
+  wire [6:0] cnt_select; //7bits, max allowed counter is 127
   wire       cnt_snapshot;
   wire       cnt_all_reset_vme;
   wire       cnt_clear_on_resync;
@@ -7356,7 +7399,8 @@
 // ADR_CNT_RDATA=0xD2  Trigger/Readout Counter Data Register
 //------------------------------------------------------------------------------------------------------------------
 // Remap 1D counters to 2D, because XST does not support 2D ports
-  parameter MXCNT = 96 + 10;                     // Number of counters, last counter id is mxcnt-1
+  parameter MXHMTCNT = 20;
+  parameter MXCNT = 96 + MXHMTCNT;                     // Number of counters, last counter id is mxcnt-1
   reg  [MXCNTVME-1:0] cnt_snap [MXCNT-1:0]; // Event counter snapshot 2D
   wire [MXCNTVME-1:0] cnt      [MXCNT-1:0]; // Event counter 2D map
 
@@ -7488,6 +7532,19 @@
   assign cnt[103] = hmt_counter7;
   assign cnt[104] = hmt_counter8;
   assign cnt[105] = hmt_counter9;
+  assign cnt[106] = hmt_counter10;
+  assign cnt[107] = hmt_counter11;
+  assign cnt[108] = hmt_counter12;
+  assign cnt[109] = hmt_counter13;
+  assign cnt[110] = hmt_counter14;
+  assign cnt[111] = hmt_counter15;
+  assign cnt[112] = hmt_counter16;
+  assign cnt[113] = hmt_counter17;
+  assign cnt[114] = hmt_counter18;
+  assign cnt[115] = hmt_counter19;
+
+  assign cnt[116] = hmt_trigger_counter;
+  assign cnt[117] = hmt_readout_counter;
 
 // Virtex-6 GTX Optical Receiver Error Counters
 //  assign cnt[81]  = gtx_rx_err_count0;  // Error count on this fiber channel
@@ -8884,19 +8941,23 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 
   initial begin
     run3_format_ctrl_wr[0] = 1'b0;
-    run3_format_ctrl_wr[1] = 1'b0; // default, Run3 trigger format upgrade is off
-    run3_format_ctrl_wr[2] = 1'b0; // default, Run3 daq format upgrade is ON
-    run3_format_ctrl_wr[15:3] = 13'b0; // NOT used
+    run3_format_ctrl_wr[1] = 1'b1; // default, Run3 trigger format upgrade is ON
+    run3_format_ctrl_wr[2] = 1'b1; // default, Run3 daq format upgrade is ON
+    run3_format_ctrl_wr[3] = 1'b0; // default, Run3 daq format upgrade is ON
+
+    run3_format_ctrl_wr[15:4] = 12'b0; // NOT used
     //cclut_format_ctrl_wr[1] = 0; //CLCT pattern sorting, 0= use {pat, nhits}, 1={new quality}
     //cclut_format_ctrl_wr[2] = 0; //LCT data format control, 0 = use Run2, 1= use Run3 with GEM-CSC+CCLUT
   end
   assign run3_trig_df = run3_format_ctrl_wr[1];
   assign run3_daq_df  = run3_format_ctrl_wr[2];
+  assign run3_alct_df = run3_format_ctrl_wr[3];
 
   assign run3_format_ctrl_rd[0]    = ccLUT_enable;
   assign run3_format_ctrl_rd[1]    = ccLUT_enable ? run3_trig_df : 1'b0;//only enable it for CCLUT algorithm case
   assign run3_format_ctrl_rd[2]    = ccLUT_enable ? run3_daq_df  : 1'b0;
-  assign run3_format_ctrl_rd[15:3] = run3_format_ctrl_wr[15:3];
+  assign run3_format_ctrl_rd[3]    = ccLUT_enable ? run3_alct_df  : 1'b0;
+  assign run3_format_ctrl_rd[15:4] = run3_format_ctrl_wr[15:4];
 
 
 //------------------------------------------------------------------------------------------------------------------
@@ -8916,8 +8977,8 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 
   assign hmt_ctrl_rd[0] = hmt_enable;
   assign hmt_ctrl_rd[1] = hmt_me1a_enable;
-  assign hmt_ctrl_rd[11:2] = hmt_nhits_trig_vme[9:0];
-  assign hmt_ctrl_rd[15:12]= hmt_trigger_vme[MXHMTB-1:0];  //reserved for HMT results 
+  assign hmt_ctrl_rd[11:2] = hmt_nhits_bx7_vme[9:0];
+  assign hmt_ctrl_rd[15:12]= hmt_cathode_vme[MXHMTB-1:0];  //reserved for HMT results 
 
 
 //------------------------------------------------------------------------------------------------------------------
@@ -8927,46 +8988,53 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 //------------------------------------------------------------------------------------------------------------------
 
   initial begin
-    hmt_thresh1_wr[9:0]   = 10'd90; // RW, enable the HMT thresh1
-    hmt_thresh2_wr[9:0]   = 10'd95; // RW, enable the HMT thresh1
-    hmt_thresh3_wr[9:0]   = 10'd100; // RW, enable the HMT thresh1
-    hmt_thresh1_wr[10]    = 1'b0; // pass threshold or not 
-    hmt_thresh2_wr[10]    = 1'b0; // pass threshold or not 
-    hmt_thresh3_wr[10]    = 1'b0; // pass threshold or not 
-    hmt_thresh1_wr[11]  = 1'b0; // read cfeb when hmt is fired
-    hmt_thresh1_wr[12]  = 1'b0; // fire trigger when hmt is fired
-    hmt_thresh1_wr[13]  = 1'b0; // readout TMB when hmt is fired
-    hmt_thresh1_wr[15:14]  = 2'b0; // not used
-    hmt_thresh2_wr[15:11] = 5'b0; // not used
-    hmt_thresh3_wr[15:11] = 5'b0; // not used
+    hmt_thresh1_wr[7:0]   = 10'd90; // RW, enable the HMT thresh1
+    hmt_thresh2_wr[7:0]   = 10'd95; // RW, enable the HMT thresh1
+    hmt_thresh3_wr[7:0]   = 10'd100; // RW, enable the HMT thresh1
+
+    hmt_thresh1_wr[    8] = 1'b0; //  RW, enable HMT to readout cfeb
+    hmt_thresh1_wr[15: 9] = 7'd6; //  RW, thresh for hmt_aff_thresh
+
+    hmt_thresh2_wr[11: 8] = 4'd5; // RW hmt delay for alct-hmt match
+    hmt_thresh2_wr[15:12] = 4'd7; // RW alct-hmt match window size
+
+    hmt_thresh3_wr[    8] = 1'b0; //  RW, hmt allow to trigger on anode hmt
+    hmt_thresh3_wr[    9] = 1'b0; //  RW, hmt allow to trigger on cathode hmt
+    hmt_thresh3_wr[   10] = 1'b0; //  RW, hmt allow to trigger on anode and cathod match hmt
+    hmt_thresh3_wr[   11] = 1'b0; //  RW, hmt allow to readout on anode hmt
+    hmt_thresh3_wr[   12] = 1'b0; //  RW, hmt allow to readout on cathode hmt
+    hmt_thresh3_wr[   13] = 1'b0; //  RW, hmt allow to readout on match hmt
+    hmt_thresh3_wr[15:14] = 2'b0; //  not used
   end 
 
-  assign hmt_thresh1[9:0]  = hmt_thresh1_wr[9:0];
-  assign hmt_thresh2[9:0]  = hmt_thresh2_wr[9:0];
-  assign hmt_thresh3[9:0]  = hmt_thresh3_wr[9:0];
-  assign cfeb_allow_hmt_ro = hmt_thresh1_wr[11];
-  assign tmb_allow_hmt     = hmt_thresh1_wr[12];
-  assign tmb_allow_hmt_ro  = hmt_thresh1_wr[13];
+  assign hmt_thresh1[7:0]  = hmt_thresh1_wr[7:0];
+  assign hmt_thresh2[7:0]  = hmt_thresh2_wr[7:0];
+  assign hmt_thresh3[7:0]  = hmt_thresh3_wr[7:0];
+  assign cfeb_allow_hmt_ro = hmt_thresh1_wr[  8];
+  assign hmt_aff_thresh[6:0]  = hmt_thresh1_wr[15:9];
 
-  assign hmt_thresh1_rd[9:0] =  hmt_thresh1_wr[9:0];
-  assign hmt_thresh2_rd[9:0] =  hmt_thresh2_wr[9:0];
-  assign hmt_thresh3_rd[9:0] =  hmt_thresh3_wr[9:0];
-  assign hmt_thresh1_rd[10]  = (hmt_nhits_trig_vme > hmt_thresh1);
-  assign hmt_thresh2_rd[10]  = (hmt_nhits_trig_vme > hmt_thresh2);
-  assign hmt_thresh3_rd[10]  = (hmt_nhits_trig_vme > hmt_thresh3);
-  assign hmt_thresh1_rd[15:11] = hmt_thresh1_wr[15:11];
-  assign hmt_thresh2_rd[15:11] = hmt_thresh2_wr[15:11];
-  assign hmt_thresh3_rd[15:11] = hmt_thresh3_wr[15:11];
+  assign hmt_delay[3:0]            = hmt_thresh2_wr[11:8];
+  assign hmt_alct_win_size[3:0]    = hmt_thresh2_wr[15:12];
+  assign hmt_allow_anode      = hmt_thresh3_wr[ 8];
+  assign hmt_allow_cathode    = hmt_thresh3_wr[ 9];
+  assign hmt_allow_match      = hmt_thresh3_wr[10];
+  assign hmt_allow_anode_ro   = hmt_thresh3_wr[11];
+  assign hmt_allow_cathode_ro = hmt_thresh3_wr[12];
+  assign hmt_allow_match_ro   = hmt_thresh3_wr[13];
+  assign hmt_outtime_check    = hmt_thresh3_wr[14];
+
+  assign hmt_thresh1_rd[15:0] =  hmt_thresh1_wr[15:0];
+  assign hmt_thresh2_rd[15:0] =  hmt_thresh2_wr[15:0];
+  assign hmt_thresh3_rd[15:0] =  hmt_thresh3_wr[15:0];
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_HMT_NHITS_SIG=0x1B4  Nhits for HMT in bx678, Signal
 // ADR_HMT_NHITS_BKG=0x1B6  Nhits for HMT in bx2345, background/control region
 //------------------------------------------------------------------------------------------------------------------
-  assign hmt_nhits_sig_rd[9:0]   = hmt_nhits_trig_bx678_vme[9:0];
+  assign hmt_nhits_sig_rd[9:0]   = hmt_nhits_bx678_vme[9:0];
   assign hmt_nhits_sig_rd[15:10] = 6'b0;
-  assign hmt_nhits_bkg_rd[9:0]   = hmt_nhits_trig_bx2345_vme[9:0];
+  assign hmt_nhits_bkg_rd[9:0]   = hmt_nhits_bx2345_vme[9:0];
   assign hmt_nhits_bkg_rd[15:10] = 6'b0;
-
 
 //------------------------------------------------------------------------------------------------------------------
 // GEM_DEBUG_FIFO_CTRL = 0x30C  GEM Raw Hits Readout RAM Simple Controller

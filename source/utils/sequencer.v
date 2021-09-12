@@ -500,12 +500,22 @@
   cfeb_layer_or,
   cfeb_nlayers_hit,
 //HMT results
-  cfeb_allow_hmt_ro,
-  hmt_nhits_trig,
-  hmt_nhits_trig_bx678,
-  hmt_nhits_trig_bx2345,
-  hmt_trigger,
   hmt_active_feb,
+  hmt_pretrig_match,
+
+  hmt_anode,
+  hmt_cathode, 
+  //hmt_cathode_fired     , 
+  //hmt_anode_fired       , 
+  hmt_anode_alct_match  ,
+  hmt_cathode_alct_match, 
+  hmt_cathode_clct_match, 
+  hmt_cathode_lct_match ,
+ 
+  hmt_fired_cathode_only,
+  hmt_fired_anode_only,
+  hmt_fired_match,
+  hmt_fired_or,
 
 // Pattern Finder CLCT results
  
@@ -631,11 +641,6 @@
   seq_trigger,
   sequencer_state,
   seq_trigger_nodeadtime,
-
-  hmt_nhits_trig_vme,
-  hmt_nhits_trig_bx678_vme,
-  hmt_nhits_trig_bx2345_vme,
-  hmt_trigger_vme,
 
   event_clear_vme,
   clct0_vme,
@@ -804,10 +809,6 @@
   wr_avail_rmpc,
 
 // TMB LCT Match
-  //hmt_nhits_trig_xtmb,
-  hmt_trigger_xtmb,
-  hmt_clct_match, 
-  
   clct0_xtmb,
   clct1_xtmb,
   clctc_xtmb,
@@ -840,6 +841,7 @@
   tmb_clct1_discard,
   tmb_aff_list,
   hmt_fired_tmb_ff,
+  hmt_readout_tmb_ff,
   tmb_pulse_hmt_only,
   tmb_keep_hmt_only,
 
@@ -861,6 +863,7 @@
   tmb_alct1,
   tmb_alctb,
   tmb_alcte,
+  hmt_nhits_bx678_ff,
 
   //GEM-CSC match output, time_only
   gemA_alct_match,
@@ -1077,6 +1080,19 @@
   hmt_counter7,
   hmt_counter8,
   hmt_counter9,
+  hmt_counter10,
+  hmt_counter11,
+  hmt_counter12,
+  hmt_counter13,
+  hmt_counter14,
+  hmt_counter15,
+  hmt_counter16,
+  hmt_counter17,
+  hmt_counter18,
+  hmt_counter19,
+
+  hmt_trigger_counter,
+  hmt_readout_counter,
 
 // GEM Trigger/Readout Counter Ports
   gem_cnt_all_reset,
@@ -1414,6 +1430,7 @@
   parameter MXXKYB = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
 
   parameter MXHMTB     =  4;// bits for HMT
+  parameter NHMTHITB   = 10;
 
 //------------------------------------------------------------------------------------------------------------------
 // I/O Ports:
@@ -1538,12 +1555,24 @@
   input  [MXLY-1:0]    cfeb_layer_or;      // OR of hstrips on each layer at pre-trigger
   input  [MXHITB-1:0]  cfeb_nlayers_hit;    // Number of CSC layers hit
 
-  input                 cfeb_allow_hmt_ro;//fire pretrigger for hmt
-  input  [9:0]         hmt_nhits_trig; // HMT results 
-  input  [9:0]         hmt_nhits_trig_bx678; // HMT results 
-  input  [9:0]         hmt_nhits_trig_bx2345; // HMT results 
-  input  [MXHMTB-1:0]  hmt_trigger; // HMT nhits passing thresholds
   input  [MXCFEB-1:0]  hmt_active_feb;
+  input                hmt_pretrig_match;
+  
+  input [MXHMTB-1:0]     hmt_anode; // tmb match bx
+  input [MXHMTB-1:0]     hmt_cathode; // tmb match bx
+  
+  //input hmt_cathode_fired     ;        
+  //input hmt_anode_fired       ;   
+  input hmt_anode_alct_match  ;
+  input hmt_cathode_alct_match; 
+  input hmt_cathode_clct_match;
+  input hmt_cathode_lct_match ;
+
+  input hmt_fired_cathode_only;
+  input hmt_fired_anode_only;
+  input hmt_fired_match;              
+  input hmt_fired_or;
+
 // Pattern Finder CLCT results
   input  [MXHITB-1:0]  hs_hit_1st;        // 1st CLCT pattern hits
   input  [MXPIDB-1:0]  hs_pid_1st;        // 1st CLCT pattern ID
@@ -1670,10 +1699,6 @@
   output [11:0] sequencer_state; // Sequencer state for vme read
   input         seq_trigger_nodeadtime;// In enable the no dead time feature for sequencer trigger
 
-  output  [9:0]         hmt_nhits_trig_vme;      // Nhits at CLCT BX
-  output  [9:0]         hmt_nhits_trig_bx678_vme;      // Nhits at bx678, assume bx7 is CLCTBX
-  output  [9:0]         hmt_nhits_trig_bx2345_vme;      // Nhits at bx2345, assume bx7 is CLCTBX
-  output  [MXHMTB-1:0]  hmt_trigger_vme; // HMT nhits passing thresholds
   input          event_clear_vme;  // Event clear for aff,alct,clct,mpc vme diagnostic registers
   output  [MXCLCT-1:0]  clct0_vme;      // First  CLCT
   output  [MXCLCT-1:0]  clct1_vme;      // Second CLCT
@@ -1841,9 +1866,6 @@
   input          wr_avail_rmpc; // Buffer available at MPC received
 
 // TMB LCT Match
-  //output  [9:0]          hmt_nhits_trig_xtmb;
-  output  [MXHMTB-1:0]   hmt_trigger_xtmb; // HMT nhits passing thresholds
-  output                 hmt_clct_match;
   output  [MXCLCT-1:0]   clct0_xtmb; // 1st CLCT to TMB
   output  [MXCLCT-1:0]   clct1_xtmb; // 2nd CLCT to TMB
   output  [MXCLCTC-1:0]  clctc_xtmb; // Common to CLCT0/1 to TMB
@@ -1878,6 +1900,7 @@
   input          tmb_clct1_discard;  // CLCT1 was discarded from ME1A
   input  [MXCFEB-1:0]  tmb_aff_list;    // Active CFEBs for CLCT used in TMB match
   input              hmt_fired_tmb_ff; // hmt fired in tmb
+  input              hmt_readout_tmb_ff;//hmt readout 
   input              tmb_pulse_hmt_only; // tmb pulse is from HMT
   input              tmb_keep_hmt_only; // tmb keep is from HMT
 
@@ -1899,6 +1922,8 @@
   input  [10:0]      tmb_alct1;      // ALCT second best muon latched at trigger
   input  [4:0]      tmb_alctb;      // ALCT bxn latched at trigger
   input  [1:0]      tmb_alcte;      // ALCT ecc error syndrome latched at trigger
+
+  input [NHMTHITB-1:0] hmt_nhits_bx678_ff;// hmt nhits in-time
 
   //GEM-CSC match output, timing only
   input  gemA_alct_match; 
@@ -2116,6 +2141,19 @@
   output  [MXCNTVME-1:0]  hmt_counter7;
   output  [MXCNTVME-1:0]  hmt_counter8;
   output  [MXCNTVME-1:0]  hmt_counter9;
+  output  [MXCNTVME-1:0]  hmt_counter10;
+  output  [MXCNTVME-1:0]  hmt_counter11;
+  output  [MXCNTVME-1:0]  hmt_counter12;
+  output  [MXCNTVME-1:0]  hmt_counter13;
+  output  [MXCNTVME-1:0]  hmt_counter14;
+  output  [MXCNTVME-1:0]  hmt_counter15;
+  output  [MXCNTVME-1:0]  hmt_counter16;
+  output  [MXCNTVME-1:0]  hmt_counter17;
+  output  [MXCNTVME-1:0]  hmt_counter18;
+  output  [MXCNTVME-1:0]  hmt_counter19;
+
+  output  [MXCNTVME-1:0]  hmt_trigger_counter;
+  output  [MXCNTVME-1:0]  hmt_readout_counter;
 
 // Trigger/Readout Counter Ports
   input  gem_cnt_all_reset;    // Trigger/Readout counter reset
@@ -2848,6 +2886,23 @@
     else if (bx0_match_cnt_en)  bx0_match_counter = bx0_match_counter + 1'b1;
   end
 
+// Trigger counter, presets at evcntres or resync, counts all triggers including ones not sent to mpc
+  reg   [MXCNTVME-1:0]  hmt_trigger_counter = 0;
+  reg   [MXCNTVME-1:0]  hmt_readout_counter = 0;
+
+  wire hmt_cnt_reset = ccb_evcntres || (ttc_resync && hdr_clear_on_resync);
+  wire hmt_trig_cnt_ovf   = (hmt_trigger_counter == {MXCNTVME{1'b1}});
+  wire hmt_ro_cnt_ovf     =   (hmt_readout_counter == {MXCNTVME{1'b1}});
+  wire hmt_trig_cnt_en    = hmt_fired_tmb_ff && !hmt_trig_cnt_ovf;
+  wire hmt_ro_cnt_en      = hmt_readout_tmb_ff && !hmt_ro_cnt_ovf;
+
+  always @(posedge clock) begin
+    if      (hmt_cnt_reset) hmt_trigger_counter = 0;
+    else if (hmt_trig_cnt_en   ) hmt_trigger_counter = hmt_trigger_counter+1'b1;
+    if      (hmt_cnt_reset)   hmt_readout_counter = 0;
+    else if (hmt_ro_cnt_en   )   hmt_readout_counter = hmt_readout_counter+1'b1;
+  end
+
 //------------------------------------------------------------------------------------------------------------------
 // Trigger Source Section
 //
@@ -3166,11 +3221,8 @@
   wire              active_feb_flag_tmb; // Active FEB flag to DMB at tmb match time
   wire              active_feb_flag;     // Active FEB flag selection
 
-  wire hmt_fired_pretrigger = (|hmt_trigger[1:0]) && cfeb_allow_hmt_ro;//fired all cfebs when hmt is fired
-  wire [MXCFEB-1:0] active_feb_list_hmt = {MXCFEB{hmt_fired_pretrigger}} & hmt_active_feb;
-
   assign active_feb_flag_pre = clct_push_pretrig;
-  assign active_feb_list_pre = (active_feb_s0[MXCFEB-1:0] & {MXCFEB{active_feb_flag_pre}}) | active_feb_list_hmt;//from pretrigger
+  assign active_feb_list_pre = (active_feb_s0[MXCFEB-1:0] & {MXCFEB{active_feb_flag_pre}}) | hmt_active_feb;//from pretrigger
 
   assign active_feb_flag_tmb = tmb_trig_write;
   assign active_feb_list_tmb = tmb_aff_list & {MXCFEB{active_feb_flag_tmb}};
@@ -3189,11 +3241,6 @@
 // Pre-trigger Pipeline
 // Pushes CLCT pretrigger data into pipeline to wait for pattern finder and drift delay
 //------------------------------------------------------------------------------------------------------------------
-  wire [9:0]         hmt_nhits_trig_xtmb;
-  wire [9:0]         hmt_nhits_trig_bx678_xtmb;
-  wire [9:0]         hmt_nhits_trig_bx2345_xtmb;
-  wire [MXHMTB-1:0]  hmt_trigger_xtmb;
-
 // On pretrigger push buffer address and bxn into the pre-trigger pipeline
   parameter PATTERN_FINDER_LATENCY = 2;  // Tuned 4/22/08
   parameter MXPTRID = 23;
@@ -3201,11 +3248,6 @@
   wire [3:0]         postdrift_adr;
   wire [MXPTRID-1:0] pretrig_data;
   wire [MXPTRID-1:0] postdrift_data;
-
-  wire [9:0] postdrift_hmt_nhits_trig;
-  wire [9:0] postdrift_hmt_nhits_trig_bx678;
-  wire [9:0] postdrift_hmt_nhits_trig_bx2345;
-  wire [MXHMTB-1:0] postdrift_hmt_trigger;
 
   assign pretrig_data[0]     = clct_push_pretrig;        // Pre-trigger flag alias active_feb_flag
   assign pretrig_data[11:1]  = wr_buf_adr[MXBADR-1:0];   // Buffer address at pre-trigger
@@ -3218,11 +3260,6 @@
 
   srl16e_bbl #(MXPTRID) usrldrift (.clock(clock),.ce(1'b1),.adr(postdrift_adr),.d(pretrig_data),.q(postdrift_data));
 
-  srl16e_bbl #(10)      usrldrift_nhit     (.clock(clock),.ce(1'b1),.adr(postdrift_adr),.d(hmt_nhits_trig),.q(postdrift_hmt_nhits_trig));
-  srl16e_bbl #(10)      usrldrift_nhit678  (.clock(clock),.ce(1'b1),.adr(postdrift_adr),.d(hmt_nhits_trig_bx678),.q(postdrift_hmt_nhits_trig_bx678));
-  srl16e_bbl #(10)      usrldrift_nhit2345 (.clock(clock),.ce(1'b1),.adr(postdrift_adr),.d(hmt_nhits_trig_bx2345),.q(postdrift_hmt_nhits_trig_bx2345));
-  srl16e_bbl #(MXHMTB)  usrldrift_trigger  (.clock(clock),.ce(1'b1),.adr(postdrift_adr),.d(hmt_trigger),.q(postdrift_hmt_trigger));
-
 // Extract pre-trigger data after drift delay, compensated for pattern-finder latency + programmable drift delay
   wire              clct_pop_xtmb        = postdrift_data[0];     // CLCT postdrift flag aka active_feb_flag
   wire [MXBADR-1:0] clct_wr_adr_xtmb     = postdrift_data[11:1];  // Buffer address at pre-trigger
@@ -3230,12 +3267,6 @@
   wire [1:0]        bxn_counter_xtmb     = postdrift_data[14:13]; // BXN at pre-trigger, only lsbs are needed for clct
   wire              trig_source_ext_xtmb = postdrift_data[15];    // Trigger source was not CLCT pattern
   wire [MXCFEB-1:0] aff_list_xtmb        = postdrift_data[22:16]; // Active feb list
-
-  assign hmt_nhits_trig_xtmb[9:0]        = postdrift_hmt_nhits_trig[9:0]; //only valid if at least one CLCT is found
-  assign hmt_nhits_trig_bx678_xtmb[9:0]  = postdrift_hmt_nhits_trig_bx678[9:0]; //only valid if at least one CLCT is found
-  assign hmt_nhits_trig_bx2345_xtmb[9:0] = postdrift_hmt_nhits_trig_bx2345[9:0]; //only valid if at least one CLCT is found
-  assign hmt_trigger_xtmb[MXHMTB-1:0]    = postdrift_hmt_trigger[MXHMTB-1:0]   ; //only valid if at least one CLCT is found
-  wire   hmt_fired_trigger               = (|hmt_trigger_xtmb[1:0]);
 
 // After drift, send CLCT words to TMB, persist 1 cycle only, blank invalid CLCTs unless override
   wire clct0_hit_valid = (hs_hit_1st >= hit_thresh_postdrift);    // CLCT is over hit thresh
@@ -3254,8 +3285,6 @@
 
   assign clct0_vpf = clct0_valid && clct_pop_xtmb;
   assign clct1_vpf = clct1_valid && clct_pop_xtmb;
-
-  assign hmt_clct_match = hmt_fired_trigger    && clct_push_xtmb && clct0_vpf;
 
 // Construct CLCTs for sending to TMB matching. These are node names only
 
@@ -3321,10 +3350,6 @@
   assign clct1_xky_xtmb   = clct1_xky & {MXXKYB {!clct1_blanking}};
 
 // Latch CLCTs for VME
-  reg [9:0]        hmt_nhits_trig_vme=0;
-  reg [9:0]        hmt_nhits_trig_bx678_vme=0;
-  reg [9:0]        hmt_nhits_trig_bx2345_vme=0;
-  reg [MXHMTB-1:0] hmt_trigger_vme=0;
   reg [MXCLCT-1:0]  clct0_vme=0;
   reg [MXCLCT-1:0]  clct1_vme=0;
   reg [MXCLCTC-1:0] clctc_vme=0;
@@ -3350,13 +3375,8 @@
       clct0_vme_xky   <= 0;
       clct1_vme_bnd   <= 0;
       clct1_vme_xky   <= 0;
-      hmt_nhits_trig_vme <= 0;
-      hmt_nhits_trig_bx678_vme <= 0;
-      hmt_nhits_trig_bx2345_vme <= 0;
-      hmt_trigger_vme <= 0;
     end
     else if (clct0_vpf) begin
-    //else if (clct0_vpf || hmt_trigger_xtmb) begin
       clct0_vme <= clct0_xtmb;
       clct1_vme <= clct1_xtmb;
       clctc_vme <= clctc_xtmb;
@@ -3367,11 +3387,6 @@
       clct0_vme_xky   <= clct0_xky_xtmb;
       clct1_vme_bnd   <= clct1_bnd_xtmb;
       clct1_vme_xky   <= clct1_xky_xtmb;
-      // should latch hmt in other case ?? may consider the trigger result of hmt_nhits_trig
-      hmt_nhits_trig_vme        <= hmt_nhits_trig_xtmb;
-      hmt_nhits_trig_bx678_vme  <= hmt_nhits_trig_bx678_xtmb;
-      hmt_nhits_trig_bx2345_vme <= hmt_nhits_trig_bx2345_xtmb;
-      hmt_trigger_vme  <= hmt_trigger_xtmb;
     end
     
   end
@@ -3424,7 +3439,7 @@
   reg [MXCNTVME-1:0] cnt [MXCNT:MNCNT]; // TMB counter array, counters[6:0] are in alct.v
   reg [MXCNT:MNCNT]  cnt_en = 0;        // Counter increment enables
 
-  parameter MXHMTCNT    = 10;
+  parameter MXHMTCNT    = 20;
   reg [MXCNTVME-1:0] hmt_cnt [MXHMTCNT-1:0];
   reg [MXHMTCNT-1:0] hmt_cnt_en = 0;//10 HMT counters
 
@@ -3497,16 +3512,27 @@
     cnt_en[64]  <= sync_err_cnt_en;           // STAT  TTC sync errors
     cnt_en[65]  <= perr_pulse;                // STAT Raw hits RAM parity errors
 
-    hmt_cnt_en[0]  <= hmt_trigger[1:0] == 2'b01; // hmt over threshold1
-    hmt_cnt_en[1]  <= hmt_trigger[1:0] == 2'b10; // hmt over threshold2
-    hmt_cnt_en[2]  <= hmt_trigger[1:0] == 2'b11; // hmt over threshold3
-    hmt_cnt_en[3]  <= hmt_fired_pretrigger && clct_pretrig;// hmt && preCLCT
-    hmt_cnt_en[4]  <= hmt_clct_match;// hmt && CLCT
-    hmt_cnt_en[5]  <= hmt_fired_tmb_ff     && tmb_match; // hmt && LCT vpf
-    hmt_cnt_en[6]  <= tmb_pulse_hmt_only; // tmb trigger pulse from hmt
-    hmt_cnt_en[7]  <= tmb_keep_hmt_only;  // tmb trigger keep from hmt
-    hmt_cnt_en[8]  <= (|hmt_trigger[1:0])  && (hmt_trigger[3:2] == 2'b00);// fire signal but not background region
-    hmt_cnt_en[9]  <= (|hmt_trigger[1:0])  && (|hmt_trigger[3:2]);// fire both signal and background region
+    hmt_cnt_en[0]  <= (|hmt_anode[1:0])  && ( hmt_anode[3:2] == 2'b00);// fire signal but not background region
+    hmt_cnt_en[1]  <= (|hmt_anode[1:0])  && (|hmt_anode[3:2]);// fire both signal and background region
+    hmt_cnt_en[2]  <= (|hmt_cathode[1:0])  && (hmt_cathode[3:2] == 2'b00);// fire signal but not background region
+    hmt_cnt_en[3]  <= (|hmt_cathode[1:0])  && (|hmt_cathode[3:2]);// fire both signal and background region
+    hmt_cnt_en[4]  <= hmt_cathode[1:0] == 2'b01; // hmt over threshold1
+    hmt_cnt_en[5]  <= hmt_cathode[1:0] == 2'b10; // hmt over threshold2
+    hmt_cnt_en[6]  <= hmt_cathode[1:0] == 2'b11; // hmt over threshold3
+    hmt_cnt_en[7]  <= hmt_anode_alct_match;// hmt anode and alct match
+    hmt_cnt_en[8]  <= hmt_pretrig_match;// hmt && preCLCT
+    hmt_cnt_en[9]  <= hmt_cathode_clct_match;// hmt && CLCT
+    hmt_cnt_en[10] <= hmt_cathode_alct_match;// hmt && ALCT
+    hmt_cnt_en[11] <= hmt_cathode_lct_match; // hmt && LCT vpf
+    hmt_cnt_en[12] <= hmt_fired_anode_only;  // only anode fired
+    hmt_cnt_en[13] <= hmt_fired_cathode_only; //only cathode fired
+    hmt_cnt_en[14] <= hmt_fired_or;// hmt,cathod or anode fired
+    hmt_cnt_en[15] <= hmt_fired_match;// hmt anode and cathode match
+    hmt_cnt_en[16] <= hmt_fired_match && hmt_cathode_lct_match;// hmt anode and cathode, LCT  match
+    hmt_cnt_en[17] <= hmt_fired_match && !hmt_cathode_alct_match;// hmt anode and cathode, no alct
+    hmt_cnt_en[18] <= tmb_pulse_hmt_only; // tmb trigger pulse from hmt
+    hmt_cnt_en[19] <= tmb_keep_hmt_only;  // tmb trigger keep from hmt
+
   end
 
 // Counter overflow disable
@@ -3632,7 +3658,16 @@
   assign hmt_counter7     = hmt_cnt[7];
   assign hmt_counter8     = hmt_cnt[8];
   assign hmt_counter9     = hmt_cnt[9];
-
+  assign hmt_counter10    = hmt_cnt[10];
+  assign hmt_counter11    = hmt_cnt[11];
+  assign hmt_counter12    = hmt_cnt[12];
+  assign hmt_counter13    = hmt_cnt[13];
+  assign hmt_counter14    = hmt_cnt[14];
+  assign hmt_counter15    = hmt_cnt[15];
+  assign hmt_counter16    = hmt_cnt[16];
+  assign hmt_counter17    = hmt_cnt[17];
+  assign hmt_counter18    = hmt_cnt[18];
+  assign hmt_counter19    = hmt_cnt[19];
 
 //------------------------------------------------------------------------------------------------------------------
 // GEM VME Counter Section
@@ -3961,10 +3996,10 @@
   assign xtmb_wdata[42]    =  clct_invp[0];     // CLCT had invalid pattern after drift delay
   assign xtmb_wdata[43]    =  clct_invp[1];     // CLCT had invalid pattern after drift delay
 
-  parameter MXCCLUTB = MXPATC+MXPATC+MXBNDB+MXBNDB+MXXKYB+MXXKYB+10;
+  parameter MXCCLUTB = MXPATC+MXPATC+MXBNDB+MXBNDB+MXXKYB+MXXKYB;
   wire [MXCCLUTB-1:0]  xtmb_cclut_wdata;                // Mapping array
   wire [MXCCLUTB-1:0]  xtmb_cclut_rdata;                // Mapping array
-  assign xtmb_cclut_wdata = {hmt_nhits_trig_bx678_xtmb, clct1_bnd_xtmb, clct1_xky_xtmb, clct1_carry_xtmb, clct0_bnd_xtmb, clct0_xky_xtmb, clct0_carry_xtmb};
+  assign xtmb_cclut_wdata = {clct1_bnd_xtmb, clct1_xky_xtmb, clct1_carry_xtmb, clct0_bnd_xtmb, clct0_xky_xtmb, clct0_carry_xtmb};
 
 // Post-drift+1bx: store CLCT counter in RAM mapping array
   parameter MXXTMB1 = 30;         // Post drift CLCT counter
@@ -3975,7 +4010,7 @@
 
 // TMB match: store TMB match results in RAM mapping array
   //parameter MXRTMB = 23;        // TMB match data bits
-  parameter MXRTMB = 31;        // TMB match data bits
+  parameter MXRTMB = 31+NHMTHITB;        // TMB match data bits
   wire [MXRTMB-1:0] rtmb_wdata; // Mapping array
   wire [MXRTMB-1:0] rtmb_rdata; // Mapping array
 
@@ -4011,6 +4046,8 @@
   assign rtmb_wdata[28]  =  lct1_with_gemA;
   assign rtmb_wdata[29]  =  lct1_with_gemB;
   assign rtmb_wdata[30]  =  lct1_with_copad;
+
+  assign rtmb_wdata[32:23] = hmt_nhits_bx678_ff[NHMTHITB-1:0];
 
 // TMB match: store ALCTs sent to MPC in RAM mapping array, arrives same bx as tmb match result
   parameter MXALCTD = 11+11+5+2; // ALCT transmit frame data bits, 2alcts + bxn + tmb stats
@@ -4637,8 +4674,7 @@
   wire [MXBNDB - 1   : 0] r_clct1_bnd_xtmb; // new bending 
   wire [MXXKYB-1     : 0] r_clct1_xky_xtmb; // new position with 1/8 precision
   wire [MXPATC-1     : 0] r_clct1_carry_xtmb; // CC code 
-  wire [9            : 0] r_hmt_nhits_trig_bx678_xtmb;
-  assign {r_hmt_nhits_trig_bx678_xtmb, r_clct1_bnd_xtmb, r_clct1_xky_xtmb, r_clct1_carry_xtmb, r_clct0_bnd_xtmb, r_clct0_xky_xtmb, r_clct0_carry_xtmb}   = xtmb_cclut_rdata;
+  assign {r_clct1_bnd_xtmb, r_clct1_xky_xtmb, r_clct1_carry_xtmb, r_clct0_bnd_xtmb, r_clct0_xky_xtmb, r_clct0_carry_xtmb}   = xtmb_cclut_rdata;
 
   wire [5:0] r_layers_hit = r_clcta_xtmb[5:0]; // Layers hit
   wire       r_clct1_busy = r_clcta_xtmb[6];   // CLCT1 busy internal check
@@ -4680,6 +4716,9 @@
   wire    r_lct1_with_gemA    = rtmb_rdata[28]; // TMB LCT with gem match
   wire    r_lct1_with_gemB    = rtmb_rdata[29]; // TMB LCT with gem match
   wire    r_lct1_with_copad   = rtmb_rdata[30]; // TMB LCT with gem match
+
+  wire [NHMTHITB-1:0] r_hmt_nhits_bx678 = rtmb_rdata[31+NHMTHITB-1:31];
+  wire [6:0] r_hmt_nhits_bx678_header =  (r_hmt_nhits_bx678>=10'h80) ? 7'h7F : r_hmt_nhits_bx678[6:0];
 
 // Unpack ALCT + extra TMB trigger data from RAM mapping array
   wire [10:0] r_tmb_alct0 = alct_rdata[10:0];  // ALCT0
@@ -5115,7 +5154,7 @@
   assign  header10_run3_[10: 0]   =  r_clct0_carry_xtmb[MXPATC-1:0]; 
   assign  header10_run3_[11]      =  run3_trig_df;
   assign  header10_run3_[13:12]   =  r_clct0_xky_xtmb[1:0];
-  assign  header10_run3_[14]      =  r_hmt_nhits_trig_bx678_xtmb[0];
+  assign  header10_run3_[14]      =  r_hmt_nhits_bx678_header[0];
   assign  header10_[14:0]   =  run3_daq_df ? header10_run3_[14:0] : r_pretrig_counter[29:15]; // CLCT pre-trigger counter
   assign  header10_[18:15]  =  0;                        // DDU+DMB control flags
 
@@ -5147,7 +5186,7 @@
   assign  header14_run3_[10: 0]   =  r_clct1_carry_xtmb[MXPATC-1:0]; 
   assign  header14_run3_[11]      =  gem_enable;// unused!!!
   assign  header14_run3_[13:12]   =  r_clct1_xky_xtmb[1:0];
-  assign  header14_run3_[14]      =  r_hmt_nhits_trig_bx678_xtmb[1];
+  assign  header14_run3_[14]      =  r_hmt_nhits_bx678_header[1];
   assign  header14_[14:0]   =  run3_daq_df ? header14_run3_[14:0] : r_trig_counter[29:15]; // TMB trigger counter
   assign  header14_[18:15]  =  0;                     // DDU+DMB control flags
 
@@ -5252,7 +5291,7 @@
   assign  header29_[14]     =  hs_layer_trig;        // Layer-mode trigger
   assign  header29_[18:15]  =  0;                    // DDU+DMB control flags
 
-  assign  header30_[4:0]    =  run3_daq_df ? r_hmt_nhits_trig_bx678_xtmb[6:2] : r_alct_bxn[4:0];         // ALCT0/1 bxn
+  assign  header30_[4:0]    =  run3_daq_df ? r_hmt_nhits_bx678_header[6:2] : r_alct_bxn[4:0];         // ALCT0/1 bxn
   assign  header30_[6:5]    =  r_alct_ecc_err[1:0];     // ALCT trigger path ECC error code
   assign  header30_[11:7]   =  cfeb_badbits_found[4:0]; // CFEB[n] has at least 1 bad bit
   assign  header30_[12]     =  cfeb_badbits_blocked;    // A CFEB had bad bits that were blocked

@@ -299,6 +299,8 @@
   parameter MXL1ARX    =  12; // Number L1As received counter bits
 
   parameter MXHMTB     =  4;// bits for HMT
+  parameter NHITCFEBB  =  6;
+  parameter NHMTHITB   = 10;
 
 //-------------------------------------------------------------------------------------------------------------------
 // I/O Port Declarations
@@ -945,6 +947,18 @@
   wire  [MXCNTVME-1:0]  hmt_counter7;
   wire  [MXCNTVME-1:0]  hmt_counter8;
   wire  [MXCNTVME-1:0]  hmt_counter9;
+  wire  [MXCNTVME-1:0]  hmt_counter10;
+  wire  [MXCNTVME-1:0]  hmt_counter11;
+  wire  [MXCNTVME-1:0]  hmt_counter12;
+  wire  [MXCNTVME-1:0]  hmt_counter13;
+  wire  [MXCNTVME-1:0]  hmt_counter14;
+  wire  [MXCNTVME-1:0]  hmt_counter15;
+  wire  [MXCNTVME-1:0]  hmt_counter16;
+  wire  [MXCNTVME-1:0]  hmt_counter17;
+  wire  [MXCNTVME-1:0]  hmt_counter18;
+  wire  [MXCNTVME-1:0]  hmt_counter19;
+  wire  [MXCNTVME-1:0]  hmt_trigger_counter,
+  wire  [MXCNTVME-1:0]  hmt_readout_counter,
 
 // GEM Counters
   wire  [MXCNTVME-1:0]  gem_counter0;
@@ -1324,106 +1338,7 @@
   wire  [MXHS-1:0]    cfeb_ly4hs [MXCFEB-1:0];    // Decoded 1/2-strip pulses
   wire  [MXHS-1:0]    cfeb_ly5hs [MXCFEB-1:0];    // Decoded 1/2-strip pulses
 
-  wire  [5:0]         cfeb_nhits [MXCFEB-1:0];
-
-  //=====================================================
-  // HMT trigger 
-  //=====================================================
-  // number of hits for ME1/1, 7 DCFEBs
-  //wire  [9:0]         allcfeb_nhits = cfeb_nhits[0] + cfeb_nhits[1] + cfeb_nhits[2] + cfeb_nhits[3] + cfeb_nhits[4] + cfeb_nhits[5] + cfeb_nhits[6];
-  reg [1:0] hmt_reset_ff = 2'b00;
-  always @(posedge clock) begin
-    hmt_reset_ff[0] <= (global_reset || ttc_resync);
-    hmt_reset_ff[1] <= hmt_reset_ff[0] || fmm_trig_stop;
-  end
-
-  wire hmt_reset = |hmt_reset_ff;
-
-  wire  hmt_enable;
-  wire  hmt_me1a_enable;
-
-  wire cfeb_allow_hmt_ro;
-  wire tmb_allow_hmt;
-  wire tmb_allow_hmt_ro;
-  
-  wire [9:0] hmt_nhits_trig;
-  wire [9:0] hmt_nhits_trig_bx678;
-  wire [9:0] hmt_nhits_trig_bx2345;
-  //wire [1:0] hmt_trigger_bx7; // HMT trigger results 
-  wire [1:0] hmt_trigger_bx678; // HMT trigger results 
-  wire [1:0] hmt_trigger_bx2345; // HMT trigger results 
-  wire [9:0] hmt_thresh1, hmt_thresh2, hmt_thresh3;
-  wire [MXHMTB-1:0] hmt_trigger ;
-
-  wire [5:0] hmt_aff_thresh = 6'd3;
-  wire [MXCFEB-1 : 0] hmt_active_feb_s0;
-
-  assign hmt_active_feb_s0[0] = cfeb_nhits[0] >= hmt_aff_thresh;
-  assign hmt_active_feb_s0[1] = cfeb_nhits[1] >= hmt_aff_thresh;
-  assign hmt_active_feb_s0[2] = cfeb_nhits[2] >= hmt_aff_thresh;
-  assign hmt_active_feb_s0[3] = cfeb_nhits[3] >= hmt_aff_thresh;
-  assign hmt_active_feb_s0[4] = cfeb_nhits[4] >= hmt_aff_thresh;
-  assign hmt_active_feb_s0[5] = cfeb_nhits[5] >= hmt_aff_thresh;
-  assign hmt_active_feb_s0[6] = cfeb_nhits[6] >= hmt_aff_thresh;
-
-  wire [9:0] nhits_chamber = hmt_me1a_enable ? (cfeb_nhits[0] + cfeb_nhits[1] + cfeb_nhits[2] + cfeb_nhits[3] + cfeb_nhits[4] + cfeb_nhits[5] + cfeb_nhits[6]) : (cfeb_nhits[0] + cfeb_nhits[1] + cfeb_nhits[2] + cfeb_nhits[3]);
-  reg [9:0] nhits_trig_s0_srl [7:0];//array 8x10bits
-
-  always @(posedge clock) begin
-      nhits_trig_s0_srl[7] <= nhits_trig_s0_srl[6];
-      nhits_trig_s0_srl[6] <= nhits_trig_s0_srl[5];
-      nhits_trig_s0_srl[5] <= nhits_trig_s0_srl[4];
-      nhits_trig_s0_srl[4] <= nhits_trig_s0_srl[3];
-      nhits_trig_s0_srl[3] <= nhits_trig_s0_srl[2];
-      nhits_trig_s0_srl[2] <= nhits_trig_s0_srl[1];
-      nhits_trig_s0_srl[1] <= nhits_trig_s0_srl[0];
-      nhits_trig_s0_srl[0] <= nhits_chamber;
-  end
-
-  wire [9:0] nhits_trig_s0_bx7    = nhits_trig_s0_srl[2];
-  //signal: over 3BX;   control region: over 4BX 
-  wire [9:0] nhits_trig_s0_bx678  = nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] + nhits_trig_s0_srl[1];
-  wire [9:0] nhits_trig_s0_bx2345 = nhits_trig_s0_srl[7] + nhits_trig_s0_srl[6] + nhits_trig_s0_srl[5] + nhits_trig_s0_srl[4];
-  //peak conditio: nhits_trig_s0_bx678 >= nhits_trig_s0_bx789 && nhits_trig_s0_bx678 >= nhits_trig_s0_bx89A
-  wire nhits_compare_s0_bx678_789 = (nhits_trig_s0_srl[3] > nhits_trig_s0_srl[0]) || (nhits_trig_s0_srl[3] == nhits_trig_s0_srl[0] &&  nhits_trig_s0_srl[2]> nhits_trig_s0_srl[1]);
-  wire nhits_compare_s0_bx678_89A = (nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] >  nhits_trig_s0_srl[0] + nhits_chamber) || (nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] ==  nhits_trig_s0_srl[0] + nhits_chamber && nhits_trig_s0_srl[2] > nhits_trig_s0_srl[0]);
-  wire nhits_trig_s0_bx678_peak = nhits_compare_s0_bx678_789 && nhits_compare_s0_bx678_89A;
-  
-  //hits to build CLCT is counted at nhits_trig_s0_srl[7], with CLCT_drift delay=2BX
-  //parameter hmt_dly_const = 4'd6; //delay HMT trigger to CLCT VPF BX
-  //parameter hmt_dly_const = 4'd1; //delay HMT trigger to preCLCT BX, nhits_trig_s0_srl[2] for pretrigger
-  //wire [9:0] nhits_trig_s0_bx678  = nhits_trig_s0_srl[2] + nhits_trig_s0_srl[1] + nhits_trig_s0_srl[0];
-  //wire [9:0] nhits_trig_s0_bx2345 = nhits_trig_s0_srl[6] + nhits_trig_s0_srl[5] + nhits_trig_s0_srl[4] + nhits_trig_s0_srl[3];
-  parameter hmt_dly_const = 4'd0; //delay HMT trigger to preCLCT BX
-  wire [9:0] nhits_trig_dly_bx2345;
-  wire [9:0] nhits_trig_dly_bx678;
-  wire [9:0] nhits_trig_dly_bx7;
-  wire nhits_trig_dly_bx678_peak;
-  srl16e_bbl #(1)     udbx678peak  ( .clock(clock), .ce(1'b1), .adr(hmt_dly_const-4'd1), .d(nhits_trig_s0_bx678_peak), .q(nhits_trig_dly_bx678_peak ));
-  srl16e_bbl #(10)    udnhitsbx7   ( .clock(clock), .ce(1'b1), .adr(hmt_dly_const-4'd1), .d(nhits_trig_s0_bx7    ), .q(nhits_trig_dly_bx7      ));
-  srl16e_bbl #(10)    udnhitsbx678 ( .clock(clock), .ce(1'b1), .adr(hmt_dly_const-4'd1), .d(nhits_trig_s0_bx678  ), .q(nhits_trig_dly_bx678    ));
-  srl16e_bbl #(10)    udnhitsbx2345( .clock(clock), .ce(1'b1), .adr(hmt_dly_const-4'd1), .d(nhits_trig_s0_bx2345 ), .q(nhits_trig_dly_bx2345   ));
-
-  wire    nhits_bx678_peak      = (hmt_dly_const == 4'd0) ? nhits_trig_s0_bx678_peak  : nhits_trig_dly_bx678_peak;
-  assign  hmt_nhits_trig        = (hmt_dly_const == 4'd0) ? nhits_trig_s0_bx7[9:0]    : nhits_trig_dly_bx7[9:0];
-  assign  hmt_nhits_trig_bx678  = (hmt_dly_const == 4'd0) ? nhits_trig_s0_bx678[9:0]  : nhits_trig_dly_bx678[9:0];
-  assign  hmt_nhits_trig_bx2345 = (hmt_dly_const == 4'd0) ? nhits_trig_s0_bx2345[9:0] : nhits_trig_dly_bx2345[9:0];
-
-  assign hmt_trigger_bx678[0]  = ((hmt_nhits_trig_bx678  >= hmt_thresh1) || (hmt_nhits_trig_bx678  >= hmt_thresh3)) & nhits_bx678_peak & (~|hmt_fired_ff) & (~hmt_reset);
-  assign hmt_trigger_bx678[1]  = ((hmt_nhits_trig_bx678  >= hmt_thresh2) || (hmt_nhits_trig_bx678  >= hmt_thresh3)) & nhits_bx678_peak & (~|hmt_fired_ff) & (~hmt_reset);
-  assign hmt_trigger_bx2345[0] = ((hmt_nhits_trig_bx2345 >= hmt_thresh1) || (hmt_nhits_trig_bx2345 >= hmt_thresh3)) & (~|hmt_fired_ff) & (~hmt_reset);
-  assign hmt_trigger_bx2345[1] = ((hmt_nhits_trig_bx2345 >= hmt_thresh2) || (hmt_nhits_trig_bx2345 >= hmt_thresh3)) & (~|hmt_fired_ff) & (~hmt_reset);
-  assign hmt_trigger = hmt_enable ? {hmt_trigger_bx2345, hmt_trigger_bx678} : 4'b0;
-  wire   hmt_fired   = |hmt_trigger_bx678[1:0];
-
-  reg [1:0] hmt_fired_ff = 2'b00;//dead time for 2BX 
-  always @(posedge clock) begin
-      hmt_fired_ff[0] <= hmt_fired;
-      hmt_fired_ff[1] <= hmt_fired_ff[0];
-  end
-
-  wire [MXCFEB-1 : 0] hmt_active_feb;
-  srl16e_bbl #(MXCFEB)     udhmtaff  ( .clock(clock), .ce(1'b1), .adr(hmt_dly_const-4'd1+4'd3), .d(hmt_active_feb_s0), .q(hmt_active_feb ));
+  wire  [NHITCFEBB-1:0]         cfeb_nhits [MXCFEB-1:0];
   
 // Status Ports
   wire  [MXCFEB-1:0]  demux_tp_1st;
@@ -1576,7 +1491,7 @@
   .ly4hs (cfeb_ly4hs[icfeb][MXHS-1:0]),  // Out  Decoded 1/2-strip pulses
   .ly5hs (cfeb_ly5hs[icfeb][MXHS-1:0]),  // Out  Decoded 1/2-strip pulses
 
-  .nhits_per_cfeb (cfeb_nhits[icfeb]),  // Out nhits per cfeb for HMT
+  .nhits_per_cfeb (cfeb_nhits[icfeb][NHITCFEBB-1:0]),  // Out nhits per cfeb for HMT
 // CFEB data received on optical link
   .gtx_rx_data_bits_or (gtx_rx_data_bits_or[icfeb]), // Out  CFEB data received on optical link = OR of all 48 bits for a given CFEB
 
@@ -2568,6 +2483,7 @@ end
 
    wire run3_trig_df; // Run3 trigger data format
    wire run3_daq_df;// Run3 daq data format
+   wire run3_alct_df;// Run3 ALCT data format
 
   //CCLUT is off
   `ifndef CCLUT
@@ -2674,10 +2590,6 @@ end
   .cfeb_layer_trig  (cfeb_layer_trig),              // Out  Layer pretrigger
   .cfeb_layer_or    (cfeb_layer_or[MXLY-1:0]),      // Out  OR of hstrips on each layer
   .cfeb_nlayers_hit (cfeb_nlayers_hit[MXHITB-1:0]), // Out  Number of CSC layers hit
-
-//HMT, 2020
-  //.hmt_me1a_enable     (hmt_me1a_enable), 
-  //.hmt_nhits_trig      (hmt_nhits_trig[9:0]), // Out
 
 //to add dead time feature in 2016Algo  
   .drift_delay        (drift_delay[MXDRIFT-1:0]),      // In  CSC Drift delay clocks
@@ -2798,11 +2710,6 @@ end
   .cfeb_layer_trig  (cfeb_layer_trig),              // Out  Layer pretrigger
   .cfeb_layer_or    (cfeb_layer_or[MXLY-1:0]),      // Out  OR of hstrips on each layer
   .cfeb_nlayers_hit (cfeb_nlayers_hit[MXHITB-1:0]), // Out  Number of CSC layers hit
-  // //HMT, 2020
-  //.hmt_me1a_enable     (hmt_me1a_enable),     //Out
-  //.hmt_nhits_trig      (hmt_nhits_trig[9:0]), //Out
-  //.hmt_nhits_trig_bx678      (hmt_nhits_trig_bx678[9:0]),//Out
-  //.hmt_nhits_trig_bx2345     (hmt_nhits_trig_bx2345[9:0]), // Out
 //to add dead time feature in 2016Algo  
   .drift_delay        (drift_delay[MXDRIFT-1:0]),      // In  CSC Drift delay clocks
   .algo2016_use_dead_time_zone         (algo2016_use_dead_time_zone), // In Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
@@ -2834,6 +2741,119 @@ end
 `endif
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//  HMT instantiation
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//
+  wire hmt_sump;
+
+  wire  hmt_enable;
+  wire  hmt_me1a_enable;
+
+  wire  hmt_allow_cathode;
+  wire  hmt_allow_anode;
+  wire  hmt_allow_match;
+  wire  hmt_allow_cathode_ro;
+  wire  hmt_allow_anode_ro;
+  wire  hmt_allow_match_ro;
+  wire  hmt_outtime_check;
+
+  wire [NHMTHITB-1:0] hmt_nhits_bx678_ff; //for header
+  wire [NHMTHITB-1:0] hmt_nhits_bx7;
+  wire [NHMTHITB-1:0] hmt_nhits_bx678;
+  wire [NHMTHITB-1:0] hmt_nhits_bx2345;
+  wire [7:0] hmt_thresh1, hmt_thresh2, hmt_thresh3;
+
+  wire [6:0] hmt_aff_thresh;
+  wire [MXCFEB-1:0] hmt_active_feb;
+  wire hmt_pretrig_match;
+
+  wire [3:0]  hmt_delay;
+  wire [3:0]  hmt_alct_win_size;
+  wire [3:0]  hmt_match_win;
+
+  wire [MXHMTB-1:0] hmt_anode;
+  wire [MXHMTB-1:0] hmt_cathode;
+  
+  wire hmt_fired_cathode_only;
+  wire hmt_fired_anode_only;
+  wire hmt_fired_match;
+
+  wire [MXHMTB-1:0] hmt_trigger_tmb;// results aligned with ALCT vpf
+  wire [MXHMTB-1:0] hmt_trigger_tmb_ro;// results aligned with ALCT vpf
+
+  hmt uhmt
+  (
+  .clock       (clock),          // In clock
+  .ttc_resync  (ttc_resync),      // In
+  .global_reset(global_reset),    // In
+
+  .fmm_trig_stop (fmm_trig_stop), // In stop HMT when it is not ready
+  .bx0_vpf_test  (bx0_vpf_test) ,  // In dynamic zero
+
+  .nhit_cfeb0    (cfeb_nhits[0][NHITCFEBB-1: 0]),// In cfeb hit counter
+  .nhit_cfeb1    (cfeb_nhits[1][NHITCFEBB-1: 0]),// In cfeb hit counter
+  .nhit_cfeb2    (cfeb_nhits[2][NHITCFEBB-1: 0]),// In cfeb hit counter
+  .nhit_cfeb3    (cfeb_nhits[3][NHITCFEBB-1: 0]),// In cfeb hit counter
+  .nhit_cfeb4    (cfeb_nhits[4][NHITCFEBB-1: 0]),// In cfeb hit counter
+  .nhit_cfeb5    (cfeb_nhits[5][NHITCFEBB-1: 0]),// In cfeb hit counter
+  .nhit_cfeb6    (cfeb_nhits[6][NHITCFEBB-1: 0]),// In cfeb hit counter
+
+  .hmt_enable         (hmt_enable) , // In hmt enabled 
+  .hmt_me1a_enable    (hmt_me1a_enable) , // In hmt enabled 
+  .hmt_thresh1   (hmt_thresh1[7:0]), // In hmt thresh1
+  .hmt_thresh2   (hmt_thresh2[7:0]), // In hmt thresh2
+  .hmt_thresh3   (hmt_thresh3[7:0]), // In hmt thresh3
+  .hmt_aff_thresh(hmt_aff_thresh[6:0]),//In hmt thresh for active cfeb flag
+
+  .hmt_delay          (hmt_delay[3:0]), // In hmt delay for matching
+  .hmt_alct_win_size  (hmt_alct_win_size[3:0]),//In hmt-alct match window size
+  .hmt_match_win      (hmt_match_win[3:0]),// In alct location in hmt window size
+  //tmb port: input
+  .alct_vpf_pipe     (alct_vpf_pipe),//In ALCT vpf after alct delay
+  .hmt_anode         (hmt_anode[MXHMTB-1:0]),// In hmt bits from anode 
+
+  .clct_pretrig     (clct_pretrig),//In clct pretrigger
+  .clct_vpf_pipe    (clct_vpf_pipe),//In CLCT vpf after delay
+
+  // vme port: input
+  .cfeb_allow_hmt_ro   (cfeb_allow_hmt_ro), //Out read out CFEB when hmt is fired
+  .hmt_allow_cathode   (hmt_allow_cathode),//In hmt allow to trigger on cathode 
+  .hmt_allow_anode     (hmt_allow_anode),//In hmt allow to trigger on anode
+  .hmt_allow_match     (hmt_allow_match),//In hmt allow to trigger on canode X anode match
+  .hmt_allow_cathode_ro(hmt_allow_cathode_ro),//In hmt allow to readout on cathode
+  .hmt_allow_anode_ro  (hmt_allow_anode_ro),//In hmt allow to readout on anode
+  .hmt_allow_match_ro  (hmt_allow_match_ro),//In hmt allow to readout on match
+  .hmt_outtime_check   (hmt_outtime_check),//In hmt fired shoudl check anode bg lower than threshold
+  // sequencer port
+  //.hmt_fired_pretrig   (hmt_fired_pretrig),//out, hmt fired preCLCT bx
+  .hmt_active_feb      (hmt_active_feb[MXCFEB-1:0]),//Out hmt active cfeb flags
+  .hmt_pretrig_match   (hmt_pretrig_match),//out hmt & preCLCT
+
+  //tmb port
+  .hmt_nhits_bx7       (hmt_nhits_bx7     [NHMTHITB-1:0]),//Out hmt nhits for central bx
+  .hmt_nhits_bx678     (hmt_nhits_bx678   [NHMTHITB-1:0]),//Out hmt nhits for in-time
+  .hmt_nhits_bx2345    (hmt_nhits_bx2345  [NHMTHITB-1:0]),//Out hmt nhits for out-time
+  .hmt_cathode_pipe    (hmt_cathode[MXHMTB-1:0]), //Out hmt bits in cathod 
+  
+  //.hmt_cathode_fired     (hmt_cathode_fired),// Out 
+  //.hmt_anode_fired       (hmt_anode_fired),// Out 
+  .hmt_anode_alct_match  (hmt_anode_alct_match),//Out
+  .hmt_cathode_alct_match(hmt_cathode_alct_match),// Out 
+  .hmt_cathode_clct_match(hmt_cathode_clct_match),// Out 
+  .hmt_cathode_lct_match (hmt_cathode_lct_match),// Out
+  
+  .hmt_fired_cathode_only (hmt_fired_cathode_only),//Out hmt is fired for cathode only
+  .hmt_fired_anode_only   (hmt_fired_anode_only),//Out hmt is fired for anode only
+  .hmt_fired_match        (hmt_fired_match),//Out hmt is fired for match
+  .hmt_fired_or           (hmt_fired_or),//Out hmt is fired for match
+
+  .hmt_trigger_tmb    (hmt_trigger_tmb[MXHMTB-1:0]),// results aligned with ALCT vpf latched for ALCT-CLCT match
+  .hmt_trigger_tmb_ro (hmt_trigger_tmb_ro[MXHMTB-1:0]),// results aligned with ALCT vpf latched for ALCT-CLCT match
+  .hmt_sump  (hmt_sump)
+);
+  
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //  Begin: Sequencer Signals
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //
@@ -2841,10 +2861,7 @@ end
    wire [MXTBIN-1:0]      cfeb_tbin;
    wire [7:0]             cfeb_rawhits;
    
-   //wire [9:0]             hmt_nhits_trig_xtmb;
-   wire [MXHMTB-1:0]             hmt_trigger_xtmb;
-   wire [MXHMTB-1:0]             hmt_trigger_vme;
-   wire hmt_clct_match;
+   wire [MXHMTB-1:0]             hmt_cathode_vme;
 
    wire [MXCLCT-1:0]      clct0_xtmb;
    wire [MXCLCT-1:0]      clct1_xtmb;
@@ -2926,9 +2943,9 @@ end
    wire [3:0]             l1a_preClct_width;
    wire [7:0]             l1a_preClct_dly;
 
-   wire [9:0]             hmt_nhits_trig_vme;
-   wire [9:0]             hmt_nhits_trig_bx678_vme;
-   wire [9:0]             hmt_nhits_trig_bx2345_vme;
+   wire [9:0]             hmt_nhits_bx7_vme;
+   wire [9:0]             hmt_nhits_bx678_vme;
+   wire [9:0]             hmt_nhits_bx2345_vme;
 
    wire [MXCLCT-1:0]      clct0_vme;
    wire [MXCLCT-1:0]      clct1_vme;
@@ -3204,12 +3221,23 @@ end
   .cfeb_layer_or    (cfeb_layer_or[MXLY-1:0]),      // In  OR of hstrips on each layer
   .cfeb_nlayers_hit (cfeb_nlayers_hit[MXHITB-1:0]), // In  Number of CSC layers hit
 
-  //Sequencer HMT results 
-  .hmt_nhits_trig      (hmt_nhits_trig[9:0]), //In hit counter from pattern finding  module
-  .hmt_nhits_trig_bx678      (hmt_nhits_trig_bx678[9:0]),//In
-  .hmt_nhits_trig_bx2345     (hmt_nhits_trig_bx2345[9:0]), //In
-  .hmt_trigger         (hmt_trigger[MXHMTB-1:0]), // In HMT trigger results
-  .hmt_active_feb      (hmt_active_feb[MXCFEB-1:0]), // In AFF from HMT
+    //Sequencer HMT
+  .hmt_active_feb      (hmt_active_feb[MXCFEB-1:0]),//In hmt active cfeb flags
+  .hmt_pretrig_match   (hmt_pretrig_match),//In hmt & preCLCT
+  //.hmt_fired_pretrig   (hmt_fired_pretrig),//out, hmt fired preCLCT bx
+  .hmt_anode        (hmt_anode[MXHMTB-1:0]),// Out HMT nhits for trigger
+  .hmt_cathode      (hmt_cathode[MXHMTB-1:0]),// Out HMT nhits for trigger
+  //.hmt_cathode_fired     (hmt_cathode_fired),// In
+  //.hmt_anode_fired       (hmt_anode_fired),// In
+  .hmt_anode_alct_match  (hmt_anode_alct_match), //In
+  .hmt_cathode_alct_match(hmt_cathode_alct_match),// In
+  .hmt_cathode_clct_match(hmt_cathode_clct_match),// In
+  .hmt_cathode_lct_match (hmt_cathode_lct_match),// In
+
+  .hmt_fired_cathode_only (hmt_fired_cathode_only),//In hmt is fired for cathode only
+  .hmt_fired_anode_only   (hmt_fired_anode_only),//In hmt is fired for anode only
+  .hmt_fired_match        (hmt_fired_match),//In hmt is fired for match
+  .hmt_fired_or           (hmt_fired_or),//In hmt is fired for match
 
 // Sequencer Pattern Finder CLCT results
   .hs_hit_1st (hs_hit_1st[MXHITB-1:0]),  // In  1st CLCT pattern hits
@@ -3334,12 +3362,6 @@ end
   .seq_trigger     (seq_trigger),           // Out  Sequencer requests L1A from CCB
   .sequencer_state (sequencer_state[11:0]), // Out  Sequencer state for vme
   .seq_trigger_nodeadtime (seq_trigger_nodeadtime),  //In no dead time for seq-trigger
-
-  .cfeb_allow_hmt_ro         (cfeb_allow_hmt_ro),// In fire the "pretrigger" when hmt is fired
-  .hmt_nhits_trig_vme        (hmt_nhits_trig_vme[9:0]),// Out HMT nhits for trigger
-  .hmt_nhits_trig_bx678_vme  (hmt_nhits_trig_bx678_vme[9:0]),// Out HMT nhits for trigger
-  .hmt_nhits_trig_bx2345_vme (hmt_nhits_trig_bx2345_vme[9:0]),// Out HMT nhits for trigger
-  .hmt_trigger_vme           (hmt_trigger_vme[MXHMTB-1:0]), // Out HMT trigger results
 
   .event_clear_vme (event_clear_vme),         // In  Event clear for aff,clct,mpc vme diagnostic registers
   .clct0_vme       (clct0_vme[MXCLCT-1:0]),   // Out  First  CLCT
@@ -3508,9 +3530,6 @@ end
   .wr_avail_rmpc (wr_avail_rmpc), // In  Buffer available at MPC received
 
 // Sequencer TMB LCT Match results
-  //.hmt_nhits_trig_xtmb (hmt_nhits_trig_xtmb[9:0]),// Out HMT nhits for trigger
-  .hmt_trigger_xtmb    (hmt_trigger_xtmb[MXHMTB-1:0]),// Out HMT nhits for trigger
-  .hmt_clct_match      (hmt_clct_match),// out
   .clct0_xtmb (clct0_xtmb[MXCLCT-1:0]),  // Out  First  CLCT
   .clct1_xtmb (clct1_xtmb[MXCLCT-1:0]),  // Out  Second CLCT
   .clctc_xtmb (clctc_xtmb[MXCLCTC-1:0]), // Out  Common to CLCT0/1 to TMB
@@ -3543,6 +3562,7 @@ end
   .tmb_clct1_discard (tmb_clct1_discard),        // In  CLCT1 was not used for LCT because from ME1A
   .tmb_aff_list      (tmb_aff_list[MXCFEB-1:0]), // In  Active CFEBs for CLCT used in TMB match
   .hmt_fired_tmb_ff  (hmt_fired_tmb_ff),         // In  hmt fired tmb
+  .hmt_readout_tmb_ff(hmt_readout_tmb_ff),       // In hmt fired for readout
   .tmb_pulse_hmt_only(tmb_pulse_hmt_only),       // In tmb pulse is from HMT
   .tmb_keep_hmt_only (tmb_keep_hmt_only),        // In tmb keep is from HMT
  
@@ -3564,6 +3584,8 @@ end
   .tmb_alct1 (tmb_alct1[10:0]), // In  ALCT second best muon latched at trigger
   .tmb_alctb (tmb_alctb[4:0]),  // In  ALCT bxn latched at trigger
   .tmb_alcte (tmb_alcte[1:0]),  // In  ALCT ecc error syndrome latched at trigger
+
+  .hmt_nhits_bx678_ff (hmt_nhits_bx678_ff[NHMTHITB-1:0]), // In hmt nhits for header
 
        //GEM-CSC match output, time_only
   .gem_enable           (gem_enable),
@@ -3763,6 +3785,29 @@ end
   .hmt_counter7  (hmt_counter7[MXCNTVME-1:0]),  // Out
   .hmt_counter8  (hmt_counter8[MXCNTVME-1:0]),  // Out
   .hmt_counter9  (hmt_counter9[MXCNTVME-1:0]),  // Out
+  .hmt_counter0  (hmt_counter0 [MXCNTVME-1:0]),  // Out
+  .hmt_counter1  (hmt_counter1 [MXCNTVME-1:0]),  // Out
+  .hmt_counter2  (hmt_counter2 [MXCNTVME-1:0]),  // Out
+  .hmt_counter3  (hmt_counter3 [MXCNTVME-1:0]),  // Out
+  .hmt_counter4  (hmt_counter4 [MXCNTVME-1:0]),  // Out
+  .hmt_counter5  (hmt_counter5 [MXCNTVME-1:0]),  // Out
+  .hmt_counter6  (hmt_counter6 [MXCNTVME-1:0]),  // Out
+  .hmt_counter7  (hmt_counter7 [MXCNTVME-1:0]),  // Out
+  .hmt_counter8  (hmt_counter8 [MXCNTVME-1:0]),  // Out
+  .hmt_counter9  (hmt_counter9 [MXCNTVME-1:0]),  // Out
+  .hmt_counter10 (hmt_counter10[MXCNTVME-1:0]),  // Out
+  .hmt_counter11 (hmt_counter11[MXCNTVME-1:0]),  // Out
+  .hmt_counter12 (hmt_counter12[MXCNTVME-1:0]),  // Out
+  .hmt_counter13 (hmt_counter13[MXCNTVME-1:0]),  // Out
+  .hmt_counter14 (hmt_counter14[MXCNTVME-1:0]),  // Out
+  .hmt_counter15 (hmt_counter15[MXCNTVME-1:0]),  // Out
+  .hmt_counter16 (hmt_counter16[MXCNTVME-1:0]),  // Out
+  .hmt_counter17 (hmt_counter17[MXCNTVME-1:0]),  // Out
+  .hmt_counter18 (hmt_counter18[MXCNTVME-1:0]),  // Out
+  .hmt_counter19 (hmt_counter19[MXCNTVME-1:0]),  // Out
+  .hmt_trigger_counter (hmt_trigger_counter[MXCNTVME-1:0]), //Out
+  .hmt_readout_counter (hmt_readout_counter[MXCNTVME-1:0]), //out
+
 
 // Sequencer Header Counters
   .hdr_clear_on_resync (hdr_clear_on_resync),           // In  Clear header counters on ttc_resync
@@ -4389,6 +4434,15 @@ wire [15:0] gemB_bxn_counter;
   .alct_bx0_rx  (alct_bx0_rx),           // In  ALCT bx0 received
   .alct_ecc_err (alct_ecc_err[1:0]),     // In  ALCT ecc syndrome code
 
+  .alct_vpf_pipe (alct_vpf_pipe), //Out alct vpf after delay_
+  .hmt_anode     (hmt_anode[MXHMTB-1:0]), //Out alct vpf after delay_
+  .clct_vpf_pipe (clct_vpf_pipe), //Out alct vpf after delay_
+
+  //hmt port
+  .hmt_nhits_bx7       (hmt_nhits_bx7     [NHMTHITB-1:0]),//In hmt nhits for central bx
+  .hmt_nhits_bx678     (hmt_nhits_bx678   [NHMTHITB-1:0]),//In hmt nhits for in-time
+  .hmt_nhits_bx2345    (hmt_nhits_bx2345  [NHMTHITB-1:0]),//In hmt nhits for out-time
+  .hmt_cathode_pipe    (hmt_cathode[MXHMTB-1:0]), //In hmt bits in cathod
 
 // GEM
   //.gemA_vpf          (gemA_vpf[7:0]),
@@ -4575,9 +4629,6 @@ wire [15:0] gemB_bxn_counter;
   .wr_avail_rmpc (wr_avail_rmpc), // Out  Buffer available at MPC received
 
 // Sequencer
-  //.hmt_nhits_trig_xtmb (hmt_nhits_trig_xtmb[9:0]),// In HMT nhits for trigger
-  .hmt_trigger_xtmb    (hmt_trigger_xtmb[MXHMTB-1:0]),// In HMT nhits for trigger
-  .hmt_clct_match      (hmt_clct_match),// in
   .clct0_xtmb (clct0_xtmb[MXCLCT-1:0]),  // In  First  CLCT
   .clct1_xtmb (clct1_xtmb[MXCLCT-1:0]),  // In  Second CLCT
   .clctc_xtmb (clctc_xtmb[MXCLCTC-1:0]), // In  Common to CLCT0/1 to TMB
@@ -4604,6 +4655,7 @@ wire [15:0] gemB_bxn_counter;
   .tmb_clct1_discard (tmb_clct1_discard),        // Out  CLCT1 was not used for LCT because from ME1A
   .tmb_aff_list      (tmb_aff_list[MXCFEB-1:0]), // Out  Active CFEBs for CLCT used in TMB match
   .hmt_fired_tmb_ff  (hmt_fired_tmb_ff),         // Out  hmt fired tmb
+  .hmt_readout_tmb_ff(hmt_readout_tmb_ff),       // Out hmt fired for readout
   .tmb_pulse_hmt_only(tmb_pulse_hmt_only),       // Out tmb pulse is from HMT
   .tmb_keep_hmt_only (tmb_keep_hmt_only),        // Out tmb keep is from HMT
 
@@ -4625,6 +4677,7 @@ wire [15:0] gemB_bxn_counter;
   .tmb_alct1 (tmb_alct1[10:0]), // Out  ALCT second best muon latched at trigger
   .tmb_alctb (tmb_alctb[4:0]),  // Out  ALCT bxn latched at trigger
   .tmb_alcte (tmb_alcte[1:0]),  // Out  ALCT ecc error syndrome latched at trigger
+  .hmt_nhits_bx678_ff (hmt_nhits_bx678_ff[NHMTHITB-1:0]), // Out hmt nhits for header
 
   //GEM-CSC match output, time_only
   .alct_gem_pulse          (alct_gem_pulse), // Out GEM-CSC matching in timing only 
@@ -4669,6 +4722,8 @@ wire [15:0] gemB_bxn_counter;
 
   .run3_trig_df   (run3_trig_df),  //In  enable Run3 trigger data format
   .run3_daq_df   (run3_daq_df), //In enable run3 daq format
+  .run3_alct_df  (run3_alct_df), //In enable run3 ALCT format
+
 // MPC Status
   .mpc_frame_ff   (mpc_frame_ff),                // Out  MPC frame latch strobe
   .mpc0_frame0_ff (mpc0_frame0_ff[MXFRAME-1:0]), // Out  MPC best muon 1st frame
@@ -4701,13 +4756,12 @@ wire [15:0] gemB_bxn_counter;
   .tmb_allow_alct_ro  (tmb_allow_alct_ro),  // In  Allow ALCT only  readout, non-triggering
   .tmb_allow_clct_ro  (tmb_allow_clct_ro),  // In  Allow CLCT only  readout, non-triggering
   .tmb_allow_match_ro (tmb_allow_match_ro), // In  Allow Match only readout, non-triggering
-  //HMT
-  .tmb_allow_hmt      (tmb_allow_hmt),    // In trigger when hmt is fired
-  .tmb_allow_hmt_ro   (tmb_allow_hmt_ro), // In read tmb when hmt is fired
   
   .algo2016_drop_used_clcts(algo2016_drop_used_clcts),             // In Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - drop used CLCTs
   .algo2016_cross_bx_algorithm(algo2016_cross_bx_algorithm),       // In LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
   .algo2016_clct_use_corrected_bx(algo2016_clct_use_corrected_bx), // In Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits NOT YET IMPLEMENTED:
+  .hmt_trigger_tmb    (hmt_trigger_tmb[MXHMTB-1:0]),//  In results aligned with ALCT vpf latched for ALCT-CLCT match
+  .hmt_trigger_tmb_ro (hmt_trigger_tmb_ro[MXHMTB-1:0]),//In results aligned with ALCT vpf latched for ALCT-CLCT match
 
   .csc_id          (csc_id[MXCSC-1:0]),   // In  CSC station number
   .csc_me1ab       (csc_me1ab),           // In  1=ME1A or ME1B CSC type
@@ -4738,6 +4792,11 @@ wire [15:0] gemB_bxn_counter;
 
 // VME Status
   .event_clear_vme  (event_clear_vme),              // In  Event clear for aff,clct,mpc vme diagnostic registers
+  .hmt_nhits_bx7_vme    (hmt_nhits_bx7_vme   [NHMTHITB-1:0]),//In  HMT nhits for trigger
+  .hmt_nhits_bx678_vme  (hmt_nhits_bx678_vme [NHMTHITB-1:0]),//In  HMT nhits for trigger
+  .hmt_nhits_bx2345_vme (hmt_nhits_bx2345_vme[NHMTHITB-1:0]),//In  HMT nhits for trigger
+  .hmt_cathode_vme      (hmt_cathode_vme[MXHMTB-1:0]),  //In  HMT trigger results
+
   .mpc_frame_vme    (mpc_frame_vme),                // Out MPC frame latch strobe for VME
   .mpc0_frame0_vme  (mpc0_frame0_vme[MXFRAME-1:0]), // Out  MPC best muon 1st frame
   .mpc0_frame1_vme  (mpc0_frame1_vme[MXFRAME-1:0]), // Out  MPC best buon 2nd frame
@@ -5373,6 +5432,7 @@ wire [15:0] gemB_bxn_counter;
       .ccLUT_enable       (ccLUT_enable),  // In
       .run3_trig_df       (run3_trig_df), // output, enable run3 trigger format or not
       .run3_daq_df        (run3_daq_df),  // output, enable run3 daq format or not
+      .run3_alct_df       (run3_alct_df), // Out enable run3 ALCT format
 
       // CFEB Ports: Hot Channel Mask
       .cfeb0_ly0_hcm (cfeb_ly0_hcm[0][MXDS-1:0]), // Out  1=enable DiStrip
@@ -5562,18 +5622,26 @@ wire [15:0] gemB_bxn_counter;
       .lhc_cycle          (lhc_cycle[MXBXN-1:0]),          // Out  LHC period, max BXN count+1
       .l1a_offset          (l1a_offset[MXL1ARX-1:0]),      // Out  L1A counter preset value
 
-      .hmt_enable         (hmt_enable),        // out ME1a enable or not in HMT
+      .hmt_enable         (hmt_enable),        // In ME1a enable or not in HMT
       .hmt_me1a_enable    (hmt_me1a_enable),        // out ME1a enable or not in HMT
-      .hmt_nhits_trig_vme (hmt_nhits_trig_vme[9:0]),        //In, nhit counter for  HMT
-      .hmt_nhits_trig_bx678_vme  (hmt_nhits_trig_bx678_vme[9:0]),// In HMT nhits for trigger
-      .hmt_nhits_trig_bx2345_vme (hmt_nhits_trig_bx2345_vme[9:0]),// In HMT nhits for trigger
-      .hmt_trigger_vme    (hmt_trigger_vme[MXHMTB-1:0]), // In HMT trigger results
-      .hmt_thresh1        (hmt_thresh1[9:0]), // out, loose HMT thresh
-      .hmt_thresh2        (hmt_thresh2[9:0]), // out, loose HMT thresh
-      .hmt_thresh3        (hmt_thresh3[9:0]), // out, loose HMT thresh
+      .hmt_nhits_bx7_vme    (hmt_nhits_bx7_vme   [NHMTHITB-1:0]),//In  HMT nhits for trigger
+      .hmt_nhits_bx678_vme  (hmt_nhits_bx678_vme [NHMTHITB-1:0]),//In  HMT nhits for trigger
+      .hmt_nhits_bx2345_vme (hmt_nhits_bx2345_vme[NHMTHITB-1:0]),//In  HMT nhits for trigger
+      .hmt_cathode_vme           (hmt_cathode_vme[MXHMTB-1:0]), // In HMT trigger results, cathode
+      .hmt_thresh1        (hmt_thresh1[7:0]), // out, loose HMT thresh
+      .hmt_thresh2        (hmt_thresh2[7:0]), // out, loose HMT thresh
+      .hmt_thresh3        (hmt_thresh3[7:0]), // out, loose HMT thresh
       .cfeb_allow_hmt_ro  (cfeb_allow_hmt_ro), //Out read out CFEB when hmt is fired
-      .tmb_allow_hmt      (tmb_allow_hmt),    // Out trigger when hmt is fired
-      .tmb_allow_hmt_ro   (tmb_allow_hmt_ro), // Out read tmb when hmt is fired
+      .hmt_aff_thresh      (hmt_aff_thresh[6:0]),    //Out hmt thresh
+      .hmt_delay          (hmt_delay[3:0]),        //Out hmt delay for matching
+      .hmt_alct_win_size  (hmt_alct_win_size[3:0]),//Out hmt-alct match window size
+      .hmt_allow_cathode   (hmt_allow_cathode),//Out hmt allow to trigger on cathode
+      .hmt_allow_anode     (hmt_allow_anode),  //Out hmt allow to trigger on anode
+      .hmt_allow_match     (hmt_allow_match),  //Out hmt allow to trigger on canode X anode match
+      .hmt_allow_cathode_ro(hmt_allow_cathode_ro), //Out hmt allow to readout on cathode
+      .hmt_allow_anode_ro  (hmt_allow_anode_ro),   //Out hmt allow to readout on anode
+      .hmt_allow_match_ro  (hmt_allow_match_ro),   //Out hmt allow to readout on match
+      .hmt_outtime_check   (hmt_outtime_check),//In hmt fired shoudl check anode bg lower than threshold
 
       // Sequencer Ports: Latched CLCTs + Status
       .event_clear_vme   (event_clear_vme),         // Out  Event clear for vme diagnostic registers
@@ -6012,6 +6080,18 @@ wire [15:0] gemB_bxn_counter;
       .hmt_counter7  (hmt_counter7[MXCNTVME-1:0]),  //In 
       .hmt_counter8  (hmt_counter8[MXCNTVME-1:0]),  //In 
       .hmt_counter9  (hmt_counter9[MXCNTVME-1:0]),  //In 
+      .hmt_counter10 (hmt_counter10[MXCNTVME-1:0]),  //In
+      .hmt_counter11 (hmt_counter11[MXCNTVME-1:0]),  //In
+      .hmt_counter12 (hmt_counter12[MXCNTVME-1:0]),  //In
+      .hmt_counter13 (hmt_counter13[MXCNTVME-1:0]),  //In
+      .hmt_counter14 (hmt_counter14[MXCNTVME-1:0]),  //In
+      .hmt_counter15 (hmt_counter15[MXCNTVME-1:0]),  //In
+      .hmt_counter16 (hmt_counter16[MXCNTVME-1:0]),  //In
+      .hmt_counter17 (hmt_counter17[MXCNTVME-1:0]),  //In
+      .hmt_counter18 (hmt_counter18[MXCNTVME-1:0]),  //In
+      .hmt_counter19 (hmt_counter19[MXCNTVME-1:0]),  //In
+      .hmt_trigger_counter (hmt_trigger_counter[MXCNTVME-1:0]), //in
+      .hmt_readout_counter (hmt_readout_counter[MXCNTVME-1:0]), //in
       
       // GEM Trigger/Readout Counter Ports
       .gem_cnt_all_reset    (gem_cnt_all_reset),     // Out  Trigger/Readout counter reset
