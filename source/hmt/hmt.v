@@ -95,6 +95,7 @@
   input  [NHITCFEBB-1: 0] nhit_cfeb6;
   
   input    hmt_enable;
+  input    hmt_me1a_enable;
   input  [7:0] hmt_thresh1;
   input  [7:0] hmt_thresh2;
   input  [7:0] hmt_thresh3;
@@ -414,8 +415,8 @@
   wire [3:0]  hmt_srl_adr = hmt_srl_ptr-1'b1;
   wire [MXHMTB-1    :0] hmt_cathode_srl;
   srl16e_bbl #(MXHMTB   ) uhmt        (.clock(clock),.ce(1'b1),.adr(hmt_srl_adr),.d(hmt_cathode_xtmb),.q(hmt_cathode_srl));
-  wire [MXHMTB-1    :0] hmt_cathode_dly   = (hmt_ptr_is_0) ? hmt_cathode_xtmb : hmt_cathode_srl;
-  assign hmt_cathode_pipe = hmt_cathode_dly & {MXHMTB{hmt_kept}};
+  wire [MXHMTB-1    :0] hmt_cathode_s3   = (hmt_ptr_is_0) ? hmt_cathode_xtmb : hmt_cathode_srl;
+  assign hmt_cathode_pipe = hmt_cathode_s3 & {MXHMTB{hmt_cathode_kept}};
 
   assign hmt_cathode_fired      = (|hmt_cathode_pipe[1:0]) && (!hmt_outtime_check || (~|hmt_cathode_pipe[3:2]));
   assign hmt_anode_alct_match   = hmt_anode_fired && alct_vpf_pipe;

@@ -517,7 +517,7 @@
   //HMT part
   hmt_enable,
   hmt_me1a_enable, 
-  hmt_nhits_vme,
+  hmt_nhits_bx7_vme,
   hmt_nhits_bx678_vme,
   hmt_nhits_bx2345_vme,
   hmt_cathode_vme,
@@ -526,6 +526,7 @@
   hmt_thresh2,
   hmt_thresh3,
   cfeb_allow_hmt_ro,
+  hmt_aff_thresh,
   hmt_delay        ,
   hmt_alct_win_size,
   hmt_allow_anode      ,
@@ -7400,7 +7401,7 @@
 //------------------------------------------------------------------------------------------------------------------
 // Remap 1D counters to 2D, because XST does not support 2D ports
   parameter MXHMTCNT = 20;
-  parameter MXCNT = 96 + MXHMTCNT;                     // Number of counters, last counter id is mxcnt-1
+  parameter MXCNT = 96 + MXHMTCNT + 2;                     // Number of counters, last counter id is mxcnt-1
   reg  [MXCNTVME-1:0] cnt_snap [MXCNT-1:0]; // Event counter snapshot 2D
   wire [MXCNTVME-1:0] cnt      [MXCNT-1:0]; // Event counter 2D map
 

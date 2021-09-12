@@ -957,8 +957,8 @@
   wire  [MXCNTVME-1:0]  hmt_counter17;
   wire  [MXCNTVME-1:0]  hmt_counter18;
   wire  [MXCNTVME-1:0]  hmt_counter19;
-  wire  [MXCNTVME-1:0]  hmt_trigger_counter,
-  wire  [MXCNTVME-1:0]  hmt_readout_counter,
+  wire  [MXCNTVME-1:0]  hmt_trigger_counter;
+  wire  [MXCNTVME-1:0]  hmt_readout_counter;
 
 // GEM Counters
   wire  [MXCNTVME-1:0]  gem_counter0;
@@ -3775,16 +3775,6 @@ end
 
   .bx0_match_counter (bx0_match_counter), // Out ALCT-CLCT BX0 match
 
-  .hmt_counter0  (hmt_counter0[MXCNTVME-1:0]),  // Out
-  .hmt_counter1  (hmt_counter1[MXCNTVME-1:0]),  // Out
-  .hmt_counter2  (hmt_counter2[MXCNTVME-1:0]),  // Out
-  .hmt_counter3  (hmt_counter3[MXCNTVME-1:0]),  // Out
-  .hmt_counter4  (hmt_counter4[MXCNTVME-1:0]),  // Out
-  .hmt_counter5  (hmt_counter5[MXCNTVME-1:0]),  // Out
-  .hmt_counter6  (hmt_counter6[MXCNTVME-1:0]),  // Out
-  .hmt_counter7  (hmt_counter7[MXCNTVME-1:0]),  // Out
-  .hmt_counter8  (hmt_counter8[MXCNTVME-1:0]),  // Out
-  .hmt_counter9  (hmt_counter9[MXCNTVME-1:0]),  // Out
   .hmt_counter0  (hmt_counter0 [MXCNTVME-1:0]),  // Out
   .hmt_counter1  (hmt_counter1 [MXCNTVME-1:0]),  // Out
   .hmt_counter2  (hmt_counter2 [MXCNTVME-1:0]),  // Out
@@ -4936,7 +4926,7 @@ wire [15:0] gemB_bxn_counter;
     assign mez_tp[7]  = alct0_vpf_tprt; // ALCT vpf signal
     //assign mez_tp[6]  = wr_push_xtmb; // CLCT vpf signal
     assign mez_tp[6]  = clct_window_tprt; // CLCT vpf signal after pipeline 
-    assign mez_tp[5]  = hmt_nhits_trig_bx678 >= hmt_nhits_trig_bx2345+10'h3;
+    assign mez_tp[5]  = hmt_nhits_bx678 >= hmt_nhits_bx2345+10'h3;
     assign mez_tp[4]  = gem_forclct_vpf_tp;//pulse width=2BX???? why????
     //assign mez_tp[5]  = (|gemA_csc_cluster_vpf) || (|gemB_csc_cluster_vpf);// gemA or gemB vpf signal
     //assign mez_tp[4]  = |copad_match; // gem copad vpf signal

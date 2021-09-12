@@ -4047,7 +4047,7 @@
   assign rtmb_wdata[29]  =  lct1_with_gemB;
   assign rtmb_wdata[30]  =  lct1_with_copad;
 
-  assign rtmb_wdata[32:23] = hmt_nhits_bx678_ff[NHMTHITB-1:0];
+  assign rtmb_wdata[31+NHMTHITB-1:31] = hmt_nhits_bx678_ff[NHMTHITB-1:0];
 
 // TMB match: store ALCTs sent to MPC in RAM mapping array, arrives same bx as tmb match result
   parameter MXALCTD = 11+11+5+2; // ALCT transmit frame data bits, 2alcts + bxn + tmb stats
