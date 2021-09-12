@@ -241,8 +241,8 @@
 
   wire [MXHMTB-1  :0] hmt_cathode_dly;
   srl16e_bbl #(MXHMTB)      udhmttrig    ( .clock(clock), .ce(1'b1), .adr(hmt_postdrift_delay-4'd1), .d(hmt_cathode_s0    ),    .q(hmt_cathode_dly      ));
-  wire [MXHMTB-1  :0] hmt_cathode_xtmb      = (hmt_postdrift_delay == 4'd0) ? hmt_cathode_s0            : hmt_cathode_dly;
 
+  wire [MXHMTB-1  :0] hmt_cathode_xtmb      = (hmt_postdrift_delay == 4'd0) ? hmt_cathode_s0            : hmt_cathode_dly;
   wire hmt_fired_xtmb = (|hmt_cathode_xtmb[1:0]) && (!hmt_outtime_check || (~|hmt_cathode_xtmb[3:2]));
 
 //------------------------------------------------------------------------------------------------------------------
@@ -407,7 +407,8 @@
   wire [3:0]  hmt_srl_adr = hmt_srl_ptr-1'b1;
   wire [MXHMTB-1    :0] hmt_cathode_srl;
   srl16e_bbl #(MXHMTB   ) uhmt        (.clock(clock),.ce(1'b1),.adr(hmt_srl_adr),.d(hmt_cathode_xtmb),.q(hmt_cathode_srl));
-  assign hmt_cathode_pipe   = (hmt_ptr_is_0) ? hmt_cathode_xtmb : hmt_cathode_srl;
+  wire [MXHMTB-1    :0] hmt_cathode_dly   = (hmt_ptr_is_0) ? hmt_cathode_xtmb : hmt_cathode_srl;
+  assign hmt_cathode_pipe = hmt_cathode_dly & {MXHMTB{hmt_kept}};
 
   assign hmt_cathode_fired      = (|hmt_cathode_pipe[1:0]) && (!hmt_outtime_check || (~|hmt_cathode_pipe[3:2]));
   assign hmt_anode_alct_match   = hmt_anode_fired && alct_vpf_pipe;

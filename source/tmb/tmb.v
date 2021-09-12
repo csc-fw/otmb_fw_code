@@ -1007,7 +1007,7 @@
   assign wr_push_xtmb_pipe  = (clct_ptr_is_0) ? wr_push_xtmb  : wr_push_xtmb_srl;
   assign wr_avail_xtmb_pipe = (clct_ptr_is_0) ? wr_avail_xtmb : wr_avail_xtmb_srl;
 
-  assign clct_vpf_pipe  = clct0_pipe[0] || clct1_pipe[0];
+  assign clct_vpf_pipe  = (clct0_pipe[0] || clct1_pipe[0]) && clct_kept;
 
   //for GEMSCC
   //wire  [MXBNDB - 1   : 0] clct0_bnd_pipe; // new bending
