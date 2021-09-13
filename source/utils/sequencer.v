@@ -5340,8 +5340,8 @@
   assign  header36_gem_[18:15] = 0;                     // DDU+DMB control flags
 
   // Run3 format change
-  //assign  header36_ [18:0]     = (gem_read_enable) ? header36_gem_ : header36_rpc_;
-  assign  header36_ [18:0]  = (run3_daq_df) ? header36_gem_ : header36_rpc_;
+  assign  header36_ [18:0]  = (gem_read_enable) ? header36_gem_ : header36_rpc_;
+  //assign  header36_ [18:0]  = (rpc_read_enable) ? header36_rpc_ : header36_gem_;
 
 // Buffer Status
 

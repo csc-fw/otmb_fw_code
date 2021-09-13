@@ -8993,19 +8993,20 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
     hmt_thresh2_wr[7:0]   = 10'd95; // RW, enable the HMT thresh1
     hmt_thresh3_wr[7:0]   = 10'd100; // RW, enable the HMT thresh1
 
-    hmt_thresh1_wr[    8] = 1'b0; //  RW, enable HMT to readout cfeb
+    hmt_thresh1_wr[    8] = 1'b1; //  RW, enable HMT to readout cfeb
     hmt_thresh1_wr[15: 9] = 7'd6; //  RW, thresh for hmt_aff_thresh
 
     hmt_thresh2_wr[11: 8] = 4'd5; // RW hmt delay for alct-hmt match
     hmt_thresh2_wr[15:12] = 4'd7; // RW alct-hmt match window size
 
     hmt_thresh3_wr[    8] = 1'b0; //  RW, hmt allow to trigger on anode hmt
-    hmt_thresh3_wr[    9] = 1'b0; //  RW, hmt allow to trigger on cathode hmt
+    hmt_thresh3_wr[    9] = 1'b1; //  RW, hmt allow to trigger on cathode hmt
     hmt_thresh3_wr[   10] = 1'b0; //  RW, hmt allow to trigger on anode and cathod match hmt
     hmt_thresh3_wr[   11] = 1'b0; //  RW, hmt allow to readout on anode hmt
-    hmt_thresh3_wr[   12] = 1'b0; //  RW, hmt allow to readout on cathode hmt
+    hmt_thresh3_wr[   12] = 1'b1; //  RW, hmt allow to readout on cathode hmt
     hmt_thresh3_wr[   13] = 1'b0; //  RW, hmt allow to readout on match hmt
-    hmt_thresh3_wr[15:14] = 2'b0; //  not used
+    hmt_thresh3_wr[   14] = 1'b0; //  RW, hmt to check outtime hits to lower than thresh
+    hmt_thresh3_wr[   15] = 1'b0; //  not used
   end 
 
   assign hmt_thresh1[7:0]  = hmt_thresh1_wr[7:0];
@@ -9069,7 +9070,7 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 //------------------------------------------------------------------------------------------------------------------
 
   initial begin
-  gem_tbins_wr[4:0]   = 5'd7; // RW Number GEM FIFO time bins to read out
+  gem_tbins_wr[4:0]   = 5'd10; // RW Number GEM FIFO time bins to read out
   gem_tbins_wr[9:5]   = 5'd2; // RW Number GEM FIFO time bins before pretrigger
   gem_tbins_wr[10]    = 1'd0; // RW 1=Independent GEM and CFEB tbins, 0=copy cfeb tbins
   gem_tbins_wr[11:11] = 1'd0; // RW 1=GEM DAQ readout enabled
@@ -9183,8 +9184,8 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 // GEM_COPAD_CTRL = 0x324 GEM Copad matching control
 //------------------------------------------------------------------------------------------------------------------
   initial begin
-      gem_copad_ctrl_wr[0]      = 1'b1;  //RW,match copad within neighborRoll or not
-      gem_copad_ctrl_wr[ 2:1]   = 2'b1;  //RW, delta roll, NOT used now
+      gem_copad_ctrl_wr[0]      = 1'b0;  //RW,match copad within neighborRoll or not
+      gem_copad_ctrl_wr[ 2:1]   = 2'b0;  //RW, delta roll, NOT used now
       gem_copad_ctrl_wr[3]      = 1'b1;  //RW, do delta pad match
       gem_copad_ctrl_wr[ 7:4]   = 4'b10; //RW, delta pad, default value = 2 
       gem_copad_ctrl_wr[15:8]   = 8'b0;  // not used
