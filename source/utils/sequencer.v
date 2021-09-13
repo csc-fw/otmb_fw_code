@@ -471,7 +471,6 @@
 
   hmt_anode,
   hmt_cathode, 
-
   //hmt_cathode_fired     , 
   //hmt_anode_fired       , 
   hmt_anode_alct_match  ,
@@ -2915,8 +2914,6 @@
   reg [MXCNTVME-1:0] hmt_cnt [MXHMTCNT-1:0];
   reg [MXHMTCNT-1:0] hmt_cnt_en = 0;//6 HMT counters
 
-
-
 // Counter enable strobes
   always @(posedge clock) begin
     cnt_en[13]  <= clct_pretrig;                 // CLCT pretrigger is on any cfeb
@@ -3878,7 +3875,7 @@
   wire       r_tmb_clct1_discard = rtmb_rdata[22]; // TMB discarded clct1 from ME1A
 
   wire [NHMTHITB-1:0] r_hmt_nhits_bx678 = rtmb_rdata[23+NHMTHITB-1:23];
-  wire [6:0] r_hmt_nhits_trig_bx678_xtmb_header =  (r_hmt_nhits_bx678>=10'h80) ? 7'h7F : r_hmt_nhits_bx678[6:0];
+  wire [6:0] r_hmt_nhits_bx678_header =  (r_hmt_nhits_bx678>=10'h80) ? 7'h7F : r_hmt_nhits_bx678[6:0];
 
 
 // Unpack ALCT + extra TMB trigger data from RAM mapping array
@@ -4289,7 +4286,7 @@
   assign  header10_run3_[10: 0]   =  r_clct0_carry_xtmb[MXPATC-1:0];
   assign  header10_run3_[11]      =  run3_trig_df;
   assign  header10_run3_[13:12]   =  r_clct0_xky_xtmb[1:0];
-  assign  header10_run3_[14]      =  r_hmt_nhits_trig_bx678_xtmb_header[0];
+  assign  header10_run3_[14]      =  r_hmt_nhits_bx678_header[0];
   assign  header10_[14:0]   =  run3_daq_df ? header10_run3_[14:0] : r_pretrig_counter[29:15]; // CLCT pre-trigger counter
   assign  header10_[18:15]  =  0;              // DDU+DMB control flags
 
@@ -4304,7 +4301,7 @@
   assign  header14_run3_[10: 0]   =  r_clct1_carry_xtmb[MXPATC-1:0];
   assign  header14_run3_[11]      =  1'b0;//????
   assign  header14_run3_[13:12]   =  r_clct1_xky_xtmb[1:0];
-  assign  header14_run3_[14]      =  r_hmt_nhits_trig_bx678_xtmb_header[1];
+  assign  header14_run3_[14]      =  r_hmt_nhits_bx678_header[1];
   assign  header14_[14:0]   =  run3_daq_df ? header14_run3_[14:0] : r_trig_counter[29:15]; // TMB trigger counter
   assign  header14_[18:15]  =  0;              // DDU+DMB control flags
 
@@ -4402,7 +4399,7 @@
   assign  header29_[18:15]  =  0;              // DDU+DMB control flags
 
   //assign  header30_[4:0]    =  r_alct_bxn[4:0];      // ALCT0/1 bxn
-  assign  header30_[4:0]    =  run3_daq_df ? r_hmt_nhits_trig_bx678_xtmb_header[6:2] : r_alct_bxn[4:0];         // ALCT0/1 bxn
+  assign  header30_[4:0]    =  run3_daq_df ? r_hmt_nhits_bx678_header[6:2] : r_alct_bxn[4:0];         // ALCT0/1 bxn
   assign  header30_[6:5]    =  r_alct_ecc_err[1:0];    // ALCT trigger path ECC error code
   assign  header30_[11:7]   =  cfeb_badbits_found[4:0];  // CFEB[n] has at least 1 bad bit
   assign  header30_[12]     =  cfeb_badbits_blocked;    // A CFEB had bad bits that were blocked

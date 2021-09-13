@@ -7634,8 +7634,8 @@
 
   initial begin
     run3_format_ctrl_wr[0] = 1'b0;
-    run3_format_ctrl_wr[1] = 1'b0; // default, Run3 trigger format upgrade is off
-    run3_format_ctrl_wr[2] = 1'b0; // default, Run3 daq format upgrade is ON
+    run3_format_ctrl_wr[1] = 1'b1; // default, Run3 trigger format upgrade is off
+    run3_format_ctrl_wr[2] = 1'b1; // default, Run3 daq format upgrade is ON
     run3_format_ctrl_wr[3] = 1'b0; // NOT used
     run3_format_ctrl_wr[15:4] = 12'b0; // NOT used
     //cclut_format_ctrl_wr[1] = 0; //CLCT pattern sorting, 0= use {pat, nhits}, 1={new quality}
@@ -7680,20 +7680,20 @@
 
   initial begin
     hmt_thresh1_wr[ 7: 0] = 8'd35; // RW, enable the HMT thresh1
-    hmt_thresh2_wr[ 7: 0] = 8'd35; // RW, enable the HMT thresh1
-    hmt_thresh3_wr[ 7: 0] = 8'd35; // RW, enable the HMT thresh1
+    hmt_thresh2_wr[ 7: 0] = 8'd40; // RW, enable the HMT thresh1
+    hmt_thresh3_wr[ 7: 0] = 8'd45; // RW, enable the HMT thresh1
 
-    hmt_thresh1_wr[    8] = 1'b0; //  RW, enable HMT to readout cfeb 
+    hmt_thresh1_wr[    8] = 1'b1; //  RW, enable HMT to readout cfeb 
     hmt_thresh1_wr[15: 9] = 7'd6; //  RW, thresh for hmt_aff_thresh 
 
     hmt_thresh2_wr[11: 8] = 4'd5; // RW hmt delay for alct-hmt match
     hmt_thresh2_wr[15:12] = 4'd7; // RW alct-hmt match window size
 
     hmt_thresh3_wr[    8] = 1'b0; //  RW, hmt allow to trigger on anode hmt
-    hmt_thresh3_wr[    9] = 1'b0; //  RW, hmt allow to trigger on cathode hmt
+    hmt_thresh3_wr[    9] = 1'b1; //  RW, hmt allow to trigger on cathode hmt
     hmt_thresh3_wr[   10] = 1'b0; //  RW, hmt allow to trigger on anode and cathod match hmt
     hmt_thresh3_wr[   11] = 1'b0; //  RW, hmt allow to readout on anode hmt
-    hmt_thresh3_wr[   12] = 1'b0; //  RW, hmt allow to readout on cathode hmt
+    hmt_thresh3_wr[   12] = 1'b1; //  RW, hmt allow to readout on cathode hmt
     hmt_thresh3_wr[   13] = 1'b0; //  RW, hmt allow to readout on match hmt
     hmt_thresh3_wr[   14] = 1'b0; //  RW, hmt anode out-time counter low than threshold to fire hmt
     hmt_thresh3_wr[   15] = 1'b0; //  RW, hmt cathode out-time counter lower than threshold to fire hmt

@@ -1662,7 +1662,7 @@
   `endif
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//  Begin: Sequencer Signals
+//  HMT instantiation
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //
   wire hmt_sump;
@@ -2070,6 +2070,20 @@
   //.hmt_fired_pretrig   (hmt_fired_pretrig),//In, hmt fired preCLCT bx
   .hmt_active_feb      (hmt_active_feb[MXCFEB-1:0]),//In hmt active cfeb flags
   .hmt_pretrig_match   (hmt_pretrig_match),//In hmt & preCLCT
+  //Sequencer HMT, hmt-alct-clct match 
+  .hmt_anode        (hmt_anode[MXHMTB-1:0]),// Out HMT nhits for trigger
+  .hmt_cathode      (hmt_cathode[MXHMTB-1:0]),// Out HMT nhits for trigger
+  //.hmt_cathode_fired     (hmt_cathode_fired),// In
+  //.hmt_anode_fired       (hmt_anode_fired),// In 
+  .hmt_anode_alct_match  (hmt_anode_alct_match), //In
+  .hmt_cathode_alct_match(hmt_cathode_alct_match),// In 
+  .hmt_cathode_clct_match(hmt_cathode_clct_match),// In 
+  .hmt_cathode_lct_match (hmt_cathode_lct_match),// In
+
+  .hmt_fired_cathode_only (hmt_fired_cathode_only),//In hmt is fired for cathode only
+  .hmt_fired_anode_only   (hmt_fired_anode_only),//In hmt is fired for anode only
+  .hmt_fired_match        (hmt_fired_match),//In hmt is fired for match
+  .hmt_fired_or           (hmt_fired_or),//In hmt is fired for match
 
 // Sequencer Pattern Finder CLCT results
   .hs_hit_1st (hs_hit_1st[MXHITB-1:0]),  // In  1st CLCT pattern hits
@@ -2324,21 +2338,6 @@
   .wr_avail_rtmb    (wr_avail_rtmb),      // In  Buffer available at TMB matching time
   .wr_avail_xmpc    (wr_avail_xmpc),      // In  Buffer available at MPC xmit to sequencer
   .wr_avail_rmpc    (wr_avail_rmpc),      // In  Buffer available at MPC received
-
-  //Sequencer HMT, hmt-alct-clct match 
-  .hmt_anode        (hmt_anode[MXHMTB-1:0]),// Out HMT nhits for trigger
-  .hmt_cathode      (hmt_cathode[MXHMTB-1:0]),// Out HMT nhits for trigger
-  //.hmt_cathode_fired     (hmt_cathode_fired),// In
-  //.hmt_anode_fired       (hmt_anode_fired),// In 
-  .hmt_anode_alct_match  (hmt_anode_alct_match), //In
-  .hmt_cathode_alct_match(hmt_cathode_alct_match),// In 
-  .hmt_cathode_clct_match(hmt_cathode_clct_match),// In 
-  .hmt_cathode_lct_match (hmt_cathode_lct_match),// In
-
-  .hmt_fired_cathode_only (hmt_fired_cathode_only),//In hmt is fired for cathode only
-  .hmt_fired_anode_only   (hmt_fired_anode_only),//In hmt is fired for anode only
-  .hmt_fired_match        (hmt_fired_match),//In hmt is fired for match
-  .hmt_fired_or           (hmt_fired_or),//In hmt is fired for match
 
 // Sequencer TMB LCT Match results
   .clct0_xtmb (clct0_xtmb[MXCLCT-1:0]),  // Out  First  CLCT
@@ -4254,8 +4253,8 @@
       .hmt_counter17 (hmt_counter17[MXCNTVME-1:0]),  //In 
       .hmt_counter18 (hmt_counter18[MXCNTVME-1:0]),  //In 
       .hmt_counter19 (hmt_counter19[MXCNTVME-1:0]),  //In 
-  .hmt_trigger_counter (hmt_trigger_counter[MXCNTVME-1:0]), //in
-  .hmt_readout_counter (hmt_readout_counter[MXCNTVME-1:0]), //in
+      .hmt_trigger_counter (hmt_trigger_counter[MXCNTVME-1:0]), //in
+      .hmt_readout_counter (hmt_readout_counter[MXCNTVME-1:0]), //in
       
       // CSC Orientation Ports
       .csc_type        (csc_type[3:0]),   // In  Firmware compile type
