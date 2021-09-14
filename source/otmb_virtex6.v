@@ -4431,11 +4431,15 @@ wire [15:0] gemB_bxn_counter;
   .clct_vpf_pipe (clct_vpf_pipe), //Out alct vpf after delay_
 
   //hmt port
+  .hmt_enable         (hmt_enable) , // In hmt enabled 
+  .hmt_outtime_check   (hmt_outtime_check),//In hmt fired shoudl check anode bg lower than threshold
   .hmt_nhits_bx7       (hmt_nhits_bx7     [NHMTHITB-1:0]),//In hmt nhits for central bx
   .hmt_nhits_bx678     (hmt_nhits_bx678   [NHMTHITB-1:0]),//In hmt nhits for in-time
   .hmt_nhits_bx2345    (hmt_nhits_bx2345  [NHMTHITB-1:0]),//In hmt nhits for out-time
   .hmt_cathode_pipe    (hmt_cathode[MXHMTB-1:0]), //In hmt bits in cathod
 
+  .hmt_trigger_tmb    (hmt_trigger_tmb[MXHMTB-1:0]),//  In results aligned with ALCT vpf latched for ALCT-CLCT match
+  .hmt_trigger_tmb_ro (hmt_trigger_tmb_ro[MXHMTB-1:0]),//In results aligned with ALCT vpf latched for ALCT-CLCT match
 // GEM
   //.gemA_vpf          (gemA_vpf[7:0]),
   //.gemB_vpf          (gemB_vpf[7:0]),
@@ -4752,8 +4756,6 @@ wire [15:0] gemB_bxn_counter;
   .algo2016_drop_used_clcts(algo2016_drop_used_clcts),             // In Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - drop used CLCTs
   .algo2016_cross_bx_algorithm(algo2016_cross_bx_algorithm),       // In LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
   .algo2016_clct_use_corrected_bx(algo2016_clct_use_corrected_bx), // In Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits NOT YET IMPLEMENTED:
-  .hmt_trigger_tmb    (hmt_trigger_tmb[MXHMTB-1:0]),//  In results aligned with ALCT vpf latched for ALCT-CLCT match
-  .hmt_trigger_tmb_ro (hmt_trigger_tmb_ro[MXHMTB-1:0]),//In results aligned with ALCT vpf latched for ALCT-CLCT match
 
   .csc_id          (csc_id[MXCSC-1:0]),   // In  CSC station number
   .csc_me1ab       (csc_me1ab),           // In  1=ME1A or ME1B CSC type

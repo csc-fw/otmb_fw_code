@@ -137,12 +137,12 @@
   clct_vpf_pipe,
 
   //hmt port
+  hmt_enable,
+  hmt_outtime_check,
   hmt_nhits_bx7,//tmb match bx cathode hmt
   hmt_nhits_bx678,
   hmt_nhits_bx2345,
   hmt_cathode_pipe, // tmb match bx
-
-  hmt_outtime_check,
   hmt_trigger_tmb,
   hmt_trigger_tmb_ro,
 // GEM
@@ -740,12 +740,13 @@
   output [MXHMTB-1:0] hmt_anode;// anode hmt bits
   output clct_vpf_pipe; // alct vpf for hmt-alct match
 
+  input  hmt_enable;
+  input  hmt_outtime_check;
   input [NHMTHITB-1:0]   hmt_nhits_bx7;//CLCT bx
   input [NHMTHITB-1:0]   hmt_nhits_bx678;
   input [NHMTHITB-1:0]   hmt_nhits_bx2345;
   input [MXHMTB-1:0]     hmt_cathode_pipe; // tmb match bx
 
-  input  hmt_outtime_check;
   input  [MXHMTB - 1:0] hmt_trigger_tmb;   // hmt bits for trigger
   input  [MXHMTB - 1:0] hmt_trigger_tmb_ro;// hmt bits for readout only
 
@@ -1503,6 +1504,7 @@
 //------------------------------------------------------------------------------------------------------------------
 
 `ifdef FAKE_ALCT
+  initial $display("tmb: fake ALCT generation code is added!!");
 //------------------------------------------------------------------------------------------------------------------
 // Generate fake ALCT with key WG 20 and 30 for TAMU test stand
 //------------------------------------------------------------------------------------------------------------------
@@ -1510,23 +1512,25 @@
   wire [MXALCT-1:0] alct0_fake_srl, alct1_fake_srl;
   reg   alct0_fake_vpf = 1'b0;
   reg   alct1_fake_vpf = 1'b0;
+  reg [4:0] alct_fake_c = 5'b0;
   reg [3:0] fakealct_srl_adr = 0;
   always @(posedge clock) begin
      alct0_fake_vpf <= clct0_xtmb[0];
      alct1_fake_vpf <= clct1_xtmb[0];
-     fakealct_srl_adr <= gem_alct_win_center-2'b01+clctc_xtmb;
+     fakealct_srl_adr <= gem_alct_win_center-2'b01+clctc_xtmb[1:0];
+     alct_fake_c    <= {2'b00, clctc_xtmb};
   end
   assign alct0_fake[   0]   = alct0_fake_vpf;
   assign alct0_fake[02:1]   = 2'b11;
   assign alct0_fake[   3]   = 1'b0;
   assign alct0_fake[10:4]   = alct0_fake_vpf ? 7'd20 : 7'b0;
-  assign alct0_fake[15:11]  = 4'b0;
+  assign alct0_fake[15:11]  = alct_fake_c;
 
   assign alct1_fake[   0]   = alct1_fake_vpf;
   assign alct1_fake[02:1]   = 2'b10;
   assign alct1_fake[   3]   = 1'b0;
   assign alct1_fake[10:4]   = alct1_fake_vpf ? 7'd30 : 7'b0;
-  assign alct1_fake[15:11]  = 4'b0;
+  assign alct1_fake[15:11]  = alct_fake_c;
 
   srl16e_bbl #(MXALCT) ualct0fake (.clock(clock),.ce(1'b1),.adr(fakealct_srl_adr-1'b1),.d(alct0_fake),.q(alct0_fake_srl));
   srl16e_bbl #(MXALCT) ualct1fake (.clock(clock),.ce(1'b1),.adr(fakealct_srl_adr-1'b1),.d(alct1_fake),.q(alct1_fake_srl));
@@ -1579,14 +1583,15 @@
   
   assign alct_vpf_pipe  = alct0_pipe_vpf || alct1_pipe_vpf;
 
+  wire [1:0] anode_intime_hmt = run3_alct_df ? (alct0_pipe[13:12] & {2{hmt_enable}}) : 2'b00;
   reg [1:0] hmt_anode_pipe [2:0];
   always @(posedge clock) begin
-      hmt_anode_pipe[0] <= run3_alct_df ? alct0_pipe[13:12] : 2'b00;
-      hmt_anode_pipe[1] <= hmt_anode_pipe[0] ;
-      hmt_anode_pipe[2] <= hmt_anode_pipe[1] ;
+      hmt_anode_pipe[0] <= anode_intime_hmt ;
+      hmt_anode_pipe[1] <= hmt_anode_pipe[0];
+      hmt_anode_pipe[2] <= hmt_anode_pipe[1];
   end
 
-  assign hmt_anode = {hmt_anode_pipe[2][1:0], alct0_pipe[13:12]};
+  assign hmt_anode = {hmt_anode_pipe[2][1:0], anode_intime_hmt};
 //------------------------------------------------------------------------------------------------------------------
 // Push ALCT data into a 1bx to 16bx pipeline delay for GEM-ALCT match
 //------------------------------------------------------------------------------------------------------------------
