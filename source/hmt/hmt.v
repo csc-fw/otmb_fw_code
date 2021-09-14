@@ -411,15 +411,18 @@
   assign hmt_cathode_pipe = hmt_cathode_s3 & {MXHMTB{hmt_cathode_kept}};
 
   assign hmt_cathode_fired      = (|hmt_cathode_pipe[1:0]) && (!hmt_outtime_check || (~|hmt_cathode_pipe[3:2]));
+
+  //just for counting
   assign hmt_anode_alct_match   = hmt_anode_fired && alct_vpf_pipe;
   assign hmt_cathode_alct_match = hmt_cathode_fired && alct_vpf_pipe;
   assign hmt_cathode_clct_match = hmt_cathode_fired && clct_vpf_pipe;
   assign hmt_cathode_lct_match  = hmt_cathode_fired && alct_vpf_pipe && clct_vpf_pipe;
 
-  assign hmt_fired_cathode_only = hmt_cathode_fired && !hmt_anode_fired;
-  assign hmt_fired_anode_only   =!hmt_cathode_fired &&  hmt_anode_fired;
-  assign hmt_fired_match        = hmt_cathode_fired &&  hmt_anode_fired;
-  assign hmt_fired_or           = hmt_cathode_fired ||  hmt_anode_fired;
+  // with triggering or readout enabled 
+  assign hmt_fired_cathode_only = hmt_cathode_fired && !hmt_anode_fired && (hmt_allow_cathode || hmt_allow_cathode_ro);
+  assign hmt_fired_anode_only   =!hmt_cathode_fired &&  hmt_anode_fired && (hmt_allow_anode   || hmt_allow_anode_ro);
+  assign hmt_fired_match        = hmt_cathode_fired &&  hmt_anode_fired &&((hmt_allow_cathode && hmt_allow_anode) || (hmt_allow_cathode_ro && hmt_allow_anode_ro));
+  assign hmt_fired_or           = hmt_cathode_fired ||  hmt_anode_fired && (hmt_allow_cathode || hmt_allow_cathode_ro || hmt_allow_anode   || hmt_allow_anode_ro);
 
   wire [MXHMTB-1    :0] hmt_trigger_cathode    = hmt_cathode_pipe  & {MXHMTB{hmt_allow_cathode}};
   wire [MXHMTB-1    :0] hmt_trigger_anode      = hmt_anode & {MXHMTB{hmt_allow_anode}};
@@ -430,7 +433,6 @@
 
   assign hmt_trigger_tmb     = hmt_trigger_cathode | hmt_trigger_anode | hmt_trigger_match;
   assign hmt_trigger_tmb_ro  = hmt_trigger_cathode_ro | hmt_trigger_anode_ro | hmt_trigger_match_ro;
-
 
   wire [3:0] hmt_final_delay = hmt_postdrift_delay+hmt_match_win;
   wire [NHMTHITB-1:0] nhits_trig_dly_bx2345;
