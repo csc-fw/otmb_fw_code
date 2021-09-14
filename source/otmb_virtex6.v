@@ -2351,7 +2351,7 @@ end
         //.csc_cluster0_roll (gemA_csc_cluster_roll[iclst_csc]), // Out, 0-7 
         //.csc_cluster0_pad  (gemA_csc_cluster_pad[iclst_csc]), // Out from 0-191
         //.csc_cluster0_size (gemA_csc_cluster_size[iclst_csc]), // Out from 0-7, 0 means 1 gem pad
-        .cluster_to_cscdummy (gemA_gemtocsc_dummy[iclst])
+        .cluster_to_cscdummy (gemA_gemtocsc_dummy[iclst_csc])
 
       );
 
@@ -2385,7 +2385,7 @@ end
         //.csc_cluster0_roll (gemB_csc_cluster_roll[iclst_csc]), // 0-7 
         //.csc_cluster0_pad  (gemB_csc_cluster_pad[iclst_csc]), // from 0-191
         //.csc_cluster0_size (gemB_csc_cluster_size[iclst_csc]), // from 0-7, 0 means 1 gem pad
-        .cluster_to_cscdummy (gemB_gemtocsc_dummy[iclst])
+        .cluster_to_cscdummy (gemB_gemtocsc_dummy[iclst_csc])
 
       );
 
