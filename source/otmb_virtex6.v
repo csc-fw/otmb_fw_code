@@ -2978,6 +2978,8 @@
   .alct_bx0_rx  (alct_bx0_rx),           // In  ALCT bx0 received
   .alct_ecc_err (alct_ecc_err[1:0]),     // In  ALCT ecc syndrome code
 
+  .hmt_enable    (hmt_enable) , // In hmt enabled 
+  .hmt_outtime_check   (hmt_outtime_check),//In hmt fired shoudl check anode bg lower than threshold
   .alct_vpf_pipe (alct_vpf_pipe), //Out alct vpf after delay_
   .hmt_anode     (hmt_anode[MXHMTB-1:0]), //Out alct vpf after delay_
   .clct_vpf_pipe (clct_vpf_pipe), //Out alct vpf after delay_
@@ -2987,6 +2989,10 @@
   .hmt_nhits_bx678     (hmt_nhits_bx678   [NHMTHITB-1:0]),//In hmt nhits for in-time
   .hmt_nhits_bx2345    (hmt_nhits_bx2345  [NHMTHITB-1:0]),//In hmt nhits for out-time
   .hmt_cathode_pipe    (hmt_cathode[MXHMTB-1:0]), //In hmt bits in cathod 
+
+  .hmt_trigger_tmb    (hmt_trigger_tmb[MXHMTB-1:0]),//  In results aligned with ALCT vpf latched for ALCT-CLCT match
+  .hmt_trigger_tmb_ro (hmt_trigger_tmb_ro[MXHMTB-1:0]),//In results aligned with ALCT vpf latched for ALCT-CLCT match
+
 
 // TMB-Sequencer Pipelines
   .wr_adr_xtmb    (wr_adr_xtmb[MXBADR-1:0]),    // In  Buffer write address after drift time
@@ -3083,10 +3089,6 @@
   .clct_window_in        (clct_window[3:0]),      // In CLCT match window width (for CLCT-centric "old" algorithm)
   .algo2016_window       (algo2016_window[3:0]),  // In CLCT match window width (for ALCT-centric 2016 algorithm)
   .algo2016_clct_to_alct (algo2016_clct_to_alct), // In ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
-
-  .hmt_outtime_check   (hmt_outtime_check),//In hmt fired shoudl check anode bg lower than threshold
-  .hmt_trigger_tmb    (hmt_trigger_tmb[MXHMTB-1:0]),//  In results aligned with ALCT vpf latched for ALCT-CLCT match
-  .hmt_trigger_tmb_ro (hmt_trigger_tmb_ro[MXHMTB-1:0]),//In results aligned with ALCT vpf latched for ALCT-CLCT match
 
   .tmb_sync_err_en  (tmb_sync_err_en[1:0]),      // In  Allow sync_err to MPC for either muon
   .tmb_allow_alct    (tmb_allow_alct),        // In  Allow ALCT only 
