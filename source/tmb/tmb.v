@@ -144,6 +144,10 @@
   hmt_nhits_bx2345,
   hmt_cathode_pipe, // tmb match bx
 
+  wr_adr_xpre_hmt_pipe,
+  wr_push_mux_hmt,
+  wr_avail_xpre_hmt_pipe,
+
 // TMB-Sequencer Pipelines
   wr_adr_xtmb,
   wr_adr_rtmb,
@@ -504,6 +508,10 @@
   input                hmt_outtime_check;
   input [MXHMTB - 1:0] hmt_trigger_tmb;   // hmt bits for trigger
   input [MXHMTB - 1:0] hmt_trigger_tmb_ro;// hmt bits for readout only
+
+  input [MXBADR-1:0] wr_adr_xpre_hmt_pipe;
+  input              wr_push_mux_hmt;
+  input              wr_avail_xpre_hmt_pipe;
 
 // TMB-Sequencer Pipelines
   input  [MXBADR-1:0] wr_adr_xtmb; // Buffer write address after drift time
@@ -1252,8 +1260,11 @@
 
   assign alct_only_trig = (alct_noclct && tmb_allow_alct) || (alct_noclct_ro && tmb_allow_alct_ro);// ALCT-only triggers are allowed
 
+  
   wire hmt_fired_tmb   = (|hmt_trigger_tmb   [1:0]) && (!hmt_outtime_check || !(|hmt_trigger_tmb   [3:2]))&& run3_trig_df;
   wire hmt_readout_tmb = (|hmt_trigger_tmb_ro[1:0]) && (!hmt_outtime_check || !(|hmt_trigger_tmb_ro[3:2]))&& run3_daq_df;
+
+  wire hmt_fired_only  = (hmt_fired_tmb || hmt_readout_tmb) && !clct_kept;//hmt but no CLCT
 
 // Latch clct match results for TMB and MPC pathways
   reg tmb_trig_pulse       = 0;
@@ -1311,9 +1322,9 @@
     tmb_alctb            <= alct0_pipe[15:11];
     tmb_alcte            <= alcte_pipe[1:0];
 
-    wr_adr_rtmb          <= wr_adr_xtmb_pipe;   // Buffer write address at TMB matching time, continuous
-    wr_push_rtmb         <= wr_push_mux;        // Buffer write strobe at TMB matching time
-    wr_avail_rtmb        <= wr_avail_xtmb_pipe; // Buffer available at TMB matching time
+    wr_adr_rtmb          <= hmt_fired_only ? wr_adr_xpre_hmt_pipe : wr_adr_xtmb_pipe;   // Buffer write address at TMB matching time, continuous
+    wr_push_rtmb         <= hmt_fired_only ? wr_push_mux_hmt : wr_push_mux;        // Buffer write strobe at TMB matching time
+    wr_avail_rtmb        <= hmt_fired_only ? wr_avail_xpre_hmt_pipe : wr_avail_xtmb_pipe; // Buffer available at TMB matching time
   end
 
 // Had to wait for kill signal to go valid
@@ -1390,9 +1401,10 @@
   //wire   kill_clct1 = clct1_cfeb456 && kill_me1a_clcts;  // Delete CLCT1 from ME1A
   wire kill_clct0 = 0;
   wire kill_clct1 = 0;
-  assign kill_trig  =    ((kill_clct0 && clct0_exists) && (kill_clct1 && clct1_exists))  // Kill both clcts
-                      || ((kill_clct0 && clct0_exists) && !clct1_exists)
-                      || ((kill_clct1 && clct1_exists) && !clct0_exists);
+  assign kill_trig = 0;
+  //assign kill_trig  =    ((kill_clct0 && clct0_exists) && (kill_clct1 && clct1_exists))  // Kill both clcts
+  //                    || ((kill_clct0 && clct0_exists) && !clct1_exists)
+  //                    || ((kill_clct1 && clct1_exists) && !clct0_exists);
 
   assign tmb_clct0_discard = kill_clct0;
   assign tmb_clct1_discard = kill_clct1;
