@@ -2775,6 +2775,14 @@ end
 
   wire [MXHMTB-1:0] hmt_anode;
   wire [MXHMTB-1:0] hmt_cathode;
+
+  wire [MXBADR-1:0] wr_adr_xpre_hmt;
+  wire              wr_push_xpre_hmt;
+  wire              wr_avail_xpre_hmt; 
+
+  wire [MXBADR-1:0] wr_adr_xpre_hmt_pipe;
+  wire              wr_push_mux_hmt;
+  wire              wr_avail_xpre_hmt_pipe; 
   
   wire hmt_fired_cathode_only;
   wire hmt_fired_anode_only;
@@ -2810,6 +2818,15 @@ end
   .hmt_delay          (hmt_delay[3:0]), // In hmt delay for matching
   .hmt_alct_win_size  (hmt_alct_win_size[3:0]),//In hmt-alct match window size
   .hmt_match_win      (hmt_match_win[3:0]),// In alct location in hmt window size
+
+  .wr_adr_xpre_hmt        (wr_adr_xpre_hmt),  //In wr_adr at pretrigger for hmt
+  .wr_push_xpre_hmt       (wr_push_xpre_hmt), //In wr_push at pretrigger for hmt
+  .wr_avail_xpre_hmt      (wr_avail_xpre_hmt),//In wr_avail at pretrigger for hmt 
+
+  .wr_adr_xpre_hmt_pipe   (wr_adr_xpre_hmt_pipe),  //Out wr_adr at rtmb-1 for hmt 
+  .wr_push_mux_hmt        (wr_push_mux_hmt),       //Out wr_push at rtmb-1 for hmt
+  .wr_avail_xpre_hmt_pipe (wr_avail_xpre_hmt_pipe),//Out wr_avail at rtmb-1 for hmt 
+
   //tmb port: input
   .alct_vpf_pipe     (alct_vpf_pipe),//In ALCT vpf after alct delay
   .hmt_anode         (hmt_anode[MXHMTB-1:0]),// In hmt bits from anode 
@@ -2827,7 +2844,7 @@ end
   .hmt_allow_match_ro  (hmt_allow_match_ro),//In hmt allow to readout on match
   .hmt_outtime_check   (hmt_outtime_check),//In hmt fired shoudl check anode bg lower than threshold
   // sequencer port
-  //.hmt_fired_pretrig   (hmt_fired_pretrig),//out, hmt fired preCLCT bx
+  .hmt_fired_pretrig   (hmt_fired_pretrig),//out, hmt fired preCLCT bx
   .hmt_active_feb      (hmt_active_feb[MXCFEB-1:0]),//Out hmt active cfeb flags
   .hmt_pretrig_match   (hmt_pretrig_match),//out hmt & preCLCT
 
@@ -3224,11 +3241,11 @@ end
   .cfeb_nlayers_hit (cfeb_nlayers_hit[MXHITB-1:0]), // In  Number of CSC layers hit
 
     //Sequencer HMT
+  .hmt_fired_pretrig   (hmt_fired_pretrig),         //In, hmt fired preCLCT bx
   .hmt_active_feb      (hmt_active_feb[MXCFEB-1:0]),//In hmt active cfeb flags
-  .hmt_pretrig_match   (hmt_pretrig_match),//In hmt & preCLCT
-  //.hmt_fired_pretrig   (hmt_fired_pretrig),//out, hmt fired preCLCT bx
-  .hmt_anode        (hmt_anode[MXHMTB-1:0]),// Out HMT nhits for trigger
-  .hmt_cathode      (hmt_cathode[MXHMTB-1:0]),// Out HMT nhits for trigger
+  .hmt_pretrig_match   (hmt_pretrig_match),        //In hmt & preCLCT
+  .hmt_anode        (hmt_anode[MXHMTB-1:0]),// In HMT nhits for trigger
+  .hmt_cathode      (hmt_cathode[MXHMTB-1:0]),// In HMT nhits for trigger
   //.hmt_cathode_fired     (hmt_cathode_fired),// In
   //.hmt_anode_fired       (hmt_anode_fired),// In
   .hmt_anode_alct_match  (hmt_anode_alct_match), //In
@@ -3240,6 +3257,10 @@ end
   .hmt_fired_anode_only   (hmt_fired_anode_only),//In hmt is fired for anode only
   .hmt_fired_match        (hmt_fired_match),//In hmt is fired for match
   .hmt_fired_or           (hmt_fired_or),//In hmt is fired for match
+
+  .wr_adr_xpre_hmt        (wr_adr_xpre_hmt),  //Out wr_adr at pretrigger for hmt
+  .wr_push_xpre_hmt       (wr_push_xpre_hmt), //Out wr_push at pretrigger for hmt
+  .wr_avail_xpre_hmt      (wr_avail_xpre_hmt),//Out wr_avail at pretrigger for hmt 
 
 // Sequencer Pattern Finder CLCT results
   .hs_hit_1st (hs_hit_1st[MXHITB-1:0]),  // In  1st CLCT pattern hits
@@ -4440,6 +4461,10 @@ wire [15:0] gemB_bxn_counter;
 
   .hmt_trigger_tmb    (hmt_trigger_tmb[MXHMTB-1:0]),//  In results aligned with ALCT vpf latched for ALCT-CLCT match
   .hmt_trigger_tmb_ro (hmt_trigger_tmb_ro[MXHMTB-1:0]),//In results aligned with ALCT vpf latched for ALCT-CLCT match
+
+  .wr_adr_xpre_hmt_pipe   (wr_adr_xpre_hmt_pipe),  //In wr_adr at rtmb-1 for hmt 
+  .wr_push_mux_hmt        (wr_push_mux_hmt),       //In wr_push at rtmb-1 for hmt
+  .wr_avail_xpre_hmt_pipe (wr_avail_xpre_hmt_pipe),//In wr_avail at rtmb-1 for hmt 
 // GEM
   //.gemA_vpf          (gemA_vpf[7:0]),
   //.gemB_vpf          (gemB_vpf[7:0]),

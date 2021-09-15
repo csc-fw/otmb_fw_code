@@ -145,7 +145,10 @@
   hmt_cathode_pipe, // tmb match bx
   hmt_trigger_tmb,
   hmt_trigger_tmb_ro,
-// GEM
+
+  wr_adr_xpre_hmt_pipe,
+  wr_push_mux_hmt,
+  wr_avail_xpre_hmt_pipe,
 
 //GEMA trigger match control
   gemA_overflow,
@@ -750,6 +753,9 @@
   input  [MXHMTB - 1:0] hmt_trigger_tmb;   // hmt bits for trigger
   input  [MXHMTB - 1:0] hmt_trigger_tmb_ro;// hmt bits for readout only
 
+  input [MXBADR-1:0] wr_adr_xpre_hmt_pipe;
+  input              wr_push_mux_hmt;
+  input              wr_avail_xpre_hmt_pipe;
 // GEM
   input              gemA_overflow;
   input              gemB_overflow;
@@ -2773,6 +2779,8 @@
   wire hmt_fired_tmb   = (|hmt_trigger_tmb   [1:0]) && (!hmt_outtime_check || !(|hmt_trigger_tmb   [3:2]))&& run3_trig_df;
   wire hmt_readout_tmb = (|hmt_trigger_tmb_ro[1:0]) && (!hmt_outtime_check || !(|hmt_trigger_tmb_ro[3:2]))&& run3_daq_df;
 
+  wire hmt_fired_only  = (hmt_fired_tmb || hmt_readout_tmb) && !clct_kept_run3;//hmt but no CLCT
+
   reg tmb_trig_pulse       = 0;
   reg tmb_trig_keep_ff     = 0;
   reg tmb_non_trig_keep_ff = 0;
@@ -2846,15 +2854,13 @@
     tmb_alctb            <= alct0_pipe[15:11];
     tmb_alcte            <= alcte_pipe[1:0];
 
-    wr_adr_rtmb          <= wr_adr_xtmb_pipe;   // Buffer write address at TMB matching time, continuous
     //wr_push_rtmb         <= wr_push_mux;        // Buffer write strobe at TMB matching time
-    wr_avail_rtmb        <= wr_avail_xtmb_pipe; // Buffer available at TMB matching time
-    wr_push_rtmb         <= wr_push_mux_run3;        // Buffer write strobe at TMB matching time
+    wr_adr_rtmb          <= hmt_fired_only ? wr_adr_xpre_hmt_pipe   : wr_adr_xtmb_pipe;   // Buffer write address at TMB matching time, continuous
+    wr_avail_rtmb        <= hmt_fired_only ? wr_avail_xpre_hmt_pipe : wr_avail_xtmb_pipe; // Buffer available at TMB matching time
+    wr_push_rtmb         <= hmt_fired_only ? wr_push_mux_hmt : wr_push_mux_run3;        // Buffer write strobe at TMB matching time
 
     tmb_gem_clct_win     <= gem_clct_win;
     tmb_alct_gem_win     <= alct_gem_win;
-
-    
   end
 
 // Had to wait for kill signal to go valid
@@ -2872,6 +2878,7 @@
 // Post FF mod trig_keep for me1a
   wire tmb_trig_keep_run2     = tmb_trig_keep_ff     && (!kill_trig || tmb_alct_only);//run2 legacy logic
   wire tmb_non_trig_keep_run2 = tmb_non_trig_keep_ff && !tmb_trig_keep_run2;//run2 legacy logic 
+
   assign tmb_trig_keep     = tmb_trig_keep_ff     && (!kill_trig || tmb_alct_only) && !kill_nomatch_run3;
   assign tmb_non_trig_keep = tmb_non_trig_keep_ff && !tmb_trig_keep_run2 && !kill_nomatch_run3;
   

@@ -30,6 +30,14 @@
   hmt_alct_win_size,
   hmt_match_win,
   
+  wr_adr_xpre_hmt, 
+  wr_push_xpre_hmt,
+  wr_avail_xpre_hmt, 
+  
+  wr_adr_xpre_hmt_pipe, 
+  wr_push_mux_hmt,
+  wr_avail_xpre_hmt_pipe, 
+  
   alct_vpf_pipe,
   hmt_anode,
 
@@ -45,7 +53,7 @@
   hmt_allow_match_ro,
   hmt_outtime_check  ,
 
-  //hmt_fired_pretrig,//preCLCT bx
+  hmt_fired_pretrig,//preCLCT bx
   hmt_active_feb,
   hmt_pretrig_match,
 
@@ -104,6 +112,14 @@
   input  [3:0]  hmt_delay;
   input  [3:0]  hmt_alct_win_size;
   output [3:0]  hmt_match_win;
+
+  input [MXBADR-1:0] wr_adr_xpre_hmt;
+  input              wr_push_xpre_hmt;
+  input              wr_avail_xpre_hmt; 
+  
+  output [MXBADR-1:0] wr_adr_xpre_hmt_pipe;
+  output              wr_push_mux_hmt;
+  output              wr_avail_xpre_hmt_pipe; 
   
   input  alct_vpf_pipe;
   input [MXHMTB-1:0] hmt_anode;
@@ -120,7 +136,7 @@
   input hmt_allow_match_ro;
   input hmt_outtime_check ;
   
-  //output  hmt_fired_pretrig;//preCLCT bx
+  output  hmt_fired_pretrig;//preCLCT bx
   output [MXCFEB-1  :0]   hmt_active_feb;
   output  hmt_pretrig_match;
 
@@ -233,10 +249,10 @@
   srl16e_bbl #(MXCFEB)  uhmtaffpre    ( .clock(clock), .ce(1'b1), .adr(delay_hmt_aff_adr),  .d(active_cfeb_s0), .q(active_cfeb_s1));
 
   wire hmt_fired_s1 = (hmt_dly_const == 4'd0) ? hmt_fired_s0 : hmt_fired_s1_srl;
-  //assign hmt_fired_pretrig = hmt_fired_s1;
+  assign hmt_fired_pretrig = hmt_fired_s1;
   assign hmt_active_feb    = active_cfeb_s1 & {MXCFEB{cfeb_allow_hmt_ro & hmt_fired_s1}};
 
-  assign hmt_pretrig_match   = hmt_fired_s1 && clct_pretrig;
+  assign hmt_pretrig_match = hmt_fired_s1 && clct_pretrig;
 
 //------------------------------------------------------------------------------------------------------------------
 //  Delay HMT to post-drift 
@@ -445,6 +461,11 @@
   wire [NHMTHITB-1:0] nhits_trig_dly_bx2345;
   wire [NHMTHITB-1:0] nhits_trig_dly_bx678;
   wire [NHMTHITB-1:0] nhits_trig_dly_bx7;
+  wire [MXBADR-1:0] wr_adr_xpre_hmt_dly;
+  wire wr_push_xpre_hmt_dly, wr_avail_xpre_hmt_dly;
+  //wire [MXBADR-1:0] wr_adr_xpre_hmt_pipe;
+  //wire  wr_avail_xpre_hmt_pipe;
+  wire wr_push_xpre_hmt_pipe;
   srl16e_bbl #(NHMTHITB)    udnhitsbx7   ( .clock(clock), .ce(1'b1), .adr(hmt_final_delay-4'd1), .d(nhits_trig_s0_bx7    ), .q(nhits_trig_dly_bx7      ));
   srl16e_bbl #(NHMTHITB)    udnhitsbx678 ( .clock(clock), .ce(1'b1), .adr(hmt_final_delay-4'd1), .d(nhits_trig_s0_bx678  ), .q(nhits_trig_dly_bx678    ));
   srl16e_bbl #(NHMTHITB)    udnhitsbx2345( .clock(clock), .ce(1'b1), .adr(hmt_final_delay-4'd1), .d(nhits_trig_s0_bx2345 ), .q(nhits_trig_dly_bx2345   ));
@@ -453,6 +474,11 @@
   assign  hmt_nhits_bx678  = (hmt_final_delay == 4'd0) ? nhits_trig_s0_bx678[9:0]  : nhits_trig_dly_bx678[9:0];
   assign  hmt_nhits_bx2345 = (hmt_final_delay == 4'd0) ? nhits_trig_s0_bx2345[9:0] : nhits_trig_dly_bx2345[9:0];
 
+  assign  wr_adr_xpre_hmt_pipe   = (hmt_final_delay == 4'd0) ?  wr_adr_xpre_hmt   : wr_adr_xpre_hmt_dly; 
+  assign  wr_avail_xpre_hmt_pipe = (hmt_final_delay == 4'd0) ?  wr_avail_xpre_hmt : wr_avail_xpre_hmt_dly;
+  wire    wr_push_xpre_hmt_pipe  = (hmt_final_delay == 4'd0) ?  wr_push_xpre_hmt  : wr_push_xpre_hmt_dly;
+
+  assign wr_push_mux_hmt =  hmt_fired_anode_only ? wr_push_xpre_hmt_pipe : (wr_push_xpre_hmt_pipe && hmt_cathode_fired);
 
   assign hmt_sump = |hmt_pri_best;
 //-------------------------------------------------------------------------------------------------------------------

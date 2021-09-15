@@ -500,6 +500,7 @@
   cfeb_layer_or,
   cfeb_nlayers_hit,
 //HMT results
+  hmt_fired_pretrig,
   hmt_active_feb,
   hmt_pretrig_match,
 
@@ -516,6 +517,10 @@
   hmt_fired_anode_only,
   hmt_fired_match,
   hmt_fired_or,
+
+  wr_adr_xpre_hmt,
+  wr_push_xpre_hmt,
+  wr_avail_xpre_hmt,
 
 // Pattern Finder CLCT results
  
@@ -1555,6 +1560,7 @@
   input  [MXLY-1:0]    cfeb_layer_or;      // OR of hstrips on each layer at pre-trigger
   input  [MXHITB-1:0]  cfeb_nlayers_hit;    // Number of CSC layers hit
 
+  input                hmt_fired_pretrig;
   input  [MXCFEB-1:0]  hmt_active_feb;
   input                hmt_pretrig_match;
   
@@ -1572,6 +1578,10 @@
   input hmt_fired_anode_only;
   input hmt_fired_match;              
   input hmt_fired_or;
+
+  input [MXBADR-1:0] wr_adr_xpre_hmt;
+  input              wr_push_xpre_hmt;
+  input              wr_avail_xpre_hmt;
 
 // Pattern Finder CLCT results
   input  [MXHITB-1:0]  hs_hit_1st;        // 1st CLCT pattern hits
@@ -4142,6 +4152,8 @@
   wire [MXBADR-1:0] wr_adr_rmpc;                     // Buffer write address at mpc receive
   wire [MXBADR-1:0] wr_adr_xl1a;                     // Buffer write address at l1a match
 
+  assign wr_adr_xpre_hmt  = wr_buf_adr;  // Buffer write address at pretrigger for HMT
+
   wire wr_push_xpre  = clct_push_pretrig; // Buffer write strobe at pre-trigger
   reg  wr_push_xpre1 = 0;                 // Buffer write strobe at pre-trigger+1bx
   wire wr_push_xtmb  = clct_push_xtmb;    // Buffer write strobe after drift time
@@ -4160,6 +4172,8 @@
   wire wr_avail_xmpc;                       // Buffer available at MPC xmit to sequencer
   wire wr_avail_rmpc;                       // Buffer available at MPC received
 //  wire wr_avail_xl1a;                     // Buffer available at L1A match
+  assign wr_push_xpre_hmt  = hmt_fired_pretrig;//  Buffer write strobe at pre-trigger for HMT
+  assign wr_avail_xpre_hmt = wr_buf_avail;     //  Buffer available at pre-trigger for HMT
 
 // Piplelines delays for locally predictable coincidences
   always @(posedge clock) begin      // 1 bx delay FFs
