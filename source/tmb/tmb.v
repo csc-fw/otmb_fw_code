@@ -1667,7 +1667,7 @@
   wire   wr_push_xtmb_pipe  = (clct_ptr_is_0) ? wr_push_xtmb  : wr_push_xtmb_srl;
   wire   wr_avail_xtmb_pipe = (clct_ptr_is_0) ? wr_avail_xtmb : wr_avail_xtmb_srl;
 
-  assign clct_vpf_pipe  = (clct0_pipe[0] || clct1_pipe[0]) && clct_kept_run3;
+  assign clct_vpf_pipe  = (clct0_pipe[0] || clct1_pipe[0]) && clct_kept;
 
   wire clct0_cfeb456_pipe  = clct0_pipe[15];          // CLCT0 is on CFEB4-6 hence ME1A
   wire clct1_cfeb456_pipe  = clct1_pipe[15];          // CLCT1 is on CFEB4-6 hence ME1A
@@ -2447,8 +2447,8 @@
   .alct0_nhit   (alct0_pipe[2:1]+3'd3),
   .alct1_nhit   (alct1_pipe[2:1]+3'd3),
 
-  .clct0_vpf  (clct0_pipe[0] && clct_kept_run3),//clct0_vpf from pipe
-  .clct1_vpf  (clct1_pipe[0] && clct_kept_run3),
+  .clct0_vpf  (clct0_pipe[0] && clct_kept),//clct0_vpf from pipe
+  .clct1_vpf  (clct1_pipe[0] && clct_kept),
   .clct0_xky  (clct0_xky_pipe[9:0]),
   .clct1_xky  (clct1_xky_pipe[9:0]),
   .clct0_bend (clct0_bnd_pipe[4]),
@@ -2859,14 +2859,21 @@
 
 // Had to wait for kill signal to go valid
   wire kill_trig;
+  wire kill_nomatch_run3 = !alct0_clct0_match_found_final_pos && !alct1_clct1_match_found_final_pos;//match failed with position considered
 
-  assign tmb_match_ro     = tmb_match_ro_ff     & kill_trig;  // ALCT and CLCT matched in time, nontriggering event
-  assign tmb_alct_only_ro = tmb_alct_only_ro_ff & kill_trig;  // Only ALCT triggered, nontriggering event
-  assign tmb_clct_only_ro = tmb_clct_only_ro_ff & kill_trig;  // Only CLCT triggered, nontriggering event
+  //assign tmb_match_ro     = tmb_match_ro_ff     & kill_trig;  // ALCT and CLCT matched in time, nontriggering event
+  //assign tmb_alct_only_ro = tmb_alct_only_ro_ff & kill_trig;  // Only ALCT triggered, nontriggering event
+  //assign tmb_clct_only_ro = tmb_clct_only_ro_ff & kill_trig;  // Only CLCT triggered, nontriggering event
+
+  assign tmb_match_ro     = tmb_match_ro_ff     & kill_trig & kill_trig_nomatch;  // ALCT and CLCT matched in time, nontriggering event
+  assign tmb_alct_only_ro = tmb_alct_only_ro_ff & kill_trig & kill_trig_nomatch;  // Only ALCT triggered, nontriggering event
+  assign tmb_clct_only_ro = tmb_clct_only_ro_ff & kill_trig & kill_trig_nomatch;  // Only CLCT triggered, nontriggering event
 
 // Post FF mod trig_keep for me1a
-  assign tmb_trig_keep     = tmb_trig_keep_ff     && (!kill_trig || tmb_alct_only);
-  assign tmb_non_trig_keep = tmb_non_trig_keep_ff && !tmb_trig_keep;
+  wire tmb_trig_keep_run2     = tmb_trig_keep_ff     && (!kill_trig || tmb_alct_only);//run2 legacy logic
+  wire tmb_non_trig_keep_run2 = tmb_non_trig_keep_ff && !tmb_trig_keep_run2;//run2 legacy logic 
+  assign tmb_trig_keep     = tmb_trig_keep_ff     && (!kill_trig || tmb_alct_only) && !kill_nomatch_run3;
+  assign tmb_non_trig_keep = tmb_non_trig_keep_ff && !tmb_trig_keep_run2 && !kill_nomatch_run3;
   
 // Pipelined CLCTs, aligned in time with trig_pulse
   //reg [MXCLCT-1:0]   clct0_real;
