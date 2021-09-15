@@ -36,7 +36,6 @@
   wr_avail_xpre_hmt_pipe, 
   
   alct_vpf_pipe,
-  alct_vpf_pipe,
   hmt_anode,
 
   clct_pretrig,
@@ -460,14 +459,14 @@
   wire wr_push_xpre_hmt_dly, wr_avail_xpre_hmt_dly;
   //wire [MXBADR-1:0] wr_adr_xpre_hmt_pipe;
   //wire  wr_avail_xpre_hmt_pipe;
-  wire wr_push_xpre_hmt_pipe;
+  //wire wr_push_xpre_hmt_pipe;
   srl16e_bbl #(NHMTHITB)    udnhitsbx7   ( .clock(clock), .ce(1'b1), .adr(hmt_final_delay-4'd1), .d(nhits_trig_s0_bx7    ), .q(nhits_trig_dly_bx7      ));
   srl16e_bbl #(NHMTHITB)    udnhitsbx678 ( .clock(clock), .ce(1'b1), .adr(hmt_final_delay-4'd1), .d(nhits_trig_s0_bx678  ), .q(nhits_trig_dly_bx678    ));
   srl16e_bbl #(NHMTHITB)    udnhitsbx2345( .clock(clock), .ce(1'b1), .adr(hmt_final_delay-4'd1), .d(nhits_trig_s0_bx2345 ), .q(nhits_trig_dly_bx2345   ));
 
   srl16e_bbl #(MXBADR)    udnhmtadr   ( .clock(clock), .ce(1'b1), .adr(hmt_final_delay-4'd1), .d(wr_adr_xpre_hmt    ), .q(wr_adr_xpre_hmt_dly      ));
-  srl16e_bbl #(1)         udnhmtpush  ( .clock(clock), .ce(1'b1), .adr(hmt_final_delay-4'd1), .d(wr_push_xpre_hmt   ), .q(wr_push_xpre_hmt_pipe    ));
-  srl16e_bbl #(1)         udnhmtavail ( .clock(clock), .ce(1'b1), .adr(hmt_final_delay-4'd1), .d(wr_avail_xpre_hmt  ), .q(wr_avail_xpre_hmt_pipe   ));
+  srl16e_bbl #(1)         udnhmtpush  ( .clock(clock), .ce(1'b1), .adr(hmt_final_delay-4'd1), .d(wr_push_xpre_hmt   ), .q(wr_push_xpre_hmt_dly    ));
+  srl16e_bbl #(1)         udnhmtavail ( .clock(clock), .ce(1'b1), .adr(hmt_final_delay-4'd1), .d(wr_avail_xpre_hmt  ), .q(wr_avail_xpre_hmt_dly   ));
 
   assign  hmt_nhits_bx7    = (hmt_final_delay == 4'd0) ? nhits_trig_s0_bx7[9:0]    : nhits_trig_dly_bx7[9:0];
   assign  hmt_nhits_bx678  = (hmt_final_delay == 4'd0) ? nhits_trig_s0_bx678[9:0]  : nhits_trig_dly_bx678[9:0];

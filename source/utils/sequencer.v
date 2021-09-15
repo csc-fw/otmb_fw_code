@@ -1280,9 +1280,9 @@
   input hmt_fired_or;
 
   //output, buffer adr for HMT in case no ALCT/CLCT is found
-  input [MXBADR-1:0] wr_adr_xpre_hmt;
-  input              wr_push_xpre_hmt;
-  input              wr_avail_xpre_hmt;
+  output [MXBADR-1:0] wr_adr_xpre_hmt;
+  output              wr_push_xpre_hmt;
+  output              wr_avail_xpre_hmt;
 
   input  [MXHITB-1:0]   hs_hit_1st;        // 1st CLCT pattern hits
   input  [MXPIDB-1:0]   hs_pid_1st;        // 1st CLCT pattern ID
