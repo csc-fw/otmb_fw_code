@@ -2859,15 +2859,15 @@
 
 // Had to wait for kill signal to go valid
   wire kill_trig;
-  wire kill_nomatch_run3 = !alct0_clct0_match_found_final_pos && !alct1_clct1_match_found_final_pos;//match failed with position considered
+  wire kill_nomatch_run3 = gemcsc_match_enable && !alct0_clct0_match_found_final_pos && !alct1_clct1_match_found_final_pos;//match failed with position considered
 
   //assign tmb_match_ro     = tmb_match_ro_ff     & kill_trig;  // ALCT and CLCT matched in time, nontriggering event
   //assign tmb_alct_only_ro = tmb_alct_only_ro_ff & kill_trig;  // Only ALCT triggered, nontriggering event
   //assign tmb_clct_only_ro = tmb_clct_only_ro_ff & kill_trig;  // Only CLCT triggered, nontriggering event
 
-  assign tmb_match_ro     = tmb_match_ro_ff     & kill_trig & kill_trig_nomatch;  // ALCT and CLCT matched in time, nontriggering event
-  assign tmb_alct_only_ro = tmb_alct_only_ro_ff & kill_trig & kill_trig_nomatch;  // Only ALCT triggered, nontriggering event
-  assign tmb_clct_only_ro = tmb_clct_only_ro_ff & kill_trig & kill_trig_nomatch;  // Only CLCT triggered, nontriggering event
+  assign tmb_match_ro     = tmb_match_ro_ff     & kill_trig & kill_nomatch_run3;  // ALCT and CLCT matched in time, nontriggering event
+  assign tmb_alct_only_ro = tmb_alct_only_ro_ff & kill_trig & kill_nomatch_run3;  // Only ALCT triggered, nontriggering event
+  assign tmb_clct_only_ro = tmb_clct_only_ro_ff & kill_trig & kill_nomatch_run3;  // Only CLCT triggered, nontriggering event
 
 // Post FF mod trig_keep for me1a
   wire tmb_trig_keep_run2     = tmb_trig_keep_ff     && (!kill_trig || tmb_alct_only);//run2 legacy logic
