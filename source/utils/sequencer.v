@@ -1579,9 +1579,9 @@
   input hmt_fired_match;              
   input hmt_fired_or;
 
-  input [MXBADR-1:0] wr_adr_xpre_hmt;
-  input              wr_push_xpre_hmt;
-  input              wr_avail_xpre_hmt;
+  output [MXBADR-1:0] wr_adr_xpre_hmt;
+  output              wr_push_xpre_hmt;
+  output              wr_avail_xpre_hmt;
 
 // Pattern Finder CLCT results
   input  [MXHITB-1:0]  hs_hit_1st;        // 1st CLCT pattern hits
