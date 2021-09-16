@@ -2614,6 +2614,8 @@
   .deb_buf_pop_adr  (deb_buf_pop_adr[MXBADR-1:0]),    // Out  Queue pop  address at last pop
   .deb_buf_push_data  (deb_buf_push_data[MXBDATA-1:0]),  // Out  Queue push data at last push
   .deb_buf_pop_data  (deb_buf_pop_data[MXBDATA-1:0]),  // Out  Queue pop  data at last pop
+   
+  .l1a_keep_tp      (l1a_keep_tp),
 
 // Sequencer Sump
   .sequencer_sump    (sequencer_sump)      // Out  Unused signals
