@@ -1687,6 +1687,9 @@
   wire [6:0] hmt_aff_thresh;
   wire [MXCFEB-1:0] hmt_active_feb;
   wire hmt_pretrig_match;
+  wire hmt_fired_pretrig;
+  wire hmt_fired_xtmb;
+  wire hmt_wr_avail_xtmb;
 
   wire [3:0]  hmt_delay;
   wire [3:0]  hmt_alct_win_size;
@@ -1762,6 +1765,8 @@
   .hmt_fired_pretrig   (hmt_fired_pretrig),//out, hmt fired preCLCT bx
   .hmt_active_feb      (hmt_active_feb[MXCFEB-1:0]),//Out hmt active cfeb flags
   .hmt_pretrig_match   (hmt_pretrig_match),//out hmt & preCLCT
+  .hmt_fired_xtmb      (hmt_fired_xtmb),//out, hmt fired preCLCT bx
+  .hmt_wr_avail_xtmb   (hmt_wr_avail_xtmb),//Out hmt wr buf available
 
   //tmb port
   .hmt_nhits_bx7       (hmt_nhits_bx7     [NHMTHITB-1:0]),//Out hmt nhits for central bx
@@ -2086,6 +2091,8 @@
   .hmt_fired_pretrig   (hmt_fired_pretrig),//In, hmt fired preCLCT bx
   .hmt_active_feb      (hmt_active_feb[MXCFEB-1:0]),//In hmt active cfeb flags
   .hmt_pretrig_match   (hmt_pretrig_match),//In hmt & preCLCT
+  .hmt_fired_xtmb      (hmt_fired_xtmb),//In, hmt fired preCLCT bx
+  .hmt_wr_avail_xtmb   (hmt_wr_avail_xtmb),//In hmt wr buf available
   //Sequencer HMT, hmt-alct-clct match 
   .hmt_anode        (hmt_anode[MXHMTB-1:0]),// Out HMT nhits for trigger
   .hmt_cathode      (hmt_cathode[MXHMTB-1:0]),// Out HMT nhits for trigger
@@ -2736,6 +2743,12 @@
   wire  [RAM_ADRB-1:0]    fifo_radr_mini;          // FIFO RAM read tbin address
   wire  [RAM_WIDTH*2-1:0]  fifo_rdata_mini;        // FIFO RAM read data
   wire  [1:0]        parity_err_mini;        // Miniscope RAM parity error detected
+  wire buf_pop;      
+  wire buf_push;      
+  wire buf_q_full;      
+  wire buf_q_empty;     
+  wire buf_stalled;     
+  //wire buf_stalled_once;
 
   assign fifo_wadr_mini = fifo_wadr-wr_mini_offset;      // FIFO RAM read tbin address
 
@@ -3274,10 +3287,14 @@
     //Tao, ME1/1->MEX/1, ignore link[5] & link[6]
     //assign mez_tp[7] =   set_sw[8] ? alct_txd_posneg : (!set_sw[7] ? bpi_enbl : link_good[6]);
     //assign mez_tp[6] = (!set_sw[7] ? bpi_dsbl        :                          link_good[5]);
-    assign mez_tp[7] =   set_sw[8] ? alct_txd_posneg : (!set_sw[7] ? bpi_enbl : link_good[2]);
-    assign mez_tp[6] = (!set_sw[7] ? bpi_dsbl        :                          link_good[1]);
-    assign mez_tp[5] =   set_sw[8] ? alct_rxd_posneg : (!set_sw[7] ? bpi_rst  : link_good[4]);
-    assign mez_tp[4] = (!set_sw[7] ? bpi_dev         :                          link_good[3]);
+    //assign mez_tp[7] =   set_sw[8] ? alct_txd_posneg : (!set_sw[7] ? bpi_enbl : link_good[2]);
+    //assign mez_tp[6] = (!set_sw[7] ? bpi_dsbl        :                          link_good[1]);
+    //assign mez_tp[5] =   set_sw[8] ? alct_rxd_posneg : (!set_sw[7] ? bpi_rst  : link_good[4]);
+    //assign mez_tp[4] = (!set_sw[7] ? bpi_dev         :                          link_good[3]);
+    assign mez_tp[5] = buf_q_full;
+    assign mez_tp[5] = buf_stalled;
+    assign mez_tp[5] = buf_pop;
+    assign mez_tp[4] = l1a_keep_tp;
 //    assign mez_tp[MXCFEB:4] = link_good[MXCFEB-1:3];
 //    reg  [3:1]  testled_r;
 //    assign mez_tp[3] = link_good[2] || ((set_sw == 2'b01) && clock_alct_txd);

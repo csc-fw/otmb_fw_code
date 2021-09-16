@@ -468,6 +468,8 @@
   hmt_fired_pretrig,
   hmt_active_feb, 
   hmt_pretrig_match,
+  hmt_fired_xtmb,
+  hmt_wr_avail_xtmb,
 
   hmt_anode,
   hmt_cathode, 
@@ -1263,6 +1265,8 @@
   input                 hmt_fired_pretrig;//hmt fired at pretrigger bx
   input  [MXCFEB-1:0]   hmt_active_feb;
   input                 hmt_pretrig_match;
+  input                 hmt_fired_xtmb;//hmt fired at pretrigger bx
+  input                 hmt_wr_avail_xtmb;//hmt fired at pretrigger bx
 
   input [MXHMTB-1:0]     hmt_anode; // tmb match bx
   input [MXHMTB-1:0]     hmt_cathode; // tmb match bx
@@ -3321,9 +3325,9 @@
 
   assign wr_adr_xpre_hmt  = wr_buf_adr;  // Buffer write address at pretrigger for HMT
 
-  wire wr_push_xpre  = clct_push_pretrig; // Buffer write strobe at pre-trigger
+  wire wr_push_xpre  = hmt_fired_pretrig || clct_push_pretrig; // Buffer write strobe at pre-trigger
   reg  wr_push_xpre1 = 0;                 // Buffer write strobe at pre-trigger+1bx
-  wire wr_push_xtmb  = clct_push_xtmb;    // Buffer write strobe after drift time
+  wire wr_push_xtmb  = hmt_fired_xtmb || clct_push_xtmb;    // Buffer write strobe after drift time
   reg  wr_push_xtmb1 = 0;                 // Buffer write strobe after drift time+1bx
   wire wr_push_rtmb;                      // Buffer write strobe at TMB matching time
   reg  wr_push_rtmb1 = 0;                 // Buffer write strobe at tmb reply+1bx
@@ -3332,7 +3336,7 @@
 
   wire wr_avail_xpre  = wr_buf_avail;       // Buffer available at pre-trigger
   reg  wr_avail_xpre1 = 0;                  // Buffer available at pre-trigger+1bx
-  wire wr_avail_xtmb  = clct_wr_avail_xtmb; // Buffer available after drift time
+  wire wr_avail_xtmb  = hmt_wr_avail_xtmb || clct_wr_avail_xtmb; // Buffer available after drift time
   reg  wr_avail_xtmb1 = 0;                  // Buffer available after drift time+1bx
   wire wr_avail_rtmb;                       // Buffer available at TMB matching time
   reg  wr_avail_rtmb1 = 0;                  // Buffer available at tmb reply+1bx
