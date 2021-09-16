@@ -138,9 +138,9 @@
   output [MXCFEB-1  :0]   hmt_active_feb;
   output  hmt_pretrig_match;
   output  hmt_fired_xtmb;//preCLCT bx
-
+  output  hmt_wr_avail_xtmb;  //
+  
   //output [MXHMTB-1:0]     hmt_cathode_xtmb; //CLCT bx
-
   output [NHMTHITB-1:0]   hmt_nhits_bx7;//CLCT bx
   output [NHMTHITB-1:0]   hmt_nhits_bx678;
   output [NHMTHITB-1:0]   hmt_nhits_bx2345;

@@ -1995,6 +1995,8 @@
   wire  [MXBADR-1:0]  deb_buf_pop_adr;    // Queue pop  address at last pop
   wire  [MXBDATA-1:0]  deb_buf_push_data;    // Queue push data at last push
   wire  [MXBDATA-1:0]  deb_buf_pop_data;    // Queue pop  data at last pop
+
+  wire l1a_keep_tp;
 // -----------------------------------------------------------------------------
 // End: Sequencer Module
 // -----------------------------------------------------------------------------
@@ -2743,12 +2745,6 @@
   wire  [RAM_ADRB-1:0]    fifo_radr_mini;          // FIFO RAM read tbin address
   wire  [RAM_WIDTH*2-1:0]  fifo_rdata_mini;        // FIFO RAM read data
   wire  [1:0]        parity_err_mini;        // Miniscope RAM parity error detected
-  wire buf_pop;      
-  wire buf_push;      
-  wire buf_q_full;      
-  wire buf_q_empty;     
-  wire buf_stalled;     
-  //wire buf_stalled_once;
 
   assign fifo_wadr_mini = fifo_wadr-wr_mini_offset;      // FIFO RAM read tbin address
 
@@ -3291,8 +3287,8 @@
     //assign mez_tp[6] = (!set_sw[7] ? bpi_dsbl        :                          link_good[1]);
     //assign mez_tp[5] =   set_sw[8] ? alct_rxd_posneg : (!set_sw[7] ? bpi_rst  : link_good[4]);
     //assign mez_tp[4] = (!set_sw[7] ? bpi_dev         :                          link_good[3]);
-    assign mez_tp[5] = buf_q_full;
-    assign mez_tp[5] = buf_stalled;
+    assign mez_tp[7] = buf_q_full;
+    assign mez_tp[6] = buf_stalled;
     assign mez_tp[5] = buf_pop;
     assign mez_tp[4] = l1a_keep_tp;
 //    assign mez_tp[MXCFEB:4] = link_good[MXCFEB-1:3];

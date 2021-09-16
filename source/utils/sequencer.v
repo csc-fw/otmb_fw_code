@@ -992,7 +992,9 @@
   deb_buf_pop_adr,
   deb_buf_push_data,
   deb_buf_pop_data,
-
+ 
+  
+  l1a_keep_tp,
 // Sump
   sequencer_sump
 
@@ -1790,7 +1792,7 @@
   output  [MXBDATA-1:0]  deb_buf_push_data;    // Queue push data at last push
   output  [MXBDATA-1:0]  deb_buf_pop_data;    // Queue pop  data at last pop
 
-
+  output l1a_keep_tp;
 // Sump
   output          sequencer_sump;      // Unused signals
 
@@ -3293,6 +3295,8 @@
   wire                l1a_push_me;
   wire                l1a_keep;
   wire                wr_avail_xl1a; // Buffer available at L1A match
+
+  assign l1a_keep_tp = l1a_keep;
 
   assign l1a_wdata[11:0]  = l1a_bxn_win[11:0];            // BXN at L1A arrival
   assign l1a_wdata[23:12] = l1a_cnt_win[11:0];            // L1As received at time of this event
