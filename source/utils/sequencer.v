@@ -4208,7 +4208,7 @@
     wr_avail_rtmb1 <= wr_avail_rtmb; // tmb reply + 1bx
 
     //HMT section
-    hmt_wr_avail_xpre1 <= hmt_wr_avail_xpre;
+    hmt_wr_avail_xpre1 <= wr_avail_xpre_hmt;
     hmt_wr_avail_xtmb1 <= hmt_wr_avail_xtmb;
 
     hmt_wr_adr_xtmb1   <= hmt_wr_adr_xtmb;
@@ -4228,7 +4228,7 @@
   wire   wr_en_rmpc  = (wr_push_rmpc  || clct_wr_continuous) && wr_avail_rmpc;
 
   wire wr_en_xpre_run3   = hmt_fired_only_pretrig  ? ( wr_avail_xpre_hmt) : wr_en_xpre;
-  wire wr_en_xpre1_run3  = hmt_fired_only_pretrig1 ? ( wr_avail_xpre1_hmt) : wr_en_xpre1;
+  wire wr_en_xpre1_run3  = hmt_fired_only_pretrig1 ? ( hmt_wr_avail_xpre1) : wr_en_xpre1;
   wire wr_en_xtmb_run3   = hmt_fired_only_xtmb     ? (hmt_wr_avail_xtmb)  : wr_en_xtmb;
   wire wr_en_xtmb1_run3  = hmt_fired_only_xtmb1    ? (hmt_wr_avail_xtmb1)  : wr_en_xtmb1;
 
