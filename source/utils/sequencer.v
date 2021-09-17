@@ -471,6 +471,7 @@
   hmt_pretrig_match,
   hmt_fired_xtmb,
   hmt_wr_avail_xtmb,
+  hmt_wr_adr_xtmb,
 
   hmt_anode,
   hmt_cathode, 
@@ -1271,6 +1272,7 @@
   input                 hmt_pretrig_match;
   input                 hmt_fired_xtmb;//hmt fired at pretrigger bx
   input                 hmt_wr_avail_xtmb;//hmt fired at pretrigger bx
+  input [MXBADR-1:0] hmt_wr_adr_xtmb;
 
   input [MXHMTB-1:0]     hmt_anode; // tmb match bx
   input [MXHMTB-1:0]     hmt_cathode; // tmb match bx
@@ -3331,9 +3333,9 @@
 
   assign wr_adr_xpre_hmt  = wr_buf_adr;  // Buffer write address at pretrigger for HMT
 
-  wire wr_push_xpre  = hmt_fired_pretrig || clct_push_pretrig; // Buffer write strobe at pre-trigger
+  wire wr_push_xpre  = clct_push_pretrig; // Buffer write strobe at pre-trigger
   reg  wr_push_xpre1 = 0;                 // Buffer write strobe at pre-trigger+1bx
-  wire wr_push_xtmb  = hmt_fired_xtmb || clct_push_xtmb;    // Buffer write strobe after drift time
+  wire wr_push_xtmb  = clct_push_xtmb;    // Buffer write strobe after drift time
   reg  wr_push_xtmb1 = 0;                 // Buffer write strobe after drift time+1bx
   wire wr_push_rtmb;                      // Buffer write strobe at TMB matching time
   reg  wr_push_rtmb1 = 0;                 // Buffer write strobe at tmb reply+1bx
@@ -3342,7 +3344,7 @@
 
   wire wr_avail_xpre  = wr_buf_avail;       // Buffer available at pre-trigger
   reg  wr_avail_xpre1 = 0;                  // Buffer available at pre-trigger+1bx
-  wire wr_avail_xtmb  = hmt_wr_avail_xtmb || clct_wr_avail_xtmb; // Buffer available after drift time
+  wire wr_avail_xtmb  = clct_wr_avail_xtmb; // Buffer available after drift time
   reg  wr_avail_xtmb1 = 0;                  // Buffer available after drift time+1bx
   wire wr_avail_rtmb;                       // Buffer available at TMB matching time
   reg  wr_avail_rtmb1 = 0;                  // Buffer available at tmb reply+1bx
@@ -3351,6 +3353,15 @@
 //  wire wr_avail_xl1a;                     // Buffer available at L1A match
   assign wr_push_xpre_hmt  = hmt_fired_pretrig;//  Buffer write strobe at pre-trigger for HMT
   assign wr_avail_xpre_hmt = wr_buf_avail;     //  Buffer available at pre-trigger for HMT
+
+  reg  [MXBADR-1:0] hmt_wr_adr_xtmb1 = 0;
+  reg  hmt_wr_avail_xpre1 = 0;
+  reg  hmt_wr_avail_xtmb1 = 0;  
+
+  wire hmt_fired_only_pretrig = hmt_fired_pretrig && !clct_push_pretrig;
+  reg  hmt_fired_only_pretrig1 = 0;
+  wire hmt_fired_only_xtmb = hmt_fired_xtmb && !clct_push_xtmb;
+  reg  hmt_fired_only_xtmb1 = 0;
 
 // Piplelines delays for locally predictable coincidences
   always @(posedge clock) begin      // 1 bx delay FFs
@@ -3365,6 +3376,15 @@
     wr_adr_rtmb1   <= wr_adr_rtmb;   // tmb reply + 1bx
     wr_push_rtmb1  <= wr_push_rtmb;  // tmb reply + 1bx
     wr_avail_rtmb1 <= wr_avail_rtmb; // tmb reply + 1bx
+
+    //HMT section
+    hmt_wr_avail_xpre1 <= hmt_wr_avail_xpre;
+    hmt_wr_avail_xtmb1 <= hmt_wr_avail_xtmb;
+
+    hmt_wr_adr_xtmb1   <= hmt_wr_adr_xtmb;
+
+    hmt_fired_only_pretrig1 <= hmt_fired_only_pretrig;
+    hmt_fired_only_xtmb1    <= hmt_fired_only_xtmb;
   end
 
 // Qualify buffer write strobes [0]=strobe,[1]=buffer available for writing
@@ -3377,6 +3397,14 @@
   wire   wr_en_xmpc  = (wr_push_xmpc  || clct_wr_continuous) && wr_avail_xmpc;
   wire   wr_en_rmpc  = (wr_push_rmpc  || clct_wr_continuous) && wr_avail_rmpc;
 
+  wire wr_en_xpre_run3   = hmt_fired_only_pretrig  ? ( wr_avail_xpre_hmt) : wr_en_xpre;
+  wire wr_en_xpre1_run3  = hmt_fired_only_pretrig1 ? ( wr_avail_xpre1_hmt) : wr_en_xpre1;
+  wire wr_en_xtmb_run3   = hmt_fired_only_xtmb     ? (hmt_wr_avail_xtmb)  : wr_en_xtmb;
+  wire wr_en_xtmb1_run3  = hmt_fired_only_xtmb1    ? (hmt_wr_avail_xtmb1)  : wr_en_xtmb1;
+
+  wire [MXBADR-1:0] wr_adr_xtmb_run3  = hmt_fired_only_xtmb  ? hmt_wr_adr_xtmb  : wr_adr_xtmb;
+  wire [MXBADR-1:0] wr_adr_xtmb1_run3 = hmt_fired_only_xtmb1 ? hmt_wr_adr_xtmb1 : wr_adr_xtmb1;
+
 //------------------------------------------------------------------------------------------------------------------
 // Header storage RAMs
 //------------------------------------------------------------------------------------------------------------------
@@ -3385,17 +3413,22 @@
   wire              rd_enb = !buf_q_empty; // Enable port b for reading when readout in progress
 
 // Store Buffer data on pretrigger
-  ramblock #(MXXPRE, MXBADR) uramblock0 (.clock(clock),.wr_wea(wr_en_xpre ),.wr_adra(wr_adr_xpre ),.wr_dataa(xpre_wdata ),.rd_enb(rd_enb),.rd_adrb(rd_buf_adr),.rd_datab(xpre_rdata ),.dang(dang[0]));
+  //ramblock #(MXXPRE, MXBADR) uramblock0 (.clock(clock),.wr_wea(wr_en_xpre ),.wr_adra(wr_adr_xpre ),.wr_dataa(xpre_wdata ),.rd_enb(rd_enb),.rd_adrb(rd_buf_adr),.rd_datab(xpre_rdata ),.dang(dang[0]));
+  ramblock #(MXXPRE, MXBADR) uramblock0 (.clock(clock),.wr_wea(wr_en_xpre_run3),.wr_adra(wr_adr_xpre ),.wr_dataa(xpre_wdata ),.rd_enb(rd_enb),.rd_adrb(rd_buf_adr),.rd_datab(xpre_rdata ),.dang(dang[0]));
 
 // Store Buffer data on pretrigger + 1bx
-  ramblock #(MXXPRE1,MXBADR) uramblock1 (.clock(clock),.wr_wea(wr_en_xpre1),.wr_adra(wr_adr_xpre1),.wr_dataa(xpre1_wdata),.rd_enb(rd_enb),.rd_adrb(rd_buf_adr),.rd_datab(xpre1_rdata),.dang(dang[1]));
+  //ramblock #(MXXPRE1,MXBADR) uramblock1 (.clock(clock),.wr_wea(wr_en_xpre1),.wr_adra(wr_adr_xpre1),.wr_dataa(xpre1_wdata),.rd_enb(rd_enb),.rd_adrb(rd_buf_adr),.rd_datab(xpre1_rdata),.dang(dang[1]));
+  ramblock #(MXXPRE1,MXBADR) uramblock1 (.clock(clock),.wr_wea(wr_en_xpre1_run3),.wr_adra(wr_adr_xpre1),.wr_dataa(xpre1_wdata),.rd_enb(rd_enb),.rd_adrb(rd_buf_adr),.rd_datab(xpre1_rdata),.dang(dang[1]));
 
 // Store CLCT data post-drift on xtmb
-  ramblock #(MXXTMB, MXBADR) uramblock2 (.clock(clock),.wr_wea(wr_en_xtmb ),.wr_adra(wr_adr_xtmb ),.wr_dataa(xtmb_wdata ),.rd_enb(rd_enb),.rd_adrb(rd_buf_adr),.rd_datab(xtmb_rdata ),.dang(dang[2]));
-  ramblock #(MXCCLUTB, MXBADR) uramblock9 (.clock(clock),.wr_wea(wr_en_xtmb ),.wr_adra(wr_adr_xtmb ),.wr_dataa(xtmb_cclut_wdata ),.rd_enb(rd_enb),.rd_adrb(rd_buf_adr),.rd_datab(xtmb_cclut_rdata ),.dang(dang[9]));
+  //ramblock #(MXXTMB, MXBADR) uramblock2 (.clock(clock),.wr_wea(wr_en_xtmb ),.wr_adra(wr_adr_xtmb ),.wr_dataa(xtmb_wdata ),.rd_enb(rd_enb),.rd_adrb(rd_buf_adr),.rd_datab(xtmb_rdata ),.dang(dang[2]));
+  //ramblock #(MXCCLUTB, MXBADR) uramblock9 (.clock(clock),.wr_wea(wr_en_xtmb ),.wr_adra(wr_adr_xtmb ),.wr_dataa(xtmb_cclut_wdata ),.rd_enb(rd_enb),.rd_adrb(rd_buf_adr),.rd_datab(xtmb_cclut_rdata ),.dang(dang[9]));
+  ramblock #(MXXTMB, MXBADR) uramblock2 (.clock(clock),.wr_wea(wr_en_xtmb_run3),.wr_adra(wr_adr_xtmb_run3),.wr_dataa(xtmb_wdata ),.rd_enb(rd_enb),.rd_adrb(rd_buf_adr),.rd_datab(xtmb_rdata ),.dang(dang[2]));
+  ramblock #(MXCCLUTB, MXBADR) uramblock9 (.clock(clock),.wr_wea(wr_en_xtmb_run3),.wr_adra(wr_adr_xtmb_run3),.wr_dataa(xtmb_cclut_wdata ),.rd_enb(rd_enb),.rd_adrb(rd_buf_adr),.rd_datab(xtmb_cclut_rdata ),.dang(dang[9]));
 
 // Store CLCT counter post-drift on xtmb+1bx
-  ramblock #(MXXTMB1,MXBADR) uramblock3 (.clock(clock),.wr_wea(wr_en_xtmb1),.wr_adra(wr_adr_xtmb1),.wr_dataa(xtmb1_wdata),.rd_enb(rd_enb),.rd_adrb(rd_buf_adr),.rd_datab(xtmb1_rdata),.dang(dang[3]));
+  //ramblock #(MXXTMB1,MXBADR) uramblock3 (.clock(clock),.wr_wea(wr_en_xtmb1),.wr_adra(wr_adr_xtmb1),.wr_dataa(xtmb1_wdata),.rd_enb(rd_enb),.rd_adrb(rd_buf_adr),.rd_datab(xtmb1_rdata),.dang(dang[3]));
+  ramblock #(MXXTMB1,MXBADR) uramblock3 (.clock(clock),.wr_wea(wr_en_xtmb1_run3),.wr_adra(wr_adr_xtmb1_run3),.wr_dataa(xtmb1_wdata),.rd_enb(rd_enb),.rd_adrb(rd_buf_adr),.rd_datab(xtmb1_rdata),.dang(dang[3]));
 
 // Store TMB match data + ALCT data on tmb_trig_pulse
   ramblock #(MXRTMB, MXBADR) uramblock4 (.clock(clock),.wr_wea(wr_en_rtmb ),.wr_adra(wr_adr_rtmb ),.wr_dataa(rtmb_wdata ),.rd_enb(rd_enb),.rd_adrb(rd_buf_adr),.rd_datab(rtmb_rdata ),.dang(dang[4]));

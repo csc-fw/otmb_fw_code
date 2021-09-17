@@ -220,7 +220,7 @@
   reg  [RAM_ADRB-1:0] buf_setback=0;
 
   assign pretrig_setback  = (fifo_pretrig_cfeb >= fifo_pretrig_rpc) ? fifo_pretrig_cfeb : fifo_pretrig_rpc;
-  assign prestore_setback =  READ_ADR_OFFSET+1+PRESTORE_SAFETY;
+  assign prestore_setback =  READ_ADR_OFFSET+1+PRESTORE_SAFETY;//=9
 
   always @(posedge clock) begin
   buf_setback <= pretrig_setback-prestore_setback;

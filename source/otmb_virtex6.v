@@ -1690,6 +1690,7 @@
   wire hmt_fired_pretrig;
   wire hmt_fired_xtmb;
   wire hmt_wr_avail_xtmb;
+  wire [MXBADR-1:0] hmt_wr_adr_xtmb;
 
   wire [3:0]  hmt_delay;
   wire [3:0]  hmt_alct_win_size;
@@ -1734,11 +1735,11 @@
   .hmt_thresh3   (hmt_thresh3[7:0]), // In hmt thresh3
   .hmt_aff_thresh(hmt_aff_thresh[6:0]),//In hmt thresh for active cfeb flag
 
-  .wr_adr_xpre_hmt        (wr_adr_xpre_hmt),  //In wr_adr at pretrigger for hmt
+  .wr_adr_xpre_hmt        (wr_adr_xpre_hmt[MXBADR-1:0]),  //In wr_adr at pretrigger for hmt
   .wr_push_xpre_hmt       (wr_push_xpre_hmt), //In wr_push at pretrigger for hmt
   .wr_avail_xpre_hmt      (wr_avail_xpre_hmt),//In wr_avail at pretrigger for hmt 
 
-  .wr_adr_xpre_hmt_pipe   (wr_adr_xpre_hmt_pipe),  //Out wr_adr at rtmb-1 for hmt 
+  .wr_adr_xpre_hmt_pipe   (wr_adr_xpre_hmt_pipe[MXBADR-1:0]),  //Out wr_adr at rtmb-1 for hmt 
   .wr_push_mux_hmt        (wr_push_mux_hmt),       //Out wr_push at rtmb-1 for hmt
   .wr_avail_xpre_hmt_pipe (wr_avail_xpre_hmt_pipe),//Out wr_avail at rtmb-1 for hmt 
 
@@ -1767,6 +1768,7 @@
   .hmt_pretrig_match   (hmt_pretrig_match),//out hmt & preCLCT
   .hmt_fired_xtmb      (hmt_fired_xtmb),//out, hmt fired preCLCT bx
   .hmt_wr_avail_xtmb   (hmt_wr_avail_xtmb),//Out hmt wr buf available
+  .hmt_wr_adr_xtmb     (hmt_wr_adr_xtmb[MXBADR-1:0]),// Out hmt wr adr at CLCt bx
 
   //tmb port
   .hmt_nhits_bx7       (hmt_nhits_bx7     [NHMTHITB-1:0]),//Out hmt nhits for central bx
@@ -2096,6 +2098,7 @@
   .hmt_pretrig_match   (hmt_pretrig_match),//In hmt & preCLCT
   .hmt_fired_xtmb      (hmt_fired_xtmb),//In, hmt fired preCLCT bx
   .hmt_wr_avail_xtmb   (hmt_wr_avail_xtmb),//In hmt wr buf available
+  .hmt_wr_adr_xtmb     (hmt_wr_adr_xtmb[MXBADR-1:0]),// In hmt wr adr at CLCt bx
   //Sequencer HMT, hmt-alct-clct match 
   .hmt_anode        (hmt_anode[MXHMTB-1:0]),// Out HMT nhits for trigger
   .hmt_cathode      (hmt_cathode[MXHMTB-1:0]),// Out HMT nhits for trigger
@@ -2112,7 +2115,7 @@
   .hmt_fired_or           (hmt_fired_or),//In hmt is fired for match
 
   //to HMT
-  .wr_adr_xpre_hmt        (wr_adr_xpre_hmt),  //Out wr_adr at pretrigger for hmt
+  .wr_adr_xpre_hmt        (wr_adr_xpre_hmt[MXBADR-1:0]),  //Out wr_adr at pretrigger for hmt
   .wr_push_xpre_hmt       (wr_push_xpre_hmt), //Out wr_push at pretrigger for hmt
   .wr_avail_xpre_hmt      (wr_avail_xpre_hmt),//Out wr_avail at pretrigger for hmt 
 
@@ -3026,7 +3029,7 @@
   .hmt_trigger_tmb    (hmt_trigger_tmb[MXHMTB-1:0]),//  In results aligned with ALCT vpf latched for ALCT-CLCT match
   .hmt_trigger_tmb_ro (hmt_trigger_tmb_ro[MXHMTB-1:0]),//In results aligned with ALCT vpf latched for ALCT-CLCT match
 
-  .wr_adr_xpre_hmt_pipe   (wr_adr_xpre_hmt_pipe),  //In wr_adr at rtmb-1 for hmt 
+  .wr_adr_xpre_hmt_pipe   (wr_adr_xpre_hmt_pipe[MXBADR-1:0]),  //In wr_adr at rtmb-1 for hmt 
   .wr_push_mux_hmt        (wr_push_mux_hmt),       //In wr_push at rtmb-1 for hmt
   .wr_avail_xpre_hmt_pipe (wr_avail_xpre_hmt_pipe),//In wr_avail at rtmb-1 for hmt 
 

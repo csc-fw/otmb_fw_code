@@ -729,13 +729,13 @@ module pattern_finder_ccLUT (
 	    pattern_unit_ccLUT upat (
 	    .ly0 (ly0hs_pad[ihs + 5 + k: ihs - 5 + k]),
 	    .ly1 (ly1hs_pad[ihs + 4 + k: ihs - 4 + k]),
-          //.ly2 (ly2hs_pad[ihs + 2 + k: ihs - 2 + k]),	//key on ly2, CCLUT v1
-	    .ly2 (ly2hs_pad[ihs + 0 + k: ihs - 0 + k]),	//key on ly2, CCLUT v2
+          //.ly2 (ly2hs_pad[ihs + 2 + k: ihs - 2 + k]),	//key on ly2, CCLUT v1, 12bits comparator code
+	    .ly2 (ly2hs_pad[ihs + 0 + k: ihs - 0 + k]),	//key on ly2, CCLUT v2, 11bits comparator code
             .ly3 (ly3hs_pad[ihs + 2 + k: ihs - 2 + k]),
             .ly4 (ly4hs_pad[ihs + 4 + k: ihs - 4 + k]),
             .ly5 (ly5hs_pad[ihs + 5 + k: ihs - 5 + k]),
             .pat_nhits (hs_hit[ihs]),
-            .pat_id (hs_pid[ihs]), //pid range 0-4
+            .pat_id (hs_pid[ihs]), //pid range 6-10
             .pat_carry (hs_carry[ihs]));
         end
        endgenerate

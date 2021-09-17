@@ -247,7 +247,7 @@
   parameter MXTBIN        = 5;      // Time bin address width
   parameter MXLY          = 6;      // Number Layers in CSC
   parameter MXDS          = 8;      // Number of DiStrips per layer
-  parameter MXRPC          = 2;      // Number RPCs
+  parameter MXRPC         = 2;      // Number RPCs
   parameter MXRPCB        = 1;      // Number RPC ID bits
   parameter READ_ADR_OFFSET    = 11'd6;    // Number clocks from first address to pretrigger adr latch, trial 04/22/08
   parameter READ_ADR_OFFSET_RPC  = 11'd0;    // Number clocks from first address to pretrigger
