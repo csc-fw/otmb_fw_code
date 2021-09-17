@@ -465,6 +465,7 @@
   cfeb_nlayers_hit,
 
 //HMT results
+  cfeb_allow_hmt_ro,
   hmt_fired_pretrig,
   hmt_active_feb, 
   hmt_pretrig_match,
@@ -1264,6 +1265,7 @@
   input  [MXHITB-1:0]  cfeb_nlayers_hit;    // Number of CSC layers hit
   
 // HMT results
+  input                 cfeb_allow_hmt_ro;
   input                 hmt_fired_pretrig;//hmt fired at pretrigger bx
   input  [MXCFEB-1:0]   hmt_active_feb;
   input                 hmt_pretrig_match;
@@ -2685,8 +2687,8 @@
   wire              active_feb_flag;     // Active FEB flag selection
 
 
-  assign active_feb_flag_pre = clct_push_pretrig;
-  assign active_feb_list_pre = (active_feb_s0[MXCFEB-1:0] & {MXCFEB{active_feb_flag_pre}}) | hmt_active_feb;
+  assign active_feb_flag_pre = clct_push_pretrig || (hmt_fired_pretrig && cfeb_allow_hmt_ro);
+  assign active_feb_list_pre = (active_feb_s0[MXCFEB-1:0] & {MXCFEB{clct_push_pretrig}}) | hmt_active_feb;
 
   assign active_feb_flag_tmb = tmb_trig_write;
   assign active_feb_list_tmb = tmb_aff_list & {MXCFEB{active_feb_flag_tmb}};
@@ -4949,7 +4951,7 @@
       dmb_tx[42]    <= (bpi_active) ? bpi_ad_out[5]     : alct_dmb[16];         // ALCT last frame   **
       dmb_tx[43]    <=                                    alct_dmb[17];         // ALCT first frame
       //Tao, ME1/1->MEX/1, ignore active_feb_list[6:5] 
-      //dmb_tx[45:44] <=                                    active_feb_list[6:5]; // DMB active cfeb list
+      dmb_tx[45:44] <=                                   2'b00; //active_feb_list[6:5]; // DMB active cfeb list
       dmb_tx[46]    <= (bpi_active) ? bpi_ad_out[8]     : dmb_tx_reserved[0];   // Unassigned   **
       dmb_tx[47]    <= (bpi_active) ? bpi_ad_out[9]     : dmb_tx_reserved[1];   // Unassigned   **
       dmb_tx[48]    <=                                    dmb_tx_reserved[2];   // Unassigned

@@ -23,9 +23,9 @@ module lct_quality_run3 (A, C, alct_nhit, clct_nhit,Q);
   always @* begin
 
   if (A && C) begin
-      if      (alct_nhit >=6 || clct_nhit >=6 )     Q=2'b11;
-      else if (alct_nhit >=5 || clct_nhit >=5 )     Q=2'b10;
-      else if (alct_nhit >=4 || clct_nhit >=4 )     Q=2'b01;
+      if      (alct_nhit == 3'd6 || clct_nhit == 3'd6 )     Q=2'b11;
+      else if (alct_nhit == 3'd5 || clct_nhit == 3'd5 )     Q=2'b10;
+      else if (alct_nhit == 3'd4 || clct_nhit == 3'd4 )     Q=2'b01;
       else                                            Q=2'b0;
   end
   else                                           Q=2'b0; // should never be assigned

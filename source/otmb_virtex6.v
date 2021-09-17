@@ -2090,6 +2090,7 @@
   .cfeb_nlayers_hit (cfeb_nlayers_hit[MXHITB-1:0]), // In  Number of CSC layers hit
 
   //Sequencer HMT results, pretrigger level 
+  .cfeb_allow_hmt_ro  (cfeb_allow_hmt_ro), //Out read out CFEB when hmt is fired
   .hmt_fired_pretrig   (hmt_fired_pretrig),//In, hmt fired preCLCT bx
   .hmt_active_feb      (hmt_active_feb[MXCFEB-1:0]),//In hmt active cfeb flags
   .hmt_pretrig_match   (hmt_pretrig_match),//In hmt & preCLCT
