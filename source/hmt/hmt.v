@@ -56,6 +56,9 @@
   hmt_fired_pretrig,//preCLCT bx
   hmt_active_feb,
   hmt_pretrig_match,
+  hmt_fired_xtmb,//CLCT bx
+  hmt_wr_avail_xtmb,
+  hmt_wr_adr_xtmb,
 
   hmt_nhits_bx7,//tmb match bx cathode hmt
   hmt_nhits_bx678,
@@ -141,6 +144,9 @@
   output [MXCFEB-1  :0]   hmt_active_feb;
   output  hmt_pretrig_match;
 
+  output  hmt_fired_xtmb;//CLCT bx
+  output  hmt_wr_avail_xtmb;//CLCT bx
+  output  [MXBADR-1:0] hmt_wr_adr_xtmb;
   //output [MXHMTB-1:0]     hmt_cathode_xtmb; //CLCT bx
 
   output [NHMTHITB-1:0]   hmt_nhits_bx7;//CLCT bx
@@ -265,10 +271,16 @@
   end
 
   wire [MXHMTB-1  :0] hmt_cathode_dly;
+  wire wr_avail_xtmb_hmt_dly;
+  wire [MXBADR-1:0] wr_adr_xtmb_hmt_dly;
   srl16e_bbl #(MXHMTB)      udhmttrig    ( .clock(clock), .ce(1'b1), .adr(hmt_postdrift_delay-4'd1), .d(hmt_cathode_s0    ),    .q(hmt_cathode_dly      ));
+  srl16e_bbl #(1)           udhmtavailxtmb ( .clock(clock), .ce(1'b1), .adr(hmt_delay-4'd1),           .d(wr_avail_xpre_hmt  ), .q(wr_avail_xtmb_hmt_dly   ));
+  srl16e_bbl #(MXBADR)      udhmtadrxtmb   ( .clock(clock), .ce(1'b1), .adr(hmt_delay-4'd1),           .d(wr_adr_xpre_hmt    ), .q(wr_adr_xtmb_hmt_dly      ));
 
   wire [MXHMTB-1  :0] hmt_cathode_xtmb      = (hmt_postdrift_delay == 4'd0) ? hmt_cathode_s0            : hmt_cathode_dly;
-  wire hmt_fired_xtmb = (|hmt_cathode_xtmb[1:0]) && (!hmt_outtime_check || (~|hmt_cathode_xtmb[3:2]));
+  assign hmt_wr_avail_xtmb  = (hmt_delay  == 4'd0) ? wr_avail_xpre_hmt : wr_avail_xtmb_hmt_dly;
+  assign hmt_wr_adr_xtmb    = (hmt_delay  == 4'd0) ? wr_adr_xpre_hmt   : wr_adr_xtmb_hmt_dly;
+  assign hmt_fired_xtmb = (|hmt_cathode_xtmb[1:0]) && (!hmt_outtime_check || (~|hmt_cathode_xtmb[3:2]));
 
 //------------------------------------------------------------------------------------------------------------------
 //  HMT-ALCT match
