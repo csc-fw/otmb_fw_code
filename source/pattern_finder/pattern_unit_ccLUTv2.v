@@ -30,7 +30,7 @@
 // convention of 12-bits comparator code: [11:0]
 // [1:0] is the first layer and [11:10] is the last layer (layer6)
 // for each layer: 00 means no hit, 01 means 1st HS, 10 means 2nd HS, 11 means 3rd HS????
-  module pattern_unit_ccLUT
+  module pattern_unit_ccLUTv2
   (
 // Inputs
 //CCLUT, v2
