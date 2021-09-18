@@ -226,7 +226,8 @@
   
     //CCLUT
   //parameter MXSUBKEYBX = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
-  parameter MXPATC   = 11;                // Pattern Carry Bits
+  //parameter MXPATC   = 11;                // Pattern Carry Bits
+  parameter MXPATC   = 12;                // Pattern Carry Bits
   parameter MXOFFSB = 4;                 // Quarter-strip bits
   parameter MXBNDB  = 5;                 // Bend bits, 4bits for value, 1bit for sign
   
@@ -4670,10 +4671,10 @@ wire [15:0] gemB_bxn_counter;
   .clctf_xtmb (clctf_xtmb[MXCFEB-1:0]),  // In  Active cfeb list to TMB
   .clct0_bnd_xtmb   (clct0_bnd_xtmb[MXBNDB - 1   : 0]), //In
   .clct0_xky_xtmb   (clct0_xky_xtmb[MXXKYB-1 : 0]),    //In
-  .clct0_carry_xtmb (clct0_carry_xtmb[MXPATC-1:0]),  // In  First  CLCT
+  //.clct0_carry_xtmb (clct0_carry_xtmb[MXPATC-1:0]),  // In  First  CLCT
   .clct1_bnd_xtmb   (clct1_bnd_xtmb[MXBNDB - 1   : 0]),  // In
   .clct1_xky_xtmb   (clct1_xky_xtmb[MXXKYB-1 : 0]),   // In 
-  .clct1_carry_xtmb (clct1_carry_xtmb[MXPATC-1:0]),  // In  Second CLCT
+  //.clct1_carry_xtmb (clct1_carry_xtmb[MXPATC-1:0]),  // In  Second CLCT
   .bx0_xmpc   (bx0_xmpc),                // In  bx0 to mpc
 
   .tmb_trig_pulse    (tmb_trig_pulse),           // Out  ALCT or CLCT or both triggered

@@ -340,10 +340,10 @@
   //ccLUT
   clct0_bnd_xtmb,
   clct0_xky_xtmb,
-  clct0_carry_xtmb, // Out  First  CLCT
+//  clct0_carry_xtmb, // Out  First  CLCT
   clct1_bnd_xtmb,
   clct1_xky_xtmb,
-  clct1_carry_xtmb, // Out  Second CLCT
+//  clct1_carry_xtmb, // Out  Second CLCT
   bx0_xmpc,
 
 
@@ -708,7 +708,7 @@
   parameter MXMPCDLY   = 4;  // MPC delay time bits
 
   //CCLUT
-  parameter MXPATC   = 11;                // Pattern Carry Bits
+  //parameter MXPATC   = 11;                // Pattern Carry Bits
   parameter MXOFFSB  = 4;                 // Quarter-strip bits
   parameter MXBNDB   = 5;                 // Bend bits
   parameter MXXKYB   = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
@@ -960,10 +960,10 @@
 
   input [MXBNDB - 1   : 0] clct0_bnd_xtmb; // new bending 
   input [MXXKYB-1     : 0] clct0_xky_xtmb; // new position with 1/8 precision
-  input [MXPATC-1     : 0] clct0_carry_xtmb; // CC code 
+  //input [MXPATC-1     : 0] clct0_carry_xtmb; // CC code 
   input [MXBNDB - 1   : 0] clct1_bnd_xtmb; // new bending 
   input [MXXKYB-1     : 0] clct1_xky_xtmb; // new position with 1/8 precision
-  input [MXPATC-1     : 0] clct1_carry_xtmb; // CC code 
+  //input [MXPATC-1     : 0] clct1_carry_xtmb; // CC code 
 
   output                tmb_trig_pulse;    // ALCT or CLCT or both triggered
   output                tmb_trig_keep;     // ALCT or CLCT or both triggered, and trigger is allowed

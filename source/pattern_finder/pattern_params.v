@@ -14,7 +14,7 @@ parameter MXPIDB  = 4;                 // Pattern ID bits
 parameter MXHITB  = 3;                 // Hits on pattern bits
 parameter MXPATB  = MXHITB + MXPIDB;   // Pattern bits
 
-parameter MXPATC  = 11;                // Pattern Carry Bits
+parameter MXPATC  = 12;                // Pattern Carry Bits
 
 parameter MXPID   = 4;                // Number of patterns
 parameter MIPID   = 0;

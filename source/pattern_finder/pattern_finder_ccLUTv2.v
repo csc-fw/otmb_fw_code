@@ -19,7 +19,7 @@
 // 09/01/2020  add CCLUT, v1
 // 10/01/2020  add CCLUT, v2
 //-------------------------------------------------------------------------------------------------------------------
-module pattern_finder_ccLUT (
+module pattern_finder_ccLUTv2 (
   // Clock Ports
   clock,
   global_reset,
@@ -69,6 +69,12 @@ module pattern_finder_ccLUT (
   cfeb_layer_trig,
   cfeb_layer_or,
   cfeb_nlayers_hit,
+
+  ////HMT part
+  //hmt_me1a_enable, 
+  //hmt_nhits_trig,
+  //hmt_nhits_trig_bx678,
+  //hmt_nhits_trig_bx2345,
 
   drift_delay,
 // Algo2016: configuration
@@ -207,6 +213,11 @@ module pattern_finder_ccLUT (
   output                 cfeb_layer_trig;  // Layer pretrigger
   output [MXLY - 1: 0]   cfeb_layer_or;    // OR of hstrips on each layer
   output [MXHITB - 1: 0] cfeb_nlayers_hit; // Number of CSC layers hit
+
+  //input hmt_me1a_enable;
+  //output [9:0] hmt_nhits_trig;
+  //output [9:0] hmt_nhits_trig_bx2345;
+  //output [9:0] hmt_nhits_trig_bx678;
 
   // 2nd CLCT separation RAM Ports
   input          clct_sep_src;       // CLCT separation source 1=VME, 0=RAM
@@ -722,22 +733,16 @@ module pattern_finder_ccLUT (
   // CCLUT v2 version:
   wire [MXHSXA - 1 + 5 + k: MXHSXB - 5 + k] ly0hs_pad_me1a; // JG, better to use MXKEYX here rather than MXHSXA
   wire [MXHSXA - 1 + 4 + k: MXHSXB - 4 + k] ly1hs_pad_me1a;
-`ifdef CCLUT_V2
+//wire [MXHSXA - 1 + 2 + k: MXHSXB - 2 + k] ly2hs_pad_me1a; // 228:133, CCLUTv1
   wire [MXHSXA - 1 + 0 + k: MXHSXB - 0 + k] ly2hs_pad_me1a; // 228:133, CCLUTv2
-`else
-  wire [MXHSXA - 1 + 2 + k: MXHSXB - 2 + k] ly2hs_pad_me1a; // 228:133, CCLUTv1
-`endif
   wire [MXHSXA - 1 + 2 + k: MXHSXB - 2 + k] ly3hs_pad_me1a;
   wire [MXHSXA - 1 + 4 + k: MXHSXB - 4 + k] ly4hs_pad_me1a;
   wire [MXHSXA - 1 + 5 + k: MXHSXB - 5 + k] ly5hs_pad_me1a;
 
   wire [MXHSXB - 1 + 5 + k: 0 - 5 + k] ly0hs_pad_me1b;
   wire [MXHSXB - 1 + 4 + k: 0 - 4 + k] ly1hs_pad_me1b;
-`ifdef CCLUT_V2
+//wire [MXHSXB - 1 + 2 + k: 0 - 2 + k] ly2hs_pad_me1b; // 132:5, CCLUTv1
   wire [MXHSXB - 1 + 0 + k: 0 - 0 + k] ly2hs_pad_me1b; // 132:5, CCLUTv2
-`else
-  wire [MXHSXB - 1 + 2 + k: 0 - 2 + k] ly2hs_pad_me1b; // 132:5, CCLUTv1
-`endif
   wire [MXHSXB - 1 + 2 + k: 0 - 2 + k] ly3hs_pad_me1b;
   wire [MXHSXB - 1 + 4 + k: 0 - 4 + k] ly4hs_pad_me1b;
   wire [MXHSXB - 1 + 5 + k: 0 - 5 + k] ly5hs_pad_me1b;
@@ -745,11 +750,8 @@ module pattern_finder_ccLUT (
   // Pad 0s beyond CSC edges ME1A hs128-223, isolate it from ME1B
   assign ly0hs_pad_me1a = { 5'b00000, ly0hs[223: 128], 5'b00000 }; // JG, later use MXKEYX-1:MXHSXB here.
   assign ly1hs_pad_me1a = {  4'b0000, ly1hs[223: 128], 4'b0000  }; // JG, MXHSXB=128 here... for non-ME1/1 upgrades use MXHSXB=0
-`ifdef CCLUT_V2
+//assign ly2hs_pad_me1a = {    2'b00, ly2hs[223: 128], 2'b00    }; // CCLUTv1, MXKEYX is based on nCFEB, so that auto-corrects for upgrades
   assign ly2hs_pad_me1a = {           ly2hs[223: 128]           }; // CCLUTv2, MXKEYX is based on nCFEB, so that auto-corrects for upgrades
-`else
-  assign ly2hs_pad_me1a = {    2'b00, ly2hs[223: 128], 2'b00    }; // CCLUTv1, MXKEYX is based on nCFEB, so that auto-corrects for upgrades
-`endif
   assign ly3hs_pad_me1a = {    2'b00, ly3hs[223: 128], 2'b00    };
   assign ly4hs_pad_me1a = {  4'b0000, ly4hs[223: 128], 4'b0000  };
   assign ly5hs_pad_me1a = { 5'b00000, ly5hs[223: 128], 5'b00000 };
@@ -757,11 +759,8 @@ module pattern_finder_ccLUT (
   // Pad 0s beyond CSC edges ME1B hs0-127, isolate it from ME1A
   assign ly0hs_pad_me1b = { 5'b00000, ly0hs[127: 0], 5'b00000 };
   assign ly1hs_pad_me1b = {  4'b0000, ly1hs[127: 0], 4'b0000  };
-`ifdef CCLUT_V2
+//assign ly2hs_pad_me1b = {    2'b00, ly2hs[127: 0], 2'b00    }; //CCLUTv1
   assign ly2hs_pad_me1b = {           ly2hs[127: 0]           };// CCLUTv2
-`else
-  assign ly2hs_pad_me1b = {    2'b00, ly2hs[127: 0], 2'b00    }; //CCLUTv1
-`endif
   assign ly3hs_pad_me1b = {    2'b00, ly3hs[127: 0], 2'b00    };
   assign ly4hs_pad_me1b = {  4'b0000, ly4hs[127: 0], 4'b0000  };
   assign ly5hs_pad_me1b = { 5'b00000, ly5hs[127: 0], 5'b00000 };
@@ -800,13 +799,12 @@ module pattern_finder_ccLUT (
   //  end
   //endgenerate
 
-`ifdef CCLUT_V2
  //-------------------------------------------------------------------------------------------------------------------
  // CCLUT v2 version:
   //new pattern finding for k=5, CCLUT v2, Tao
   generate  
     for (ihs = 128; ihs <= 223; ihs = ihs + 1) begin: patgen_me1a  // JG, later use MXHSXB, MXKEYX-1 here.
-      pattern_unit_ccLUT upat_me1a (
+      pattern_unit_ccLUTv2 upat_me1a (
         .ly0 (ly0hs_pad_me1a[ihs + 5 + k: ihs - 5 + k]),
         .ly1 (ly1hs_pad_me1a[ihs + 4 + k: ihs - 4 + k]),
 //      .ly2 (ly2hs_pad_me1a[ihs + 2 + k: ihs - 2 + k]),  //key on ly2
@@ -823,7 +821,7 @@ module pattern_finder_ccLUT (
 
   generate
     for (ihs = 0; ihs <= 127; ihs = ihs + 1) begin: patgen_me1b
-      pattern_unit_ccLUT upat_me1b (
+      pattern_unit_ccLUTv2 upat_me1b (
         .ly0 (ly0hs_pad_me1b[ihs + 5 + k: ihs - 5 + k]),
         .ly1 (ly1hs_pad_me1b[ihs + 4 + k: ihs - 4 + k]),
 //      .ly2 (ly2hs_pad_me1b[ihs + 2 + k: ihs - 2 + k]),  //key on ly2, CCLUT v1
@@ -837,41 +835,6 @@ module pattern_finder_ccLUT (
     );
     end
   endgenerate
-`else
- // CCLUT v1 version:
-  //new pattern finding for k=5, CCLUT v2, Tao
-  generate  
-    for (ihs = 128; ihs <= 223; ihs = ihs + 1) begin: patgen_me1a  // JG, later use MXHSXB, MXKEYX-1 here.
-      pattern_unit_ccLUT upat_me1a (
-        .ly0 (ly0hs_pad_me1a[ihs + 5 + k: ihs - 5 + k]),
-        .ly1 (ly1hs_pad_me1a[ihs + 4 + k: ihs - 4 + k]),
-        .ly2 (ly2hs_pad_me1a[ihs + 2 + k: ihs - 2 + k]),  //key on ly2, CCLUT v1
-        .ly3 (ly3hs_pad_me1a[ihs + 2 + k: ihs - 2 + k]),
-        .ly4 (ly4hs_pad_me1a[ihs + 4 + k: ihs - 4 + k]),
-        .ly5 (ly5hs_pad_me1a[ihs + 5 + k: ihs - 5 + k]),
-        .pat_nhits (hs_hit[ihs]),
-        .pat_id (hs_pid[ihs]),
-        .pat_carry (hs_carry[ihs])
-    );
-    end
-  endgenerate
-
-  generate
-    for (ihs = 0; ihs <= 127; ihs = ihs + 1) begin: patgen_me1b
-      pattern_unit_ccLUT upat_me1b (
-        .ly0 (ly0hs_pad_me1b[ihs + 5 + k: ihs - 5 + k]),
-        .ly1 (ly1hs_pad_me1b[ihs + 4 + k: ihs - 4 + k]),
-        .ly2 (ly2hs_pad_me1b[ihs + 2 + k: ihs - 2 + k]),  //key on ly2, CCLUT v1
-        .ly3 (ly3hs_pad_me1b[ihs + 2 + k: ihs - 2 + k]),
-        .ly4 (ly4hs_pad_me1b[ihs + 4 + k: ihs - 4 + k]),
-        .ly5 (ly5hs_pad_me1b[ihs + 5 + k: ihs - 5 + k]),
-        .pat_nhits (hs_hit[ihs]),
-        .pat_id (hs_pid[ihs]),
-        .pat_carry (hs_carry[ihs])
-    );
-    end
-  endgenerate
-`endif
 
 
 
@@ -887,23 +850,23 @@ module pattern_finder_ccLUT (
 	if ((ihs/MXHS) > 3) begin // Reverse ME1/1a
            hs_hit_s0ab[ihs] <= cfeb_en_ff[10-(ihs/MXHS)] ? hs_hit[ihs] : 3'b0;
            hs_pid_s0ab[ihs] <= cfeb_en_ff[10-(ihs/MXHS)] ? hs_pid[ihs] : 4'b0;
-           hs_carry_s0ab[ihs] <= cfeb_en_ff[10-(ihs/MXHS)] ? hs_carry[ihs] : 12'b0;
+           hs_carry_s0ab[ihs] <= cfeb_en_ff[10-(ihs/MXHS)] ? hs_carry[ihs] : 11'b0;
 	end
 	else begin
           hs_hit_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_hit[ihs] : 3'b0;
           hs_pid_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_pid[ihs] : 4'b0;
-          hs_carry_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_carry[ihs] : 12'b0;
+          hs_carry_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_carry[ihs] : 11'b0;
 	end 
 `elsif CSC_TYPE_D
 	if ((ihs/MXHS) > 3) begin
            hs_hit_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_hit[ihs] : 3'b0;
            hs_pid_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_pid[ihs] : 4'b0;
-           hs_carry_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_carry[ihs] : 12'b0;
+           hs_carry_s0ab[ihs] <= cfeb_en_ff[(ihs/MXHS)] ? hs_carry[ihs] : 11'b0;
 	end
 	else begin    // Reverse ME1/1b
           hs_hit_s0ab[ihs] <= cfeb_en_ff[3-(ihs/MXHS)] ? hs_hit[ihs] : 3'b0;
           hs_pid_s0ab[ihs] <= cfeb_en_ff[3-(ihs/MXHS)] ? hs_pid[ihs] : 4'b0;
-          hs_carry_s0ab[ihs] <= cfeb_en_ff[3-(ihs/MXHS)] ? hs_carry[ihs] : 12'b0;
+          hs_carry_s0ab[ihs] <= cfeb_en_ff[3-(ihs/MXHS)] ? hs_carry[ihs] : 11'b0;
 	end 
 `endif
       end
@@ -919,7 +882,7 @@ module pattern_finder_ccLUT (
       always @(posedge clock) begin
         hs_hit_s0[ihs]   <= (algo2016_use_dead_time_zone & hs_dead_drift[ihs]) ? 3'b0  : hs_hit_s0ab[ihs];
         hs_pid_s0[ihs]   <= (algo2016_use_dead_time_zone & hs_dead_drift[ihs]) ? 4'b0  : hs_pid_s0ab[ihs];
-        hs_carry_s0[ihs] <= (algo2016_use_dead_time_zone & hs_dead_drift[ihs]) ? 12'b0 : hs_carry_s0ab[ihs];
+        hs_carry_s0[ihs] <= (algo2016_use_dead_time_zone & hs_dead_drift[ihs]) ? 11'b0 : hs_carry_s0ab[ihs];
       end
     end
   endgenerate
@@ -1358,10 +1321,17 @@ module pattern_finder_ccLUT (
   reg [MXLY - 1: 0]   hs_layer_or;
   reg [MXHITB - 1: 0] hs_nlayers_hit;
 
+  //reg [9:0]           hmt_nhits_trig;
+  //reg [9:0]           hmt_nhits_trig_bx678;
+  //reg [9:0]           hmt_nhits_trig_bx2345;
+
   always @(posedge clock) begin
     hs_layer_trig  <= hs_layer_trig_dly;
     hs_layer_or    <= hs_layer_or_dly;
     hs_nlayers_hit <= hs_nlayers_hit_dly;
+    //hmt_nhits_trig <= nhits_trig_dly; 
+    //hmt_nhits_trig_bx678   <= nhits_trig_dly_bx678; 
+    //hmt_nhits_trig_bx2345  <= nhits_trig_dly_bx2345; 
   end
 
 // Stage 6B no change for CCLUT, Tao
