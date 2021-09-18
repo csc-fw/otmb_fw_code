@@ -693,11 +693,8 @@ module pattern_finder_ccLUT (
 // CCLUT v2 version:
 	wire [MXHSX-1+5+k:-5+k]  ly0hs_pad;
 	wire [MXHSX-1+4+k:-4+k]  ly1hs_pad;
-`ifdef CCLUT_V2
+///	wire [MXHSX-1+2+k:-2+k]  ly2hs_pad;//CCLUTv1
 	wire [MXHSX-1+0+k:-0+k]  ly2hs_pad;//CCLUTv2
-`else
-	wire [MXHSX-1+2+k:-2+k]  ly2hs_pad;//CCLUTv1
-`endif
 	wire [MXHSX-1+2+k:-2+k]  ly3hs_pad;
 	wire [MXHSX-1+4+k:-4+k]  ly4hs_pad;
 	wire [MXHSX-1+5+k:-5+k]  ly5hs_pad;
@@ -706,11 +703,8 @@ module pattern_finder_ccLUT (
 // Pad 0s beyond csc edges: whole CSC
 	assign ly0hs_pad = {5'b00000, ly0hs[MXHSX-1+j:j],              5'b00000};
 	assign ly1hs_pad = {4'b0000,  ly1hs[MXHSX-1+j:j], ly1hs[-1+j], 3'b000  };
- `ifdef CCLUT_V2
+///	assign ly2hs_pad = {2'b00,    ly2hs[MXHSX-1+j:j],              2'b00   };//CCLUTv1
 	assign ly2hs_pad = {          ly2hs[MXHSX-1+j:j]                       };//CCLUTv2
- `else
-	assign ly2hs_pad = {2'b00,    ly2hs[MXHSX-1+j:j],              2'b00   };//CCLUTv1
- `endif
 	assign ly3hs_pad = {2'b00,    ly3hs[MXHSX-1+j:j], ly3hs[-1+j], 1'b0    };
 	assign ly4hs_pad = {4'b0000,  ly4hs[MXHSX-1+j:j],              4'b0000 };
 	assign ly5hs_pad = {5'b00000, ly5hs[MXHSX-1+j:j], ly5hs[-1+j], 4'b0000 };
@@ -718,11 +712,8 @@ module pattern_finder_ccLUT (
 `else
 	assign ly0hs_pad = {5'b00000, me234_ly0hs[MXHSX-1:0], 5'b00000};
 	assign ly1hs_pad = {4'b0000,  me234_ly1hs[MXHSX-1:0], 4'b0000 };
- `ifdef CCLUT_V2
+///	assign ly2hs_pad = {2'b00,    me234_ly2hs[MXHSX-1:0], 2'b00   };//CCLUTv1
 	assign ly2hs_pad = {          me234_ly2hs[MXHSX-1:0]          };//CCLUTv2
- `else
-	assign ly2hs_pad = {2'b00,    me234_ly2hs[MXHSX-1:0], 2'b00   };//CCLUTv1
- `endif
 	assign ly3hs_pad = {2'b00,    me234_ly3hs[MXHSX-1:0], 2'b00   };
 	assign ly4hs_pad = {4'b0000,  me234_ly4hs[MXHSX-1:0], 4'b0000 };
 	assign ly5hs_pad = {5'b00000, me234_ly5hs[MXHSX-1:0], 5'b00000};
@@ -733,12 +724,12 @@ module pattern_finder_ccLUT (
 	wire [MXPIDB-1:0] hs_pid [MXHSX-1:0];
         wire [MXPATC - 1: 0] hs_carry [MXHSX - 1: 0]; //Tao CCLUT, carry->comparator code 
 
- `ifdef CCLUT_V2
 	generate
 	for (ihs=0; ihs<=MXHSX-1; ihs=ihs+1) begin: patgen
-	    pattern_unit_ccLUTv2 upat (
+	    pattern_unit_ccLUT upat (
 	    .ly0 (ly0hs_pad[ihs + 5 + k: ihs - 5 + k]),
 	    .ly1 (ly1hs_pad[ihs + 4 + k: ihs - 4 + k]),
+          //.ly2 (ly2hs_pad[ihs + 2 + k: ihs - 2 + k]),	//key on ly2, CCLUT v1, 12bits comparator code
 	    .ly2 (ly2hs_pad[ihs + 0 + k: ihs - 0 + k]),	//key on ly2, CCLUT v2, 11bits comparator code
             .ly3 (ly3hs_pad[ihs + 2 + k: ihs - 2 + k]),
             .ly4 (ly4hs_pad[ihs + 4 + k: ihs - 4 + k]),
@@ -748,22 +739,6 @@ module pattern_finder_ccLUT (
             .pat_carry (hs_carry[ihs]));
         end
        endgenerate
- `else
-	generate
-	for (ihs=0; ihs<=MXHSX-1; ihs=ihs+1) begin: patgen
-	    pattern_unit_ccLUT upat (
-	    .ly0 (ly0hs_pad[ihs + 5 + k: ihs - 5 + k]),
-	    .ly1 (ly1hs_pad[ihs + 4 + k: ihs - 4 + k]),
-            .ly2 (ly2hs_pad[ihs + 2 + k: ihs - 2 + k]),	//key on ly2, CCLUT v1, 12bits comparator code
-            .ly3 (ly3hs_pad[ihs + 2 + k: ihs - 2 + k]),
-            .ly4 (ly4hs_pad[ihs + 4 + k: ihs - 4 + k]),
-            .ly5 (ly5hs_pad[ihs + 5 + k: ihs - 5 + k]),
-            .pat_nhits (hs_hit[ihs]),
-            .pat_id (hs_pid[ihs]), //pid range 6-10
-            .pat_carry (hs_carry[ihs]));
-        end
-       endgenerate
- `endif
 
 // before CCLUT, Tao
 //`ifdef STAGGER_HS_CSC

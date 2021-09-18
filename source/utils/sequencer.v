@@ -1171,7 +1171,8 @@
   parameter MXORBIT      = 30;        // Number orbit counter bits
 
   //CCLUT
-  parameter MXPATC  = 11;                // Pattern Carry Bits
+  //parameter MXPATC  = 11;                // Pattern Carry Bits
+  parameter MXPATC  = 12;                // Pattern Carry Bits
   parameter MXOFFSB = 4;                 // Quarter-strip bits
   parameter MXQLTB  = 9;                 // Fit quality bits
   parameter MXBNDB  = 5;                 // Bend bits
@@ -4362,7 +4363,7 @@
   assign  header09_[18:15]  =  0;              // DDU+DMB control flags
 
   //assign  header10_[14:0]    =  r_pretrig_counter[29:15];  // CLCT pre-trigger counter
-  assign  header10_run3_[10: 0]   =  r_clct0_carry_xtmb[MXPATC-1:0];
+  assign  header10_run3_[10: 0]   =  r_clct0_carry_xtmb[MXPATC-2:0];//Tao warning!!
   assign  header10_run3_[11]      =  run3_trig_df;
   assign  header10_run3_[13:12]   =  r_clct0_xky_xtmb[1:0];
   assign  header10_run3_[14]      =  r_hmt_nhits_bx678_header[0];
@@ -4377,7 +4378,7 @@
   assign  header13_[14:0]   =  r_trig_counter[14:0];    // TMB trigger counter, stop on ovf
   assign  header13_[18:15]  =  0;              // DDU+DMB control flags
   //assign  header14_[14:0]    =  r_trig_counter[29:15];    // TMB trigger counter
-  assign  header14_run3_[10: 0]   =  r_clct1_carry_xtmb[MXPATC-1:0];
+  assign  header14_run3_[10: 0]   =  r_clct1_carry_xtmb[MXPATC-2:0];//Tao warning!!
   assign  header14_run3_[11]      =  1'b0;//????
   assign  header14_run3_[13:12]   =  r_clct1_xky_xtmb[1:0];
   assign  header14_run3_[14]      =  r_hmt_nhits_bx678_header[1];
