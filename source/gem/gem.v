@@ -101,6 +101,7 @@ module gem (
     input  [1:0]           fifo_sel,   // FIFO RAM read cluster address 0-7
     output [RAM_WIDTH-1:0] fifo_rdata, // FIFO RAM read data
 
+    input                 gem_fiber_enable,
     //GEM hot vfat mask
     input  [MXFEB-1:0]    gemA_vfat_hcm,
     input  [MXFEB-1:0]    gemB_vfat_hcm,
@@ -361,8 +362,8 @@ parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
     assign cluster     [iclst] = (pass_ff) ? cluster_raw [iclst] : cluster_inj [iclst];
     assign cluster_raw [iclst] = gtx_rx_data[(iclst+1)*14-1 : iclst*14];
     assign cluster_inj [iclst] = gem_inj[iclst][13:0];
-    //assign adr         [iclst] = cluster[iclst][10:0];
     assign cnt         [iclst] = cluster[iclst][13:11];
+    //assign adr         [iclst] = cluster[iclst][10:0];
     //assign vpf         [iclst] = ~(adr[iclst][10:9]==2'b11);
 
     //v2 GEM trigger format
@@ -807,10 +808,10 @@ parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
 // outputs
 //----------------------------------------------------------------------------------------------------------------------
 
-  assign vpf0 = vpf[0] & ~cluster_maskout[0];
-  assign vpf1 = vpf[1] & ~cluster_maskout[1];
-  assign vpf2 = vpf[2] & ~cluster_maskout[2];
-  assign vpf3 = vpf[3] & ~cluster_maskout[3];
+  assign vpf0 = vpf[0] & ~cluster_maskout[0] & gem_fiber_enable;
+  assign vpf1 = vpf[1] & ~cluster_maskout[1] & gem_fiber_enable;
+  assign vpf2 = vpf[2] & ~cluster_maskout[2] & gem_fiber_enable;
+  assign vpf3 = vpf[3] & ~cluster_maskout[3] & gem_fiber_enable;
 
   assign  cluster0      = cluster [0];
   assign  cluster1      = cluster [1];

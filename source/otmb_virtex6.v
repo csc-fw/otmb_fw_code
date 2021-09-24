@@ -1725,30 +1725,30 @@
   wire [3:0] gem_fiber_enable = {gemB_fiber_enable, gemA_fiber_enable};
   wire gem_enable = (|gem_fiber_enable) && (gem_me1a_match_enable || gem_me1b_match_enable);
 
-  reg  [MXCLUSTER_CHAMBER-1:0] gemA_cluster_enable = 8'b0;
-  reg  [MXCLUSTER_CHAMBER-1:0] gemB_cluster_enable = 8'b0;
-  always @ (posedge clock ) begin
-      gemA_cluster_enable <= {
-      gemA_fiber_enable[1],
-      gemA_fiber_enable[1],
-      gemA_fiber_enable[1],
-      gemA_fiber_enable[1],
-      gemA_fiber_enable[0],
-      gemA_fiber_enable[0],
-      gemA_fiber_enable[0],
-      gemA_fiber_enable[0]
-      };
-      gemB_cluster_enable <= {
-      gemB_fiber_enable[1],
-      gemB_fiber_enable[1],
-      gemB_fiber_enable[1],
-      gemB_fiber_enable[1],
-      gemB_fiber_enable[0],
-      gemB_fiber_enable[0],
-      gemB_fiber_enable[0],
-      gemB_fiber_enable[0]
-      };
-  end
+  //reg  [MXCLUSTER_CHAMBER-1:0] gemA_cluster_enable = 8'b0;
+  //reg  [MXCLUSTER_CHAMBER-1:0] gemB_cluster_enable = 8'b0;
+  //always @ (posedge clock ) begin
+  //    gemA_cluster_enable <= {
+  //    gemA_fiber_enable[1],
+  //    gemA_fiber_enable[1],
+  //    gemA_fiber_enable[1],
+  //    gemA_fiber_enable[1],
+  //    gemA_fiber_enable[0],
+  //    gemA_fiber_enable[0],
+  //    gemA_fiber_enable[0],
+  //    gemA_fiber_enable[0]
+  //    };
+  //    gemB_cluster_enable <= {
+  //    gemB_fiber_enable[1],
+  //    gemB_fiber_enable[1],
+  //    gemB_fiber_enable[1],
+  //    gemB_fiber_enable[1],
+  //    gemB_fiber_enable[0],
+  //    gemB_fiber_enable[0],
+  //    gemB_fiber_enable[0],
+  //    gemB_fiber_enable[0]
+  //    };
+  //end
 
   wire [9:0]   gem_debug_fifo_adr;    // FIFO RAM read tbin address
   wire [1:0]   gem_debug_fifo_sel;    // FIFO RAM read layer clusters 0-3
@@ -1901,6 +1901,7 @@
 
   .parity_err_gem (parity_err_gem[igem]),  // RAW hits RAM parity error
 
+  .gem_fiber_enable  (gem_fiber_enable[igem]), //
   .gemA_vfat_hcm     (gemA_vfat_hcm), // In GEM hot vfat mask
   .gemB_vfat_hcm     (gemB_vfat_hcm), // In GEM hot vfat mask
 
@@ -2328,7 +2329,7 @@ end
 	.clock (clock),    //in clock
 
         .evenchamber       (evenchamber),   //in,  even pair or not
-        .gem_match_enable  (gemA_cluster_enable[iclst_csc]),//In enable GEMA for GEMCSC match or not, if not, vpf is invalid from here
+        //.gem_match_enable  (gemA_cluster_enable[iclst_csc]),//In enable GEMA for GEMCSC match or not, if not, vpf is invalid from here
         .gem_clct_deltahs  (gem_clct_deltahs), // In matching window in halfstrip direction
         .gem_alct_deltawire(gem_alct_deltawire), //In  matching window in wiregroup direction
 
@@ -2362,7 +2363,7 @@ end
 	.clock (clock),
 
         .evenchamber       (evenchamber),   // even pair or not
-        .gem_match_enable  (gemB_cluster_enable[iclst_csc]),
+        //.gem_match_enable  (gemB_cluster_enable[iclst_csc]),
         .gem_clct_deltahs  (gem_clct_deltahs), // matching window in halfstrip direction
         .gem_alct_deltawire(gem_alct_deltawire), // matching window in wiregroup direction
 

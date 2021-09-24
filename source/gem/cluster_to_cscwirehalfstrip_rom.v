@@ -14,7 +14,7 @@ module cluster_to_cscwirehalfstrip_rom (
 	input                     clock,
 
         input                     evenchamber,   // even pair or not
-        input                     gem_match_enable,
+        //input                     gem_match_enable,
         input      [4:0]          gem_clct_deltahs, // matching window in halfstrip direction
         input      [2:0]          gem_alct_deltawire, // matching window in wiregroup direction
         input                     gem_me1a_match_enable,
@@ -232,7 +232,7 @@ always @(posedge logic_clock) begin
 
     //also add cluster_pad, roll, vpf here to align them in timing!!!
     reg_cluster0           <= cluster0;
-    reg_cluster0_vpf       <= cluster0_vpf && gem_match_enable && (gem_me1b_match_enable || ((cluster0_roll== 3'd7) && gem_me1a_match_enable));
+    reg_cluster0_vpf       <= cluster0_vpf && (gem_me1b_match_enable || ((cluster0_roll== 3'd7) && gem_me1a_match_enable));
     //reg_cluster0_roll      <= cluster0_roll;
     //reg_cluster0_pad       <= cluster0_pad;
     //reg_cluster0_size      <= cluster0_size;
