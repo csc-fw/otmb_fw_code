@@ -800,6 +800,7 @@
   tmb_alct1,
   tmb_alctb,
   tmb_alcte,
+  tmb_hmt_match_win,
   hmt_nhits_bx678_ff,
 
   ccLUT_enable,
@@ -1604,6 +1605,7 @@
   input  [10:0]      tmb_alct1;      // ALCT second best muon latched at trigger
   input  [4:0]      tmb_alctb;      // ALCT bxn latched at trigger
   input  [1:0]      tmb_alcte;      // ALCT ecc error syndrome latched at trigger
+  input [3:0] tmb_hmt_match_win;
   input [NHMTHITB-1:0] hmt_nhits_bx678_ff;// hmt nhits in-time
 
   input  ccLUT_enable;
@@ -3246,7 +3248,7 @@
   assign xtmb1_wdata[29:0]  =  clct_counter[29:0];      // CLCTs sent to TMB section
 
 // TMB match: store TMB match results in RAM mapping array
-  parameter MXRTMB = 23 + NHMTHITB;        // TMB match data bits
+  parameter MXRTMB = 27 + NHMTHITB;        // TMB match data bits
   wire [MXRTMB-1:0] rtmb_wdata; // Mapping array
   wire [MXRTMB-1:0] rtmb_rdata; // Mapping array
 
@@ -3274,7 +3276,8 @@
   assign rtmb_wdata[21]  =  tmb_clct0_discard; // TMB discarded clct0 from ME1A
   assign rtmb_wdata[22]  =  tmb_clct1_discard; // TMB discarded clct1 from ME1A
 
-  assign rtmb_wdata[32:23] = hmt_nhits_bx678_ff[NHMTHITB-1:0];
+  assign rtmb_wdata[26:23] = tmb_hmt_match_win[3:0];
+  assign rtmb_wdata[27+NHMTHITB-1:27] = hmt_nhits_bx678_ff[NHMTHITB-1:0];
 
 // TMB match: store ALCTs sent to MPC in RAM mapping array, arrives same bx as tmb match result
   parameter MXALCTD = 11+11+5+2; // ALCT transmit frame data bits, 2alcts + bxn + tmb stats
@@ -3954,7 +3957,9 @@
   wire       r_tmb_clct0_discard = rtmb_rdata[21]; // TMB discarded clct0 from ME1A
   wire       r_tmb_clct1_discard = rtmb_rdata[22]; // TMB discarded clct1 from ME1A
 
-  wire [NHMTHITB-1:0] r_hmt_nhits_bx678 = rtmb_rdata[23+NHMTHITB-1:23];
+  wire [3:0] r_hmt_match_win  = rtmb_rdata[34:31];// alct/anode hmt in cathode hmt tagged window
+
+  wire [NHMTHITB-1:0] r_hmt_nhits_bx678 = rtmb_rdata[27+NHMTHITB-1:27];
   wire [6:0] r_hmt_nhits_bx678_header =  (r_hmt_nhits_bx678>=10'h80) ? 7'h7F : r_hmt_nhits_bx678[6:0];
 
 
@@ -4363,8 +4368,7 @@
   assign  header09_[18:15]  =  0;              // DDU+DMB control flags
 
   //assign  header10_[14:0]    =  r_pretrig_counter[29:15];  // CLCT pre-trigger counter
-  assign  header10_run3_[10: 0]   =  r_clct0_carry_xtmb[MXPATC-2:0];//Tao warning!!
-  assign  header10_run3_[11]      =  run3_trig_df;
+  assign  header10_run3_[11: 0]   =  r_clct0_carry_xtmb[MXPATC-1:0];//Tao warning!!
   assign  header10_run3_[13:12]   =  r_clct0_xky_xtmb[1:0];
   assign  header10_run3_[14]      =  r_hmt_nhits_bx678_header[0];
   assign  header10_[14:0]   =  run3_daq_df ? header10_run3_[14:0] : r_pretrig_counter[29:15]; // CLCT pre-trigger counter
@@ -4378,8 +4382,7 @@
   assign  header13_[14:0]   =  r_trig_counter[14:0];    // TMB trigger counter, stop on ovf
   assign  header13_[18:15]  =  0;              // DDU+DMB control flags
   //assign  header14_[14:0]    =  r_trig_counter[29:15];    // TMB trigger counter
-  assign  header14_run3_[10: 0]   =  r_clct1_carry_xtmb[MXPATC-2:0];//Tao warning!!
-  assign  header14_run3_[11]      =  1'b0;//????
+  assign  header14_run3_[11: 0]   =  r_clct1_carry_xtmb[MXPATC-1:0];//Tao warning!!
   assign  header14_run3_[13:12]   =  r_clct1_xky_xtmb[1:0];
   assign  header14_run3_[14]      =  r_hmt_nhits_bx678_header[1];
   assign  header14_[14:0]   =  run3_daq_df ? header14_run3_[14:0] : r_trig_counter[29:15]; // TMB trigger counter
@@ -4553,12 +4556,12 @@
   assign  header40_[14]     =  r_tmb_trig_pulse;      // TMB trig pulse coincident with rtmb_push
   assign  header40_[18:15]  =  0;              // DDU+DMB control flags
 
-  assign  header41_[0]      =  tmb_allow_alct;        // Allow ALCT-only  tmb-matching trigger
-  assign  header41_[1]      =  tmb_allow_clct;        // Allow CLCT-only  tmb-matching trigger
-  assign  header41_[2]      =  tmb_allow_match;      // Allow Match-only tmb-matching trigger
-  assign  header41_[3]      =  tmb_allow_alct_ro;      // Allow ALCT-only  tmb-matching readout only
-  assign  header41_[4]      =  tmb_allow_clct_ro;      // Allow CLCT-only  tmb-matching readout only
-  assign  header41_[5]      =  tmb_allow_match_ro;      // Allow Match-only tmb-matching readout only
+  assign  header41_[0]      =  run3_daq_df ? run3_trig_df : tmb_allow_alct;        // Allow ALCT-only  tmb-matching trigger
+  assign  header41_[1]      =  run3_daq_df ? 1'b0 : tmb_allow_clct;        // Allow CLCT-only  tmb-matching trigger
+  assign  header41_[2]      =  run3_daq_df ? r_hmt_match_win[0] : tmb_allow_match;      // Allow Match-only tmb-matching trigger
+  assign  header41_[3]      =  run3_daq_df ? r_hmt_match_win[1] : tmb_allow_alct_ro;      // Allow ALCT-only  tmb-matching readout only
+  assign  header41_[4]      =  run3_daq_df ? r_hmt_match_win[2] : tmb_allow_clct_ro;      // Allow CLCT-only  tmb-matching readout only
+  assign  header41_[5]      =  run3_daq_df ? r_hmt_match_win[3] : tmb_allow_match_ro;      // Allow Match-only tmb-matching readout only
   assign  header41_[6]      =  r_tmb_alct_only_ro;      // Only ALCT triggered, non-triggering readout
   assign  header41_[7]      =  r_tmb_clct_only_ro;      // Only CLCT triggered, non-triggering readout
   assign  header41_[8]      =  r_tmb_match_ro;        // ALCT and CLCT matched in time, non-triggering readout

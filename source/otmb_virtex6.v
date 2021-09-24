@@ -2428,6 +2428,7 @@
   .tmb_alct1 (tmb_alct1[10:0]), // In  ALCT second best muon latched at trigger
   .tmb_alctb (tmb_alctb[4:0]),  // In  ALCT bxn latched at trigger
   .tmb_alcte (tmb_alcte[1:0]),  // In  ALCT ecc error syndrome latched at trigger
+  .tmb_hmt_match_win         (tmb_hmt_match_win[3:0]), //In  alct/anode hmt in cathode hmt tagged window
   .hmt_nhits_bx678_ff (hmt_nhits_bx678_ff[NHMTHITB-1:0]), // In hmt nhits for header
 
   .ccLUT_enable  (ccLUT_enable),//In enabe CCLUT
@@ -3007,6 +3008,8 @@
   wire  [1:0]      mpc_accept_vme;
   wire  [1:0]      mpc_reserved_vme;
 
+  wire [3:0] tmb_hmt_match_win;
+
   tmb utmb
   (
 // Clock
@@ -3030,6 +3033,7 @@
   .hmt_nhits_bx678     (hmt_nhits_bx678   [NHMTHITB-1:0]),//In hmt nhits for in-time
   .hmt_nhits_bx2345    (hmt_nhits_bx2345  [NHMTHITB-1:0]),//In hmt nhits for out-time
   .hmt_cathode_pipe    (hmt_cathode[MXHMTB-1:0]), //In hmt bits in cathod 
+  .hmt_match_win      (hmt_match_win[3:0]),// In alct location in hmt window size
 
   .hmt_trigger_tmb    (hmt_trigger_tmb[MXHMTB-1:0]),//  In results aligned with ALCT vpf latched for ALCT-CLCT match
   .hmt_trigger_tmb_ro (hmt_trigger_tmb_ro[MXHMTB-1:0]),//In results aligned with ALCT vpf latched for ALCT-CLCT match
@@ -3104,6 +3108,7 @@
   .tmb_alct1 (tmb_alct1[10:0]), // Out  ALCT second best muon latched at trigger
   .tmb_alctb (tmb_alctb[4:0]),  // Out  ALCT bxn latched at trigger
   .tmb_alcte (tmb_alcte[1:0]),  // Out  ALCT ecc error syndrome latched at trigger
+  .tmb_hmt_match_win         (tmb_hmt_match_win[3:0]), //In  alct/anode hmt in cathode hmt tagged window
   .hmt_nhits_bx678_ff (hmt_nhits_bx678_ff[NHMTHITB-1:0]), // Out hmt nhits for header
 
   .run3_trig_df   (run3_trig_df),//enable run3 trigger format

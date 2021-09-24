@@ -136,13 +136,14 @@
   hmt_anode,
   clct_vpf_pipe, 
 
-  hmt_trigger_tmb, 
-  hmt_trigger_tmb_ro,
-
   hmt_nhits_bx7,//tmb match bx cathode hmt
   hmt_nhits_bx678,
   hmt_nhits_bx2345,
   hmt_cathode_pipe, // tmb match bx
+  hmt_match_win,
+
+  hmt_trigger_tmb, 
+  hmt_trigger_tmb_ro,
 
   wr_adr_xpre_hmt_pipe,
   wr_push_mux_hmt,
@@ -499,13 +500,14 @@
   output [MXHMTB-1:0] hmt_anode;// anode hmt bits
   output clct_vpf_pipe; // alct vpf for hmt-alct match
 
+  input                hmt_enable;
+  input                hmt_outtime_check;
   input [NHMTHITB-1:0]   hmt_nhits_bx7;//CLCT bx
   input [NHMTHITB-1:0]   hmt_nhits_bx678;
   input [NHMTHITB-1:0]   hmt_nhits_bx2345;
   input [MXHMTB-1:0]     hmt_cathode_pipe; // tmb match bx
+  input [3:0]            hmt_match_win;
 
-  input                hmt_enable;
-  input                hmt_outtime_check;
   input [MXHMTB - 1:0] hmt_trigger_tmb;   // hmt bits for trigger
   input [MXHMTB - 1:0] hmt_trigger_tmb_ro;// hmt bits for readout only
 
@@ -580,6 +582,7 @@
   output  [4:0]      tmb_alctb;      // ALCT bxn latched at trigger
   output  [1:0]      tmb_alcte;      // ALCT ecc error syndrome latched at trigger
 
+  output  [3:0]       tmb_hmt_match_win;
   output [NHMTHITB-1:0] hmt_nhits_bx678_ff;
 // MPC Status
   output          mpc_frame_ff;    // MPC frame latch
@@ -1292,6 +1295,8 @@
   reg tmb_pulse_hmt_only = 0;
   reg tmb_keep_hmt_only = 0;
 
+  reg tmb_hmt_match_win = 0;
+
   always @(posedge clock) begin
     hmt_fired_tmb_ff     <= hmt_fired_tmb;
     hmt_readout_tmb_ff   <= hmt_readout_tmb;
@@ -1325,6 +1330,8 @@
     wr_adr_rtmb          <= hmt_fired_only ? wr_adr_xpre_hmt_pipe : wr_adr_xtmb_pipe;   // Buffer write address at TMB matching time, continuous
     wr_push_rtmb         <= hmt_fired_only ? wr_push_mux_hmt : wr_push_mux;        // Buffer write strobe at TMB matching time
     wr_avail_rtmb        <= hmt_fired_only ? wr_avail_xpre_hmt_pipe : wr_avail_xtmb_pipe; // Buffer available at TMB matching time
+
+    tmb_hmt_match_win <= hmt_match_win[3:0];
   end
 
 // Had to wait for kill signal to go valid
