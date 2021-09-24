@@ -2923,6 +2923,8 @@ end
    wire [3:0]  tmb_gem_clct_win;
    wire [2:0]  tmb_alct_gem_win;
 
+   wire [3:0] tmb_hmt_match_win;
+
    wire [MXBADR-1:0]      wr_adr_xtmb; // Buffer write address to TMB
    wire [MXBADR-1:0]      wr_adr_rtmb; // Buffer write address at TMB matching time
    wire [MXBADR-1:0]      wr_adr_xmpc; // wr_adr at mpc xmit to sequencer
@@ -3366,6 +3368,7 @@ end
   .gems_sync_err_real        (gems_sync_err_real),
   .tmb_gem_clct_win          (tmb_gem_clct_win[3:0]), // In gem location in GEM-CLCT window
   .tmb_alct_gem_win          (tmb_alct_gem_win[2:0]), // In gem location in GEM-ALCT window
+  .tmb_hmt_match_win         (tmb_hmt_match_win[3:0]), //In  alct/anode hmt in cathode hmt tagged window
 
   .mpc_tx_delay    (mpc_tx_delay[MXMPCDLY-1:0]), // In  MPC transmit delay
   .mpc_sel_ttc_bx0 (mpc_sel_ttc_bx0),            // In  MPC gets ttc_bx0 or bx0_local
@@ -4474,6 +4477,7 @@ wire [15:0] gemB_bxn_counter;
   .hmt_nhits_bx2345    (hmt_nhits_bx2345  [NHMTHITB-1:0]),//In hmt nhits for out-time
   .hmt_cathode_pipe    (hmt_cathode[MXHMTB-1:0]), //In hmt bits in cathod
 
+  .hmt_match_win      (hmt_match_win[3:0]),// In alct location in hmt window size
   .hmt_trigger_tmb    (hmt_trigger_tmb[MXHMTB-1:0]),//  In results aligned with ALCT vpf latched for ALCT-CLCT match
   .hmt_trigger_tmb_ro (hmt_trigger_tmb_ro[MXHMTB-1:0]),//In results aligned with ALCT vpf latched for ALCT-CLCT match
 
@@ -4646,7 +4650,7 @@ wire [15:0] gemB_bxn_counter;
   .gems_sync_err_real        (gems_sync_err_real),
   .tmb_gem_clct_win          (tmb_gem_clct_win[3:0]), // In gem location in GEM-CLCT window
   .tmb_alct_gem_win          (tmb_alct_gem_win[2:0]), // In gem location in GEM-ALCT window
-
+  .tmb_hmt_match_win         (tmb_hmt_match_win[3:0]), //In  alct/anode hmt in cathode hmt tagged window
 
 // TMB-Sequencer Pipelines
   .wr_adr_xtmb (wr_adr_xtmb[MXBADR-1:0]), // In  Buffer write address after drift time

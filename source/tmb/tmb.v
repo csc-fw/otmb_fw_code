@@ -143,6 +143,7 @@
   hmt_nhits_bx678,
   hmt_nhits_bx2345,
   hmt_cathode_pipe, // tmb match bx
+  hmt_match_win,
   hmt_trigger_tmb,
   hmt_trigger_tmb_ro,
 
@@ -314,7 +315,7 @@
   gems_sync_err_real,
   tmb_gem_clct_win,
   tmb_alct_gem_win,
-
+  tmb_hmt_match_win,
 
 // TMB-Sequencer Pipelines
   wr_adr_xtmb,
@@ -750,6 +751,8 @@
   input [NHMTHITB-1:0]   hmt_nhits_bx2345;
   input [MXHMTB-1:0]     hmt_cathode_pipe; // tmb match bx
 
+  input [3:0] hmt_match_win;
+
   input  [MXHMTB - 1:0] hmt_trigger_tmb;   // hmt bits for trigger
   input  [MXHMTB - 1:0] hmt_trigger_tmb_ro;// hmt bits for readout only
 
@@ -934,6 +937,8 @@
   output              gems_sync_err_real;
   output  [3:0]       tmb_gem_clct_win;
   output  [2:0]       tmb_alct_gem_win;
+
+  output  [3:0]       tmb_hmt_match_win;
 
 // TMB-Sequencer Pipelines
   input  [MXBADR-1:0]  wr_adr_xtmb; // Buffer write address after drift time
@@ -2823,6 +2828,8 @@
   
   reg [ 3:0]  tmb_gem_clct_win =0;
   reg [ 2:0]  tmb_alct_gem_win =0; 
+
+  reg [3:0]  tmb_hmt_match_win =0;
   
   always @(posedge clock) begin
     //HMT part
@@ -2876,6 +2883,8 @@
 
     tmb_gem_clct_win     <= gem_clct_win;
     tmb_alct_gem_win     <= alct_gem_win;
+
+    tmb_hmt_match_win    <= hmt_match_win;
   end
 
 // Had to wait for kill signal to go valid

@@ -619,6 +619,7 @@
   gems_sync_err_real,
   tmb_gem_clct_win,
   tmb_alct_gem_win,
+  tmb_hmt_match_win,
 
   mpc_tx_delay,
   mpc_sel_ttc_bx0,
@@ -1688,6 +1689,7 @@
   input       gems_sync_err_real;
   input [3:0] tmb_gem_clct_win;
   input [2:0] tmb_alct_gem_win;
+  input [3:0] tmb_hmt_match_win;
 
   input  [MXMPCDLY-1:0] mpc_tx_delay;    // Delay LCT to MPC
   input                 mpc_sel_ttc_bx0; // MPC gets ttc_bx0 or bx0_local
@@ -4052,7 +4054,7 @@
 
 // TMB match: store TMB match results in RAM mapping array
   //parameter MXRTMB = 23;        // TMB match data bits
-  parameter MXRTMB = 31+NHMTHITB;        // TMB match data bits
+  parameter MXRTMB = 35+NHMTHITB;        // TMB match data bits
   wire [MXRTMB-1:0] rtmb_wdata; // Mapping array
   wire [MXRTMB-1:0] rtmb_rdata; // Mapping array
 
@@ -4089,7 +4091,9 @@
   assign rtmb_wdata[29]  =  lct1_with_gemB;
   assign rtmb_wdata[30]  =  lct1_with_copad;
 
-  assign rtmb_wdata[31+NHMTHITB-1:31] = hmt_nhits_bx678_ff[NHMTHITB-1:0];
+  assign rtmb_wdata[34:31] = tmb_hmt_match_win[3:0];
+
+  assign rtmb_wdata[35+NHMTHITB-1:35] = hmt_nhits_bx678_ff[NHMTHITB-1:0];
 
 // TMB match: store ALCTs sent to MPC in RAM mapping array, arrives same bx as tmb match result
   parameter MXALCTD = 11+11+5+2; // ALCT transmit frame data bits, 2alcts + bxn + tmb stats
@@ -4793,8 +4797,9 @@
   wire    r_lct1_with_gemA    = rtmb_rdata[28]; // TMB LCT with gem match
   wire    r_lct1_with_gemB    = rtmb_rdata[29]; // TMB LCT with gem match
   wire    r_lct1_with_copad   = rtmb_rdata[30]; // TMB LCT with gem match
+  wire [3:0] r_hmt_match_win  = rtmb_rdata[34:31];// alct/anode hmt in cathode hmt tagged window
 
-  wire [NHMTHITB-1:0] r_hmt_nhits_bx678 = rtmb_rdata[31+NHMTHITB-1:31];
+  wire [NHMTHITB-1:0] r_hmt_nhits_bx678 = rtmb_rdata[35+NHMTHITB-1:35];
   wire [6:0] r_hmt_nhits_bx678_header =  (r_hmt_nhits_bx678>=10'h80) ? 7'h7F : r_hmt_nhits_bx678[6:0];
 
 // Unpack ALCT + extra TMB trigger data from RAM mapping array
@@ -5260,8 +5265,7 @@
   assign  header13_[14:0]   =  r_trig_counter[14:0];  // TMB trigger counter, stop on ovf
   assign  header13_[18:15]  =  0;                     // DDU+DMB control flags
 
-  assign  header14_run3_[10: 0]   =  r_clct1_carry_xtmb[MXPATC-1:0]; 
-  assign  header14_run3_[11]      =  gem_enable;// unused!!!
+  assign  header14_run3_[11: 0]   =  r_clct1_carry_xtmb[MXPATC-1:0]; 
   assign  header14_run3_[13:12]   =  r_clct1_xky_xtmb[1:0];
   assign  header14_run3_[14]      =  r_hmt_nhits_bx678_header[1];
   assign  header14_[14:0]   =  run3_daq_df ? header14_run3_[14:0] : r_trig_counter[29:15]; // TMB trigger counter
@@ -5455,12 +5459,12 @@
   assign  header40_[18:15]  =  0;                       // DDU+DMB control flags
 
 //6bits for configuration. may reuse 6bits later
-  assign  header41_[0]      =  tmb_allow_alct;          // Allow ALCT-only  tmb-matching trigger
-  assign  header41_[1]      =  tmb_allow_clct;          // Allow CLCT-only  tmb-matching trigger
-  assign  header41_[2]      =  tmb_allow_match;         // Allow Match-only tmb-matching trigger
-  assign  header41_[3]      =  tmb_allow_alct_ro;       // Allow ALCT-only  tmb-matching readout only
-  assign  header41_[4]      =  tmb_allow_clct_ro;       // Allow CLCT-only  tmb-matching readout only
-  assign  header41_[5]      =  tmb_allow_match_ro;      // Allow Match-only tmb-matching readout only
+  assign  header41_[0]      =  run3_daq_df ? run3_trig_df : tmb_allow_alct;          // Allow ALCT-only  tmb-matching trigger
+  assign  header41_[1]      =  run3_daq_df ? gem_enable : tmb_allow_clct;          // Allow CLCT-only  tmb-matching trigger
+  assign  header41_[2]      =  run3_daq_df ? r_hmt_match_win[0] : tmb_allow_match;         // Allow Match-only tmb-matching trigger
+  assign  header41_[3]      =  run3_daq_df ? r_hmt_match_win[1] : tmb_allow_alct_ro;       // Allow ALCT-only  tmb-matching readout only
+  assign  header41_[4]      =  run3_daq_df ? r_hmt_match_win[2] : tmb_allow_clct_ro;       // Allow CLCT-only  tmb-matching readout only
+  assign  header41_[5]      =  run3_daq_df ? r_hmt_match_win[3] : tmb_allow_match_ro;      // Allow Match-only tmb-matching readout only
   assign  header41_[6]      =  r_tmb_alct_only_ro;      // Only ALCT triggered, non-triggering readout
   assign  header41_[7]      =  r_tmb_clct_only_ro;      // Only CLCT triggered, non-triggering readout
   assign  header41_[8]      =  r_tmb_match_ro;          // ALCT and CLCT matched in time, non-triggering readout
