@@ -1752,6 +1752,8 @@
   output run3_trig_df;
   output run3_daq_df;
   output run3_alct_df;
+  //output run2_revcode;
+  wire run2_revcode;
 
 // CFEB Ports: Hot Channel Mask
   output  [MXDS-1:0]    cfeb0_ly0_hcm;      // 1=enable DiStrip
@@ -4028,7 +4030,12 @@
   assign revcode_vme_new [15:13] = 3'd0;
 
   //CCLUT algorithm
-  assign revcode[14:0]    = (ccLUT_enable) ? revcode_vme_new[14:0] : revcode_vme[14:0];  // Sequencer format is 15 bits, VME is 16
+  wire run2_revcode_enable = run2_revcode && !run3_daq_df;//switch to Run2 legacy revision code 
+  wire [15:0] run2_legacy_revcode;//2016.03.16
+  assign run2_legacy_revcode[8:0]    = 8'd112;//3*32 + 16
+  assign run2_legacy_revcode[12:9]   = 4'h6 + 4'hA;   
+  assign run2_legacy_revcode[15:13]  = FPGAID[15:13];  
+  assign revcode[14:0]    = run2_revcode_enable ? run2_legacy_revcode[14:0] : ((ccLUT_enable) ? revcode_vme_new[14:0] : revcode_vme[14:0]);  // Sequencer format is 15 bits, VME is 16
   //assign revcode[14:0]    = revcode_vme_new[14:0];  // Sequencer format is 15 bits, VME is 16
 
 // VME ID Registers, Readonly
@@ -7643,14 +7650,16 @@
     run3_format_ctrl_wr[0] = 1'b0;
     run3_format_ctrl_wr[1] = 1'b1; // default, Run3 trigger format upgrade is off
     run3_format_ctrl_wr[2] = 1'b1; // default, Run3 daq format upgrade is ON
-    run3_format_ctrl_wr[3] = 1'b0; // NOT used
-    run3_format_ctrl_wr[15:4] = 12'b0; // NOT used
+    run3_format_ctrl_wr[3] = 1'b0; // Run3 ALCT data format enable or not.  Run2 ALCT data format had HMT encoded
+    run3_format_ctrl_wr[4] = 1'b0; // use Run2 legacy revcode or not
+    run3_format_ctrl_wr[15:5] = 12'b0; // NOT used
     //cclut_format_ctrl_wr[1] = 0; //CLCT pattern sorting, 0= use {pat, nhits}, 1={new quality}
     //cclut_format_ctrl_wr[2] = 0; //LCT data format control, 0 = use Run2, 1= use Run3 with GEM-CSC+CCLUT
   end
   assign run3_trig_df = run3_format_ctrl_wr[1];
   assign run3_daq_df  = run3_format_ctrl_wr[2];
   assign run3_alct_df = run3_format_ctrl_wr[3];
+  assign run2_revcode = run3_format_ctrl_wr[4];
 
   assign run3_format_ctrl_rd[0]    = ccLUT_enable;
   assign run3_format_ctrl_rd[1]    = ccLUT_enable ? run3_trig_df : 1'b0;//only enable it for CCLUT case
