@@ -88,6 +88,7 @@
    parameter NHITCFEBB  =  6;
    parameter NHMTHITB   = 10;
 
+   `include "../otmb_virtex6_fw_version.v"
 
   input  clock;
   input  ttc_resync;
@@ -187,11 +188,70 @@
   wire hmt_reset = |hmt_reset_ff;
 
   wire [MXCFEB-1  :0]  active_cfeb_s0; 
-  assign active_cfeb_s0[0] = nhit_cfeb0 >= hmt_aff_thresh;
-  assign active_cfeb_s0[1] = nhit_cfeb1 >= hmt_aff_thresh;
-  assign active_cfeb_s0[2] = nhit_cfeb2 >= hmt_aff_thresh;
-  assign active_cfeb_s0[3] = nhit_cfeb3 >= hmt_aff_thresh;
-  assign active_cfeb_s0[4] = nhit_cfeb4 >= hmt_aff_thresh;
+//`ifdef CSC_TYPE_A
+//  initial $display ("CSC_TYPE_A instantiated in HMT module");
+//  assign active_cfeb_s0[0] = nhit_cfeb0 >= hmt_aff_thresh;
+//  assign active_cfeb_s0[1] = nhit_cfeb1 >= hmt_aff_thresh;
+//  assign active_cfeb_s0[2] = nhit_cfeb2 >= hmt_aff_thresh;
+//  assign active_cfeb_s0[3] = nhit_cfeb3 >= hmt_aff_thresh;
+//  assign active_cfeb_s0[4] = nhit_cfeb4 >= hmt_aff_thresh;
+//`elsif CSC_TYPE_B
+//  initial $display ("CSC_TYPE_B instantiated in HMT module");
+//  assign active_cfeb_s0[0] = nhit_cfeb4 >= hmt_aff_thresh;
+//  assign active_cfeb_s0[1] = nhit_cfeb3 >= hmt_aff_thresh;
+//  assign active_cfeb_s0[2] = nhit_cfeb2 >= hmt_aff_thresh;
+//  assign active_cfeb_s0[3] = nhit_cfeb1 >= hmt_aff_thresh;
+//  assign active_cfeb_s0[4] = nhit_cfeb0 >= hmt_aff_thresh;
+//`else
+//  initial $display ("CSC_TYPE Undefined. Halting. from HMT module");
+//  $finish
+//`endif
+  reg  [NHITCFEBB-1: 0] nhit_cfeb0_s0 [3:0];
+  reg  [NHITCFEBB-1: 0] nhit_cfeb1_s0 [3:0];
+  reg  [NHITCFEBB-1: 0] nhit_cfeb2_s0 [3:0];
+  reg  [NHITCFEBB-1: 0] nhit_cfeb3_s0 [3:0];
+  reg  [NHITCFEBB-1: 0] nhit_cfeb4_s0 [3:0];
+  always @(posedge clock) begin
+      nhit_cfeb0_s0[0] <= nhit_cfeb0;
+      nhit_cfeb1_s0[0] <= nhit_cfeb1;
+      nhit_cfeb2_s0[0] <= nhit_cfeb2;
+      nhit_cfeb3_s0[0] <= nhit_cfeb3;
+      nhit_cfeb4_s0[0] <= nhit_cfeb4;
+      nhit_cfeb0_s0[1] <= nhit_cfeb0_s0[0];
+      nhit_cfeb1_s0[1] <= nhit_cfeb1_s0[0];
+      nhit_cfeb2_s0[1] <= nhit_cfeb2_s0[0];
+      nhit_cfeb3_s0[1] <= nhit_cfeb3_s0[0];
+      nhit_cfeb4_s0[1] <= nhit_cfeb4_s0[0];
+      nhit_cfeb0_s0[2] <= nhit_cfeb0_s0[1];
+      nhit_cfeb1_s0[2] <= nhit_cfeb1_s0[1];
+      nhit_cfeb2_s0[2] <= nhit_cfeb2_s0[1];
+      nhit_cfeb3_s0[2] <= nhit_cfeb3_s0[1];
+      nhit_cfeb4_s0[2] <= nhit_cfeb4_s0[1];
+      nhit_cfeb0_s0[3] <= nhit_cfeb0_s0[2];
+      nhit_cfeb1_s0[3] <= nhit_cfeb1_s0[2];
+      nhit_cfeb2_s0[3] <= nhit_cfeb2_s0[2];
+      nhit_cfeb3_s0[3] <= nhit_cfeb3_s0[2];
+      nhit_cfeb4_s0[3] <= nhit_cfeb4_s0[2];
+  end
+`ifdef CSC_TYPE_A
+  initial $display ("CSC_TYPE_A instantiated in HMT module");
+  assign active_cfeb_s0[0] = (nhit_cfeb0[1] + nhit_cfeb0[2] + nhit_cfeb0[3]) >= hmt_aff_thresh;
+  assign active_cfeb_s0[1] = (nhit_cfeb1[1] + nhit_cfeb1[2] + nhit_cfeb1[3]) >= hmt_aff_thresh;
+  assign active_cfeb_s0[2] = (nhit_cfeb2[1] + nhit_cfeb2[2] + nhit_cfeb2[3]) >= hmt_aff_thresh;
+  assign active_cfeb_s0[3] = (nhit_cfeb3[1] + nhit_cfeb3[2] + nhit_cfeb3[3]) >= hmt_aff_thresh;
+  assign active_cfeb_s0[4] = (nhit_cfeb4[1] + nhit_cfeb4[2] + nhit_cfeb4[3]) >= hmt_aff_thresh;
+`elsif CSC_TYPE_B
+  initial $display ("CSC_TYPE_B instantiated in HMT module");
+  assign active_cfeb_s0[0] = (nhit_cfeb4[1] + nhit_cfeb4[2] + nhit_cfeb4[3]) >= hmt_aff_thresh;
+  assign active_cfeb_s0[1] = (nhit_cfeb3[1] + nhit_cfeb3[2] + nhit_cfeb3[3]) >= hmt_aff_thresh;
+  assign active_cfeb_s0[2] = (nhit_cfeb2[1] + nhit_cfeb2[2] + nhit_cfeb2[3]) >= hmt_aff_thresh;
+  assign active_cfeb_s0[3] = (nhit_cfeb1[1] + nhit_cfeb1[2] + nhit_cfeb1[3]) >= hmt_aff_thresh;
+  assign active_cfeb_s0[4] = (nhit_cfeb0[1] + nhit_cfeb0[2] + nhit_cfeb0[3]) >= hmt_aff_thresh;
+`else
+  initial $display ("CSC_TYPE Undefined. Halting. from HMT module");
+  $finish
+`endif
+
 
   wire [NHMTHITB-1:0] nhits_chamber = nhit_cfeb0 + nhit_cfeb1 + nhit_cfeb2 + nhit_cfeb3 + nhit_cfeb4;
   reg  [NHMTHITB-1:0] nhits_trig_s0_srl [7:0];//array 8x10bits
@@ -241,13 +301,15 @@
   //parameter hmt_dly_const = 4'd6; //delay HMT trigger to CLCT VPF BX
   //parameter hmt_dly_const = 4'd1; //delay HMT trigger to preCLCT BX, old setting
   parameter hmt_dly_const = 4'd0; //delay HMT trigger to preCLCT BX. nhits_trig_s0_srl[2] is synchronized with pretrigger
-  wire [3:0] delay_hmt_aff_adr = hmt_dly_const + 4'd2;// equivalent 4'd3-4'd1
+  //wire [3:0] delay_hmt_aff_adr = hmt_dly_const + 4'd2;// equivalent 4'd3-4'd1
 
-  wire [MXCFEB-1  :0]  active_cfeb_s1; 
+  wire [MXCFEB-1  :0]  active_cfeb_s1_srl; 
   srl16e_bbl #(1)       uhmtfiredpre  ( .clock(clock), .ce(1'b1), .adr(hmt_dly_const-4'd1), .d(hmt_fired_s0),   .q(hmt_fired_s1_srl));
-  srl16e_bbl #(MXCFEB)  uhmtaffpre    ( .clock(clock), .ce(1'b1), .adr(delay_hmt_aff_adr),  .d(active_cfeb_s0), .q(active_cfeb_s1));
+  srl16e_bbl #(MXCFEB)  uhmtaffpre    ( .clock(clock), .ce(1'b1), .adr(hmt_dly_const-4'd1),  .d(active_cfeb_s0), .q(active_cfeb_s1_srl));
 
   wire hmt_fired_s1 = (hmt_dly_const == 4'd0) ? hmt_fired_s0 : hmt_fired_s1_srl;
+  wire [MXCFEB-1  :0] active_cfeb_s1 = (hmt_dly_const == 4'd0) ? active_cfeb_s0 : active_cfeb_s1_srl;
+
   assign hmt_fired_pretrig = hmt_fired_s1;
   assign hmt_active_feb    = active_cfeb_s1 & {MXCFEB{cfeb_allow_hmt_ro & hmt_fired_s1}};
 
@@ -420,7 +482,7 @@
 
 // Event trigger disposition
 
-  wire hmt_cathode_kept    =  (hmt_match) || (hmt_noanode && !hmt_noanode_lost);
+  wire hmt_cathode_kept    =  (hmt_match) || (hmt_noanode && !hmt_noanode_lost && (hmt_allow_cathode || hmt_allow_cathode_ro));
 
 // Match window mux
   wire [3:0] match_win;
