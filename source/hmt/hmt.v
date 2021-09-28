@@ -339,7 +339,7 @@
 
   wire [MXCFEB-1  :0]  active_cfeb_s1_srl; 
   srl16e_bbl #(1)       uhmtfiredpre  ( .clock(clock), .ce(1'b1), .adr(hmt_dly_const-4'd1), .d(hmt_fired_s0),   .q(hmt_fired_s1_srl));
-  srl16e_bbl #(MXCFEB)  uhmtaffpre    ( .clock(clock), .ce(1'b1), .adr(delay_hmt_aff_adr),  .d(active_cfeb_s0), .q(active_cfeb_s1_srl));
+  srl16e_bbl #(MXCFEB)  uhmtaffpre    ( .clock(clock), .ce(1'b1), .adr(hmt_dly_const-4'd1),  .d(active_cfeb_s0), .q(active_cfeb_s1_srl));
 
   wire hmt_fired_s1 = (hmt_dly_const == 4'd0) ? hmt_fired_s0 : hmt_fired_s1_srl;
   wire [MXCFEB-1  :0]  active_cfeb_s1 = (hmt_dly_const == 4'd0) ? active_cfeb_s0 : active_cfeb_s1_srl;
@@ -516,7 +516,7 @@
 
 // Event trigger disposition
 
-  wire hmt_cathode_kept    =  (hmt_match) || (hmt_noanode && !hmt_noanode_lost);
+  wire hmt_cathode_kept    =  (hmt_match) || (hmt_noanode && !hmt_noanode_lost && ( hmt_allow_cathode|| hmt_allow_cathode_ro));
 
 // Match window mux
   wire [3:0] match_win;
