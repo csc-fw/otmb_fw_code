@@ -335,13 +335,14 @@
   //parameter hmt_dly_const = 4'd6; //delay HMT trigger to CLCT VPF BX
   //parameter hmt_dly_const = 4'd1; //delay HMT trigger to preCLCT BX, old setting
   parameter hmt_dly_const = 4'd0; //delay HMT trigger to preCLCT BX. nhits_trig_s0_srl[2] is synchronized with pretrigger
-  wire [3:0] delay_hmt_aff_adr = hmt_dly_const + 4'd2;// equivalent 4'd3-4'd1
+  //wire [3:0] delay_hmt_aff_adr = hmt_dly_const + 4'd2;// equivalent 4'd3-4'd1
 
-  wire [MXCFEB-1  :0]  active_cfeb_s1; 
+  wire [MXCFEB-1  :0]  active_cfeb_s1_srl; 
   srl16e_bbl #(1)       uhmtfiredpre  ( .clock(clock), .ce(1'b1), .adr(hmt_dly_const-4'd1), .d(hmt_fired_s0),   .q(hmt_fired_s1_srl));
-  srl16e_bbl #(MXCFEB)  uhmtaffpre    ( .clock(clock), .ce(1'b1), .adr(delay_hmt_aff_adr),  .d(active_cfeb_s0), .q(active_cfeb_s1));
+  srl16e_bbl #(MXCFEB)  uhmtaffpre    ( .clock(clock), .ce(1'b1), .adr(delay_hmt_aff_adr),  .d(active_cfeb_s0), .q(active_cfeb_s1_srl));
 
   wire hmt_fired_s1 = (hmt_dly_const == 4'd0) ? hmt_fired_s0 : hmt_fired_s1_srl;
+  wire [MXCFEB-1  :0]  active_cfeb_s1 = (hmt_dly_const == 4'd0) ? active_cfeb_s0 : active_cfeb_s1_srl;
   assign hmt_fired_pretrig = hmt_fired_s1;
   assign hmt_active_feb    = active_cfeb_s1 & {MXCFEB{cfeb_allow_hmt_ro & hmt_fired_s1}};
 
