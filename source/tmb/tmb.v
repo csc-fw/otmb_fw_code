@@ -217,7 +217,8 @@
   tmb_alct1,
   tmb_alctb,
   tmb_alcte,
-
+  
+  tmb_hmt_match_win,
   hmt_nhits_bx678_ff,
 
   run3_trig_df, // input, flag of run3 data format upgrade  
@@ -892,7 +893,8 @@
   always @(posedge clock) begin
     mpc_set <= (!powerup_ff || !mpc_oe || sync_err_blanks_mpc);
   end
-`define FAKE_ALCT 1
+  
+//`define FAKE_ALCT 0
 
 `ifdef FAKE_ALCT
   initial $display("tmb: fake ALCT generation code is added!!!!");
@@ -1295,7 +1297,7 @@
   reg tmb_pulse_hmt_only = 0;
   reg tmb_keep_hmt_only = 0;
 
-  reg tmb_hmt_match_win = 0;
+  reg [3:0] tmb_hmt_match_win = 0;
 
   always @(posedge clock) begin
     hmt_fired_tmb_ff     <= hmt_fired_tmb;
