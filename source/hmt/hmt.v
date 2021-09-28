@@ -90,6 +90,7 @@
    parameter NHITCFEBB  =  6;
    parameter NHMTHITB   = 10;
 
+   `include "../otmb_virtex6_fw_version.v"
 
   input  clock;
   input  ttc_resync;
@@ -193,13 +194,98 @@
   wire hmt_reset = |hmt_reset_ff;
 
   wire [MXCFEB-1  :0]  active_cfeb_s0; 
-  assign active_cfeb_s0[0] = nhit_cfeb0 >= hmt_aff_thresh;
-  assign active_cfeb_s0[1] = nhit_cfeb1 >= hmt_aff_thresh;
-  assign active_cfeb_s0[2] = nhit_cfeb2 >= hmt_aff_thresh;
-  assign active_cfeb_s0[3] = nhit_cfeb3 >= hmt_aff_thresh;
-  assign active_cfeb_s0[4] = nhit_cfeb4 >= hmt_aff_thresh;
-  assign active_cfeb_s0[5] = nhit_cfeb4 >= hmt_aff_thresh;
-  assign active_cfeb_s0[6] = nhit_cfeb4 >= hmt_aff_thresh;
+//`ifdef CSC_TYPE_C
+//  initial $display ("CSC_TYPE_C instantiated in HMT module");
+//  //normal ME1b
+//  assign active_cfeb_s0[0] = nhit_cfeb0 >= hmt_aff_thresh;
+//  assign active_cfeb_s0[1] = nhit_cfeb1 >= hmt_aff_thresh;
+//  assign active_cfeb_s0[2] = nhit_cfeb2 >= hmt_aff_thresh;
+//  assign active_cfeb_s0[3] = nhit_cfeb3 >= hmt_aff_thresh;
+//  //reversed ME1a
+//  assign active_cfeb_s0[4] = nhit_cfeb6 >= hmt_aff_thresh;
+//  assign active_cfeb_s0[5] = nhit_cfeb5 >= hmt_aff_thresh;
+//  assign active_cfeb_s0[6] = nhit_cfeb4 >= hmt_aff_thresh;
+//`ifdef CSC_TYPE_D
+//  initial $display ("CSC_TYPE_D instantiated in HMT module");
+//  //reversed ME1b
+//  assign active_cfeb_s0[0] = nhit_cfeb3 >= hmt_aff_thresh;
+//  assign active_cfeb_s0[1] = nhit_cfeb2 >= hmt_aff_thresh;
+//  assign active_cfeb_s0[2] = nhit_cfeb1 >= hmt_aff_thresh;
+//  assign active_cfeb_s0[3] = nhit_cfeb0 >= hmt_aff_thresh;
+//  //normal ME1a
+//  assign active_cfeb_s0[4] = nhit_cfeb4 >= hmt_aff_thresh;
+//  assign active_cfeb_s0[5] = nhit_cfeb5 >= hmt_aff_thresh;
+//  assign active_cfeb_s0[6] = nhit_cfeb6 >= hmt_aff_thresh;
+//`else
+//  initial $display ("CSC_TYPE Undefined. Halting from HMT module.");
+//  $finish
+//`endif
+  reg  [NHITCFEBB-1: 0] nhit_cfeb0_s0 [3:0];
+  reg  [NHITCFEBB-1: 0] nhit_cfeb1_s0 [3:0];
+  reg  [NHITCFEBB-1: 0] nhit_cfeb2_s0 [3:0];
+  reg  [NHITCFEBB-1: 0] nhit_cfeb3_s0 [3:0];
+  reg  [NHITCFEBB-1: 0] nhit_cfeb4_s0 [3:0];
+  reg  [NHITCFEBB-1: 0] nhit_cfeb5_s0 [3:0];
+  reg  [NHITCFEBB-1: 0] nhit_cfeb6_s0 [3:0];
+  always @(posedge clock) begin
+      nhit_cfeb0_s0[0] <= nhit_cfeb0;
+      nhit_cfeb1_s0[0] <= nhit_cfeb1;
+      nhit_cfeb2_s0[0] <= nhit_cfeb2;
+      nhit_cfeb3_s0[0] <= nhit_cfeb3;
+      nhit_cfeb4_s0[0] <= nhit_cfeb4;
+      nhit_cfeb5_s0[0] <= nhit_cfeb5;
+      nhit_cfeb6_s0[0] <= nhit_cfeb6;
+
+      nhit_cfeb0_s0[1] <= nhit_cfeb0_s0[0];
+      nhit_cfeb1_s0[1] <= nhit_cfeb1_s0[0];
+      nhit_cfeb2_s0[1] <= nhit_cfeb2_s0[0];
+      nhit_cfeb3_s0[1] <= nhit_cfeb3_s0[0];
+      nhit_cfeb4_s0[1] <= nhit_cfeb4_s0[0];
+      nhit_cfeb5_s0[1] <= nhit_cfeb5_s0[0];
+      nhit_cfeb6_s0[1] <= nhit_cfeb6_s0[0];
+
+      nhit_cfeb0_s0[2] <= nhit_cfeb0_s0[1];
+      nhit_cfeb1_s0[2] <= nhit_cfeb1_s0[1];
+      nhit_cfeb2_s0[2] <= nhit_cfeb2_s0[1];
+      nhit_cfeb3_s0[2] <= nhit_cfeb3_s0[1];
+      nhit_cfeb4_s0[2] <= nhit_cfeb4_s0[1];
+      nhit_cfeb5_s0[2] <= nhit_cfeb5_s0[1];
+      nhit_cfeb6_s0[2] <= nhit_cfeb6_s0[1];
+
+      nhit_cfeb0_s0[3] <= nhit_cfeb0_s0[2];
+      nhit_cfeb1_s0[3] <= nhit_cfeb1_s0[2];
+      nhit_cfeb2_s0[3] <= nhit_cfeb2_s0[2];
+      nhit_cfeb3_s0[3] <= nhit_cfeb3_s0[2];
+      nhit_cfeb4_s0[3] <= nhit_cfeb4_s0[2];
+      nhit_cfeb5_s0[3] <= nhit_cfeb5_s0[2];
+      nhit_cfeb6_s0[3] <= nhit_cfeb6_s0[2];
+  end
+`ifdef CSC_TYPE_C
+  initial $display ("CSC_TYPE_C instantiated in HMT module");
+  //normal ME1b
+  assign active_cfeb_s0[0] = (nhit_cfeb0[1] + nhit_cfeb0[2] + nhit_cfeb0[3]) >= hmt_aff_thresh;
+  assign active_cfeb_s0[1] = (nhit_cfeb1[1] + nhit_cfeb1[2] + nhit_cfeb1[3]) >= hmt_aff_thresh;
+  assign active_cfeb_s0[2] = (nhit_cfeb2[1] + nhit_cfeb2[2] + nhit_cfeb2[3]) >= hmt_aff_thresh;
+  assign active_cfeb_s0[3] = (nhit_cfeb3[1] + nhit_cfeb3[2] + nhit_cfeb3[3]) >= hmt_aff_thresh;
+  //reversed ME1a
+  assign active_cfeb_s0[4] = (nhit_cfeb6[1] + nhit_cfeb6[2] + nhit_cfeb6[3]) >= hmt_aff_thresh;
+  assign active_cfeb_s0[5] = (nhit_cfeb5[1] + nhit_cfeb5[2] + nhit_cfeb5[3]) >= hmt_aff_thresh;
+  assign active_cfeb_s0[6] = (nhit_cfeb4[1] + nhit_cfeb4[2] + nhit_cfeb4[3]) >= hmt_aff_thresh;
+`elsif CSC_TYPE_D
+  initial $display ("CSC_TYPE_D instantiated in HMT module");
+  //reversed ME1b
+  assign active_cfeb_s0[0] = (nhit_cfeb3[1] + nhit_cfeb3[2] + nhit_cfeb3[3]) >= hmt_aff_thresh;
+  assign active_cfeb_s0[1] = (nhit_cfeb2[1] + nhit_cfeb2[2] + nhit_cfeb2[3]) >= hmt_aff_thresh;
+  assign active_cfeb_s0[2] = (nhit_cfeb1[1] + nhit_cfeb1[2] + nhit_cfeb1[3]) >= hmt_aff_thresh;
+  assign active_cfeb_s0[3] = (nhit_cfeb0[1] + nhit_cfeb0[2] + nhit_cfeb0[3]) >= hmt_aff_thresh;
+  //normal ME1a
+  assign active_cfeb_s0[4] = (nhit_cfeb4[1] + nhit_cfeb4[2] + nhit_cfeb4[3]) >= hmt_aff_thresh;
+  assign active_cfeb_s0[5] = (nhit_cfeb5[1] + nhit_cfeb5[2] + nhit_cfeb5[3]) >= hmt_aff_thresh;
+  assign active_cfeb_s0[6] = (nhit_cfeb6[1] + nhit_cfeb6[2] + nhit_cfeb6[3]) >= hmt_aff_thresh;
+`else
+  initial $display ("CSC_TYPE Undefined. Halting. from HMT module");
+  $finish
+`endif
 
   wire [NHMTHITB-1:0] nhits_chamber = hmt_me1a_enable ? (nhit_cfeb0 + nhit_cfeb1 + nhit_cfeb2 + nhit_cfeb3 + nhit_cfeb4 + nhit_cfeb5 + nhit_cfeb6) : (nhit_cfeb0 + nhit_cfeb1 + nhit_cfeb2 + nhit_cfeb3);
   reg  [NHMTHITB-1:0] nhits_trig_s0_srl [7:0];//array 8x10bits
