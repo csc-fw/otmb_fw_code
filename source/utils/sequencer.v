@@ -3957,7 +3957,7 @@
   wire       r_tmb_clct0_discard = rtmb_rdata[21]; // TMB discarded clct0 from ME1A
   wire       r_tmb_clct1_discard = rtmb_rdata[22]; // TMB discarded clct1 from ME1A
 
-  wire [3:0] r_hmt_match_win  = rtmb_rdata[34:31];// alct/anode hmt in cathode hmt tagged window
+  wire [3:0] r_hmt_match_win  = rtmb_rdata[26:23];// alct/anode hmt in cathode hmt tagged window
 
   wire [NHMTHITB-1:0] r_hmt_nhits_bx678 = rtmb_rdata[27+NHMTHITB-1:27];
   wire [6:0] r_hmt_nhits_bx678_header =  (r_hmt_nhits_bx678>=10'h80) ? 7'h7F : r_hmt_nhits_bx678[6:0];
