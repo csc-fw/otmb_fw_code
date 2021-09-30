@@ -4634,8 +4634,10 @@ wire [15:0] gemB_bxn_counter;
   .match_drop_lowqalct     (match_drop_lowqalct),               //IN gem-csc match drop lowQ stub 
   .me1a_match_drop_lowqclct     (me1a_match_drop_lowqclct),     //IN gem-csc match drop lowQ stub 
   .me1b_match_drop_lowqclct     (me1b_match_drop_lowqclct),     //IN gem-csc match drop lowQ stub 
-  .tmb_copad_alct_allow      (tmb_copad_alct_allow),       //In gem-csc match, allow ALCT+copad match
-  .tmb_copad_clct_allow      (tmb_copad_clct_allow),       //In gem-csc match, allow CLCT+copad match
+  .tmb_copad_alct_allow_ro      (tmb_copad_alct_allow_ro),       //In gem-csc match, allow ALCT+copad match for readout
+  .tmb_copad_clct_allow_ro      (tmb_copad_clct_allow_ro),       //In gem-csc match, allow CLCT+copad match for readout
+  .tmb_copad_alct_allow      (tmb_copad_alct_allow),       //In gem-csc match, allow ALCT+copad match for triggering
+  .tmb_copad_clct_allow      (tmb_copad_clct_allow),       //In gem-csc match, allow CLCT+copad match for triggering
   .gemA_match_ignore_position     (gemA_match_ignore_position),             //In GEMCSC match, no position match
   .gemB_match_ignore_position     (gemB_match_ignore_position),             //In GEMCSC match, no position match
   .gemcsc_bend_enable        (gemcsc_bend_enable),             //In GEMCSC bending angle enabled
@@ -4961,22 +4963,22 @@ wire [15:0] gemB_bxn_counter;
      assign mez_tp10_busy = (raw_mez_busy | alct_startup_msec | alct_wait_dll | alct_startup_done | alct_wait_vme | alct_wait_cfg);
 
 // JRG: if set_sw8 & 7 are both low, put BPI debug signals on the mezanine test points
-    //assign mez_tp[9] = (!set_sw[7] ? bpi_dtack       : (|link_bad) || ((set_sw == 2'b01) && sump));
-    //assign mez_tp[8] = (!set_sw[7] ? bpi_we          : (&link_good || ((set_sw == 2'b01) && alct_wait_cfg)));
+    assign mez_tp[9] = (!set_sw[7] ? bpi_dtack       : (|link_bad) || ((set_sw == 2'b01) && sump));
+    assign mez_tp[8] = (!set_sw[7] ? bpi_we          : (&link_good || ((set_sw == 2'b01) && alct_wait_cfg)));
 
-    //assign mez_tp[7] =   set_sw[8] ? alct_txd_posneg : (!set_sw[7] ? bpi_enbl : link_good[6]);
-    //assign mez_tp[6] = (!set_sw[7] ? bpi_dsbl        :                          link_good[5]);
-    //assign mez_tp[5] =   set_sw[8] ? alct_rxd_posneg : (!set_sw[7] ? bpi_rst  : link_good[4]);
-    //assign mez_tp[4] = (!set_sw[7] ? bpi_dev         :                          link_good[3]);
+    assign mez_tp[7] =   set_sw[8] ? alct_txd_posneg : (!set_sw[7] ? bpi_enbl : link_good[6]);
+    assign mez_tp[6] = (!set_sw[7] ? bpi_dsbl        :                          link_good[5]);
+    assign mez_tp[5] =   set_sw[8] ? alct_rxd_posneg : (!set_sw[7] ? bpi_rst  : link_good[4]);
+    assign mez_tp[4] = (!set_sw[7] ? bpi_dev         :                          link_good[3]);
     
     // for debuging GEMCSC OTMB firmware, go back to above setting for normal OTMB firmware 
-    assign mez_tp[9]  = keep_gem_tp; //CLCT window for  CLCT-ALCT and CLCT-GEM
-    assign mez_tp[8]  = gem_alct_window_hasgem_tp;//gem window for gem-ALCT
-    assign mez_tp[7]  = alct0_vpf_tprt; // ALCT vpf signal
+    //assign mez_tp[9]  = keep_gem_tp; //CLCT window for  CLCT-ALCT and CLCT-GEM
+    //assign mez_tp[8]  = gem_alct_window_hasgem_tp;//gem window for gem-ALCT
+    //assign mez_tp[7]  = alct0_vpf_tprt; // ALCT vpf signal
     //assign mez_tp[6]  = wr_push_xtmb; // CLCT vpf signal
-    assign mez_tp[6]  = clct_window_tprt; // CLCT vpf signal after pipeline 
-    assign mez_tp[5]  = hmt_nhits_bx678 >= hmt_nhits_bx2345+10'h3;
-    assign mez_tp[4]  = gem_forclct_vpf_tp;//pulse width=2BX???? why????
+    //assign mez_tp[6]  = clct_window_tprt; // CLCT vpf signal after pipeline 
+    //assign mez_tp[5]  = hmt_nhits_bx678 >= hmt_nhits_bx2345+10'h3;
+    //assign mez_tp[4]  = gem_forclct_vpf_tp;//pulse width=2BX???? why????
     //assign mez_tp[5]  = (|gemA_csc_cluster_vpf) || (|gemB_csc_cluster_vpf);// gemA or gemB vpf signal
     //assign mez_tp[4]  = |copad_match; // gem copad vpf signal
 
@@ -5939,8 +5941,10 @@ wire [15:0] gemB_bxn_counter;
       .match_drop_lowqalct         (match_drop_lowqalct),       //Out gem-csc match drop lowQ stub 
       .me1a_match_drop_lowqclct    (me1a_match_drop_lowqclct),       //Out gem-csc match drop lowQ stub 
       .me1b_match_drop_lowqclct    (me1b_match_drop_lowqclct),       //Out gem-csc match drop lowQ stub 
-      .tmb_copad_alct_allow      (tmb_copad_alct_allow),       //In gem-csc match, allow ALCT+copad match
-      .tmb_copad_clct_allow      (tmb_copad_clct_allow),       //In gem-csc match, allow CLCT+copad match
+      .tmb_copad_alct_allow_ro      (tmb_copad_alct_allow_ro),       //In gem-csc match, allow ALCT+copad match for readout
+      .tmb_copad_clct_allow_ro      (tmb_copad_clct_allow_ro),       //In gem-csc match, allow CLCT+copad match for readout
+      .tmb_copad_alct_allow      (tmb_copad_alct_allow),       //In gem-csc match, allow ALCT+copad match for triggering
+      .tmb_copad_clct_allow      (tmb_copad_clct_allow),       //In gem-csc match, allow CLCT+copad match for triggering
       //.gem_me1a_match_promotequal  (gem_me1a_match_promotequal),     //Out promote quality or not for match in ME1a region, 
       //.gem_me1b_match_promotequal  (gem_me1b_match_promotequal),     //Out promote quality or not for match in ME1b region 
       //.gem_me1a_match_promotepat   (gem_me1a_match_promotepat),     //Out promote pattern or not for match in ME1a region, 
