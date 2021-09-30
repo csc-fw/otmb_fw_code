@@ -298,6 +298,8 @@
   //me1b_match_drop_lowqalct, // drop lowQ stub when no GEM      
   me1a_match_drop_lowqclct, // drop lowQ stub when no GEM      
   me1b_match_drop_lowqclct, // drop lowQ stub when no GEM      
+  tmb_copad_alct_allow_ro,
+  tmb_copad_clct_allow_ro,
   tmb_copad_alct_allow,
   tmb_copad_clct_allow,
   gemA_match_ignore_position,
@@ -904,6 +906,8 @@
   input               match_drop_lowqalct;// drop low Q alct for  match when no GEM is available
   input               me1a_match_drop_lowqclct;// drop low Q clct for  match when no GEM is available 
   input               me1b_match_drop_lowqclct;// drop low Q clct for  match when no GEM is available
+  input               tmb_copad_alct_allow_ro;
+  input               tmb_copad_clct_allow_ro;
   input               tmb_copad_alct_allow;
   input               tmb_copad_clct_allow;
   //input               gem_me1a_match_promotequal;
@@ -2169,8 +2173,8 @@
   wire clct_gemB_noclct = gemB_pulse_forclct  && !clct_window_haslcts;  // gem arrived, but there was no CLCT window open
   wire gemB_clct_nogem  = clct_last_win && !gemB_pulse_forclct;    // No ALCT arrived in window, pushed mpc on last bx
 
-  wire clct_copad_pulse_match = copad_pulse_forclct && tmb_copad_clct_allow  && clct_window_haslcts;  // gem matches CLCT window, push to mpc on current bx
-  wire alct_copad_pulse_match = copad_pulse_forclct && tmb_copad_alct_allow  && alct_pulse;  // gem matches CLCT window, push to mpc on current bx
+  wire clct_copad_pulse_match = copad_pulse_forclct && (tmb_copad_clct_allow || tmb_copad_clct_allow_ro) && clct_window_haslcts;  // gem matches CLCT window, push to mpc on current bx
+  wire alct_copad_pulse_match = copad_pulse_forclct && (tmb_copad_alct_allow || tmb_copad_alct_allow_ro) && alct_pulse;  // gem matches CLCT window, push to mpc on current bx
 
 
   wire   gem_pulse                   = gemA_pulse_forclct || gemB_pulse_forclct;
@@ -2436,10 +2440,10 @@
 
   assign     alct_clct_copad_match_pos  = alct0_clct0_copad_match_found_pos;
 
-  assign     alct0fromcopad_run3 = alct0fromcopad_pos &&  tmb_copad_clct_allow;
-  assign     alct1fromcopad_run3 = alct1fromcopad_pos &&  tmb_copad_clct_allow;
-  assign     clct0fromcopad_run3 = clct0fromcopad_pos &&  tmb_copad_alct_allow;
-  assign     clct1fromcopad_run3 = clct1fromcopad_pos &&  tmb_copad_alct_allow;
+  assign     alct0fromcopad_run3 = alct0fromcopad_pos &&  (tmb_copad_clct_allow || tmb_copad_clct_allow_ro);
+  assign     alct1fromcopad_run3 = alct1fromcopad_pos &&  (tmb_copad_clct_allow || tmb_copad_clct_allow_ro);
+  assign     clct0fromcopad_run3 = clct0fromcopad_pos &&  (tmb_copad_alct_allow || tmb_copad_alct_allow_ro);
+  assign     clct1fromcopad_run3 = clct1fromcopad_pos &&  (tmb_copad_alct_allow || tmb_copad_alct_allow_ro);
 
   assign     clctcopad_swapped = swapclct_clctcopad_match_pos;
   assign     alctclctgem_swapped = swapalct_gem_match_pos || swapclct_gem_match_pos;
@@ -2475,8 +2479,8 @@
   .me1b_match_drop_lowqclct   (me1b_match_drop_lowqclct), // drop lowQ stub when no GEM      
   .gemA_match_ignore_position (gemA_match_ignore_position),
   .gemB_match_ignore_position (gemB_match_ignore_position),
-  .tmb_copad_alct_allow       (tmb_copad_alct_allow),       //In gem-csc match, allow ALCT+copad match
-  .tmb_copad_clct_allow       (tmb_copad_clct_allow),       //In gem-csc match, allow CLCT+copad match
+  .tmb_copad_alct_allow       (tmb_copad_alct_allow || tmb_copad_alct_allow_ro),       //In gem-csc match, allow ALCT+copad match
+  .tmb_copad_clct_allow       (tmb_copad_clct_allow || tmb_copad_clct_allow_ro),       //In gem-csc match, allow CLCT+copad match
   .gemcsc_ignore_bend_check   (gemcsc_ignore_bend_check),   //In gemcsc amtch, ignore GEMCSC bend check
 
   .gemA_vpf (gemA_forclct_pipe[MXCLUSTER_CHAMBER-1:0]),
@@ -2728,27 +2732,30 @@
   // Run3 logic with GEMCSC match. if GEM is not enable for match, it should fall back to above logic
   wire alct_copad_good    =  alct_copad_match_pos && tmb_copad_alct_allow; //still in same bx of trig_pulse_run3
   wire clct_copad_good    =  clct_copad_match_pos && tmb_copad_clct_allow;
+  wire alct_copad_good_ro =  alct_copad_match_pos && tmb_copad_alct_allow_ro; //still in same bx of trig_pulse_run3
+  wire clct_copad_good_ro =  clct_copad_match_pos && tmb_copad_clct_allow_ro;
   //wire trig_pulse_run3    = clct_match_run3 || (clct_noalct && clct_nocopad && !clct_used_run3) || clct_lost_run3 || alct_only_trig_run3;  // Event pulse, with clct reuse feature
-  wire trig_pulse_run3    = clct_match || clct_copad_good || (clct_noalct && clct_nocopad && !clct_used_run3) || clct_lost_run3 || alct_only_trig_run3;  // Event pulse, with clct reuse feature
+  wire trig_pulse_run3    = clct_match || clct_copad_match_pos || (clct_noalct && clct_nocopad && !clct_used_run3) || clct_lost_run3 || alct_only_trig_run3;  // Event pulse, with clct reuse feature
 
   //wire trig_keep_run3     = (clct_keep_run3   || alct_keep_run3);
   //wire non_trig_keep_run3 = (clct_keep_ro_run3 || alct_keep_ro_run3);
   wire trig_keep_run3     = (clct_match && tmb_allow_match   ) || (clct_noalct && tmb_allow_clct && !clct_lost_run3 && !clct_used_run3) || (alct_noclct && tmb_allow_alct) || clct_copad_good || alct_copad_good;
-  wire non_trig_keep_run3 = (clct_match && tmb_allow_match_ro) || (clct_noalct && tmb_allow_clct_ro && !clct_lost_run3 && !clct_used_run3) || (alct_noclct && tmb_allow_alct_ro) || clct_copad_good || alct_copad_good;
+  wire non_trig_keep_run3 = (clct_match && tmb_allow_match_ro) || (clct_noalct && tmb_allow_clct_ro && !clct_lost_run3 && !clct_used_run3) || (alct_noclct && tmb_allow_alct_ro) || clct_copad_good_ro || alct_copad_good_ro;
 
   //wire alct_only_run3     = (alct_noclct && tmb_allow_alct && !clct_keep_run3) || alct_copad_pulse_match; //alct-only in gem-csc
-  wire alct_only_run3     = (alct_noclct && tmb_allow_alct && !clct_keep_run3) || alct_copad_good; //alct-only in gem-csc
-  wire wr_push_mux_run3   = (alct_only_run3) ? trig_pulse_run3 : (wr_push_xtmb_pipe  && trig_pulse_run3); 
+  wire alct_only_run3     = (alct_noclct && tmb_allow_alct && !clct_keep_run3 && !alct_copad_good; //alct-only in gem-csc
+  wire alct_copad_good_only = alct_noclct && !clct_keep_run3 && alct_copad_good && !tmb_allow_alct;
+  wire wr_push_mux_run3   = (alct_only_run3 || alct_copad_good_only) ? trig_pulse_run3 : (wr_push_xtmb_pipe  && trig_pulse_run3); 
 
-  wire clct_match_tr_run3  = (clct_match || clct_copad_good) && trig_keep_run3; // ALCT and CLCT matched in time, nontriggering event
+  wire clct_match_tr_run3  = (clct_match || clct_copad_good || alct_copad_good) && trig_keep_run3; // ALCT and CLCT matched in time, nontriggering event
   wire alct_noclct_tr_run3 = alct_noclct && !alct_copad_good && trig_keep_run3; // Only ALCT triggered, nontriggering event
   wire clct_noalct_tr_run3 = clct_noalct && !clct_copad_good && !clct_used_run3 && trig_keep_run3; // Only CLCT triggered, nontriggering event
 
-  wire clct_match_ro_run3  = (clct_match || clct_copad_good) && non_trig_keep_run3; // ALCT and CLCT matched in time, nontriggering event
-  wire alct_noclct_ro_run3 = alct_noclct && !alct_copad_good && non_trig_keep_run3; // Only ALCT triggered, nontriggering event
-  wire clct_noalct_ro_run3 = clct_noalct && !clct_copad_good && !clct_used_run3 && non_trig_keep_run3; // Only CLCT triggered, nontriggering event
+  wire clct_match_ro_run3  = (clct_match ||  clct_copad_good_ro || alct_copad_good_ro) && non_trig_keep_run3; // ALCT and CLCT matched in time, nontriggering event
+  wire alct_noclct_ro_run3 = alct_noclct && !alct_copad_good_ro && non_trig_keep_run3; // Only ALCT triggered, nontriggering event
+  wire clct_noalct_ro_run3 = clct_noalct && !clct_copad_good_ro && !clct_used_run3 && non_trig_keep_run3; // Only CLCT triggered, nontriggering event
 
-  assign alct_only_trig_run3 = (alct_noclct && !alct_copad_good && tmb_allow_alct) || (alct_noclct_ro_run3 && tmb_allow_alct_ro);// ALCT-only triggers are allowed
+  assign alct_only_trig_run3 = (alct_noclct && !alct_copad_good && tmb_allow_alct) || (alct_noclct_ro_run3 && !alct_copad_good_ro && tmb_allow_alct_ro);// ALCT-only triggers are allowed
   //wire clct_match_tr_run3  = clct_match_run3  && trig_keep_run3; // ALCT and CLCT matched in time, nontriggering event
   //wire alct_noclct_tr_run3 = alct_noclct && !alct_copad_pulse_match && trig_keep_run3; // Only ALCT triggered, nontriggering event
   //wire clct_noalct_tr_run3 = clct_noalct && clct_nocopad && !clct_used_run3 && trig_keep_run3; // Only CLCT triggered, nontriggering event
@@ -2763,10 +2770,10 @@
   //------------------------------------------------------------------------------------------------------------------
   // Here position is taken into consideration??
   //following part is already 1Bx after clct0_pipe/clct1_pipe/alct0_pipe/alct1_pipe because 1BX latency from position match
-  wire clct0_copad_match_good = clct0_copad_match_found_pos && tmb_copad_clct_allow;
-  wire alct0_copad_match_good = alct0_copad_match_found_pos && tmb_copad_alct_allow;
-  wire clct1_copad_match_good = clct1_copad_match_found_pos && tmb_copad_clct_allow;
-  wire alct1_copad_match_good = alct1_copad_match_found_pos && tmb_copad_alct_allow;
+  wire clct0_copad_match_good = clct0_copad_match_found_pos && (tmb_copad_clct_allow || tmb_copad_clct_allow_ro);
+  wire alct0_copad_match_good = alct0_copad_match_found_pos && (tmb_copad_alct_allow || tmb_copad_alct_allow_ro);
+  wire clct1_copad_match_good = clct1_copad_match_found_pos && (tmb_copad_clct_allow || tmb_copad_clct_allow_ro);
+  wire alct1_copad_match_good = alct1_copad_match_found_pos && (tmb_copad_alct_allow || tmb_copad_alct_allow_ro);
 
   wire alctclct_match_run3 = (alct0_clct0_copad_match_found_pos || alct0_clct0_gem_match_found_pos || alct0_clct0_nogem_match_found_pos);
   wire alctclct_match_good_run3 = alctclct_match_run3 && tmb_allow_match;
