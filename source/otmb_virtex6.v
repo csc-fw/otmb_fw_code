@@ -1778,9 +1778,7 @@
 
   wire       gem_me1a_match_enable;
   wire       gem_me1b_match_enable;
-  wire       gem_me1a_match_nogem;// no gem is fine for GEM-CSC match
-  wire       gem_me1b_match_nogem;// no gem is fine for GEM-CSC match
-  //wire       me1a_match_drop_lowqalct;// no alct is fine for GEM-CSC match
+
   wire       match_drop_lowqalct;     //drop low Q stub 
   wire       me1a_match_drop_lowqclct;//drop low Q stub 
   wire       me1b_match_drop_lowqclct;//drop low Q stub 
@@ -4628,9 +4626,7 @@ wire [15:0] gemB_bxn_counter;
   //GEM-CSC match control
   .gem_me1a_match_enable     (gem_me1a_match_enable),       //IN gem-csc match in me1a
   .gem_me1b_match_enable     (gem_me1b_match_enable),       //IN gem-csc match in me1b
-  .gem_me1a_match_nogem      (gem_me1a_match_nogem),      //IN gem-csc match without gem is allowed in ME1b
-  .gem_me1b_match_nogem      (gem_me1b_match_nogem),      //IN gem-csc match without gem is allowed in ME1a
-  //.gem_me1a_match_noalct     (gem_me1a_match_noalct),     //IN gem-csc match without alct is allowed in ME1b
+
   .match_drop_lowqalct     (match_drop_lowqalct),               //IN gem-csc match drop lowQ stub 
   .me1a_match_drop_lowqclct     (me1a_match_drop_lowqclct),     //IN gem-csc match drop lowQ stub 
   .me1b_match_drop_lowqclct     (me1b_match_drop_lowqclct),     //IN gem-csc match drop lowQ stub 
@@ -5935,9 +5931,7 @@ wire [15:0] gemB_bxn_counter;
       //GEM-CSC match control
       .gem_me1a_match_enable     (gem_me1a_match_enable),       //Out gem-csc match in me1a
       .gem_me1b_match_enable     (gem_me1b_match_enable),       //Out gem-csc match in me1b
-      .gem_me1a_match_nogem        (gem_me1a_match_nogem),       //Out gem-csc match without gem is allowed in ME1b
-      .gem_me1b_match_nogem        (gem_me1b_match_nogem),       //Out gem-csc match without gem is allowed in ME1a
-      //.gem_me1a_match_noalct       (gem_me1a_match_noalct),       //Out gem-csc match without alct is allowed in ME1b
+    
       .match_drop_lowqalct         (match_drop_lowqalct),       //Out gem-csc match drop lowQ stub 
       .me1a_match_drop_lowqclct    (me1a_match_drop_lowqclct),       //Out gem-csc match drop lowQ stub 
       .me1b_match_drop_lowqclct    (me1b_match_drop_lowqclct),       //Out gem-csc match drop lowQ stub 

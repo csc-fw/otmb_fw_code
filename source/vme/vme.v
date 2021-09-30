@@ -2546,9 +2546,6 @@
 
   output       gem_me1a_match_enable;
   output       gem_me1b_match_enable;
-  output       gem_me1a_match_nogem;// no gem is fine for GEM-CSC match
-  output       gem_me1b_match_nogem;// no gem is fine for GEM-CSC match
-  //output       me1b_match_drop_lowqalct;// no alct is fine for GEM-CSC match
   output       gemcsc_match_extrapolate;
   output       gemcsc_match_bend_correction;
   output       gemcsc_match_tightwindow;

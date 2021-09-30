@@ -292,10 +292,7 @@
   //GEM-CSC match control
   gem_me1a_match_enable,      //in gem-csc match in me1a. applied during GEM-CSC coordination conversion
   gem_me1b_match_enable,      //in gem-csc match in me1b. applied during GEM-CSC coordination conversion
-  gem_me1a_match_nogem,       //??? not used yet. gem-csc match without gem is allowed in ME1b, => allow lowQ ALCT-CLCT match
-  gem_me1b_match_nogem,       //??? not used yet. gem-csc match without gem is allowed in ME1a
-  match_drop_lowqalct, // drop lowQ stub when no GEM      
-  //me1b_match_drop_lowqalct, // drop lowQ stub when no GEM      
+  match_drop_lowqalct, // drop lowQ stub when no GEM         
   me1a_match_drop_lowqclct, // drop lowQ stub when no GEM      
   me1b_match_drop_lowqclct, // drop lowQ stub when no GEM      
   tmb_copad_alct_allow_ro,
@@ -901,8 +898,7 @@
 
   input               gem_me1a_match_enable;
   input               gem_me1b_match_enable;
-  input               gem_me1a_match_nogem;// no gem is fine for GEM-CSC match
-  input               gem_me1b_match_nogem;// no gem is fine for GEM-CSC match
+
   input               match_drop_lowqalct;// drop low Q alct for  match when no GEM is available
   input               me1a_match_drop_lowqclct;// drop low Q clct for  match when no GEM is available 
   input               me1b_match_drop_lowqclct;// drop low Q clct for  match when no GEM is available
@@ -2743,7 +2739,7 @@
   wire non_trig_keep_run3 = (clct_match && tmb_allow_match_ro) || (clct_noalct && tmb_allow_clct_ro && !clct_lost_run3 && !clct_used_run3) || (alct_noclct && tmb_allow_alct_ro) || clct_copad_good_ro || alct_copad_good_ro;
 
   //wire alct_only_run3     = (alct_noclct && tmb_allow_alct && !clct_keep_run3) || alct_copad_pulse_match; //alct-only in gem-csc
-  wire alct_only_run3     = (alct_noclct && tmb_allow_alct && !clct_keep_run3 && !alct_copad_good; //alct-only in gem-csc
+  wire alct_only_run3     = alct_noclct && tmb_allow_alct && !clct_keep_run3 && !alct_copad_good; //alct-only in gem-csc
   wire alct_copad_good_only = alct_noclct && !clct_keep_run3 && alct_copad_good && !tmb_allow_alct;
   wire wr_push_mux_run3   = (alct_only_run3 || alct_copad_good_only) ? trig_pulse_run3 : (wr_push_xtmb_pipe  && trig_pulse_run3); 
 
