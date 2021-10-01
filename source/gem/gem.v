@@ -799,10 +799,10 @@ parameter MXGEMHCM   = 16;  // hot channel mask bits for one vfat
 //----------------------------------------------------------------------------------------------------------------------
 
   wire  cluster_maskout    [3:0];// cluster is masked out or partial masked
-  assign cluster_maskout[0] = ~gem_vfat_hcm[feb[0]];
-  assign cluster_maskout[1] = ~gem_vfat_hcm[feb[1]];
-  assign cluster_maskout[2] = ~gem_vfat_hcm[feb[2]];
-  assign cluster_maskout[3] = ~gem_vfat_hcm[feb[3]];
+  assign cluster_maskout[0] = gem_vfat_hcm[feb[0]];
+  assign cluster_maskout[1] = gem_vfat_hcm[feb[1]];
+  assign cluster_maskout[2] = gem_vfat_hcm[feb[2]];
+  assign cluster_maskout[3] = gem_vfat_hcm[feb[3]];
 
 //----------------------------------------------------------------------------------------------------------------------
 // outputs
