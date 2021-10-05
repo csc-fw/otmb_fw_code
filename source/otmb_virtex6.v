@@ -961,7 +961,7 @@
   wire  [MXCNTVME-1:0]  hmt_trigger_counter;
   wire  [MXCNTVME-1:0]  hmt_readout_counter;
   wire  [MXCNTVME-1:0]  hmt_aff_counter;
-  wire  [MXCNTVME-1:0]  buff_stall_counter;
+  wire  [MXCNTVME-1:0]  buf_stall_counter;
 
 // GEM Counters
   wire  [MXCNTVME-1:0]  gem_counter0;
@@ -3836,7 +3836,7 @@ end
   .hmt_trigger_counter (hmt_trigger_counter[MXCNTVME-1:0]), //Out
   .hmt_readout_counter (hmt_readout_counter[MXCNTVME-1:0]), //out
   .hmt_aff_counter     (hmt_aff_counter[MXCNTVME-1:0]), //out
-  .buff_stall_counter  (buff_stall_counter[MXCNTVME-1:0]),
+  .buf_stall_counter   (buf_stall_counter[MXCNTVME-1:0]),
 
 
 // Sequencer Header Counters
@@ -6130,7 +6130,7 @@ wire [15:0] gemB_bxn_counter;
       .hmt_trigger_counter (hmt_trigger_counter[MXCNTVME-1:0]), //in
       .hmt_readout_counter (hmt_readout_counter[MXCNTVME-1:0]), //in
       .hmt_aff_counter     (hmt_aff_counter[MXCNTVME-1:0]), //In
-      .buff_stall_counter  (buff_stall_counter[MXCNTVME-1:0]),//In
+      .buf_stall_counter   (buf_stall_counter[MXCNTVME-1:0]),//In
       
       // GEM Trigger/Readout Counter Ports
       .gem_cnt_all_reset    (gem_cnt_all_reset),     // Out  Trigger/Readout counter reset

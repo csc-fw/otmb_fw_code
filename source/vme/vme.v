@@ -946,7 +946,7 @@
   hmt_trigger_counter,
   hmt_readout_counter,
   hmt_aff_counter,
-  buff_stall_counter,
+  buf_stall_counter,
 
   gem_counter0,
   gem_counter1,
@@ -2721,7 +2721,7 @@
   input  [MXCNTVME-1:0]  hmt_trigger_counter;
   input  [MXCNTVME-1:0]  hmt_readout_counter;
   input  [MXCNTVME-1:0]  hmt_aff_counter;
-  input  [MXCNTVME-1:0]  buff_stall_counter;
+  input  [MXCNTVME-1:0]  buf_stall_counter;
 
 // GEM Counters
   input  [MXCNTVME-1:0]  gem_counter0;
@@ -7557,7 +7557,7 @@
   assign cnt[116] = hmt_trigger_counter;
   assign cnt[117] = hmt_readout_counter;
   assign cnt[118] = hmt_aff_counter;// active cfeb flag from HMT
-  assign cnt[119] = buff_stall_counter;
+  assign cnt[119] = buf_stall_counter;
 
 // Virtex-6 GTX Optical Receiver Error Counters
 //  assign cnt[81]  = gtx_rx_err_count0;  // Error count on this fiber channel

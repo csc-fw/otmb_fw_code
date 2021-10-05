@@ -1105,7 +1105,7 @@
   hmt_trigger_counter,
   hmt_readout_counter,
   hmt_aff_counter,
-  buff_stall_counter,
+  buf_stall_counter,
 
 // GEM Trigger/Readout Counter Ports
   gem_cnt_all_reset,
@@ -2179,7 +2179,7 @@
   output  [MXCNTVME-1:0]  hmt_trigger_counter;
   output  [MXCNTVME-1:0]  hmt_readout_counter;
   output  [MXCNTVME-1:0]  hmt_aff_counter;
-  output  [MXCNTVME-1:0]  buff_stall_counter;
+  output  [MXCNTVME-1:0]  buf_stall_counter;
 
 // Trigger/Readout Counter Ports
   input  gem_cnt_all_reset;    // Trigger/Readout counter reset
