@@ -5233,8 +5233,7 @@
   assign  header09_[14:0]   =  r_pretrig_counter[14:0]; // CLCT pre-trigger counter, stop on ovf
   assign  header09_[18:15]  =  0;                       // DDU+DMB control flags
 
-  assign  header10_run3_[10: 0]   =  r_clct0_carry_xtmb[MXPATC-1:0]; 
-  assign  header10_run3_[11]      =  run3_trig_df;
+  assign  header10_run3_[11: 0]   =  r_clct0_carry_xtmb[MXPATC-1:0]; 
   assign  header10_run3_[13:12]   =  r_clct0_xky_xtmb[1:0];
   assign  header10_run3_[14]      =  r_hmt_nhits_bx678_header[0];
   assign  header10_[14:0]   =  run3_daq_df ? header10_run3_[14:0] : r_pretrig_counter[29:15]; // CLCT pre-trigger counter
