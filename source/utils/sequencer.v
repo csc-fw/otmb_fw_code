@@ -3266,7 +3266,7 @@
   wire              active_feb_flag;     // Active FEB flag selection
 
   assign active_feb_flag_pre = clct_push_pretrig || (hmt_fired_pretrig && cfeb_allow_hmt_ro);
-  assign active_feb_list_pre = (active_feb_s0[MXCFEB-1:0] & {MXCFEB{active_feb_flag_pre}}) | hmt_active_feb;//from pretrigger
+  assign active_feb_list_pre = (active_feb_s0[MXCFEB-1:0] & {MXCFEB{clct_push_pretrig}}) | hmt_active_feb;//from pretrigger
 
   assign active_feb_flag_tmb = tmb_trig_write;
   assign active_feb_list_tmb = tmb_aff_list & {MXCFEB{active_feb_flag_tmb}};
