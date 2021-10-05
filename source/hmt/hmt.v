@@ -308,7 +308,7 @@
 
   wire [MXCFEB-1  :0]  active_cfeb_s1_srl; 
   srl16e_bbl #(1)       uhmtfiredpre  ( .clock(clock), .ce(1'b1), .adr(hmt_dly_const-4'd1), .d(hmt_fired_s0),   .q(hmt_fired_s1_srl));
-  srl16e_bbl #(MXCFEB)  uhmtaffpre    ( .clock(clock), .ce(1'b1), .adr(hmt_dly_const-4'd1),  .d(active_cfeb_s0), .q(active_cfeb_s1_srl));
+  srl16e_bbl #(MXCFEB)  uhmtaffpre    ( .clock(clock), .ce(1'b1), .adr(hmt_dly_const-4'd1), .d(active_cfeb_s0), .q(active_cfeb_s1_srl));
 
   wire hmt_fired_s1 = (hmt_dly_const == 4'd0) ? hmt_fired_s0 : hmt_fired_s1_srl;
   wire [MXCFEB-1  :0] active_cfeb_s1 = (hmt_dly_const == 4'd0) ? active_cfeb_s0 : active_cfeb_s1_srl;

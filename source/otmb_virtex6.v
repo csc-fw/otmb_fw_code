@@ -923,7 +923,7 @@
   wire  [MXCNTVME-1:0]  hmt_trigger_counter;
   wire  [MXCNTVME-1:0]  hmt_readout_counter;
   wire [MXCNTVME-1:0]  hmt_aff_counter;
-  wire [MXCNTVME-1:0]  buff_stall_counter;
+  wire [MXCNTVME-1:0]  buf_stall_counter;
 
 // CFEB injector RAM map 2D arrays into 1D for ALCT
   wire  [MXCFEB-1:0]  inj_ramout_pulse;
@@ -2597,7 +2597,7 @@
   .hmt_trigger_counter (hmt_trigger_counter[MXCNTVME-1:0]), //Out
   .hmt_readout_counter (hmt_readout_counter[MXCNTVME-1:0]), //out
   .hmt_aff_counter     (hmt_aff_counter[MXCNTVME-1:0]), //out
-  .buff_stall_counter  (buff_stall_counter[MXCNTVME-1:0]),
+  .buf_stall_counter   (buf_stall_counter[MXCNTVME-1:0]),
   
 // Sequencer Header Counters
   .hdr_clear_on_resync (hdr_clear_on_resync),           // In  Clear header counters on ttc_resync
@@ -4312,7 +4312,7 @@
       .hmt_trigger_counter (hmt_trigger_counter[MXCNTVME-1:0]), //in
       .hmt_readout_counter (hmt_readout_counter[MXCNTVME-1:0]), //in
       .hmt_aff_counter     (hmt_aff_counter[MXCNTVME-1:0]), //out
-      .buff_stall_counter  (buff_stall_counter[MXCNTVME-1:0]),
+      .buf_stall_counter   (buf_stall_counter[MXCNTVME-1:0]),
       
       // CSC Orientation Ports
       .csc_type        (csc_type[3:0]),   // In  Firmware compile type
