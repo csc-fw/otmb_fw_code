@@ -801,7 +801,7 @@
   tmb_alctb,
   tmb_alcte,
   tmb_hmt_match_win,
-  hmt_nhits_bx678_ff,
+  hmt_nhits_sig_ff,
 
   ccLUT_enable,
   run3_trig_df,
@@ -1606,7 +1606,7 @@
   input  [4:0]      tmb_alctb;      // ALCT bxn latched at trigger
   input  [1:0]      tmb_alcte;      // ALCT ecc error syndrome latched at trigger
   input [3:0] tmb_hmt_match_win;
-  input [NHMTHITB-1:0] hmt_nhits_bx678_ff;// hmt nhits in-time
+  input [NHMTHITB-1:0] hmt_nhits_sig_ff;// hmt nhits in-time
 
   input  ccLUT_enable;
   input  run3_trig_df;
@@ -3277,7 +3277,7 @@
   assign rtmb_wdata[22]  =  tmb_clct1_discard; // TMB discarded clct1 from ME1A
 
   assign rtmb_wdata[26:23] = tmb_hmt_match_win[3:0];
-  assign rtmb_wdata[27+NHMTHITB-1:27] = hmt_nhits_bx678_ff[NHMTHITB-1:0];
+  assign rtmb_wdata[27+NHMTHITB-1:27] = hmt_nhits_sig_ff[NHMTHITB-1:0];
 
 // TMB match: store ALCTs sent to MPC in RAM mapping array, arrives same bx as tmb match result
   parameter MXALCTD = 11+11+5+2; // ALCT transmit frame data bits, 2alcts + bxn + tmb stats
@@ -3959,8 +3959,8 @@
 
   wire [3:0] r_hmt_match_win  = rtmb_rdata[26:23];// alct/anode hmt in cathode hmt tagged window
 
-  wire [NHMTHITB-1:0] r_hmt_nhits_bx678 = rtmb_rdata[27+NHMTHITB-1:27];
-  wire [6:0] r_hmt_nhits_bx678_header =  (r_hmt_nhits_bx678>=10'h80) ? 7'h7F : r_hmt_nhits_bx678[6:0];
+  wire [NHMTHITB-1:0] r_hmt_nhits_sig = rtmb_rdata[27+NHMTHITB-1:27];
+  wire [6:0] r_hmt_nhits_sig_header =  (r_hmt_nhits_sig>=10'h80) ? 7'h7F : r_hmt_nhits_sig[6:0];
 
 
 // Unpack ALCT + extra TMB trigger data from RAM mapping array
@@ -4370,7 +4370,7 @@
   //assign  header10_[14:0]    =  r_pretrig_counter[29:15];  // CLCT pre-trigger counter
   assign  header10_run3_[11: 0]   =  r_clct0_carry_xtmb[MXPATC-1:0];//Tao warning!!
   assign  header10_run3_[13:12]   =  r_clct0_xky_xtmb[1:0];
-  assign  header10_run3_[14]      =  r_hmt_nhits_bx678_header[0];
+  assign  header10_run3_[14]      =  r_hmt_nhits_sig_header[0];
   assign  header10_[14:0]   =  run3_daq_df ? header10_run3_[14:0] : r_pretrig_counter[29:15]; // CLCT pre-trigger counter
   assign  header10_[18:15]  =  0;              // DDU+DMB control flags
 
@@ -4384,7 +4384,7 @@
   //assign  header14_[14:0]    =  r_trig_counter[29:15];    // TMB trigger counter
   assign  header14_run3_[11: 0]   =  r_clct1_carry_xtmb[MXPATC-1:0];//Tao warning!!
   assign  header14_run3_[13:12]   =  r_clct1_xky_xtmb[1:0];
-  assign  header14_run3_[14]      =  r_hmt_nhits_bx678_header[1];
+  assign  header14_run3_[14]      =  r_hmt_nhits_sig_header[1];
   assign  header14_[14:0]   =  run3_daq_df ? header14_run3_[14:0] : r_trig_counter[29:15]; // TMB trigger counter
   assign  header14_[18:15]  =  0;              // DDU+DMB control flags
 
@@ -4482,7 +4482,7 @@
   assign  header29_[18:15]  =  0;              // DDU+DMB control flags
 
   //assign  header30_[4:0]    =  r_alct_bxn[4:0];      // ALCT0/1 bxn
-  assign  header30_[4:0]    =  run3_daq_df ? r_hmt_nhits_bx678_header[6:2] : r_alct_bxn[4:0];         // ALCT0/1 bxn
+  assign  header30_[4:0]    =  run3_daq_df ? r_hmt_nhits_sig_header[6:2] : r_alct_bxn[4:0];         // ALCT0/1 bxn
   assign  header30_[6:5]    =  r_alct_ecc_err[1:0];    // ALCT trigger path ECC error code
   assign  header30_[11:7]   =  cfeb_badbits_found[4:0];  // CFEB[n] has at least 1 bad bit
   assign  header30_[12]     =  cfeb_badbits_blocked;    // A CFEB had bad bits that were blocked

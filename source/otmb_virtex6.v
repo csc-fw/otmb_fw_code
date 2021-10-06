@@ -1681,10 +1681,10 @@
   wire  hmt_allow_match_ro;
   wire  hmt_outtime_check;
 
-  wire [NHMTHITB-1:0] hmt_nhits_bx678_ff; //for header
+  wire [NHMTHITB-1:0] hmt_nhits_sig_ff; //for header
   wire [NHMTHITB-1:0] hmt_nhits_bx7;
-  wire [NHMTHITB-1:0] hmt_nhits_bx678;
-  wire [NHMTHITB-1:0] hmt_nhits_bx2345;
+  wire [NHMTHITB-1:0] hmt_nhits_sig;
+  wire [NHMTHITB-1:0] hmt_nhits_bkg;
   wire [7:0] hmt_thresh1, hmt_thresh2, hmt_thresh3;
 
   wire [6:0] hmt_aff_thresh;
@@ -1775,8 +1775,8 @@
 
   //tmb port
   .hmt_nhits_bx7       (hmt_nhits_bx7     [NHMTHITB-1:0]),//Out hmt nhits for central bx
-  .hmt_nhits_bx678     (hmt_nhits_bx678   [NHMTHITB-1:0]),//Out hmt nhits for in-time
-  .hmt_nhits_bx2345    (hmt_nhits_bx2345  [NHMTHITB-1:0]),//Out hmt nhits for out-time
+  .hmt_nhits_sig     (hmt_nhits_sig   [NHMTHITB-1:0]),//Out hmt nhits for in-time
+  .hmt_nhits_bkg    (hmt_nhits_bkg  [NHMTHITB-1:0]),//Out hmt nhits for out-time
   .hmt_cathode_pipe    (hmt_cathode[MXHMTB-1:0]), //Out hmt bits in cathod 
   
   //.hmt_cathode_fired     (hmt_cathode_fired),// Out 
@@ -1868,8 +1868,8 @@
   wire [7:0] l1a_preClct_dly;
   
   wire [NHMTHITB-1:0]             hmt_nhits_bx7_vme;
-  wire [NHMTHITB-1:0]             hmt_nhits_bx678_vme;
-  wire [NHMTHITB-1:0]             hmt_nhits_bx2345_vme;
+  wire [NHMTHITB-1:0]             hmt_nhits_sig_vme;
+  wire [NHMTHITB-1:0]             hmt_nhits_bkg_vme;
 
   wire  [MXCLCT-1:0]  clct0_vme;
   wire  [MXCLCT-1:0]  clct1_vme;
@@ -2429,7 +2429,7 @@
   .tmb_alctb (tmb_alctb[4:0]),  // In  ALCT bxn latched at trigger
   .tmb_alcte (tmb_alcte[1:0]),  // In  ALCT ecc error syndrome latched at trigger
   .tmb_hmt_match_win         (tmb_hmt_match_win[3:0]), //In  alct/anode hmt in cathode hmt tagged window
-  .hmt_nhits_bx678_ff (hmt_nhits_bx678_ff[NHMTHITB-1:0]), // In hmt nhits for header
+  .hmt_nhits_sig_ff (hmt_nhits_sig_ff[NHMTHITB-1:0]), // In hmt nhits for header
 
   .ccLUT_enable  (ccLUT_enable),//In enabe CCLUT
   .run3_trig_df  (run3_trig_df), //In enable run3 trigger format
@@ -3030,8 +3030,8 @@
 
   //hmt port
   .hmt_nhits_bx7       (hmt_nhits_bx7     [NHMTHITB-1:0]),//In hmt nhits for central bx
-  .hmt_nhits_bx678     (hmt_nhits_bx678   [NHMTHITB-1:0]),//In hmt nhits for in-time
-  .hmt_nhits_bx2345    (hmt_nhits_bx2345  [NHMTHITB-1:0]),//In hmt nhits for out-time
+  .hmt_nhits_sig     (hmt_nhits_sig   [NHMTHITB-1:0]),//In hmt nhits for in-time
+  .hmt_nhits_bkg    (hmt_nhits_bkg  [NHMTHITB-1:0]),//In hmt nhits for out-time
   .hmt_cathode_pipe    (hmt_cathode[MXHMTB-1:0]), //In hmt bits in cathod 
   .hmt_match_win      (hmt_match_win[3:0]),// In alct location in hmt window size
 
@@ -3109,7 +3109,7 @@
   .tmb_alctb (tmb_alctb[4:0]),  // Out  ALCT bxn latched at trigger
   .tmb_alcte (tmb_alcte[1:0]),  // Out  ALCT ecc error syndrome latched at trigger
   .tmb_hmt_match_win         (tmb_hmt_match_win[3:0]), //In  alct/anode hmt in cathode hmt tagged window
-  .hmt_nhits_bx678_ff (hmt_nhits_bx678_ff[NHMTHITB-1:0]), // Out hmt nhits for header
+  .hmt_nhits_sig_ff (hmt_nhits_sig_ff[NHMTHITB-1:0]), // Out hmt nhits for header
 
   .run3_trig_df   (run3_trig_df),//enable run3 trigger format
   .run3_daq_df   (run3_daq_df), //In enable run3 daq format
@@ -3173,8 +3173,8 @@
   .event_clear_vme  (event_clear_vme),        // In  Event clear for aff,clct,mpc vme diagnostic registers
 
   .hmt_nhits_bx7_vme    (hmt_nhits_bx7_vme   [NHMTHITB-1:0]),//In  HMT nhits for trigger
-  .hmt_nhits_bx678_vme  (hmt_nhits_bx678_vme [NHMTHITB-1:0]),//In  HMT nhits for trigger
-  .hmt_nhits_bx2345_vme (hmt_nhits_bx2345_vme[NHMTHITB-1:0]),//In  HMT nhits for trigger
+  .hmt_nhits_sig_vme  (hmt_nhits_sig_vme [NHMTHITB-1:0]),//In  HMT nhits for trigger
+  .hmt_nhits_bkg_vme (hmt_nhits_bkg_vme[NHMTHITB-1:0]),//In  HMT nhits for trigger
   .hmt_cathode_vme      (hmt_cathode_vme[MXHMTB-1:0]),  //In  HMT trigger results
 
   .mpc_frame_vme    (mpc_frame_vme),          // Out MPC frame latch strobe for VME
@@ -3979,8 +3979,8 @@
 
       .hmt_enable         (hmt_enable),        // In ME1a enable or not in HMT
       .hmt_nhits_bx7_vme    (hmt_nhits_bx7_vme   [NHMTHITB-1:0]),//In  HMT nhits for trigger
-      .hmt_nhits_bx678_vme  (hmt_nhits_bx678_vme [NHMTHITB-1:0]),//In  HMT nhits for trigger
-      .hmt_nhits_bx2345_vme (hmt_nhits_bx2345_vme[NHMTHITB-1:0]),//In  HMT nhits for trigger
+      .hmt_nhits_sig_vme  (hmt_nhits_sig_vme [NHMTHITB-1:0]),//In  HMT nhits for trigger
+      .hmt_nhits_bkg_vme (hmt_nhits_bkg_vme[NHMTHITB-1:0]),//In  HMT nhits for trigger
       .hmt_cathode_vme           (hmt_cathode_vme[MXHMTB-1:0]), // In HMT trigger results, cathode
       .hmt_thresh1        (hmt_thresh1[7:0]),    // Out  loose HMT thresh
       .hmt_thresh2        (hmt_thresh2[7:0]),    // Out  median HMT thresh
