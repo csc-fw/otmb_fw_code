@@ -140,8 +140,8 @@
   hmt_enable,
   hmt_outtime_check,
   hmt_nhits_bx7,//tmb match bx cathode hmt
-  hmt_nhits_bx678,
-  hmt_nhits_bx2345,
+  hmt_nhits_sig,
+  hmt_nhits_bkg,
   hmt_cathode_pipe, // tmb match bx
   hmt_match_win,
   hmt_trigger_tmb,
@@ -384,7 +384,7 @@
   tmb_alct1,
   tmb_alctb,
   tmb_alcte,
-  hmt_nhits_bx678_ff,
+  hmt_nhits_sig_ff,
 
   //GEM-CSC match output, time_only
   alct_gem_pulse,
@@ -509,8 +509,8 @@
 // VME Status
   event_clear_vme,
   hmt_nhits_bx7_vme,                                                                                                                                                 
-  hmt_nhits_bx678_vme,
-  hmt_nhits_bx2345_vme,
+  hmt_nhits_sig_vme,
+  hmt_nhits_bkg_vme,
   hmt_cathode_vme,
 
   mpc_frame_vme,
@@ -746,8 +746,8 @@
   input  hmt_enable;
   input  hmt_outtime_check;
   input [NHMTHITB-1:0]   hmt_nhits_bx7;//CLCT bx
-  input [NHMTHITB-1:0]   hmt_nhits_bx678;
-  input [NHMTHITB-1:0]   hmt_nhits_bx2345;
+  input [NHMTHITB-1:0]   hmt_nhits_sig;
+  input [NHMTHITB-1:0]   hmt_nhits_bkg;
   input [MXHMTB-1:0]     hmt_cathode_pipe; // tmb match bx
 
   input [3:0] hmt_match_win;
@@ -1007,7 +1007,7 @@
   output  [4:0]      tmb_alctb; // ALCT bxn latched at trigger
   output  [1:0]      tmb_alcte; // ALCT ecc error syndrome latched at trigger
 
-  output [NHMTHITB-1:0] hmt_nhits_bx678_ff;
+  output [NHMTHITB-1:0] hmt_nhits_sig_ff;
 
   //GEM-CSC match output, timing only
   output             alct_gem_pulse;        // GEM matched (in time) to ALCT
@@ -1117,8 +1117,8 @@
 // VME Status
   input                  event_clear_vme;  // Event clear for aff,clct,mpc vme diagnostic registers
   output [NHMTHITB-1:0]   hmt_nhits_bx7_vme;//CLCT bx
-  output [NHMTHITB-1:0]   hmt_nhits_bx678_vme;
-  output [NHMTHITB-1:0]   hmt_nhits_bx2345_vme;
+  output [NHMTHITB-1:0]   hmt_nhits_sig_vme;
+  output [NHMTHITB-1:0]   hmt_nhits_bkg_vme;
   output [MXHMTB-1:0]     hmt_cathode_vme; // tmb match bx
 
   output                 mpc_frame_vme;    // MPC frame latch
@@ -3605,28 +3605,28 @@
   assign tmb_rank_err = lct0_qlt_run3[2:0] < lct1_qlt_run3[2:0];
 
   reg [NHMTHITB-1:0]   hmt_nhits_bx7_ff=0;//CLCT bx
-  reg [NHMTHITB-1:0]   hmt_nhits_bx678_ff=0;
-  reg [NHMTHITB-1:0]   hmt_nhits_bx2345_ff=0;
+  reg [NHMTHITB-1:0]   hmt_nhits_sig_ff=0;
+  reg [NHMTHITB-1:0]   hmt_nhits_bkg_ff=0;
   reg [MXHMTB-1:0]     hmt_cathode_ff=0; // tmb match bx
   reg [NHMTHITB-1:0]   hmt_nhits_bx7_vme=0;//CLCT bx
-  reg [NHMTHITB-1:0]   hmt_nhits_bx678_vme=0;
-  reg [NHMTHITB-1:0]   hmt_nhits_bx2345_vme=0;
+  reg [NHMTHITB-1:0]   hmt_nhits_sig_vme=0;
+  reg [NHMTHITB-1:0]   hmt_nhits_bkg_vme=0;
   reg [MXHMTB-1:0]     hmt_cathode_vme=0; // tmb match bx
   always @(posedge clock) begin
     hmt_nhits_bx7_ff    <= hmt_nhits_bx7;
-    hmt_nhits_bx678_ff  <= hmt_nhits_bx678;
-    hmt_nhits_bx2345_ff <= hmt_nhits_bx2345;
+    hmt_nhits_sig_ff  <= hmt_nhits_sig;
+    hmt_nhits_bkg_ff <= hmt_nhits_bkg;
     hmt_cathode_ff      <= hmt_cathode_pipe;
     if (event_clear_vme) begin
         hmt_nhits_bx7_vme    <= 0;
-        hmt_nhits_bx678_vme  <= 0;
-        hmt_nhits_bx2345_vme <= 0;
+        hmt_nhits_sig_vme  <= 0;
+        hmt_nhits_bkg_vme <= 0;
         hmt_cathode_vme      <= 0;
     end
     else if (trig_mpc || mpc0_frame0_pulse[15]) begin
         hmt_nhits_bx7_vme    <= hmt_nhits_bx7_ff;
-        hmt_nhits_bx678_vme  <= hmt_nhits_bx678_ff;
-        hmt_nhits_bx2345_vme <= hmt_nhits_bx2345_ff;
+        hmt_nhits_sig_vme  <= hmt_nhits_sig_ff;
+        hmt_nhits_bkg_vme <= hmt_nhits_bkg_ff;
         hmt_cathode_vme      <= hmt_cathode_ff;                                                                                                                                                 
     end
   end

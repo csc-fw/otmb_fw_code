@@ -2761,10 +2761,10 @@ end
   wire  hmt_allow_match_ro;
   wire  hmt_outtime_check;
 
-  wire [NHMTHITB-1:0] hmt_nhits_bx678_ff; //for header
+  wire [NHMTHITB-1:0] hmt_nhits_sig_ff; //for header
   wire [NHMTHITB-1:0] hmt_nhits_bx7;
-  wire [NHMTHITB-1:0] hmt_nhits_bx678;
-  wire [NHMTHITB-1:0] hmt_nhits_bx2345;
+  wire [NHMTHITB-1:0] hmt_nhits_sig;
+  wire [NHMTHITB-1:0] hmt_nhits_bkg;
   wire [7:0] hmt_thresh1, hmt_thresh2, hmt_thresh3;
 
   wire [6:0] hmt_aff_thresh;
@@ -2858,8 +2858,8 @@ end
 
   //tmb port
   .hmt_nhits_bx7       (hmt_nhits_bx7     [NHMTHITB-1:0]),//Out hmt nhits for central bx
-  .hmt_nhits_bx678     (hmt_nhits_bx678   [NHMTHITB-1:0]),//Out hmt nhits for in-time
-  .hmt_nhits_bx2345    (hmt_nhits_bx2345  [NHMTHITB-1:0]),//Out hmt nhits for out-time
+  .hmt_nhits_sig     (hmt_nhits_sig   [NHMTHITB-1:0]),//Out hmt nhits for in-time
+  .hmt_nhits_bkg    (hmt_nhits_bkg  [NHMTHITB-1:0]),//Out hmt nhits for out-time
   .hmt_cathode_pipe    (hmt_cathode[MXHMTB-1:0]), //Out hmt bits in cathod 
   
   //.hmt_cathode_fired     (hmt_cathode_fired),// Out 
@@ -2973,8 +2973,8 @@ end
    wire [7:0]             l1a_preClct_dly;
 
    wire [9:0]             hmt_nhits_bx7_vme;
-   wire [9:0]             hmt_nhits_bx678_vme;
-   wire [9:0]             hmt_nhits_bx2345_vme;
+   wire [9:0]             hmt_nhits_sig_vme;
+   wire [9:0]             hmt_nhits_bkg_vme;
 
    wire [MXCLCT-1:0]      clct0_vme;
    wire [MXCLCT-1:0]      clct1_vme;
@@ -3623,7 +3623,7 @@ end
   .tmb_alctb (tmb_alctb[4:0]),  // In  ALCT bxn latched at trigger
   .tmb_alcte (tmb_alcte[1:0]),  // In  ALCT ecc error syndrome latched at trigger
 
-  .hmt_nhits_bx678_ff (hmt_nhits_bx678_ff[NHMTHITB-1:0]), // In hmt nhits for header
+  .hmt_nhits_sig_ff (hmt_nhits_sig_ff[NHMTHITB-1:0]), // In hmt nhits for header
 
        //GEM-CSC match output, time_only
   .gem_enable           (gem_enable),
@@ -4472,8 +4472,8 @@ wire [15:0] gemB_bxn_counter;
   .hmt_enable         (hmt_enable) , // In hmt enabled 
   .hmt_outtime_check   (hmt_outtime_check),//In hmt fired shoudl check anode bg lower than threshold
   .hmt_nhits_bx7       (hmt_nhits_bx7     [NHMTHITB-1:0]),//In hmt nhits for central bx
-  .hmt_nhits_bx678     (hmt_nhits_bx678   [NHMTHITB-1:0]),//In hmt nhits for in-time
-  .hmt_nhits_bx2345    (hmt_nhits_bx2345  [NHMTHITB-1:0]),//In hmt nhits for out-time
+  .hmt_nhits_sig     (hmt_nhits_sig   [NHMTHITB-1:0]),//In hmt nhits for in-time
+  .hmt_nhits_bkg    (hmt_nhits_bkg  [NHMTHITB-1:0]),//In hmt nhits for out-time
   .hmt_cathode_pipe    (hmt_cathode[MXHMTB-1:0]), //In hmt bits in cathod
 
   .hmt_match_win      (hmt_match_win[3:0]),// In alct location in hmt window size
@@ -4716,7 +4716,7 @@ wire [15:0] gemB_bxn_counter;
   .tmb_alct1 (tmb_alct1[10:0]), // Out  ALCT second best muon latched at trigger
   .tmb_alctb (tmb_alctb[4:0]),  // Out  ALCT bxn latched at trigger
   .tmb_alcte (tmb_alcte[1:0]),  // Out  ALCT ecc error syndrome latched at trigger
-  .hmt_nhits_bx678_ff (hmt_nhits_bx678_ff[NHMTHITB-1:0]), // Out hmt nhits for header
+  .hmt_nhits_sig_ff (hmt_nhits_sig_ff[NHMTHITB-1:0]), // Out hmt nhits for header
 
   //GEM-CSC match output, time_only
   .alct_gem_pulse          (alct_gem_pulse), // Out GEM-CSC matching in timing only 
@@ -4830,8 +4830,8 @@ wire [15:0] gemB_bxn_counter;
 // VME Status
   .event_clear_vme  (event_clear_vme),              // In  Event clear for aff,clct,mpc vme diagnostic registers
   .hmt_nhits_bx7_vme    (hmt_nhits_bx7_vme   [NHMTHITB-1:0]),//In  HMT nhits for trigger
-  .hmt_nhits_bx678_vme  (hmt_nhits_bx678_vme [NHMTHITB-1:0]),//In  HMT nhits for trigger
-  .hmt_nhits_bx2345_vme (hmt_nhits_bx2345_vme[NHMTHITB-1:0]),//In  HMT nhits for trigger
+  .hmt_nhits_sig_vme  (hmt_nhits_sig_vme [NHMTHITB-1:0]),//In  HMT nhits for trigger
+  .hmt_nhits_bkg_vme (hmt_nhits_bkg_vme[NHMTHITB-1:0]),//In  HMT nhits for trigger
   .hmt_cathode_vme      (hmt_cathode_vme[MXHMTB-1:0]),  //In  HMT trigger results
 
   .mpc_frame_vme    (mpc_frame_vme),                // Out MPC frame latch strobe for VME
@@ -4973,7 +4973,7 @@ wire [15:0] gemB_bxn_counter;
     //assign mez_tp[7]  = alct0_vpf_tprt; // ALCT vpf signal
     //assign mez_tp[6]  = wr_push_xtmb; // CLCT vpf signal
     //assign mez_tp[6]  = clct_window_tprt; // CLCT vpf signal after pipeline 
-    //assign mez_tp[5]  = hmt_nhits_bx678 >= hmt_nhits_bx2345+10'h3;
+    //assign mez_tp[5]  = hmt_nhits_sig >= hmt_nhits_bkg+10'h3;
     //assign mez_tp[4]  = gem_forclct_vpf_tp;//pulse width=2BX???? why????
     //assign mez_tp[5]  = (|gemA_csc_cluster_vpf) || (|gemB_csc_cluster_vpf);// gemA or gemB vpf signal
     //assign mez_tp[4]  = |copad_match; // gem copad vpf signal
@@ -5662,8 +5662,8 @@ wire [15:0] gemB_bxn_counter;
       .hmt_enable         (hmt_enable),        // In ME1a enable or not in HMT
       .hmt_me1a_enable    (hmt_me1a_enable),        // out ME1a enable or not in HMT
       .hmt_nhits_bx7_vme    (hmt_nhits_bx7_vme   [NHMTHITB-1:0]),//In  HMT nhits for trigger
-      .hmt_nhits_bx678_vme  (hmt_nhits_bx678_vme [NHMTHITB-1:0]),//In  HMT nhits for trigger
-      .hmt_nhits_bx2345_vme (hmt_nhits_bx2345_vme[NHMTHITB-1:0]),//In  HMT nhits for trigger
+      .hmt_nhits_sig_vme  (hmt_nhits_sig_vme [NHMTHITB-1:0]),//In  HMT nhits for trigger
+      .hmt_nhits_bkg_vme (hmt_nhits_bkg_vme[NHMTHITB-1:0]),//In  HMT nhits for trigger
       .hmt_cathode_vme           (hmt_cathode_vme[MXHMTB-1:0]), // In HMT trigger results, cathode
       .hmt_thresh1        (hmt_thresh1[7:0]), // out, loose HMT thresh
       .hmt_thresh2        (hmt_thresh2[7:0]), // out, loose HMT thresh

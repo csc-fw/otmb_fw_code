@@ -519,8 +519,8 @@
   hmt_enable,
   hmt_me1a_enable, 
   hmt_nhits_bx7_vme,
-  hmt_nhits_bx678_vme,
-  hmt_nhits_bx2345_vme,
+  hmt_nhits_sig_vme,
+  hmt_nhits_bkg_vme,
   hmt_cathode_vme,
 //output
   hmt_thresh1,
@@ -2330,8 +2330,8 @@
   output hmt_enable; 
   output hmt_me1a_enable; 
   input [NHMTHITB-1:0] hmt_nhits_bx7_vme;
-  input [NHMTHITB-1:0] hmt_nhits_bx678_vme;
-  input [NHMTHITB-1:0] hmt_nhits_bx2345_vme;
+  input [NHMTHITB-1:0] hmt_nhits_sig_vme;
+  input [NHMTHITB-1:0] hmt_nhits_bkg_vme;
   input [MXHMTB-1:0] hmt_cathode_vme;
 
   output [7:0] hmt_thresh1;
@@ -9047,9 +9047,9 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 // ADR_HMT_NHITS_SIG=0x1B4  Nhits for HMT in bx678, Signal
 // ADR_HMT_NHITS_BKG=0x1B6  Nhits for HMT in bx2345, background/control region
 //------------------------------------------------------------------------------------------------------------------
-  assign hmt_nhits_sig_rd[9:0]   = hmt_nhits_bx678_vme[9:0];
+  assign hmt_nhits_sig_rd[9:0]   = hmt_nhits_sig_vme[9:0];
   assign hmt_nhits_sig_rd[15:10] = 6'b0;
-  assign hmt_nhits_bkg_rd[9:0]   = hmt_nhits_bx2345_vme[9:0];
+  assign hmt_nhits_bkg_rd[9:0]   = hmt_nhits_bkg_vme[9:0];
   assign hmt_nhits_bkg_rd[15:10] = 6'b0;
 
 //------------------------------------------------------------------------------------------------------------------

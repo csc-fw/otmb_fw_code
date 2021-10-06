@@ -61,8 +61,8 @@
   hmt_wr_adr_xtmb,
 
   hmt_nhits_bx7,//tmb match bx cathode hmt
-  hmt_nhits_bx678,
-  hmt_nhits_bx2345,
+  hmt_nhits_sig,
+  hmt_nhits_bkg,
   hmt_cathode_pipe, // tmb match bx
 
   //hmt_cathode_fired     , 
@@ -151,8 +151,8 @@
   //output [MXHMTB-1:0]     hmt_cathode_xtmb; //CLCT bx
 
   output [NHMTHITB-1:0]   hmt_nhits_bx7;//CLCT bx
-  output [NHMTHITB-1:0]   hmt_nhits_bx678;
-  output [NHMTHITB-1:0]   hmt_nhits_bx2345;
+  output [NHMTHITB-1:0]   hmt_nhits_sig;
+  output [NHMTHITB-1:0]   hmt_nhits_bkg;
   output [MXHMTB-1:0]     hmt_cathode_pipe; // tmb match bx
 
   wire hmt_cathode_fired     ; 
@@ -303,18 +303,19 @@
 
   //signal: over 3BX;   control region: over 4BX 
 
-  wire [NHMTHITB-1:0] nhits_trig_s0_bx7    = nhits_trig_s0_srl[2];//center one
-  wire [NHMTHITB-1:0] nhits_trig_s0_bx678  = nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] + nhits_trig_s0_srl[1];
-  wire [NHMTHITB-1:0] nhits_trig_s0_bx2345 = nhits_trig_s0_srl[7] + nhits_trig_s0_srl[6] + nhits_trig_s0_srl[5] + nhits_trig_s0_srl[4];
-  //peak conditio: nhits_trig_s0_bx678 >= nhits_trig_s0_bx789 && nhits_trig_s0_bx678 >= nhits_trig_s0_bx89A
-  wire nhits_compare_s0_bx678_789 = (nhits_trig_s0_srl[3] > nhits_trig_s0_srl[0]) || (nhits_trig_s0_srl[3] == nhits_trig_s0_srl[0] &&  nhits_trig_s0_srl[2]> nhits_trig_s0_srl[1]);
-  wire nhits_compare_s0_bx678_89A = (nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] >  nhits_trig_s0_srl[0] + nhits_chamber) || (nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] ==  nhits_trig_s0_srl[0] + nhits_chamber && nhits_trig_s0_srl[2] > nhits_trig_s0_srl[0]);
-  wire nhits_trig_s0_bx678_peak = nhits_compare_s0_bx678_789 && nhits_compare_s0_bx678_89A;
+  wire [NHMTHITB-1:0] nhits_trig_s0_bx7 = nhits_trig_s0_srl[2];//center one
+  wire [NHMTHITB-1:0] nhits_trig_s0_sig = nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] + nhits_trig_s0_srl[1];
+  //wire [NHMTHITB-1:0] nhits_trig_s0_bkg = nhits_trig_s0_srl[7] + nhits_trig_s0_srl[6] + nhits_trig_s0_srl[5] + nhits_trig_s0_srl[4];
+  wire [NHMTHITB-1:0] nhits_trig_s0_bkg = nhits_trig_s0_srl[6] + nhits_trig_s0_srl[5] + nhits_trig_s0_srl[4];
+  //peak conditio: nhits_trig_s0_sig >= nhits_trig_s0_bx789 && nhits_trig_s0_sig >= nhits_trig_s0_bx89A
+  wire nhits_compare_s0_sig_789 = (nhits_trig_s0_srl[3] > nhits_trig_s0_srl[0]) || (nhits_trig_s0_srl[3] == nhits_trig_s0_srl[0] &&  nhits_trig_s0_srl[2]> nhits_trig_s0_srl[1]);
+  wire nhits_compare_s0_sig_89A = (nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] >  nhits_trig_s0_srl[0] + nhits_chamber) || (nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] ==  nhits_trig_s0_srl[0] + nhits_chamber && nhits_trig_s0_srl[2] > nhits_trig_s0_srl[0]);
+  wire nhits_trig_s0_sig_peak = nhits_compare_s0_sig_789 && nhits_compare_s0_sig_89A;
 
-  wire hmt_bit0_s0 = ((nhits_trig_s0_bx678 >= hmt_thresh1) || (nhits_trig_s0_bx678 >= hmt_thresh3)) & nhits_trig_s0_bx678_peak &  (~|hmt_fired_s0_ff) & (~hmt_reset);
-  wire hmt_bit1_s0 = ((nhits_trig_s0_bx678 >= hmt_thresh2) || (nhits_trig_s0_bx678 >= hmt_thresh3)) & nhits_trig_s0_bx678_peak &  (~|hmt_fired_s0_ff) & (~hmt_reset);
-  wire hmt_bit2_s0 = ((nhits_trig_s0_bx2345 >= hmt_thresh1) || (nhits_trig_s0_bx2345 >= hmt_thresh3)) &  (~|hmt_fired_s0_ff) & (~hmt_reset);
-  wire hmt_bit3_s0 = ((nhits_trig_s0_bx2345 >= hmt_thresh2) || (nhits_trig_s0_bx2345 >= hmt_thresh3)) &  (~|hmt_fired_s0_ff) & (~hmt_reset);
+  wire hmt_bit0_s0 = ((nhits_trig_s0_sig >= hmt_thresh1) || (nhits_trig_s0_sig >= hmt_thresh3)) & nhits_trig_s0_sig_peak &  (~|hmt_fired_s0_ff) & (~hmt_reset);
+  wire hmt_bit1_s0 = ((nhits_trig_s0_sig >= hmt_thresh2) || (nhits_trig_s0_sig >= hmt_thresh3)) & nhits_trig_s0_sig_peak &  (~|hmt_fired_s0_ff) & (~hmt_reset);
+  wire hmt_bit2_s0 = ((nhits_trig_s0_bkg >= hmt_thresh1) || (nhits_trig_s0_bkg >= hmt_thresh3)) &  (~|hmt_fired_s0_ff) & (~hmt_reset);
+  wire hmt_bit3_s0 = ((nhits_trig_s0_bkg >= hmt_thresh2) || (nhits_trig_s0_bkg >= hmt_thresh3)) &  (~|hmt_fired_s0_ff) & (~hmt_reset);
   wire [MXHMTB-1:0] hmt_cathode_s0 = hmt_enable ? {hmt_bit3_s0, hmt_bit2_s0, hmt_bit1_s0, hmt_bit0_s0} : 4'b0;
 
   wire   hmt_fired_bg_s0  = (hmt_bit2_s0 || hmt_bit3_s0);
@@ -559,8 +560,8 @@
 
 
   wire [3:0] hmt_final_delay = hmt_postdrift_delay+hmt_match_win;
-  wire [NHMTHITB-1:0] nhits_trig_dly_bx2345;
-  wire [NHMTHITB-1:0] nhits_trig_dly_bx678;
+  wire [NHMTHITB-1:0] nhits_trig_dly_bkg;
+  wire [NHMTHITB-1:0] nhits_trig_dly_sig;
   wire [NHMTHITB-1:0] nhits_trig_dly_bx7;
   wire [MXBADR-1:0] wr_adr_xpre_hmt_dly;
   wire wr_push_xpre_hmt_dly, wr_avail_xpre_hmt_dly;
@@ -568,16 +569,16 @@
   //wire  wr_avail_xpre_hmt_pipe;
   //wire wr_push_xpre_hmt_pipe;
   srl16e_bbl #(NHMTHITB)    udnhitsbx7   ( .clock(clock), .ce(1'b1), .adr(hmt_final_delay-4'd1), .d(nhits_trig_s0_bx7    ), .q(nhits_trig_dly_bx7      ));
-  srl16e_bbl #(NHMTHITB)    udnhitsbx678 ( .clock(clock), .ce(1'b1), .adr(hmt_final_delay-4'd1), .d(nhits_trig_s0_bx678  ), .q(nhits_trig_dly_bx678    ));
-  srl16e_bbl #(NHMTHITB)    udnhitsbx2345( .clock(clock), .ce(1'b1), .adr(hmt_final_delay-4'd1), .d(nhits_trig_s0_bx2345 ), .q(nhits_trig_dly_bx2345   ));
+  srl16e_bbl #(NHMTHITB)    udnhitsbxsig ( .clock(clock), .ce(1'b1), .adr(hmt_final_delay-4'd1), .d(nhits_trig_s0_sig  ), .q(nhits_trig_dly_sig    ));
+  srl16e_bbl #(NHMTHITB)    udnhitsbxbkg ( .clock(clock), .ce(1'b1), .adr(hmt_final_delay-4'd1), .d(nhits_trig_s0_bkg ), .q(nhits_trig_dly_bkg   ));
   
   srl16e_bbl #(MXBADR)    udnhmtadr   ( .clock(clock), .ce(1'b1), .adr(hmt_final_delay-4'd1), .d(wr_adr_xpre_hmt    ), .q(wr_adr_xpre_hmt_dly      ));
   srl16e_bbl #(1)         udnhmtpush  ( .clock(clock), .ce(1'b1), .adr(hmt_final_delay-4'd1), .d(wr_push_xpre_hmt   ), .q(wr_push_xpre_hmt_dly    ));
   srl16e_bbl #(1)         udnhmtavail ( .clock(clock), .ce(1'b1), .adr(hmt_final_delay-4'd1), .d(wr_avail_xpre_hmt  ), .q(wr_avail_xpre_hmt_dly   ));
 
   assign  hmt_nhits_bx7    = (hmt_final_delay == 4'd0) ? nhits_trig_s0_bx7[9:0]    : nhits_trig_dly_bx7[9:0];
-  assign  hmt_nhits_bx678  = (hmt_final_delay == 4'd0) ? nhits_trig_s0_bx678[9:0]  : nhits_trig_dly_bx678[9:0];
-  assign  hmt_nhits_bx2345 = (hmt_final_delay == 4'd0) ? nhits_trig_s0_bx2345[9:0] : nhits_trig_dly_bx2345[9:0];
+  assign  hmt_nhits_sig  = (hmt_final_delay == 4'd0) ? nhits_trig_s0_sig[9:0]  : nhits_trig_dly_sig[9:0];
+  assign  hmt_nhits_bkg = (hmt_final_delay == 4'd0) ? nhits_trig_s0_bkg[9:0] : nhits_trig_dly_bkg[9:0];
 
   assign  wr_adr_xpre_hmt_pipe   = (hmt_final_delay == 4'd0) ?  wr_adr_xpre_hmt   : wr_adr_xpre_hmt_dly; 
   assign  wr_avail_xpre_hmt_pipe = (hmt_final_delay == 4'd0) ?  wr_avail_xpre_hmt : wr_avail_xpre_hmt_dly;
