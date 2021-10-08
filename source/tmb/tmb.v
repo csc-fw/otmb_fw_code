@@ -1891,6 +1891,7 @@
   //_run3 to represent the Run3 variable
   //Run3, gemcsc algorithm
   wire clct_nocopad     =  clct_last_win && !copad_pulse_forclct_good; 
+  //wire alct_nocapad     =  alct_pulse && !copad_pulse_forclct_good;
   wire clct_match_run3  = (alct_pulse || copad_pulse_forclct_good) &&  clct_window_haslcts;  // ALCT/copad matches CLCT window, push to mpc on current bx
   wire clct_used_run3   = clct_match_run3_sr[winclosing]; //CLCT was used
   wire clct_lost_run3   = clct_last_win &&  (alct_pulse || copad_pulse_forclct_good) && clct_win_best!=winclosing;
@@ -2702,10 +2703,10 @@
   reg  [MXCFEB-1:0] tmb_aff_list  = 0;
   reg  [3:0]        tmb_match_win = 0;
   reg  [3:0]        tmb_match_pri = 0;
-  wire              alct_only_trig;
 
   //------------------------------------------------------------------------------------------------------------------
   //run2 legacy logic
+  wire alct_only_trig = (alct_noclct && tmb_allow_alct) || (alct_noclct_ro && tmb_allow_alct_ro);// ALCT-only triggers are allowed
 //  wire trig_pulse    = clct_match || clct_noalct || clct_noalct_lost || alct_noclct;    // Event pulse
   wire trig_pulse    = clct_match || (clct_noalct && !clct_used) || clct_noalct_lost || alct_only_trig;  // Event pulse, with clct reuse feature
 
@@ -2723,7 +2724,6 @@
   wire alct_noclct_ro = alct_noclct && non_trig_keep; // Only ALCT triggered, nontriggering event
   wire clct_noalct_ro = clct_noalct && !clct_used && non_trig_keep; // Only CLCT triggered, nontriggering event
 
-  assign alct_only_trig = (alct_noclct && tmb_allow_alct) || (alct_noclct_ro && tmb_allow_alct_ro);// ALCT-only triggers are allowed
 
   //------------------------------------------------------------------------------------------------------------------
   // Run3 logic with GEMCSC match. if GEM is not enable for match, it should fall back to above logic
@@ -2731,37 +2731,36 @@
   wire clct_copad_good    =  clct_copad_match_pos && tmb_copad_clct_allow;
   wire alct_copad_good_ro =  alct_copad_match_pos && tmb_copad_alct_allow_ro; //still in same bx of trig_pulse_run3
   wire clct_copad_good_ro =  clct_copad_match_pos && tmb_copad_clct_allow_ro;
-  //wire trig_pulse_run3    = clct_match_run3 || (clct_noalct && clct_nocopad && !clct_used_run3) || clct_lost_run3 || alct_only_trig_run3;  // Event pulse, with clct reuse feature
-  wire trig_pulse_run3    = clct_match || clct_copad_match_pos || (clct_noalct && clct_nocopad && !clct_used_run3) || clct_lost_run3 || alct_only_trig_run3;  // Event pulse, with clct reuse feature
+
+  wire alct_only_trig_run3 = (alct_noclct && !alct_copad_good && tmb_allow_alct) || (alct_noclct_ro_run3 && !alct_copad_good_ro && tmb_allow_alct_ro);// ALCT-only triggers are allowed
+  wire trig_pulse_run3    = clct_match || clct_copad_match_pos || alct_copad_match_pos || (clct_noalct && !clct_copad_match_pos && !clct_used_run3) || clct_lost_run3 || alct_only_trig_run3;  // Event pulse, with clct reuse feature
 
   //wire trig_keep_run3     = (clct_keep_run3   || alct_keep_run3);
   //wire non_trig_keep_run3 = (clct_keep_ro_run3 || alct_keep_ro_run3);
   wire trig_keep_run3     = (clct_match && tmb_allow_match   ) || (clct_noalct && tmb_allow_clct && !clct_lost_run3 && !clct_used_run3) || (alct_noclct && tmb_allow_alct) || clct_copad_good || alct_copad_good;
-  wire non_trig_keep_run3 = (clct_match && tmb_allow_match_ro) || (clct_noalct && tmb_allow_clct_ro && !clct_lost_run3 && !clct_used_run3) || (alct_noclct && tmb_allow_alct_ro) || clct_copad_good_ro || alct_copad_good_ro;
+  wire non_trig_keep_run3 = (clct_match && tmb_allow_match_ro) || (clct_noalct && tmb_allow_clct_ro && !clct_lost_run3 && !clct_used_run3) || (alct_noclct && tmb_allow_alct_ro ) || clct_copad_good_ro || alct_copad_good_ro;
 
   //wire alct_only_run3     = (alct_noclct && tmb_allow_alct && !clct_keep_run3) || alct_copad_pulse_match; //alct-only in gem-csc
   wire alct_only_run3     = alct_noclct && tmb_allow_alct && !clct_keep_run3 && !alct_copad_good; //alct-only in gem-csc
   wire alct_copad_good_only = alct_noclct && !clct_keep_run3 && alct_copad_good && !tmb_allow_alct;
   wire wr_push_mux_run3   = (alct_only_run3 || alct_copad_good_only) ? trig_pulse_run3 : (wr_push_xtmb_pipe  && trig_pulse_run3); 
 
-  wire clct_match_tr_run3  = (clct_match || clct_copad_good || alct_copad_good) && trig_keep_run3; // ALCT and CLCT matched in time, nontriggering event
-  wire alct_noclct_tr_run3 = alct_noclct && !alct_copad_good && trig_keep_run3; // Only ALCT triggered, nontriggering event
-  wire clct_noalct_tr_run3 = clct_noalct && !clct_copad_good && !clct_used_run3 && trig_keep_run3; // Only CLCT triggered, nontriggering event
+  wire clct_match_tr_run3  = (clct_match && tmb_allow_match) || clct_copad_good || alct_copad_good; // ALCT and CLCT matched in time, nontriggering event
+  wire alct_noclct_tr_run3 = alct_noclct && !alct_copad_good && tmb_allow_alct; // Only ALCT triggered, nontriggering event
+  wire clct_noalct_tr_run3 = clct_noalct && !clct_copad_good && !clct_used_run3 && tmb_allow_clct; // Only CLCT triggered, nontriggering event
 
-  wire clct_match_ro_run3  = (clct_match ||  clct_copad_good_ro || alct_copad_good_ro) && non_trig_keep_run3; // ALCT and CLCT matched in time, nontriggering event
-  wire alct_noclct_ro_run3 = alct_noclct && !alct_copad_good_ro && non_trig_keep_run3; // Only ALCT triggered, nontriggering event
-  wire clct_noalct_ro_run3 = clct_noalct && !clct_copad_good_ro && !clct_used_run3 && non_trig_keep_run3; // Only CLCT triggered, nontriggering event
+  wire clct_match_ro_run3  = (clct_match && tmb_allow_match_ro) ||  clct_copad_good_ro || alct_copad_good_ro; // ALCT and CLCT matched in time, nontriggering event
+  wire alct_noclct_ro_run3 = alct_noclct && !alct_copad_good_ro && tmb_allow_alct_ro; // Only ALCT triggered, nontriggering event
+  wire clct_noalct_ro_run3 = clct_noalct && !clct_copad_good_ro && !clct_used_run3 && tmb_allow_clct_ro; // Only CLCT triggered, nontriggering event
 
-  assign alct_only_trig_run3 = (alct_noclct && !alct_copad_good && tmb_allow_alct) || (alct_noclct_ro_run3 && !alct_copad_good_ro && tmb_allow_alct_ro);// ALCT-only triggers are allowed
-  //wire clct_match_tr_run3  = clct_match_run3  && trig_keep_run3; // ALCT and CLCT matched in time, nontriggering event
-  //wire alct_noclct_tr_run3 = alct_noclct && !alct_copad_pulse_match && trig_keep_run3; // Only ALCT triggered, nontriggering event
-  //wire clct_noalct_tr_run3 = clct_noalct && clct_nocopad && !clct_used_run3 && trig_keep_run3; // Only CLCT triggered, nontriggering event
+  //wire clct_match_tr_run3  = (clct_match || clct_copad_good || alct_copad_good) && trig_keep_run3; // ALCT and CLCT matched in time, nontriggering event
+  //wire alct_noclct_tr_run3 = alct_noclct && !alct_copad_good && trig_keep_run3; // Only ALCT triggered, nontriggering event
+  //wire clct_noalct_tr_run3 = clct_noalct && !clct_copad_good && !clct_used_run3 && trig_keep_run3; // Only CLCT triggered, nontriggering event
 
-  //wire clct_match_ro_run3  = clct_match_run3  && non_trig_keep_run3; // ALCT and CLCT matched in time, nontriggering event
-  //wire alct_noclct_ro_run3 = alct_noclct && !alct_copad_pulse_match && non_trig_keep_run3; // Only ALCT triggered, nontriggering event
-  //wire clct_noalct_ro_run3 = clct_noalct && clct_nocopad && !clct_used_run3 && non_trig_keep_run3; // Only CLCT triggered, nontriggering event
+  //wire clct_match_ro_run3  = (clct_match ||  clct_copad_good_ro || alct_copad_good_ro) && non_trig_keep_run3; // ALCT and CLCT matched in time, nontriggering event
+  //wire alct_noclct_ro_run3 = alct_noclct && !alct_copad_good_ro && non_trig_keep_run3; // Only ALCT triggered, nontriggering event
+  //wire clct_noalct_ro_run3 = clct_noalct && !clct_copad_good_ro && !clct_used_run3 && non_trig_keep_run3; // Only CLCT triggered, nontriggering event
 
-  //assign alct_only_trig_run3 = (alct_noclct && !alct_copad_pulse_match && tmb_allow_alct) || (alct_noclct_ro_run3 && tmb_allow_alct_ro);// ALCT-only triggers are allowed
 
 
   //------------------------------------------------------------------------------------------------------------------
