@@ -9109,7 +9109,7 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 //------------------------------------------------------------------------------------------------------------------
 // ADR_GEM_CFG=0x312    GEM Configuration
 //------------------------------------------------------------------------------------------------------------------
-
+  wire [1:0] gemA_read_mask, gemB_read_mask;
   initial begin
   gem_cfg_wr[3:0]   = 4'd0; // RW GEMA Rxd Integer BX Delay
   gem_cfg_wr[7:4]   = 4'd0; // RW GEMB Rxd Integer BX Delay
@@ -9122,8 +9122,8 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   wire [3:0] gemB_rxd_int_delay_wr = gem_cfg_wr[7:4];
 
   wire gem_rxd_int_delay_decouple = gem_cfg_wr[8];
-  wire gemA_read_mask[1:0]        = gem_cfg_wr[10: 9];
-  wire gemB_read_mask[1:0]        = gem_cfg_wr[12:11];
+  assign gemA_read_mask[1:0]        = gem_cfg_wr[10: 9];
+  assign gemB_read_mask[1:0]        = gem_cfg_wr[12:11];
   assign gem_read_mask            = {gemB_read_mask, gemA_read_mask};
 
   // FF Buffer gem rxd integer delay
