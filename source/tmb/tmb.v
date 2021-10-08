@@ -2475,6 +2475,7 @@
   .me1b_match_drop_lowqclct   (me1b_match_drop_lowqclct), // drop lowQ stub when no GEM      
   .gemA_match_ignore_position (gemA_match_ignore_position),
   .gemB_match_ignore_position (gemB_match_ignore_position),
+  .tmb_allow_match            (tmb_allow_match  || tmb_allow_match_ro),
   .tmb_copad_alct_allow       (tmb_copad_alct_allow || tmb_copad_alct_allow_ro),       //In gem-csc match, allow ALCT+copad match
   .tmb_copad_clct_allow       (tmb_copad_clct_allow || tmb_copad_clct_allow_ro),       //In gem-csc match, allow CLCT+copad match
   .gemcsc_ignore_bend_check   (gemcsc_ignore_bend_check),   //In gemcsc amtch, ignore GEMCSC bend check

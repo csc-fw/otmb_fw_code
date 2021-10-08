@@ -9249,7 +9249,7 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   //[15:11] for gemA fiber enable, 5 fibers from GE2/1 one layer
   assign gemA_fiber_enable[1:0]           = gemA_trg_ctrl_wr[12:11];
 
-  assign gemA_trg_ctrl_rd[15: 0]          =  gemA_trg_ctrl_wr[15: 0]; // NOT used
+  assign gemA_trg_ctrl_rd[15: 0]          = gemA_trg_ctrl_wr[15: 0]; // NOT used
 
 
 //------------------------------------------------------------------------------------------------------------------

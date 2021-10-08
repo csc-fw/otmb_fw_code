@@ -45,6 +45,7 @@ module  alct_clct_gem_matching_TR(
   input me1b_match_drop_lowqclct, // drop lowQ stub when no GEM      
   input gemA_match_ignore_position, 
   input gemB_match_ignore_position, 
+  input tmb_allow_match,
   input tmb_copad_alct_allow,
   input tmb_copad_clct_allow,
   input gemcsc_ignore_bend_check,
@@ -284,6 +285,8 @@ module  alct_clct_gem_matching_TR(
   
   wire  drop_lowqclct0 = clct0_lowQ && ((me1a_match_drop_lowqclct && clct0_xky[9]) || (me1b_match_drop_lowqclct && !clct0_xky[9]));
   wire  drop_lowqclct1 = clct1_lowQ && ((me1a_match_drop_lowqclct && clct1_xky[9]) || (me1b_match_drop_lowqclct && !clct1_xky[9]));
+
+  wire  tmb_allow_match_any = (tmb_allow_match || tmb_copad_alct_allow || tmb_copad_clct_allow);
 
   wire [6:0] gemA_cluster_cscwg_lo[MXCLUSTER_CHAMBER-1:0] = {
       gemA_cluster7_wg_lo,
@@ -721,10 +724,10 @@ module  alct_clct_gem_matching_TR(
       );
 
 
-  wire alct0_clct0_copad_match_any = |alct0_clct0_copad_match;
-  wire alct0_clct1_copad_match_any = |alct0_clct1_copad_match;
-  wire alct1_clct0_copad_match_any = |alct1_clct0_copad_match;
-  wire alct1_clct1_copad_match_any = |alct1_clct1_copad_match;
+  wire alct0_clct0_copad_match_any = ( |alct0_clct0_copad_match ) && tmb_allow_match_any;
+  wire alct0_clct1_copad_match_any = ( |alct0_clct1_copad_match ) && tmb_allow_match_any;
+  wire alct1_clct0_copad_match_any = ( |alct1_clct0_copad_match ) && tmb_allow_match_any;
+  wire alct1_clct1_copad_match_any = ( |alct1_clct1_copad_match ) && tmb_allow_match_any;
 
   //reg alct0_clct0_copad_match_any_r = 1'b0;
   //reg alct0_clct1_copad_match_any_r = 1'b0;
@@ -1060,15 +1063,15 @@ module  alct_clct_gem_matching_TR(
       );
 
 
-  wire alct0_clct0_gemA_match_any  = |alct0_clct0_gemA_match;
-  wire alct0_clct1_gemA_match_any  = |alct0_clct1_gemA_match;
-  wire alct1_clct0_gemA_match_any  = |alct1_clct0_gemA_match;
-  wire alct1_clct1_gemA_match_any  = |alct1_clct1_gemA_match;
+  wire alct0_clct0_gemA_match_any  = (|alct0_clct0_gemA_match) && tmb_allow_match;
+  wire alct0_clct1_gemA_match_any  = (|alct0_clct1_gemA_match) && tmb_allow_match;
+  wire alct1_clct0_gemA_match_any  = (|alct1_clct0_gemA_match) && tmb_allow_match;
+  wire alct1_clct1_gemA_match_any  = (|alct1_clct1_gemA_match) && tmb_allow_match;
 
-  wire alct0_clct0_gemB_match_any  = |alct0_clct0_gemB_match;
-  wire alct0_clct1_gemB_match_any  = |alct0_clct1_gemB_match;
-  wire alct1_clct0_gemB_match_any  = |alct1_clct0_gemB_match;
-  wire alct1_clct1_gemB_match_any  = |alct1_clct1_gemB_match;
+  wire alct0_clct0_gemB_match_any  = (|alct0_clct0_gemB_match) && tmb_allow_match;
+  wire alct0_clct1_gemB_match_any  = (|alct0_clct1_gemB_match) && tmb_allow_match;
+  wire alct1_clct0_gemB_match_any  = (|alct1_clct0_gemB_match) && tmb_allow_match;
+  wire alct1_clct1_gemB_match_any  = (|alct1_clct1_gemB_match) && tmb_allow_match;
   //reg alct0_clct0_gemA_match_any_r  = 1'b0;
   //reg alct0_clct1_gemA_match_any_r  = 1'b0;
   //reg alct1_clct0_gemA_match_any_r  = 1'b0;
@@ -1324,7 +1327,7 @@ module  alct_clct_gem_matching_TR(
   wire alct1_clct1_nogem_nocopad = !alct1_clct1_gem_match_found && !alct1_clct1_copad_match_found;
 
   //assign alct0_clct0_nogem_match_found = alct_clct_nogem_nocopad && alct0_vpf && clct0_vpf && !drop_lowqalct0 && !drop_lowqclct0; 
-  assign alct0_clct0_nogem_match_found = alct_clct_nogem_nocopad && alct0_vpf_r && clct0_vpf_r && !drop_lowqalct0_r && !drop_lowqclct0_r; 
+  assign alct0_clct0_nogem_match_found = alct_clct_nogem_nocopad && alct0_vpf_r && clct0_vpf_r && !drop_lowqalct0_r && !drop_lowqclct0_r && tmb_allow_match; 
 
   //wire alct1_vpf_nocopad  = (swapalct_copad_match ? alct0_vpf : alct1_vpf);
   //wire alct1_vpf_nogem    = (swapalct_gem_match   ? alct0_vpf : alct1_vpf);
@@ -1337,7 +1340,7 @@ module  alct_clct_gem_matching_TR(
   //wire clct1_vpf_afterswap = (swapclct_copad_match || swapclct_gem_match) ? (clct0_vpf && !drop_lowqclct0) : (clct1_vpf && !drop_lowqclct1);
   wire alct1_vpf_afterswap = (swapalct_copad_match || swapalct_gem_match) ? (alct0_vpf_r && !drop_lowqalct0_r) : (alct1_vpf_r && !drop_lowqalct1_r);
   wire clct1_vpf_afterswap = (swapclct_copad_match || swapclct_gem_match) ? (clct0_vpf_r && !drop_lowqclct0_r) : (clct1_vpf_r && !drop_lowqclct1_r);
-  assign alct1_clct1_nogem_match_found = (alct1_vpf_afterswap && clct1_vpf_afterswap && alct1_clct1_nogem_nocopad);
+  assign alct1_clct1_nogem_match_found = (alct1_vpf_afterswap && clct1_vpf_afterswap && alct1_clct1_nogem_nocopad && tmb_allow_match);
 
   //-------------------------------------------------------------------------------------------------------------------
   // step4  CLCT+Copad matching
