@@ -733,14 +733,10 @@
   match_gem_alct_delay,
   match_gem_alct_window,
   match_gem_clct_window,
-  gemA_alct_match, 
-  gemA_clct_match,
   gemA_fiber_enable,
 //GEMB trigger match control
   //match_gemB_alct_window,
   //match_gemB_clct_window,
-  gemB_alct_match,
-  gemB_clct_match,
   gemB_fiber_enable,
 
 //Hot gem vfat mask
@@ -2526,15 +2522,11 @@
   output [7:0] match_gem_alct_delay;
   output [3:0] match_gem_alct_window;
   output [3:0] match_gem_clct_window;
-  input        gemA_alct_match;
-  input        gemA_clct_match;
   output [1:0] gemA_fiber_enable;
 
   //GEMB trigger match control
   //output [3:0] match_gemB_alct_window;
   //output [3:0] match_gemB_clct_window;
-  input        gemB_alct_match;
-  input        gemB_clct_match;
   output [1:0] gemB_fiber_enable;
 
   output [4:0] gem_clct_deltahs_odd;
@@ -9130,7 +9122,9 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   wire [3:0] gemB_rxd_int_delay_wr = gem_cfg_wr[7:4];
 
   wire gem_rxd_int_delay_decouple = gem_cfg_wr[8];
-  assign gem_read_mask            = gem_cfg_wr[12:9];
+  wire gemA_read_mask[1:0]        = gem_cfg_wr[10: 9];
+  wire gemB_read_mask[1:0]        = gem_cfg_wr[12:11];
+  assign gem_read_mask            = {gemB_read_mask, gemA_read_mask};
 
   // FF Buffer gem rxd integer delay
   reg [3:0] gemA_rxd_int_delay = 0;
@@ -9241,45 +9235,40 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 // GEMA_TRG_CTRL = 0x328 GEMA trigger match control control
 //------------------------------------------------------------------------------------------------------------------
   initial begin
-      gemA_trg_ctrl_wr[ 3: 0]      = 4'b0;  //RW, NOT USED!! 
-      gemA_trg_ctrl_wr[ 7: 4]      = 4'd3;  //RW, gemA and ALCT match window, should be half ALCT-CLCT window size,like 3 if ALCT-CLCT win=5, 4 if ALCT_CLCT win=7
-      gemA_trg_ctrl_wr[11: 8]      = 4'd5;  //RW, gemA and CLCT match window, not used now. use the same ALCT-CLCT window size
-      gemA_trg_ctrl_wr[   12]      = 1'b0;  //Ronly, gemA and ALCT match
-      gemA_trg_ctrl_wr[   13]      = 1'b0;  //R only, gemA and CLCT match 
-      gemA_trg_ctrl_wr[15:14]      = 2'b11;  //RW, gemA two fibers enabled or not, for triggering
+      gemA_trg_ctrl_wr[ 3: 0]      = 4'd3;  //RW, gemA and ALCT match window, should be half ALCT-CLCT window size,like 3 if ALCT-CLCT win=5, 4 if ALCT_CLCT win=7
+      gemA_trg_ctrl_wr[ 7: 4]      = 4'd5;  //RW, gemA and CLCT match window, not used now. use the same ALCT-CLCT window size
+      gemA_trg_ctrl_wr[10: 8]      = 3'b0;  //RW, not used for ge11
+      gemA_trg_ctrl_wr[12:11]      = 2'b11;  //RW, gemA two fibers enabled or not, for triggering
+      gemA_trg_ctrl_wr[15:13]      = 3'b0;  //RW, not used for ge11
   end
 
-  assign match_gem_alct_window            = gemA_trg_ctrl_wr[7:4];
-  assign match_gem_clct_window            = gemA_trg_ctrl_wr[11:8];
-  assign gemA_fiber_enable                = gemA_trg_ctrl_wr[15:14];
+  assign match_gem_alct_window            = gemA_trg_ctrl_wr[3:0];
+  assign match_gem_clct_window            = gemA_trg_ctrl_wr[7:4];
+  //[10: 8] for gemA fiber readout mask, for GE2/1
+  // gemA_read_mask[4:2]                  = gemA_trg_ctrl_wr[10:8];
+  //[15:11] for gemA fiber enable, 5 fibers from GE2/1 one layer
+  assign gemA_fiber_enable[1:0]           = gemA_trg_ctrl_wr[12:11];
 
-  assign gemA_trg_ctrl_rd[3:0]            = 4'b0; // NOT used
-  assign gemA_trg_ctrl_rd[7:4]            = match_gem_alct_window;
-  assign gemA_trg_ctrl_rd[11:8]           = match_gem_clct_window;
-  assign gemA_trg_ctrl_rd[12]             = gemA_alct_match;
-  assign gemA_trg_ctrl_rd[13]             = gemA_clct_match;
-  assign gemA_trg_ctrl_rd[15:14]          = gemA_fiber_enable[1:0];
+  assign gemA_trg_ctrl_rd[15: 0]          =  gemA_trg_ctrl_wr[15: 0]; // NOT used
 
 
 //------------------------------------------------------------------------------------------------------------------
 // GEMA_TRG_CTRL = 0x32a GEMB trigger match control control
 //------------------------------------------------------------------------------------------------------------------
   initial begin
-      gemB_trg_ctrl_wr[ 7: 0]      = 8'd1;  //RW,gem and ALCT match trigger delay, default 1BX delay
-      gemB_trg_ctrl_wr[11: 8]      = 4'd5;  //RW,gemB and CLCT match window
-      gemB_trg_ctrl_wr[   12]      = 1'b0;  //R,gemB and ALCT match
-      gemB_trg_ctrl_wr[   13]      = 1'b0;  //R, gemB and CLCT match 
-      gemB_trg_ctrl_wr[15:14]      = 2'b11; //RW, gemB two fibers enabled or not, for triggering
+      gemB_trg_ctrl_wr[ 7: 0]      = 8'd2;  //RW,gem and ALCT match trigger delay, default 2BX delay
+      gemB_trg_ctrl_wr[10: 8]      = 3'b0;  //RW, not used for ge11
+      gemB_trg_ctrl_wr[12:11]      = 2'b11; //RW, gemB two fibers enabled or not, for triggering
+      gemB_trg_ctrl_wr[15:13]      = 3'b0;  //RW, not used for ge11
   end
 
   assign match_gem_alct_delay             = gemB_trg_ctrl_wr[7:0];
-  assign gemB_fiber_enable                = gemB_trg_ctrl_wr[15:14];
+  //[10: 8] for gemB fiber readout mask, for GE2/1
+  // gemB_read_mask[4:2]                  = gemB_trg_ctrl_wr[10:8];
+  //[15:11] for gemB fiber enable, 5 fibers from GE2/1 one layer
+  assign gemB_fiber_enable                = gemB_trg_ctrl_wr[12:11];
 
-  assign gemB_trg_ctrl_rd[7:0]            = match_gem_alct_delay;
-  assign gemB_trg_ctrl_rd[11:8]           = gemB_trg_ctrl_wr [11:8];
-  assign gemB_trg_ctrl_rd[12]             = gemB_alct_match;
-  assign gemB_trg_ctrl_rd[13]             = gemB_clct_match;
-  assign gemB_trg_ctrl_rd[15:14]          = gemB_fiber_enable[1:0];
+  assign gemB_trg_ctrl_rd[15: 0]          = gemB_trg_ctrl_wr[15: 0];
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_GEM_CSC_MATCH_CTRL=0x32c    GEM-CSC match control

@@ -5809,15 +5809,11 @@ wire [15:0] gemB_bxn_counter;
       .match_gem_alct_delay   (match_gem_alct_delay[7:0]),  //Out gemA delay for gemA-ALCT match
       .match_gem_alct_window  (match_gem_alct_window[3:0]), //Out gemA-alct match window
       .match_gem_clct_window  (match_gem_clct_window[3:0]), //Out gemA-clct match window
-      .gemA_alct_match        (gemA_alct_match),             //In gemA+ALCT match
-      .gemA_clct_match        (gemA_clct_match),             //In gemA+CLCT match
       .gemA_fiber_enable      (gemA_fiber_enable[1:0]),     //Out gemA two fibers enabled or not
 
       //GEMB trigger match control
       //.match_gemB_alct_window (match_gemB_alct_window[3:0]),  //Out gemB-alct match window
       //.match_gemB_clct_window (match_gemB_clct_window[3:0]),  //Out gem-clct match window
-      .gemB_alct_match        (gemB_alct_match),       // In gemB+ALCT match or not
-      .gemB_clct_match        (gemB_clct_match),      // In gemB+CLCT match or not
       .gemB_fiber_enable      (gemB_fiber_enable[1:0]),    // Out gemB two fibers enabled or not
 
       .gemA_vfat_hcm       (gemA_vfat_hcm),   //Out GEMA hot vfat mask
