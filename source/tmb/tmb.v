@@ -583,7 +583,7 @@
   output  [4:0]      tmb_alctb;      // ALCT bxn latched at trigger
   output  [1:0]      tmb_alcte;      // ALCT ecc error syndrome latched at trigger
 
-  output  [3:0]       tmb_hmt_match_win;
+  output  [3:0]         tmb_hmt_match_win;
   output [NHMTHITB-1:0] hmt_nhits_sig_ff;
 // MPC Status
   output          mpc_frame_ff;    // MPC frame latch
@@ -1292,10 +1292,10 @@
   reg [ 4:0] tmb_alctb = 0; // ALCT bxn latched at trigger
   reg [ 1:0] tmb_alcte = 0; // ALCT ecc latched at trigger
 
-  reg hmt_fired_tmb_ff = 0;
+  reg hmt_fired_tmb_ff   = 0;
   reg hmt_readout_tmb_ff = 0;
   reg tmb_pulse_hmt_only = 0;
-  reg tmb_keep_hmt_only = 0;
+  reg tmb_keep_hmt_only  = 0;
 
   reg [3:0] tmb_hmt_match_win = 0;
 
@@ -1333,7 +1333,7 @@
     wr_push_rtmb         <= hmt_fired_only ? wr_push_mux_hmt : wr_push_mux;        // Buffer write strobe at TMB matching time
     wr_avail_rtmb        <= hmt_fired_only ? wr_avail_xpre_hmt_pipe : wr_avail_xtmb_pipe; // Buffer available at TMB matching time
 
-    tmb_hmt_match_win <= hmt_match_win[3:0];
+    tmb_hmt_match_win    <= hmt_match_win[3:0];
   end
 
 // Had to wait for kill signal to go valid
@@ -1734,8 +1734,8 @@
   reg [MXHMTB-1:0]     hmt_cathode_vme=0; // tmb match bx
   always @(posedge clock) begin
     hmt_nhits_bx7_ff    <= hmt_nhits_bx7;
-    hmt_nhits_sig_ff  <= hmt_nhits_sig;
-    hmt_nhits_bkg_ff <= hmt_nhits_bkg;
+    hmt_nhits_sig_ff    <= hmt_nhits_sig;
+    hmt_nhits_bkg_ff    <= hmt_nhits_bkg;
     hmt_cathode_ff      <= hmt_cathode_pipe;
     if (event_clear_vme) begin
         hmt_nhits_bx7_vme    <= 0;
@@ -1745,8 +1745,8 @@
     end
     else if (trig_mpc || mpc0_frame0_pulse[15]) begin
         hmt_nhits_bx7_vme    <= hmt_nhits_bx7_ff;
-        hmt_nhits_sig_vme  <= hmt_nhits_sig_ff;
-        hmt_nhits_bkg_vme <= hmt_nhits_bkg_ff;
+        hmt_nhits_sig_vme    <= hmt_nhits_sig_ff;
+        hmt_nhits_bkg_vme    <= hmt_nhits_bkg_ff;
         hmt_cathode_vme      <= hmt_cathode_ff;
     end
   end

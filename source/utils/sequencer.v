@@ -2368,7 +2368,7 @@
 
   wire hmt_cnt_reset = ccb_evcntres || (ttc_resync && hdr_clear_on_resync);
   wire hmt_trig_cnt_ovf   = (hmt_trigger_counter == {MXCNTVME{1'b1}});
-  wire hmt_ro_cnt_ovf     =   (hmt_readout_counter == {MXCNTVME{1'b1}});
+  wire hmt_ro_cnt_ovf     = (hmt_readout_counter == {MXCNTVME{1'b1}});
   wire hmt_trig_cnt_en    = hmt_fired_tmb_ff && !hmt_trig_cnt_ovf;
   wire hmt_ro_cnt_en      = hmt_readout_tmb_ff && !hmt_ro_cnt_ovf;
 

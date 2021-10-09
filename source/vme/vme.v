@@ -7711,8 +7711,8 @@
     hmt_thresh3_wr[   11] = 1'b0; //  RW, hmt allow to readout on anode hmt
     hmt_thresh3_wr[   12] = 1'b1; //  RW, hmt allow to readout on cathode hmt
     hmt_thresh3_wr[   13] = 1'b0; //  RW, hmt allow to readout on match hmt
-    hmt_thresh3_wr[   14] = 1'b0; //  RW, hmt anode out-time counter low than threshold to fire hmt
-    hmt_thresh3_wr[   15] = 1'b0; //  RW, hmt cathode out-time counter lower than threshold to fire hmt
+    hmt_thresh3_wr[   14] = 1'b0; //  RW, hmt anode/cathode out-time counter low than threshold to fire hmt
+    hmt_thresh3_wr[   15] = 1'b0; //  RW, not used
   end 
 
   assign hmt_thresh1[7:0]  = hmt_thresh1_wr[7:0];
