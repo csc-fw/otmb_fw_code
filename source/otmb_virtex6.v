@@ -1814,10 +1814,10 @@
 
   wire [MXBNDB - 1   : 0] clct0_bnd_xtmb; // new bending 
   wire [MXXKYB-1     : 0] clct0_xky_xtmb; // new position with 1/8 precision
-  wire [MXPATC-1     : 0] clct0_carry_xtmb; // CC code 
+  //wire [MXPATC-1     : 0] clct0_carry_xtmb; // CC code 
   wire [MXBNDB - 1   : 0] clct1_bnd_xtmb; // new bending 
   wire [MXXKYB-1     : 0] clct1_xky_xtmb; // new position with 1/8 precision
-  wire [MXPATC-1     : 0] clct1_carry_xtmb; // CC code 
+  //wire [MXPATC-1     : 0] clct1_carry_xtmb; // CC code 
 
   wire  [MXBADR-1:0]  wr_adr_xtmb;      // Buffer write address to TMB
   wire  [MXBADR-1:0]  wr_adr_rtmb;      // Buffer write address at TMB matching time
@@ -2383,10 +2383,10 @@
   .clctf_xtmb (clctf_xtmb[MXCFEB-1:0]),  // Out  Active cfeb list to TMB
   .clct0_bnd_xtmb   (clct0_bnd_xtmb[MXBNDB - 1   : 0]),
   .clct0_xky_xtmb   (clct0_xky_xtmb[MXXKYB-1 : 0]),
-  .clct0_carry_xtmb (clct0_carry_xtmb[MXPATC-1:0]),  // Out  First  CLCT
+  //.clct0_carry_xtmb (clct0_carry_xtmb[MXPATC-1:0]),  // Out  First  CLCT
   .clct1_bnd_xtmb   (clct1_bnd_xtmb[MXBNDB - 1   : 0]),
   .clct1_xky_xtmb   (clct1_xky_xtmb[MXXKYB-1 : 0]),
-  .clct1_carry_xtmb (clct1_carry_xtmb[MXPATC-1:0]),  // Out  Second CLCT
+  //.clct1_carry_xtmb (clct1_carry_xtmb[MXPATC-1:0]),  // Out  Second CLCT
 
   .bx0_xmpc   (bx0_xmpc),  // Out  bx0 to tmb aligned with clct0/1
   .bx0_match  (bx0_match), // In  ALCT bx0 and CLCT bx0 match in time

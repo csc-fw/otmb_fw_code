@@ -755,10 +755,10 @@
   clctf_xtmb,
   clct0_bnd_xtmb,
   clct0_xky_xtmb,
-  clct0_carry_xtmb, // Out  First  CLCT
+  //clct0_carry_xtmb, // Out  First  CLCT
   clct1_bnd_xtmb,
   clct1_xky_xtmb,
-  clct1_carry_xtmb, // Out  Second CLCT
+  //clct1_carry_xtmb, // Out  Second CLCT
 
   bx0_xmpc,
   bx0_match,
@@ -1560,10 +1560,10 @@
 
   output [MXBNDB - 1   : 0] clct0_bnd_xtmb; // new bending 
   output [MXXKYB-1     : 0] clct0_xky_xtmb; // new position with 1/8 precision
-  output [MXPATC-1     : 0] clct0_carry_xtmb; // CC code 
+  //output [MXPATC-1     : 0] clct0_carry_xtmb; // CC code 
   output [MXBNDB - 1   : 0] clct1_bnd_xtmb; // new bending 
   output [MXXKYB-1     : 0] clct1_xky_xtmb; // new position with 1/8 precision
-  output [MXPATC-1     : 0] clct1_carry_xtmb; // CC code 
+  //output [MXPATC-1     : 0] clct1_carry_xtmb; // CC code 
 
   output bx0_xmpc;  // bx0 to mpc
   input  bx0_match; // ALCT bx0 and CLCT bx0 match in time
