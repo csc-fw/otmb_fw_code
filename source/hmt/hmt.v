@@ -139,7 +139,7 @@
   output  hmt_fired_pretrig;//preCLCT bx
   output [MXCFEB-1  :0]   hmt_active_feb;
   output  hmt_pretrig_match;
-  output  hmt_fired_xtmb;//preCLCT bx
+  output  hmt_fired_xtmb;//CLCT bx
   output  hmt_wr_avail_xtmb;  //
   output  [MXBADR-1:0] hmt_wr_adr_xtmb;
   
@@ -382,9 +382,9 @@
   always @(posedge clock) begin
   i=0;
   while (i<=15) begin
-  if    (ttc_resync            ) hmt_win_priority[i] <= 4'hF;
-  else if (i>=hmt_window || i==0) hmt_win_priority[i] <= 0;                          // i >  lastwin or i=0
-  else if (i<=hmt_win_center    ) hmt_win_priority[i] <= hmt_window-4'd1-((hmt_win_center-i[3:0]) << 1);  // i <= center
+  if    (ttc_resync            )   hmt_win_priority[i] <= 4'hF;
+  else if (i>=hmt_window || i==0)  hmt_win_priority[i] <= 0;                          // i >  lastwin or i=0
+  else if (i<=hmt_win_center    )  hmt_win_priority[i] <= hmt_window-4'd1-((hmt_win_center-i[3:0]) << 1);  // i <= center
   else                             hmt_win_priority[i] <= hmt_window-4'd0-((i[3:0]-hmt_win_center) << 1);  // i >  center
   i=i+1;
   end
@@ -508,7 +508,7 @@
   assign hmt_cathode_fired      = (|hmt_cathode_pipe[1:0]) && (!hmt_outtime_check || (~|hmt_cathode_pipe[3:2]));
 
   //just for counting
-  assign hmt_anode_alct_match   = hmt_anode_fired && alct_vpf_pipe;
+  assign hmt_anode_alct_match   = hmt_anode_fired   && alct_vpf_pipe;
   assign hmt_cathode_alct_match = hmt_cathode_fired && alct_vpf_pipe;
   assign hmt_cathode_clct_match = hmt_cathode_fired && clct_vpf_pipe;
   assign hmt_cathode_lct_match  = hmt_cathode_fired && alct_vpf_pipe && clct_vpf_pipe;
@@ -546,8 +546,8 @@
   srl16e_bbl #(1)         udnhmtpush  ( .clock(clock), .ce(1'b1), .adr(hmt_final_delay-4'd1), .d(wr_push_xpre_hmt   ), .q(wr_push_xpre_hmt_dly   ));
   srl16e_bbl #(1)         udnhmtavail ( .clock(clock), .ce(1'b1), .adr(hmt_final_delay-4'd1), .d(wr_avail_xpre_hmt  ), .q(wr_avail_xpre_hmt_dly  ));
 
-  assign  hmt_nhits_bx7 = (hmt_final_delay == 4'd0) ? nhits_trig_s0_bx7[9:0]    : nhits_trig_dly_bx7[9:0];
-  assign  hmt_nhits_sig = (hmt_final_delay == 4'd0) ? nhits_trig_s0_sig[9:0]  : nhits_trig_dly_sig[9:0];
+  assign  hmt_nhits_bx7 = (hmt_final_delay == 4'd0) ? nhits_trig_s0_bx7[9:0] : nhits_trig_dly_bx7[9:0];
+  assign  hmt_nhits_sig = (hmt_final_delay == 4'd0) ? nhits_trig_s0_sig[9:0] : nhits_trig_dly_sig[9:0];
   assign  hmt_nhits_bkg = (hmt_final_delay == 4'd0) ? nhits_trig_s0_bkg[9:0] : nhits_trig_dly_bkg[9:0];
 
   assign  wr_adr_xpre_hmt_pipe   = (hmt_final_delay == 4'd0) ?  wr_adr_xpre_hmt   : wr_adr_xpre_hmt_dly; 
