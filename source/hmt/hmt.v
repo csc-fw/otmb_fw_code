@@ -272,8 +272,8 @@
 
   //signal: over 3BX;   control region: over 4BX 
 
-  wire [NHMTHITB-1:0] nhits_trig_s0_bx7    = nhits_trig_s0_srl[2];//center one
-  wire [NHMTHITB-1:0] nhits_trig_s0_sig  = nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] + nhits_trig_s0_srl[1];
+  wire [NHMTHITB-1:0] nhits_trig_s0_bx7 = nhits_trig_s0_srl[2];//center one
+  wire [NHMTHITB-1:0] nhits_trig_s0_sig = nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] + nhits_trig_s0_srl[1];
   //wire [NHMTHITB-1:0] nhits_trig_s0_bkg = nhits_trig_s0_srl[7] + nhits_trig_s0_srl[6] + nhits_trig_s0_srl[5] + nhits_trig_s0_srl[4];
   wire [NHMTHITB-1:0] nhits_trig_s0_bkg = nhits_trig_s0_srl[6] + nhits_trig_s0_srl[5] + nhits_trig_s0_srl[4];
   //peak conditio: nhits_trig_s0_sig >= nhits_trig_s0_bx789 && nhits_trig_s0_sig >= nhits_trig_s0_bx89A
@@ -287,9 +287,9 @@
   wire hmt_bit3_s0 = ((nhits_trig_s0_bkg >= hmt_thresh2) || (nhits_trig_s0_bkg >= hmt_thresh3)) &  (~|hmt_fired_s0_ff) & (~hmt_reset);
   wire [MXHMTB-1:0] hmt_cathode_s0 = hmt_enable ? {hmt_bit3_s0, hmt_bit2_s0, hmt_bit1_s0, hmt_bit0_s0} : 4'b0;
 
-  wire   hmt_fired_bg_s0  = (hmt_bit2_s0 || hmt_bit3_s0);
-  wire   hmt_fired_sig_s0 = (hmt_bit0_s0 || hmt_bit1_s0);
-  wire   hmt_fired_s0 = hmt_fired_sig_s0 && (!hmt_outtime_check || !hmt_fired_bg_s0);
+  wire   hmt_fired_bkg_s0 = |hmt_cathode_s0[3:2];
+  wire   hmt_fired_sig_s0 = |hmt_cathode_s0[1:0];
+  wire   hmt_fired_s0 = hmt_fired_sig_s0 && (!hmt_outtime_check || !hmt_fired_bkg_s0);
 
   reg [1:0] hmt_fired_s0_ff = 2'b00;//dead time for 2BX 
   always @(posedge clock) begin
