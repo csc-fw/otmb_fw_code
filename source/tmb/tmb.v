@@ -281,12 +281,12 @@
   match_gem_clct_window,
 
   //gemA_match_enable,
-  gemA_alct_match, 
-  gemA_clct_match,
+  gemA_alct_pulse_match, 
+  gemA_clct_pulse_match,
   gemA_fiber_enable,
   //gemB_match_enable,
-  gemB_alct_match,
-  gemB_clct_match,
+  gemB_alct_pulse_match,
+  gemB_clct_pulse_match,
   gemB_fiber_enable,
 
   //GEM-CSC match control
@@ -886,14 +886,14 @@
   input  [3:0]        match_gem_alct_window;
   input  [3:0]        match_gem_clct_window;
   //input               gemA_match_enable;
-  output              gemA_alct_match;
-  output              gemA_clct_match;
+  output              gemA_alct_pulse_match;
+  output              gemA_clct_pulse_match;
   input  [1:0]        gemA_fiber_enable;
 
   //GEMB trigger match control
   //input               gemB_match_enable;
-  output              gemB_alct_match;
-  output              gemB_clct_match;
+  output              gemB_alct_pulse_match;
+  output              gemB_clct_pulse_match;
   input [1:0]         gemB_fiber_enable;
 
   input               gem_me1a_match_enable;
@@ -2160,10 +2160,10 @@
 
   assign gem_forclct_vpf_tp = gemA_pulse_forclct || gemB_pulse_forclct; 
 
-  assign gemA_clct_match  = gemA_pulse_forclct  &&  clct_window_haslcts;  // gem matches CLCT window, push to mpc on current bx
-  assign gemB_clct_match  = gemB_pulse_forclct  &&  clct_window_haslcts;  // gem matches CLCT window, push to mpc on current bx
-  assign gemA_alct_match  = alct_pulse  &&  gemA_pulse_forclct;  // ALCT matches GEM window, push to CLCT match
-  assign gemB_alct_match  = alct_pulse  &&  gemB_pulse_forclct;  // ALCT matches GEM window, push to CLCT match
+  assign gemA_clct_pulse_match  = gemA_pulse_forclct  &&  clct_window_haslcts;  // gem matches CLCT window, push to mpc on current bx
+  assign gemB_clct_pulse_match  = gemB_pulse_forclct  &&  clct_window_haslcts;  // gem matches CLCT window, push to mpc on current bx
+  assign gemA_alct_pulse_match  = alct_pulse  &&  gemA_pulse_forclct;  // ALCT matches GEM window, push to CLCT match
+  assign gemB_alct_pulse_match  = alct_pulse  &&  gemB_pulse_forclct;  // ALCT matches GEM window, push to CLCT match
 
   wire clct_gemA_noclct = gemA_pulse_forclct  && !clct_window_haslcts;  // gem arrived, but there was no CLCT window open
   wire gemA_clct_nogem  = clct_last_win && !gemA_pulse_forclct;    // No ALCT arrived in window, pushed mpc on last bx

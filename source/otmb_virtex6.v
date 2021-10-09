@@ -2904,10 +2904,10 @@ end
 
 
    //GEM CSC match
-   wire        gemA_alct_match; 
-   wire        gemA_clct_match;
-   wire        gemB_alct_match; 
-   wire        gemB_clct_match;
+   wire        gemA_alct_pulse_match; 
+   wire        gemA_clct_pulse_match;
+   wire        gemB_alct_pulse_match; 
+   wire        gemB_clct_pulse_match;
    wire        gemA_match_ignore_position;
    wire        gemB_match_ignore_position;
    wire        gemcsc_bend_enable;
@@ -3627,10 +3627,10 @@ end
 
        //GEM-CSC match output, time_only
   .gem_enable           (gem_enable),
-  .gemA_alct_match      (gemA_alct_match), // In Gem alct/clct match in timing only 
-  .gemB_alct_match      (gemB_alct_match), // In Gem alct/clct match in timing only
-  .gemA_clct_match      (gemA_clct_match), // In Gem alct/clct match in timing only
-  .gemB_clct_match      (gemB_clct_match), // In Gem alct/clct match in timing only
+  .gemA_alct_pulse_match      (gemA_alct_pulse_match), // In Gem alct/clct match in timing only 
+  .gemB_alct_pulse_match      (gemB_alct_pulse_match), // In Gem alct/clct match in timing only
+  .gemA_clct_pulse_match      (gemA_clct_pulse_match), // In Gem alct/clct match in timing only
+  .gemB_clct_pulse_match      (gemB_clct_pulse_match), // In Gem alct/clct match in timing only
 
   .alct_gem_pulse          (alct_gem_pulse), // Out GEM-CSC matching in timing only 
   .clct_gem_pulse          (clct_gem_pulse), // Out GEM-CSC matching in timing only
@@ -4615,12 +4615,12 @@ wire [15:0] gemB_bxn_counter;
   .match_gem_clct_window  (match_gem_clct_window[3:0]), //In gem-clct match window
 
   //.gemA_match_enable      (gemA_match_enable),             //In gemA+ALCT match
-  .gemA_alct_match        (gemA_alct_match),             //Out gemA+ALCT match
-  .gemA_clct_match        (gemA_clct_match),             //Out gemA+CLCT match
+  .gemA_alct_pulse_match        (gemA_alct_pulse_match),             //Out gemA+ALCT match
+  .gemA_clct_pulse_match        (gemA_clct_pulse_match),             //Out gemA+CLCT match
   .gemA_fiber_enable      (gemA_fiber_enable[1:0]),     //In gemA two fibers enabled or not
   //.gemB_match_enable      (gemB_match_enable),             //IN gemB+ALCT match
-  .gemB_alct_match        (gemB_alct_match),       // Out gemB+ALCT match or not
-  .gemB_clct_match        (gemB_clct_match),      // Out gemB+CLCT match or not
+  .gemB_alct_pulse_match        (gemB_alct_pulse_match),       // Out gemB+ALCT match or not
+  .gemB_clct_pulse_match        (gemB_clct_pulse_match),      // Out gemB+CLCT match or not
   .gemB_fiber_enable      (gemB_fiber_enable[1:0]),    //In gemB two fibers enabled or not
 
   //GEM-CSC match control

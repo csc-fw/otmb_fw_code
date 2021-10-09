@@ -877,10 +877,10 @@
   hmt_nhits_sig_ff,
 
   //GEM-CSC match output, time_only
-  gemA_alct_match,
-  gemB_alct_match,
-  gemA_clct_match,
-  gemB_clct_match,
+  gemA_alct_pulse_match,
+  gemB_alct_pulse_match,
+  gemA_clct_pulse_match,
+  gemB_clct_pulse_match,
 
   alct_gem_pulse,
   clct_gem_pulse,
@@ -1950,10 +1950,10 @@
   input [NHMTHITB-1:0] hmt_nhits_sig_ff;// hmt nhits in-time
 
   //GEM-CSC match output, timing only
-  input  gemA_alct_match; 
-  input  gemB_alct_match;
-  input  gemA_clct_match;
-  input  gemB_clct_match;
+  input  gemA_alct_pulse_match; 
+  input  gemB_alct_pulse_match;
+  input  gemA_clct_pulse_match;
+  input  gemB_clct_pulse_match;
 
   input             alct_gem_pulse;        // GEM matched (in time) to ALCT
   input             clct_gem_pulse;        // GEM in CLCT open window
@@ -3761,10 +3761,10 @@
 
     gem_cnt_en[GEMCSCMATCH_CNT_START   ]    <= gemA_bx0_match2;
     gem_cnt_en[GEMCSCMATCH_CNT_START+1 ]    <= gemB_bx0_match2;
-    gem_cnt_en[GEMCSCMATCH_CNT_START+2 ]    <= gemA_alct_match;
-    gem_cnt_en[GEMCSCMATCH_CNT_START+3 ]    <= gemB_alct_match;
-    gem_cnt_en[GEMCSCMATCH_CNT_START+4 ]    <= gemA_clct_match;
-    gem_cnt_en[GEMCSCMATCH_CNT_START+5 ]    <= gemB_clct_match;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+2 ]    <= gemA_alct_pulse_match;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+3 ]    <= gemB_alct_pulse_match;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+4 ]    <= gemA_clct_pulse_match;
+    gem_cnt_en[GEMCSCMATCH_CNT_START+5 ]    <= gemB_clct_pulse_match;
     gem_cnt_en[GEMCSCMATCH_CNT_START+6 ]    <= alct_clct_gemA_pulse;
     gem_cnt_en[GEMCSCMATCH_CNT_START+7 ]    <= alct_clct_gemB_pulse;
     gem_cnt_en[GEMCSCMATCH_CNT_START+8 ]    <= clct_copad_noalct_pulse;
