@@ -2176,7 +2176,7 @@
 
   wire   gem_pulse                   = gemA_pulse_forclct || gemB_pulse_forclct;
   assign alct_gem_pulse              = alct_pulse  && gem_pulse;
-  assign clct_gem_pulse              = gemB_clct_match || gemA_clct_match; 
+  assign clct_gem_pulse              = gemB_clct_pulse_match || gemA_clct_pulse_match; 
   
   assign alct_clct_gemA_pulse        = gemA_pulse_forclct && clct_match;
   assign alct_clct_gemB_pulse        = gemB_pulse_forclct && clct_match;
