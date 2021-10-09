@@ -826,10 +826,10 @@
   clctf_xtmb,
   clct0_bnd_xtmb,
   clct0_xky_xtmb,
-  clct0_carry_xtmb, // Out  First  CLCT
+  //clct0_carry_xtmb, // Out  First  CLCT
   clct1_bnd_xtmb,
   clct1_xky_xtmb,
-  clct1_carry_xtmb, // Out  Second CLCT
+  //clct1_carry_xtmb, // Out  Second CLCT
   bx0_xmpc,
   bx0_match,
   bx0_match2,
@@ -1897,10 +1897,10 @@
 
   output [MXBNDB - 1   : 0] clct0_bnd_xtmb; // new bending 
   output [MXXKYB-1     : 0] clct0_xky_xtmb; // new position with 1/8 precision
-  output [MXPATC-1     : 0] clct0_carry_xtmb; // CC code 
+  //output [MXPATC-1     : 0] clct0_carry_xtmb; // CC code 
   output [MXBNDB - 1   : 0] clct1_bnd_xtmb; // new bending 
   output [MXXKYB-1     : 0] clct1_xky_xtmb; // new position with 1/8 precision
-  output [MXPATC-1     : 0] clct1_carry_xtmb; // CC code 
+  //output [MXPATC-1     : 0] clct1_carry_xtmb; // CC code 
 
   output   bx0_xmpc;  // bx0 to mpc
   input    bx0_match; // ALCT bx0 and CLCT bx0 match in time
@@ -2918,7 +2918,7 @@
 
   wire hmt_cnt_reset = ccb_evcntres || (ttc_resync && hdr_clear_on_resync);
   wire hmt_trig_cnt_ovf   = (hmt_trigger_counter == {MXCNTVME{1'b1}});
-  wire hmt_ro_cnt_ovf     =   (hmt_readout_counter == {MXCNTVME{1'b1}});
+  wire hmt_ro_cnt_ovf     = (hmt_readout_counter == {MXCNTVME{1'b1}});
   wire hmt_trig_cnt_en    = hmt_fired_tmb_ff && !hmt_trig_cnt_ovf;
   wire hmt_ro_cnt_en      = hmt_readout_tmb_ff && !hmt_ro_cnt_ovf;
 
@@ -4313,7 +4313,7 @@
     //seq_trigger <= tmb_trig_pulse && (tmb_trig_keep || tmb_non_trig_keep) && !seq_trigger;
     //old logic would block the second L1A request when two triggers are in
     //a row, Tao
-    seq_trigger <= tmb_trig_pulse && (tmb_trig_keep || tmb_non_trig_keep) && (!seq_trigger || seq_trigger_nodeadtime);
+    seq_trigger <= tmb_trig_pulse && (tmb_trig_keep || tmb_non_trig_keep) && (!seq_trigger || seq_trigger_nodeadtime) && !fmm_trig_stop;
   end
 
 // Scintillator Veto for FAST sites, Assert veto on l1a request, persist until clear on VME, copy to VME
@@ -5304,8 +5304,8 @@
   assign  header21_[3:0]    =  triad_persist[3:0];      // CLCT Triad persistence
   assign  header21_[6:4]    =  dmb_thresh_pretrig[2:0]; // DMB pre-trigger threshold for active-feb
   assign  header21_[10:7]   =  alct_delay[3:0];         // Delay ALCT for CLCT match window
-//assign  header21_[14:11]  =  clct_window[3:0];        // CLCT match window width
-  assign  header21_[14:11]  = (algo2016_clct_to_alct ? algo2016_clct_window[3:0] : clct_window[3:0] ); // CLCT match window width (if algo2016_clct_to_alct = 1 then set window to ALCT-centric 2016 algorithm else to CLCT-centric "old" algorithm)
+  assign  header21_[14:11]  =  clct_window[3:0];        // CLCT match window width
+//assign  header21_[14:11]  = (algo2016_clct_to_alct ? algo2016_clct_window[3:0] : clct_window[3:0] ); // CLCT match window width (if algo2016_clct_to_alct = 1 then set window to ALCT-centric 2016 algorithm else to CLCT-centric "old" algorithm)
   assign  header21_[18:15]  =  0;                       // DDU+DMB control flags
 
 // CLCT Trigger Status

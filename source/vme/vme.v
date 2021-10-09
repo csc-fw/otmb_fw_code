@@ -9275,8 +9275,8 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 //------------------------------------------------------------------------------------------------------------------
 
   initial begin
-  gem_csc_match_ctrl_wr[ 0]   = 1'b1; // RW GEMCSC match, enabled in ME1a or not
-  gem_csc_match_ctrl_wr[ 1]   = 1'b1; // RW GEMCSC match, enabled in ME1b or not
+  gem_csc_match_ctrl_wr[ 0]   = 1'b0; // RW GEMCSC match, enabled in ME1a or not
+  gem_csc_match_ctrl_wr[ 1]   = 1'b0; // RW GEMCSC match, enabled in ME1b or not
   gem_csc_match_ctrl_wr[ 2]   = 1'b0; // RW GEMCSC match, extrapolation
   gem_csc_match_ctrl_wr[ 3]   = 1'b0; // RW GEMCSC match, correct bending with gEMCSC bending 
   gem_csc_match_ctrl_wr[ 4]   = 1'b0; // RW GEMCSC match, use tight GEMCSC position match window
@@ -9291,7 +9291,6 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
   gem_csc_match_ctrl_wr[13]   = 1'b1; // RW GEMCSC match, enable GEMA for GEMCSC match without position match
   gem_csc_match_ctrl_wr[14]   = 1'b1; // RW GEMCSC bending angle enable 
   gem_csc_match_ctrl_wr[15]   = 1'b1; // RW GEMCSC match, ignore bending direction check if bending angle is small
-
   end
 
   assign gem_me1a_match_enable        = gem_csc_match_ctrl_wr[ 0];

@@ -2205,11 +2205,11 @@
 
   //------------------------------------------------------------------------------------------------------------------
   // Run3 logic with GEMCSC match: ALCT+copad, CLCT+copad, only matching in time here
-  wire clct_keep_run3 = (clct_match && tmb_allow_match   ) || (clct_noalct && tmb_allow_clct && !clct_lost_run3 && !clct_used_run3) || clct_copad_pulse_match;
-  wire alct_keep_run3 = (clct_match && tmb_allow_match   ) || (alct_noclct && tmb_allow_alct) || alct_copad_pulse_match;
+  wire clct_keep_run3 = (clct_match && tmb_allow_match   ) || (clct_noalct && tmb_allow_clct && !clct_lost_run3 && !clct_used_run3) || (clct_copad_pulse_match && tmb_copad_clct_allow);
+  wire alct_keep_run3 = (clct_match && tmb_allow_match   ) || (alct_noclct && tmb_allow_alct) || (alct_copad_pulse_match && tmb_copad_alct_allow);
 
-  wire clct_keep_ro_run3 = (clct_match && tmb_allow_match_ro) || (clct_noalct &&  tmb_allow_clct_ro && !clct_lost_run3 && !clct_used_run3) || clct_copad_pulse_match;
-  wire alct_keep_ro_run3 = (clct_match && tmb_allow_match_ro) || (alct_noclct &&  tmb_allow_alct_ro) || alct_copad_pulse_match;
+  wire clct_keep_ro_run3 = (clct_match && tmb_allow_match_ro) || (clct_noalct &&  tmb_allow_clct_ro && !clct_lost_run3 && !clct_used_run3) || (clct_copad_pulse_match && tmb_copad_clct_allow_ro);
+  wire alct_keep_ro_run3 = (clct_match && tmb_allow_match_ro) || (alct_noclct &&  tmb_allow_alct_ro) || (alct_copad_pulse_match && tmb_copad_alct_allow_ro);
 
   wire clct_discard_run3 = (clct_match && !tmb_allow_match) || (clct_noalct && !tmb_allow_clct && !clct_copad_pulse_match) || clct_lost_run3 || clct_used_run3;
   wire alct_discard_run3 =  alct_pulse && !alct_keep_run3;
@@ -2858,13 +2858,13 @@
     tmb_trig_keep_ff     <= trig_keep_run3  || hmt_fired_tmb;     // ALCT or CLCT or both triggered, and trigger is allowed
     tmb_non_trig_keep_ff <= non_trig_keep_run3 || hmt_readout_tmb; // Event did not trigger but is kept for readout
 
-    tmb_match            <= clct_match_tr_run3  && tmb_allow_match; // ALCT and CLCT, copad matched in time, 
-    tmb_alct_only        <= alct_noclct_tr_run3 && tmb_allow_alct;  // Only ALCT triggered
-    tmb_clct_only        <= clct_noalct_tr_run3 && tmb_allow_clct;  // Only CLCT triggered
+    tmb_match            <= clct_match_tr_run3 ;// ALCT and CLCT, copad matched in time, 
+    tmb_alct_only        <= alct_noclct_tr_run3;// Only ALCT triggered
+    tmb_clct_only        <= clct_noalct_tr_run3;// Only CLCT triggered
 
-    tmb_match_ro_ff      <= clct_match_ro_run3  && tmb_allow_match_ro; // ALCT and CLCT, copad matched in time, nontriggering event
-    tmb_alct_only_ro_ff  <= alct_noclct_ro_run3 && tmb_allow_alct_ro;  // Only ALCT triggered, nontriggering event
-    tmb_clct_only_ro_ff  <= clct_noalct_ro_run3 && tmb_allow_clct_ro;  // Only CLCT triggered, nontriggering event
+    tmb_match_ro_ff      <= clct_match_ro_run3 ; // ALCT and CLCT, copad matched in time, nontriggering event
+    tmb_alct_only_ro_ff  <= alct_noclct_ro_run3;  // Only ALCT triggered, nontriggering event
+    tmb_clct_only_ro_ff  <= clct_noalct_ro_run3;  // Only CLCT triggered, nontriggering event
 
     tmb_match_win        <= match_win;     // Location of alct in clct window
     tmb_match_pri        <= clct_pri_best; // Priority of clct that matched
@@ -2888,27 +2888,19 @@
     tmb_gem_clct_win     <= gem_clct_win;
     tmb_alct_gem_win     <= alct_gem_win;
 
-    tmb_hmt_match_win    <= hmt_match_win;
+    tmb_hmt_match_win    <= hmt_match_win[3:0];
   end
 
 // Had to wait for kill signal to go valid
   wire kill_trig;
-  wire kill_nomatch_run3 = gemcsc_match_enable && !alct0_clct0_match_found_final_pos && !alct1_clct1_match_found_final_pos;//match failed with position considered
 
-  //assign tmb_match_ro     = tmb_match_ro_ff     & kill_trig;  // ALCT and CLCT matched in time, nontriggering event
-  //assign tmb_alct_only_ro = tmb_alct_only_ro_ff & kill_trig;  // Only ALCT triggered, nontriggering event
-  //assign tmb_clct_only_ro = tmb_clct_only_ro_ff & kill_trig;  // Only CLCT triggered, nontriggering event
-
-  assign tmb_match_ro     = tmb_match_ro_ff     & kill_trig & kill_nomatch_run3;  // ALCT and CLCT matched in time, nontriggering event
-  assign tmb_alct_only_ro = tmb_alct_only_ro_ff & kill_trig & kill_nomatch_run3;  // Only ALCT triggered, nontriggering event
-  assign tmb_clct_only_ro = tmb_clct_only_ro_ff & kill_trig & kill_nomatch_run3;  // Only CLCT triggered, nontriggering event
+  assign tmb_match_ro     = tmb_match_ro_ff     & kill_trig;  // ALCT and CLCT matched in time, nontriggering event
+  assign tmb_alct_only_ro = tmb_alct_only_ro_ff & kill_trig;  // Only ALCT triggered, nontriggering event
+  assign tmb_clct_only_ro = tmb_clct_only_ro_ff & kill_trig;  // Only CLCT triggered, nontriggering event
 
 // Post FF mod trig_keep for me1a
-  wire tmb_trig_keep_run2     = tmb_trig_keep_ff     && (!kill_trig || tmb_alct_only);//run2 legacy logic
-  wire tmb_non_trig_keep_run2 = tmb_non_trig_keep_ff && !tmb_trig_keep_run2;//run2 legacy logic 
-
-  assign tmb_trig_keep     = tmb_trig_keep_ff     && (!kill_trig || tmb_alct_only) && !kill_nomatch_run3;
-  assign tmb_non_trig_keep = tmb_non_trig_keep_ff && !tmb_trig_keep_run2 && !kill_nomatch_run3;
+  assign tmb_trig_keep     = tmb_trig_keep_ff     && (!kill_trig || tmb_alct_only);//run2 legacy logic
+  assign tmb_non_trig_keep = tmb_non_trig_keep_ff && !tmb_trig_keep;//run2 legacy logic 
   
 // Pipelined CLCTs, aligned in time with trig_pulse
   //reg [MXCLCT-1:0]   clct0_real;
@@ -3614,8 +3606,8 @@
   reg [MXHMTB-1:0]     hmt_cathode_vme=0; // tmb match bx
   always @(posedge clock) begin
     hmt_nhits_bx7_ff    <= hmt_nhits_bx7;
-    hmt_nhits_sig_ff  <= hmt_nhits_sig;
-    hmt_nhits_bkg_ff <= hmt_nhits_bkg;
+    hmt_nhits_sig_ff    <= hmt_nhits_sig;
+    hmt_nhits_bkg_ff    <= hmt_nhits_bkg;
     hmt_cathode_ff      <= hmt_cathode_pipe;
     if (event_clear_vme) begin
         hmt_nhits_bx7_vme    <= 0;
@@ -3625,8 +3617,8 @@
     end
     else if (trig_mpc || mpc0_frame0_pulse[15]) begin
         hmt_nhits_bx7_vme    <= hmt_nhits_bx7_ff;
-        hmt_nhits_sig_vme  <= hmt_nhits_sig_ff;
-        hmt_nhits_bkg_vme <= hmt_nhits_bkg_ff;
+        hmt_nhits_sig_vme    <= hmt_nhits_sig_ff;
+        hmt_nhits_bkg_vme    <= hmt_nhits_bkg_ff;
         hmt_cathode_vme      <= hmt_cathode_ff;                                                                                                                                                 
     end
   end
