@@ -2821,7 +2821,7 @@
   reg tmb_clct_discard     = 0;
 
   reg hmt_fired_tmb_ff     = 0;
-  reg hmt_readout_tmb_ff  = 0;
+  reg hmt_readout_tmb_ff   = 0;
   reg tmb_pulse_hmt_only   = 0;
   reg tmb_keep_hmt_only    = 0;
 
