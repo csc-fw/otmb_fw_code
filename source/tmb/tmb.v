@@ -3512,8 +3512,8 @@
   wire [6:0] alct1_key_run3 =  alct1fromcopad_run3 ?  alct1wg_fromcopad[6:0] : alct1_key[6:0];
   wire [9:0] clct0_xky_run3 =  clct0fromcopad_run3 ? clct0xky_fromcopad[9:0] : clct0_xky[9:0];
   wire [9:0] clct1_xky_run3 =  clct1fromcopad_run3 ? clct1xky_fromcopad[9:0] : clct1_xky[9:0];
-  wire [4:0] clct0_bnd_run3 =  alct0fromcopad_run3 ? 4'b0 : ((gemcsc_bend_enable && gemcsc_bending_lct0) ? gemcsc_bnd0[4:0] : clct0_bnd[4:0]);    
-  wire [4:0] clct1_bnd_run3 =  alct1fromcopad_run3 ? 4'b0 : ((gemcsc_bend_enable && gemcsc_bending_lct1) ? gemcsc_bnd1[4:0] : clct1_bnd[4:0]);    
+  wire [4:0] clct0_bnd_run3 =  clct0fromcopad_run3 ? 5'b0 : ((gemcsc_bend_enable && gemcsc_bending_lct0) ? gemcsc_bnd0[4:0] : clct0_bnd[4:0]);    
+  wire [4:0] clct1_bnd_run3 =  clct1fromcopad_run3 ? 5'b0 : ((gemcsc_bend_enable && gemcsc_bending_lct1) ? gemcsc_bnd1[4:0] : clct1_bnd[4:0]);    
   //should we use bending direction also from GEM-CSC???
   //gemcsc_bend_enable && gemcsc_match_enable
   //wire [4:0] clct0_bnd_run3 = clct0_bnd[4:0];  
