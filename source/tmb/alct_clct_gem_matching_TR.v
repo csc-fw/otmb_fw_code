@@ -729,24 +729,6 @@ module  alct_clct_gem_matching_TR(
   wire alct1_clct0_copad_match_any = ( |alct1_clct0_copad_match ) && tmb_allow_match_any;
   wire alct1_clct1_copad_match_any = ( |alct1_clct1_copad_match ) && tmb_allow_match_any;
 
-  //reg alct0_clct0_copad_match_any_r = 1'b0;
-  //reg alct0_clct1_copad_match_any_r = 1'b0;
-  //reg alct1_clct0_copad_match_any_r = 1'b0;
-  //reg alct1_clct1_copad_match_any_r = 1'b0;
-
-  //always @ (posedge clock) begin
-  //  alct0_clct0_copad_match_any_r <= |alct0_clct0_copad_match;
-  //  alct0_clct1_copad_match_any_r <= |alct0_clct1_copad_match;
-  //  alct1_clct0_copad_match_any_r <= |alct1_clct0_copad_match;
-  //  alct1_clct1_copad_match_any_r <= |alct1_clct1_copad_match;
-
-  //end
-  //
-  //wire alct0_clct0_copad_match_any = alct0_clct0_copad_match_any_r;
-  //wire alct0_clct1_copad_match_any = alct0_clct1_copad_match_any_r;
-  //wire alct1_clct0_copad_match_any = alct1_clct0_copad_match_any_r;
-  //wire alct1_clct1_copad_match_any = alct1_clct1_copad_match_any_r;
-
   //include 1.alct0=clct0-copad, alct1-clct1-copad
   //2. alct0=clct1-copad, alct1-clct0-copad
   // alct0 is not copied to alct1 yet if alct0 is valid while alct1 is invalid
@@ -1072,38 +1054,6 @@ module  alct_clct_gem_matching_TR(
   wire alct0_clct1_gemB_match_any  = (|alct0_clct1_gemB_match) && tmb_allow_match;
   wire alct1_clct0_gemB_match_any  = (|alct1_clct0_gemB_match) && tmb_allow_match;
   wire alct1_clct1_gemB_match_any  = (|alct1_clct1_gemB_match) && tmb_allow_match;
-  //reg alct0_clct0_gemA_match_any_r  = 1'b0;
-  //reg alct0_clct1_gemA_match_any_r  = 1'b0;
-  //reg alct1_clct0_gemA_match_any_r  = 1'b0;
-  //reg alct1_clct1_gemA_match_any_r  = 1'b0;
-
-  //reg alct0_clct0_gemB_match_any_r  = 1'b0;
-  //reg alct0_clct1_gemB_match_any_r  = 1'b0;
-  //reg alct1_clct0_gemB_match_any_r  = 1'b0;
-  //reg alct1_clct1_gemB_match_any_r  = 1'b0;
-
-  //always @ (posedge clock) begin
-  // alct0_clct0_gemA_match_any_r  <= |alct0_clct0_gemA_match;
-  // alct0_clct1_gemA_match_any_r  <= |alct0_clct1_gemA_match;
-  // alct1_clct0_gemA_match_any_r  <= |alct1_clct0_gemA_match;
-  // alct1_clct1_gemA_match_any_r  <= |alct1_clct1_gemA_match;
-
-  // alct0_clct0_gemB_match_any_r  <= |alct0_clct0_gemB_match;
-  // alct0_clct1_gemB_match_any_r  <= |alct0_clct1_gemB_match;
-  // alct1_clct0_gemB_match_any_r  <= |alct1_clct0_gemB_match;
-  // alct1_clct1_gemB_match_any_r  <= |alct1_clct1_gemB_match;
-  //end
-
-
-  //wire alct0_clct0_gemA_match_any  = alct0_clct0_gemA_match_any_r;
-  //wire alct0_clct1_gemA_match_any  = alct0_clct1_gemA_match_any_r;
-  //wire alct1_clct0_gemA_match_any  = alct1_clct0_gemA_match_any_r;
-  //wire alct1_clct1_gemA_match_any  = alct1_clct1_gemA_match_any_r;
-
-  //wire alct0_clct0_gemB_match_any  = alct0_clct0_gemB_match_any_r;
-  //wire alct0_clct1_gemB_match_any  = alct0_clct1_gemB_match_any_r;
-  //wire alct1_clct0_gemB_match_any  = alct1_clct0_gemB_match_any_r;
-  //wire alct1_clct1_gemB_match_any  = alct1_clct1_gemB_match_any_r;
 
   assign alct_clct_gemA_match      = alct0_clct0_gemA_match_any || alct0_clct1_gemA_match_any || alct1_clct0_gemA_match_any || alct1_clct1_gemA_match_any;
   assign alct_clct_gemB_match      = alct0_clct0_gemB_match_any || alct0_clct1_gemB_match_any || alct1_clct0_gemB_match_any || alct1_clct1_gemB_match_any;
@@ -1410,16 +1360,8 @@ module  alct_clct_gem_matching_TR(
   wire clct0_copad_match_any = ( |clct0_copad_match_ok ) && !drop_lowqclct0_r;
   wire clct1_copad_match_any = ( |clct1_copad_match_ok ) && !drop_lowqclct1_r;
   
-  //reg clct0_copad_match_ok_any_r = 1'b0;
-  //reg clct1_copad_match_ok_any_r = 1'b0;
-  //always @ (posedge clock) begin
-  //    clct0_copad_match_ok_any_r <= |clct0_copad_match_ok;
-  //    clct1_copad_match_ok_any_r <= |clct1_copad_match_ok;
-  //end
-  //wire clct0_copad_match_any =  clct0_copad_match_ok_any_r  && !drop_lowqclct0_r;
-  //wire clct1_copad_match_any =  clct1_copad_match_ok_any_r  && !drop_lowqclct1_r;
-  assign clct0_copad_match_found  = !alct0_vpf && (clct0_copad_match_any || clct1_copad_match_any);
-  assign clct1_copad_match_found  = !alct1_vpf && ((swapclct_copad_match || swapclct_gem_match) ? clct0_copad_match_any : clct1_copad_match_any);
+  assign clct0_copad_match_found  = !alct0_vpf_r && (clct0_copad_match_any || clct1_copad_match_any);
+  assign clct1_copad_match_found  = !alct1_vpf_r && ((swapclct_copad_match || swapclct_gem_match) ? clct0_copad_match_any : clct1_copad_match_any);
   //only case to swap clct0 and clct1 here: both LCTs built from CLCT+copad
   assign swapclct_clctcopad_match = clct0_copad_match_found && clct1_copad_match_found && (clct0_copad_best_angle > clct1_copad_best_angle);
   wire [2:0] best_cluster0_clct_copad_iclst = swapclct_clctcopad_match ?  clct1_copad_best_icluster : clct0_copad_best_icluster;
@@ -1494,16 +1436,9 @@ module  alct_clct_gem_matching_TR(
 
   wire alct0_copad_match_any = (|alct0_copad_match) && !drop_lowqalct0_r;
   wire alct1_copad_match_any = (|alct1_copad_match) && !drop_lowqalct1_r;
-  //reg alct0_copad_match_any_r = 1'b0;
-  //reg alct1_copad_match_any_r = 1'b0;
-  //always @(posedge clock) begin
-  //    alct0_copad_match_any_r <= |alct0_copad_match;
-  //    alct1_copad_match_any_r <= |alct1_copad_match;
-  //end
-  //wire alct0_copad_match_any = alct0_copad_match_any_r;
-  //wire alct1_copad_match_any = alct1_copad_match_any_r;
-  assign alct0_copad_match_found = !clct0_vpf && (alct0_copad_match_any || alct1_copad_match_any);
-  assign alct1_copad_match_found = !clct1_vpf && ((swapalct_copad_match || swapalct_gem_match) ? alct0_copad_match_any : alct1_copad_match_any);//
+
+  assign alct0_copad_match_found = !clct0_vpf_r && (alct0_copad_match_any || alct1_copad_match_any);
+  assign alct1_copad_match_found = !clct1_vpf_r && ((swapalct_copad_match || swapalct_gem_match) ? alct0_copad_match_any : alct1_copad_match_any);//
 
   assign clct0xky_fromcopad = alct0_copad_best_cscxky;
   assign clct1xky_fromcopad = alct1_copad_best_cscxky;
@@ -1528,10 +1463,10 @@ module  alct_clct_gem_matching_TR(
   assign  clct0fromcopad  = alct0_copad_match_good && !clct0_vpf_r;
   assign  clct1fromcopad  = alct1_copad_match_good && !clct1_vpf_r;
 
-  //assign  copyalct0_foralct1 = !alct1_vpf && !clct1_copad_match_good && clct1_vpf;
-  //assign  copyclct0_forclct1 = !clct1_vpf && !alct1_copad_match_good && alct1_vpf;
-  assign  copyalct0_foralct1 = !alct1_vpf_r && !clct1_copad_match_good && clct1_vpf_r;
-  assign  copyclct0_forclct1 = !clct1_vpf_r && !alct1_copad_match_good && alct1_vpf_r;
+  //assign  copyalct0_foralct1 = alct0_vpf && !alct1_vpf && !clct1_copad_match_good && clct1_vpf;
+  //assign  copyclct0_forclct1 = clct0_vpf && !clct1_vpf && !alct1_copad_match_good && alct1_vpf;
+  assign  copyalct0_foralct1 = alct0_vpf_r && !alct1_vpf_r && !clct1_copad_match_good && clct1_vpf_r;
+  assign  copyclct0_forclct1 = clct0_vpf_r && !clct1_vpf_r && !alct1_copad_match_good && alct1_vpf_r;
 
   //select the best match cluster
   assign  best_cluster0_ingemB = best_cluster0_alct_clct_gem_vpf & cluster0layer_alct_clct_gem_r;
