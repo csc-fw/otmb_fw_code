@@ -3592,7 +3592,7 @@
 
 // TMB is supposed to rank LCTs, but doesn't yet
   //assign tmb_rank_err = (lct0_quality[3:0] * lct0_vpf) < (lct1_quality[3:0] * lct1_vpf);
-  assign tmb_rank_err = lct0_qlt_run3[2:0] < lct1_qlt_run3[2:0];
+  assign tmb_rank_err = (lct0_qlt_run3[2:0] < lct1_qlt_run3[2:0]) || (alct0_clct0_match_found_final_pos != lct0_vpf_run3) || (alct1_clct1_match_found_final_pos != lct1_vpf_run3);
 
   reg [NHMTHITB-1:0]   hmt_nhits_bx7_ff=0;//CLCT bx
   reg [NHMTHITB-1:0]   hmt_nhits_sig_ff=0;
@@ -4069,6 +4069,9 @@
 // Sump
 //------------------------------------------------------------------------------------------------------------------
   assign tmb_sump = 
+  (|gem_alct_pri_best)    |
+   alct_clct_copad_nomatch_pos |
+   alct_clct_gem_nomatch_pos |
    alctclctgem_match_sump |
   (|match_gem_clct_window ) |
   (|algo2016_window) |
