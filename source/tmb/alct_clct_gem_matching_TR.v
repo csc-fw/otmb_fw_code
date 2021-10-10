@@ -1371,6 +1371,15 @@ module  alct_clct_gem_matching_TR(
   wire [MXBENDANGLEB-1:0] best_angle0_clct_copad = swapclct_clctcopad_match ?  clct1_copad_best_angle : clct0_copad_best_angle;
   wire [MXBENDANGLEB-1:0] best_angle1_clct_copad = swapclct_clctcopad_match ?  clct0_copad_best_angle : clct1_copad_best_angle;
 
+  assign alct0wg_fromcopad = wgfromGEMcluster(
+      best_cluster0_clct_copad_iclst
+      //clct0_copad_best_icluster 
+      );
+  assign alct1wg_fromcopad = wgfromGEMcluster(
+      best_cluster1_clct_copad_iclst
+      //clct1_copad_best_icluster
+  );
+
   wire clct0_copad_match_good = clct0_copad_match_found && tmb_copad_clct_allow;
   wire clct1_copad_match_good = clct1_copad_match_found && tmb_copad_clct_allow;
 
@@ -1519,34 +1528,6 @@ module  alct_clct_gem_matching_TR(
       gemA_cluster6_wg_mi_r <= gemA_cluster6_wg_mi;
       gemA_cluster7_wg_mi_r <= gemA_cluster7_wg_mi;
   end
-
-
-  assign alct0wg_fromcopad = wgfromGEMcluster(
-      best_cluster0_clct_copad_iclst
-      //clct0_copad_best_icluster, 
-      //gemA_cluster0_wg_mi,
-      //gemA_cluster1_wg_mi,
-      //gemA_cluster2_wg_mi,
-      //gemA_cluster3_wg_mi,
-      //gemA_cluster4_wg_mi,
-      //gemA_cluster5_wg_mi,
-      //gemA_cluster6_wg_mi,
-      //gemA_cluster7_wg_mi
-      );
-  
-  assign alct1wg_fromcopad = wgfromGEMcluster(
-      best_cluster1_clct_copad_iclst
-      //clct1_copad_best_icluster, 
-      //gemA_cluster0_wg_mi,
-      //gemA_cluster1_wg_mi,
-      //gemA_cluster2_wg_mi,
-      //gemA_cluster3_wg_mi,
-      //gemA_cluster4_wg_mi,
-      //gemA_cluster5_wg_mi,
-      //gemA_cluster6_wg_mi,
-      //gemA_cluster6_wg_mi
-  );
-
 
 
 
