@@ -243,6 +243,7 @@ module  alct_clct_gem_matching_TR(
 
   output       alct0_copad_match_found,
   output       alct1_copad_match_found,
+  output       swapalct_alctcopad_match,
   output [9:0] clct0xky_fromcopad,
   output [9:0] clct1xky_fromcopad,
 
@@ -1453,7 +1454,7 @@ module  alct_clct_gem_matching_TR(
   assign alct0_copad_match_found = !alct0_clct0_match && !clct0_copad_match_good && (alct0_copad_match_any || alct1_copad_match_any);
   assign alct1_copad_match_found = !alct1_clct1_match && !clct1_copad_match_good && ((swapalct_copad_match || swapalct_gem_match || (alct0_copad_match_found && !alct0_copad_match_any)) ? alct0_copad_match_any : alct1_copad_match_any);//
 
-  wire swapalct_alctcopad_match = alct0_copad_match_found && !alct0_copad_match_any;
+  assign swapalct_alctcopad_match = alct0_copad_match_found && !alct0_copad_match_any;
   wire [2:0] best_cluster0_alct_copad_iclst = swapalct_alctcopad_match ?  alct1_copad_best_icluster : alct0_copad_best_icluster;
   wire [2:0] best_cluster1_alct_copad_iclst = swapalct_alctcopad_match ?  alct0_copad_best_icluster : alct1_copad_best_icluster;
   wire [MXBENDANGLEB-1:0] best_angle0_alct_copad = 0;

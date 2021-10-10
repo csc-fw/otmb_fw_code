@@ -2412,6 +2412,7 @@
   wire       alct1_copad_match_found_pos;
   wire [9:0] clct0xky_fromcopad;
   wire [9:0] clct1xky_fromcopad;
+  wire       swapalct_alctcopad_match_pos;
 
   wire       alct0_clct0_match_found_final_pos;
   wire       alct1_clct1_match_found_final_pos;
@@ -2442,7 +2443,7 @@
   assign     clct0fromcopad_run3 = clct0fromcopad_pos &&  (tmb_copad_alct_allow || tmb_copad_alct_allow_ro);
   assign     clct1fromcopad_run3 = clct1fromcopad_pos &&  (tmb_copad_alct_allow || tmb_copad_alct_allow_ro);
 
-  assign     clctcopad_swapped = swapclct_clctcopad_match_pos;
+  assign     clctcopad_swapped   = swapclct_clctcopad_match_pos || swapalct_alctcopad_match_pos;
   assign     alctclctgem_swapped = swapalct_gem_match_pos || swapclct_gem_match_pos;
   assign     alctclctcopad_swapped = swapalct_copad_match_pos || swapclct_copad_match_pos;
 
@@ -2667,6 +2668,7 @@
   .alct1_copad_match_found        (alct1_copad_match_found_pos),
   .clct0xky_fromcopad             (clct0xky_fromcopad[MXXKYB-1:0]),
   .clct1xky_fromcopad             (clct1xky_fromcopad[MXXKYB-1:0]),
+  .swapalct_alctcopad_match       (swapalct_alctcopad_match_pos),
 
    // summary
   .alct0_clct0_match_found_final  (alct0_clct0_match_found_final_pos),
