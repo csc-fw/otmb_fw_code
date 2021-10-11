@@ -2336,7 +2336,7 @@ end
 
         .cluster0      (gemA_cluster[iclst_csc]),//In gem cluster
         .cluster0_vpf  (gemA_vpf[iclst_csc]),// In, cluster valid or not
-        .cluster0_roll (gemA_cluster_roll[iclst_csc]), //In clsuter roll,  0-7 
+        .cluster0_roll (~gemA_cluster_roll[iclst_csc]), //In clsuter roll,  0-7; roll0 is in eta partition8, narrow end of GEM chamber
         .cluster0_pad  (gemA_cluster_pad[iclst_csc]), // In pad in a roll, from 0-191
         .cluster0_size (gemA_cluster[iclst_csc][13:11]), //In gem cluster size  from 0-7, 0 means 1 gem pad
 
@@ -2370,7 +2370,7 @@ end
 
         .cluster0      (gemB_cluster[iclst_csc]),
         .cluster0_vpf  (gemB_vpf[iclst_csc]),// valid or not
-        .cluster0_roll (gemB_cluster_roll[iclst_csc]), // 0-7 
+        .cluster0_roll (~gemB_cluster_roll[iclst_csc]), // 0-7 
         .cluster0_pad  (gemB_cluster_pad[iclst_csc]), // from 0-191
         .cluster0_size (gemB_cluster[iclst_csc][13:11]), // from 0-7, 0 means 1 gem pad
 
