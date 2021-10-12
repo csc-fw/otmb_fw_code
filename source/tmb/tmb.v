@@ -887,15 +887,15 @@
   input  [WIREBITS-1:0] gemB_cluster6_cscwire_hi;
   input  [WIREBITS-1:0] gemB_cluster7_cscwire_hi;
 
-  input  [MXCLUSTERS-1:0] copad_match;
-  input  [MXCLUSTERS-1:0] copad_A0_B,
-  input  [MXCLUSTERS-1:0] copad_A1_B,
-  input  [MXCLUSTERS-1:0] copad_A2_B,
-  input  [MXCLUSTERS-1:0] copad_A3_B,
-  input  [MXCLUSTERS-1:0] copad_A4_B,
-  input  [MXCLUSTERS-1:0] copad_A5_B,
-  input  [MXCLUSTERS-1:0] copad_A6_B,
-  input  [MXCLUSTERS-1:0] copad_A7_B,
+  input  [MXCLUSTER_CHAMBER-1:0] copad_match;
+  input  [MXCLUSTER_CHAMBER-1:0] copad_A0_B;
+  input  [MXCLUSTER_CHAMBER-1:0] copad_A1_B;
+  input  [MXCLUSTER_CHAMBER-1:0] copad_A2_B;
+  input  [MXCLUSTER_CHAMBER-1:0] copad_A3_B;
+  input  [MXCLUSTER_CHAMBER-1:0] copad_A4_B;
+  input  [MXCLUSTER_CHAMBER-1:0] copad_A5_B;
+  input  [MXCLUSTER_CHAMBER-1:0] copad_A6_B;
+  input  [MXCLUSTER_CHAMBER-1:0] copad_A7_B;
 
 
   //GEMA trigger match control

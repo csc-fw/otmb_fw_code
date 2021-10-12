@@ -53,10 +53,10 @@ module copad (
     output reg [MXCLSTB-1:0] cluster7,
 
     // 8 bit ff'd register of matches found, with respect to the address in gemA
-    output reg [MXCLUSTERS-1:0] match,
+    output reg [MXCLUSTER_CHAMBER-1:0] match,
 
-    output reg [MXCLUSTERS-1:0] match_right, // 8 bit flag that the match was found on the rhs of gemA adr
-    output reg [MXCLUSTERS-1:0] match_left,  // 8 bit flag that the match was found on the lhs of gemA adr
+    output reg [MXCLUSTER_CHAMBER-1:0] match_right, // 8 bit flag that the match was found on the rhs of gemA adr
+    output reg [MXCLUSTER_CHAMBER-1:0] match_left,  // 8 bit flag that the match was found on the lhs of gemA adr
 
     output reg any_match, // Output: 1 bit, any match was found
 
@@ -67,7 +67,7 @@ module copad (
 
 
 parameter MXFEB      = 24;
-parameter MXCLUSTERS = 8;
+parameter MXCLUSTER_CHAMBER = 8;
 parameter MXADRB     = 11;
 parameter MXCNTB     = 3;
 parameter MXCLSTB    = 14;
@@ -128,12 +128,12 @@ parameter MXCLSTB    = 14;
   *   hit[13:11] = n additional pads hit  up to 7
   */
 
-  wire [MXADRB-1:0] adr    [1:0][MXCLUSTERS-1:0];
-  wire [MXADRB-1:0] adr0_p      [MXCLUSTERS-1:0]; // adr+1
-  wire [MXADRB-1:0] adr0_m      [MXCLUSTERS-1:0]; // adr-1
+  wire [MXADRB-1:0] adr    [1:0][MXCLUSTER_CHAMBER-1:0];
+  wire [MXADRB-1:0] adr0_p      [MXCLUSTER_CHAMBER-1:0]; // adr+1
+  wire [MXADRB-1:0] adr0_m      [MXCLUSTER_CHAMBER-1:0]; // adr-1
 
-  wire [MXCNTB-1:0] cnt    [1:0][MXCLUSTERS-1:0];
-  wire              vpf    [1:0][MXCLUSTERS-1:0];
+  wire [MXCNTB-1:0] cnt    [1:0][MXCLUSTER_CHAMBER-1:0];
+  wire              vpf    [1:0][MXCLUSTER_CHAMBER-1:0];
 
   // unpack the cnts and adrs here; cnts are used, but save them for later (probably useful with vfat3)
 
@@ -195,12 +195,12 @@ wire [7:0] match_c;
 wire [7:0] match_r;
 wire [7:0] match_l;
 
-wire [0:0] adr_at_left_edge  [MXCLUSTERS-1:0];
-wire [0:0] adr_at_right_edge [MXCLUSTERS-1:0];
+wire [0:0] adr_at_left_edge  [MXCLUSTER_CHAMBER-1:0];
+wire [0:0] adr_at_right_edge [MXCLUSTER_CHAMBER-1:0];
 
 genvar iclst;
 generate
-for (iclst=0; iclst<MXCLUSTERS; iclst=iclst+1) begin: clust_match_loop
+for (iclst=0; iclst<MXCLUSTER_CHAMBER; iclst=iclst+1) begin: clust_match_loop
 
   // we don't want to form left matches at the left edge of the chamber
   assign adr_at_left_edge [iclst] = (adr[0][iclst] == 0    )|
@@ -287,10 +287,10 @@ end
 
 
 // form a list of 8 Active FEBs with clusters in gemA
-//wire [4:0] cluster_feb [MXCLUSTERS-1:0];
-reg [4:0] cluster_feb [MXCLUSTERS-1:0];
+//wire [4:0] cluster_feb [MXCLUSTER_CHAMBER-1:0];
+reg [4:0] cluster_feb [MXCLUSTER_CHAMBER-1:0];
 generate
-for (iclst=0; iclst<MXCLUSTERS; iclst=iclst+1) begin: feb_assign_loop
+for (iclst=0; iclst<MXCLUSTER_CHAMBER; iclst=iclst+1) begin: feb_assign_loop
   // assign cluster_feb[iclst] = adr[0][iclst] >> 6;  // shr6 is a floored div64, which gives us the 5 bit VFAT-ID of the cluster
 
   // chamber looks like this  (for dumb reasons that can't be helped)
