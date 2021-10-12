@@ -2407,10 +2407,15 @@ end
 
    wire gemtocsc_sump = (|gemA_gemtocsc_dummy) | (|gemB_gemtocsc_dummy) ;
     //-------------------------------------------------------------------------------------------------------------------
+    // bidirection timing scan to find best delay value
     // Delay ALCT signal to find ALCT-GEM match
+    // Delay GEM signal to find ALCT-GEM match
     //-------------------------------------------------------------------------------------------------------------------
 
-      wire [7:0] alct_delay_forgem = match_gem_alct_delay - 8'b1;
+      reg [7:0] alct_delay_forgem;
+      always @(posedge clock)begin
+       alct_delay_forgem = match_gem_alct_delay - 8'b1;
+      end
       wire alct_vpf_forgem_srl;
 
       srl16e_bit #(8, 256) usrlbitalct (.clock(clock),.adr(alct_delay_forgem),.d(alct0_tmb[0]),.q(alct_vpf_forgem_srl));
@@ -2432,7 +2437,6 @@ end
     //-------------------------------------------------------------------------------------------------------------------
     // End of Delay ALCT signal to find ALCT-GEM match
     //-------------------------------------------------------------------------------------------------------------------
-
 
 
 //-------------------------------------------------------------------------------------------------------------------
