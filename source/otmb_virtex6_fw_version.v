@@ -5,7 +5,7 @@
 // Firmware version global definitions
   `define FIRMWARE_TYPE        04'hC    // C=Normal CLCT/TMB, D=Debug PCB loopback version
   `define VERSION              04'hE    // Version revision number, A=TMB2004 and earlier, E=TMB2005E production
-  `define MONTHDAY             16'h1011 // Version date
+  `define MONTHDAY             16'h1012 // Version date
   `define YEAR                 16'h2021 // Version year
   `define REVISION             04'h01   // Firmware Revision
 

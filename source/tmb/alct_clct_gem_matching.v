@@ -1656,22 +1656,22 @@ module  alct_clct_gem_matching(
   reg [6:0] copad_cluster7_wg1_mi_r = 7'b0;
 
   always @(posedge clock) begin
-      copad_cluster0_wg0_mi_r <= (copad_match[0] && clct0_gemA_match_ok[i]) ? gemA_cluster0_wg_mi : gemB_cluster0_wg_mi;
-      copad_cluster1_wg0_mi_r <= (copad_match[1] && clct0_gemA_match_ok[i]) ? gemA_cluster1_wg_mi : gemB_cluster1_wg_mi;
-      copad_cluster2_wg0_mi_r <= (copad_match[2] && clct0_gemA_match_ok[i]) ? gemA_cluster2_wg_mi : gemB_cluster2_wg_mi;
-      copad_cluster3_wg0_mi_r <= (copad_match[3] && clct0_gemA_match_ok[i]) ? gemA_cluster3_wg_mi : gemB_cluster3_wg_mi;
-      copad_cluster4_wg0_mi_r <= (copad_match[4] && clct0_gemA_match_ok[i]) ? gemA_cluster4_wg_mi : gemB_cluster4_wg_mi;
-      copad_cluster5_wg0_mi_r <= (copad_match[5] && clct0_gemA_match_ok[i]) ? gemA_cluster5_wg_mi : gemB_cluster5_wg_mi;
-      copad_cluster6_wg0_mi_r <= (copad_match[6] && clct0_gemA_match_ok[i]) ? gemA_cluster6_wg_mi : gemB_cluster6_wg_mi;
-      copad_cluster7_wg0_mi_r <= (copad_match[7] && clct0_gemA_match_ok[i]) ? gemA_cluster7_wg_mi : gemB_cluster7_wg_mi;
-      copad_cluster0_wg1_mi_r <= (copad_match[0] && clct1_gemA_match_ok[i]) ? gemA_cluster0_wg_mi : gemB_cluster0_wg_mi;
-      copad_cluster1_wg1_mi_r <= (copad_match[1] && clct1_gemA_match_ok[i]) ? gemA_cluster1_wg_mi : gemB_cluster1_wg_mi;
-      copad_cluster2_wg1_mi_r <= (copad_match[2] && clct1_gemA_match_ok[i]) ? gemA_cluster2_wg_mi : gemB_cluster2_wg_mi;
-      copad_cluster3_wg1_mi_r <= (copad_match[3] && clct1_gemA_match_ok[i]) ? gemA_cluster3_wg_mi : gemB_cluster3_wg_mi;
-      copad_cluster4_wg1_mi_r <= (copad_match[4] && clct1_gemA_match_ok[i]) ? gemA_cluster4_wg_mi : gemB_cluster4_wg_mi;
-      copad_cluster5_wg1_mi_r <= (copad_match[5] && clct1_gemA_match_ok[i]) ? gemA_cluster5_wg_mi : gemB_cluster5_wg_mi;
-      copad_cluster6_wg1_mi_r <= (copad_match[6] && clct1_gemA_match_ok[i]) ? gemA_cluster6_wg_mi : gemB_cluster6_wg_mi;
-      copad_cluster7_wg1_mi_r <= (copad_match[7] && clct1_gemA_match_ok[i]) ? gemA_cluster7_wg_mi : gemB_cluster7_wg_mi;
+      copad_cluster0_wg0_mi_r <= (copad_match[0] && clct0_gemA_match_ok[0]) ? gemA_cluster0_wg_mi : gemB_cluster0_wg_mi;
+      copad_cluster1_wg0_mi_r <= (copad_match[1] && clct0_gemA_match_ok[1]) ? gemA_cluster1_wg_mi : gemB_cluster1_wg_mi;
+      copad_cluster2_wg0_mi_r <= (copad_match[2] && clct0_gemA_match_ok[2]) ? gemA_cluster2_wg_mi : gemB_cluster2_wg_mi;
+      copad_cluster3_wg0_mi_r <= (copad_match[3] && clct0_gemA_match_ok[3]) ? gemA_cluster3_wg_mi : gemB_cluster3_wg_mi;
+      copad_cluster4_wg0_mi_r <= (copad_match[4] && clct0_gemA_match_ok[4]) ? gemA_cluster4_wg_mi : gemB_cluster4_wg_mi;
+      copad_cluster5_wg0_mi_r <= (copad_match[5] && clct0_gemA_match_ok[5]) ? gemA_cluster5_wg_mi : gemB_cluster5_wg_mi;
+      copad_cluster6_wg0_mi_r <= (copad_match[6] && clct0_gemA_match_ok[6]) ? gemA_cluster6_wg_mi : gemB_cluster6_wg_mi;
+      copad_cluster7_wg0_mi_r <= (copad_match[7] && clct0_gemA_match_ok[7]) ? gemA_cluster7_wg_mi : gemB_cluster7_wg_mi;
+      copad_cluster0_wg1_mi_r <= (copad_match[0] && clct1_gemA_match_ok[0]) ? gemA_cluster0_wg_mi : gemB_cluster0_wg_mi;
+      copad_cluster1_wg1_mi_r <= (copad_match[1] && clct1_gemA_match_ok[1]) ? gemA_cluster1_wg_mi : gemB_cluster1_wg_mi;
+      copad_cluster2_wg1_mi_r <= (copad_match[2] && clct1_gemA_match_ok[2]) ? gemA_cluster2_wg_mi : gemB_cluster2_wg_mi;
+      copad_cluster3_wg1_mi_r <= (copad_match[3] && clct1_gemA_match_ok[3]) ? gemA_cluster3_wg_mi : gemB_cluster3_wg_mi;
+      copad_cluster4_wg1_mi_r <= (copad_match[4] && clct1_gemA_match_ok[4]) ? gemA_cluster4_wg_mi : gemB_cluster4_wg_mi;
+      copad_cluster5_wg1_mi_r <= (copad_match[5] && clct1_gemA_match_ok[5]) ? gemA_cluster5_wg_mi : gemB_cluster5_wg_mi;
+      copad_cluster6_wg1_mi_r <= (copad_match[6] && clct1_gemA_match_ok[6]) ? gemA_cluster6_wg_mi : gemB_cluster6_wg_mi;
+      copad_cluster7_wg1_mi_r <= (copad_match[7] && clct1_gemA_match_ok[7]) ? gemA_cluster7_wg_mi : gemB_cluster7_wg_mi;
   end
 
 
