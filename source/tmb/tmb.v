@@ -1943,15 +1943,15 @@
   reg  [3:0] gem_alct_delay = 0;
 
   always @(posedge clock) begin
-  gem_srl_adr       <= match_gem_alct_delay-1'b1;
-  gem_alct_delay    <= match_gem_alct_delay;
+  gem_srl_adr       <= match_gem_alct_delay[3:0]-1'b1;
+  gem_alct_delay    <= match_gem_alct_delay[3:0];
   end
 
   //srl16e_bbl #(MXCLUSTER_CHAMBER) ugemA (.clock(clock),.ce(1'b1),.adr(gem_srl_adr),.d(gemA_vpf[MXCLUSTER_CHAMBER-1:0]),.q(gemA_foralct_srl[MXCLUSTER_CHAMBER-1:0])); 
   //srl16e_bbl #(MXCLUSTER_CHAMBER) ugemB (.clock(clock),.ce(1'b1),.adr(gem_srl_adr),.d(gemB_vpf[MXCLUSTER_CHAMBER-1:0]),.q(gemB_foralct_srl[MXCLUSTER_CHAMBER-1:0]));
   srl16e_bbl #(1) ugemalct (.clock(clock),.ce(1'b1),.adr(gem_srl_adr),.d(gem_vpf), .q(gem_foralct_srl));
 
-  wire gem_ptr_is_0 = (match_gem_alct_delay == 0);               // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
+  wire gem_ptr_is_0 = (gem_alct_delay == 0);               // Use direct input if SRL address is 0, 1st SRL output has 1bx overhead
 
   //assign gemA_pipe_foralct = (gem_ptr_is_0) ? gemA_vpf : gemA_foralct_srl;  // First  GEM after pipe delay
   //assign gemB_pipe_foralct = (gem_ptr_is_0) ? gemB_vpf : gemB_foralct_srl;  // Second GEM after pipe delay
@@ -2156,7 +2156,7 @@
   wire [7:0] copad_match_srl;
   wire [3:0] gem_final_delay_withalct   = gem_alct_match_win_mux_pipe + gem_alct_delay + gem_alct_win_center;
   wire [3:0] gem_final_delay_noalct     = gem_alct_delay + gem_alct_winclosing;
-  wire [3:0] gem_final_delay_wincenter  = gem_alct_delay+gem_alct_win_center;
+  wire [3:0] gem_final_delay_wincenter  = gem_alct_delay + gem_alct_win_center;
 
   //wire [3:0] gem_final_delay = alct_pulse ? gem_final_delay_withalct : (gem_usedforalct ? gem_final_delay_wincenter : gem_final_delay_noalct);
   wire [3:0] gem_final_delay = alct_pulse ? gem_final_delay_withalct : gem_final_delay_noalct;
