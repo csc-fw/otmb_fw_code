@@ -490,10 +490,10 @@ module  alct_clct_gem_matching_TR(
   wire                     clct1_gemA_bend [MXCLUSTER_CHAMBER-1:0];
   wire                     clct0_gemB_bend [MXCLUSTER_CHAMBER-1:0];
   wire                     clct1_gemB_bend [MXCLUSTER_CHAMBER-1:0];
-  wire [MXBENDANGLEB-1:0]  clct0_gemA_angle [MXCLUSTER_CHAMBER-1:0];
-  wire [MXBENDANGLEB-1:0]  clct1_gemA_angle [MXCLUSTER_CHAMBER-1:0];
-  wire [MXBENDANGLEB-1:0]  clct0_gemB_angle [MXCLUSTER_CHAMBER-1:0];
-  wire [MXBENDANGLEB-1:0]  clct1_gemB_angle [MXCLUSTER_CHAMBER-1:0];
+  reg  [MXBENDANGLEB-1:0]  clct0_gemA_angle [MXCLUSTER_CHAMBER-1:0];
+  reg  [MXBENDANGLEB-1:0]  clct1_gemA_angle [MXCLUSTER_CHAMBER-1:0];
+  reg  [MXBENDANGLEB-1:0]  clct0_gemB_angle [MXCLUSTER_CHAMBER-1:0];
+  reg  [MXBENDANGLEB-1:0]  clct1_gemB_angle [MXCLUSTER_CHAMBER-1:0];
   wire [MXBENDANGLEB-1:0]  alct0_clct0_gemA_angle [MXCLUSTER_CHAMBER-1:0];
   wire [MXBENDANGLEB-1:0]  alct0_clct1_gemA_angle [MXCLUSTER_CHAMBER-1:0];
   wire [MXBENDANGLEB-1:0]  alct0_clct0_gemB_angle [MXCLUSTER_CHAMBER-1:0];
@@ -525,6 +525,7 @@ module  alct_clct_gem_matching_TR(
   wire [9:0] bending_min_me1b = evenchamber ? ME1BEVEN : ME1BODD;
 
   genvar i;
+  genvar k;
   generate
   for (i=0; i<MXCLUSTER_CHAMBER; i=i+1) begin: gem_csc_match
        //ME1a with CFEB 4, 5,6 while ME1b with CFEB 0, 1,2,3
@@ -571,22 +572,24 @@ module  alct_clct_gem_matching_TR(
            copad_cluster_cscxky_mi[i]  <= copad_match[i] ? gemA_cluster_cscxky_mi[i] : gemB_cluster_cscxky_mi[i];//use all 3FF as default csc coordinate for copad 
            gemA_cluster_cscxky_mi_r[i] <= gemA_cluster_cscxky_mi[i];
            gemB_cluster_cscxky_mi_r[i] <= gemB_cluster_cscxky_mi[i];
-          //it is possible that for copad pair, CLCT/ALCt only match with gemB cluster not gemA cluster
-          //to avoid duplicate copad+ALCT/CLCT match, only with either gemA_cluster[i]+copad_A_B[i][k] or gemB_cluster[i]+coapd_A_B[..][i]+!gemA_cluster[k]
-          //the first part gemA-ALCT/CLCT match is found and copad is valid for this gemA cluster, handle by i(copad_match[i] && alct0_gemA_match)
-          //the second part gemB-ALCT/CLCT match is found and copad is valid for this gemB clsuter, And no gemA-ALCT/CLCT, handled by alct0_copad_matchB[i][k]
-          for (k=0; k<MXCLUSTER_CHAMBER; k=k+1) begin: gem_csc_matchAB
-              //assign alct0_copad_matchB[i][k] = (copad_A_B[k][i] && alct0_gemB_match   [i] && !alct0_gemA_match   [k]);
-              //assign alct1_copad_matchB[i][k] = (copad_A_B[k][i] && alct1_gemB_match   [i] && !alct1_gemA_match   [k]);
-              //assign clct0_copad_matchB[i][k] = (copad_A_B[k][i] && clct0_gemB_match_ok[i] && !clct0_gemA_match_ok[k]);
-              //assign clct1_copad_matchB[i][k] = (copad_A_B[k][i] && clct1_gemB_match_ok[i] && !clct1_gemA_match_ok[k]);
-              alct0_copad_matchB[i][k] <= copad_A_B[k][i] && !(alct0_vpf && gemA_vpf[k] && (gemA_match_ignore_position || (alct0_wg  >= gemA_cluster_cscwg_lo[k]  && alct0_wg  <= gemA_cluster_cscwg_hi[k] )));
-              alct1_copad_matchB[i][k] <= copad_A_B[k][i] && !(alct1_vpf && gemA_vpf[k] && (gemA_match_ignore_position || (alct1_wg  >= gemA_cluster_cscwg_lo[k]  && alct1_wg  <= gemA_cluster_cscwg_hi[k] )));
-              clct0_copad_matchB[i][k] <= copad_A_B[k][i] && !(clct0_gemA_match[k] && (gemcsc_ignore_bend_check || (clct0_xky[9] && bending_min_me1a >= clct0_gemA_angle[k]) || (!clct0_xky[9] && bending_min_me1b >= clct0_gemA_angle[k]) || (clct0_gemA_bend[k] == clct0_bend)));
-              clct1_copad_matchB[i][k] <= copad_A_B[k][i] && !(clct1_gemA_match[k] && (gemcsc_ignore_bend_check || (clct1_xky[9] && bending_min_me1a >= clct1_gemA_angle[k]) || (!clct1_xky[9] && bending_min_me1b >= clct1_gemA_angle[k]) || (clct1_gemA_bend[k] == clct1_bend)));
-          end
+ 
       end
-
+      //it is possible that for copad pair, CLCT/ALCt only match with gemB cluster not gemA cluster
+      //to avoid duplicate copad+ALCT/CLCT match, only with either gemA_cluster[i]+copad_A_B[i][k] or gemB_cluster[i]+coapd_A_B[..][i]+!gemA_cluster[k]
+      //the first part gemA-ALCT/CLCT match is found and copad is valid for this gemA cluster, handle by i(copad_match[i] && alct0_gemA_match)
+      //the second part gemB-ALCT/CLCT match is found and copad is valid for this gemB clsuter, And no gemA-ALCT/CLCT, handled by alct0_copad_matchB[i][k]
+      for (k=0; k<MXCLUSTER_CHAMBER; k=k+1) begin: gem_csc_matchAB
+          always @ (posedge clock) begin
+          //assign alct0_copad_matchB[i][k] = (copad_A_B[k][i] && alct0_gemB_match   [i] && !alct0_gemA_match   [k]);
+          //assign alct1_copad_matchB[i][k] = (copad_A_B[k][i] && alct1_gemB_match   [i] && !alct1_gemA_match   [k]);
+          //assign clct0_copad_matchB[i][k] = (copad_A_B[k][i] && clct0_gemB_match_ok[i] && !clct0_gemA_match_ok[k]);
+          //assign clct1_copad_matchB[i][k] = (copad_A_B[k][i] && clct1_gemB_match_ok[i] && !clct1_gemA_match_ok[k]);
+          alct0_copad_matchB[i][k] <= copad_A_B[k][i] && !(alct0_vpf && gemA_vpf[k] && (gemA_match_ignore_position || (alct0_wg  >= gemA_cluster_cscwg_lo[k]  && alct0_wg  <= gemA_cluster_cscwg_hi[k] )));
+          alct1_copad_matchB[i][k] <= copad_A_B[k][i] && !(alct1_vpf && gemA_vpf[k] && (gemA_match_ignore_position || (alct1_wg  >= gemA_cluster_cscwg_lo[k]  && alct1_wg  <= gemA_cluster_cscwg_hi[k] )));
+          clct0_copad_matchB[i][k] <= copad_A_B[k][i] && !(clct0_gemA_match[k] && (gemcsc_ignore_bend_check || (clct0_xky[9] && bending_min_me1a >= clct0_gemA_angle[k]) || (!clct0_xky[9] && bending_min_me1b >= clct0_gemA_angle[k]) || (clct0_gemA_bend[k] == clct0_bend)));
+          clct1_copad_matchB[i][k] <= copad_A_B[k][i] && !(clct1_gemA_match[k] && (gemcsc_ignore_bend_check || (clct1_xky[9] && bending_min_me1a >= clct1_gemA_angle[k]) || (!clct1_xky[9] && bending_min_me1b >= clct1_gemA_angle[k]) || (clct1_gemA_bend[k] == clct1_bend)));
+	  end
+      end 
        //equivalent to  (copad_match[i] && alct0_gemA_match ) || (copad_A_B[0][i] && alct0_gemB_match   [i] && !alct0_gemA_match   [0]) || (copad_A_B[1][i] && alct0_gemB_match   [i] && !alct0_gemA_match   [1]) || ...
       assign alct0_copad_match[i]    = (copad_match_r[i] && alct0_gemA_match[i]) || (alct0_gemB_match   [i] && (|alct0_copad_matchB[i][MXCLUSTER_CHAMBER-1:0]));
       assign alct1_copad_match[i]    = (copad_match_r[i] && alct1_gemA_match[i]) || (alct1_gemB_match   [i] && (|alct1_copad_matchB[i][MXCLUSTER_CHAMBER-1:0]));
@@ -1583,15 +1586,7 @@ module  alct_clct_gem_matching_TR(
       copad_cluster6_wg_mi_r <= copad_match[6] ? gemA_cluster6_wg_mi : gemB_cluster6_wg_mi;
       copad_cluster7_wg_mi_r <= copad_match[7] ? gemA_cluster7_wg_mi : gemB_cluster7_wg_mi;
   end
-
-
-function [6: 0] wgfromGEMcluster;
-  input [2: 0] icluster;
-  //input [6:0] cluster0_wg_mi;
-  //input [6:0] cluster1_wg_mi;
-  //input [6:0] cluster2_wg_mi;
-  //input [6:0] cluster3_wg_mi;
-                             
+        
 
 function [6: 0] wgfromGEMcluster;
   input [2: 0] icluster;
@@ -1657,6 +1652,11 @@ assign alctclctgem_match_sump =
     (|alct1_clct1_copad_best_cscxky) |
     (|alct0_clct0_gemA_best_cscxky) |
     (|alct0_clct1_gemA_best_cscxky) |
+    (|alct1_clct0_gemA_best_cscxky) |
+    (|alct1_clct1_gemA_best_cscxky) |
+    (|alct0_clct0_gemB_best_cscxky) |
+    (|alct0_clct1_gemB_best_cscxky) |
+    (|alct1_clct0_gemB_best_cscxky) |
     (|alct1_clct0_gemA_best_cscxky) |
     (|alct1_clct1_gemA_best_cscxky) |
     (|alct0_clct0_gemB_best_cscxky) |
