@@ -1646,14 +1646,14 @@
   wire [1:0]        alcte_gem_pipe, alcte_gem_srl, alcte_gem_tmb;
   reg  [3:0]        alct_gem_srl_adr = 0;
 
-  reg [3:0] gem_alct_win_center; 
-  reg [3:0] gem_alct_window; 
+  reg  [3:0] gem_alct_win_center = 0; 
+  reg  [3:0] gem_alct_window     = 0; 
   wire [3:0] alct_delay_forgem   = (alct_delay > gem_alct_win_center)? (alct_delay - gem_alct_win_center) : 4'b0;//
 
   always @(posedge clock) begin
     alct_gem_srl_adr  <= alct_delay_forgem-1'b1;
-  gem_alct_win_center <= {1'b0, match_gem_alct_window[3:1]}; // namely window/2
-  gem_alct_window     <= match_gem_alct_window;
+    gem_alct_win_center <= {1'b0, match_gem_alct_window[3:1]}; // namely window/2
+    gem_alct_window     <= match_gem_alct_window;
   end
 
   //maybe here we only need alct vpf???
@@ -2370,16 +2370,16 @@
 // 1BX latency. results is 1Bx later
 //------------------------------------------------------------------------------------------------------------------
 
-  reg gem_me1a_match_enable_r = 1'b0;
-  reg gem_me1b_match_enable_r = 1'b0;
+  //reg gem_me1a_match_enable_r = 1'b0;
+  //reg gem_me1b_match_enable_r = 1'b0;
   //reg gemA_fiber_enable_r = 2'b00;
   //reg gemB_fiber_enable_r = 2'b00;
   reg gemcsc_match_enable = 1'b0;
   always @ (posedge clock) begin
      gemcsc_match_enable <= (gem_me1a_match_enable || gem_me1b_match_enable) && (gemA_fiber_enable || gemB_fiber_enable);
 
-     gem_me1a_match_enable_r <= gem_me1a_match_enable;
-     gem_me1b_match_enable_r <= gem_me1b_match_enable;
+     //gem_me1a_match_enable_r <= gem_me1a_match_enable;
+     //gem_me1b_match_enable_r <= gem_me1b_match_enable;
      //gemA_fiber_enable_r  <= gemA_fiber_enable;
      //gemB_fiber_enable_r  <= gemB_fiber_enable;
  end
@@ -2508,8 +2508,8 @@
   .clct0_nhit (clct0_pipe[3:1]),
   .clct1_nhit (clct1_pipe[3:1]),
 
-  .gem_me1a_match_enable      (gem_me1a_match_enable_r),
-  .gem_me1b_match_enable      (gem_me1b_match_enable_r),
+  //.gem_me1a_match_enable      (gem_me1a_match_enable_r),
+  //.gem_me1b_match_enable      (gem_me1b_match_enable_r),
   .match_drop_lowqalct        (match_drop_lowqalct), // drop lowQ stub when no GEM      
   .me1a_match_drop_lowqclct   (me1a_match_drop_lowqclct), // drop lowQ stub when no GEM      
   .me1b_match_drop_lowqclct   (me1b_match_drop_lowqclct), // drop lowQ stub when no GEM      
@@ -2819,21 +2819,6 @@
   //wire clct_noalct_ro_run3 = clct_noalct && !clct_copad_good_ro && !clct_used_run3 && non_trig_keep_run3; // Only CLCT triggered, nontriggering event
 
 
-
-  //------------------------------------------------------------------------------------------------------------------
-  // Here position is taken into consideration??
-  //following part is already 1Bx after clct0_pipe/clct1_pipe/alct0_pipe/alct1_pipe because 1BX latency from position match
-  wire clct0_copad_match_good = clct0_copad_match_found_pos && (tmb_copad_clct_allow || tmb_copad_clct_allow_ro);
-  wire alct0_copad_match_good = alct0_copad_match_found_pos && (tmb_copad_alct_allow || tmb_copad_alct_allow_ro);
-  wire clct1_copad_match_good = clct1_copad_match_found_pos && (tmb_copad_clct_allow || tmb_copad_clct_allow_ro);
-  wire alct1_copad_match_good = alct1_copad_match_found_pos && (tmb_copad_alct_allow || tmb_copad_alct_allow_ro);
-
-  wire alctclct_match_run3 = (alct0_clct0_copad_match_found_pos || alct0_clct0_gem_match_found_pos || alct0_clct0_nogem_match_found_pos);
-  wire alctclct_match_good_run3 = alctclct_match_run3 && tmb_allow_match;
-
-  wire gemcsc_bending_lct0 = (alct0_clct0_copad_match_found_pos || alct0_clct0_gem_match_found_pos || clct0_copad_match_good );//ALCT+copad does not have gemcsc bending
-  wire gemcsc_bending_lct1 = (alct1_clct1_copad_match_found_pos || alct1_clct1_gem_match_found_pos || clct1_copad_match_good );
-
   //wire trig_pulse_run3    = alctclct_match_run3 || clct0_copad_match_good || alct0_copad_match_good || (clct_noalct && clct_nocopad && !clct_used_run3) || clct_lost_run3 || alct_only_trig_run3;  // Event pulse , ALCT,CLCT, copad match in timing, or alct-only+allow, clct-only
 
   //wire trig_keep_run3     = (clct_keep_run3   || alct_keep_run3);
@@ -3040,26 +3025,20 @@
    gemB_sync_err_real <= gemB_sync_err_pipe;
    gems_sync_err_real <= gems_sync_err_pipe;
   end
-  //Position matching already had one BX latency
-  ////latched position match results, aligned in time with LCT construction 
-  //reg copyalct0_foralct1_pos_r, copyclct0_forclct1_pos_r;
-  //reg alct0fromcopad_run3_r, alct1fromcopad_run3_r, clct0fromcopad_run3_r, clct1fromcopad_run3_r;
-  //reg [6:0] alct0wg_fromcopad_r, alct1wg_fromcopad_r;
-  //reg [9:0] clct0xky_fromcopad_r, clct1xky_fromcopad_r;
-  //always @(posedge clock) begin
-  //    copyalct0_foralct1_pos_r <= copyalct0_foralct1_pos;
-  //    copyclct0_forclct1_pos_r <= copyclct0_forclct1_pos;
 
-  //    alct0fromcopad_run3_r    <= alct0fromcopad_run3;
-  //    alct1fromcopad_run3_r    <= alct1fromcopad_run3;
-  //    clct0fromcopad_run3_r    <= clct0fromcopad_run3;
-  //    clct1fromcopad_run3_r    <= clct1fromcopad_run3;
+  //------------------------------------------------------------------------------------------------------------------
+  // Here position is taken into consideration
+  //following part is already 1Bx after clct0_pipe/clct1_pipe/alct0_pipe/alct1_pipe because 1BX latency from position match
+  wire clct0_copad_match_good = clct0_copad_match_found_pos && (tmb_copad_clct_allow || tmb_copad_clct_allow_ro);
+  wire alct0_copad_match_good = alct0_copad_match_found_pos && (tmb_copad_alct_allow || tmb_copad_alct_allow_ro);
+  wire clct1_copad_match_good = clct1_copad_match_found_pos && (tmb_copad_clct_allow || tmb_copad_clct_allow_ro);
+  wire alct1_copad_match_good = alct1_copad_match_found_pos && (tmb_copad_alct_allow || tmb_copad_alct_allow_ro);
 
-  //    alct0wg_fromcopad_r      <= alct0wg_fromcopad;
-  //    alct1wg_fromcopad_r      <= alct1wg_fromcopad;
-  //    clct0xky_fromcopad_r     <= clct0xky_fromcopad;
-  //    clct1xky_fromcopad_r     <= clct1xky_fromcopad;
-  //end
+  wire alctclct_match_run3      = (alct0_clct0_copad_match_found_pos || alct0_clct0_gem_match_found_pos || alct0_clct0_nogem_match_found_pos);
+  wire alctclct_match_good_run3 = alctclct_match_run3 && tmb_allow_match;
+
+  wire gemcsc_bending_lct0 = (alct0_clct0_copad_match_found_pos || alct0_clct0_gem_match_found_pos || clct0_copad_match_good );//ALCT+copad does not have gemcsc bending
+  wire gemcsc_bending_lct1 = (alct1_clct1_copad_match_found_pos || alct1_clct1_gem_match_found_pos || clct1_copad_match_good );
 
   //TMB match results for headers
   assign     lct0_with_copad = alct0_clct0_copad_match_found_pos;
@@ -3199,18 +3178,6 @@
      best_cluster1_icluster_ff <= best_cluster1_iclst;
      best_cluster1_angle_ff    <= best_cluster1_angle;
   end
-
-  //assign gemcscmatch_cluster0_vpf    = best_cluster0_vpf_ff;
-  //assign gemcscmatch_cluster0_iclst  = best_cluster0_icluster_ff;
-  //assign gemcscmatch_cluster0_roll   = best_cluster0_roll_ff;
-  //assign gemcscmatch_cluster0_cscxky = best_cluster0_cscxky_ff;
-  //assign gemcscmatch_cluster1_vpf    = best_cluster1_vpf_ff;
-  //assign gemcscmatch_cluster1_iclst  = best_cluster1_iclst_ff;
-  //assign gemcscmatch_cluster1_roll   = best_cluster1_roll_ff;
-  //assign gemcscmatch_cluster1_cscxky = best_cluster1_cscxky_ff;
-
-  //wire [15:0] gemcscmatch_cluster0  = best_cluster0_vpf_ff ? {best_cluster0_cscxky_ff, best_cluster0_roll_ff, best_cluster0_icluster_ff} : 16'h0; 
-  //wire [15:0] gemcscmatch_cluster1  = best_cluster1_vpf_ff ? {best_cluster1_cscxky_ff, best_cluster1_roll_ff, best_cluster1_icluster_ff} : 16'h0; 
 
   //for csc alone, Bend direction, same as pid lsb. and for gemcsc, bend=1 if cscxky>gem_cscxky????
   wire       best_cluster0_bend = clct0_xky > best_cluster0_cscxky_ff;

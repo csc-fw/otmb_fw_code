@@ -209,7 +209,7 @@ rom_roll_wg #(
 );
 
 rom_roll_wg #(
-  .ROM_FILE("GEMCSCLUT_roll_l1_max_wg_ME11_odd.mem")
+  .ROM_FILE("GEMCSCLUT_roll_l1_max_wg_ME11_even.mem")
 ) romwgmaxeven (
   .clock(clock),
   .adr0(cluster0_roll),

@@ -4,7 +4,7 @@
 // should add ALCT-CLCT-GEM match
 // one option to fix time constraints
 module  tree_encoder_alctclctgem_TR(
-  input clock,
+  //input clock,
   input [9:0] win_pri_0 , // bending angle in gem-clct match
   input [9:0] win_pri_1 ,
   input [9:0] win_pri_2 ,

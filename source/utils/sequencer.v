@@ -6402,7 +6402,7 @@
 //-------------------------------------------------------------------------------------------------------------------
 // Sump unused signals
 //-------------------------------------------------------------------------------------------------------------------
-  wire gemcsc_sump = alct_gem_pulse | clct_gem_pulse | alct_clct_gem_pulse | alct_gem_noclct_pulse | clct_gem_noalct_pulse;
+  wire gemcsc_sump = gemA_bx0_match | gemA_bx0_match | alct_gem_pulse | clct_gem_pulse | alct_clct_gem_pulse | alct_gem_noclct_pulse | clct_gem_noalct_pulse;
   wire clct_sump =
   cfeb_first_frame | cfeb_last_frame |
   rpc_first_frame  | rpc_last_frame  |
@@ -6438,6 +6438,7 @@
   (|hs_nlayers_hit[2:0])  | // was for header, but is already included in pattern info
   scope_sump              |
   header_sump             |
+      (|gemcsc_sump)      |
   alct1_valid             |
   clct_vpf_tprt;
 
