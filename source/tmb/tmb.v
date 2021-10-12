@@ -275,6 +275,14 @@
   gemB_cluster7_cscwire_hi,
 
   copad_match,
+  copad_A0_B,
+  copad_A1_B,
+  copad_A2_B,
+  copad_A3_B,
+  copad_A4_B,
+  copad_A5_B,
+  copad_A6_B,
+  copad_A7_B,
 
   match_gem_alct_delay,
   match_gem_alct_window,
@@ -879,7 +887,16 @@
   input  [WIREBITS-1:0] gemB_cluster6_cscwire_hi;
   input  [WIREBITS-1:0] gemB_cluster7_cscwire_hi;
 
-  input  [7:0]        copad_match;
+  input  [MXCLUSTERS-1:0] copad_match;
+  input  [MXCLUSTERS-1:0] copad_A0_B,
+  input  [MXCLUSTERS-1:0] copad_A1_B,
+  input  [MXCLUSTERS-1:0] copad_A2_B,
+  input  [MXCLUSTERS-1:0] copad_A3_B,
+  input  [MXCLUSTERS-1:0] copad_A4_B,
+  input  [MXCLUSTERS-1:0] copad_A5_B,
+  input  [MXCLUSTERS-1:0] copad_A6_B,
+  input  [MXCLUSTERS-1:0] copad_A7_B,
+
 
   //GEMA trigger match control
   input  [7:0]        match_gem_alct_delay;
@@ -1322,6 +1339,8 @@
   wire [MXXKYB-1:0]   gemA_cluster_cscxky_mi [MXCLUSTER_CHAMBER-1:0]; // 
   wire [MXXKYB-1:0]   gemB_cluster_cscxky_mi [MXCLUSTER_CHAMBER-1:0]; // 
 
+  wire [MXCLUSTER_CHAMBER-1:0] copad_A_B [MXCLUSTER_CHAMBER-1:0];
+
   assign gemA_cluster[0] = gemA_cluster0;
   assign gemA_cluster[1] = gemA_cluster1;
   assign gemA_cluster[2] = gemA_cluster2;
@@ -1437,6 +1456,15 @@
   assign gemB_cluster_cscxky_hi[6] = gemB_cluster6_cscxky_hi;
   assign gemB_cluster_cscxky_hi[7] = gemB_cluster7_cscxky_hi;
 
+
+  assign copad_A_B[0] = copad_A0_B;
+  assign copad_A_B[1] = copad_A1_B;
+  assign copad_A_B[2] = copad_A2_B;
+  assign copad_A_B[3] = copad_A3_B;
+  assign copad_A_B[4] = copad_A4_B;
+  assign copad_A_B[5] = copad_A5_B;
+  assign copad_A_B[6] = copad_A6_B;
+  assign copad_A_B[7] = copad_A7_B;
 //------------------------------------------------------------------------------------------------------------------
 // Local
 //------------------------------------------------------------------------------------------------------------------
@@ -2248,7 +2276,7 @@
   wire [WIREBITS-1:0] gemA_cluster_cscwire_hi_srl[MXCLUSTER_CHAMBER-1:0];
   wire [WIREBITS-1:0] gemB_cluster_cscwire_hi_srl[MXCLUSTER_CHAMBER-1:0];
   wire [WIREBITS-1:0] gemA_cluster_cscwire_mi_srl[MXCLUSTER_CHAMBER-1:0];
-  //wire [WIREBITS-1:0] gemB_cluster_cscwire_mi_srl[MXCLUSTER_CHAMBER-1:0];
+  wire [WIREBITS-1:0] gemB_cluster_cscwire_mi_srl[MXCLUSTER_CHAMBER-1:0];
   wire [MXXKYB-1:0]   gemA_cluster_cscxky_lo_srl [MXCLUSTER_CHAMBER-1:0]; // 
   wire [MXXKYB-1:0]   gemB_cluster_cscxky_lo_srl [MXCLUSTER_CHAMBER-1:0]; // 
   wire [MXXKYB-1:0]   gemA_cluster_cscxky_hi_srl [MXCLUSTER_CHAMBER-1:0]; // 
@@ -2271,6 +2299,8 @@
   wire [MXXKYB-1:0]   gemA_cluster_cscxky_mi_pipe [MXCLUSTER_CHAMBER-1:0]; // 
   wire [MXXKYB-1:0]   gemB_cluster_cscxky_mi_pipe [MXCLUSTER_CHAMBER-1:0]; // 
 
+  wire [MXCLUSTER_CHAMBER-1:0]  copad_A_B_srl [MXCLUSTER_CHAMBER-1:0]; // 
+  wire [MXCLUSTER_CHAMBER-1:0]  copad_A_B_pipe [MXCLUSTER_CHAMBER-1:0]; // 
 
   genvar k;                // Table window priorities multipled by windwo position enables
   generate
@@ -2284,12 +2314,13 @@
       srl16e_bbl #(MXXKYB)   ugemAxkyhi   (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemA_cluster_cscxky_hi[k]), .q(gemA_cluster_cscxky_hi_srl[k]));
       srl16e_bbl #(CLSTBITS) ugemBcluster (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_cluster[k]),           .q(gemB_cluster_srl[k]));
       srl16e_bbl #(WIREBITS) ugemBwirelo  (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_cluster_cscwire_lo[k]),.q(gemB_cluster_cscwire_lo_srl[k]));
-      //srl16e_bbl #(WIREBITS) ugemBwiremi  (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_cluster_cscwire_mi[k]),.q(gemB_cluster_cscwire_mi_srl[k]));
+      srl16e_bbl #(WIREBITS) ugemBwiremi  (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_cluster_cscwire_mi[k]),.q(gemB_cluster_cscwire_mi_srl[k]));
       srl16e_bbl #(WIREBITS) ugemBwirehi  (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_cluster_cscwire_hi[k]),.q(gemB_cluster_cscwire_hi_srl[k]));
       srl16e_bbl #(MXXKYB)   ugemBxkylo   (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_cluster_cscxky_lo[k]), .q(gemB_cluster_cscxky_lo_srl[k]));
       srl16e_bbl #(MXXKYB)   ugemBxkymi   (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_cluster_cscxky_mi[k]), .q(gemB_cluster_cscxky_mi_srl[k]));
       srl16e_bbl #(MXXKYB)   ugemBxkyhi   (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(gemB_cluster_cscxky_hi[k]), .q(gemB_cluster_cscxky_hi_srl[k]));
 
+      srl16e_bbl #(MXCLUSTER_CHAMBER) ucopadAB   (.clock(clock),.ce(1'b1),.adr(gem_final_adr),.d(copad_A_B[k]), .q(copad_A_B_srl[k]));
 
 
       assign gemA_cluster_pipe[k]            = (gem_final_delay == 0) ? gemA_cluster[k]        : gemA_cluster_srl[k];
@@ -2301,11 +2332,13 @@
       assign gemA_cluster_cscxky_hi_pipe[k]  = (gem_final_delay == 0) ? gemA_cluster_cscxky_hi[k]  : gemA_cluster_cscxky_hi_srl[k];
       assign gemB_cluster_pipe[k]            = (gem_final_delay == 0) ? gemB_cluster[k]        : gemB_cluster_srl[k];
       assign gemB_cluster_cscwire_lo_pipe[k] = (gem_final_delay == 0) ? gemB_cluster_cscwire_lo[k] : gemB_cluster_cscwire_lo_srl[k];
-      //assign gemB_cluster_cscwire_mi_pipe[k] = (gem_final_delay == 0) ? gemB_cluster_cscwire_mi[k] : gemB_cluster_cscwire_mi_srl[k];
+      assign gemB_cluster_cscwire_mi_pipe[k] = (gem_final_delay == 0) ? gemB_cluster_cscwire_mi[k] : gemB_cluster_cscwire_mi_srl[k];
       assign gemB_cluster_cscwire_hi_pipe[k] = (gem_final_delay == 0) ? gemB_cluster_cscwire_hi[k] : gemB_cluster_cscwire_hi_srl[k];
       assign gemB_cluster_cscxky_lo_pipe[k]  = (gem_final_delay == 0) ? gemB_cluster_cscxky_lo[k]  : gemB_cluster_cscxky_lo_srl[k];
       assign gemB_cluster_cscxky_mi_pipe[k]  = (gem_final_delay == 0) ? gemB_cluster_cscxky_mi[k]  : gemB_cluster_cscxky_mi_srl[k];
       assign gemB_cluster_cscxky_hi_pipe[k]  = (gem_final_delay == 0) ? gemB_cluster_cscxky_hi[k]  : gemB_cluster_cscxky_hi_srl[k];
+
+      assign copad_A_B_pipe[k]               = (gem_final_delay == 0) ? copad_A_B[k]  : copad_A_B_srl[k];
 
   end 
   endgenerate 
@@ -2548,6 +2581,14 @@
   .gemB_cluster6_wg_lo(gemB_cluster_cscwire_lo_pipe[6][WIREBITS-1:0]),
   .gemB_cluster7_wg_lo(gemB_cluster_cscwire_lo_pipe[7][WIREBITS-1:0]),
 
+  .gemB_cluster0_wg_mi(gemB_cluster_cscwire_mi_pipe[0][WIREBITS-1:0]),
+  .gemB_cluster1_wg_mi(gemB_cluster_cscwire_mi_pipe[1][WIREBITS-1:0]),
+  .gemB_cluster2_wg_mi(gemB_cluster_cscwire_mi_pipe[2][WIREBITS-1:0]),
+  .gemB_cluster3_wg_mi(gemB_cluster_cscwire_mi_pipe[3][WIREBITS-1:0]),
+  .gemB_cluster4_wg_mi(gemB_cluster_cscwire_mi_pipe[4][WIREBITS-1:0]),
+  .gemB_cluster5_wg_mi(gemB_cluster_cscwire_mi_pipe[5][WIREBITS-1:0]),
+  .gemB_cluster6_wg_mi(gemB_cluster_cscwire_mi_pipe[6][WIREBITS-1:0]),
+  .gemB_cluster7_wg_mi(gemB_cluster_cscwire_mi_pipe[7][WIREBITS-1:0]),
 
   .gemB_cluster0_wg_hi(gemB_cluster_cscwire_hi_pipe[0][WIREBITS-1:0]),
   .gemB_cluster1_wg_hi(gemB_cluster_cscwire_hi_pipe[1][WIREBITS-1:0]),
@@ -2586,6 +2627,15 @@
   .gemB_cluster7_xky_mi(gemB_cluster_cscxky_mi_pipe[7][MXXKYB-1:0]),
 
   .copad_match  (copad_match_pipe[7:0]), // copad 
+  // copad match matrix. copad_A_B[0][0] means whether cluster0 from gemA matches with cluster0 from gem B or not
+  .copad_A0_B   (copad_A_B_pipe[0][MXCLUSTER_CHAMBER-1:0]),
+  .copad_A1_B   (copad_A_B_pipe[1][MXCLUSTER_CHAMBER-1:0]),
+  .copad_A2_B   (copad_A_B_pipe[2][MXCLUSTER_CHAMBER-1:0]),
+  .copad_A3_B   (copad_A_B_pipe[3][MXCLUSTER_CHAMBER-1:0]),
+  .copad_A4_B   (copad_A_B_pipe[4][MXCLUSTER_CHAMBER-1:0]),
+  .copad_A5_B   (copad_A_B_pipe[5][MXCLUSTER_CHAMBER-1:0]),
+  .copad_A6_B   (copad_A_B_pipe[6][MXCLUSTER_CHAMBER-1:0]),
+  .copad_A7_B   (copad_A_B_pipe[7][MXCLUSTER_CHAMBER-1:0]),
 
   .alct_gemA_match_found (alct_gemA_match_pos),
   .alct_gemB_match_found (alct_gemB_match_pos),

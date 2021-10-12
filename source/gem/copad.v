@@ -147,6 +147,15 @@ module copad (
     output  [MXCLUSTERS-1:0] match_upper,
     output  [MXCLUSTERS-1:0] match_lower,
 
+    output  [MXCLUSTERS-1:0] copad_A0_B,
+    output  [MXCLUSTERS-1:0] copad_A1_B,
+    output  [MXCLUSTERS-1:0] copad_A2_B,
+    output  [MXCLUSTERS-1:0] copad_A3_B,
+    output  [MXCLUSTERS-1:0] copad_A4_B,
+    output  [MXCLUSTERS-1:0] copad_A5_B,
+    output  [MXCLUSTERS-1:0] copad_A6_B,
+    output  [MXCLUSTERS-1:0] copad_A7_B,
+
     output  any_match, // Output: 1 bit, any match was found
 
     //output reg [MXFEB-1:0] active_feb_list_copad,  // 24 bit register of active FEBs. Can be used e.g. in GEM only self-trigger
@@ -167,12 +176,12 @@ parameter MXCLSTB    = 14;
 
  // insert ff for correct simulation standalone synthesis timing
  `ifdef debug_copad
-    reg [2:0] gemA_cluster_roll [7:0];// 8-elements array 
-    reg [7:0] gemA_cluster_pad  [7:0];// 8-elements array 
-    reg [2:0] gemA_cluster_cnt  [7:0];// 8-elements array 
-    reg [2:0] gemB_cluster_roll [7:0];// 8-elements array 
-    reg [7:0] gemB_cluster_pad  [7:0];// 8-elements array 
-    reg [2:0] gemB_cluster_cnt  [7:0];// 8-elements array 
+    reg [2:0] gemA_cluster_roll [MXCLUSTERS-1:0];// 8-elements array 
+    reg [7:0] gemA_cluster_pad  [MXCLUSTERS-1:0];// 8-elements array 
+    reg [2:0] gemA_cluster_cnt  [MXCLUSTERS-1:0];// 8-elements array 
+    reg [2:0] gemB_cluster_roll [MXCLUSTERS-1:0];// 8-elements array 
+    reg [7:0] gemB_cluster_pad  [MXCLUSTERS-1:0];// 8-elements array 
+    reg [2:0] gemB_cluster_cnt  [MXCLUSTERS-1:0];// 8-elements array 
     reg gemA_vpf[7:0];
     reg gemB_vpf[7:0];
 
@@ -253,12 +262,12 @@ parameter MXCLSTB    = 14;
  `else
     wire gemA_vpf[7:0];
     wire gemB_vpf[7:0];
-    wire [2:0] gemA_cluster_roll [7:0];// 8-elements array , each element is a 3 bits wire
-    wire [7:0] gemA_cluster_pad  [7:0];// 8-elements array 
-    wire [2:0] gemA_cluster_cnt  [7:0];// 8-elements array 
-    wire [2:0] gemB_cluster_roll [7:0];// 8-elements array 
-    wire [7:0] gemB_cluster_pad  [7:0];// 8-elements array 
-    wire [2:0] gemB_cluster_cnt  [7:0];// 8-elements array 
+    wire [2:0] gemA_cluster_roll [MXCLUSTERS-1:0];// 8-elements array , each element is a 3 bits wire
+    wire [7:0] gemA_cluster_pad  [MXCLUSTERS-1:0];// 8-elements array 
+    wire [2:0] gemA_cluster_cnt  [MXCLUSTERS-1:0];// 8-elements array 
+    wire [2:0] gemB_cluster_roll [MXCLUSTERS-1:0];// 8-elements array 
+    wire [7:0] gemB_cluster_pad  [MXCLUSTERS-1:0];// 8-elements array 
+    wire [2:0] gemB_cluster_cnt  [MXCLUSTERS-1:0];// 8-elements array 
 
     assign  gemA_vpf[0]          = gemA_cluster0_vpf;
     assign  gemA_vpf[1]          = gemA_cluster1_vpf;
@@ -353,17 +362,25 @@ parameter MXCLSTB    = 14;
 //roll7: pad0, pad1, pad2 ..... pad190, pad191
 //----------------------------------------------------------------------------------------------------------------------
 
-wire [7:0] match_AB_c [MXCLUSTERS-1:0]; // same roll
-wire [7:0] match_AB_u [MXCLUSTERS-1:0]; //upper roll, 
-wire [7:0] match_AB_l [MXCLUSTERS-1:0]; //lower roll
+wire [MXCLUSTERS-1:0] match_AB_c [MXCLUSTERS-1:0]; // same roll
+wire [MXCLUSTERS-1:0] match_AB_u [MXCLUSTERS-1:0]; //upper roll, 
+wire [MXCLUSTERS-1:0] match_AB_l [MXCLUSTERS-1:0]; //lower roll
+wire [MXCLUSTERS-1:0] match_AB  [MXCLUSTERS-1:0]; //or of all matches
 
-//wire [7:0] match_c;
-//wire [7:0] match_u;
-//wire [7:0] match_l;
+//wire [2:0] match_c_iclst[MXCLUSTERS-1:0];//iclst
+//wire [2:0] match_u_iclst[MXCLUSTERS-1:0];//iclst
+//wire [2:0] match_l_iclst[MXCLUSTERS-1:0];//iclst
 
-reg [7:0] match_c;
-reg [7:0] match_u;
-reg [7:0] match_l;
+reg [MXCLUSTERS-1:0] match_c;
+reg [MXCLUSTERS-1:0] match_u;
+reg [MXCLUSTERS-1:0] match_l;
+
+reg [MXCLUSTERS-1:0] copad_A_B [MXCLUSTERS-1:0];
+//reg [MXCLUSTERS-1:0] matchB_c;
+//reg [MXCLUSTERS-1:0] matchB_u;
+//reg [MXCLUSTERS-1:0] matchB_l;
+
+reg [2:0] match_iclst [MXCLUSTERS-1:0];
 
 wire [0:0] gemApad_at_left_edge  [MXCLUSTERS-1:0];
 wire [0:0] gemApad_at_right_edge [MXCLUSTERS-1:0];
@@ -391,32 +408,59 @@ for (iclst=0; iclst<MXCLUSTERS; iclst=iclst+1) begin: clust_match_loop
       assign padmatch_Acluster_Bcluster[iclst][iclstB]  = (gemB_cluster_pad[iclstB] >= minpad_match[iclst] & gemB_cluster_pad[iclstB] <= maxpad_match[iclst]) | ((gemB_cluster_pad[iclstB] + gemB_cluster_cnt[iclstB]) >= minpad_match[iclst] & (gemB_cluster_pad[iclstB] + gemB_cluster_cnt[iclstB]) <= maxpad_match[iclst]);
 
       assign match_AB_c [iclst][iclstB] =  gemA_vpf[iclst] & gemB_vpf[iclstB] &  gemA_cluster_roll[iclst] == gemB_cluster_roll[iclstB] & padmatch_Acluster_Bcluster[iclst][iclstB];
-      assign match_AB_u [iclst][iclstB]  = (gemA_cluster_roll[iclst] == 3'd0) ? 1'b0 : (gemA_vpf[iclst] & gemB_vpf[iclstB] &  gemA_cluster_roll[iclst] == gemB_cluster_roll[iclstB]+3'd1 & padmatch_Acluster_Bcluster[iclst][iclstB]);
-      assign match_AB_l [iclst][iclstB]  = (gemA_cluster_roll[iclst] == 3'd7) ? 1'b0 : (gemA_vpf[iclst] & gemB_vpf[iclstB] &  gemA_cluster_roll[iclst]+3'd1 == gemB_cluster_roll[iclstB] & padmatch_Acluster_Bcluster[iclst][iclstB]);
+      assign match_AB_u [iclst][iclstB] = (gemA_cluster_roll[iclst] == 3'd0) ? 1'b0 : (gemA_vpf[iclst] & gemB_vpf[iclstB] &  gemA_cluster_roll[iclst] == gemB_cluster_roll[iclstB]+3'd1 & padmatch_Acluster_Bcluster[iclst][iclstB] & match_neighborRoll);
+      assign match_AB_l [iclst][iclstB] = (gemA_cluster_roll[iclst] == 3'd7) ? 1'b0 : (gemA_vpf[iclst] & gemB_vpf[iclstB] &  gemA_cluster_roll[iclst]+3'd1 == gemB_cluster_roll[iclstB] & padmatch_Acluster_Bcluster[iclst][iclstB] & match_neighborRoll);
       
-  end 
+      assign match_AB   [iclst][iclstB] = match_AB_c [iclst][iclstB] | match_AB_u [iclst][iclstB] | match_AB_l [iclst][iclstB];
+  end // end of clustAB_match_loop2
+
+  //assign match_c_iclst[iclst] = index1ofbus8(match_AB_c [iclst]);
+  //assign match_u_iclst[iclst] = index1ofbus8(match_AB_u [iclst]);
+  //assign match_l_iclst[iclst] = index1ofbus8(match_AB_l [iclst]);
+
 
   always @ (posedge clock) begin
        match_c[iclst] <= | match_AB_c[iclst];
        match_u[iclst] <= | match_AB_u[iclst];
        match_l[iclst] <= | match_AB_l[iclst];
+       //match_iclst[iclst] <= ((| match_AB_c[iclst]) ? match_c_iclst[iclst] : ((| match_AB_u[iclst]) ? match_u_iclst[iclst] : match_l_iclst[iclst]);
+       //matchB_c[iclst] <= match_AB_c[0][iclst] | match_AB_c[1][iclst] | match_AB_c[2][iclst] | match_AB_c[3][iclst] | match_AB_c[4][iclst] | match_AB_c[5][iclst] | match_AB_c[6][iclst] | match_AB_c[7][iclst];
+       //matchB_l[iclst] <= match_AB_u[0][iclst] | match_AB_u[1][iclst] | match_AB_u[2][iclst] | match_AB_u[3][iclst] | match_AB_u[4][iclst] | match_AB_u[5][iclst] | match_AB_u[6][iclst] | match_AB_u[7][iclst];
+       //matchB_u[iclst] <= match_AB_l[0][iclst] | match_AB_l[1][iclst] | match_AB_l[2][iclst] | match_AB_l[3][iclst] | match_AB_l[4][iclst] | match_AB_l[5][iclst] | match_AB_l[6][iclst] | match_AB_l[7][iclst];
+       copad_A_B[iclst]   <= match_AB[iclst];
   end
 
-end
+end// end of clust_match_loop
 endgenerate
 
-wire [7:0] match_full  =   match_c   // full cluster match
-                          | ({8{match_neighborRoll}} & match_u )
-                          | ({8{match_neighborRoll}} & match_l );
+wire [MXCLUSTERS-1:0] match_full  =   match_c   // full cluster match
+                                    | match_u 
+                                    | match_l; 
 
 //wire any_match_full = (|match_full);
 
-assign any_match            = (|match_full);
-assign match         [7:0]  = match_full;
-assign match_upper   [7:0]  = match_u;
-assign match_lower   [7:0]  = match_l;
+assign any_match                    = (|match_full);
+assign match      [MXCLUSTERS-1:0]  = match_full;
+assign match_upper[MXCLUSTERS-1:0]  = match_u;
+assign match_lower[MXCLUSTERS-1:0]  = match_l;
 
+//assign copad0_iclstB     = match_iclst[0];
+//assign copad1_iclstB     = match_iclst[1];
+//assign copad2_iclstB     = match_iclst[2];
+//assign copad3_iclstB     = match_iclst[3];
+//assign copad4_iclstB     = match_iclst[4];
+//assign copad5_iclstB     = match_iclst[5];
+//assign copad6_iclstB     = match_iclst[6];
+//assign copad7_iclstB     = match_iclst[7];
 
+assign copad_A0_B     = copad_A_B[0];
+assign copad_A1_B     = copad_A_B[1];
+assign copad_A2_B     = copad_A_B[2];
+assign copad_A3_B     = copad_A_B[3];
+assign copad_A4_B     = copad_A_B[4];
+assign copad_A5_B     = copad_A_B[5];
+assign copad_A6_B     = copad_A_B[6];
+assign copad_A7_B     = copad_A_B[7];
 
 assign sump =
               (|gemA_cluster_cnt[0])
@@ -435,6 +479,30 @@ assign sump =
             | (|gemB_cluster_cnt[5])
             | (|gemB_cluster_cnt[6])
             | (|gemB_cluster_cnt[7]);
+
+
+//------------------------------------------------------------------------------------------------------------------------
+// 10/10/2021  find 1st non zero bit index,  ROM version for Virtex-6
+//------------------------------------------------------------------------------------------------------------------------
+function [2:0] index1ofbus8;
+input    [7:0] bits;
+reg      [2:0] rom;
+begin
+  casex(bits[7:0])    // 128x3 ROM
+  8'b00000000:  rom = 0;
+  8'bxxxxxxx1:  rom = 0;
+  8'bxxxxxx10:  rom = 1;
+  8'bxxxxx100:  rom = 2;
+  8'bxxxx1000:  rom = 3;
+  8'bxxx10000:  rom = 4;
+  8'bxx100000:  rom = 5;
+  8'bx1000000:  rom = 6;
+  8'b10000000:  rom = 7;
+  endcase
+  index1ofbus8=rom;
+end
+endfunction
+
 
 //----------------------------------------------------------------------------------------------------------------------
 endmodule

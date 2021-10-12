@@ -2052,6 +2052,7 @@
   wire [23:0] gemcopad_active_feb_list;
   reg  [CLSTBITS -1 :0] gem_copad_reg  [MXCLUSTER_CHAMBER-1:0];
   wire [CLSTBITS -1 :0] gem_copad      [MXCLUSTER_CHAMBER-1:0];
+  wire [MXCLUSTER_CHAMBER-1:0] copad_A_B [MXCLUSTER_CHAMBER-1:0];
   reg  gem_any_copad_ff;
 
   wire [3:0] gem_match_deltaPad;
@@ -2146,6 +2147,16 @@
     // 8 bit cluster match was found on upper/lower roll 
     .match_upper (gem_match_upper[7:0]),
     .match_lower (gem_match_lower[7:0]),
+
+    // copad match matrix. copad_A_B[0][0] means whether cluster0 from gemA matches with cluster0 from gem B or not
+    .copad_A0_B   (copad_A_B[0][MXCLUSTER_CHAMBER-1:0]),
+    .copad_A1_B   (copad_A_B[1][MXCLUSTER_CHAMBER-1:0]),
+    .copad_A2_B   (copad_A_B[2][MXCLUSTER_CHAMBER-1:0]),
+    .copad_A3_B   (copad_A_B[3][MXCLUSTER_CHAMBER-1:0]),
+    .copad_A4_B   (copad_A_B[4][MXCLUSTER_CHAMBER-1:0]),
+    .copad_A5_B   (copad_A_B[5][MXCLUSTER_CHAMBER-1:0]),
+    .copad_A6_B   (copad_A_B[6][MXCLUSTER_CHAMBER-1:0]),
+    .copad_A7_B   (copad_A_B[7][MXCLUSTER_CHAMBER-1:0]),
 
     // 1 bit any match found
     .any_match(gem_any_match),
@@ -4609,6 +4620,15 @@ wire [15:0] gemB_bxn_counter;
   .gemB_cluster7_cscwire_hi  (gemB_csc_cluster_cscwire_hi[7]),// In CSC wire group mapped from GEM pad
 
   .copad_match   (copad_match_forgemcsc[7:0]),
+  // copad match matrix. copad_A_B[0][0] means whether cluster0 from gemA matches with cluster0 from gem B or not
+  .copad_A0_B   (copad_A_B[0][MXCLUSTER_CHAMBER-1:0]),
+  .copad_A1_B   (copad_A_B[1][MXCLUSTER_CHAMBER-1:0]),
+  .copad_A2_B   (copad_A_B[2][MXCLUSTER_CHAMBER-1:0]),
+  .copad_A3_B   (copad_A_B[3][MXCLUSTER_CHAMBER-1:0]),
+  .copad_A4_B   (copad_A_B[4][MXCLUSTER_CHAMBER-1:0]),
+  .copad_A5_B   (copad_A_B[5][MXCLUSTER_CHAMBER-1:0]),
+  .copad_A6_B   (copad_A_B[6][MXCLUSTER_CHAMBER-1:0]),
+  .copad_A7_B   (copad_A_B[7][MXCLUSTER_CHAMBER-1:0]),
 
   .match_gem_alct_delay   (match_gem_alct_delay[7:0]),  //In gem delay for gem-ALCT match
   .match_gem_alct_window  (match_gem_alct_window[3:0]), //In gem-alct match window
