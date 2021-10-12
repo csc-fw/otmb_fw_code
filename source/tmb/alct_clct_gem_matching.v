@@ -1485,14 +1485,8 @@ module  alct_clct_gem_matching(
   wire cluster0layer_clct_copad = swapclct_clctcopad_match ? copadB_clct1_match_r[clct1_copad_best_icluster] : copadB_clct0_match_r[clct0_copad_best_icluster];
   wire cluster1layer_clct_copad = swapclct_clctcopad_match ? copadB_clct0_match_r[clct0_copad_best_icluster] : copadB_clct1_match_r[clct1_copad_best_icluster];
 
-  assign alct0wg_fromcopad = wg0fromGEMcluster(
-      best_cluster0_clct_copad_iclst
-      //clct0_copad_best_icluster 
-      );
-  assign alct1wg_fromcopad = wg1fromGEMcluster(
-      best_cluster1_clct_copad_iclst
-      //clct1_copad_best_icluster
-  );
+  assign alct0wg_fromcopad = swapclct_clctcopad_match ? wg1fromGEMcluster(clct1_copad_best_icluster) : wg0fromGEMcluster(clct0_copad_best_icluster );
+  assign alct1wg_fromcopad = swapclct_clctcopad_match ? wg0fromGEMcluster(clct0_copad_best_icluster) : wg1fromGEMcluster(clct1_copad_best_icluster);
 
   wire clct0_copad_match_good = clct0_copad_match_found && tmb_copad_clct_allow;
   wire clct1_copad_match_good = clct1_copad_match_found && tmb_copad_clct_allow;
@@ -1772,6 +1766,7 @@ assign alctclctgem_match_sump =
     (|alct0_clct1_copad_best_cscxky) |
     (|alct1_clct0_copad_best_cscxky) |
     (|alct1_clct1_copad_best_cscxky) |
+    (|alct0_copad_best_angle) |
     (|alct0_clct0_gemA_best_cscxky) |
     (|alct0_clct1_gemA_best_cscxky) |
     (|alct1_clct0_gemA_best_cscxky) |
@@ -1780,6 +1775,8 @@ assign alctclctgem_match_sump =
     (|alct0_clct1_gemB_best_cscxky) |
     (|alct1_clct0_gemB_best_cscxky) |
     (|alct1_clct1_gemB_best_cscxky) |
+    (|alct0_copad_best_angle) |
+    (|alct1_copad_best_angle) |
     (|clct0_copad_best_cscxky)  |
     (|clct1_copad_best_cscxky) ;
 
