@@ -659,7 +659,6 @@ module  alct_clct_gem_matching(
 
   wire [2:0] alct0_clct0_copad_best_icluster;
   wire [MXBENDANGLEB-1:0] alct0_clct0_copad_best_angle;
-  wire [9:0] alct0_clct0_copad_best_cscxky;
   tree_encoder_alctclctgem ualct0_clct0_copad_match(
       clock,
       alct0_clct0_copad_angle[0],
@@ -671,23 +670,12 @@ module  alct_clct_gem_matching(
       alct0_clct0_copad_angle[6],
       alct0_clct0_copad_angle[7],
 
-      copad_cluster_cscxky0_mi[0],
-      copad_cluster_cscxky0_mi[1],
-      copad_cluster_cscxky0_mi[2],
-      copad_cluster_cscxky0_mi[3],
-      copad_cluster_cscxky0_mi[4],
-      copad_cluster_cscxky0_mi[5],
-      copad_cluster_cscxky0_mi[6],
-      copad_cluster_cscxky0_mi[7],
-
-      alct0_clct0_copad_best_cscxky,
       alct0_clct0_copad_best_angle,
       alct0_clct0_copad_best_icluster
       );
 
   wire [2:0] alct0_clct1_copad_best_icluster;
   wire [MXBENDANGLEB-1:0] alct0_clct1_copad_best_angle;
-  wire [9:0] alct0_clct1_copad_best_cscxky;
   tree_encoder_alctclctgem ualct0_clct1_copad_match(
       clock,
       alct0_clct1_copad_angle[0],
@@ -699,23 +687,12 @@ module  alct_clct_gem_matching(
       alct0_clct1_copad_angle[6],
       alct0_clct1_copad_angle[7],
 
-      copad_cluster_cscxky0_mi[0],
-      copad_cluster_cscxky0_mi[1],
-      copad_cluster_cscxky0_mi[2],
-      copad_cluster_cscxky0_mi[3],
-      copad_cluster_cscxky0_mi[4],
-      copad_cluster_cscxky0_mi[5],
-      copad_cluster_cscxky0_mi[6],
-      copad_cluster_cscxky0_mi[7],
-
-      alct0_clct1_copad_best_cscxky,
       alct0_clct1_copad_best_angle,
       alct0_clct1_copad_best_icluster
       );
 
   wire [2:0] alct1_clct0_copad_best_icluster;
   wire [MXBENDANGLEB-1:0] alct1_clct0_copad_best_angle;
-  wire [9:0] alct1_clct0_copad_best_cscxky;
   tree_encoder_alctclctgem ualct1_clct0_copad_match(
       clock,
       alct1_clct0_copad_angle[0],
@@ -727,23 +704,12 @@ module  alct_clct_gem_matching(
       alct1_clct0_copad_angle[6],
       alct1_clct0_copad_angle[7],
 
-      copad_cluster_cscxky1_mi[0],
-      copad_cluster_cscxky1_mi[1],
-      copad_cluster_cscxky1_mi[2],
-      copad_cluster_cscxky1_mi[3],
-      copad_cluster_cscxky1_mi[4],
-      copad_cluster_cscxky1_mi[5],
-      copad_cluster_cscxky1_mi[6],
-      copad_cluster_cscxky1_mi[7],
-
-      alct1_clct0_copad_best_cscxky,
       alct1_clct0_copad_best_angle,
       alct1_clct0_copad_best_icluster
       );
 
   wire [2:0] alct1_clct1_copad_best_icluster;
   wire [MXBENDANGLEB-1:0] alct1_clct1_copad_best_angle;
-  wire [9:0] alct1_clct1_copad_best_cscxky;
   tree_encoder_alctclctgem ualct1_clct1_copad_match(
       clock,
       alct1_clct1_copad_angle[0],
@@ -755,16 +721,6 @@ module  alct_clct_gem_matching(
       alct1_clct1_copad_angle[6],
       alct1_clct1_copad_angle[7],
 
-      copad_cluster_cscxky1_mi[0],
-      copad_cluster_cscxky1_mi[1],
-      copad_cluster_cscxky1_mi[2],
-      copad_cluster_cscxky1_mi[3],
-      copad_cluster_cscxky1_mi[4],
-      copad_cluster_cscxky1_mi[5],
-      copad_cluster_cscxky1_mi[6],
-      copad_cluster_cscxky1_mi[7],
-
-      alct1_clct1_copad_best_cscxky,
       alct1_clct1_copad_best_angle,
       alct1_clct1_copad_best_icluster
       );
@@ -893,7 +849,6 @@ module  alct_clct_gem_matching(
 
   wire [2:0] alct0_clct0_gemA_best_icluster;
   wire [MXBENDANGLEB-1:0] alct0_clct0_gemA_best_angle;
-  wire [9:0] alct0_clct0_gemA_best_cscxky;
   tree_encoder_alctclctgem ualct0_clct0_gemA_match(
       clock,
       alct0_clct0_gemA_angle[0],
@@ -905,16 +860,6 @@ module  alct_clct_gem_matching(
       alct0_clct0_gemA_angle[6],
       alct0_clct0_gemA_angle[7],
 
-      gemA_cluster_cscxky_mi[0],
-      gemA_cluster_cscxky_mi[1],
-      gemA_cluster_cscxky_mi[2],
-      gemA_cluster_cscxky_mi[3],
-      gemA_cluster_cscxky_mi[4],
-      gemA_cluster_cscxky_mi[5],
-      gemA_cluster_cscxky_mi[6],
-      gemA_cluster_cscxky_mi[7],
-
-      alct0_clct0_gemA_best_cscxky,
       alct0_clct0_gemA_best_angle,
       alct0_clct0_gemA_best_icluster
       );
@@ -922,7 +867,6 @@ module  alct_clct_gem_matching(
 
   wire [2:0] alct0_clct0_gemB_best_icluster;
   wire [MXBENDANGLEB-1:0] alct0_clct0_gemB_best_angle;
-  wire [9:0] alct0_clct0_gemB_best_cscxky;
   tree_encoder_alctclctgem ualct0_clct0_gemB_match(
       clock,
       alct0_clct0_gemB_angle[0],
@@ -934,23 +878,12 @@ module  alct_clct_gem_matching(
       alct0_clct0_gemB_angle[6],
       alct0_clct0_gemB_angle[7],
 
-      gemB_cluster_cscxky_mi[0],
-      gemB_cluster_cscxky_mi[1],
-      gemB_cluster_cscxky_mi[2],
-      gemB_cluster_cscxky_mi[3],
-      gemB_cluster_cscxky_mi[4],
-      gemB_cluster_cscxky_mi[5],
-      gemB_cluster_cscxky_mi[6],
-      gemB_cluster_cscxky_mi[7],
-
-      alct0_clct0_gemB_best_cscxky,
       alct0_clct0_gemB_best_angle,
       alct0_clct0_gemB_best_icluster
       );
 
   wire [2:0] alct1_clct0_gemA_best_icluster;
   wire [MXBENDANGLEB-1:0] alct1_clct0_gemA_best_angle;
-  wire [9:0] alct1_clct0_gemA_best_cscxky;
   tree_encoder_alctclctgem ualct1_clct0_gemA_match(
       clock,
       alct1_clct0_gemA_angle[0],
@@ -962,16 +895,6 @@ module  alct_clct_gem_matching(
       alct1_clct0_gemA_angle[6],
       alct1_clct0_gemA_angle[7],
 
-      gemA_cluster_cscxky_mi[0],
-      gemA_cluster_cscxky_mi[1],
-      gemA_cluster_cscxky_mi[2],
-      gemA_cluster_cscxky_mi[3],
-      gemA_cluster_cscxky_mi[4],
-      gemA_cluster_cscxky_mi[5],
-      gemA_cluster_cscxky_mi[6],
-      gemA_cluster_cscxky_mi[7],
-
-      alct1_clct0_gemA_best_cscxky,
       alct1_clct0_gemA_best_angle,
       alct1_clct0_gemA_best_icluster
       );
@@ -979,7 +902,6 @@ module  alct_clct_gem_matching(
 
   wire [2:0] alct1_clct0_gemB_best_icluster;
   wire [MXBENDANGLEB-1:0] alct1_clct0_gemB_best_angle;
-  wire [9:0] alct1_clct0_gemB_best_cscxky;
   tree_encoder_alctclctgem ualct1_clct0_gemB_match(
       clock,
       alct1_clct0_gemB_angle[0],
@@ -991,16 +913,6 @@ module  alct_clct_gem_matching(
       alct1_clct0_gemB_angle[6],
       alct1_clct0_gemB_angle[7],
 
-      gemB_cluster_cscxky_mi[0],
-      gemB_cluster_cscxky_mi[1],
-      gemB_cluster_cscxky_mi[2],
-      gemB_cluster_cscxky_mi[3],
-      gemB_cluster_cscxky_mi[4],
-      gemB_cluster_cscxky_mi[5],
-      gemB_cluster_cscxky_mi[6],
-      gemB_cluster_cscxky_mi[7],
-
-      alct1_clct0_gemB_best_cscxky,
       alct1_clct0_gemB_best_angle,
       alct1_clct0_gemB_best_icluster
       );
@@ -1008,7 +920,6 @@ module  alct_clct_gem_matching(
 
   wire [2:0] alct0_clct1_gemA_best_icluster;
   wire [MXBENDANGLEB-1:0] alct0_clct1_gemA_best_angle;
-  wire [9:0] alct0_clct1_gemA_best_cscxky;
   tree_encoder_alctclctgem ualct0_clct1_gemA_match(
       clock,
       alct0_clct1_gemA_angle[0],
@@ -1020,16 +931,6 @@ module  alct_clct_gem_matching(
       alct0_clct1_gemA_angle[6],
       alct0_clct1_gemA_angle[7],
 
-      gemA_cluster_cscxky_mi[0],
-      gemA_cluster_cscxky_mi[1],
-      gemA_cluster_cscxky_mi[2],
-      gemA_cluster_cscxky_mi[3],
-      gemA_cluster_cscxky_mi[4],
-      gemA_cluster_cscxky_mi[5],
-      gemA_cluster_cscxky_mi[6],
-      gemA_cluster_cscxky_mi[7],
-
-      alct0_clct1_gemA_best_cscxky,
       alct0_clct1_gemA_best_angle,
       alct0_clct1_gemA_best_icluster
       );
@@ -1037,7 +938,6 @@ module  alct_clct_gem_matching(
 
   wire [2:0] alct0_clct1_gemB_best_icluster;
   wire [MXBENDANGLEB-1:0] alct0_clct1_gemB_best_angle;
-  wire [9:0] alct0_clct1_gemB_best_cscxky;
   tree_encoder_alctclctgem ualct0_clct1_gemB_match(
       clock,
       alct0_clct1_gemB_angle[0],
@@ -1049,23 +949,12 @@ module  alct_clct_gem_matching(
       alct0_clct1_gemB_angle[6],
       alct0_clct1_gemB_angle[7],
 
-      gemB_cluster_cscxky_mi[0],
-      gemB_cluster_cscxky_mi[1],
-      gemB_cluster_cscxky_mi[2],
-      gemB_cluster_cscxky_mi[3],
-      gemB_cluster_cscxky_mi[4],
-      gemB_cluster_cscxky_mi[5],
-      gemB_cluster_cscxky_mi[6],
-      gemB_cluster_cscxky_mi[7],
-
-      alct0_clct1_gemB_best_cscxky,
       alct0_clct1_gemB_best_angle,
       alct0_clct1_gemB_best_icluster
       );
 
   wire [2:0] alct1_clct1_gemA_best_icluster;
   wire [MXBENDANGLEB-1:0] alct1_clct1_gemA_best_angle;
-  wire [9:0] alct1_clct1_gemA_best_cscxky;
   tree_encoder_alctclctgem ualct1_clct1_gemA_match(
       clock,
       alct1_clct1_gemA_angle[0],
@@ -1077,16 +966,6 @@ module  alct_clct_gem_matching(
       alct1_clct1_gemA_angle[6],
       alct1_clct1_gemA_angle[7],
 
-      gemA_cluster_cscxky_mi[0],
-      gemA_cluster_cscxky_mi[1],
-      gemA_cluster_cscxky_mi[2],
-      gemA_cluster_cscxky_mi[3],
-      gemA_cluster_cscxky_mi[4],
-      gemA_cluster_cscxky_mi[5],
-      gemA_cluster_cscxky_mi[6],
-      gemA_cluster_cscxky_mi[7],
-
-      alct1_clct1_gemA_best_cscxky,
       alct1_clct1_gemA_best_angle,
       alct1_clct1_gemA_best_icluster
       );
@@ -1094,7 +973,6 @@ module  alct_clct_gem_matching(
 
   wire [2:0] alct1_clct1_gemB_best_icluster;
   wire [MXBENDANGLEB-1:0] alct1_clct1_gemB_best_angle;
-  wire [9:0] alct1_clct1_gemB_best_cscxky;
   tree_encoder_alctclctgem ualct1_clct1_gemB_match(
       clock,
       alct1_clct1_gemB_angle[0],
@@ -1106,16 +984,6 @@ module  alct_clct_gem_matching(
       alct1_clct1_gemB_angle[6],
       alct1_clct1_gemB_angle[7],
 
-      gemB_cluster_cscxky_mi[0],
-      gemB_cluster_cscxky_mi[1],
-      gemB_cluster_cscxky_mi[2],
-      gemB_cluster_cscxky_mi[3],
-      gemB_cluster_cscxky_mi[4],
-      gemB_cluster_cscxky_mi[5],
-      gemB_cluster_cscxky_mi[6],
-      gemB_cluster_cscxky_mi[7],
-
-      alct1_clct1_gemB_best_cscxky,
       alct1_clct1_gemB_best_angle,
       alct1_clct1_gemB_best_icluster
       );
@@ -1400,7 +1268,6 @@ module  alct_clct_gem_matching(
 
   wire [2:0] clct0_copad_best_icluster;
   wire [MXBENDANGLEB-1:0] clct0_copad_best_angle;
-  wire [9:0] clct0_copad_best_cscxky;
   tree_encoder_alctclctgem uclct0_copad_match(
       clock,
       clct0_copad_angle[0],
@@ -1412,23 +1279,12 @@ module  alct_clct_gem_matching(
       clct0_copad_angle[6],
       clct0_copad_angle[7],
 
-      copad_cluster_cscxky0_mi[0],
-      copad_cluster_cscxky0_mi[1],
-      copad_cluster_cscxky0_mi[2],
-      copad_cluster_cscxky0_mi[3],
-      copad_cluster_cscxky0_mi[4],
-      copad_cluster_cscxky0_mi[5],
-      copad_cluster_cscxky0_mi[6],
-      copad_cluster_cscxky0_mi[7],
-
-      clct0_copad_best_cscxky,
       clct0_copad_best_angle,
       clct0_copad_best_icluster
       );
 
   wire [2:0] clct1_copad_best_icluster;
   wire [MXBENDANGLEB-1:0] clct1_copad_best_angle;
-  wire [9:0] clct1_copad_best_cscxky;
   tree_encoder_alctclctgem uclct1_copad_match(
       clock,
       clct1_copad_angle[0],
@@ -1440,16 +1296,6 @@ module  alct_clct_gem_matching(
       clct1_copad_angle[6],
       clct1_copad_angle[7],
 
-      copad_cluster_cscxky1_mi[0],
-      copad_cluster_cscxky1_mi[1],
-      copad_cluster_cscxky1_mi[2],
-      copad_cluster_cscxky1_mi[3],
-      copad_cluster_cscxky1_mi[4],
-      copad_cluster_cscxky1_mi[5],
-      copad_cluster_cscxky1_mi[6],
-      copad_cluster_cscxky1_mi[7],
-
-      clct1_copad_best_cscxky,
       clct1_copad_best_angle,
       clct1_copad_best_icluster
       );
@@ -1495,7 +1341,7 @@ module  alct_clct_gem_matching(
   wire [2:0] alct0_copad_best_icluster;
   wire [MXBENDANGLEB-1:0] alct0_copad_best_angle;
   wire [9:0] alct0_copad_best_cscxky;
-  tree_encoder_alctclctgem ualct0_copad_match(
+  tree_encoder_alctcopad ualct0_copad_match(
       clock,
       alct0_copad_angle[0],
       alct0_copad_angle[1],
@@ -1523,7 +1369,7 @@ module  alct_clct_gem_matching(
   wire [2:0] alct1_copad_best_icluster;
   wire [MXBENDANGLEB-1:0] alct1_copad_best_angle;
   wire [9:0] alct1_copad_best_cscxky;
-  tree_encoder_alctclctgem ualct1_copad_match(
+  tree_encoder_alctcopad ualct1_copad_match(
       clock,
       alct1_copad_angle[0],
       alct1_copad_angle[1],
