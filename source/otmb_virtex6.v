@@ -1764,6 +1764,7 @@
   wire         gem_inj_wen;      // GEM Injector Write Enable
   wire         injector_go_gem;  // Start GEM injector
 
+  wire       evenchamber;  // from VME register 0x198, 1 for even chamber and 0 for odd chamber
   wire [4:0]   gem_clct_deltahs_odd;
   wire [4:0]   gem_clct_deltahs_even;
   wire [2:0]   gem_alct_deltawire_odd;
@@ -2324,7 +2325,6 @@ end
   wire [MXCLUSTER_CHAMBER-1:0] gemA_gemtocsc_dummy;
   wire [MXCLUSTER_CHAMBER-1:0] gemB_gemtocsc_dummy;
 
-  wire evenchamber = ~csc_id[0];//double check it counts from 0 or 1 in term of even and odd?????
 
   //wire [MXCFEB-1:0] gemA_csc_cluster_active_cfeb_list; //dummy signal!!
   //wire [MXCFEB-1:0] gemB_csc_cluster_active_cfeb_list;
@@ -3359,7 +3359,7 @@ end
    
   .algo2016_use_dead_time_zone         (algo2016_use_dead_time_zone),         // In Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
   .algo2016_dead_time_zone_size        (algo2016_dead_time_zone_size[4:0]),   // In Constant size of the dead time zone
-  .algo2016_use_dynamic_dead_time_zone (algo2016_use_dynamic_dead_time_zone), // In Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
+  .algo2016_use_dynamic_doead_time_zone (algo2016_use_dynamic_dead_time_zone), // In Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
 
   .tmb_allow_alct  (tmb_allow_alct),  // In  Allow ALCT only
   .tmb_allow_clct  (tmb_allow_clct),  // In  Allow CLCT only
@@ -5815,6 +5815,7 @@ wire [15:0] gemB_bxn_counter;
       .algo2016_drop_used_clcts            (algo2016_drop_used_clcts),            // Out Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - drop used CLCTs
       .algo2016_cross_bx_algorithm         (algo2016_cross_bx_algorithm),         // Out LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
       .algo2016_clct_use_corrected_bx      (algo2016_clct_use_corrected_bx),      // Out Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits NOT YET IMPLEMENTED:
+      .evenchamber                         (evenchamber),   // evenodd parity. 1 for even chamber and 0 for odd chamber
 
       .alct_bx0_delay  (alct_bx0_delay[3:0]), // Out  ALCT bx0 delay to mpc transmitter
       .clct_bx0_delay  (clct_bx0_delay[3:0]), // Out  CLCT bx0 delay to mpc transmitter

@@ -648,7 +648,7 @@ module  alct_clct_gem_matching(
   assign alct_gemB_match_found  = (|alct0_gemB_match)  || (|alct1_gemB_match);
   assign clct_gemA_match_found  = (|clct0_gemA_match_ok)  || (|clct1_gemA_match_ok);
   assign clct_gemB_match_found  = (|clct0_gemB_match_ok)  || (|clct1_gemB_match_ok);
-  assign alct_copad_match_found = (|alct0_copad_match) || (|alct1_copad_match);
+  assign alct_copad_match_found = (|alct0_copad_match   ) || (|alct1_copad_match   );
   assign clct_copad_match_found = (|clct0_copad_match_ok) || (|clct1_copad_match_ok);
 
   
