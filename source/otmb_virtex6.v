@@ -1342,6 +1342,7 @@
   wire  [MXHS-1:0]    cfeb_ly5hs [MXCFEB-1:0];    // Decoded 1/2-strip pulses
 
   wire  [NHITCFEBB-1:0]         cfeb_nhits [MXCFEB-1:0];
+  wire  [MXLY-1:0]    cfeb_layers_withhits[MXCFEB-1:0];
   
 // Status Ports
   wire  [MXCFEB-1:0]  demux_tp_1st;
@@ -1495,6 +1496,7 @@
   .ly5hs (cfeb_ly5hs[icfeb][MXHS-1:0]),  // Out  Decoded 1/2-strip pulses
 
   .nhits_per_cfeb (cfeb_nhits[icfeb][NHITCFEBB-1:0]),  // Out nhits per cfeb for HMT
+  .layers_withhits_per_cfeb  (cfeb_layers_withhits[icfeb][MXLY-1:0]),// Out layers with hits for one cfeb
 // CFEB data received on optical link
   .gtx_rx_data_bits_or (gtx_rx_data_bits_or[icfeb]), // Out  CFEB data received on optical link = OR of all 48 bits for a given CFEB
 
@@ -2828,6 +2830,14 @@ end
   .nhit_cfeb4    (cfeb_nhits[4][NHITCFEBB-1: 0]),// In cfeb hit counter
   .nhit_cfeb5    (cfeb_nhits[5][NHITCFEBB-1: 0]),// In cfeb hit counter
   .nhit_cfeb6    (cfeb_nhits[6][NHITCFEBB-1: 0]),// In cfeb hit counter
+
+  .layers_withhits_cfeb0 (cfeb_layers_withhits[0][MXLY-1:0]), // In layers with hits
+  .layers_withhits_cfeb1 (cfeb_layers_withhits[1][MXLY-1:0]), // In layers with hits
+  .layers_withhits_cfeb2 (cfeb_layers_withhits[2][MXLY-1:0]), // In layers with hits
+  .layers_withhits_cfeb3 (cfeb_layers_withhits[3][MXLY-1:0]), // In layers with hits
+  .layers_withhits_cfeb4 (cfeb_layers_withhits[4][MXLY-1:0]), // In layers with hits
+  .layers_withhits_cfeb5 (cfeb_layers_withhits[5][MXLY-1:0]), // In layers with hits
+  .layers_withhits_cfeb6 (cfeb_layers_withhits[6][MXLY-1:0]), // In layers with hits
 
   .hmt_enable         (hmt_enable) , // In hmt enabled 
   .hmt_me1a_enable    (hmt_me1a_enable) , // In hmt enabled 

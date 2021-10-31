@@ -18,6 +18,14 @@
   nhit_cfeb4,
   nhit_cfeb5,
   nhit_cfeb6,
+
+  layers_withhits_cfeb0,
+  layers_withhits_cfeb1,
+  layers_withhits_cfeb2,
+  layers_withhits_cfeb3,
+  layers_withhits_cfeb4,
+  layers_withhits_cfeb6,
+  layers_withhits_cfeb7,
   
   hmt_enable,
   hmt_me1a_enable,
@@ -106,6 +114,14 @@
   input  [NHITCFEBB-1: 0] nhit_cfeb4;
   input  [NHITCFEBB-1: 0] nhit_cfeb5;
   input  [NHITCFEBB-1: 0] nhit_cfeb6;
+
+  input  [MXLY-1:0]   layers_withhits_cfeb0;
+  input  [MXLY-1:0]   layers_withhits_cfeb1;
+  input  [MXLY-1:0]   layers_withhits_cfeb2;
+  input  [MXLY-1:0]   layers_withhits_cfeb3;
+  input  [MXLY-1:0]   layers_withhits_cfeb4;
+  input  [MXLY-1:0]   layers_withhits_cfeb5;
+  input  [MXLY-1:0]   layers_withhits_cfeb6;
   
   input    hmt_enable;
   input    hmt_me1a_enable;
@@ -192,6 +208,12 @@
     hmt_reset_ff[1] <= hmt_reset_ff[0] || fmm_trig_stop;
   end
   wire hmt_reset = |hmt_reset_ff;
+
+  wire [MXLY-1:0]   layers_withhits_me1a = layers_withhits_cfeb4 | layers_withhits_cfeb5 | layers_withhits_cfebr6;
+  wire [MXLY-1:0]   layers_withhits_me1b = layers_withhits_cfeb0 | layers_withhits_cfeb1 | layers_withhits_cfeb2 | layers_withhits_cfeb3;
+  wire [MXLY-1:0]   layers_withhits  =  hmt_me1a_enable ? (layers_withhits_me1a | layers_withhits_me1b) : layers_withhits_me1b;
+
+  wire [2:0] nlayer_withhits = countnlayer(layers_withhits);
 
   wire [MXCFEB-1  :0]  active_cfeb_s0; 
 //`ifdef CSC_TYPE_C
@@ -290,6 +312,8 @@
   wire [NHMTHITB-1:0] nhits_chamber = hmt_me1a_enable ? (nhit_cfeb0 + nhit_cfeb1 + nhit_cfeb2 + nhit_cfeb3 + nhit_cfeb4 + nhit_cfeb5 + nhit_cfeb6) : (nhit_cfeb0 + nhit_cfeb1 + nhit_cfeb2 + nhit_cfeb3);
   reg  [NHMTHITB-1:0] nhits_trig_s0_srl [7:0];//array 8x10bits
 
+  reg  [2:0] nlayer_s0 [7:0];
+  reg  [2:0] hmt_nhit_thresh = 3'd5;
   always @(posedge clock) begin
       nhits_trig_s0_srl[7] <= nhits_trig_s0_srl[6];
       nhits_trig_s0_srl[6] <= nhits_trig_s0_srl[5];
@@ -299,6 +323,15 @@
       nhits_trig_s0_srl[2] <= nhits_trig_s0_srl[1];
       nhits_trig_s0_srl[1] <= nhits_trig_s0_srl[0];
       nhits_trig_s0_srl[0] <= nhits_chamber;
+
+      nlayer_s0[0]     <= nlayer_withhits;
+      nlayer_s0[1]     <= nlayer_s0[0];
+      nlayer_s0[2]     <= nlayer_s0[1];
+      nlayer_s0[3]     <= nlayer_s0[2];
+      nlayer_s0[4]     <= nlayer_s0[3];
+      nlayer_s0[5]     <= nlayer_s0[4];
+      nlayer_s0[6]     <= nlayer_s0[5];
+      nlayer_s0[7]     <= nlayer_s0[6];
   end
 
   //signal: over 3BX;   control region: over 4BX 
@@ -312,10 +345,13 @@
   wire nhits_compare_s0_sig_89A = (nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] >  nhits_trig_s0_srl[0] + nhits_chamber) || (nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] ==  nhits_trig_s0_srl[0] + nhits_chamber && nhits_trig_s0_srl[2] > nhits_trig_s0_srl[0]);
   wire nhits_trig_s0_sig_peak = nhits_compare_s0_sig_789 && nhits_compare_s0_sig_89A;
 
-  wire hmt_bit0_s0 = ((nhits_trig_s0_sig >= hmt_thresh1) || (nhits_trig_s0_sig >= hmt_thresh3)) & nhits_trig_s0_sig_peak &  (~|hmt_fired_s0_ff) & (~hmt_reset);
-  wire hmt_bit1_s0 = ((nhits_trig_s0_sig >= hmt_thresh2) || (nhits_trig_s0_sig >= hmt_thresh3)) & nhits_trig_s0_sig_peak &  (~|hmt_fired_s0_ff) & (~hmt_reset);
-  wire hmt_bit2_s0 = ((nhits_trig_s0_bkg >= hmt_thresh1) || (nhits_trig_s0_bkg >= hmt_thresh3)) &  (~|hmt_fired_s0_ff) & (~hmt_reset);
-  wire hmt_bit3_s0 = ((nhits_trig_s0_bkg >= hmt_thresh2) || (nhits_trig_s0_bkg >= hmt_thresh3)) &  (~|hmt_fired_s0_ff) & (~hmt_reset);
+  wire nlayer_pass_thresh_sig = nlayer_s0[3] >= hmt_nhit_thresh || nlayer_s0[2] >= hmt_nhit_thresh || nlayer_s0[1] >= hmt_nhit_thresh;
+  wire nlayer_pass_thresh_bkg = nlayer_s0[6] >= hmt_nhit_thresh || nlayer_s0[5] >= hmt_nhit_thresh || nlayer_s0[4] >= hmt_nhit_thresh;
+
+  wire hmt_bit0_s0 = ((nhits_trig_s0_sig >= hmt_thresh1) || (nhits_trig_s0_sig >= hmt_thresh3)) & nhits_trig_s0_sig_peak &  (~|hmt_fired_s0_ff) & (~hmt_reset) & nlayer_pass_thresh_sig;
+  wire hmt_bit1_s0 = ((nhits_trig_s0_sig >= hmt_thresh2) || (nhits_trig_s0_sig >= hmt_thresh3)) & nhits_trig_s0_sig_peak &  (~|hmt_fired_s0_ff) & (~hmt_reset) & nlayer_pass_thresh_sig;
+  wire hmt_bit2_s0 = ((nhits_trig_s0_bkg >= hmt_thresh1) || (nhits_trig_s0_bkg >= hmt_thresh3)) &  (~|hmt_fired_s0_ff) & (~hmt_reset) & nlayer_pass_thresh_bkg;
+  wire hmt_bit3_s0 = ((nhits_trig_s0_bkg >= hmt_thresh2) || (nhits_trig_s0_bkg >= hmt_thresh3)) &  (~|hmt_fired_s0_ff) & (~hmt_reset) & nlayer_pass_thresh_bkg;
   wire [MXHMTB-1:0] hmt_cathode_s0 = hmt_enable ? {hmt_bit3_s0, hmt_bit2_s0, hmt_bit1_s0, hmt_bit0_s0} : 4'b0;
 
   wire   hmt_fired_bkg_s0 = |hmt_cathode_s0[3:2];

@@ -171,6 +171,7 @@
   ly4hs,
   ly5hs,
   nhits_per_cfeb,
+  layers_withhits_per_cfeb,    
 
 // CFEB data received on optical link = OR of all bits for ALL CFEBs
   gtx_rx_data_bits_or,
@@ -316,6 +317,7 @@
   output [MXHS-1:0] ly5hs;
 
   output [5:0] nhits_per_cfeb;
+  output [MXLY-1:0] layers_withhits_per_cfeb;
 // CFEB data received on optical link = OR of all 48 bits for a given CFEB
   output gtx_rx_data_bits_or;
 
@@ -836,11 +838,13 @@
   assign triad_skip = (|tskip[0]) | (|tskip[1]) | (|tskip[2]) | (|tskip[3]) | (|tskip[4]) | (|tskip[5]);
 
   reg [5:0] nhits_s0 = 6'b0;
+  reg [MXLY-1:0] layers_with_hit_s0 = 0;
   always  @(posedge clock) begin
             nhits_s0       <= count1s(hs_fired[0][5:0]) + count1s(hs_fired[1][5:0]) + count1s(hs_fired[2][5:0]) + count1s(hs_fired[3][5:0]) + count1s(hs_fired[4][5:0]) +
                         count1s(hs_fired[5][5:0]) +
                         count1s({hs_fired[0][7:6], hs_fired[1][7:6], hs_fired[2][7:6]}) +
                         count1s({hs_fired[3][7:6], hs_fired[4][7:6], hs_fired[5][7:6]});
+            layers_with_hit_s0 <= {|hs_fired[5], |hs_fired[4], |hs_fired[3], |hs_fired[2], |hs_fired[1], |hs_fired[0]};
       //nhits_s0       <= hs_fired[0][0] + hs_fired[0][1] + hs_fired[0][2] + hs_fired[0][3] + hs_fired[0][4] + hs_fired[0][5] + hs_fired[0][6] + hs_fired[0][7] + 
       //                  hs_fired[1][0] + hs_fired[1][1] + hs_fired[1][2] + hs_fired[1][3] + hs_fired[1][4] + hs_fired[1][5] + hs_fired[1][6] + hs_fired[1][7] + 
       //                  hs_fired[2][0] + hs_fired[2][1] + hs_fired[2][2] + hs_fired[2][3] + hs_fired[2][4] + hs_fired[2][5] + hs_fired[2][6] + hs_fired[2][7] + 
@@ -851,6 +855,7 @@
 
 
   assign nhits_per_cfeb = nhits_s0;
+  assign layers_withhits_per_cfeb = layers_with_hit_s0;
 
 // Expand 2d arrays for transmission to next module
   assign ly0hs = hs[0];

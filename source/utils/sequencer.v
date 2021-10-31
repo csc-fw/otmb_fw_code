@@ -6438,7 +6438,7 @@
   (|hs_nlayers_hit[2:0])  | // was for header, but is already included in pattern info
   scope_sump              |
   header_sump             |
-      (|gemcsc_sump)      |
+  gemcsc_sump             |
   alct1_valid             |
   clct_vpf_tprt;
 
