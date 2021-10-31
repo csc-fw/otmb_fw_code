@@ -16,6 +16,12 @@
   nhit_cfeb2,
   nhit_cfeb3,
   nhit_cfeb4,
+
+  layers_withhits_cfeb0,
+  layers_withhits_cfeb1,
+  layers_withhits_cfeb2,
+  layers_withhits_cfeb3,
+  layers_withhits_cfeb4,
   
   hmt_enable,
   hmt_thresh1,
@@ -87,6 +93,7 @@
    parameter MXCFEB     =  5;
    parameter NHITCFEBB  =  6;
    parameter NHMTHITB   = 10;
+   parameter MXLY       =  6;//6 CSC layers
 
    `include "../otmb_virtex6_fw_version.v"
 
@@ -102,6 +109,12 @@
   input  [NHITCFEBB-1: 0] nhit_cfeb2;
   input  [NHITCFEBB-1: 0] nhit_cfeb3;
   input  [NHITCFEBB-1: 0] nhit_cfeb4;
+
+  input  [MXLY-1:0]   layers_withhits_cfeb0;
+  input  [MXLY-1:0]   layers_withhits_cfeb1;
+  input  [MXLY-1:0]   layers_withhits_cfeb2;
+  input  [MXLY-1:0]   layers_withhits_cfeb3;
+  input  [MXLY-1:0]   layers_withhits_cfeb4;
   
   input    hmt_enable;
   input  [7:0] hmt_thresh1;
@@ -187,6 +200,11 @@
   end
   wire hmt_reset = |hmt_reset_ff;
 
+
+  wire [MXLY-1:0]   layers_withhits = layers_withhits_cfeb0 | layers_withhits_cfeb1 | layers_withhits_cfeb2 | layers_withhits_cfeb3 | layers_withhits_cfeb4;
+
+  wire [2:0] nlayer_withhits = countnlayer(layers_withhits);
+
   wire [MXCFEB-1  :0]  active_cfeb_s0; 
 //`ifdef CSC_TYPE_A
 //  initial $display ("CSC_TYPE_A instantiated in HMT module");
@@ -259,6 +277,8 @@
   wire [NHMTHITB-1:0] nhits_chamber = nhit_cfeb0 + nhit_cfeb1 + nhit_cfeb2 + nhit_cfeb3 + nhit_cfeb4;
   reg  [NHMTHITB-1:0] nhits_trig_s0_srl [7:0];//array 8x10bits
 
+  reg  [2:0] nlayer_s0 [7:0];
+  reg  [2:0] hmt_nhit_thresh = 3'd5;
   always @(posedge clock) begin
       nhits_trig_s0_srl[7] <= nhits_trig_s0_srl[6];
       nhits_trig_s0_srl[6] <= nhits_trig_s0_srl[5];
@@ -268,6 +288,15 @@
       nhits_trig_s0_srl[2] <= nhits_trig_s0_srl[1];
       nhits_trig_s0_srl[1] <= nhits_trig_s0_srl[0];
       nhits_trig_s0_srl[0] <= nhits_chamber;
+
+      nlayer_s0[0]     <= nlayer_withhits;
+      nlayer_s0[1]     <= nlayer_s0[0];
+      nlayer_s0[2]     <= nlayer_s0[1];
+      nlayer_s0[3]     <= nlayer_s0[2];
+      nlayer_s0[4]     <= nlayer_s0[3];
+      nlayer_s0[5]     <= nlayer_s0[4];
+      nlayer_s0[6]     <= nlayer_s0[5];
+      nlayer_s0[7]     <= nlayer_s0[6];
   end
 
   //signal: over 3BX;   control region: over 4BX 
@@ -281,10 +310,13 @@
   wire nhits_compare_s0_sig_89A = (nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] >  nhits_trig_s0_srl[0] + nhits_chamber) || (nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] ==  nhits_trig_s0_srl[0] + nhits_chamber && nhits_trig_s0_srl[2] > nhits_trig_s0_srl[0]);
   wire nhits_trig_s0_sig_peak = nhits_compare_s0_sig_789 && nhits_compare_s0_sig_89A;
 
-  wire hmt_bit0_s0 = ((nhits_trig_s0_sig >= hmt_thresh1) || (nhits_trig_s0_sig >= hmt_thresh3)) & nhits_trig_s0_sig_peak &  (~|hmt_fired_s0_ff) & (~hmt_reset);
-  wire hmt_bit1_s0 = ((nhits_trig_s0_sig >= hmt_thresh2) || (nhits_trig_s0_sig >= hmt_thresh3)) & nhits_trig_s0_sig_peak &  (~|hmt_fired_s0_ff) & (~hmt_reset);
-  wire hmt_bit2_s0 = ((nhits_trig_s0_bkg >= hmt_thresh1) || (nhits_trig_s0_bkg >= hmt_thresh3)) &  (~|hmt_fired_s0_ff) & (~hmt_reset);
-  wire hmt_bit3_s0 = ((nhits_trig_s0_bkg >= hmt_thresh2) || (nhits_trig_s0_bkg >= hmt_thresh3)) &  (~|hmt_fired_s0_ff) & (~hmt_reset);
+  wire nlayer_pass_thresh_sig = nlayer_s0[3] >= hmt_nhit_thresh || nlayer_s0[2] >= hmt_nhit_thresh || nlayer_s0[1] >= hmt_nhit_thresh;
+  wire nlayer_pass_thresh_bkg = nlayer_s0[6] >= hmt_nhit_thresh || nlayer_s0[5] >= hmt_nhit_thresh || nlayer_s0[4] >= hmt_nhit_thresh;
+
+  wire hmt_bit0_s0 = ((nhits_trig_s0_sig >= hmt_thresh1) || (nhits_trig_s0_sig >= hmt_thresh3)) & nhits_trig_s0_sig_peak &  (~|hmt_fired_s0_ff) & (~hmt_reset) & nlayer_pass_thresh_sig;
+  wire hmt_bit1_s0 = ((nhits_trig_s0_sig >= hmt_thresh2) || (nhits_trig_s0_sig >= hmt_thresh3)) & nhits_trig_s0_sig_peak &  (~|hmt_fired_s0_ff) & (~hmt_reset) & nlayer_pass_thresh_sig;
+  wire hmt_bit2_s0 = ((nhits_trig_s0_bkg >= hmt_thresh1) || (nhits_trig_s0_bkg >= hmt_thresh3)) &  (~|hmt_fired_s0_ff) & (~hmt_reset) & nlayer_pass_thresh_bkg;
+  wire hmt_bit3_s0 = ((nhits_trig_s0_bkg >= hmt_thresh2) || (nhits_trig_s0_bkg >= hmt_thresh3)) &  (~|hmt_fired_s0_ff) & (~hmt_reset) & nlayer_pass_thresh_bkg;
   wire [MXHMTB-1:0] hmt_cathode_s0 = hmt_enable ? {hmt_bit3_s0, hmt_bit2_s0, hmt_bit1_s0, hmt_bit0_s0} : 4'b0;
 
   wire   hmt_fired_bkg_s0 = |hmt_cathode_s0[3:2];
@@ -557,6 +589,90 @@
   assign wr_push_mux_hmt =  hmt_fired_anode_only ? wr_push_xpre_hmt_pipe : (wr_push_xpre_hmt_pipe && hmt_cathode_fired);
 
   assign hmt_sump = |hmt_pri_best;
+
+
+//------------------------------------------------------------------------------------------------------------------------
+// Virtex-6 Specific
+//
+// 03/21/2013 Initial
+//------------------------------------------------------------------------------------------------------------------------
+function [2: 0] countnlayer;
+  input [5: 0] inp;
+  reg   [2: 0] rom;
+
+  begin
+    case (inp[5: 0])
+      6'b000000: rom = 0;
+      6'b000001: rom = 1;
+      6'b000010: rom = 1;
+      6'b000011: rom = 2;
+      6'b000100: rom = 1;
+      6'b000101: rom = 2;
+      6'b000110: rom = 2;
+      6'b000111: rom = 3;
+      6'b001000: rom = 1;
+      6'b001001: rom = 2;
+      6'b001010: rom = 2;
+      6'b001011: rom = 3;
+      6'b001100: rom = 2;
+      6'b001101: rom = 3;
+      6'b001110: rom = 3;
+      6'b001111: rom = 4;
+      6'b010000: rom = 1;
+      6'b010001: rom = 2;
+      6'b010010: rom = 2;
+      6'b010011: rom = 3;
+      6'b010100: rom = 2;
+      6'b010101: rom = 3;
+      6'b010110: rom = 3;
+      6'b010111: rom = 4;
+      6'b011000: rom = 2;
+      6'b011001: rom = 3;
+      6'b011010: rom = 3;
+      6'b011011: rom = 4;
+      6'b011100: rom = 3;
+      6'b011101: rom = 4;
+      6'b011110: rom = 4;
+      6'b011111: rom = 5;
+      6'b100000: rom = 1;
+      6'b100001: rom = 2;
+      6'b100010: rom = 2;
+      6'b100011: rom = 3;
+      6'b100100: rom = 2;
+      6'b100101: rom = 3;
+      6'b100110: rom = 3;
+      6'b100111: rom = 4;
+      6'b101000: rom = 2;
+      6'b101001: rom = 3;
+      6'b101010: rom = 3;
+      6'b101011: rom = 4;
+      6'b101100: rom = 3;
+      6'b101101: rom = 4;
+      6'b101110: rom = 4;
+      6'b101111: rom = 5;
+      6'b110000: rom = 2;
+      6'b110001: rom = 3;
+      6'b110010: rom = 3;
+      6'b110011: rom = 4;
+      6'b110100: rom = 3;
+      6'b110101: rom = 4;
+      6'b110110: rom = 4;
+      6'b110111: rom = 5;
+      6'b111000: rom = 3;
+      6'b111001: rom = 4;
+      6'b111010: rom = 4;
+      6'b111011: rom = 5;
+      6'b111100: rom = 4;
+      6'b111101: rom = 5;
+      6'b111110: rom = 5;
+      6'b111111: rom = 6;
+    endcase
+
+    countnlayer = rom;
+  end
+
+endfunction
+
 //-------------------------------------------------------------------------------------------------------------------
   endmodule
 //-------------------------------------------------------------------------------------------------------------------

@@ -154,6 +154,7 @@ end
 //     [12:9] is slope value                                                                                                                                   
 //     [13] is slope sign                                                                                                                                       
 //     [17:14] is offset    
+// 2021/09: drop the quality bits 
 //  for offset:default output is in middle of halfstrip: n+0.5 in halfstrip unit; n*4+2 in ES unit
 //  | Value | Value (B)| HS Offset  | Delta HS  | QS Bit  | ES Bit |
 //  |-------|          |------------|-----------|---------|--------|

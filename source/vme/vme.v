@@ -1025,6 +1025,7 @@
   algo2016_drop_used_clcts,
   algo2016_cross_bx_algorithm,
   algo2016_clct_use_corrected_bx,
+  evenchamber,
 
 // Sump
   vme_sump
@@ -2457,6 +2458,7 @@
   output       algo2016_drop_used_clcts;            // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - drop used CLCTs
   output       algo2016_cross_bx_algorithm;         // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
   output       algo2016_clct_use_corrected_bx;      // Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
+  output       evenchamber;
 
 // Sump
   output          vme_sump;        // Unused signals
@@ -7610,6 +7612,7 @@
     algo2016_ctrl_wr[9]   = 1'b1;  // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
     algo2016_ctrl_wr[10]  = 1'b0;  // not used!!!
     algo2016_ctrl_wr[11]  = 1'b0;  // allow seq trigger in a row
+    algo2016_ctrl_wr[12]  = 1'b0;  // even odd parity. software use 1 for odd chamber.  here we use 1 for evenchamber 
   end
   
   assign algo2016_use_dead_time_zone         = algo2016_ctrl_wr[0];   // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
@@ -7620,6 +7623,7 @@
   assign algo2016_cross_bx_algorithm         = algo2016_ctrl_wr[9];   // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
   assign algo2016_clct_use_corrected_bx      = algo2016_ctrl_wr[10];  // Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
   assign seq_trigger_nodeadtime              = algo2016_ctrl_wr[11];// allow two seq trigger in a row
+  assign evenchamber                         =~algo2016_ctrl_wr[12]; // even odd parity. software use 1 for odd chamber.  here we use 1 for evenchamber 
 
   assign algo2016_ctrl_rd[15:0] = algo2016_ctrl_wr[15:0];
 
@@ -7736,9 +7740,6 @@
   assign hmt_thresh1_rd[15:0] = hmt_thresh1_wr[15:0];
   assign hmt_thresh2_rd[15:0] = hmt_thresh2_wr[15:0];
   assign hmt_thresh3_rd[15:0] = hmt_thresh3_wr[15:0];
-  //assign hmt_thresh1_rd[10]  = (hmt_nhits_trig_vme > hmt_thresh1);
-  //assign hmt_thresh2_rd[10]  = (hmt_nhits_trig_vme > hmt_thresh2);
-  //assign hmt_thresh3_rd[10]  = (hmt_nhits_trig_vme > hmt_thresh3);
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_HMT_NHITS_SIG=0x1B4  Nhits for HMT in bx678, Signal

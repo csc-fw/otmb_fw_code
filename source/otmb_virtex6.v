@@ -1178,6 +1178,7 @@
   wire  [MXHS-1:0]    cfeb_ly5hs [MXCFEB-1:0];    // Decoded 1/2-strip pulses
 
   wire  [NHITCFEBB-1:0]     cfeb_nhits [MXCFEB-1:0];
+  wire  [MXLY-1:0]    cfeb_layers_withhits[MXCFEB-1:0];
 
 // Status Ports
   wire  [MXCFEB-1:0]  demux_tp_1st;
@@ -1328,7 +1329,9 @@
   .ly4hs          (cfeb_ly4hs[icfeb][MXHS-1:0]),    // Out  Decoded 1/2-strip pulses
   .ly5hs          (cfeb_ly5hs[icfeb][MXHS-1:0]),    // Out  Decoded 1/2-strip pulses
 
-  .nhits_per_cfeb (cfeb_nhits[icfeb][NHITCFEBB-1:0]),   // Out nhits for one cfeb
+  //for HMT, without pulse extension
+  .nhits_per_cfeb            (cfeb_nhits[icfeb][NHITCFEBB-1:0]),   // Out nhits for one cfeb
+  .layers_withhits_per_cfeb  (cfeb_layers_withhits[icfeb][MXLY-1:0]),// Out layers with hits for one cfeb
 
 // CFEB data received on optical link
   .gtx_rx_data_bits_or (gtx_rx_data_bits_or[icfeb]), // Out  CFEB data received on optical link = OR of all 48 bits for a given CFEB
@@ -1460,6 +1463,7 @@
   wire       algo2016_drop_used_clcts;            // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - drop used CLCTs
   wire       algo2016_cross_bx_algorithm;         // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm, almost no effect, Tao
   wire       algo2016_clct_use_corrected_bx;      // NOT YET IMPLEMENTED: Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits,  NOT USED, Tao
+  wire       evenchamber;  // from VME register 0x198, 1 for even chamber and 0 for odd chamber
   
   `ifdef CCLUT
   pattern_finder_ccLUT upattern_finder
@@ -1732,6 +1736,12 @@
   .nhit_cfeb3    (cfeb_nhits[3][NHITCFEBB-1: 0]),// In cfeb hit counter
   .nhit_cfeb4    (cfeb_nhits[4][NHITCFEBB-1: 0]),// In cfeb hit counter
 
+  .layers_withhits_cfeb0 (cfeb_layers_withhits[0][MXLY-1:0]), // In layers with hits
+  .layers_withhits_cfeb1 (cfeb_layers_withhits[1][MXLY-1:0]), // In layers with hits
+  .layers_withhits_cfeb2 (cfeb_layers_withhits[2][MXLY-1:0]), // In layers with hits
+  .layers_withhits_cfeb3 (cfeb_layers_withhits[3][MXLY-1:0]), // In layers with hits
+  .layers_withhits_cfeb4 (cfeb_layers_withhits[4][MXLY-1:0]), // In layers with hits
+
   .hmt_enable    (hmt_enable) , // In hmt enabled 
   .hmt_thresh1   (hmt_thresh1[7:0]), // In hmt thresh1
   .hmt_thresh2   (hmt_thresh2[7:0]), // In hmt thresh2
@@ -1806,7 +1816,6 @@
   wire  [MXTBIN-1:0]  cfeb_tbin;
   wire  [7:0]      cfeb_rawhits;
 
-  wire [MXHMTB-1:0]             hmt_cathode_vme;
   wire  [MXCLCT-1:0]  clct0_xtmb;
   wire  [MXCLCT-1:0]  clct1_xtmb;
   wire  [MXCLCTC-1:0]  clctc_xtmb;        // Common to CLCT0/1 to TMB
@@ -1867,11 +1876,6 @@
   wire [3:0] l1a_preClct_width;
   wire [7:0] l1a_preClct_dly;
   
-  wire [NHMTHITB-1:0]             hmt_nhits_bx7_vme;
-  wire [NHMTHITB-1:0]             hmt_nhits_sig_vme;
-  wire [NHMTHITB-1:0]             hmt_nhits_bkg_vme;
-
-  wire  [MXCLCT-1:0]  clct0_vme;
   wire  [MXCLCT-1:0]  clct1_vme;
   wire  [MXCLCTC-1:0]  clctc_vme;
   wire  [MXCFEB-1:0]  clctf_vme;
@@ -2191,6 +2195,7 @@
   .algo2016_use_dead_time_zone         (algo2016_use_dead_time_zone),         // In Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
   .algo2016_dead_time_zone_size        (algo2016_dead_time_zone_size[4:0]),   // In Constant size of the dead time zone
   .algo2016_use_dynamic_dead_time_zone (algo2016_use_dynamic_dead_time_zone), // In Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
+  .evenchamber                         (evenchamber),   // evenodd parity. 1 for even chamber and 0 for odd chamber
   
   .tmb_allow_alct  (tmb_allow_alct),  // In  Allow ALCT only 
   .tmb_allow_clct  (tmb_allow_clct),  // In  Allow CLCT only
@@ -3010,6 +3015,12 @@
 
   wire [3:0] tmb_hmt_match_win;
 
+  wire [NHMTHITB-1:0]             hmt_nhits_bx7_vme;
+  wire [NHMTHITB-1:0]             hmt_nhits_sig_vme;
+  wire [NHMTHITB-1:0]             hmt_nhits_bkg_vme;
+  wire [MXHMTB-1:0]             hmt_cathode_vme;
+
+  wire  [MXCLCT-1:0]  clct0_vme;
   tmb utmb
   (
 // Clock
@@ -3172,10 +3183,10 @@
 // VME Status
   .event_clear_vme  (event_clear_vme),        // In  Event clear for aff,clct,mpc vme diagnostic registers
 
-  .hmt_nhits_bx7_vme    (hmt_nhits_bx7_vme   [NHMTHITB-1:0]),//In  HMT nhits for trigger
-  .hmt_nhits_sig_vme  (hmt_nhits_sig_vme [NHMTHITB-1:0]),//In  HMT nhits for trigger
-  .hmt_nhits_bkg_vme (hmt_nhits_bkg_vme[NHMTHITB-1:0]),//In  HMT nhits for trigger
-  .hmt_cathode_vme      (hmt_cathode_vme[MXHMTB-1:0]),  //In  HMT trigger results
+  .hmt_nhits_bx7_vme    (hmt_nhits_bx7_vme   [NHMTHITB-1:0]),//Out HMT nhits for VME  
+  .hmt_nhits_sig_vme    (hmt_nhits_sig_vme [NHMTHITB-1:0]),  //Out HMT nhits for VME  
+  .hmt_nhits_bkg_vme    (hmt_nhits_bkg_vme[NHMTHITB-1:0]),   //Out HMT nhits for VME  
+  .hmt_cathode_vme      (hmt_cathode_vme[MXHMTB-1:0]),       //Out HMT trigger results
 
   .mpc_frame_vme    (mpc_frame_vme),          // Out MPC frame latch strobe for VME
   .mpc0_frame0_vme  (mpc0_frame0_vme[MXFRAME-1:0]),  // Out  MPC best muon 1st frame
@@ -4084,6 +4095,7 @@
       .algo2016_drop_used_clcts            (algo2016_drop_used_clcts),            // Out Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - drop used CLCTs
       .algo2016_cross_bx_algorithm         (algo2016_cross_bx_algorithm),         // Out LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
       .algo2016_clct_use_corrected_bx      (algo2016_clct_use_corrected_bx),      // Out Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits NOT YET IMPLEMENTED:
+      .evenchamber                         (evenchamber),   // evenodd parity. 1 for even chamber and 0 for odd chamber
 
       .tmb_allow_alct_ro  (tmb_allow_alct_ro),  // Out  Allow ALCT only  readout, non-triggering
       .tmb_allow_clct_ro  (tmb_allow_clct_ro),  // Out  Allow CLCT only  readout, non-triggering

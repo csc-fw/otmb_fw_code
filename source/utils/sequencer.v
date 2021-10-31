@@ -4414,11 +4414,12 @@
   assign  header20_[14]     =  stagger_hs_csc;        // CSC Staggering ON
   assign  header20_[18:15]  =  0;              // DDU+DMB control flags
 
-  assign  header21_[3:0]   = triad_persist[3:0];        // CLCT Triad persistence
-  assign  header21_[6:4]   = dmb_thresh_pretrig[2:0];   // DMB pre-trigger threshold for active-feb
-  assign  header21_[10:7]  = alct_delay[3:0];           // Delay ALCT for CLCT match window
-  assign  header21_[14:11] = (algo2016_clct_to_alct ? algo2016_clct_window[3:0] : clct_window[3:0] ); // CLCT match window width (if algo2016_clct_to_alct = 1 then set window to ALCT-centric 2016 algorithm else to CLCT-centric "old" algorithm)
-  assign  header21_[18:15] = 0;                         // DDU+DMB control flags
+  assign  header21_[3:0]    = triad_persist[3:0];        // CLCT Triad persistence
+  assign  header21_[6:4]    = dmb_thresh_pretrig[2:0];   // DMB pre-trigger threshold for active-feb
+  assign  header21_[10:7]   = alct_delay[3:0];           // Delay ALCT for CLCT match window
+  assign  header21_[14:11]  = clct_window[3:0];        // CLCT match window width
+//assign  header21_[14:11] = (algo2016_clct_to_alct ? algo2016_clct_window[3:0] : clct_window[3:0] ); // CLCT match window width (if algo2016_clct_to_alct = 1 then set window to ALCT-centric 2016 algorithm else to CLCT-centric "old" algorithm)
+  assign  header21_[18:15]  = 0;                         // DDU+DMB control flags
 
 // CLCT Trigger Status
   assign  header22_[8:0]    =  r_trig_source_vec[8:0];    // Trigger source vector
