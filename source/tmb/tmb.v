@@ -473,7 +473,6 @@
   parameter MXMPCDLY    =  4;        // MPC delay time bits
   //CCLUT
   //parameter MXPATC  = 11;                // Pattern Carry Bits
-  //parameter MXQLTB  = 9;                 // Fit quality bits
   parameter MXOFFSB = 4;                 // Quarter-strip bits
   parameter MXBNDB  = 5;                 // Bend bits
   parameter MXXKYB = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding

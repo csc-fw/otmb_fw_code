@@ -220,7 +220,7 @@
   //parameter MXPATC   = 11;                // Pattern Carry Bits
   parameter MXPATC   = 12;                // Pattern Carry Bits
   parameter MXOFFSB = 4;                 // Quarter-strip bits
-  parameter MXQLTB  = 9;                 // Fit quality bits
+  //parameter MXQLTB  = 9;                 // Fit quality bits
   parameter MXBNDB  = 5;                 // Bend bits, 4bits for value, 1bit for sign
   parameter MXPID   = 11;                // Number of patterns
   parameter MXPAT   = 5;                 // Number of patterns

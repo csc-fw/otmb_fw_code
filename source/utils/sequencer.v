@@ -1175,7 +1175,6 @@
   //parameter MXPATC  = 11;                // Pattern Carry Bits
   parameter MXPATC  = 12;                // Pattern Carry Bits
   parameter MXOFFSB = 4;                 // Quarter-strip bits
-  parameter MXQLTB  = 9;                 // Fit quality bits
   parameter MXBNDB  = 5;                 // Bend bits
   parameter MXXKYB = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
 
@@ -4368,7 +4367,7 @@
   assign  header09_[18:15]  =  0;              // DDU+DMB control flags
 
   //assign  header10_[14:0]    =  r_pretrig_counter[29:15];  // CLCT pre-trigger counter
-  assign  header10_run3_[11: 0]   =  r_clct0_carry_xtmb[MXPATC-1:0];//Tao warning!!
+  assign  header10_run3_[11: 0]   =  r_clct0_carry_xtmb[MXPATC-1:0];//12-bit comparator code
   assign  header10_run3_[13:12]   =  r_clct0_xky_xtmb[1:0];
   assign  header10_run3_[14]      =  r_hmt_nhits_sig_header[0];
   assign  header10_[14:0]   =  run3_daq_df ? header10_run3_[14:0] : r_pretrig_counter[29:15]; // CLCT pre-trigger counter
