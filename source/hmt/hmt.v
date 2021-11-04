@@ -310,8 +310,9 @@
   wire nhits_compare_s0_sig_89A = (nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] >  nhits_trig_s0_srl[0] + nhits_chamber) || (nhits_trig_s0_srl[3] + nhits_trig_s0_srl[2] ==  nhits_trig_s0_srl[0] + nhits_chamber && nhits_trig_s0_srl[2] > nhits_trig_s0_srl[0]);
   wire nhits_trig_s0_sig_peak = nhits_compare_s0_sig_789 && nhits_compare_s0_sig_89A;
 
-  wire nlayer_pass_thresh_sig = nlayer_s0[3] >= hmt_nhit_thresh || nlayer_s0[2] >= hmt_nhit_thresh || nlayer_s0[1] >= hmt_nhit_thresh;
-  wire nlayer_pass_thresh_bkg = nlayer_s0[6] >= hmt_nhit_thresh || nlayer_s0[5] >= hmt_nhit_thresh || nlayer_s0[4] >= hmt_nhit_thresh;
+  //requirement of num of layers with hit is only in the central BX
+  wire nlayer_pass_thresh_sig = nlayer_s0[2] >= hmt_nhit_thresh;
+  wire nlayer_pass_thresh_bkg = nlayer_s0[5] >= hmt_nhit_thresh;
 
   wire hmt_bit0_s0 = ((nhits_trig_s0_sig >= hmt_thresh1) || (nhits_trig_s0_sig >= hmt_thresh3)) & nhits_trig_s0_sig_peak &  (~|hmt_fired_s0_ff) & (~hmt_reset) & nlayer_pass_thresh_sig;
   wire hmt_bit1_s0 = ((nhits_trig_s0_sig >= hmt_thresh2) || (nhits_trig_s0_sig >= hmt_thresh3)) & nhits_trig_s0_sig_peak &  (~|hmt_fired_s0_ff) & (~hmt_reset) & nlayer_pass_thresh_sig;
