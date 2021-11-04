@@ -24,8 +24,8 @@
   layers_withhits_cfeb2,
   layers_withhits_cfeb3,
   layers_withhits_cfeb4,
+  layers_withhits_cfeb5,
   layers_withhits_cfeb6,
-  layers_withhits_cfeb7,
   
   hmt_enable,
   hmt_me1a_enable,
@@ -97,6 +97,7 @@
    parameter MXCFEB     =  7;
    parameter NHITCFEBB  =  6;
    parameter NHMTHITB   = 10;
+	parameter MXLY       =  6;
 
    `include "../otmb_virtex6_fw_version.v"
 
@@ -209,7 +210,7 @@
   end
   wire hmt_reset = |hmt_reset_ff;
 
-  wire [MXLY-1:0]   layers_withhits_me1a = layers_withhits_cfeb4 | layers_withhits_cfeb5 | layers_withhits_cfebr6;
+  wire [MXLY-1:0]   layers_withhits_me1a = layers_withhits_cfeb4 | layers_withhits_cfeb5 | layers_withhits_cfeb6;
   wire [MXLY-1:0]   layers_withhits_me1b = layers_withhits_cfeb0 | layers_withhits_cfeb1 | layers_withhits_cfeb2 | layers_withhits_cfeb3;
   wire [MXLY-1:0]   layers_withhits  =  hmt_me1a_enable ? (layers_withhits_me1a | layers_withhits_me1b) : layers_withhits_me1b;
 
@@ -627,6 +628,90 @@
   assign wr_push_mux_hmt =  hmt_fired_anode_only ? wr_push_xpre_hmt_pipe : (wr_push_xpre_hmt_pipe && hmt_cathode_fired);
 
   assign hmt_sump = |hmt_pri_best;
+ 
+//------------------------------------------------------------------------------------------------------------------------
+// Virtex-6 Specific
+//
+// 03/21/2013 Initial
+//------------------------------------------------------------------------------------------------------------------------
+function [2: 0] countnlayer;
+  input [5: 0] inp;
+  reg   [2: 0] rom;
+
+  begin
+    case (inp[5: 0])
+      6'b000000: rom = 0;
+      6'b000001: rom = 1;
+      6'b000010: rom = 1;
+      6'b000011: rom = 2;
+      6'b000100: rom = 1;
+      6'b000101: rom = 2;
+      6'b000110: rom = 2;
+      6'b000111: rom = 3;
+      6'b001000: rom = 1;
+      6'b001001: rom = 2;
+      6'b001010: rom = 2;
+      6'b001011: rom = 3;
+      6'b001100: rom = 2;
+      6'b001101: rom = 3;
+      6'b001110: rom = 3;
+      6'b001111: rom = 4;
+      6'b010000: rom = 1;
+      6'b010001: rom = 2;
+      6'b010010: rom = 2;
+      6'b010011: rom = 3;
+      6'b010100: rom = 2;
+      6'b010101: rom = 3;
+      6'b010110: rom = 3;
+      6'b010111: rom = 4;
+      6'b011000: rom = 2;
+      6'b011001: rom = 3;
+      6'b011010: rom = 3;
+      6'b011011: rom = 4;
+      6'b011100: rom = 3;
+      6'b011101: rom = 4;
+      6'b011110: rom = 4;
+      6'b011111: rom = 5;
+      6'b100000: rom = 1;
+      6'b100001: rom = 2;
+      6'b100010: rom = 2;
+      6'b100011: rom = 3;
+      6'b100100: rom = 2;
+      6'b100101: rom = 3;
+      6'b100110: rom = 3;
+      6'b100111: rom = 4;
+      6'b101000: rom = 2;
+      6'b101001: rom = 3;
+      6'b101010: rom = 3;
+      6'b101011: rom = 4;
+      6'b101100: rom = 3;
+      6'b101101: rom = 4;
+      6'b101110: rom = 4;
+      6'b101111: rom = 5;
+      6'b110000: rom = 2;
+      6'b110001: rom = 3;
+      6'b110010: rom = 3;
+      6'b110011: rom = 4;
+      6'b110100: rom = 3;
+      6'b110101: rom = 4;
+      6'b110110: rom = 4;
+      6'b110111: rom = 5;
+      6'b111000: rom = 3;
+      6'b111001: rom = 4;
+      6'b111010: rom = 4;
+      6'b111011: rom = 5;
+      6'b111100: rom = 4;
+      6'b111101: rom = 5;
+      6'b111110: rom = 5;
+      6'b111111: rom = 6;
+    endcase
+
+    countnlayer = rom;
+  end
+
+endfunction
+
+
 //-------------------------------------------------------------------------------------------------------------------
   endmodule
 //-------------------------------------------------------------------------------------------------------------------

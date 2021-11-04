@@ -1542,7 +1542,7 @@
 // Push ALCT data into a 1bx to 16bx pipeline delay to compensate for CLCT processing time
 //------------------------------------------------------------------------------------------------------------------
   
-//`define FAKE_ALCT 0
+`define FAKE_ALCT 1
 `ifdef FAKE_ALCT
   initial $display("tmb: fake ALCT generation code is added!!");
 //------------------------------------------------------------------------------------------------------------------
@@ -2485,7 +2485,7 @@
   assign     alctclctgem_swapped = swapalct_gem_match_pos || swapclct_gem_match_pos;
   assign     alctclctcopad_swapped = swapalct_copad_match_pos || swapclct_copad_match_pos;
 
-  alct_clct_gem_matching ualct_clct_gem_matching(
+  alct_clct_gem_matching_TR ualct_clct_gem_matching(
     
   .clock        (clock),
 
