@@ -562,6 +562,7 @@
 // JG: this functionality is being removed, 10/25/2017...
   algo2016_dead_time_zone_size,
   algo2016_use_dynamic_dead_time_zone,
+  evenchamber,
 
   tmb_allow_alct,
   tmb_allow_clct,
@@ -1367,6 +1368,7 @@
 // JG: this functionality is being removed, 10/25/2017...
   input [4:0] algo2016_dead_time_zone_size;        // Constant size of the dead time zone
   input       algo2016_use_dynamic_dead_time_zone; // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
+  input evenchamber;
 
   input tmb_allow_alct;  // Allow ALCT only 
   input tmb_allow_clct;  // Allow CLCT only
