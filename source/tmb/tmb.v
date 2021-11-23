@@ -392,6 +392,7 @@
   tmb_alct1,
   tmb_alctb,
   tmb_alcte,
+  tmb_cathode_hmt,
   hmt_nhits_sig_ff,
 
   //GEM-CSC match output, time_only
@@ -1024,6 +1025,7 @@
   output  [4:0]      tmb_alctb; // ALCT bxn latched at trigger
   output  [1:0]      tmb_alcte; // ALCT ecc error syndrome latched at trigger
 
+  output  [MXHMTB-1:0]  tmb_cathode_hmt;
   output [NHMTHITB-1:0] hmt_nhits_sig_ff;
 
   //GEM-CSC match output, timing only
@@ -2871,6 +2873,7 @@
   reg [10:0]  tmb_alct1    = 0; // ALCT second best muon latched at trigger
   reg [ 4:0]  tmb_alctb    = 0; // ALCT bxn latched at trigger
   reg [ 1:0]  tmb_alcte    = 0; // ALCT ecc latched at trigger
+  reg [MXHMTB-1:0] tmb_cathode_hmt;
   
   reg [ 3:0]  tmb_gem_clct_win =0;
   reg [ 2:0]  tmb_alct_gem_win =0; 
@@ -2921,6 +2924,7 @@
     tmb_alct1            <= alct1_pipe[10:0];
     tmb_alctb            <= alct0_pipe[15:11];
     tmb_alcte            <= alcte_pipe[1:0];
+    tmb_cathode_hmt      <= hmt_cathode_pipe[MXHMTB-1:0];
 
     //wr_push_rtmb         <= wr_push_mux;        // Buffer write strobe at TMB matching time
     wr_adr_rtmb          <= hmt_fired_only ? wr_adr_xpre_hmt_pipe   : wr_adr_xtmb_pipe;   // Buffer write address at TMB matching time, continuous

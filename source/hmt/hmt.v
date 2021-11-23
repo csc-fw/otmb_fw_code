@@ -586,8 +586,8 @@
   //with triggering or readout enabled
   assign hmt_fired_cathode_only = hmt_cathode_fired && !hmt_anode_fired && (hmt_allow_cathode || hmt_allow_cathode_ro);
   assign hmt_fired_anode_only   =!hmt_cathode_fired &&  hmt_anode_fired && (hmt_allow_anode   || hmt_allow_anode_ro);
-  assign hmt_fired_match        = hmt_cathode_fired &&  hmt_anode_fired &&((hmt_allow_cathode && hmt_allow_anode) || (hmt_allow_cathode_ro && hmt_allow_anode_ro));
-  assign hmt_fired_or           = hmt_cathode_fired ||  hmt_anode_fired && (hmt_allow_cathode || hmt_allow_cathode_ro || hmt_allow_anode   || hmt_allow_anode_ro);
+  assign hmt_fired_match        = hmt_cathode_fired &&  hmt_anode_fired && (hmt_allow_match   || hmt_allow_match_ro);
+  assign hmt_fired_or           =(hmt_cathode_fired && (hmt_allow_cathode || hmt_allow_cathode_ro)) || (hmt_anode_fired && (hmt_allow_anode   || hmt_allow_anode_ro)) || (hmt_cathode_fired &&  hmt_anode_fired && (hmt_allow_match   || hmt_allow_match_ro));
 
   wire [MXHMTB-1    :0] hmt_trigger_cathode    = hmt_cathode_pipe  & {MXHMTB{hmt_allow_cathode}};
   wire [MXHMTB-1    :0] hmt_trigger_anode      = hmt_anode & {MXHMTB{hmt_allow_anode}};
