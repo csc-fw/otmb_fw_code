@@ -1712,7 +1712,8 @@
   wire   wr_push_xtmb_pipe  = (clct_ptr_is_0) ? wr_push_xtmb  : wr_push_xtmb_srl;
   wire   wr_avail_xtmb_pipe = (clct_ptr_is_0) ? wr_avail_xtmb : wr_avail_xtmb_srl;
 
-  assign clct_vpf_pipe  = (clct0_pipe[0] || clct1_pipe[0]) && clct_kept_run3;
+  assign clct_vpf_pipe  = (clct0_pipe[0] || clct1_pipe[0]) && trig_pulse_run3;
+  //assign clct_vpf_pipe  = (clct0_pipe[0] || clct1_pipe[0]) && clct_kept_run3;
 
   wire clct0_cfeb456_pipe  = clct0_pipe[15];          // CLCT0 is on CFEB4-6 hence ME1A
   wire clct1_cfeb456_pipe  = clct1_pipe[15];          // CLCT1 is on CFEB4-6 hence ME1A
