@@ -1293,7 +1293,7 @@
   reg [ 4:0] tmb_alctb = 0; // ALCT bxn latched at trigger
   reg [ 1:0] tmb_alcte = 0; // ALCT ecc latched at trigger
 
-  reg [MXHMTB-1:0] tmb_cathode_hmt;
+  reg [MXHMTB-1:0] tmb_cathode_hmt = 0;
 
   reg hmt_fired_tmb_ff   = 0;
   reg hmt_readout_tmb_ff = 0;

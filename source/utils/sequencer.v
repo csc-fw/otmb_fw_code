@@ -3283,7 +3283,7 @@
   assign rtmb_wdata[22]  =  tmb_clct1_discard; // TMB discarded clct1 from ME1A
 
   assign rtmb_wdata[26:23] = tmb_hmt_match_win[3:0];
-  wire [6:0] hmt_nhits_sig_header = (hmt_nhits_sig_ff>=10'h80) ? 7'h7F : hmt_nhits_sig_ff[6:0]
+  wire [6:0] hmt_nhits_sig_header = (hmt_nhits_sig_ff>=10'h80) ? 7'h7F : hmt_nhits_sig_ff[6:0];
   assign rtmb_wdata[33:27] = hmt_nhits_sig_header[6:0];
   assign rtmb_wdata[35:34] = tmb_cathode_hmt[1:0];
   //old implementation
