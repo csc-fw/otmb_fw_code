@@ -171,6 +171,7 @@
   ly4hs,
   ly5hs,
   nhits_per_cfeb,
+  layers_withhits_per_cfeb,
 
 // CFEB data received on optical link = OR of all bits for ALL CFEBs
   gtx_rx_data_bits_or,
