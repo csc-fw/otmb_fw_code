@@ -218,6 +218,7 @@
   tmb_alctb,
   tmb_alcte,
   
+  tmb_cathode_hmt,
   tmb_hmt_match_win,
   hmt_nhits_sig_ff,
 
@@ -582,6 +583,7 @@
   output  [4:0]      tmb_alctb;      // ALCT bxn latched at trigger
   output  [1:0]      tmb_alcte;      // ALCT ecc error syndrome latched at trigger
 
+  output  [MXHMTB-1:0]  tmb_cathode_hmt;
   output  [3:0]         tmb_hmt_match_win;
   output [NHMTHITB-1:0] hmt_nhits_sig_ff;
 // MPC Status
@@ -1291,6 +1293,8 @@
   reg [ 4:0] tmb_alctb = 0; // ALCT bxn latched at trigger
   reg [ 1:0] tmb_alcte = 0; // ALCT ecc latched at trigger
 
+  reg [MXHMTB-1:0] tmb_cathode_hmt;
+
   reg hmt_fired_tmb_ff   = 0;
   reg hmt_readout_tmb_ff = 0;
   reg tmb_pulse_hmt_only = 0;
@@ -1327,6 +1331,8 @@
     tmb_alct1            <= alct1_pipe[10:0];
     tmb_alctb            <= alct0_pipe[15:11];
     tmb_alcte            <= alcte_pipe[1:0];
+
+    tmb_cathode_hmt      <= hmt_cathode_pipe[MXHMTB-1:0];
 
     wr_adr_rtmb          <= hmt_fired_only ? wr_adr_xpre_hmt_pipe : wr_adr_xtmb_pipe;   // Buffer write address at TMB matching time, continuous
     wr_push_rtmb         <= hmt_fired_only ? wr_push_mux_hmt : wr_push_mux;        // Buffer write strobe at TMB matching time

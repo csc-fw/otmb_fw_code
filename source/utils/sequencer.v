@@ -800,12 +800,14 @@
   tmb_alct1,
   tmb_alctb,
   tmb_alcte,
+  tmb_cathode_hmt,
   tmb_hmt_match_win,
   hmt_nhits_sig_ff,
 
   ccLUT_enable,
   run3_trig_df,
   run3_daq_df,
+  run3_alct_df,
 // MPC Status
   mpc_frame_ff,
   mpc0_frame0_ff,
@@ -1604,12 +1606,14 @@
   input  [10:0]      tmb_alct1;      // ALCT second best muon latched at trigger
   input  [4:0]      tmb_alctb;      // ALCT bxn latched at trigger
   input  [1:0]      tmb_alcte;      // ALCT ecc error syndrome latched at trigger
+  input  [MXHMTB-1:0] tmb_cathode_hmt;
   input [3:0] tmb_hmt_match_win;
   input [NHMTHITB-1:0] hmt_nhits_sig_ff;// hmt nhits in-time
 
   input  ccLUT_enable;
   input  run3_trig_df;
   input  run3_daq_df;
+  input  run3_alct_df;
 
 // MPC Status
   input          mpc_frame_ff;    // MPC frame latch strobe
@@ -2763,14 +2767,14 @@
   wire [MXCFEB-1:0] aff_list_xtmb        = postdrift_data[16+MXCFEB-1:16]; // Active feb list
 
 // After drift, send CLCT words to TMB, persist 1 cycle only, blank invalid CLCTs unless override
-  wire clct0_hit_valid = (hs_hit_1st >= hit_thresh_postdrift);    // CLCT is over hit thresh
+  wire clct0_hit_valid = (hs_hit_1st <= 3'd6 && hs_hit_1st >= hit_thresh_postdrift);    // CLCT is over hit thresh
   wire clct0_pid_valid = (ccLUT_enable && !run3_trig_df) ? (hs_run2pid_1st >= pid_thresh_postdrift) : (hs_pid_1st >= pid_thresh_postdrift);
 
 // JG: this functionality is being removed, 10/25/2017...
 // Algo2016: check if new clct0 key half-strip is outside of dead zone around clct0
 //  wire clct0_key_valid = (hs_key_1st >= hs_key_1st_algo2016 + algo2016_dead_time_zone_size_1st) || (hs_key_1st <= hs_key_1st_algo2016 - algo2016_dead_time_zone_size_1st);
 
-  wire clct1_hit_valid = (hs_hit_2nd >= hit_thresh_postdrift);    // CLCT is over hit thresh
+  wire clct1_hit_valid = (hs_hit_2nd <= 3'd6 && hs_hit_2nd >= hit_thresh_postdrift);    // CLCT is over hit thresh
   wire clct1_pid_valid = (ccLUT_enable && !run3_trig_df) ? (hs_run2pid_2nd >= pid_thresh_postdrift) : (hs_pid_2nd >= pid_thresh_postdrift);
   //wire clct1_pid_valid = (hs_pid_2nd >= pid_thresh_postdrift);    // CLCT is over pid thresh
 
@@ -3247,7 +3251,8 @@
   assign xtmb1_wdata[29:0]  =  clct_counter[29:0];      // CLCTs sent to TMB section
 
 // TMB match: store TMB match results in RAM mapping array
-  parameter MXRTMB = 27 + NHMTHITB;        // TMB match data bits
+  //parameter MXRTMB = 29 + NHMTHITB;        // TMB match data bits
+  parameter MXRTMB = 36;        // TMB match data bits
   wire [MXRTMB-1:0] rtmb_wdata; // Mapping array
   wire [MXRTMB-1:0] rtmb_rdata; // Mapping array
 
@@ -3276,7 +3281,12 @@
   assign rtmb_wdata[22]  =  tmb_clct1_discard; // TMB discarded clct1 from ME1A
 
   assign rtmb_wdata[26:23] = tmb_hmt_match_win[3:0];
-  assign rtmb_wdata[27+NHMTHITB-1:27] = hmt_nhits_sig_ff[NHMTHITB-1:0];
+  wire [6:0] hmt_nhits_sig_header = (hmt_nhits_sig_ff>=10'h80) ? 7'h7F : hmt_nhits_sig_ff[6:0]
+  assign rtmb_wdata[33:27] = hmt_nhits_sig_header[6:0];
+  assign rtmb_wdata[35:34] = tmb_cathode_hmt[1:0];
+  //old implementation
+  //assign rtmb_wdata[27+NHMTHITB-1:27] = hmt_nhits_sig_ff[NHMTHITB-1:0];
+  //assign rtmb_wdata[28+NHMTHITB:27+NHMTHITB]  = tmb_cathode_hmt[1:0];
 
 // TMB match: store ALCTs sent to MPC in RAM mapping array, arrives same bx as tmb match result
   parameter MXALCTD = 11+11+5+2; // ALCT transmit frame data bits, 2alcts + bxn + tmb stats
@@ -3956,10 +3966,13 @@
   wire       r_tmb_clct0_discard = rtmb_rdata[21]; // TMB discarded clct0 from ME1A
   wire       r_tmb_clct1_discard = rtmb_rdata[22]; // TMB discarded clct1 from ME1A
 
-  wire [3:0] r_hmt_match_win  = rtmb_rdata[26:23];// alct/anode hmt in cathode hmt tagged window
+  wire [3:0] r_hmt_match_win        = rtmb_rdata[26:23];// alct/anode hmt in cathode hmt tagged window
+  wire [6:0] r_hmt_nhits_sig_header = rtmb_rdata[33:27];// num of comparator hits
+  wire [1:0] r_tmb_cathode_hmt      = rtmb_rdata[35:34];//cathode HMT bits
 
-  wire [NHMTHITB-1:0] r_hmt_nhits_sig = rtmb_rdata[27+NHMTHITB-1:27];
-  wire [6:0] r_hmt_nhits_sig_header =  (r_hmt_nhits_sig>=10'h80) ? 7'h7F : r_hmt_nhits_sig[6:0];
+  //wire [NHMTHITB-1:0] r_hmt_nhits_sig = rtmb_rdata[27+NHMTHITB-1:27];
+  //wire [6:0] r_hmt_nhits_sig_header =  (r_hmt_nhits_sig>=10'h80) ? 7'h7F : r_hmt_nhits_sig[6:0];
+  //wire [1:0] r_tmb_cathode_hmt =  rtmb_rdata[29+NHMTHITB:28];
 
 
 // Unpack ALCT + extra TMB trigger data from RAM mapping array
@@ -4567,8 +4580,10 @@
   assign  header41_[8]      =  r_tmb_match_ro;        // ALCT and CLCT matched in time, non-triggering readout
   assign  header41_[9]      =  r_tmb_trig_keep;      // Triggering readout event
   assign  header41_[10]     =  r_tmb_non_trig_keep;    // Non-triggering readout event
-  assign  header41_[13:11]  =  lyr_thresh_pretrig[2:0];  // Layer pre-trigger threshold
-  assign  header41_[14]     =  layer_trig_en;        // Layer trigger mode enabled
+  //assign  header41_[13:11]  =  lyr_thresh_pretrig[2:0];  // Layer pre-trigger threshold
+  assign  header41_[12:11]  =  run3_daq_df ? r_tmb_cathode_hmt[1:0] : lyr_thresh_pretrig[1:0];  // Layer pre-trigger threshold
+  assign  header41_[13]     =  run3_daq_df ? r_alct_bxn[1] & run3_alct_df : lyr_thresh_pretrig[2];
+  assign  header41_[14]     =  run3_daq_df ? r_alct_bxn[2] & run3_alct_df : layer_trig_en;        // Layer trigger mode enabled
   assign  header41_[18:15]  =  0;              // DDU+DMB control flags
 
 // Store header in parallel shifter

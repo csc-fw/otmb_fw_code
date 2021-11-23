@@ -1444,10 +1444,10 @@
   //CCLUT is off
   `ifndef CCLUT
    assign hs_bnd_1st[MXBNDB - 1   : 0] = hs_pid_1st;
-   assign hs_xky_1st[MXXKYB - 1   : 0] = {hs_hit_1st, 2'b10};
+   assign hs_xky_1st[MXXKYB - 1   : 0] = {hs_key_1st, 2'b10};
    assign hs_carry_1st[MXPATC - 1 : 0] = 0;
    assign hs_bnd_2nd[MXBNDB - 1   : 0] = hs_pid_2nd;
-   assign hs_xky_2nd[MXXKYB - 1   : 0] = {hs_hit_2nd, 2'b10};
+   assign hs_xky_2nd[MXXKYB - 1   : 0] = {hs_key_2nd, 2'b10};
    assign hs_carry_2nd[MXPATC - 1 : 0] = 0;
    assign hs_run2pid_1st[MXPIDB-1:0]   = hs_pid_1st;
    assign hs_run2pid_2nd[MXPIDB-1:0]   = hs_pid_2nd;
@@ -1910,6 +1910,8 @@
   wire  [10:0]      tmb_alct1;
   wire  [ 4:0]      tmb_alctb;
   wire  [ 1:0]      tmb_alcte;
+
+  wire  [MXHMTB-1:0] tmb_cathode_hmt;
 
   wire [1:0]        mpc_accept_ff;
   wire [1:0]        mpc_reserved_ff;
@@ -2433,12 +2435,14 @@
   .tmb_alct1 (tmb_alct1[10:0]), // In  ALCT second best muon latched at trigger
   .tmb_alctb (tmb_alctb[4:0]),  // In  ALCT bxn latched at trigger
   .tmb_alcte (tmb_alcte[1:0]),  // In  ALCT ecc error syndrome latched at trigger
-  .tmb_hmt_match_win         (tmb_hmt_match_win[3:0]), //In  alct/anode hmt in cathode hmt tagged window
+  .tmb_cathode_hmt  (tmb_cathode_hmt[MXHMTB-1:0]),       
+  .tmb_hmt_match_win(tmb_hmt_match_win[3:0]), //In  alct/anode hmt in cathode hmt tagged window
   .hmt_nhits_sig_ff (hmt_nhits_sig_ff[NHMTHITB-1:0]), // In hmt nhits for header
 
   .ccLUT_enable  (ccLUT_enable),//In enabe CCLUT
   .run3_trig_df  (run3_trig_df), //In enable run3 trigger format
   .run3_daq_df   (run3_daq_df), //In enable run3 daq format
+  .run3_alct_df  (run3_alct_df), //In enable run3 ALCT format
 
 // Sequencer MPC Status
   .mpc_frame_ff    (mpc_frame_ff),        // In  MPC frame latch strobe
@@ -3119,6 +3123,7 @@
   .tmb_alct1 (tmb_alct1[10:0]), // Out  ALCT second best muon latched at trigger
   .tmb_alctb (tmb_alctb[4:0]),  // Out  ALCT bxn latched at trigger
   .tmb_alcte (tmb_alcte[1:0]),  // Out  ALCT ecc error syndrome latched at trigger
+  .tmb_cathode_hmt  (tmb_cathode_hmt[MXHMTB-1:0]),     //out, cathode hmt, aligned with tmb results
   .tmb_hmt_match_win         (tmb_hmt_match_win[3:0]), //In  alct/anode hmt in cathode hmt tagged window
   .hmt_nhits_sig_ff (hmt_nhits_sig_ff[NHMTHITB-1:0]), // Out hmt nhits for header
 
