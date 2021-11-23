@@ -4097,7 +4097,7 @@
   assign rtmb_wdata[30]  =  lct1_with_copad;
 
   assign rtmb_wdata[34:31] = tmb_hmt_match_win[3:0];
-  wire [6:0] hmt_nhits_sig_header = (hmt_nhits_sig_ff>=10'h80) ? 7'h7F : hmt_nhits_sig_ff[6:0]
+  wire [6:0] hmt_nhits_sig_header = (hmt_nhits_sig_ff>=10'h80) ? 7'h7F : hmt_nhits_sig_ff[6:0];
   assign rtmb_wdata[41:35] = hmt_nhits_sig_header[6:0];
   assign rtmb_wdata[43:42] = tmb_cathode_hmt[1:0];
   //assign rtmb_wdata[35+NHMTHITB-1:35] = hmt_nhits_sig_ff[NHMTHITB-1:0];
