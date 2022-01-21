@@ -9214,10 +9214,10 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 // GEM_BX0_DELAY = 0x326 GEM BX0 DELAY 
 //------------------------------------------------------------------------------------------------------------------
   initial begin
-      gem_bx0_delay_wr[5:0]    = 4'b0;  //RW, gemA bx0 delay
+      gem_bx0_delay_wr[5:0]    = 6'b0;  //RW, gemA bx0 delay
       gem_bx0_delay_wr[6]      = 1'b1;  //RW, gemA bx0 enable
       gem_bx0_delay_wr[7]      = 1'b0;  //R gemA bx0 match with clct bx0
-      gem_bx0_delay_wr[13:8]    = 4'b0;  //RW, gemB bx0 delay 
+      gem_bx0_delay_wr[13:8]   = 6'b0;  //RW, gemB bx0 delay 
       gem_bx0_delay_wr[14]     = 1'b1;  //RW, gemB bx0 enable
       gem_bx0_delay_wr[15]     = 1'b0;  //R gemB bx0 match
   end
