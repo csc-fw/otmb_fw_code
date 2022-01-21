@@ -223,7 +223,8 @@
   assign prestore_setback =  READ_ADR_OFFSET+1+PRESTORE_SAFETY;//=9
 
   always @(posedge clock) begin
-  buf_setback <= pretrig_setback+prestore_setback;
+      buf_setback <= pretrig_setback-prestore_setback; //Run2 legacy code
+  //buf_setback <= pretrig_setback+prestore_setback;//Run3 change but may induce the bug causing the invalid CLCT readout in DAQ
   end
 
   assign next_fence_adr = buf_queue_adr-buf_setback;  // compensate for pre-trig latency
