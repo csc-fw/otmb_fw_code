@@ -3317,11 +3317,11 @@
   wire [MXCFEB-1:0] aff_list_xtmb        = postdrift_data[22:16]; // Active feb list
 
 // After drift, send CLCT words to TMB, persist 1 cycle only, blank invalid CLCTs unless override
-  wire clct0_hit_valid = (hs_hit_1st >= hit_thresh_postdrift);    // CLCT is over hit thresh
+  wire clct0_hit_valid = (hs_hit_1st <= 3'd6 && hs_hit_1st >= hit_thresh_postdrift);    // CLCT is over hit thresh
   wire clct0_pid_valid = (ccLUT_enable && !run3_trig_df) ? (hs_run2pid_1st >= pid_thresh_postdrift) : (hs_pid_1st >= pid_thresh_postdrift);
   //wire clct0_pid_valid = (hs_pid_1st >= pid_thresh_postdrift);    // CLCT is over pid thresh
 
-  wire clct1_hit_valid = (hs_hit_2nd >= hit_thresh_postdrift);    // CLCT is over hit thresh
+  wire clct1_hit_valid = (hs_hit_2nd <= 3'd6 && hs_hit_2nd >= hit_thresh_postdrift);    // CLCT is over hit thresh
   wire clct1_pid_valid = (ccLUT_enable && !run3_trig_df) ? (hs_run2pid_2nd >= pid_thresh_postdrift) : (hs_pid_2nd >= pid_thresh_postdrift);
   //wire clct1_pid_valid = (hs_pid_2nd >= pid_thresh_postdrift);    // CLCT is over pid thresh
 
