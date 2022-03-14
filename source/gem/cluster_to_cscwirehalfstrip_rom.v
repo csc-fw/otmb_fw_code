@@ -126,7 +126,7 @@ assign cluster0_pad_hi    = cluster0_vpf ? (cluster0_pad + cluster0_size) : 8'b0
 //   .me1b_r_data2 (me1b_xky_hi) 
 //   );
 rom_pad_es #(
-  .ROM_FILE("GEMCSCLUT_pad_es_ME1a_odd_20220224.mem")
+  .ROM_FILE("GEMCSCLUT_pad_es_ME1a_odd.mem")
 ) romme1aodd (
   .clock(clock),
   .adr0(cluster0_pad_lo),
@@ -136,7 +136,7 @@ rom_pad_es #(
 );
 
 rom_pad_es #(
-  .ROM_FILE("GEMCSCLUT_pad_es_ME1a_even_20220224.mem")
+  .ROM_FILE("GEMCSCLUT_pad_es_ME1a_even.mem")
 ) romme1aeven (
   .clock(clock),
   .adr0(cluster0_pad_lo),
@@ -146,7 +146,7 @@ rom_pad_es #(
 );
 
 rom_pad_es #(
-  .ROM_FILE("GEMCSCLUT_pad_es_ME1b_odd_20220224.mem")
+  .ROM_FILE("GEMCSCLUT_pad_es_ME1b_odd.mem")
 ) romme1bodd (
   .clock(clock),
   .adr0(cluster0_pad_lo),
@@ -156,7 +156,7 @@ rom_pad_es #(
 );
 
 rom_pad_es #(
-  .ROM_FILE("GEMCSCLUT_pad_es_ME1b_even_20220224.mem")
+  .ROM_FILE("GEMCSCLUT_pad_es_ME1b_even.mem")
 ) romme1beven (
   .clock(clock),
   .adr0(cluster0_pad_lo),
