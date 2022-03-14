@@ -1,7 +1,9 @@
 //GEM pad to CSC halfstrip, up to 1/8 strip bits
 //GEM pad: 0-191;    CSC es: 0-128*4 for ME1b  and 128*4-224*4 for ME1a
+//LUTs to find the offset between expected GEM position and CSC position using CSC slope
+//namely: extrapolate the CSC position to GEM position using CSC slope
 
-module rom_gemcsc_slope (
+module rom_cscoffset_slope (
   input clock,
   input  [MXADRB-1:0] adr0, adr1,
   output [MXDATB-1:0] rd0, rd1
