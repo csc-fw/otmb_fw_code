@@ -2506,8 +2506,8 @@
   .clct1_vpf  (clct1_pipe[0] && clct_kept_run3),
   .clct0_xky  (clct0_xky_pipe[9:0]),
   .clct1_xky  (clct1_xky_pipe[9:0]),
-  .clct0_bend (clct0_bnd_pipe[4]),
-  .clct1_bend (clct1_bnd_pipe[4]),
+  .clct0_bnd  (clct0_bnd_pipe[4:0]),
+  .clct1_bnd  (clct1_bnd_pipe[4:0]),
   .clct0_nhit (clct0_pipe[3:1]),
   .clct1_nhit (clct1_pipe[3:1]),
 

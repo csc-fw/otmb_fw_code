@@ -33,8 +33,8 @@ module  alct_clct_gem_matching_TR(
   input clct1_vpf,
   input [9:0] clct0_xky,
   input [9:0] clct1_xky,
-  input clct0_bend,//l or r
-  input clct1_bend,
+  input [4:0] clct0_bnd,//l or r
+  input [4:0] clct1_bnd,
   input [2:0] clct0_nhit,
   input [2:0] clct1_nhit,
 
@@ -548,6 +548,31 @@ module  alct_clct_gem_matching_TR(
   parameter MAXGEMCSCBND = 10'd1023;// invalid bending 
   wire [9:0] bending_min_me1a = evenchamber ? ME1AEVEN : ME1AODD;
   wire [9:0] bending_min_me1b = evenchamber ? ME1BEVEN : ME1BODD;
+  wire clct0_bend = clct0_bnd[4];// bending direction, left or right 
+  wire clct1_bend = clct1_bnd[4];// bending direction, left or right 
+
+  wire [7:0] clct0_gemA_offset;
+  wire [7:0] clct0_gemB_offset;
+  wire [7:0] clct1_gemA_offset;
+  wire [7:0] clct1_gemB_offset;
+ clct_gem_offset_slope uclctoffset(
+    .clock            (clock), 
+    .clct0_bend       (clct0_bnd[3:0]), //clct0 bending, abs value
+    .clct1_bend       (clct1_bnd[3:0]), //clct1 bending, abs value
+    .isME1a0          (clct0_xky[9]),  // Me1a or not, isME1a0=1 means clct0 in ME1a
+    .isME1a1          (clct1_xky[9]),  //Me1a or not, isME1a1=1 means clct1 in ME1a 
+    .even             (evenchamber),   //even chamber pair not, even=1 means even chamber pair 
+    .clct0_gemA_offset(clct0_gemA_offset), // output, offset for clct0-gemA strip position match
+    .clct0_gemB_offset(clct0_gemB_offset),//output, offset for clct0-gemB strip position match
+    .clct1_gemA_offset(clct1_gemA_offset),//output, offset for clct1-gemA strip position match
+    .clct1_gemB_offset(clct1_gemB_offset)  // output, offset for clct1-gemB strip position match
+  );
+
+  //cross the edge is not real issue as the match code is checking whether gem and csc both me1a or me1b. so we ignore it
+  wire [9:0] clct0_gemA_xky_slopecorr = clct0_bend ? (clct0_xky-clct0_gemA_offset) : (clct0_xky+clct0_gemA_offset);
+  wire [9:0] clct0_gemB_xky_slopecorr = clct0_bend ? (clct0_xky-clct0_gemB_offset) : (clct0_xky+clct0_gemB_offset);
+  wire [9:0] clct1_gemA_xky_slopecorr = clct1_bend ? (clct1_xky-clct1_gemA_offset) : (clct1_xky+clct1_gemA_offset);
+  wire [9:0] clct1_gemB_xky_slopecorr = clct1_bend ? (clct1_xky-clct1_gemB_offset) : (clct1_xky+clct1_gemB_offset);
 
   genvar i;
   genvar k;
@@ -568,21 +593,32 @@ module  alct_clct_gem_matching_TR(
       assign clct1_gemA_match_me1ab[i] = clct1_xky[9]  == gemA_cluster_cscxky_mi[i][9]; 
       assign clct1_gemB_match_me1ab[i] = clct1_xky[9]  == gemB_cluster_cscxky_mi[i][9]; 
 
-      assign clct0_gemA_bend[i]   = clct0_xky > gemA_cluster_cscxky_mi[i];
+      assign clct0_gemA_bend[i]   = clct0_xky > gemA_cluster_cscxky_mi[i]; //bending direction means clct_xky > gem_xky
       assign clct0_gemB_bend[i]   = clct0_xky > gemB_cluster_cscxky_mi[i];
       assign clct1_gemA_bend[i]   = clct1_xky > gemA_cluster_cscxky_mi[i];
       assign clct1_gemB_bend[i]   = clct1_xky > gemB_cluster_cscxky_mi[i];
 
-      assign clct0_gemA_match[i] = clct0_vpf && gemA_vpf[i] && (gemA_match_ignore_position || (clct0_xky >= gemA_cluster_cscxky_lo[i] && clct0_xky <= gemA_cluster_cscxky_hi[i])) &&  clct0_gemA_match_me1ab[i]; 
-      assign clct1_gemA_match[i] = clct1_vpf && gemA_vpf[i] && (gemA_match_ignore_position || (clct1_xky >= gemA_cluster_cscxky_lo[i] && clct1_xky <= gemA_cluster_cscxky_hi[i])) &&  clct1_gemA_match_me1ab[i]; 
-      assign clct0_gemB_match[i] = clct0_vpf && gemB_vpf[i] && (gemB_match_ignore_position || (clct0_xky >= gemB_cluster_cscxky_lo[i] && clct0_xky <= gemB_cluster_cscxky_hi[i])) &&  clct0_gemB_match_me1ab[i]; 
-      assign clct1_gemB_match[i] = clct1_vpf && gemB_vpf[i] && (gemB_match_ignore_position || (clct1_xky >= gemB_cluster_cscxky_lo[i] && clct1_xky <= gemB_cluster_cscxky_hi[i])) &&  clct1_gemB_match_me1ab[i]; 
-      
+      //assign clct0_gemA_match[i] = clct0_vpf && gemA_vpf[i] && (gemA_match_ignore_position || (clct0_xky >= gemA_cluster_cscxky_lo[i] && clct0_xky <= gemA_cluster_cscxky_hi[i])) &&  clct0_gemA_match_me1ab[i]; 
+      //assign clct1_gemA_match[i] = clct1_vpf && gemA_vpf[i] && (gemA_match_ignore_position || (clct1_xky >= gemA_cluster_cscxky_lo[i] && clct1_xky <= gemA_cluster_cscxky_hi[i])) &&  clct1_gemA_match_me1ab[i]; 
+      //assign clct0_gemB_match[i] = clct0_vpf && gemB_vpf[i] && (gemB_match_ignore_position || (clct0_xky >= gemB_cluster_cscxky_lo[i] && clct0_xky <= gemB_cluster_cscxky_hi[i])) &&  clct0_gemB_match_me1ab[i]; 
+      //assign clct1_gemB_match[i] = clct1_vpf && gemB_vpf[i] && (gemB_match_ignore_position || (clct1_xky >= gemB_cluster_cscxky_lo[i] && clct1_xky <= gemB_cluster_cscxky_hi[i])) &&  clct1_gemB_match_me1ab[i]; 
       //with bending direction check
-      assign clct0_gemA_match_s0[i] = clct0_gemA_match[i] && (gemcsc_ignore_bend_check || (clct0_xky[9] && bending_min_me1a >= clct0_gemA_angle[i]) || (!clct0_xky[9] && bending_min_me1b >= clct0_gemA_angle[i]) || (clct0_gemA_bend[i] == clct0_bend));
-      assign clct0_gemB_match_s0[i] = clct0_gemB_match[i] && (gemcsc_ignore_bend_check || (clct0_xky[9] && bending_min_me1a >= clct0_gemB_angle[i]) || (!clct0_xky[9] && bending_min_me1b >= clct0_gemB_angle[i]) || (clct0_gemB_bend[i] == clct0_bend));
-      assign clct1_gemA_match_s0[i] = clct1_gemA_match[i] && (gemcsc_ignore_bend_check || (clct1_xky[9] && bending_min_me1a >= clct1_gemA_angle[i]) || (!clct1_xky[9] && bending_min_me1b >= clct1_gemA_angle[i]) || (clct1_gemA_bend[i] == clct1_bend));
-      assign clct1_gemB_match_s0[i] = clct1_gemB_match[i] && (gemcsc_ignore_bend_check || (clct1_xky[9] && bending_min_me1a >= clct1_gemB_angle[i]) || (!clct1_xky[9] && bending_min_me1b >= clct1_gemB_angle[i]) || (clct1_gemB_bend[i] == clct1_bend));
+      //assign clct0_gemA_match_s0[i] = clct0_gemA_match[i] && (gemcsc_ignore_bend_check || (clct0_xky[9] && bending_min_me1a >= clct0_gemA_angle[i]) || (!clct0_xky[9] && bending_min_me1b >= clct0_gemA_angle[i]) || (clct0_gemA_bend[i] == clct0_bend));
+      //assign clct0_gemB_match_s0[i] = clct0_gemB_match[i] && (gemcsc_ignore_bend_check || (clct0_xky[9] && bending_min_me1a >= clct0_gemB_angle[i]) || (!clct0_xky[9] && bending_min_me1b >= clct0_gemB_angle[i]) || (clct0_gemB_bend[i] == clct0_bend));
+      //assign clct1_gemA_match_s0[i] = clct1_gemA_match[i] && (gemcsc_ignore_bend_check || (clct1_xky[9] && bending_min_me1a >= clct1_gemA_angle[i]) || (!clct1_xky[9] && bending_min_me1b >= clct1_gemA_angle[i]) || (clct1_gemA_bend[i] == clct1_bend));
+      //assign clct1_gemB_match_s0[i] = clct1_gemB_match[i] && (gemcsc_ignore_bend_check || (clct1_xky[9] && bending_min_me1a >= clct1_gemB_angle[i]) || (!clct1_xky[9] && bending_min_me1b >= clct1_gemB_angle[i]) || (clct1_gemB_bend[i] == clct1_bend));
+
+      //adding CSC xky correction from CSC slope
+      assign clct0_gemA_match[i] = clct0_vpf && gemA_vpf[i] && (gemA_match_ignore_position || (clct0_gemA_xky_slopecorr >= gemA_cluster_cscxky_lo[i] && clct0_gemA_xky_slopecorr <= gemA_cluster_cscxky_hi[i])) &&  clct0_gemA_match_me1ab[i]; 
+      assign clct1_gemA_match[i] = clct1_vpf && gemA_vpf[i] && (gemA_match_ignore_position || (clct1_gemB_xky_slopecorr >= gemA_cluster_cscxky_lo[i] && clct1_gemB_xky_slopecorr <= gemA_cluster_cscxky_hi[i])) &&  clct1_gemA_match_me1ab[i]; 
+      assign clct0_gemB_match[i] = clct0_vpf && gemB_vpf[i] && (gemB_match_ignore_position || (clct0_gemA_xky_slopecorr >= gemB_cluster_cscxky_lo[i] && clct0_gemA_xky_slopecorr <= gemB_cluster_cscxky_hi[i])) &&  clct0_gemB_match_me1ab[i]; 
+      assign clct1_gemB_match[i] = clct1_vpf && gemB_vpf[i] && (gemB_match_ignore_position || (clct1_gemB_xky_slopecorr >= gemB_cluster_cscxky_lo[i] && clct1_gemB_xky_slopecorr <= gemB_cluster_cscxky_hi[i])) &&  clct1_gemB_match_me1ab[i]; 
+      
+      //with CSC xky correction from CSC slope, the bending direction check could be ignore. 
+      assign clct0_gemA_match_s0[i] = clct0_gemA_match[i];
+      assign clct0_gemB_match_s0[i] = clct0_gemB_match[i];
+      assign clct1_gemA_match_s0[i] = clct1_gemA_match[i];
+      assign clct1_gemB_match_s0[i] = clct1_gemB_match[i];
 
       assign alct0_gemA_match_s0[i] = alct0_vpf && gemA_vpf[i] && (gemA_match_ignore_position || (alct0_wg  >= gemA_cluster_cscwg_lo[i]  && alct0_wg  <= gemA_cluster_cscwg_hi[i] )); 
       assign alct1_gemA_match_s0[i] = alct1_vpf && gemA_vpf[i] && (gemA_match_ignore_position || (alct1_wg  >= gemA_cluster_cscwg_lo[i]  && alct1_wg  <= gemA_cluster_cscwg_hi[i] )); 

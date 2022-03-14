@@ -39,16 +39,16 @@
 //uniform for even and odd: 
 //       60, 56, 52, 48, 44, 40, 36, 32, 28, 24, 20, 16,   12, 8,  4
 module gemcsc_bending_bits (
-    clock, 
-    gemcsc_bending0, 
-    gemcsc_bending1, 
-    gemcsc_gemB0,
-    gemcsc_gemB1,
-    isME1a0, 
-    isME1a1, 
-    even, 
-    bending_bits0, 
-    bending_bits1
+    clock,  
+    gemcsc_bending0,//gemcsc bending angle for first LCT 
+    gemcsc_bending1,//gemcsc bending angle for second LCT
+    gemcsc_gemB0,   //gemcsc match from CSC-gemB match for 1st LCT
+    gemcsc_gemB1,   //gemcsc match from CSC-gemB match for 2nd LCT
+    isME1a0,       //1st LCT in ME1a or not
+    isME1a1,       //2nd LCT in ME1a or not
+    even,          // evenchamber or not
+    bending_bits0, //corrected gemcsc bending angle 
+    bending_bits1  //corrected gemcsc bending angle
   );
 
 parameter MXADRB       = 7;
@@ -66,64 +66,133 @@ parameter MXDATB       = 4;
   output[3:0]    bending_bits1;
 
 
-  wire [3:0] bending_bit0_odd_A, bending_bit0_odd_B;
-  wire [3:0] bending_bit1_odd_A, bending_bit1_odd_B;
-  wire [3:0] bending_bit0_even_A, bending_bit0_even_B;
-  wire [3:0] bending_bit1_even_A, bending_bit1_even_B;
+  wire [3:0] bending_bit0_me1b_odd_A,  bending_bit0_me1b_odd_B;
+  wire [3:0] bending_bit1_me1b_odd_A,  bending_bit1_me1b_odd_B;
+  wire [3:0] bending_bit0_me1b_even_A, bending_bit0_me1b_even_B;
+  wire [3:0] bending_bit1_me1b_even_A, bending_bit1_me1b_even_B;
+  wire [3:0] bending_bit0_me1a_odd_A,  bending_bit0_me1a_odd_B;
+  wire [3:0] bending_bit1_me1a_odd_A,  bending_bit1_me1a_odd_B;
+  wire [3:0] bending_bit0_me1a_even_A, bending_bit0_me1a_even_B;
+  wire [3:0] bending_bit1_me1a_even_A, bending_bit1_me1a_even_B;
   wire [3:0] bending_bit0_even, bending_bit0_odd;
   wire [3:0] bending_bit1_even, bending_bit1_odd;
   
+//ME1B part
 rom_gemcsc_slope #(
-  .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME11_odd_GE11_layer1.mem"),
+  .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME1b_odd_layer1.mem"),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB),
-  .ROMLENGTH(65)
+  .ROMLENGTH(128)
 ) romme1boddA (
   .clock(clock),
   .adr0(gemcsc_bending0),
   .adr1(gemcsc_bending1),
-  .rd0 (bending_bit0_odd_A),
-  .rd1 (bending_bit1_odd_A)
+  .rd0 (bending_bit0_me1b_odd_A),
+  .rd1 (bending_bit1_me1b_odd_A)
 );
 
 rom_gemcsc_slope #(
-  .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME11_even_GE11_layer1.mem"),
+  .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME1b_even_layer1.mem"),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB),
-  .ROMLENGTH(43)
+  .ROMLENGTH(73)
 ) romme1bevenA (
   .clock(clock),
   .adr0(gemcsc_bending0),
   .adr1(gemcsc_bending1),
-  .rd0 (bending_bit0_even_A),
-  .rd1 (bending_bit1_even_A)
+  .rd0 (bending_bit0_me1b_even_A),
+  .rd1 (bending_bit1_me1b_even_A)
 );
 
 rom_gemcsc_slope #(
-  .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME11_odd_GE11_layer2.mem"),
+  .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME1b_odd_layer2.mem"),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB),
-  .ROMLENGTH(59)
+  .ROMLENGTH(128)
 ) romme1boddB (
   .clock(clock),
   .adr0(gemcsc_bending0),
   .adr1(gemcsc_bending1),
-  .rd0 (bending_bit0_odd_B),
-  .rd1 (bending_bit1_odd_B)
+  .rd0 (bending_bit0_me1b_odd_B),
+  .rd1 (bending_bit1_me1b_odd_B)
 );
 
 rom_gemcsc_slope #(
-  .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME11_even_GE11_layer2.mem"),
+  .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME1b_even_layer2.mem"),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB),
-  .ROMLENGTH(39)
+  .ROMLENGTH(60)
 ) romme1bevenB (
   .clock(clock),
   .adr0(gemcsc_bending0),
   .adr1(gemcsc_bending1),
-  .rd0 (bending_bit0_even_B),
-  .rd1 (bending_bit1_even_B)
+  .rd0 (bending_bit0_me1b_even_B),
+  .rd1 (bending_bit1_me1b_even_B)
 );
+
+
+//ME1A part
+rom_gemcsc_slope #(
+  .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME1a_odd_layer1.mem"),
+  .MXADRB(MXADRB),
+  .MXDATB(MXDATB),
+  .ROMLENGTH(128)
+) romme1aoddA (
+  .clock(clock),
+  .adr0(gemcsc_bending0),
+  .adr1(gemcsc_bending1),
+  .rd0 (bending_bit0_me1a_odd_A),
+  .rd1 (bending_bit1_me1a_odd_A)
+);
+
+rom_gemcsc_slope #(
+  .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME1a_even_layer1.mem"),
+  .MXADRB(MXADRB),
+  .MXDATB(MXDATB),
+  .ROMLENGTH(60)
+) romme1aevenA (
+  .clock(clock),
+  .adr0(gemcsc_bending0),
+  .adr1(gemcsc_bending1),
+  .rd0 (bending_bit0_me1a_even_A),
+  .rd1 (bending_bit1_me1a_even_A)
+);
+
+rom_gemcsc_slope #(
+  .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME1a_odd_layer2.mem"),
+  .MXADRB(MXADRB),
+  .MXDATB(MXDATB),
+  .ROMLENGTH(128)
+) romme1aoddB (
+  .clock(clock),
+  .adr0(gemcsc_bending0),
+  .adr1(gemcsc_bending1),
+  .rd0 (bending_bit0_me1a_odd_B),
+  .rd1 (bending_bit1_me1a_odd_B)
+);
+
+rom_gemcsc_slope #(
+  .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME1a_even_layer2.mem"),
+  .MXADRB(MXADRB),
+  .MXDATB(MXDATB),
+  .ROMLENGTH(50)
+) romme1aevenB (
+  .clock(clock),
+  .adr0(gemcsc_bending0),
+  .adr1(gemcsc_bending1),
+  .rd0 (bending_bit0_me1a_even_B),
+  .rd1 (bending_bit1_me1a_even_B)
+);
+
+  wire [3:0] bending_bit0_even_A = isME1a0 ? bending_bit0_me1a_even_A : bending_bit0_me1b_even_A;
+  wire [3:0] bending_bit0_even_B = isME1a0 ? bending_bit0_me1a_even_B : bending_bit0_me1b_even_B;
+  wire [3:0] bending_bit1_even_A = isME1a1 ? bending_bit1_me1a_even_A : bending_bit1_me1b_even_A;
+  wire [3:0] bending_bit1_even_B = isME1a1 ? bending_bit1_me1a_even_B : bending_bit1_me1b_even_B;
+
+  wire [3:0] bending_bit0_odd_A  = isME1a0 ? bending_bit0_me1a_odd_A : bending_bit0_me1b_odd_A;
+  wire [3:0] bending_bit0_odd_B  = isME1a0 ? bending_bit0_me1a_odd_B : bending_bit0_me1b_odd_B;
+  wire [3:0] bending_bit1_odd_A  = isME1a1 ? bending_bit1_me1a_odd_A : bending_bit1_me1b_odd_A;
+  wire [3:0] bending_bit1_odd_B  = isME1a1 ? bending_bit1_me1a_odd_B : bending_bit1_me1b_odd_B;
 
   assign bending_bit0_even = gemcsc_gemB0 ? bending_bit0_even_B : bending_bit0_even_A;
   assign bending_bit1_even = gemcsc_gemB1 ? bending_bit1_even_B : bending_bit1_even_A;
