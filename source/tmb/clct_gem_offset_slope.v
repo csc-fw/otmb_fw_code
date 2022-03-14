@@ -21,7 +21,7 @@ parameter MXDATB       = 8;
 // Ports
   input                  clock;
   input [3:0]  clct0_bend;
-  input [3:0]  clct0_bend;
+  input [3:0]  clct1_bend;
   input                isME1a0;
   input                isME1a1;
   input                   even;
@@ -89,8 +89,8 @@ rom_cscoffset_slope #(
   .clock(clock),
   .adr0(clct0_bend),
   .adr1(clct1_bend),
-  .rd0 (clct0_offset_me1b_odd_B),
-  .rd1 (clct1_offset_me1b_odd_B)
+  .rd0 (clct0_offset_me1b_even_B),
+  .rd1 (clct1_offset_me1b_even_B)
 );
 
 // ME1A part 
