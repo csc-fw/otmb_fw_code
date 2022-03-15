@@ -541,7 +541,8 @@
   wire      ext_trig;
   wire      level1_accept;
   wire      sync_adb_pulse;
-  wire  [3:0]  seq_cmd;
+  //wire  [3:0]  seq_cmd;
+  reg  [3:0]  seq_cmd;
   wire  [3:0]  seq_cmd_mux;
   wire  [3:0]  seq_cmd_ecc;
   wire  [3:0]  reserved_in;
@@ -1517,9 +1518,12 @@
 
   assign level1_accept  = ccb_l1accept;
   assign sync_adb_pulse = alct_adb_pulse_sync;
-  assign seq_cmd[3:0]   = alct_seq_cmd[3:0];
+  //assign seq_cmd[3:0]   = alct_seq_cmd[3:0];
   assign clock_en       = alct_clock_en_vme;
   assign alct_cfg_done  = cfg_done;
+  always @(posedge clock) begin
+      seq_cmd[3:0]   <= alct_seq_cmd[3:0];
+  end
 
 //----------------------------------------------------------------------------------------------------------------
 // ECC parity for outgoing signals
