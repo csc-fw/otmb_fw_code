@@ -32,6 +32,7 @@ module cluster_to_cscwirehalfstrip_rom (
         output     [MXXKYB-1:0]   cluster0_cscxky_lo, // from 0-127 for halfstrip, later replaced by xky resolution
         output     [MXXKYB-1:0]   cluster0_cscxky_hi, // from 0-127
         output     [MXXKYB-1:0]   cluster0_cscxky_mi, // from 128-223, middle
+        output     [MXXKYB-1:0]   cluster0_cscxky_win, // strip match window
         output                    csc_cluster0_me1a,
         output     [13:0]         csc_cluster0,  
         output                    csc_cluster0_vpf,// valid or not
@@ -262,9 +263,13 @@ wire [MXXKYB-1:0]  cluster0_me1bxky_hi  = ((me1b_xky_real_hi+gem_clct_deltaxky) 
 wire [MXXKYB-1:0]  cluster0_me1axky_mi  = me1a_xky_real_lo[MXXKYB-1:1]+me1a_xky_real_hi[MXXKYB-1:1]+(me1a_xky_real_lo[0] | me1a_xky_real_hi[0]);
 wire [MXXKYB-1:0]  cluster0_me1bxky_mi  = me1b_xky_real_lo[MXXKYB-1:1]+me1b_xky_real_hi[MXXKYB-1:1]+(me1b_xky_real_lo[0] | me1b_xky_real_hi[0]);
 
+wire [MXXKYB-1:0]  cluster0_me1axky_win = me1a_xky_real_hi[MXXKYB-1:1]-me1a_xky_real_lo[MXXKYB-1:1]+gem_clct_deltaxky;
+wire [MXXKYB-1:0]  cluster0_me1bxky_win = me1b_xky_real_hi[MXXKYB-1:1]-me1b_xky_real_lo[MXXKYB-1:1]+gem_clct_deltaxky;
+
 assign cluster0_cscxky_lo = (csc_cluster0_me1a) ? cluster0_me1axky_lo : cluster0_me1bxky_lo;
 assign cluster0_cscxky_hi = (csc_cluster0_me1a) ? cluster0_me1axky_hi : cluster0_me1bxky_hi;
 assign cluster0_cscxky_mi = (csc_cluster0_me1a) ? cluster0_me1axky_mi : cluster0_me1bxky_mi;
+assign cluster0_cscxky_win = (csc_cluster0_me1a) ? cluster0_me1axky_win : cluster0_me1bxky_win;
 
 
 //assign cluster0_cscxky_lo = (csc_cluster0_me1a) ? ((me1a_xky_real_lo > MINKEYHSME1A+gem_clct_deltaxky) ? me1a_xky_real_lo-gem_clct_deltaxky : MINKEYHSME1A) : ((me1b_xky_real_lo > MINKEYHSME1B+gem_clct_deltaxky) ? me1b_xky_real_lo-gem_clct_deltaxky : MINKEYHSME1B);

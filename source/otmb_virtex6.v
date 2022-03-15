@@ -2323,6 +2323,8 @@ end
   wire [MXXKYB-1:0] gemB_csc_cluster_xky_hi [MXCLUSTER_CHAMBER-1:0]; // 
   wire [MXXKYB-1:0] gemA_csc_cluster_xky_mi [MXCLUSTER_CHAMBER-1:0]; // 
   wire [MXXKYB-1:0] gemB_csc_cluster_xky_mi [MXCLUSTER_CHAMBER-1:0]; // 
+  wire [MXXKYB-1:0] gemA_csc_cluster_xky_win [MXCLUSTER_CHAMBER-1:0]; // 
+  wire [MXXKYB-1:0] gemB_csc_cluster_xky_win [MXCLUSTER_CHAMBER-1:0]; // 
 
   wire [MXCLUSTER_CHAMBER-1:0] gemA_gemtocsc_dummy;
   wire [MXCLUSTER_CHAMBER-1:0] gemB_gemtocsc_dummy;
@@ -2359,6 +2361,7 @@ end
         .cluster0_cscxky_lo  (gemA_csc_cluster_xky_lo[iclst_csc]), // Out, gem pad into me1b hs, from 0-127
         .cluster0_cscxky_hi  (gemA_csc_cluster_xky_hi[iclst_csc]), // Out, gem pad into me1b hs from 0-127
         .cluster0_cscxky_mi  (gemA_csc_cluster_xky_mi[iclst_csc]), // Out, gem pad into me1b hs from 0-127
+        .cluster0_cscxky_win (gemA_csc_cluster_xky_win[iclst_csc]), // Out, gem pad into me1b hs from 0-127
         .csc_cluster0_me1a   (gemA_csc_cluster_me1a[iclst_csc]),  //Out gem cluster in me1a or not
 
         .csc_cluster0      (gemA_csc_cluster[iclst_csc]),  // Out, aligned gem cluster 
@@ -2393,6 +2396,7 @@ end
         .cluster0_cscxky_lo  (gemB_csc_cluster_xky_lo[iclst_csc]), // from 0-127
         .cluster0_cscxky_hi  (gemB_csc_cluster_xky_hi[iclst_csc]), // from 0-127
         .cluster0_cscxky_mi  (gemB_csc_cluster_xky_mi[iclst_csc]), // from 0-127
+        .cluster0_cscxky_win (gemB_csc_cluster_xky_win[iclst_csc]), // Out, gem pad into me1b hs from 0-127
         .csc_cluster0_me1a   (gemB_csc_cluster_me1a[iclst_csc]),
 
         .csc_cluster0      (gemB_csc_cluster[iclst_csc]),  
@@ -2934,6 +2938,9 @@ end
    wire        gemA_clct_pulse_match;
    wire        gemB_alct_pulse_match; 
    wire        gemB_clct_pulse_match;
+   wire        gemcsc_match_extrapolate;
+   wire        gemcsc_match_bend_correction;
+   wire        gemcsc_match_tightwindow;
    wire        gemA_match_ignore_position;
    wire        gemB_match_ignore_position;
    wire        gemcsc_bend_enable;
@@ -4552,6 +4559,14 @@ wire [15:0] gemB_bxn_counter;
   .gemA_cluster5_cscxky_hi   (gemA_csc_cluster_xky_hi[5]),// IN CSC xky mapped from GEM pad
   .gemA_cluster6_cscxky_hi   (gemA_csc_cluster_xky_hi[6]),// IN CSC xky mapped from GEM pad
   .gemA_cluster7_cscxky_hi   (gemA_csc_cluster_xky_hi[7]),// IN CSC xky mapped from GEM pad
+  .gemA_cluster0_cscxky_win  (gemA_csc_cluster_xky_win[0]),// IN CSC xky mapped from GEM pad
+  .gemA_cluster1_cscxky_win  (gemA_csc_cluster_xky_win[1]),// IN CSC xky mapped from GEM pad
+  .gemA_cluster2_cscxky_win  (gemA_csc_cluster_xky_win[2]),// IN CSC xky mapped from GEM pad
+  .gemA_cluster3_cscxky_win  (gemA_csc_cluster_xky_win[3]),// IN CSC xky mapped from GEM pad
+  .gemA_cluster4_cscxky_win  (gemA_csc_cluster_xky_win[4]),// IN CSC xky mapped from GEM pad
+  .gemA_cluster5_cscxky_win  (gemA_csc_cluster_xky_win[5]),// IN CSC xky mapped from GEM pad
+  .gemA_cluster6_cscxky_win  (gemA_csc_cluster_xky_win[6]),// IN CSC xky mapped from GEM pad
+  .gemA_cluster7_cscxky_win  (gemA_csc_cluster_xky_win[7]),// IN CSC xky mapped from GEM pad
   .gemA_cluster0_cscwire_lo  (gemA_csc_cluster_cscwire_lo[0]),// In CSC wire group mapped from GEM pad
   .gemA_cluster1_cscwire_lo  (gemA_csc_cluster_cscwire_lo[1]),// In CSC wire group mapped from GEM pad
   .gemA_cluster2_cscwire_lo  (gemA_csc_cluster_cscwire_lo[2]),// In CSC wire group mapped from GEM pad
@@ -4611,6 +4626,14 @@ wire [15:0] gemB_bxn_counter;
   .gemB_cluster5_cscxky_hi   (gemB_csc_cluster_xky_hi[5]),// IN CSC xky mapped from GEM pad
   .gemB_cluster6_cscxky_hi   (gemB_csc_cluster_xky_hi[6]),// IN CSC xky mapped from GEM pad
   .gemB_cluster7_cscxky_hi   (gemB_csc_cluster_xky_hi[7]),// IN CSC xky mapped from GEM pad
+  .gemB_cluster0_cscxky_win  (gemB_csc_cluster_xky_win[0]),// IN CSC xky mapped from GEM pad
+  .gemB_cluster1_cscxky_win  (gemB_csc_cluster_xky_win[1]),// IN CSC xky mapped from GEM pad
+  .gemB_cluster2_cscxky_win  (gemB_csc_cluster_xky_win[2]),// IN CSC xky mapped from GEM pad
+  .gemB_cluster3_cscxky_win  (gemB_csc_cluster_xky_win[3]),// IN CSC xky mapped from GEM pad
+  .gemB_cluster4_cscxky_win  (gemB_csc_cluster_xky_win[4]),// IN CSC xky mapped from GEM pad
+  .gemB_cluster5_cscxky_win  (gemB_csc_cluster_xky_win[5]),// IN CSC xky mapped from GEM pad
+  .gemB_cluster6_cscxky_win  (gemB_csc_cluster_xky_win[6]),// IN CSC xky mapped from GEM pad
+  .gemB_cluster7_cscxky_win  (gemB_csc_cluster_xky_win[7]),// IN CSC xky mapped from GEM pad
   .gemB_cluster0_cscwire_lo  (gemB_csc_cluster_cscwire_lo[0]),// In CSC wire group mapped from GEM pad
   .gemB_cluster1_cscwire_lo  (gemB_csc_cluster_cscwire_lo[1]),// In CSC wire group mapped from GEM pad
   .gemB_cluster2_cscwire_lo  (gemB_csc_cluster_cscwire_lo[2]),// In CSC wire group mapped from GEM pad
@@ -4663,6 +4686,10 @@ wire [15:0] gemB_bxn_counter;
   //GEM-CSC match control
   .gem_me1a_match_enable     (gem_me1a_match_enable),       //IN gem-csc match in me1a
   .gem_me1b_match_enable     (gem_me1b_match_enable),       //IN gem-csc match in me1b
+
+  .gemcsc_match_extrapolate    (gemcsc_match_extrapolate),    //In enable GEMCSC match using extrapolation
+  .gemcsc_match_bend_correction(gemcsc_match_bend_correction),//In correct bending angle with GEMCSC bending
+  .gemcsc_match_tightwindow    (gemcsc_match_tightwindow),    //In use tight window when extrapolation is used
 
   .match_drop_lowqalct     (match_drop_lowqalct),               //IN gem-csc match drop lowQ stub 
   .me1a_match_drop_lowqclct     (me1a_match_drop_lowqclct),     //IN gem-csc match drop lowQ stub 
@@ -5966,6 +5993,10 @@ wire [15:0] gemB_bxn_counter;
       //GEM-CSC match control
       .gem_me1a_match_enable     (gem_me1a_match_enable),       //Out gem-csc match in me1a
       .gem_me1b_match_enable     (gem_me1b_match_enable),       //Out gem-csc match in me1b
+
+      .gemcsc_match_extrapolate    (gemcsc_match_extrapolate),    //Out enable GEMCSC match using extrapolation
+      .gemcsc_match_bend_correction(gemcsc_match_bend_correction),//Out correct bending angle with GEMCSC bending
+      .gemcsc_match_tightwindow    (gemcsc_match_tightwindow),    //Out use tight window when extrapolation is used
     
       .match_drop_lowqalct         (match_drop_lowqalct),       //Out gem-csc match drop lowQ stub 
       .me1a_match_drop_lowqclct    (me1a_match_drop_lowqclct),       //Out gem-csc match drop lowQ stub 

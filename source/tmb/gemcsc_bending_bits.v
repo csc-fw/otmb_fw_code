@@ -95,7 +95,7 @@ rom_gemcsc_slope #(
   .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME1b_even_layer1.mem"),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB),
-  .ROMLENGTH(73)
+  .ROMLENGTH(128)
 ) romme1bevenA (
   .clock(clock),
   .adr0(gemcsc_bending0),
@@ -121,7 +121,7 @@ rom_gemcsc_slope #(
   .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME1b_even_layer2.mem"),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB),
-  .ROMLENGTH(60)
+  .ROMLENGTH(128)
 ) romme1bevenB (
   .clock(clock),
   .adr0(gemcsc_bending0),
@@ -149,7 +149,7 @@ rom_gemcsc_slope #(
   .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME1a_even_layer1.mem"),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB),
-  .ROMLENGTH(60)
+  .ROMLENGTH(128)
 ) romme1aevenA (
   .clock(clock),
   .adr0(gemcsc_bending0),
@@ -175,7 +175,7 @@ rom_gemcsc_slope #(
   .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME1a_even_layer2.mem"),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB),
-  .ROMLENGTH(50)
+  .ROMLENGTH(128)
 ) romme1aevenB (
   .clock(clock),
   .adr0(gemcsc_bending0),
