@@ -1379,6 +1379,8 @@
   wire [MXXKYB-1:0]   gemB_cluster_cscxky_hi [MXCLUSTER_CHAMBER-1:0]; // 
   wire [MXXKYB-1:0]   gemA_cluster_cscxky_mi [MXCLUSTER_CHAMBER-1:0]; // 
   wire [MXXKYB-1:0]   gemB_cluster_cscxky_mi [MXCLUSTER_CHAMBER-1:0]; // 
+  wire [MXXKYB-1:0]   gemA_cluster_cscxky_win [MXCLUSTER_CHAMBER-1:0]; // 
+  wire [MXXKYB-1:0]   gemB_cluster_cscxky_win [MXCLUSTER_CHAMBER-1:0]; // 
 
   wire [MXCLUSTER_CHAMBER-1:0] copad_A_B [MXCLUSTER_CHAMBER-1:0];
 
@@ -3593,8 +3595,8 @@
   );
 
   wire [4:0] gemcsc_bnd0, gemcsc_bnd1;
-  assign gemcsc_bnd0[0]  = best_cluster0_bend;
-  assign gemcsc_bnd1[0]  = best_cluster1_bend;
+  assign gemcsc_bnd0[4]  = best_cluster0_bend;
+  assign gemcsc_bnd1[4]  = best_cluster1_bend;
   wire [6:0] gemcsc0_angle_ff = best_cluster0_bend ? (clct0_xky_run3-best_cluster0_cscxky_ff) : (best_cluster0_cscxky_ff-clct0_xky_run3);
   wire [6:0] gemcsc1_angle_ff = best_cluster1_bend ? (clct1_xky_run3-best_cluster1_cscxky_ff) : (best_cluster1_cscxky_ff-clct1_xky_run3);
   gemcsc_bending_bits ugemcscbnd(
