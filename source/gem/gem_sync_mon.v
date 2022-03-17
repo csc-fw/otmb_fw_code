@@ -82,7 +82,8 @@ module gem_sync_mon (
 // we should cycle through these four K-codes:  BC, F7, FB, FD to serve as
 // bunch sequence indicators.when we have more than 8 clusters
 // detected on an OH (an S-bit overflow)
-// we should send the "FC" K-code instead of the usual choice.
+//old definition: we should send the "FC" K-code instead of the usual choice, 
+//2022-03-17, replace FC by FE for overflow marker
 // "1C" K-code for BC0 marker
 // "3C" K-code for resync marker
 

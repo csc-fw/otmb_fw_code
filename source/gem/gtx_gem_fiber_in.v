@@ -300,7 +300,7 @@ module gtx_gem_fiber_in
                 gem_rx_data[7:0] == 8'hF7 || 
                 gem_rx_data[7:0] == 8'hFB || 
                 gem_rx_data[7:0] == 8'hFD || 
-                gem_rx_data[7:0] == 8'hFC || 
+                gem_rx_data[7:0] == 8'hFE || 
                 gem_rx_data[7:0] == 8'h1C || 
                 gem_rx_data[7:0] == 8'h3C 
                 ); 
@@ -313,7 +313,7 @@ module gtx_gem_fiber_in
             // 0xf7 = 11110111
             // 0xfb = 11111011
             // 0xfd = 11111101
-            // 0xfc = 11111100
+            // 0xfe = 11111110, replace FC by FE for overflow, 2022-03-17
             // 0x1c = 00011100, added by Tao,2019-08-22
             // 0x3c = 00111100, added by Tao, 2019-08-22
 
