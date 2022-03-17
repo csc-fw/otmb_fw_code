@@ -2899,8 +2899,10 @@
       clct1_vme_xky   <= 0;
     end
     else if (clct0_vpf) begin
-      clct0_vme <= clct0_xtmb;
-      clct1_vme <= clct1_xtmb;
+      //clct0_vme <= clct0_xtmb;
+      //clct1_vme <= clct1_xtmb;
+      clct0_vme <= {clct0_xtmb[15:8], hs_run2pid_1st[3:0], clct0_xtmb[3:0]};
+      clct1_vme <= {clct1_xtmb[15:8], hs_run2pid_2nd[3:0], clct1_xtmb[3:0]};
       clctc_vme <= clctc_xtmb;
       clctf_vme <= clctf_xtmb;
       clct0_vme_carry <= clct0_carry_xtmb;
