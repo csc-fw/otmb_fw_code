@@ -962,6 +962,8 @@
   wire  [MXCNTVME-1:0]  hmt_readout_counter;
   wire  [MXCNTVME-1:0]  hmt_aff_counter;
   wire  [MXCNTVME-1:0]  buf_stall_counter;
+  wire  [MXCNTVME-1:0]  new_counter0;
+  wire  [MXCNTVME-1:0]  new_counter1;
 
 // GEM Counters
   wire  [MXCNTVME-1:0]  gem_counter0;
@@ -1387,6 +1389,7 @@
   wire  [MXCFEB-1:0]  gtx_rx_err;                    // Out  PRBS test detects an error
   wire  [MXCFEB-1:0]  gtx_rx_sump;                   // Out  Unused signals
   wire  [15:0]        gtx_rx_err_count [MXCFEB-1:0]; // Out  Error count on this fiber channel
+  wire  [15:0]        gtx_rx_kchar [MXCFEB-1:0]; // Out  Error count on this fiber channel
   wire  [MXCFEB-1:0]  link_had_err;                  // link stability monitor: error happened at least once
   wire  [MXCFEB-1:0]  link_good;                     // link stability monitor: always good, no errors since last resync
   wire  [MXCFEB-1:0]  link_bad;                      // link stability monitor: errors happened over 100 times
@@ -1531,6 +1534,7 @@
   .gtx_rx_pol_swap      (gtx_rx_pol_swap[icfeb]),                      // Out GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
   .gtx_rx_err           (gtx_rx_err[icfeb]),                           // Out PRBS test detects an error
   .gtx_rx_err_count     (gtx_rx_err_count[icfeb][15:0]),               // Out Error count on this fiber channel
+  .gtx_rx_kchar         (gtx_rx_kchar[icfeb][15:0]),                   // Out gtx kchar
   .link_had_err         (link_had_err[icfeb]),                         // Out Link stability monitor: error happened at least once
   .link_good            (link_good[icfeb]),                            // Out Link stability monitor: always good, no errors since last resync
   .link_bad             (link_bad[icfeb]),                             // Out Link stability monitor: errors happened over 100 times
@@ -1542,6 +1546,40 @@
   );
   end
   endgenerate
+
+
+  wire cfebs_me1a_synced;
+  wire cfebs_me1a_lostsync;
+  wire cfebs_me1b_synced;
+  wire cfebs_me1b_lostsync;
+  csc_sync_mon ucsc_sync_mon
+  (
+  .clock              (clock),                           // In  40MHz TMB system clock from MMCM
+  .clk_lock           (lock_tmb_clock0),                 // In  40MHz TMB system clock MMCM locked
+
+// Resets
+  .global_reset (global_reset),     // In  Global reset
+  .ttc_resync   (ttc_resync),       // In  TTC resync
+
+  .cfeb0_kchar  (gtx_rx_kchar[0][7:0]),//In CFEB0 kchar, 8bits
+  .cfeb1_kchar  (gtx_rx_kchar[1][7:0]),//In CFEB0 kchar, 8bits
+  .cfeb2_kchar  (gtx_rx_kchar[2][7:0]),//In CFEB0 kchar, 8bits
+  .cfeb3_kchar  (gtx_rx_kchar[3][7:0]),//In CFEB0 kchar, 8bits
+  .cfeb4_kchar  (gtx_rx_kchar[4][7:0]),//In CFEB0 kchar, 8bits
+  .cfeb4_kchar  (gtx_rx_kchar[5][7:0]),//In CFEB0 kchar, 8bits
+  .cfeb4_kchar  (gtx_rx_kchar[6][7:0]),//In CFEB0 kchar, 8bits
+
+  .cfeb_rxd_int_delay         (cfeb_rxd_int_delay[0][3:0]),  // In  Interstage delay, integer bx
+  .cfeb_rxd_int_delay_me1a    (cfeb_rxd_int_delay[4][3:0]),  // In  Interstage delay, integer bx
+  .cfeb_fiber_enable     (mask_all[MXCFEB-1:0]),  // In  1=Enable, 0=Turn off all inputs
+  .link_good             (link_good[MXCFEB-1:0]),   // In Link stability monitor: always good, no errors since last resync
+  .cfeb_sync_done        (gtx_rx_sync_done[MXCFEB-1:0]),//In, all cfeb sync done or not
+  .cfebs_me1a_synced          (cfebs_me1a_synced), //out all cfebs are in sync
+  .cfebs_me1a_lostsync        (cfebs_me1a_lostsync), //out all cfebs are in sync
+  .cfebs_synced               (cfebs_me1b_synced), //out all cfebs are in sync
+  .cfebs_lostsync             (cfebs_me1b_lostsync) //out all cfebs are in sync
+  );
+
 
 //-------------------------------------------------------------------------------------------------------------------
 // GEM Instantiation
@@ -3276,6 +3314,8 @@ end
   .cfeb_badbits_found   (cfeb_badbits_found[MXCFEB-1:0] | link_had_err[MXCFEB-1:0]), // In  CFEB[n] has at least 1 bad bit or fiber error detected
   .cfeb_badbits_blocked (cfeb_badbits_blocked),                                      // In  A CFEB had bad bits that were blocked
 
+  .cfebs_me1b_syncerr   (~cfebs_me1b_synced),   // In, ME1b links synced
+  .cfebs_me1a_syncerr   (~cfebs_me1a_synced),   // In, ME1b links synced
 // Sequencer Pattern Finder PreTrigger Ports
   .cfeb_hit    (cfeb_hit[MXCFEB-1:0]),    // In  This CFEB has a pattern over pre-trigger threshold
   .cfeb_active (cfeb_active[MXCFEB-1:0]), // In  CFEBs marked for DMB readout
@@ -3874,6 +3914,8 @@ end
   .buf_stall_counter   (buf_stall_counter[MXCNTVME-1:0]),
 
 
+  .new_counter0  (new_counter0 [MXCNTVME-1:0]),  // Out
+  .new_counter1  (new_counter1 [MXCNTVME-1:0]),  // Out
 // Sequencer Header Counters
   .hdr_clear_on_resync (hdr_clear_on_resync),           // In  Clear header counters on ttc_resync
   .pretrig_counter     (pretrig_counter[MXCNTVME-1:0]), // Out  Pre-trigger counter
@@ -6198,6 +6240,8 @@ wire [15:0] gemB_bxn_counter;
       .hmt_aff_counter     (hmt_aff_counter[MXCNTVME-1:0]), //In
       .buf_stall_counter   (buf_stall_counter[MXCNTVME-1:0]),//In
       
+      .new_counter0  (new_counter0 [MXCNTVME-1:0]),  //In 
+      .new_counter1  (new_counter1 [MXCNTVME-1:0]),  //In 
       // GEM Trigger/Readout Counter Ports
       .gem_cnt_all_reset    (gem_cnt_all_reset),     // Out  Trigger/Readout counter reset
       .gem_cnt_stop_on_ovf  (gem_cnt_stop_on_ovf),   // Out  Stop all counters if any overflows

@@ -492,6 +492,9 @@
   cfeb_badbits_found,
   cfeb_badbits_blocked,
 
+  cfebs_me1b_syncerr,
+  cfebs_me1a_syncerr,
+
 // Pattern Finder PreTrigger Ports
   cfeb_hit,
   cfeb_active,
@@ -1109,6 +1112,9 @@
   hmt_aff_counter,
   buf_stall_counter,
 
+  new_counter0,
+  new_counter1,
+
 // GEM Trigger/Readout Counter Ports
   gem_cnt_all_reset,
   gem_cnt_stop_on_ovf,
@@ -1562,6 +1568,9 @@
   input [MXCFEB-1:0] triad_tp;             // Triad test point at input to raw hits RAM
   input [MXCFEB-1:0] cfeb_badbits_found;   // CFEB[n] has at least 1 bad bit
   input              cfeb_badbits_blocked; // A CFEB had bad bits that were blocked
+
+  input              cfebs_me1b_syncerr;
+  input              cfebs_me1a_syncerr;
 
 // Pattern Finder PreTrigger Ports
   input  [MXCFEB-1:0]  cfeb_hit;        // This CFEB has a pattern over pre-trigger threshold
@@ -2185,6 +2194,8 @@
   output  [MXCNTVME-1:0]  hmt_aff_counter;
   output  [MXCNTVME-1:0]  buf_stall_counter;
 
+  output  [MXCNTVME-1:0]  new_counter0;
+  output  [MXCNTVME-1:0]  new_counter1;
 // Trigger/Readout Counter Ports
   input  gem_cnt_all_reset;    // Trigger/Readout counter reset
   input  gem_cnt_stop_on_ovf;  // Stop all counters if any overflows
@@ -3491,6 +3502,10 @@
   reg [MXCNTVME-1:0] hmt_cnt [MXHMTCNT-1:0];
   reg [MXHMTCNT-1:0] hmt_cnt_en = 0;//10 HMT counters
 
+  parameter MXNEWCNT = 2; //new counters
+  reg [MXCNTVME-1:0] new_cnt [MXNEWCNT-1:0];
+  reg [MXNEWCNT-1:0] new_cnt_en = 0;//10 HMT counters
+
 // Counter enable strobes
   always @(posedge clock) begin
     cnt_en[13]  <= clct_pretrig;                 // CLCT pretrigger is on any cfeb
@@ -3580,13 +3595,16 @@
     hmt_cnt_en[17] <= hmt_fired_match && !hmt_cathode_alct_match;// hmt anode and cathode, no alct
     hmt_cnt_en[18] <= tmb_pulse_hmt_only; // tmb trigger pulse from hmt
     hmt_cnt_en[19] <= tmb_keep_hmt_only;  // tmb trigger keep from hmt
-
+   
+    new_cnt_en[0]  <= cfebs_me1b_syncerr;
+    new_cnt_en[1]  <= cfebs_me1a_syncerr;
   end
 
 // Counter overflow disable
   wire [MXCNTVME-1:0] cnt_fullscale = {MXCNTVME{1'b1}};
   wire [MXCNT:MNCNT]  cnt_nof;
   wire [MXHMTCNT: 0]  hmt_cnt_nof;
+  wire [MXNEWCNT: 0]  new_cnt_nof;
 
   genvar j;
   generate
@@ -3597,6 +3615,11 @@
   generate
     for (j=0; j<MXHMTCNT; j=j+1) begin: genhmtnof
       assign hmt_cnt_nof[j] = (hmt_cnt[j] < cnt_fullscale);    // 1=counter j not overflowed
+    end
+  endgenerate
+  generate
+    for (j=0; j<MXNEWCNT; j=j+1) begin: gennewnof
+      assign new_cnt_nof[j] = (new_cnt[j] < cnt_fullscale);    // 1=counter j not overflowed
     end
   endgenerate
 
@@ -3640,6 +3663,20 @@
         end
       end //end always
     end //end genhmtcnt
+  endgenerate
+
+  generate
+    for (j=0; j<MXNEWCNT; j=j+1) begin: gennewcnt
+      always @(posedge clock) begin
+        if (vme_cnt_reset) begin
+          if (!(j==RESYNCCNT_ID && ttc_resync)) // Don't let ttc_resync clear the resync counter, eh
+            new_cnt[j] = cnt_fatzero;               // Clear counter j
+        end
+        else if (cnt_en_all) begin
+          if (new_cnt_en[j] && new_cnt_nof[j]) new_cnt[j] = new_cnt[j]+1'b1;  // Increment counter j if it has not overflowed
+        end
+      end //end always
+    end //end gennewcnt
   endgenerate
 
 // Map 2D counter array to 1D for io ports
@@ -3717,6 +3754,8 @@
   assign hmt_counter18    = hmt_cnt[18];
   assign hmt_counter19    = hmt_cnt[19];
 
+  assign new_counter0     = new_cnt[0];
+  assign new_counter1     = new_cnt[1];
 //------------------------------------------------------------------------------------------------------------------
 // GEM VME Counter Section
 //------------------------------------------------------------------------------------------------------------------

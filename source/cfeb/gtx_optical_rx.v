@@ -45,7 +45,7 @@
   gtx_rx_err,
   gtx_rx_err_count, // switch between  link_errcount or prbs_errcount if it's enabled
   gtx_rx_data,
-  //gtx_rx_kchar,
+  gtx_rx_kchar,
   link_had_err,
   link_good,
   link_bad,
@@ -90,7 +90,7 @@
   output      gtx_rx_err;    // PRBS test detects an error
   output  [15:0]  gtx_rx_err_count;    // Error count on this fiber channel (link errors or PRBS test errors if it's enabled)
   output  [47:0]  gtx_rx_data;      // DCFEB comparator data
-  //output  [15:0]  gtx_rx_kchar;      // DCFEB comparator data
+  output  [15:0]  gtx_rx_kchar;      // DCFEB comparator data
   output      link_had_err;
   output      link_good;
   output      link_bad;
@@ -99,7 +99,7 @@
 // Sump
   output      gtx_rx_sump;    // Unused signals
 
-  wire  [15:0]  gtx_rx_kchar;      // DCFEB comparator data
+  //wire  [15:0]  gtx_rx_kchar;      // DCFEB comparator data
 //-------------------------------------------------------------------------------------------------------------------
 // Instantiate TAMU SNAP12 optical receiver logic
 //-------------------------------------------------------------------------------------------------------------------

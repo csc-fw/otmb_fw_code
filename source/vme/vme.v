@@ -944,6 +944,9 @@
   hmt_aff_counter,
   buf_stall_counter,
 
+  new_counter0,
+  new_counter1,
+
   gem_counter0,
   gem_counter1,
   gem_counter2,
@@ -2716,6 +2719,8 @@
   input  [MXCNTVME-1:0]  hmt_aff_counter;
   input  [MXCNTVME-1:0]  buf_stall_counter;
 
+  input  [MXCNTVME-1:0]  new_counter0;
+  input  [MXCNTVME-1:0]  new_counter1;
 // GEM Counters
   input  [MXCNTVME-1:0]  gem_counter0;
   input  [MXCNTVME-1:0]  gem_counter1;
@@ -7405,7 +7410,8 @@
 //------------------------------------------------------------------------------------------------------------------
 // Remap 1D counters to 2D, because XST does not support 2D ports
   parameter MXHMTCNT = 20;
-  parameter MXCNT = 100 + MXHMTCNT;                     // Number of counters, last counter id is mxcnt-1
+  parameter MXNEWCNT = 2;
+  parameter MXCNT = 100 + MXHMTCNT + MXNEWCNT;                     // Number of counters, last counter id is mxcnt-1
   reg  [MXCNTVME-1:0] cnt_snap [MXCNT-1:0]; // Event counter snapshot 2D
   wire [MXCNTVME-1:0] cnt      [MXCNT-1:0]; // Event counter 2D map
 
@@ -7553,6 +7559,8 @@
   assign cnt[118] = hmt_aff_counter;// active cfeb flag from HMT
   assign cnt[119] = buf_stall_counter;
 
+  assign cnt[120] = new_counter0;
+  assign cnt[121] = new_counter1;
 // Virtex-6 GTX Optical Receiver Error Counters
 //  assign cnt[81]  = gtx_rx_err_count0;  // Error count on this fiber channel
 //  assign cnt[82]  = gtx_rx_err_count1;
