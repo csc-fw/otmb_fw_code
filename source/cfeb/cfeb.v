@@ -196,6 +196,7 @@
   gtx_rx_en_prbs_test,
   gtx_rx_start,
   gtx_rx_fc,
+  gtx_rx_nonzero,
   gtx_rx_valid,
   gtx_rx_match,
   gtx_rx_rst_done,
@@ -342,6 +343,7 @@
   input         gtx_rx_en_prbs_test;  // Select random input test data mode
   output        gtx_rx_start;         // Set when the DCFEB Start Pattern is present
   output        gtx_rx_fc;            // Flags when Rx sees "FC" code (sent by Tx) for latency measurement
+  output reg    gtx_rx_nonzero;      // GTX received non-zero data
   output        gtx_rx_valid;         // Valid data detected on link
   output        gtx_rx_match;         // PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
   output        gtx_rx_rst_done;     // This has to complete before rxsync can start
@@ -476,6 +478,8 @@
   always @(posedge clock) begin
      demux_tp_1st <= triad_s0[0][0];  // Layer 0 ds 0  1st in time
      demux_tp_2nd <= triad_s0[3][0];  // Layer 3 ds 0 2nd in time
+     
+     gtx_rx_nonzero <= |gtx_rx_data[47:0];
   end
 
 //-------------------------------------------------------------------------------------------------------------------

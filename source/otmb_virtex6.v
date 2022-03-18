@@ -1233,6 +1233,7 @@
   wire  [15:0]        gtx_rx_disperr_count [MXCFEB-1:0]; // Out  Error count on this fiber channel
   //Tao, comment out ready_phaser_a, only use ready_phaser_b for MEX/1
   wire 	ready_phaser_b, auto_gtx_reset;
+  wire  [MXCFEB-1:0]  cfeb_rx_nonzero;               // Out Flags when rx sees non-zero data
    
   reg 	     gtx_wait       = 1'b1;
   reg [15:0] gtx_wait_count = 0;
@@ -1361,6 +1362,7 @@
   .gtx_rx_en_prbs_test  (gtx_rx_en_prbs_test[icfeb]),  // In  Select random input test data mode
   .gtx_rx_start    (gtx_rx_start[icfeb]),  // Out  Set when the DCFEB Start Pattern is present
   .gtx_rx_fc       (gtx_rx_fc[icfeb]),     // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
+  .gtx_rx_nonzero  (cfeb_rx_nonzero[icfeb]),                      // Out Flags when any non-zero data passes through CFEB link
   .gtx_rx_valid    (gtx_rx_valid[icfeb]),  // Out  Valid data detected on link
   .gtx_rx_match    (gtx_rx_match[icfeb]),  // Out  PRBS test data match detected, for PRBS tests, a VALID = "should have a match" such that !MATCH is an error
   .gtx_rx_rst_done  (gtx_rx_rst_done[icfeb]),  // Out  These get set before rxsync cycle begins
@@ -1402,7 +1404,7 @@
   .cfeb_rxd_int_delay    (cfeb_rxd_int_delay[0][3:0]),  // In  Interstage delay, integer bx. fiber bundled
   .cfeb_fiber_enable     (mask_all[MXCFEB-1:0]),  // In  1=Enable, 0=Turn off all inputs
   .link_good             (link_good[MXCFEB-1:0]),   // In Link stability monitor: always good, no errors since last resync
-  .cfeb_sync_done       (gtx_rx_sync_done[MXCFEB-1:0]),//In, all cfeb sync done or not
+  .cfeb_sync_done        (gtx_rx_sync_done[MXCFEB-1:0]),//In, all cfeb sync done or not
   .cfebs_synced          (cfebs_synced), //out all cfebs are in sync
   .cfebs_lostsync        (cfebs_lostsync) //out all cfebs are in sync
   );
@@ -3408,9 +3410,10 @@
   .Q  (mez_tp[1]));    // Out  1-bit DDR output
 
 
+  x_flashsm #(22) uflash_blink_cfeb_led (.trigger(|cfeb_rx_nonzero ),    .hold(1'b0), .clock(clock), .out(blink_cfeb_led));
 
   assign mez_led[0] = ~|link_had_err;    // blue OFF.  was ~alct_wait_cfg
-  assign mez_led[1] = ~l_tmbclk0_lock;   // green
+  assign mez_led[1] = ~l_tmbclk0_lock ^ blink_cfeb_led;   // green
   assign mez_led[2] = lock_tmb_clock0;   // yellow
   assign mez_led[3] = ~tmbmmcm_locklost; // red
   assign mez_led[4] = ~l_qpll_lock;   // green
@@ -4362,7 +4365,7 @@
       .hmt_aff_counter     (hmt_aff_counter[MXCNTVME-1:0]), //out
       .buf_stall_counter   (buf_stall_counter[MXCNTVME-1:0]),
       
-      .new_counter0 (new_counter0[MXCNTVME-1:0]),  // Out
+      .new_counter0 (new_counter0[MXCNTVME-1:0]),  // In
       // CSC Orientation Ports
       .csc_type        (csc_type[3:0]),   // In  Firmware compile type
       .csc_me1ab       (csc_me1ab),       // In  1=ME1A or ME1B CSC type
