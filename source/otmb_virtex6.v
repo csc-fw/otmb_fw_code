@@ -924,6 +924,7 @@
   wire  [MXCNTVME-1:0]  hmt_readout_counter;
   wire [MXCNTVME-1:0]  hmt_aff_counter;
   wire [MXCNTVME-1:0]  buf_stall_counter;
+  wire  [MXCNTVME-1:0] new_counter0;
 
 // CFEB injector RAM map 2D arrays into 1D for ALCT
   wire  [MXCFEB-1:0]  inj_ramout_pulse;
@@ -1367,7 +1368,7 @@
   .gtx_rx_pol_swap  (gtx_rx_pol_swap[icfeb]),  // Out  GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
   .gtx_rx_err       (gtx_rx_err[icfeb]),       // Out  PRBS test detects an error
   .gtx_rx_err_count (gtx_rx_err_count[icfeb][15:0]),  // Out  Error count on this fiber channel
-  .gtx_rx_err_count (gtx_rx_kchar[icfeb][15:0]),  // Out  gtx Kchar
+  .gtx_rx_kchar     (gtx_rx_kchar[icfeb][15:0]),  // Out  gtx Kchar
   .link_had_err     (link_had_err[icfeb]),     // link stability monitor: error happened at least once
   .link_good        (link_good[icfeb]),        // link stability monitor: always good, no errors since last resync
   .link_bad         (link_bad[icfeb]),         // link stability monitor: errors happened over 100 times
@@ -1401,10 +1402,10 @@
   .cfeb_rxd_int_delay    (cfeb_rxd_int_delay[0][3:0]),  // In  Interstage delay, integer bx. fiber bundled
   .cfeb_fiber_enable     (mask_all[MXCFEB-1:0]),  // In  1=Enable, 0=Turn off all inputs
   .link_good             (link_good[MXCFEB-1:0]),   // In Link stability monitor: always good, no errors since last resync
-  .cfebs_sync_done       (gtx_rx_sync_done[MXCFEB-1:0]),//In, all cfeb sync done or not
+  .cfeb_sync_done       (gtx_rx_sync_done[MXCFEB-1:0]),//In, all cfeb sync done or not
   .cfebs_synced          (cfebs_synced), //out all cfebs are in sync
   .cfebs_lostsync        (cfebs_lostsync) //out all cfebs are in sync
-  )
+  );
 
 //-------------------------------------------------------------------------------------------------------------------
 // Pattern Finder declarations, common to ME1A+ME1B+ME234
@@ -2636,7 +2637,7 @@
   .hmt_readout_counter (hmt_readout_counter[MXCNTVME-1:0]), //out
   .hmt_aff_counter     (hmt_aff_counter[MXCNTVME-1:0]), //out
   .buf_stall_counter   (buf_stall_counter[MXCNTVME-1:0]),
-  .new_counter0 (new_counter19[MXCNTVME-1:0]),  // Out
+  .new_counter0 (new_counter0[MXCNTVME-1:0]),  // Out
   
 // Sequencer Header Counters
   .hdr_clear_on_resync (hdr_clear_on_resync),           // In  Clear header counters on ttc_resync
@@ -4361,7 +4362,7 @@
       .hmt_aff_counter     (hmt_aff_counter[MXCNTVME-1:0]), //out
       .buf_stall_counter   (buf_stall_counter[MXCNTVME-1:0]),
       
-      .new_counter0 (new_counter19[MXCNTVME-1:0]),  // Out
+      .new_counter0 (new_counter0[MXCNTVME-1:0]),  // Out
       // CSC Orientation Ports
       .csc_type        (csc_type[3:0]),   // In  Firmware compile type
       .csc_me1ab       (csc_me1ab),       // In  1=ME1A or ME1B CSC type

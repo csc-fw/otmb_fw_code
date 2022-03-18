@@ -40,7 +40,7 @@
 	RX_RST_DONE,
 	RX_SYNC_DONE,
         errcount,
-        force_err,
+        force_error,
         link_had_err,
         link_good,
 	link_bad,

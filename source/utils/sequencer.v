@@ -456,6 +456,8 @@
   cfeb_badbits_found,
   cfeb_badbits_blocked,
 
+   cfebs_syncerr,
+	
 // Pattern Finder PreTrigger Ports
   cfeb_hit,
   cfeb_active,
@@ -1264,6 +1266,7 @@
   input [MXCFEB-1:0] cfeb_badbits_found;   // CFEB[n] has at least 1 bad bit
   input              cfeb_badbits_blocked; // A CFEB had bad bits that were blocked
   
+  input              cfebs_syncerr;
 // Pattern Finder PreTrigger Ports
   input  [MXCFEB-1:0]  cfeb_hit;        // This CFEB has a pattern over pre-trigger threshold
   input  [MXCFEB-1:0]  cfeb_active;     // CFEBs marked for DMB readout

@@ -34,7 +34,8 @@ parameter MXCFEB = 5;
 
   wire [3:0] cfebdly = cfeb_rxd_int_delay +1;
 
-  wire cfebs_sync_done_srl = &cfeb_sync_done;
+  wire cfebs_sync_done = &cfeb_sync_done;
+  wire cfebs_sync_done_srl;
 
   SRL16E upup (.CLK(clock),.CE(!power_up & clk_lock),.D(1'b1),.A0(pdly[0]),.A1(pdly[1]),.A2(pdly[2]),.A3(pdly[3]),.Q(power_up));
   
@@ -73,7 +74,7 @@ parameter MXCFEB = 5;
 wire [MXCFEB-1:0] skip_sync_check;
 wire [MXCFEB-1:0] kchar_in_table;
 
-genvar icfeb
+genvar icfeb;
 generate
     for (icfeb=0; icfeb<MXCFEB; icfeb=icfeb+1) begin
         //ignore the sync check when links are not good, cfeb fibers are not enabled, overflow, bc0marker, resyncmarker
@@ -100,7 +101,7 @@ initial cfebs_synced = 1'b1;
 initial cfebs_lostsync = 1'b0;
 
 always @(posedge clock) begin
-    cscs_synced   <= (reset || !cfebs_sync_done_srl) ? 1'b1 : cfebs_sync;
+    cfebs_synced   <= (reset || !cfebs_sync_done_srl) ? 1'b1 : cfebs_sync;
     cfebs_lostsync <= (reset || !cfebs_sync_done_srl) ? 1'b0 : (cfebs_lostsync | ~cfebs_sync);
 end
 
