@@ -385,7 +385,9 @@
 
 	   link_good <= !mon_rst & (mon_count[3:0]==4'hf);  // use to signal the link is alive after 1 + 15 complete BX cycles
 	   if(!link_err) link_err <= (link_went_down); // use to signal the link was OK then had a problem (== link_went_down) at least once
-	   if((err_inj || link_went_down) && err_count[7:4]!=4'hE) err_count <= err_count + 1'b1; // how many times the link was lost
+	   //if((err_inj || link_went_down) && err_count[7:4]!=4'hE) err_count <= err_count + 1'b1; // how many times the link was lost
+       //ignore the forec err
+	   if(link_went_down && err_count[7:4]!=4'hE) err_count <= err_count + 1'b1; // how many times the link was lost
 
            if (CEW0 || CEW1 || CEW2 || CEW3) begin
               if (cmp_rx_notintable[1:0] != 2'b00 && notintable_cnt[15:0] != 16'hFFFE) notintable_cnt <= notintable_cnt +1'b1;
