@@ -857,6 +857,7 @@
   hmt_aff_counter,
   buf_stall_counter,
 
+  new_counter0,
 // CSC Orientation Ports
   csc_type,
   csc_me1ab,
@@ -2282,6 +2283,7 @@
   input  [MXCNTVME-1:0]  hmt_aff_counter;
   input  [MXCNTVME-1:0]  buf_stall_counter;
 
+  input  [MXCNTVME-1:0]  new_counter0;
 // CSC Orientation Ports
   input  [3:0] csc_type;        // Firmware compile type
   input        csc_me1ab;       // 1=ME1A or ME1B CSC type
@@ -6419,7 +6421,8 @@
 // Remap 1D counters to 2D, because XST does not support 2D ports
 // MAX allowed counter is 127
   parameter MXHMTCNT = 20;
-  parameter MXCNT = 100 + MXHMTCNT;                     // Number of counters, last counter id is mxcnt-1
+  parameter MXNEWCNT = 2;//2 new counters for syncerror
+  parameter MXCNT = 100 + MXHMTCNT + MXNEWCNT;                     // Number of counters, last counter id is mxcnt-1
   reg  [MXCNTVME-1:0] cnt_snap [MXCNT-1:0]; // Event counter snapshot 2D
   wire [MXCNTVME-1:0] cnt      [MXCNT-1:0]; // Event counter 2D map
 
@@ -6571,6 +6574,8 @@
   assign cnt[118] = hmt_aff_counter;// active cfeb flag from HMT
   assign cnt[119] = buf_stall_counter;
 
+  assign cnt[120] = new_counter0;
+  assign cnt[121] = new_counter0;//reserved for ME1a for ME11
 // Virtex-6 GTX Optical Receiver Error Counters
 //  assign cnt[81]  = gtx_rx_err_count0;  // Error count on this fiber channel
 //  assign cnt[82]  = gtx_rx_err_count1;

@@ -987,6 +987,7 @@
   hmt_aff_counter,
   buf_stall_counter,
 
+  new_counter0,
 // Parity Errors
   perr_pulse,
   perr_cfeb_ff,
@@ -1794,6 +1795,7 @@
   output  [MXCNTVME-1:0]  hmt_readout_counter;
   output  [MXCNTVME-1:0]  hmt_aff_counter;
   output  [MXCNTVME-1:0]  buf_stall_counter;
+  output  [MXCNTVME-1:0]  new_counter0;
 // Parity Errors
   input                perr_pulse;   // Parity error pulse for counting
   input  [MXCFEB-1:0]  perr_cfeb_ff; // CFEB RAM parity error, latched
@@ -2966,6 +2968,10 @@
   reg [MXCNTVME-1:0] hmt_cnt [MXHMTCNT-1:0];
   reg [MXHMTCNT-1:0] hmt_cnt_en = 0;//6 HMT counters
 
+  parameter MXNEWCNT    = 1;
+  reg [MXCNTVME-1:0] new_cnt [MXNEWCNT-1:0];
+  reg [MXNEWCNT-1:0] new_cnt_en = 0;//1 new counters
+
 // Counter enable strobes
   always @(posedge clock) begin
     cnt_en[13]  <= clct_pretrig;                 // CLCT pretrigger is on any cfeb
@@ -3060,12 +3066,15 @@
     hmt_cnt_en[17] <= hmt_fired_match && !hmt_cathode_alct_match;// hmt anode and cathode, no alct 
     hmt_cnt_en[18] <= tmb_pulse_hmt_only; // tmb trigger pulse from hmt
     hmt_cnt_en[19] <= tmb_keep_hmt_only;  // tmb trigger keep from hmt
+
+    new_cnt_en[0]  <= cfebs_syncerr;
   end
 
 // Counter overflow disable
   wire [MXCNTVME-1:0] cnt_fullscale = {MXCNTVME{1'b1}};
   wire [MXCNT:MNCNT]  cnt_nof;
   wire [MXHMTCNT-1:0]  hmt_cnt_nof;
+  wire [MXNEWCNT-1:0]  new_cnt_nof;
 
   genvar j;
   generate
@@ -3076,6 +3085,11 @@
   generate
     for (j=0; j<MXHMTCNT; j=j+1) begin: genhmtnof
       assign hmt_cnt_nof[j] = (hmt_cnt[j] < cnt_fullscale);    // 1=counter j not overflowed
+    end
+  endgenerate
+  generate
+    for (j=0; j<MXNEWCNT; j=j+1) begin: gennewnof
+      assign new_cnt_nof[j] = (new_cnt[j] < cnt_fullscale);    // 1=counter j not overflowed
     end
   endgenerate
 
@@ -3119,6 +3133,20 @@
         end
       end //end always
     end //end genhmtcnt
+  endgenerate
+
+  generate
+    for (j=0; j<MXNEWCNT; j=j+1) begin: gennewcnt
+      always @(posedge clock) begin
+        if (vme_cnt_reset) begin
+          if (!(j==RESYNCCNT_ID && ttc_resync)) // Don't let ttc_resync clear the resync counter, eh
+            new_cnt[j] = cnt_fatzero;               // Clear counter j
+        end
+        else if (cnt_en_all) begin
+          if (new_cnt_en[j] && new_cnt_nof[j]) new_cnt[j] = new_cnt[j]+1'b1;  // Increment counter j if it has not overflowed
+        end
+      end //end always
+    end //end gennewcnt
   endgenerate
 
 
@@ -3198,6 +3226,7 @@
   assign hmt_counter18    = hmt_cnt[18];
   assign hmt_counter19    = hmt_cnt[19];
 
+  assign new_counter19    = new_cnt[0];
 //------------------------------------------------------------------------------------------------------------------
 // Multi-buffer storage for event header
 //------------------------------------------------------------------------------------------------------------------

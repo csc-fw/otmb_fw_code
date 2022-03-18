@@ -45,7 +45,7 @@
   gtx_rx_err,
   gtx_rx_err_count, // switch between  link_errcount or prbs_errcount if it's enabled
   gtx_rx_data,
-  //gtx_rx_kchar,
+  gtx_rx_kchar,
         link_had_err,
         link_good,
   link_bad,
@@ -90,6 +90,7 @@
   output      gtx_rx_sync_done; // Use these to determine gtx_ready
   output      gtx_rx_err;    // PRBS test detects an error
   output  [15:0]  gtx_rx_err_count;    // Error count on this fiber channel (link errors or PRBS test errors if it's enabled)
+  output  [15:0]  gtx_rx_kchar;      // DCFEB comparator data
   output  [47:0]  gtx_rx_data;      // DCFEB comparator data
   output      link_had_err;
   output      link_good;
@@ -114,9 +115,11 @@
   wire [3:1]  nonzero_word;
   wire [47:0]  comp_dat;
   wire [47:0]  prompt_dat;
+  wire [15:0]  comp_kchar;
 
   wire [15:0]  notintable_count;
   wire [15:0]  disperr_count;
+  reg          lt_trg_err        = 0;
 
 // GTX instance
   gtx_comp_fiber_in ugtx_comp_fiber_in
@@ -134,6 +137,7 @@
   .VALID       (rx_valid),        // Out  Send this output to TP (only valid after StartMtch has come by)
   .MATCH       (rx_match),        // Out  Send this output to TP  AND use for counting errors. VALID="should match" when true, !MATCH is an error
   .RCV_DATA    (comp_dat[47:0]),  // Out  48 bit comp. data output; stable for 25ns
+  .RCV_KCHAR        (comp_kchar[15:0]),         // Out  16 bit comp. kchar output; stable for 25ns
   .PROMPT_DATA (prompt_dat[47:0]),// Out  48 bit comp. data output, but 6.25ns sooner; only good for 6.25ns though!
   .NONZERO_WORD(nonzero_word[3:1]),  // Out
   .CEW0        (cew[0]),    // Out  Access four phases of 40 MHz cycle, frame separated output from GTX
@@ -145,6 +149,7 @@
   .RX_SYNC_DONE(rx_sync_done), // Out  set when gtx_rxsync is complete (after gtx_reset)
   .errcount    (link_errcount[7:0]),
   .link_had_err(link_had_err),
+  .force_error (lt_trg_err),
   .link_good   (link_good),
   .link_bad    (link_bad),
   .notintablecount  (notintable_count[15:0]),
@@ -255,6 +260,9 @@
   wire [47:0] comp_dat_mux;
   reg  [47:0] comp_dat_180;
   reg  [47:0] comp_dat_phaser;
+  wire [15:0] comp_kchar_mux;
+  reg  [15:0] comp_kchar_180;
+  reg  [15:0] comp_kchar_phaser;
   reg  [3:0]  idly=0;  // JRG, simple phase delay selector
   reg  [3:0]  dly=0;   // JRG, complex phase delay selector
   reg         dly_is_0=0;
@@ -270,21 +278,65 @@
    
 // JRG: add custom muonic CLCT logic. Note that comparator data leaves this module on FALLING LHC_CLOCK edge (~clock)
   always @(posedge clock_iob) begin  // JRG, comment this for test with no recclk or phaser clocks in use
-     if (!ignore_link) comp_dat_phaser[47:0] <= comp_dat[47:0];  // JRG: bring data into phase-tuned time domain
-     else comp_dat_phaser[47:0] <= 0;  // JRG: bring data into phase-tuned time domain
+    if (!ignore_link) begin
+       comp_dat_phaser   [47:0] <= comp_dat  [47:0];  // JRG: bring data into phase-tuned time domain
+       comp_kchar_phaser [15:0] <= comp_kchar[15:0];  // JRG: bring data into phase-tuned time domain
+     end
+     else begin
+       comp_dat_phaser  [47:0] <= 0;  // JRG: bring data into phase-tuned time domain
+       comp_kchar_phaser[15:0] <= 0;  // JRG: bring data into phase-tuned time domain
+     end
   end
 
   always @(posedge clock) begin
-     comp_dat_180[47:0] <= comp_dat_phaser[47:0];  // JRG: push data to opposite lhc clock edge (if needed) for SRL
+     comp_dat_180  [47:0] <= comp_dat_phaser[47:0];  // JRG: push data to opposite lhc clock edge (if needed) for SRL
+     comp_kchar_180[15:0] <= comp_kchar_phaser[15:0];  // JRG: push data to opposite lhc clock edge (if needed) for SRL
   end
-  assign comp_dat_mux[47:0] = (posneg_ff) ? comp_dat_180[47:0] : comp_dat_phaser[47:0];
+  assign comp_dat_mux  [47:0] = (posneg_ff) ? comp_dat_180  [47:0] : comp_dat_phaser  [47:0];
+  assign comp_kchar_mux[15:0] = (posneg_ff) ? comp_kchar_180[15:0] : comp_kchar_phaser[15:0];
 
 
 //  JRG: for muonic timing use comp_dat_r, not gtx_rx_data_raw; also force a minimum single clock delay (no zero bypass)
 // old  srl16e_bbl #(48) udcfebdly (.clock(clock),.ce(1'b1),.adr(dly),.d(gtx_rx_data_raw[47:0]),.q(gtx_rx_data_srl[47:0]));
 // old  assign gtx_rx_data[47:0] = (dly_is_0) ? gtx_rx_data_raw[47:0] : gtx_rx_data_srl[47:0];
-  srl16e_bbl #(48) udcfebdly (.clock(~clock),.ce(1'b1),.adr(idly),.d(comp_dat_mux[47:0]),.q(gtx_rx_data[47:0])); // JRG: comp data leaves module on FALLING LHC_CLOCK edge (~clock)
+  srl16e_bbl #(48) udcfebdly   (.clock(~clock),.ce(1'b1),.adr(idly),.d(comp_dat_mux[47:0]),  .q(gtx_rx_data[47:0])); // JRG: comp data leaves module on FALLING LHC_CLOCK edge (~clock)
+  srl16e_bbl #(16) udcfebkcdly (.clock(~clock),.ce(1'b1),.adr(idly),.d(comp_kchar_mux[15:0]),.q(gtx_rx_kchar[15:0])); // JRG: comp data leaves module on FALLING LHC_CLOCK edge (~clock)
 
+  //--------------------------------------------------------------------------------------------------------------------
+  // following logic is not working at lab when AC is not working!!!
+  //--------------------------------------------------------------------------------------------------------------------
+
+  assign lt_trg = (gtx_rx_kchar==16'h50FC);
+
+  reg  [6:0] lt_trg_cnt  = 0;
+  reg  lt_trg_locked     = 0;
+  reg  lt_trg_expect     = 0;
+  reg  lt_trg_ff         = 0;
+
+  always @(posedge clock) begin
+
+    if (!rx_rst_done || ttc_resync) begin
+      lt_trg_cnt    <= 0;
+      lt_trg_err    <= 0;
+      lt_trg_expect <= 0;
+      lt_trg_locked <= 0;
+    end
+    else begin
+
+      lt_trg_cnt    <=   (lt_trg) ? 7'd1 : lt_trg_cnt + 1'b1;
+      lt_trg_expect <=   (lt_trg_cnt==7'd127); // expect lt trig in the next clock
+      if (lt_trg)  // wait until we "lock in" once before we start accumulating errors
+        lt_trg_locked <= 1'b1;
+
+      lt_trg_err <=  lt_trg_locked ? ~(lt_trg_expect==lt_trg) : 1'b0;
+
+    end
+  end
+
+
+  //--------------------------------------------------------------------------------------------------------------------
+  //
+  //--------------------------------------------------------------------------------------------------------------------
 
 // Unused muonic signals
   reg muonic_sump=0;

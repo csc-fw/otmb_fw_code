@@ -203,6 +203,7 @@
   gtx_rx_pol_swap,
   gtx_rx_err,
   gtx_rx_err_count,
+  gtx_rx_kchar,
   link_had_err,
   link_good,
   link_bad,
@@ -348,6 +349,7 @@
   output        gtx_rx_pol_swap;     // GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
   output        gtx_rx_err;          // PRBS test detects an error
   output [15:0] gtx_rx_err_count;    // Error count on this fiber channel
+  output [15:0] gtx_rx_kchar;    // Kchar
   output [15:0] gtx_rx_notintable_count;     // Error count on this fiber channel
   output [15:0] gtx_rx_disperr_count;     // Error count on this fiber channel
   output        gtx_rx_sump;         // Unused signals
@@ -448,6 +450,7 @@
   .gtx_rx_err           (gtx_rx_err),             // Out  PRBS test detects an error
   .gtx_rx_err_count     (gtx_rx_err_count[15:0]), // Out  Error count on this fiber channel
   .gtx_rx_data          (gtx_rx_data[47:0]),      // Out  DCFEB comparator data
+  .gtx_rx_kchar         (gtx_rx_kchar[15:0]),      // Out  DCFEB comparator data
   .link_had_err         (link_had_err),
   .link_good            (link_good),
   .link_bad             (link_bad),

@@ -29,6 +29,7 @@
 	VALID,
 	MATCH,
 	RCV_DATA,
+    RCV_KCHAR,
 	PROMPT_DATA,
 	NONZERO_WORD,
 	CEW0,
@@ -39,6 +40,7 @@
 	RX_RST_DONE,
 	RX_SYNC_DONE,
         errcount,
+        force_err,
         link_had_err,
         link_good,
 	link_bad,
@@ -72,6 +74,7 @@
 	output			VALID;
 	output			MATCH;
 	output	[47:0]	RCV_DATA;
+    output  [15:0]  RCV_KCHAR;
 	output	[47:0]	PROMPT_DATA;
 	output	[3:1]	NONZERO_WORD;
 	output		CEW0;
@@ -83,6 +86,7 @@
 	output		RX_SYNC_DONE;
 	output		sump;
         output 	[7:0]	errcount;
+        input         force_error;
         output 		link_had_err;
         output 		link_good;
         output 		link_bad;
@@ -94,6 +98,7 @@
 // Output Registers
 //-------------------------------------------------------------------------------------------------------------------
 	reg		[47:0]	RCV_DATA;
+    reg     [15:0]  RCV_KCHAR;
 	reg		[3:1]	NONZERO_WORD;
 	reg				CEW0;
 	reg				CEW1;
@@ -146,6 +151,8 @@
 	wire sync_match;
 	wire lt_trg;
 	reg		lt_trg_reg 	= 0;
+
+    reg [15:0]  w0_reg     = 0;
 	reg [15:0]	w1_reg 		= 0;
 	reg [15:0]	w2_reg 		= 0;
 
@@ -315,7 +322,15 @@
 	CEW0	<= CEW3;
      end
 
-     always @(posedge CMP_RX_CLK160) begin
+  reg [1:0] force_err_sr;
+  always @(posedge CMP_RX_CLK160) begin
+    force_err_sr[0] <= force_error;
+    force_err_sr[1] <= force_err_sr[0];
+  end
+
+  wire err_inj = (force_err_sr[1:0] == 2'b10);
+
+  always @(posedge CMP_RX_CLK160) begin
 	if(!RX_SYNC_DONE || ttc_resync) begin
 	   NONZERO_WORD[3:1]	<= 3'h0;
 	   RCV_DATA		<= 0;
@@ -332,6 +347,7 @@
 	else begin
 	   if(CEW0)	begin     // this gets set for the first time after the first CEW3
 	      lt_trg_reg <= lt_trg;
+          w0_reg     <= cmp_rx_data;
 	      mon_in[0] <= (!cmp_rx_lossofsync[1]) && (cmp_rx_isk==2'b01) && (cmp_rx_notintable[1:0]==2'b00) && (cmp_rx_data[4:1] == 4'hE); // allows 8 possible EOF markers:
 	   // 1C,3C,5C,7C,9C,BC,DC,FD are valid K-words available to represent 3 extra bits in the data stream. --Skip F7, FB, FC and FE. 
 	   // So we could identify that BC=0 (very common), 1C=1, 3C=2, 5C=3, 7C=4, 9C=5, DC=6, FD=7 (all less common). 
@@ -350,6 +366,7 @@
 	   end
 	   else if(CEW3) begin
 	      RCV_DATA		<= {cmp_rx_data,w2_reg,w1_reg};
+          RCV_KCHAR       <= w0_reg;
 	      LTNCY_TRIG	<=  lt_trg_reg;
 	      NONZERO_WORD[3]	<= |cmp_rx_data;
 	      mon_in[3] <= (!cmp_rx_lossofsync[1]) && (cmp_rx_notintable[1:0]==2'b00) && (cmp_rx_isk==2'b00); // no k-bits set
@@ -358,6 +375,7 @@
 	      mon_in[3:0] <= 4'h0; // this will set mon_rst next cycle any time the link is down or goes bad
 	      NONZERO_WORD[3:1]	<= 3'h0;
 	      RCV_DATA		<= 0;
+          RCV_KCHAR       <= 0;
 	      LTNCY_TRIG	<= 0;
 	   end
 
@@ -367,7 +385,7 @@
 
 	   link_good <= !mon_rst & (mon_count[3:0]==4'hf);  // use to signal the link is alive after 1 + 15 complete BX cycles
 	   if(!link_err) link_err <= (link_went_down); // use to signal the link was OK then had a problem (== link_went_down) at least once
-	   if(link_went_down && err_count[7:4]!=4'hE) err_count <= err_count + 1'b1; // how many times the link was lost
+	   if((err_inj || link_went_down) && err_count[7:4]!=4'hE) err_count <= err_count + 1'b1; // how many times the link was lost
 
            if (CEW0 || CEW1 || CEW2 || CEW3) begin
               if (cmp_rx_notintable[1:0] != 2'b00 && notintable_cnt[15:0] != 16'hFFFE) notintable_cnt <= notintable_cnt +1'b1;

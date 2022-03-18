@@ -1223,6 +1223,7 @@
   wire  [MXCFEB-1:0]  gtx_rx_err;                    // Out  PRBS test detects an error
   wire  [MXCFEB-1:0]  gtx_rx_sump;                   // Out  Unused signals
   wire  [15:0]        gtx_rx_err_count [MXCFEB-1:0]; // Out  Error count on this fiber channel
+  wire  [15:0]        gtx_rx_kchar [MXCFEB-1:0]; // Out  kchar
   wire  [MXCFEB-1:0]  link_had_err;                  // link stability monitor: error happened at least once
   wire  [MXCFEB-1:0]  link_good;                     // link stability monitor: always good, no errors since last resync
   wire  [MXCFEB-1:0]  link_bad;                      // link stability monitor: errors happened over 100 times
@@ -1366,6 +1367,7 @@
   .gtx_rx_pol_swap  (gtx_rx_pol_swap[icfeb]),  // Out  GTX 5,6 [ie dcfeb 4,5] have swapped rx board routes
   .gtx_rx_err       (gtx_rx_err[icfeb]),       // Out  PRBS test detects an error
   .gtx_rx_err_count (gtx_rx_err_count[icfeb][15:0]),  // Out  Error count on this fiber channel
+  .gtx_rx_err_count (gtx_rx_kchar[icfeb][15:0]),  // Out  gtx Kchar
   .link_had_err     (link_had_err[icfeb]),     // link stability monitor: error happened at least once
   .link_good        (link_good[icfeb]),        // link stability monitor: always good, no errors since last resync
   .link_bad         (link_bad[icfeb]),         // link stability monitor: errors happened over 100 times
@@ -1377,6 +1379,32 @@
   );
   end
   endgenerate
+
+
+  wire cfebs_synced;
+  wire cfebs_lostsync;
+  csc_sync_mon ucsc_sync_mon
+  (
+  .clock              (clock),                           // In  40MHz TMB system clock from MMCM
+  .clk_lock           (lock_tmb_clock0),                 // In  40MHz TMB system clock MMCM locked
+
+// Resets
+  .global_reset (global_reset),     // In  Global reset
+  .ttc_resync   (ttc_resync),       // In  TTC resync
+
+  .cfeb0_kchar  (gtx_rx_kchar[0][7:0]),//In CFEB0 kchar, 8bits
+  .cfeb1_kchar  (gtx_rx_kchar[1][7:0]),//In CFEB0 kchar, 8bits
+  .cfeb2_kchar  (gtx_rx_kchar[2][7:0]),//In CFEB0 kchar, 8bits
+  .cfeb3_kchar  (gtx_rx_kchar[3][7:0]),//In CFEB0 kchar, 8bits
+  .cfeb4_kchar  (gtx_rx_kchar[4][7:0]),//In CFEB0 kchar, 8bits
+
+  .cfeb_rxd_int_delay    (cfeb_rxd_int_delay[0][3:0]),  // In  Interstage delay, integer bx. fiber bundled
+  .cfeb_fiber_enable     (mask_all[MXCFEB-1:0]),  // In  1=Enable, 0=Turn off all inputs
+  .link_good             (link_good[MXCFEB-1:0]),   // In Link stability monitor: always good, no errors since last resync
+  .cfebs_sync_done       (gtx_rx_sync_done[MXCFEB-1:0]),//In, all cfeb sync done or not
+  .cfebs_synced          (cfebs_synced), //out all cfebs are in sync
+  .cfebs_lostsync        (cfebs_lostsync) //out all cfebs are in sync
+  )
 
 //-------------------------------------------------------------------------------------------------------------------
 // Pattern Finder declarations, common to ME1A+ME1B+ME234
@@ -2092,6 +2120,7 @@
   .cfeb_badbits_found   (cfeb_badbits_found[MXCFEB-1:0]), // In  CFEB[n] has at least 1 bad bit
   .cfeb_badbits_blocked (cfeb_badbits_blocked),           // In  A CFEB had bad bits that were blocked
 
+  .cfebs_syncerr        (~cfebs_synced),    // In all cfeb synced or not
 // Sequencer Pattern Finder PreTrigger Ports
   .cfeb_hit    (cfeb_hit[MXCFEB-1:0]),    // In  This CFEB has a pattern over pre-trigger threshold
   .cfeb_active (cfeb_active[MXCFEB-1:0]), // In  CFEBs marked for DMB readout
@@ -2109,8 +2138,8 @@
   .hmt_wr_avail_xtmb   (hmt_wr_avail_xtmb),//In hmt wr buf available
   .hmt_wr_adr_xtmb     (hmt_wr_adr_xtmb[MXBADR-1:0]),// In hmt wr adr at CLCt bx
   //Sequencer HMT, hmt-alct-clct match 
-  .hmt_anode        (hmt_anode[MXHMTB-1:0]),// Out HMT nhits for trigger
-  .hmt_cathode      (hmt_cathode[MXHMTB-1:0]),// Out HMT nhits for trigger
+  .hmt_anode        (hmt_anode[MXHMTB-1:0]),// In HMT nhits for trigger
+  .hmt_cathode      (hmt_cathode[MXHMTB-1:0]),// In HMT nhits for trigger
   //.hmt_cathode_fired     (hmt_cathode_fired),// In
   //.hmt_anode_fired       (hmt_anode_fired),// In 
   .hmt_anode_alct_match  (hmt_anode_alct_match), //In
@@ -2607,6 +2636,7 @@
   .hmt_readout_counter (hmt_readout_counter[MXCNTVME-1:0]), //out
   .hmt_aff_counter     (hmt_aff_counter[MXCNTVME-1:0]), //out
   .buf_stall_counter   (buf_stall_counter[MXCNTVME-1:0]),
+  .new_counter0 (new_counter19[MXCNTVME-1:0]),  // Out
   
 // Sequencer Header Counters
   .hdr_clear_on_resync (hdr_clear_on_resync),           // In  Clear header counters on ttc_resync
@@ -4331,6 +4361,7 @@
       .hmt_aff_counter     (hmt_aff_counter[MXCNTVME-1:0]), //out
       .buf_stall_counter   (buf_stall_counter[MXCNTVME-1:0]),
       
+      .new_counter0 (new_counter19[MXCNTVME-1:0]),  // Out
       // CSC Orientation Ports
       .csc_type        (csc_type[3:0]),   // In  Firmware compile type
       .csc_me1ab       (csc_me1ab),       // In  1=ME1A or ME1B CSC type
