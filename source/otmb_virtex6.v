@@ -1231,6 +1231,8 @@
   wire  [MXCFEB-1:0]  ready_phaser;                  // phaser dps done and ready status
   wire  [15:0]        gtx_rx_notintable_count [MXCFEB-1:0]; // Out  Error count on this fiber channel
   wire  [15:0]        gtx_rx_disperr_count [MXCFEB-1:0]; // Out  Error count on this fiber channel
+  wire  [MXCFEB-1:0]  gtx_rx_lt_trg_expect;
+  wire  [MXCFEB-1:0]  gtx_rx_lt_trg;
   //Tao, comment out ready_phaser_a, only use ready_phaser_b for MEX/1
   wire 	ready_phaser_b, auto_gtx_reset;
   wire  [MXCFEB-1:0]  cfeb_rx_nonzero;               // Out Flags when rx sees non-zero data
@@ -1376,6 +1378,8 @@
   .link_bad         (link_bad[icfeb]),         // link stability monitor: errors happened over 100 times
   .gtx_rx_notintable_count  (gtx_rx_notintable_count[icfeb][15:0]),               // Out Error count on this fiber channel
   .gtx_rx_disperr_count     (gtx_rx_disperr_count[icfeb][15:0]),               // Out Error count on this fiber channel
+  .gtx_rx_lt_trg       (gtx_rx_lt_trg[icfeb]),     // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
+  .gtx_rx_lt_trg_expect       (gtx_rx_lt_trg_expect[icfeb]),     // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
   .gtx_rx_sump      (gtx_rx_sump[icfeb])  // Out  Unused signals
 
 // Debug Ports
@@ -3343,15 +3347,20 @@
      assign mez_tp10_busy = (raw_mez_busy | alct_startup_msec | alct_wait_dll | alct_startup_done | alct_wait_vme | alct_wait_cfg);
 
 // JRG: if set_sw8 & 7 are both low, put BPI debug signals on the mezanine test points
-    assign mez_tp[9] = (!set_sw[7] ? bpi_dtack       : (|link_bad) || ((set_sw == 2'b01) && sump));
-    assign mez_tp[8] = (!set_sw[7] ? bpi_we          : (&link_good || ((set_sw == 2'b01) && alct_wait_cfg)));
-    //Tao, ME1/1->MEX/1, ignore link[5] & link[6]
-    //assign mez_tp[7] =   set_sw[8] ? alct_txd_posneg : (!set_sw[7] ? bpi_enbl : link_good[6]);
-    //assign mez_tp[6] = (!set_sw[7] ? bpi_dsbl        :                          link_good[5]);
-    assign mez_tp[7] =   set_sw[8] ? alct_txd_posneg : (!set_sw[7] ? bpi_enbl : link_good[2]);
-    assign mez_tp[6] = (!set_sw[7] ? bpi_dsbl        :                          link_good[1]);
-    assign mez_tp[5] =   set_sw[8] ? alct_rxd_posneg : (!set_sw[7] ? bpi_rst  : link_good[4]);
-    assign mez_tp[4] = (!set_sw[7] ? bpi_dev         :                          link_good[3]);
+    //assign mez_tp[9] = (!set_sw[7] ? bpi_dtack       : (|link_bad) || ((set_sw == 2'b01) && sump));
+    //assign mez_tp[8] = (!set_sw[7] ? bpi_we          : (&link_good || ((set_sw == 2'b01) && alct_wait_cfg)));
+    ////Tao, ME1/1->MEX/1, ignore link[5] & link[6]
+    //assign mez_tp[7] =   set_sw[8] ? alct_txd_posneg : (!set_sw[7] ? bpi_enbl : link_good[2]);
+    //assign mez_tp[6] = (!set_sw[7] ? bpi_dsbl        :                          link_good[1]);
+    //assign mez_tp[5] =   set_sw[8] ? alct_rxd_posneg : (!set_sw[7] ? bpi_rst  : link_good[4]);
+    //assign mez_tp[4] = (!set_sw[7] ? bpi_dev         :                          link_good[3]);
+    ////debugging the FC signal from cfeb gtx 
+    assign mez_tp[9] = & (gtx_rx_fc[MXCFEB-1:0]);
+    assign mez_tp[8] = & (gtx_rx_lt_trg[MXCFEB-1:0]);
+    assign mez_tp[7] = & (gtx_rx_lt_trg_expect[MXCFEB-1:0]);
+    assign mez_tp[6] = (gtx_rx_fc[0]);
+    assign mez_tp[5] = (gtx_rx_lt_trg[0] );
+    assign mez_tp[4] = gtx_rx_lt_trg[1];
     //to debug buffer 
     //assign mez_tp[7] = buf_q_full;
     //assign mez_tp[6] = buf_stalled;

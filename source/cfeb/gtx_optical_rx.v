@@ -51,6 +51,8 @@
   link_bad,
   gtx_rx_notintable_count, 
   gtx_rx_disperr_count, 
+  lt_trg_expect,
+  lt_trg,
 
 // Sump
   gtx_rx_sump
@@ -96,6 +98,9 @@
   output      link_bad;
   output  [15:0]  gtx_rx_notintable_count;    // Error count on this fiber channel for notintable
   output  [15:0]  gtx_rx_disperr_count;    // Error count on this fiber channel for disperr
+
+  output lt_trg_expect;
+  output lt_trg;
 // Sump
   output      gtx_rx_sump;    // Unused signals
 
@@ -265,12 +270,12 @@
   reg  [15:0] comp_kchar_phaser;
   reg  [3:0]  idly=0;  // JRG, simple phase delay selector
   reg  [3:0]  dly=0;   // JRG, complex phase delay selector
-  //reg         dly_is_0=0;
+  reg         dly_is_0=0;
   
   always @(negedge clock) begin // JRG: comp data goes out on FALLING LHC_CLOCK edge (~clock) to save .5BX latency
      idly     <=  delay_is;  // Pointer to clct SRL, integer 1-16 clock delay for comparator data
      dly      <=  delay_is-4'd1;  // Pointer to clct SRL data that accounts for SLR 1bx minimum (0-15 bx)
-     //dly_is_0 <= (delay_is == 0);  // may use direct input if delay is 0; 1st SRL output has 1bx overhead
+     dly_is_0 <= (delay_is == 0);  // may use direct input if delay is 0; 1st SRL output has 1bx overhead
      posneg_ff <= posneg;
   end
 
@@ -280,12 +285,13 @@
   always @(posedge clock_iob) begin  // JRG, comment this for test with no recclk or phaser clocks in use
     if (!ignore_link) begin
        comp_dat_phaser   [47:0] <= comp_dat  [47:0];  // JRG: bring data into phase-tuned time domain
-       comp_kchar_phaser [15:0] <= comp_kchar[15:0];  // JRG: bring data into phase-tuned time domain
+       //comp_kchar_phaser [15:0] <= comp_kchar[15:0];  // JRG: bring data into phase-tuned time domain
      end
      else begin
        comp_dat_phaser  [47:0] <= 0;  // JRG: bring data into phase-tuned time domain
-       comp_kchar_phaser[15:0] <= 0;  // JRG: bring data into phase-tuned time domain
+       //comp_kchar_phaser[15:0] <= 0;  // JRG: bring data into phase-tuned time domain
      end
+       comp_kchar_phaser [15:0] <= comp_kchar[15:0];  // JRG: bring data into phase-tuned time domain
   end
 
   always @(posedge clock) begin
@@ -303,7 +309,7 @@
   srl16e_bbl #(16) udcfebkcdly (.clock(~clock),.ce(1'b1),.adr(idly),.d(comp_kchar_mux[15:0]),.q(gtx_rx_kchar[15:0])); // JRG: comp data leaves module on FALLING LHC_CLOCK edge (~clock)
 
   //--------------------------------------------------------------------------------------------------------------------
-  // following logic is not working at lab when AC is not working!!!
+  //
   //--------------------------------------------------------------------------------------------------------------------
 
   assign lt_trg = (gtx_rx_kchar==16'h50FC);
@@ -315,6 +321,8 @@
 
   always @(posedge clock) begin
 
+    lt_trg_ff <= lt_trg;
+    //adding rx_sync_done or not ??
     if (!rx_rst_done || ttc_resync) begin
       lt_trg_cnt    <= 0;
       lt_trg_err    <= 0;
@@ -326,7 +334,7 @@
       lt_trg_cnt    <=   (lt_trg) ? 7'd1 : lt_trg_cnt + 1'b1;
       lt_trg_expect <=   (lt_trg_cnt==7'd127); // expect lt trig in the next clock
 
-      if (lt_trg)  // wait until we "lock in" once before we start accumulating errors
+      if (lt_trg_ff)  // wait until we "lock in" once before we start accumulating errors
         lt_trg_locked <= 1'b1;
 
       lt_trg_err <=  lt_trg_locked ? ~(lt_trg_expect==lt_trg) : 1'b0;
