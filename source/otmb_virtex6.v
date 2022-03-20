@@ -1566,8 +1566,8 @@
   .cfeb2_kchar  (gtx_rx_kchar[2][7:0]),//In CFEB0 kchar, 8bits
   .cfeb3_kchar  (gtx_rx_kchar[3][7:0]),//In CFEB0 kchar, 8bits
   .cfeb4_kchar  (gtx_rx_kchar[4][7:0]),//In CFEB0 kchar, 8bits
-  .cfeb4_kchar  (gtx_rx_kchar[5][7:0]),//In CFEB0 kchar, 8bits
-  .cfeb4_kchar  (gtx_rx_kchar[6][7:0]),//In CFEB0 kchar, 8bits
+  .cfeb5_kchar  (gtx_rx_kchar[5][7:0]),//In CFEB0 kchar, 8bits
+  .cfeb6_kchar  (gtx_rx_kchar[6][7:0]),//In CFEB0 kchar, 8bits
 
   .cfeb_rxd_int_delay         (cfeb_rxd_int_delay[0][3:0]),  // In  Interstage delay, integer bx
   .cfeb_rxd_int_delay_me1a    (cfeb_rxd_int_delay[4][3:0]),  // In  Interstage delay, integer bx

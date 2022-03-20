@@ -9308,7 +9308,8 @@ wire latency_sr_sump = (|tmb_latency_sr[31:21]);
 
   assign gem_me1a_match_enable        = gem_csc_match_ctrl_wr[ 0];
   assign gem_me1b_match_enable        = gem_csc_match_ctrl_wr[ 1];
-  assign gemcsc_match_extrapolate     = gem_csc_match_ctrl_wr[ 2]; //advance GEMCSc match with extrapolation
+  //assign gemcsc_match_extrapolate     = gem_csc_match_ctrl_wr[ 2]; //advance GEMCSc match with extrapolation
+  assign gemcsc_match_extrapolate     = 1'b1;
   assign gemcsc_match_bend_correction = gem_csc_match_ctrl_wr[ 3]; // 
   assign gemcsc_match_tightwindow     = gem_csc_match_ctrl_wr[ 4]; // 
   assign match_drop_lowqalct          = gem_csc_match_ctrl_wr[ 5]; 

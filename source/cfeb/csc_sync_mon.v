@@ -85,7 +85,7 @@ parameter MXCFEB = 7;
 wire [MXCFEB-1:0] skip_sync_check;
 wire [MXCFEB-1:0] kchar_in_table;
 
-genvar icfeb
+genvar icfeb;
 generate
     for (icfeb=0; icfeb<MXCFEB; icfeb=icfeb+1) begin
         //ignore the sync check when links are not good, cfeb fibers are not enabled, overflow, bc0marker, resyncmarker
@@ -118,14 +118,14 @@ wire cfebs_sync_me1a = ((cfebs_sync_s0_me1a == cfebs_sync_s1_me1a) && (&kchar_in
 
 initial cfebs_synced = 1'b1;
 initial cfebs_lostsync = 1'b0;
-initial cfebs_synced_me1a = 1'b1;
-initial cfebs_lostsync_mea = 1'b0;
+initial cfebs_me1a_synced = 1'b1;
+initial cfebs_me1a_lostsync = 1'b0;
 
 always @(posedge clock) begin
     cfebs_synced   <= (reset || !cfebs_sync_done_srl) ? 1'b1 : cfebs_sync;
     cfebs_lostsync <= (reset || !cfebs_sync_done_srl) ? 1'b0 : (cfebs_lostsync | ~cfebs_sync);
-    cfebs_synced_me1a   <= (reset || !cfebs_sync_done_me1a_srl) ? 1'b1 : cfebs_sync_me1a;
-    cfebs_lostsync_me1a <= (reset || !cfebs_sync_done_me1a_srl) ? 1'b0 : (cfebs_lostsync_me1a | ~cfebs_sync_me1a);
+    cfebs_me1a_synced   <= (reset || !cfebs_sync_done_me1a_srl) ? 1'b1 : cfebs_sync_me1a;
+    cfebs_me1a_lostsync <= (reset || !cfebs_sync_done_me1a_srl) ? 1'b0 : (cfebs_me1a_lostsync | ~cfebs_sync_me1a);
 end
 
 
