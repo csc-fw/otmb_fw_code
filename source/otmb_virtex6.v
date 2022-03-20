@@ -1233,6 +1233,7 @@
   wire  [15:0]        gtx_rx_disperr_count [MXCFEB-1:0]; // Out  Error count on this fiber channel
   wire  [MXCFEB-1:0]  gtx_rx_lt_trg_expect;
   wire  [MXCFEB-1:0]  gtx_rx_lt_trg;
+  wire  [MXCFEB-1:0]  gtx_rx_lt_trg_err;
   //Tao, comment out ready_phaser_a, only use ready_phaser_b for MEX/1
   wire 	ready_phaser_b, auto_gtx_reset;
   wire  [MXCFEB-1:0]  cfeb_rx_nonzero;               // Out Flags when rx sees non-zero data
@@ -1378,6 +1379,7 @@
   .link_bad         (link_bad[icfeb]),         // link stability monitor: errors happened over 100 times
   .gtx_rx_notintable_count  (gtx_rx_notintable_count[icfeb][15:0]),               // Out Error count on this fiber channel
   .gtx_rx_disperr_count     (gtx_rx_disperr_count[icfeb][15:0]),               // Out Error count on this fiber channel
+  .gtx_rx_lt_trg_err       (gtx_rx_lt_trg_err[icfeb]),     // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
   .gtx_rx_lt_trg       (gtx_rx_lt_trg[icfeb]),     // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
   .gtx_rx_lt_trg_expect       (gtx_rx_lt_trg_expect[icfeb]),     // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
   .gtx_rx_sump      (gtx_rx_sump[icfeb])  // Out  Unused signals
@@ -3358,9 +3360,9 @@
     assign mez_tp[9] = & (gtx_rx_fc[MXCFEB-1:0]);
     assign mez_tp[8] = & (gtx_rx_lt_trg[MXCFEB-1:0]);
     assign mez_tp[7] = & (gtx_rx_lt_trg_expect[MXCFEB-1:0]);
-    assign mez_tp[6] = (gtx_rx_fc[0]);
-    assign mez_tp[5] = (gtx_rx_lt_trg[0] );
-    assign mez_tp[4] = gtx_rx_lt_trg[1];
+    assign mez_tp[6] = (gtx_rx_lt_trg_err[0]);
+    assign mez_tp[5] = (gtx_rx_lt_trg[0]=gtx_rx_lt_trg_expect[0]);
+    assign mez_tp[4] = clock;
     //to debug buffer 
     //assign mez_tp[7] = buf_q_full;
     //assign mez_tp[6] = buf_stalled;

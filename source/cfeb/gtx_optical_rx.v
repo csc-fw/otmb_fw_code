@@ -51,6 +51,7 @@
   link_bad,
   gtx_rx_notintable_count, 
   gtx_rx_disperr_count, 
+  lt_trg_err,
   lt_trg_expect,
   lt_trg,
 
@@ -99,6 +100,7 @@
   output  [15:0]  gtx_rx_notintable_count;    // Error count on this fiber channel for notintable
   output  [15:0]  gtx_rx_disperr_count;    // Error count on this fiber channel for disperr
 
+  output lt_trg_err;
   output lt_trg_expect;
   output lt_trg;
 // Sump
