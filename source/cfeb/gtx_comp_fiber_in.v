@@ -358,7 +358,9 @@
   else begin
      if(CEW0)  begin     // this gets set for the first time after the first CEW3
         lt_trg_reg <= lt_trg;
-        mon_in[0]  <= (!cmp_rx_lossofsync[1]) && (cmp_rx_isk==2'b01) && (cmp_rx_notintable[1:0]==2'b00) && (cmp_rx_data[4:1] == 4'hE); // allows 8 possible EOF markers:
+        //From Ben: The DCFEBs send 48 bits of data and a frame separator, continuously.  The frame separator is a BC50 (idle).  Every 256 clock cycles (80 MHz) the frame separator changes to an FC50.
+        //OTMB shoudl receive 50BC and 50FC only
+        mon_in[0]  <= (!cmp_rx_lossofsync[1]) && (cmp_rx_isk==2'b01) && (cmp_rx_notintable[1:0]==2'b00) && (cmp_rx_data[7:0] == 8'hBC || cmp_rx_data[7:0] == 8'hFC); // allows 8 possible EOF markers:
         w0_reg     <= cmp_rx_data;
      // 1C,3C,5C,7C,9C,BC,DC,FD are valid K-words available to represent 3 extra bits in the data stream. --Skip F7, FB, FC and FE.
      // So we could identify that BC=0 (very common), 1C=1, 3C=2, 5C=3, 7C=4, 9C=5, DC=6, FD=7 (all less common).
