@@ -79,6 +79,7 @@ parameter MXCFEB = 7;
 //	   // So we could identify that BC=0 (very common), 1C=1, 3C=2, 5C=3, 7C=4, 9C=5, DC=6, FD=7 (all less common). 
 //	   // Also allows use of 8-bit "data" byte in the EOF frame! Thus we have "59 data bits" per link (i.e. 118) every BX.
 //	   // Perhaps a bit could mark the BC0, or overflow/error condition, or QPLL lock was lost, etc.
+//The DCFEBs send 48 bits of data and a frame separator, continuously.  The frame separator is a BC50 (idle).  Every 256 clock cycles (80 MHz) the frame separator changes to an FC50.
 //----------------------------------------------------------------------------------------------------------------------
 
 wire [MXCFEB-1:0] skip_sync_check;
@@ -88,8 +89,8 @@ genvar icfeb
 generate
     for (icfeb=0; icfeb<MXCFEB; icfeb=icfeb+1) begin
         //ignore the sync check when links are not good, cfeb fibers are not enabled, overflow, bc0marker, resyncmarker
-        assign skip_sync_check[icfeb] = cfeb_kchar[icfeb] == 8'hFC || ~link_good[icfeb] || ~link_good_r2[icfeb] || ~cfeb_fiber_enable[icfeb];
-        assign kchar_in_table[icfeb]  = (cfeb_kchar[icfeb][4:1] == 4'hE) || skip_sync_check[icfeb];
+        assign skip_sync_check[icfeb] = ~link_good[icfeb] || ~link_good_r2[icfeb] || ~cfeb_fiber_enable[icfeb];
+        assign kchar_in_table[icfeb]  = (cfeb_kchar[icfeb][7:0] == 8'hFC || cfeb_kchar[icfeb][7:0] == 8'hBC) || skip_sync_check[icfeb];
     end
 endgenerate 
 

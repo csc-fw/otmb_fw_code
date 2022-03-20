@@ -315,6 +315,7 @@
 
   always @(posedge clock) begin
 
+    lt_trg_ff <= lt_trg;
     if (!rx_rst_done || ttc_resync) begin
       lt_trg_cnt    <= 0;
       lt_trg_err    <= 0;
@@ -326,7 +327,7 @@
       lt_trg_cnt    <=   (lt_trg) ? 7'd1 : lt_trg_cnt + 1'b1;
       lt_trg_expect <=   (lt_trg_cnt==7'd127); // expect lt trig in the next clock
 
-      if (lt_trg)  // wait until we "lock in" once before we start accumulating errors
+      if (lt_trg_ff)  // wait until we "lock in" once before we start accumulating errors
         lt_trg_locked <= 1'b1;
 
       lt_trg_err <=  lt_trg_locked ? ~(lt_trg_expect==lt_trg) : 1'b0;
