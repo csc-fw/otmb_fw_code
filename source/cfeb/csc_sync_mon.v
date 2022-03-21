@@ -19,6 +19,7 @@ module csc_sync_mon (
   input [3:0] cfeb_rxd_int_delay_me1a,
   input [6:0] cfeb_fiber_enable,
   input [6:0] link_good, 
+  input [6:0] cfeb_lt_trg_err, 
   input [6:0] cfeb_sync_done, // ttc resync is done
 
 
@@ -41,6 +42,11 @@ parameter MXCFEB = 7;
   wire [3:0] cfebdly_me1a = cfeb_rxd_int_delay_me1a +1;
   wire cfebs_sync_done_me1a = &cfeb_sync_done[6:4];
 
+  wire lt_trg_err_any      = |cfeb_lt_trg_err[3:0];
+  wire lt_trg_err_any_me1a = |cfeb_lt_trg_err[6:4];
+
+  wire lt_trg_err_any_srl, lt_trg_err_any_me1a_srl;
+
   wire cfebs_sync_done_srl;
   wire cfebs_sync_done_me1a_srl;
 
@@ -48,6 +54,9 @@ parameter MXCFEB = 7;
   
   srl16e_bbl #(1)  ucfebSyncdelay  (.clock(~clock), .ce(1'b1), .adr(cfebdly), .d(  cfebs_sync_done), .q( cfebs_sync_done_srl)); // JRG: comp data leaves module on FALLING LHC_CLOCK edge (~clock)
   srl16e_bbl #(1)  ucfebSyncdelaya (.clock(~clock), .ce(1'b1), .adr(cfebdly_me1a), .d(  cfebs_sync_done_me1a), .q( cfebs_sync_done_me1a_srl)); // JRG: comp data leaves module on FALLING LHC_CLOCK edge (~clock)
+
+  srl16e_bbl #(1)  ucfeblttrgerrdelay   (.clock(~clock), .ce(1'b1), .adr(cfebdly), .d(  lt_trg_err_any), .q( lt_trg_err_any_srl));
+  srl16e_bbl #(1)  ucfeblttrgerrdelaya  (.clock(~clock), .ce(1'b1), .adr(cfebdly), .d(  lt_trg_err_any_me1a), .q( lt_trg_err_any_me1a_srl));
 
   always @(posedge clock) begin
       ready  <= power_up && !(global_reset || ttc_resync);
@@ -89,7 +98,7 @@ genvar icfeb;
 generate
     for (icfeb=0; icfeb<MXCFEB; icfeb=icfeb+1) begin
         //ignore the sync check when links are not good, cfeb fibers are not enabled, overflow, bc0marker, resyncmarker
-        assign skip_sync_check[icfeb] = ~link_good[icfeb] || ~link_good_r2[icfeb] || ~cfeb_fiber_enable[icfeb];
+        assign skip_sync_check[icfeb] = ~link_good[icfeb] || ~link_good_r2[icfeb] || ~cfeb_fiber_enable[icfeb] || reset;
         assign kchar_in_table[icfeb]  = (cfeb_kchar[icfeb][7:0] == 8'hFC || cfeb_kchar[icfeb][7:0] == 8'hBC) || skip_sync_check[icfeb];
     end
 endgenerate 
@@ -104,7 +113,7 @@ wire cfebs_sync_s1 = (cfeb_kchar[0] | {8{skip_sync_check[0]}}) &
                      (cfeb_kchar[2] | {8{skip_sync_check[2]}}) &
                      (cfeb_kchar[3] | {8{skip_sync_check[3]}});
                  
-wire cfebs_sync = ((cfebs_sync_s0 == cfebs_sync_s1) && (&kchar_in_table[3:0])) || (&skip_sync_check[3:0]);
+wire cfebs_sync = ((cfebs_sync_s0 == cfebs_sync_s1) && (&kchar_in_table[3:0]) && ~lt_trg_err_any_srl) || (&skip_sync_check[3:0]);
 
 wire cfebs_sync_s0_me1a = (cfeb_kchar[4] & {8{~skip_sync_check[4]}}) | 
                           (cfeb_kchar[5] & {8{~skip_sync_check[5]}}) |
@@ -114,7 +123,7 @@ wire cfebs_sync_s1_me1a = (cfeb_kchar[4] | {8{skip_sync_check[4]}}) &
                           (cfeb_kchar[5] | {8{skip_sync_check[5]}}) &
                           (cfeb_kchar[6] | {8{skip_sync_check[6]}});
                  
-wire cfebs_sync_me1a = ((cfebs_sync_s0_me1a == cfebs_sync_s1_me1a) && (&kchar_in_table[6:4])) || (&skip_sync_check[6:4]);
+wire cfebs_sync_me1a = ((cfebs_sync_s0_me1a == cfebs_sync_s1_me1a) && (&kchar_in_table[6:4]) && ~lt_trg_err_any_me1a_srl) || (&skip_sync_check[6:4]);
 
 initial cfebs_synced = 1'b1;
 initial cfebs_lostsync = 1'b0;

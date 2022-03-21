@@ -1395,6 +1395,9 @@
   wire  [MXCFEB-1:0]  link_bad;                      // link stability monitor: errors happened over 100 times
   wire  [MXCFEB-1:0]  ready_phaser;                  // phaser dps done and ready status
 
+  wire  [MXCFEB-1:0]  gtx_rx_lt_trg_expect;
+  wire  [MXCFEB-1:0]  gtx_rx_lt_trg;
+  wire  [MXCFEB-1:0]  gtx_rx_lt_trg_err;
   wire  [15:0]        gtx_rx_notintable_count [MXCFEB-1:0]; // Out  Error count on this fiber channel
   wire  [15:0]        gtx_rx_disperr_count [MXCFEB-1:0]; // Out  Error count on this fiber channel
 
@@ -1538,6 +1541,9 @@
   .link_had_err         (link_had_err[icfeb]),                         // Out Link stability monitor: error happened at least once
   .link_good            (link_good[icfeb]),                            // Out Link stability monitor: always good, no errors since last resync
   .link_bad             (link_bad[icfeb]),                             // Out Link stability monitor: errors happened over 100 times
+  .gtx_rx_lt_trg_err        (gtx_rx_lt_trg_err[icfeb]),     // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
+  .gtx_rx_lt_trg            (gtx_rx_lt_trg[icfeb]),     // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
+  .gtx_rx_lt_trg_expect     (gtx_rx_lt_trg_expect[icfeb]),     // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
   .gtx_rx_notintable_count  (gtx_rx_notintable_count[icfeb][15:0]),               // Out Error count on this fiber channel
   .gtx_rx_disperr_count     (gtx_rx_disperr_count[icfeb][15:0]),               // Out Error count on this fiber channel
   .gtx_rx_sump          (gtx_rx_sump[icfeb])                           // Out Unused signals
@@ -1573,6 +1579,7 @@
   .cfeb_rxd_int_delay_me1a    (cfeb_rxd_int_delay[4][3:0]),  // In  Interstage delay, integer bx
   .cfeb_fiber_enable     (mask_all[MXCFEB-1:0]),  // In  1=Enable, 0=Turn off all inputs
   .link_good             (link_good[MXCFEB-1:0]),   // In Link stability monitor: always good, no errors since last resync
+  .cfeb_lt_trg_err       (gtx_rx_lt_trg_err[MXCFEB-1:0]),//In, all cfeb sync done or not
   .cfeb_sync_done        (gtx_rx_sync_done[MXCFEB-1:0]),//In, all cfeb sync done or not
   .cfebs_me1a_synced          (cfebs_me1a_synced), //out all cfebs are in sync
   .cfebs_me1a_lostsync        (cfebs_me1a_lostsync), //out all cfebs are in sync
@@ -5074,6 +5081,7 @@ wire [15:0] gemB_bxn_counter;
     assign mez_tp[5] =   set_sw[8] ? alct_rxd_posneg : (!set_sw[7] ? bpi_rst  : link_good[4]);
     assign mez_tp[4] = (!set_sw[7] ? bpi_dev         :                          link_good[3]);
     
+    //debugging the FC signal from cfeb gtx 
     // for debuging GEMCSC OTMB firmware, go back to above setting for normal OTMB firmware 
     //assign mez_tp[9]  = keep_gem_tp; //CLCT window for  CLCT-ALCT and CLCT-GEM
     //assign mez_tp[8]  = gem_alct_window_hasgem_tp;//gem window for gem-ALCT
