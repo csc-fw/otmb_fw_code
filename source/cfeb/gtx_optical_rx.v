@@ -53,7 +53,7 @@
   gtx_rx_disperr_count, 
   lt_trg_err,
   lt_trg_expect,
-  lt_trg,
+  lt_trg_ff,
 
 // Sump
   gtx_rx_sump
@@ -102,7 +102,7 @@
 
   output lt_trg_err;
   output lt_trg_expect;
-  output lt_trg;
+  output lt_trg_ff;
 // Sump
   output      gtx_rx_sump;    // Unused signals
 
@@ -333,13 +333,13 @@
     end
     else begin
 
-      lt_trg_cnt    <=   (lt_trg) ? 7'd1 : lt_trg_cnt + 1'b1;
+      lt_trg_cnt    <=   (lt_trg_ff) ? 7'd1 : lt_trg_cnt + 1'b1;
       lt_trg_expect <=   (lt_trg_cnt==7'd127); // expect lt trig in the next clock
 
       if (lt_trg_ff)  // wait until we "lock in" once before we start accumulating errors
         lt_trg_locked <= 1'b1;
 
-      lt_trg_err <=  lt_trg_locked ? ~(lt_trg_expect==lt_trg) : 1'b0;
+      lt_trg_err <=  lt_trg_locked ? ~(lt_trg_expect==lt_trg_ff) : 1'b0;
 
     end
   end

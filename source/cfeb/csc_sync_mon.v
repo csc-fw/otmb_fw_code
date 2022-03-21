@@ -16,6 +16,7 @@ module csc_sync_mon (
   input [3:0] cfeb_rxd_int_delay,
   input [4:0] cfeb_fiber_enable,
   input [4:0] link_good, 
+  input [4:0] cfeb_lt_trg_err,
   input [4:0] cfeb_sync_done, // ttc resync is done
 
 
@@ -37,9 +38,13 @@ parameter MXCFEB = 5;
   wire cfebs_sync_done = &cfeb_sync_done;
   wire cfebs_sync_done_srl;
 
+  wire lt_trg_err_any = |cfeb_lt_trg_err[4:0];
+  wire lt_trg_err_any_srl;
+
   SRL16E upup (.CLK(clock),.CE(!power_up & clk_lock),.D(1'b1),.A0(pdly[0]),.A1(pdly[1]),.A2(pdly[2]),.A3(pdly[3]),.Q(power_up));
   
   srl16e_bbl #(1)  ucfebSyncdelay (.clock(~clock), .ce(1'b1), .adr(cfebdly), .d(  cfebs_sync_done), .q( cfebs_sync_done_srl)); // JRG: comp data leaves module on FALLING LHC_CLOCK edge (~clock)
+  srl16e_bbl #(1)  ucfeblttrgdelay (.clock(~clock), .ce(1'b1), .adr(cfebdly), .d(  lt_trg_err_any), .q( lt_trg_err_any_srl)); // JRG: comp data leaves module on FALLING LHC_CLOCK edge (~clock)
 
   always @(posedge clock) begin
       ready  <= power_up && !(global_reset || ttc_resync);
@@ -80,7 +85,7 @@ genvar icfeb;
 generate
     for (icfeb=0; icfeb<MXCFEB; icfeb=icfeb+1) begin: cfebsync
         //ignore the sync check when links are not good, cfeb fibers are not enabled, overflow, bc0marker, resyncmarker
-        assign skip_sync_check[icfeb] =  ~link_good[icfeb] || ~link_good_r2[icfeb] || ~cfeb_fiber_enable[icfeb];
+        assign skip_sync_check[icfeb] =  ~link_good[icfeb] || ~link_good_r2[icfeb] || ~cfeb_fiber_enable[icfeb] || reset;
         assign kchar_in_table[icfeb]  = (cfeb_kchar[icfeb][7:0] == 8'hBC || cfeb_kchar[icfeb][7:0] == 8'hFC) || skip_sync_check[icfeb];
     end
 endgenerate 
@@ -96,10 +101,9 @@ wire cfebs_sync_s1 = (cfeb_kchar[0] | {8{skip_sync_check[0]}}) &
                      (cfeb_kchar[2] | {8{skip_sync_check[2]}}) &
                      (cfeb_kchar[3] | {8{skip_sync_check[3]}}) &
                      (cfeb_kchar[4] | {8{skip_sync_check[4]}});
-wire cfebs_sync = ((cfebs_sync_s0 == cfebs_sync_s1) && (&kchar_in_table)) || (&skip_sync_check);
+wire cfebs_sync = ((cfebs_sync_s0 == cfebs_sync_s1) && (&kchar_in_table) && ~lt_trg_err_any_srl) || (&skip_sync_check) ;
 
 initial cfebs_synced = 1'b1;
-
 initial cfebs_lostsync = 1'b0;
 
 always @(posedge clock) begin

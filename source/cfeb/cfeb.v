@@ -465,7 +465,7 @@
   .gtx_rx_notintable_count  (gtx_rx_notintable_count[15:0]), // Out  Error count on this fiber channel
   .gtx_rx_disperr_count     (gtx_rx_disperr_count[15:0]), // Out  Error count on this fiber channel
   .lt_trg_err            (gtx_rx_lt_trg_err),              // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
-  .lt_trg            (gtx_rx_lt_trg),              // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
+  .lt_trg_ff             (gtx_rx_lt_trg),              // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
   .lt_trg_expect            (gtx_rx_lt_trg_expect),              // Out  Flags when Rx sees "FC" code (sent by Tx) for latency measurement
   .gtx_rx_sump          (gtx_rx_sump)        // Unused signals
   );

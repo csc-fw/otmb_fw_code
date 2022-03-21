@@ -1410,6 +1410,7 @@
   .cfeb_rxd_int_delay    (cfeb_rxd_int_delay[0][3:0]),  // In  Interstage delay, integer bx. fiber bundled
   .cfeb_fiber_enable     (mask_all[MXCFEB-1:0]),  // In  1=Enable, 0=Turn off all inputs
   .link_good             (link_good[MXCFEB-1:0]),   // In Link stability monitor: always good, no errors since last resync
+  .cfeb_lt_trg_err       (gtx_rx_lt_trg_err[MXCFEB-1:0]),//In lt_trg check
   .cfeb_sync_done        (gtx_rx_sync_done[MXCFEB-1:0]),//In, all cfeb sync done or not
   .cfebs_synced          (cfebs_synced), //out all cfebs are in sync
   .cfebs_lostsync        (cfebs_lostsync) //out all cfebs are in sync
@@ -3361,7 +3362,7 @@
     assign mez_tp[8] = & (gtx_rx_lt_trg[MXCFEB-1:0]);
     assign mez_tp[7] = & (gtx_rx_lt_trg_expect[MXCFEB-1:0]);
     assign mez_tp[6] = (gtx_rx_lt_trg_err[0]);
-    assign mez_tp[5] = (gtx_rx_lt_trg[0]=gtx_rx_lt_trg_expect[0]);
+    assign mez_tp[5] = (gtx_rx_lt_trg[0]==gtx_rx_lt_trg_expect[0]);
     assign mez_tp[4] = clock;
     //to debug buffer 
     //assign mez_tp[7] = buf_q_full;
