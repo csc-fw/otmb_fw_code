@@ -6691,7 +6691,7 @@
   assign seq_fifo_rd[15:0] = seq_fifo_wr[15:0]; // Readback
 
 //------------------------------------------------------------------------------------------------------------------
-// ADR_SEQ_L1A=74    Sequencer Level 1 Accept Configuration Register
+// ADR_SEQ_L1A=0x74    Sequencer Level 1 Accept Configuration Register
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
@@ -7050,7 +7050,7 @@
   assign buf_stat4_rd[15:12] = 0;                            // R  Free
 
 //------------------------------------------------------------------------------------------------------------------
-// ADR_SEQMOD=AC    Sequencer Trigger Modifiers Register
+// ADR_SEQMOD=0xAC    Sequencer Trigger Modifiers Register
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin

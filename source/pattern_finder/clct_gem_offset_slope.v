@@ -5,30 +5,43 @@
 //-------------------------------------------------------------------------------------------------------------------
 module clct_gem_offset_slope (
     clock, 
+    clct0_xky, 
     clct0_bend, 
+    clct0_lr, 
+    clct1_xky, 
     clct1_bend, 
+    clct1_lr, 
     isME1a0, 
     isME1a1, 
     even, 
-    clct0_gemA_offset,
-    clct0_gemB_offset,
-    clct1_gemA_offset,
-    clct1_gemB_offset
+    clct0_gemA_xky_slopecorr,
+    clct0_gemB_xky_slopecorr,
+    clct1_gemA_xky_slopecorr,
+    clct1_gemB_xky_slopecorr
   );
 
 parameter MXADRB       = 4;
 parameter MXDATB       = 8;
 // Ports
   input                  clock;
+  input [9:0]  clct0_xky;
   input [3:0]  clct0_bend;
+  input        clct0_lr;
+  input [9:0]  clct1_xky;
   input [3:0]  clct1_bend;
+  input        clct1_lr;
   input                isME1a0;
   input                isME1a1;
   input                   even;
-  output[7:0]    clct0_gemA_offset;
-  output[7:0]    clct0_gemB_offset;
-  output[7:0]    clct1_gemA_offset;
-  output[7:0]    clct1_gemB_offset;
+  output [7:0]    clct0_gemA_xky_slopecorr;//extrapolated GEM location
+  output [7:0]    clct0_gemB_xky_slopecorr;
+  output [7:0]    clct1_gemA_xky_slopecorr;
+  output [7:0]    clct1_gemB_xky_slopecorr;
+
+  wire [7:0]    clct0_gemA_offset;
+  wire [7:0]    clct0_gemB_offset;
+  wire [7:0]    clct1_gemA_offset;
+  wire [7:0]    clct1_gemB_offset;
 
 
   wire [7:0] clct0_offset_me1b_odd_A,  clct0_offset_me1b_odd_B;
@@ -159,6 +172,11 @@ rom_cscoffset_slope #(
   assign clct0_gemB_offset      = even ? clct0_offset_gemB_even : clct0_offset_gemB_odd;
   assign clct1_gemA_offset      = even ? clct1_offset_gemA_even : clct1_offset_gemA_odd;
   assign clct1_gemB_offset      = even ? clct1_offset_gemB_even : clct1_offset_gemB_odd;
+
+  assign clct0_gemA_xky_slopecorr = clct0_lr ? ((clct0_xky>clct0_gemA_offset) ? (clct0_xky-clct0_gemA_offset):10'd0) : (clct0_xky+clct0_gemA_offset);
+  assign clct0_gemB_xky_slopecorr = clct0_lr ? ((clct0_xky>clct0_gemB_offset) ? (clct0_xky-clct0_gemB_offset):10'd0) : (clct0_xky+clct0_gemB_offset);
+  assign clct1_gemA_xky_slopecorr = clct1_lr ? ((clct1_xky>clct1_gemA_offset) ? (clct1_xky-clct1_gemA_offset):10'd0) : (clct1_xky+clct1_gemA_offset);
+  assign clct1_gemB_xky_slopecorr = clct1_lr ? ((clct1_xky>clct1_gemB_offset) ? (clct1_xky-clct1_gemB_offset):10'd0) : (clct1_xky+clct1_gemB_offset);
 
 
 //-------------------------------------------------------------------------------------------------------------------

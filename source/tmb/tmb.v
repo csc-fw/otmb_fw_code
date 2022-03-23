@@ -367,9 +367,13 @@
   //ccLUT
   clct0_bnd_xtmb,
   clct0_xky_xtmb,
+  clct0_gemAxky_xtmb,
+  clct0_gemBxky_xtmb,
 //  clct0_carry_xtmb, // Out  First  CLCT
   clct1_bnd_xtmb,
   clct1_xky_xtmb,
+  clct1_gemAxky_xtmb,
+  clct1_gemBxky_xtmb,
 //  clct1_carry_xtmb, // Out  Second CLCT
   bx0_xmpc,
 
@@ -741,7 +745,8 @@
   parameter MXBNDB   = 5;                 // Bend bits
   parameter MXXKYB   = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
   //parameter MXCCLUTB = 10+5+9+12;  // New 35bits for CCLUT, new quality, bnd, xky, comparator code 
-  parameter MXCCLUTB = MXBNDB+MXXKYB;
+  //parameter MXCCLUTB = MXBNDB+MXXKYB;
+  parameter MXCCLUTB = MXBNDB+MXXKYB+MXXKYB+MXXKYB;
 
   //HMT
   parameter MXHMTB   = 4;
@@ -1022,9 +1027,13 @@
 
   input [MXBNDB - 1   : 0] clct0_bnd_xtmb; // new bending 
   input [MXXKYB-1     : 0] clct0_xky_xtmb; // new position with 1/8 precision
+  input [MXXKYB-1     : 0] clct0_gemAxky_xtmb; // new position with 1/8 precision
+  input [MXXKYB-1     : 0] clct0_gemBxky_xtmb; // new position with 1/8 precision
   //input [MXPATC-1     : 0] clct0_carry_xtmb; // CC code 
   input [MXBNDB - 1   : 0] clct1_bnd_xtmb; // new bending 
   input [MXXKYB-1     : 0] clct1_xky_xtmb; // new position with 1/8 precision
+  input [MXXKYB-1     : 0] clct1_gemAxky_xtmb; // new position with 1/8 precision
+  input [MXXKYB-1     : 0] clct1_gemBxky_xtmb; // new position with 1/8 precision
   //input [MXPATC-1     : 0] clct1_carry_xtmb; // CC code 
 
   output                tmb_trig_pulse;    // ALCT or CLCT or both triggered
@@ -1733,8 +1742,8 @@
   wire [MXCLCTC-1:0] clctc_pipe, clctc_srl; // Common to CLCT0/1 to TMB
   wire [MXCFEB-1:0]  clctf_pipe, clctf_srl; // Active cfeb list to TMB
 
-  wire [MXCCLUTB-1  : 0]  clct0_cclut_xtmb = {clct0_bnd_xtmb, clct0_xky_xtmb};
-  wire [MXCCLUTB-1  : 0]  clct1_cclut_xtmb = {clct1_bnd_xtmb, clct1_xky_xtmb};
+  wire [MXCCLUTB-1  : 0]  clct0_cclut_xtmb = {clct0_gemAxky_xtmb, clct0_gemBxky_xtmb, clct0_bnd_xtmb, clct0_xky_xtmb};
+  wire [MXCCLUTB-1  : 0]  clct1_cclut_xtmb = {clct1_gemAxky_xtmb, clct1_gemBxky_xtmb, clct1_bnd_xtmb, clct1_xky_xtmb};
   wire [MXCCLUTB-1  : 0]  clct0_cclut_pipe, clct0_cclut_srl;
   wire [MXCCLUTB-1  : 0]  clct1_cclut_pipe, clct1_cclut_srl;
 
@@ -1782,12 +1791,16 @@
   //wire  [MXPATC-1     : 0] clct0_carry_pipe; // CC code 
   wire  [MXBNDB - 1   : 0] clct0_bnd_pipe; // new bending 
   wire  [MXXKYB-1     : 0] clct0_xky_pipe; // new position with 1/8 precision
+  wire  [MXXKYB-1     : 0] clct0_gemAxky_pipe; // new position with 1/8 precision
+  wire  [MXXKYB-1     : 0] clct0_gemBxky_pipe; // new position with 1/8 precision
   //wire  [MXPATC-1     : 0] clct1_carry_pipe; // CC code 
   wire  [MXBNDB - 1   : 0] clct1_bnd_pipe; // new bending 
   wire  [MXXKYB-1     : 0] clct1_xky_pipe; // new position with 1/8 precision
+  wire  [MXXKYB-1     : 0] clct1_gemAxky_pipe; // new position with 1/8 precision
+  wire  [MXXKYB-1     : 0] clct1_gemBxky_pipe; // new position with 1/8 precision
 
-  assign {clct0_bnd_pipe, clct0_xky_pipe} = clct0_cclut_pipe;
-  assign {clct1_bnd_pipe, clct1_xky_pipe} = clct1_cclut_pipe;
+  assign {clct0_gemAxky_pipe, clct0_gemBxky_pipe, clct0_bnd_pipe, clct0_xky_pipe} = clct0_cclut_pipe;
+  assign {clct1_gemAxky_pipe, clct1_gemBxky_pipe, clct1_bnd_pipe, clct1_xky_pipe} = clct1_cclut_pipe;
 //------------------------------------------------------------------------------------------------------------------
 // Pre-calculate dynamic clct window parameters
 //------------------------------------------------------------------------------------------------------------------
@@ -2534,10 +2547,10 @@
 
   wire       copyalct0_foralct1_pos;
   wire       copyclct0_forclct1_pos;
-  wire [7:0] clct0_gemA_offset_slopecorr;
-  wire [7:0] clct0_gemB_offset_slopecorr;
-  wire [7:0] clct1_gemA_offset_slopecorr;
-  wire [7:0] clct1_gemB_offset_slopecorr;
+  //wire [7:0] clct0_gemA_offset_slopecorr;
+  //wire [7:0] clct0_gemB_offset_slopecorr;
+  //wire [7:0] clct1_gemA_offset_slopecorr;
+  //wire [7:0] clct1_gemB_offset_slopecorr;
 
   wire       best_cluster0_ingemB;
   wire [2:0] best_cluster0_iclst;
@@ -2610,6 +2623,10 @@
   .clct1_vpf  (clct1_pipe[0] && clct_kept_run3),
   .clct0_xky  (clct0_xky_pipe[9:0]),
   .clct1_xky  (clct1_xky_pipe[9:0]),
+  .clct0_gemA_xky_slopecorr  (clct0_gemAxky_pipe[9:0]),
+  .clct1_gemA_xky_slopecorr  (clct1_gemAxky_pipe[9:0]),
+  .clct0_gemB_xky_slopecorr  (clct0_gemBxky_pipe[9:0]),
+  .clct1_gemB_xky_slopecorr  (clct1_gemBxky_pipe[9:0]),
   .clct0_bnd  (clct0_bnd_pipe[4:0]),
   .clct1_bnd  (clct1_bnd_pipe[4:0]),
   .clct0_nhit (clct0_pipe[3:1]),
@@ -2868,10 +2885,10 @@
   .copyalct0_foralct1             (copyalct0_foralct1_pos),
   .copyclct0_forclct1             (copyclct0_forclct1_pos),
 
-  .clct0_gemA_offset_slopecorr_reg   (clct0_gemA_offset_slopecorr),
-  .clct0_gemB_offset_slopecorr_reg   (clct0_gemB_offset_slopecorr),
-  .clct1_gemA_offset_slopecorr_reg   (clct1_gemA_offset_slopecorr),
-  .clct1_gemB_offset_slopecorr_reg   (clct1_gemB_offset_slopecorr),
+  //.clct0_gemA_offset_slopecorr_reg   (clct0_gemA_offset_slopecorr),
+  //.clct0_gemB_offset_slopecorr_reg   (clct0_gemB_offset_slopecorr),
+  //.clct1_gemA_offset_slopecorr_reg   (clct1_gemA_offset_slopecorr),
+  //.clct1_gemB_offset_slopecorr_reg   (clct1_gemB_offset_slopecorr),
 
   .best_cluster0_ingemB           (best_cluster0_ingemB),
   .best_cluster0_iclst            (best_cluster0_iclst),
@@ -3125,10 +3142,10 @@
   assign clct0_cclut_real   = swapclct_final_pos ? clct1_cclut_real_r : clct0_cclut_real_r;
   assign clct1_cclut_real   = swapclct_final_pos ? clct0_cclut_real_r : clct1_cclut_real_r;
 
-  wire [7:0] clct0_gemA_offset_slopecorr_real  = swapclct_final_pos ? clct1_gemA_offset_slopecorr : clct0_gemA_offset_slopecorr; 
-  wire [7:0] clct0_gemB_offset_slopecorr_real  = swapclct_final_pos ? clct1_gemB_offset_slopecorr : clct0_gemB_offset_slopecorr; 
-  wire [7:0] clct1_gemA_offset_slopecorr_real  = swapclct_final_pos ? clct0_gemA_offset_slopecorr : clct1_gemA_offset_slopecorr; 
-  wire [7:0] clct1_gemB_offset_slopecorr_real  = swapclct_final_pos ? clct0_gemB_offset_slopecorr : clct1_gemB_offset_slopecorr; 
+  //wire [7:0] clct0_gemA_offset_slopecorr_real  = swapclct_final_pos ? clct1_gemA_offset_slopecorr : clct0_gemA_offset_slopecorr; 
+  //wire [7:0] clct0_gemB_offset_slopecorr_real  = swapclct_final_pos ? clct1_gemB_offset_slopecorr : clct0_gemB_offset_slopecorr; 
+  //wire [7:0] clct1_gemA_offset_slopecorr_real  = swapclct_final_pos ? clct0_gemA_offset_slopecorr : clct1_gemA_offset_slopecorr; 
+  //wire [7:0] clct1_gemB_offset_slopecorr_real  = swapclct_final_pos ? clct0_gemB_offset_slopecorr : clct1_gemB_offset_slopecorr; 
 
 // Latch pipelined ALCTs, aligned in time with CLCTs because CLCTs are delayed 1bx in the SRLs
   //reg [MXALCT-1:0] alct0_real = 0;
@@ -3326,12 +3343,12 @@
   wire       best_cluster1_bend = clct1_xky > best_cluster1_cscxky_ff;
   wire [31:0] gemcscmatch_cluster0  = best_cluster0_vpf_ff ? {best_cluster0_bend, best_cluster0_angle_ff[6:0], best_cluster0_pad_ff,best_cluster0_cscxky_ff, best_cluster0_roll_ff, best_cluster0_icluster_ff} : 32'hFFFFFFFF; 
   wire [31:0] gemcscmatch_cluster1  = best_cluster1_vpf_ff ? {best_cluster1_bend, best_cluster1_angle_ff[6:0], best_cluster1_pad_ff,best_cluster1_cscxky_ff, best_cluster1_roll_ff, best_cluster1_icluster_ff} : 32'hFFFFFFFF; 
-  wire [7:0] clct0_best_offset_slopecorr = best_cluster0_ingemB ? clct0_gemB_offset_slopecorr_real : clct0_gemA_offset_slopecorr_real;
-  wire [7:0] clct1_best_offset_slopecorr = best_cluster1_ingemB ? clct1_gemB_offset_slopecorr_real : clct1_gemA_offset_slopecorr_real;
+  //wire [7:0] clct0_best_offset_slopecorr = best_cluster0_ingemB ? clct0_gemB_offset_slopecorr_real : clct0_gemA_offset_slopecorr_real;
+  //wire [7:0] clct1_best_offset_slopecorr = best_cluster1_ingemB ? clct1_gemB_offset_slopecorr_real : clct1_gemA_offset_slopecorr_real;
 
   //wire clct0_bend_slopecorr = clct0_bnd[4] ? (clct0_xky-clct0_gemA_offset > best_cluster0_cscxky_ff) : (clct0_xky+clct0_best_offset_slopecorr>best_cluster0_cscxky_ff); 
-  wire clct0_bend_slopecorr = clct0_bnd[4] ? (clct0_xky > best_cluster0_cscxky_ff+clct0_best_offset_slopecorr) : (clct0_xky+clct0_best_offset_slopecorr>best_cluster0_cscxky_ff); 
-  wire clct1_bend_slopecorr = clct1_bnd[4] ? (clct1_xky > best_cluster1_cscxky_ff+clct1_best_offset_slopecorr) : (clct1_xky+clct1_best_offset_slopecorr>best_cluster1_cscxky_ff); 
+  //wire clct0_bend_slopecorr = clct0_bnd[4] ? (clct0_xky > best_cluster0_cscxky_ff+clct0_best_offset_slopecorr) : (clct0_xky+clct0_best_offset_slopecorr>best_cluster0_cscxky_ff); 
+  //wire clct1_bend_slopecorr = clct1_bnd[4] ? (clct1_xky > best_cluster1_cscxky_ff+clct1_best_offset_slopecorr) : (clct1_xky+clct1_best_offset_slopecorr>best_cluster1_cscxky_ff); 
 
 // Output vpf test point signals for timing-in, removed FFs so internal scope will be in real-time
   reg  alct_vpf_tp    = 0;
@@ -3490,13 +3507,17 @@
 
   wire  [MXBNDB - 1   : 0] clct0_bnd; // new bending 
   wire  [MXXKYB-1     : 0] clct0_xky; // new position with 1/8 precision
+  wire  [MXXKYB-1     : 0] clct0_gemAxky; // new position with 1/8 precision
+  wire  [MXXKYB-1     : 0] clct0_gemBxky; // new position with 1/8 precision
   //wire  [MXPATC-1     : 0] clct0_carry; // CC code 
   wire  [MXBNDB - 1   : 0] clct1_bnd; // new bending 
   wire  [MXXKYB-1     : 0] clct1_xky; // new position with 1/8 precision
+  wire  [MXXKYB-1     : 0] clct1_gemAxky; // new position with 1/8 precision
+  wire  [MXXKYB-1     : 0] clct1_gemBxky; // new position with 1/8 precision
   //wire  [MXPATC-1     : 0] clct1_carry; // CC code 
 
-  assign {clct0_bnd, clct0_xky} = clct0_cclut;
-  assign {clct1_bnd, clct1_xky} = clct1_cclut;
+  assign {clct0_gemAxky, clct0_gemBxky, clct0_bnd, clct0_xky} = clct0_cclut;
+  assign {clct1_gemAxky, clct1_gemBxky, clct1_bnd, clct1_xky} = clct1_cclut;
   
 
 //------------------------------------------------------------------------------------------------------------------

@@ -540,6 +540,8 @@
   hs_xky_1st,
   hs_carry_1st,
   hs_run2pid_1st,
+  hs_gemAxky_1st,
+  hs_gemBxky_1st,
 
   hs_hit_2nd,
   hs_pid_2nd,
@@ -550,6 +552,8 @@
   hs_xky_2nd,
   hs_carry_2nd,
   hs_run2pid_2nd,     
+  hs_gemAxky_2nd,
+  hs_gemBxky_2nd,
 
   hs_layer_trig,
   hs_nlayers_hit,
@@ -829,9 +833,13 @@
   clctf_xtmb,
   clct0_bnd_xtmb,
   clct0_xky_xtmb,
+  clct0_gemAxky_xtmb,
+  clct0_gemBxky_xtmb,
   //clct0_carry_xtmb, // Out  First  CLCT
   clct1_bnd_xtmb,
   clct1_xky_xtmb,
+  clct1_gemAxky_xtmb,
+  clct1_gemBxky_xtmb,
   //clct1_carry_xtmb, // Out  Second CLCT
   bx0_xmpc,
   bx0_match,
@@ -1617,6 +1625,8 @@
   input [MXBNDB     - 1 : 0] hs_bnd_1st; // 1st CLCT pattern lookup bend angle
   input [MXPATC     - 1 : 0] hs_carry_1st; // 1st CLCT pattern lookup comparator-code
   input  [MXPIDB-1:0]   hs_run2pid_1st;        // 1st CLCT pattern ID
+  input [MXXKYB     - 1 : 0] hs_gemAxky_1st; // 1st CLCT key 1/8-strip     
+  input [MXXKYB     - 1 : 0] hs_gemBxky_1st; // 1st CLCT key 1/8-strip     
 
   input [MXHITB - 1: 0]  hs_hit_2nd; // 2nd CLCT pattern hits
   input [MXPIDB - 1: 0]  hs_pid_2nd; // 2nd CLCT pattern ID
@@ -1628,6 +1638,8 @@
   input [MXBNDB     - 1 : 0] hs_bnd_2nd; // 1st CLCT pattern lookup bend angle
   input [MXPATC     - 1 : 0] hs_carry_2nd; // 1st CLCT pattern lookup comparator-code
   input  [MXPIDB-1:0]   hs_run2pid_2nd;
+  input [MXXKYB     - 1 : 0] hs_gemAxky_2nd; // 1st CLCT key 1/8-strip     
+  input [MXXKYB     - 1 : 0] hs_gemBxky_2nd; // 1st CLCT key 1/8-strip     
 
   input          hs_layer_trig;      // Layer triggered
   input  [MXHITB-1:0]  hs_nlayers_hit;      // Number of layers hit
@@ -1908,10 +1920,14 @@
 
   output [MXBNDB - 1   : 0] clct0_bnd_xtmb; // new bending 
   output [MXXKYB-1     : 0] clct0_xky_xtmb; // new position with 1/8 precision
+  output [MXXKYB-1     : 0] clct0_gemAxky_xtmb; // new position with 1/8 precision
+  output [MXXKYB-1     : 0] clct0_gemBxky_xtmb; // new position with 1/8 precision
   //output [MXPATC-1     : 0] clct0_carry_xtmb; // CC code 
   output [MXBNDB - 1   : 0] clct1_bnd_xtmb; // new bending 
   output [MXXKYB-1     : 0] clct1_xky_xtmb; // new position with 1/8 precision
   //output [MXPATC-1     : 0] clct1_carry_xtmb; // CC code 
+  output [MXXKYB-1     : 0] clct1_gemAxky_xtmb; // new position with 1/8 precision
+  output [MXXKYB-1     : 0] clct1_gemBxky_xtmb; // new position with 1/8 precision
 
   output   bx0_xmpc;  // bx0 to mpc
   input    bx0_match; // ALCT bx0 and CLCT bx0 match in time
@@ -3358,12 +3374,21 @@
   wire [MXPATC-1:0] clct1_carry, clct1_carry_xtmb;
   wire [MXBNDB - 1   : 0] clct0_bnd; // new bending 
   wire [MXXKYB-1     : 0] clct0_xky; // new position with 1/8 precision
+  wire [MXXKYB-1     : 0] clct0_gemAxky; // new position with 1/8 precision
+  wire [MXXKYB-1     : 0] clct0_gemBxky; // new position with 1/8 precision
   wire [MXBNDB - 1   : 0] clct1_bnd; // new bending 
   wire [MXXKYB-1     : 0] clct1_xky; // new position with 1/8 precision
+  wire [MXXKYB-1     : 0] clct1_gemAxky; // new position with 1/8 precision
+  wire [MXXKYB-1     : 0] clct1_gemBxky; // new position with 1/8 precision
   wire [MXBNDB - 1   : 0] clct0_bnd_xtmb; // new bending 
   wire [MXXKYB-1     : 0] clct0_xky_xtmb; // new position with 1/8 precision
+  wire [MXXKYB-1     : 0] clct0_gemAxky_xtmb; // new position with 1/8 precision
+  wire [MXXKYB-1     : 0] clct0_gemBxky_xtmb; // new position with 1/8 precision
   wire [MXBNDB - 1   : 0] clct1_bnd_xtmb; // new bending 
   wire [MXXKYB-1     : 0] clct1_xky_xtmb; // new position with 1/8 precision
+  wire [MXXKYB-1     : 0] clct1_gemAxky_xtmb; // new position with 1/8 precision
+  wire [MXXKYB-1     : 0] clct1_gemBxky_xtmb; // new position with 1/8 precision
+
 
   assign clct0[0]    = clct0_vpf;       // Valid pattern flag
   assign clct0[3:1]  = hs_hit_1st[2:0]; // Hits on pattern 0-6
@@ -3373,9 +3398,13 @@
   assign clct0_bnd[MXBNDB - 1: 0]= hs_bnd_1st[MXBNDB - 1   : 0]; 
   assign clct0_xky[MXXKYB - 1: 0]= hs_xky_1st[MXXKYB - 1   : 0]; 
   assign clct0_carry[MXPATC-1:0] = hs_carry_1st[MXPATC-1:0];
+  assign clct0_gemAxky[MXXKYB - 1: 0]= hs_gemAxky_1st[MXXKYB - 1   : 0];
+  assign clct0_gemBxky[MXXKYB - 1: 0]= hs_gemBxky_1st[MXXKYB - 1   : 0];
   assign clct1_bnd[MXBNDB - 1: 0]= hs_bnd_2nd[MXBNDB - 1   : 0]; 
   assign clct1_xky[MXXKYB - 1: 0]= hs_xky_2nd[MXXKYB - 1   : 0]; 
   assign clct1_carry[MXPATC-1:0] = hs_carry_2nd[MXPATC-1:0];
+  assign clct1_gemAxky[MXXKYB - 1: 0]= hs_gemAxky_2nd[MXXKYB - 1   : 0];
+  assign clct1_gemBxky[MXXKYB - 1: 0]= hs_gemBxky_2nd[MXXKYB - 1   : 0];
 
   assign clct1[0]    = clct1_vpf;       // Valid pattern flag
   assign clct1[3:1]  = hs_hit_2nd[2:0]; // Hits on pattern 0-6
@@ -3407,6 +3436,10 @@
   assign clct1_carry_xtmb = clct1_carry & {MXPATC {!clct1_blanking}};
   assign clct1_bnd_xtmb   = clct1_bnd & {MXBNDB {!clct1_blanking}};
   assign clct1_xky_xtmb   = clct1_xky & {MXXKYB {!clct1_blanking}};
+  assign clct0_gemAxky_xtmb   = clct0_gemAxky & {MXXKYB {!clct0_blanking}};
+  assign clct0_gemBxky_xtmb   = clct0_gemBxky & {MXXKYB {!clct0_blanking}};
+  assign clct1_gemAxky_xtmb   = clct1_gemAxky & {MXXKYB {!clct1_blanking}};
+  assign clct1_gemBxky_xtmb   = clct1_gemBxky & {MXXKYB {!clct1_blanking}};
 
 // Latch CLCTs for VME
   reg [MXCLCT-1:0]  clct0_vme=0;

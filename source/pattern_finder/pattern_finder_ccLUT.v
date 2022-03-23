@@ -52,6 +52,7 @@ module pattern_finder_ccLUT (
   reverse_hs_csc,
   reverse_hs_me1a,
   reverse_hs_me1b,
+  evenchamber, 
 
   // PreTrigger Ports
   layer_trig_en,
@@ -92,6 +93,8 @@ module pattern_finder_ccLUT (
   hs_xky_1st,
   hs_car_1st,
   hs_run2pid_1st,
+  hs_gemAxky_1st,
+  hs_gemBxky_1st,
 
   hs_hit_2nd,
   hs_pid_2nd,
@@ -102,6 +105,8 @@ module pattern_finder_ccLUT (
   hs_xky_2nd,
   hs_car_2nd,
   hs_run2pid_2nd,
+  hs_gemAxky_2nd,
+  hs_gemBxky_2nd,
 
   hs_layer_trig,
   hs_nlayers_hit,
@@ -192,6 +197,8 @@ module pattern_finder_ccLUT (
   output        reverse_hs_me1a; // 1=reverse me1a hstrips prior to pattern sorting
   output        reverse_hs_me1b; // 1=reverse me1b hstrips prior to pattern sorting
 
+  input evenchamber;
+
   // PreTrigger Ports
   input  layer_trig_en;                          // 1=Enable layer trigger mode
   input  [MXHITB - 1: 0]     lyr_thresh_pretrig; // Layers hit pre-trigger threshold
@@ -231,6 +238,8 @@ module pattern_finder_ccLUT (
   output [MXBNDB     - 1 : 0] hs_bnd_1st; // 1st CLCT pattern lookup bend angle
   output [MXPATC     - 1 : 0] hs_car_1st; // 1st CLCT pattern lookup comparator-code
   output [MXPIDB - 1: 0]  hs_run2pid_1st; // 1st CLCT pattern ID
+  output [MXXKYB     - 1 : 0] hs_gemAxky_1st; // 1st CLCT key 1/8-strip, extrapolated to gemA
+  output [MXXKYB     - 1 : 0] hs_gemBxky_1st; // 1st CLCT key 1/8-strip, extrapolated to gemB
 
   output [MXHITB - 1: 0]  hs_hit_2nd; // 2nd CLCT pattern hits
   output [MXPIDB - 1: 0]  hs_pid_2nd; // 2nd CLCT pattern ID
@@ -238,10 +247,12 @@ module pattern_finder_ccLUT (
   output                  hs_bsy_2nd; // 2nd CLCT busy, logic error indicator
 
 //Tao CCLUT pattern
-  output [MXXKYB     - 1 : 0] hs_xky_2nd; // 1st CLCT key 1/8-strip     
-  output [MXBNDB     - 1 : 0] hs_bnd_2nd; // 1st CLCT pattern lookup bend angle
-  output [MXPATC     - 1 : 0] hs_car_2nd; // 1st CLCT pattern lookup comparator-code
-  output [MXPIDB - 1: 0]  hs_run2pid_2nd; // 1st CLCT pattern ID
+  output [MXXKYB     - 1 : 0] hs_xky_2nd; // 2nd CLCT key 1/8-strip     
+  output [MXBNDB     - 1 : 0] hs_bnd_2nd; // 2nd CLCT pattern lookup bend angle
+  output [MXPATC     - 1 : 0] hs_car_2nd; // 2nd CLCT pattern lookup comparator-code
+  output [MXPIDB - 1: 0]  hs_run2pid_2nd; // 2nd CLCT pattern ID
+  output [MXXKYB     - 1 : 0] hs_gemAxky_2nd; //2nd  CLCT key 1/8-strip, extrapolated to gemA
+  output [MXXKYB     - 1 : 0] hs_gemBxky_2nd; //2nd  CLCT key 1/8-strip, extrapolated to gemB
 
   output                  hs_layer_trig;  // Layer triggered
   output [MXHITB - 1: 0]  hs_nlayers_hit; // Number of layers hit
@@ -1297,6 +1308,9 @@ module pattern_finder_ccLUT (
   wire [MXPATC -1:0] hs_car_1st_dly;
   wire [MXXKYB -1:0] hs_xky_1st_dly;
 
+  wire [MXXKYB -1:0] gemAxky_slopecorr_1st;
+  wire [MXXKYB -1:0] gemBxky_slopecorr_1st;
+
   parameter cdly = 4'd0;
 
   srl16e_bbl #(MXPATB ) upatbbl (.clock(clock), .ce(1'b1), .adr(cdly), .d(hs_pat_1st_nodly), .q(hs_pat_1st_dly));
@@ -1315,6 +1329,8 @@ module pattern_finder_ccLUT (
   reg [MXXKYB - 1:0] hs_xky_1st;
   reg [MXPIDB - 1:0] hs_run2pid_1st;
 
+  reg [MXXKYB - 1:0] hs_gemAxky_1st;//CSC extrapolated in gemA
+  reg [MXXKYB - 1:0] hs_gemBxky_1st;
 
   assign hs_hit_1st_dly = hs_pat_1st_dly[MXPATB - 1: MXPIDB];
 
@@ -1332,6 +1348,8 @@ module pattern_finder_ccLUT (
       hs_car_1st <= 0;
       hs_xky_1st <= 0;
       hs_run2pid_1st <= 0;
+      hs_gemAxky_1st <= 0;
+      hs_gemBxky_1st <= 0;
     end
     else if (lyr_trig_1st) begin        // layer-trigger mode
       hs_pid_1st <= 1;                  // Pattern id=1 for layer triggers
@@ -1341,6 +1359,8 @@ module pattern_finder_ccLUT (
       hs_car_1st <= 0;
       hs_xky_1st <= 0;
       hs_run2pid_1st <= 0;
+      hs_gemAxky_1st <= 0;
+      hs_gemBxky_1st <= 0;
     end
     else begin          // else assert final 1st clct
       hs_key_1st <= hs_key_1st_dly;
@@ -1350,6 +1370,8 @@ module pattern_finder_ccLUT (
       hs_car_1st <= hs_car_1st_dly;
       hs_xky_1st <= hs_xky_1st_dly;
       hs_run2pid_1st <= hs_run2pid_1st_dly;
+      hs_gemAxky_1st <= gemAxky_slopecorr_1st;
+      hs_gemBxky_1st <= gemBxky_slopecorr_1st;
     end
   end
 
@@ -1628,6 +1650,8 @@ module pattern_finder_ccLUT (
   wire [MXXKYB -1:0]    hs_xky_s5; // CCLUT, Tao
   wire [MXBNDB -1:0]    hs_bnd_s5;
   wire [MXPATC -1:0]    hs_car_s5;
+  wire [MXXKYB -1:0] gemAxky_slopecorr_2nd;
+  wire [MXXKYB -1:0] gemBxky_slopecorr_2nd;
   wire hs_bsy_s5;
 
   // CCLUT, Tao, best_1of7_busy_ccLUT
@@ -1702,6 +1726,8 @@ module pattern_finder_ccLUT (
   reg [MXXKYB - 1:0]     hs_xky_2nd;
   reg                    hs_bsy_2nd;
   reg [MXPIDB     - 1:0] hs_run2pid_2nd;
+  reg [MXXKYB - 1:0]     hs_gemAxky_2nd;
+  reg [MXXKYB - 1:0]     hs_gemBxky_2nd;
 
   assign hs_hit_s5 = hs_pat_s5[MXPATB - 1: MXPIDB];
   wire blank_2nd    = ((hs_hit_s5 == 0) && (clct_blanking == 1)) || purging;
@@ -1717,6 +1743,8 @@ module pattern_finder_ccLUT (
       hs_xky_2nd <= 0;
       hs_bsy_2nd <= hs_bsy_s5;
       hs_run2pid_2nd <= 0;
+      hs_gemAxky_2nd <= 0;
+      hs_gemBxky_2nd <= 0;
     end
     else if (lyr_trig_2nd) begin    // layer-trigger mode
       hs_pid_2nd <= 0;
@@ -1727,6 +1755,8 @@ module pattern_finder_ccLUT (
       hs_xky_2nd <= 0;
       hs_bsy_2nd <= hs_bsy_s5;
       hs_run2pid_2nd <= 0;
+      hs_gemAxky_2nd <= 0;
+      hs_gemBxky_2nd <= 0;
     end
     else begin         // else assert final 2nd clct
       hs_pid_2nd <= hs_pat_s5[MXPIDB - 1: 0]; 
@@ -1737,6 +1767,8 @@ module pattern_finder_ccLUT (
       hs_car_2nd <= hs_car_s5;
       hs_xky_2nd <= hs_xky_s5;
       hs_run2pid_2nd <= hs_run2pid_2nd_s5;
+      hs_gemAxky_2nd <= gemAxky_slopecorr_2nd;
+      hs_gemBxky_2nd <= gemBxky_slopecorr_2nd;
     end
   end
 
@@ -1771,6 +1803,22 @@ module pattern_finder_ccLUT (
   endgenerate
 
 
+  clct_gem_offset_slope uclctoffset(
+    .clock            (clock), 
+    .clct0_xky        (hs_xky_1st_dly[9:0]), //clct0 xky
+    .clct0_bend       (hs_bnd_1st_dly[3:0]), //clct0 bending, abs value
+    .clct0_lr         (hs_bnd_1st_dly[4]), //clct0 bending, left or right
+    .clct1_xky        (hs_xky_s5[9:0]), //clct1 xky
+    .clct1_bend       (hs_bnd_s5[3:0]), //clct1 bending, abs value
+    .clct1_lr         (hs_bnd_s5[4]), //clct1 bending, left or right
+    .isME1a0          (hs_xky_1st_dly[9]),  // Me1a or not, isME1a0=1 means clct0 in ME1a
+    .isME1a1          (hs_xky_s5[9]),  //Me1a or not, isME1a1=1 means clct1 in ME1a 
+    .even             (evenchamber),   //even chamber pair not, even=1 means even chamber pair 
+    .clct0_gemA_xky_slopecorr(gemAxky_slopecorr_1st), // output, offset for clct0-gemA strip position match
+    .clct0_gemB_xky_slopecorr(gemBxky_slopecorr_1st),//output, offset for clct0-gemB strip position match
+    .clct1_gemA_xky_slopecorr(gemAxky_slopecorr_2nd),//output, offset for clct1-gemA strip position match
+    .clct1_gemB_xky_slopecorr(gemBxky_slopecorr_2nd)  // output, offset for clct1-gemB strip position match
+  );
 
 //------------------------------------------------------------------------------------------------------------------------
 // Prodcedural function to sum number of layers hit into a binary value - ROM version
