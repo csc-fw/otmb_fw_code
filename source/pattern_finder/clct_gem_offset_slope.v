@@ -22,6 +22,11 @@ module clct_gem_offset_slope (
 
 parameter MXADRB       = 4;
 parameter MXDATB       = 8;
+parameter MINKEYHSME1B = 10'd0;
+parameter MAXKEYHSME1B = 10'd511;
+parameter MINKEYHSME1A = 10'd512;
+parameter MAXKEYHSME1A = 10'd895;
+
 // Ports
   input                  clock;
   input [9:0]  clct0_xky;
@@ -173,10 +178,15 @@ rom_cscoffset_slope #(
   assign clct1_gemA_offset      = even ? clct1_offset_gemA_even : clct1_offset_gemA_odd;
   assign clct1_gemB_offset      = even ? clct1_offset_gemB_even : clct1_offset_gemB_odd;
 
-  assign clct0_gemA_xky_slopecorr = clct0_lr ? ((clct0_xky>clct0_gemA_offset) ? (clct0_xky-clct0_gemA_offset):10'd0) : (clct0_xky+clct0_gemA_offset);
-  assign clct0_gemB_xky_slopecorr = clct0_lr ? ((clct0_xky>clct0_gemB_offset) ? (clct0_xky-clct0_gemB_offset):10'd0) : (clct0_xky+clct0_gemB_offset);
-  assign clct1_gemA_xky_slopecorr = clct1_lr ? ((clct1_xky>clct1_gemA_offset) ? (clct1_xky-clct1_gemA_offset):10'd0) : (clct1_xky+clct1_gemA_offset);
-  assign clct1_gemB_xky_slopecorr = clct1_lr ? ((clct1_xky>clct1_gemB_offset) ? (clct1_xky-clct1_gemB_offset):10'd0) : (clct1_xky+clct1_gemB_offset);
+  wire [9:0] clct0_minxky = isME1a0 ? MINKEYHSME1A:MINKEYHSME1B;
+  wire [9:0] clct1_minxky = isME1a1 ? MINKEYHSME1A:MINKEYHSME1B;
+  wire [9:0] clct0_maxxky = isME1a0 ? MAXKEYHSME1A:MAXKEYHSME1B;
+  wire [9:0] clct1_maxxky = isME1a1 ? MAXKEYHSME1A:MAXKEYHSME1B;
+
+  assign clct0_gemA_xky_slopecorr = clct0_lr ? ((clct0_xky>clct0_gemA_offset+clct0_minxky) ? (clct0_xky-clct0_gemA_offset):clct0_minxky) : ((clct0_xky+clct0_gemA_offset > clct0_maxxky) ? clct0_maxxky : clct0_xky+clct0_gemA_offset);
+  assign clct0_gemB_xky_slopecorr = clct0_lr ? ((clct0_xky>clct0_gemB_offset+clct0_minxky) ? (clct0_xky-clct0_gemB_offset):clct0_minxky) : ((clct0_xky+clct0_gemB_offset > clct0_maxxky) ? clct0_maxxky : clct0_xky+clct0_gemB_offset);
+  assign clct1_gemA_xky_slopecorr = clct1_lr ? ((clct1_xky>clct1_gemA_offset+clct1_minxky) ? (clct1_xky-clct1_gemA_offset):clct1_minxky) : ((clct1_xky+clct1_gemA_offset > clct1_maxxky) ? clct1_maxxky : clct1_xky+clct1_gemA_offset);
+  assign clct1_gemB_xky_slopecorr = clct1_lr ? ((clct1_xky>clct1_gemB_offset+clct1_minxky) ? (clct1_xky-clct1_gemB_offset):clct1_minxky) : ((clct1_xky+clct1_gemB_offset > clct1_maxxky) ? clct1_maxxky : clct1_xky+clct1_gemB_offset);
 
 
 //-------------------------------------------------------------------------------------------------------------------
