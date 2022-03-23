@@ -210,6 +210,9 @@
   link_bad,
   gtx_rx_notintable_count,
   gtx_rx_disperr_count,
+  gtx_rx_lt_trg,
+  gtx_rx_lt_trg_expect,
+  gtx_rx_lt_trg_err,
   gtx_rx_sump
 
 // Debug
@@ -351,9 +354,9 @@
   output  [15:0] gtx_rx_kchar;     // Error count on this fiber channel
   output         gtx_rx_err;           // PRBS test detects an error
   output  [15:0] gtx_rx_err_count;     // Error count on this fiber channel
-  output         gtx_rx_lt_trg_err,  //lt trg check err
-  output         gtx_rx_lt_trg,      //lt trg signal, FC
-  output         gtx_rx_lt_trg_expect, // expect lt
+  output         gtx_rx_lt_trg_err;  //lt trg check err
+  output         gtx_rx_lt_trg;      //lt trg signal, FC
+  output         gtx_rx_lt_trg_expect; // expect lt
   output         gtx_rx_sump;          // Unused signals
   output  [15:0] gtx_rx_notintable_count;     // Error count on this fiber channel
   output  [15:0] gtx_rx_disperr_count;     // Error count on this fiber channel

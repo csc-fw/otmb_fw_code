@@ -96,7 +96,7 @@ wire [MXCFEB-1:0] kchar_in_table;
 
 genvar icfeb;
 generate
-    for (icfeb=0; icfeb<MXCFEB; icfeb=icfeb+1) begin
+    for (icfeb=0; icfeb<MXCFEB; icfeb=icfeb+1) begin : gencfebsync
         //ignore the sync check when links are not good, cfeb fibers are not enabled, overflow, bc0marker, resyncmarker
         assign skip_sync_check[icfeb] = ~link_good[icfeb] || ~link_good_r2[icfeb] || ~cfeb_fiber_enable[icfeb] || reset;
         assign kchar_in_table[icfeb]  = (cfeb_kchar[icfeb][7:0] == 8'hFC || cfeb_kchar[icfeb][7:0] == 8'hBC) || skip_sync_check[icfeb];

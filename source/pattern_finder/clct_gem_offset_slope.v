@@ -33,10 +33,10 @@ parameter MXDATB       = 8;
   input                isME1a0;
   input                isME1a1;
   input                   even;
-  output [7:0]    clct0_gemA_xky_slopecorr;//extrapolated GEM location
-  output [7:0]    clct0_gemB_xky_slopecorr;
-  output [7:0]    clct1_gemA_xky_slopecorr;
-  output [7:0]    clct1_gemB_xky_slopecorr;
+  output [9:0]    clct0_gemA_xky_slopecorr;//extrapolated GEM location
+  output [9:0]    clct0_gemB_xky_slopecorr;
+  output [9:0]    clct1_gemA_xky_slopecorr;
+  output [9:0]    clct1_gemB_xky_slopecorr;
 
   wire [7:0]    clct0_gemA_offset;
   wire [7:0]    clct0_gemB_offset;
