@@ -3350,20 +3350,21 @@
      assign mez_tp10_busy = (raw_mez_busy | alct_startup_msec | alct_wait_dll | alct_startup_done | alct_wait_vme | alct_wait_cfg);
 
 // JRG: if set_sw8 & 7 are both low, put BPI debug signals on the mezanine test points
-    //assign mez_tp[9] = (!set_sw[7] ? bpi_dtack       : (|link_bad) || ((set_sw == 2'b01) && sump));
-    //assign mez_tp[8] = (!set_sw[7] ? bpi_we          : (&link_good || ((set_sw == 2'b01) && alct_wait_cfg)));
-    ////Tao, ME1/1->MEX/1, ignore link[5] & link[6]
-    //assign mez_tp[7] =   set_sw[8] ? alct_txd_posneg : (!set_sw[7] ? bpi_enbl : link_good[2]);
-    //assign mez_tp[6] = (!set_sw[7] ? bpi_dsbl        :                          link_good[1]);
-    //assign mez_tp[5] =   set_sw[8] ? alct_rxd_posneg : (!set_sw[7] ? bpi_rst  : link_good[4]);
-    //assign mez_tp[4] = (!set_sw[7] ? bpi_dev         :                          link_good[3]);
+    assign mez_tp[9] = (!set_sw[7] ? bpi_dtack       : (|link_bad) || ((set_sw == 2'b01) && sump));
+    assign mez_tp[8] = (!set_sw[7] ? bpi_we          : (&link_good || ((set_sw == 2'b01) && alct_wait_cfg)));
+    //Tao, ME1/1->MEX/1, ignore link[5] & link[6]
+    assign mez_tp[7] =   set_sw[8] ? alct_txd_posneg : (!set_sw[7] ? bpi_enbl : link_good[2]);
+    assign mez_tp[6] = (!set_sw[7] ? bpi_dsbl        :                          link_good[1]);
+    assign mez_tp[5] =   set_sw[8] ? alct_rxd_posneg : (!set_sw[7] ? bpi_rst  : link_good[4]);
+    assign mez_tp[4] = (!set_sw[7] ? bpi_dev         :                          link_good[3]);
     ////debugging the FC signal from cfeb gtx 
-    assign mez_tp[9] = & (gtx_rx_fc[MXCFEB-1:0]);
-    assign mez_tp[8] = & (gtx_rx_lt_trg[MXCFEB-1:0]);
-    assign mez_tp[7] = & (gtx_rx_lt_trg_expect[MXCFEB-1:0]);
-    assign mez_tp[6] = (gtx_rx_lt_trg_err[0]);
-    assign mez_tp[5] = (gtx_rx_lt_trg[0]==gtx_rx_lt_trg_expect[0]);
-    assign mez_tp[4] = clock;
+    //assign mez_tp[9] = clct0_xtmb[0];
+    //assign mez_tp[8] = & (gtx_rx_lt_trg[MXCFEB-1:0]);
+    //assign mez_tp[7] = & (gtx_rx_lt_trg_expect[MXCFEB-1:0]);
+    //assign mez_tp[6] = (gtx_rx_lt_trg_err[0]);
+    ////assign mez_tp[5] = (gtx_rx_lt_trg[0]==gtx_rx_lt_trg_expect[0]);
+    //assign mez_tp[5] = clct_pretrig;
+    //assign mez_tp[4] = clock;
     //to debug buffer 
     //assign mez_tp[7] = buf_q_full;
     //assign mez_tp[6] = buf_stalled;
