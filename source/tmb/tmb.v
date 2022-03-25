@@ -3374,6 +3374,7 @@
   //for csc alone, Bend direction, same as pid lsb. and for gemcsc, bend=1 if cscxky>gem_cscxky????
   wire       best_cluster0_bend = clct0_xky > best_cluster0_cscxky_ff;
   wire       best_cluster1_bend = clct1_xky > best_cluster1_cscxky_ff;
+  //note: best_cluster0_angle_ff[6:0] is trancated to 7bits 
   wire [31:0] gemcscmatch_cluster0  = best_cluster0_vpf_ff ? {best_cluster0_bend, best_cluster0_angle_ff[6:0], best_cluster0_pad_ff,best_cluster0_cscxky_ff, best_cluster0_roll_ff, best_cluster0_icluster_ff} : 32'hFFFFFFFF; 
   wire [31:0] gemcscmatch_cluster1  = best_cluster1_vpf_ff ? {best_cluster1_bend, best_cluster1_angle_ff[6:0], best_cluster1_pad_ff,best_cluster1_cscxky_ff, best_cluster1_roll_ff, best_cluster1_icluster_ff} : 32'hFFFFFFFF; 
   //wire [7:0] clct0_best_offset_slopecorr = best_cluster0_ingemB ? clct0_gemB_offset_slopecorr_real : clct0_gemA_offset_slopecorr_real;

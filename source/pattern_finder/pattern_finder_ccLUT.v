@@ -1574,7 +1574,7 @@ module pattern_finder_ccLUT (
 
     // also do it for comparator code, hit carrry
       for (ibit = 0; ibit <= MXPATC - 1; ibit = ibit + 1) begin: bit_loop_carry
-        SRL16E u0 ( // Primitive: 16-Bit Shift Register Look-Up Table (LUT) with Clock Enable
+        SRL16E uc ( // Primitive: 16-Bit Shift Register Look-Up Table (LUT) with Clock Enable
           .CLK(clock),
           .CE(1'b1),
           .D(hs_carry_s0[ikey][ibit]),
