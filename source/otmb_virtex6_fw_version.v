@@ -5,7 +5,7 @@
 // Firmware version global definitions
   `define FIRMWARE_TYPE        04'hC    // C=Normal CLCT/TMB, D=Debug PCB loopback version
   `define VERSION              04'hE    // Version revision number, A=TMB2004 and earlier, E=TMB2005E production
-  `define MONTHDAY             16'h0312 // Version date
+  `define MONTHDAY             16'h0324 // Version date
   `define YEAR                 16'h2022 // Version year
   `define REVISION             04'h01   // Firmware Revision
 
@@ -36,8 +36,8 @@
 
 
 // Conditional compile flags: Enable only one CSC_TYPE
-  `define CSC_TYPE_D  04'hD // Reversed ME1B: ME1B   chambers facing away from IR. ME1B hs = reversed, ME1A hs =!reversed. Negative endcap at P5
-//    `define CSC_TYPE_C  04'hC // Normal   ME1B: ME1B   chambers facing toward IR.    ME1B hs =!reversed, ME1A hs = reversed. Positive endcap at P5
+//  `define CSC_TYPE_D  04'hD // Reversed ME1B: ME1B   chambers facing away from IR. ME1B hs = reversed, ME1A hs =!reversed. Negative endcap at P5
+    `define CSC_TYPE_C  04'hC // Normal   ME1B: ME1B   chambers facing toward IR.    ME1B hs =!reversed, ME1A hs = reversed. Positive endcap at P5
     //Type A is for non-ME1/1, both two endcaps
 
 // Revision log
