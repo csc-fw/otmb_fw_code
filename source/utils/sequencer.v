@@ -3494,18 +3494,18 @@
   assign clct1_carry_xtmb = clct1_carry & {MXPATC {!clct1_blanking}};
   assign clct1_bnd_xtmb   = clct1_bnd & {MXBNDB {!clct1_blanking}};
   assign clct1_xky_xtmb   = clct1_xky & {MXXKYB {!clct1_blanking}};
-  assign clct0_gemAxky_xtmb   = clct0_gemAxky & {MXXKYB {!clct0_blanking}};
-  assign clct0_gemBxky_xtmb   = clct0_gemBxky & {MXXKYB {!clct0_blanking}};
-  assign clct0_gemAoffset_xtmb= clct0_gemAoffset & {8{!clct0_blanking}};
-  assign clct0_gemBoffset_xtmb= clct0_gemBoffset & {8{!clct0_blanking}};
-  assign clct0_gemAedge_xtmb  = clct0_gemAedge   & (  !clct0_blanking);
-  assign clct0_gemBedge_xtmb  = clct0_gemBedge   & (  !clct0_blanking);
-  assign clct1_gemAxky_xtmb   = clct1_gemAxky & {MXXKYB {!clct1_blanking}};
-  assign clct1_gemBxky_xtmb   = clct1_gemBxky & {MXXKYB {!clct1_blanking}};
-  assign clct1_gemAoffset_xtmb= clct1_gemAoffset & {8{!clct1_blanking}};
-  assign clct1_gemBoffset_xtmb= clct1_gemBoffset & {8{!clct1_blanking}};
-  assign clct1_gemAedge_xtmb  = clct1_gemAedge   & (  !clct1_blanking);
-  assign clct1_gemBedge_xtmb  = clct1_gemBedge   & (  !clct1_blanking);
+  assign clct0_gemAxky_xtmb   = clct0_gemAxky    ;//& {MXXKYB {!clct0_blanking}};
+  assign clct0_gemBxky_xtmb   = clct0_gemBxky    ;//& {MXXKYB {!clct0_blanking}};
+  assign clct0_gemAoffset_xtmb= clct0_gemAoffset ;//& {8{!clct0_blanking}};
+  assign clct0_gemBoffset_xtmb= clct0_gemBoffset ;//& {8{!clct0_blanking}};
+  assign clct0_gemAedge_xtmb  = clct0_gemAedge   ;//& (  !clct0_blanking);
+  assign clct0_gemBedge_xtmb  = clct0_gemBedge   ;//& (  !clct0_blanking);
+  assign clct1_gemAxky_xtmb   = clct1_gemAxky    ;//& {MXXKYB {!clct1_blanking}};
+  assign clct1_gemBxky_xtmb   = clct1_gemBxky    ;//& {MXXKYB {!clct1_blanking}};
+  assign clct1_gemAoffset_xtmb= clct1_gemAoffset ;//& {8{!clct1_blanking}};
+  assign clct1_gemBoffset_xtmb= clct1_gemBoffset ;//& {8{!clct1_blanking}};
+  assign clct1_gemAedge_xtmb  = clct1_gemAedge   ;//& (  !clct1_blanking);
+  assign clct1_gemBedge_xtmb  = clct1_gemBedge   ;//& (  !clct1_blanking);
 
 // Latch CLCTs for VME
   reg [MXCLCT-1:0]  clct0_vme=0;
