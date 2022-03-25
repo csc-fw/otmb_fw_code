@@ -205,10 +205,15 @@ rom_cscoffset_slope #(
   //assign clct1_gemA_xky_slopecorr = clct1_lr ? ((clct1_xky>clct1_gemA_offset+clct1_minxky) ? (clct1_xky-clct1_gemA_offset):clct1_minxky) : ((clct1_xky+clct1_gemA_offset > clct1_maxxky) ? clct1_maxxky : clct1_xky+clct1_gemA_offset);
   //assign clct1_gemB_xky_slopecorr = clct1_lr ? ((clct1_xky>clct1_gemB_offset+clct1_minxky) ? (clct1_xky-clct1_gemB_offset):clct1_minxky) : ((clct1_xky+clct1_gemB_offset > clct1_maxxky) ? clct1_maxxky : clct1_xky+clct1_gemB_offset);
 
-  assign clct0_gemA_xky_slopecorr = clct0_lr ? ((clct0_xky>clct0_gemA_offset) ? (clct0_xky-clct0_gemA_offset) : 10'd0) : (clct0_xky+clct0_gemA_offset);
-  assign clct0_gemB_xky_slopecorr = clct0_lr ? ((clct0_xky>clct0_gemB_offset) ? (clct0_xky-clct0_gemB_offset) : 10'd0) : (clct0_xky+clct0_gemB_offset);
-  assign clct1_gemA_xky_slopecorr = clct1_lr ? ((clct1_xky>clct1_gemA_offset) ? (clct1_xky-clct1_gemA_offset) : 10'd0) : (clct1_xky+clct1_gemA_offset);
-  assign clct1_gemB_xky_slopecorr = clct1_lr ? ((clct1_xky>clct1_gemB_offset) ? (clct1_xky-clct1_gemB_offset) : 10'd0) : (clct1_xky+clct1_gemB_offset);
+  //assign clct0_gemA_xky_slopecorr = clct0_lr ? ((clct0_xky>clct0_gemA_offset) ? (clct0_xky-clct0_gemA_offset) : 10'd0) : (clct0_xky+clct0_gemA_offset);
+  //assign clct0_gemB_xky_slopecorr = clct0_lr ? ((clct0_xky>clct0_gemB_offset) ? (clct0_xky-clct0_gemB_offset) : 10'd0) : (clct0_xky+clct0_gemB_offset);
+  //assign clct1_gemA_xky_slopecorr = clct1_lr ? ((clct1_xky>clct1_gemA_offset) ? (clct1_xky-clct1_gemA_offset) : 10'd0) : (clct1_xky+clct1_gemA_offset);
+  //assign clct1_gemB_xky_slopecorr = clct1_lr ? ((clct1_xky>clct1_gemB_offset) ? (clct1_xky-clct1_gemB_offset) : 10'd0) : (clct1_xky+clct1_gemB_offset);
+
+  assign clct0_gemA_xky_slopecorr = clct0_lr ? (clct0_xky-clct0_gemA_offset) : (clct0_xky+clct0_gemA_offset);
+  assign clct0_gemB_xky_slopecorr = clct0_lr ? (clct0_xky-clct0_gemB_offset) : (clct0_xky+clct0_gemB_offset);
+  assign clct1_gemA_xky_slopecorr = clct1_lr ? (clct1_xky-clct1_gemA_offset) : (clct1_xky+clct1_gemA_offset);
+  assign clct1_gemB_xky_slopecorr = clct1_lr ? (clct1_xky-clct1_gemB_offset) : (clct1_xky+clct1_gemB_offset);
 
   assign clct0_gemA_outedge = clct0_lr && (clct0_xky<clct0_gemA_offset);
   assign clct0_gemB_outedge = clct0_lr && (clct0_xky<clct0_gemB_offset);

@@ -2387,6 +2387,7 @@ end
 	.clock (clock),    //in clock
 
         .evenchamber       (evenchamber),   //in,  even pair or not
+        .gemcsc_match_extrapolate    (gemcsc_match_extrapolate),    //In enable GEMCSC match using extrapolation
         //.gem_match_enable  (gemA_cluster_enable[iclst_csc]),//In enable GEMA for GEMCSC match or not, if not, vpf is invalid from here
         .gem_clct_deltahs  (gem_clct_deltahs), // In matching window in halfstrip direction
         .gem_alct_deltawire(gem_alct_deltawire), //In  matching window in wiregroup direction
@@ -2422,6 +2423,7 @@ end
 	.clock (clock),
 
         .evenchamber       (evenchamber),   // even pair or not
+        .gemcsc_match_extrapolate    (gemcsc_match_extrapolate),    //In enable GEMCSC match using extrapolation
         //.gem_match_enable  (gemB_cluster_enable[iclst_csc]),
         .gem_clct_deltahs  (gem_clct_deltahs), // matching window in halfstrip direction
         .gem_alct_deltawire(gem_alct_deltawire), // matching window in wiregroup direction
