@@ -369,11 +369,19 @@
   clct0_xky_xtmb,
   clct0_gemAxky_xtmb,
   clct0_gemBxky_xtmb,
+  clct0_gemAoffset_xtmb,//CSC extrapolated in gemA
+  clct0_gemBoffset_xtmb,
+  clct0_gemAedge_xtmb,//CSC extrapolated in gemA
+  clct0_gemBedge_xtmb,
 //  clct0_carry_xtmb, // Out  First  CLCT
   clct1_bnd_xtmb,
   clct1_xky_xtmb,
   clct1_gemAxky_xtmb,
   clct1_gemBxky_xtmb,
+  clct1_gemAoffset_xtmb,//CSC extrapolated in gemA
+  clct1_gemBoffset_xtmb,
+  clct1_gemAedge_xtmb,//CSC extrapolated in gemA
+  clct1_gemBedge_xtmb,
 //  clct1_carry_xtmb, // Out  Second CLCT
   bx0_xmpc,
 
@@ -746,7 +754,7 @@
   parameter MXXKYB   = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
   //parameter MXCCLUTB = 10+5+9+12;  // New 35bits for CCLUT, new quality, bnd, xky, comparator code 
   //parameter MXCCLUTB = MXBNDB+MXXKYB;
-  parameter MXCCLUTB = MXBNDB+MXXKYB+MXXKYB+MXXKYB;
+  parameter MXCCLUTB = MXBNDB+MXXKYB+MXXKYB+MXXKYB+18;//bnd, xky, gemA/Bxky, gemA/Boffset, gemA/Bedge
 
   //HMT
   parameter MXHMTB   = 4;
@@ -1029,11 +1037,20 @@
   input [MXXKYB-1     : 0] clct0_xky_xtmb; // new position with 1/8 precision
   input [MXXKYB-1     : 0] clct0_gemAxky_xtmb; // new position with 1/8 precision
   input [MXXKYB-1     : 0] clct0_gemBxky_xtmb; // new position with 1/8 precision
+  input [         7:0]     clct0_gemAoffset_xtmb;//CSC extrapolated in gemA
+  input [         7:0]     clct0_gemBoffset_xtmb;
+  input                    clct0_gemAedge_xtmb;//CSC extrapolated in gemA
+  input                    clct0_gemBedge_xtmb;
+
   //input [MXPATC-1     : 0] clct0_carry_xtmb; // CC code 
   input [MXBNDB - 1   : 0] clct1_bnd_xtmb; // new bending 
   input [MXXKYB-1     : 0] clct1_xky_xtmb; // new position with 1/8 precision
   input [MXXKYB-1     : 0] clct1_gemAxky_xtmb; // new position with 1/8 precision
   input [MXXKYB-1     : 0] clct1_gemBxky_xtmb; // new position with 1/8 precision
+  input [         7:0]     clct1_gemAoffset_xtmb;//CSC extrapolated in gemA
+  input [         7:0]     clct1_gemBoffset_xtmb;
+  input                    clct1_gemAedge_xtmb;//CSC extrapolated in gemA
+  input                    clct1_gemBedge_xtmb;
   //input [MXPATC-1     : 0] clct1_carry_xtmb; // CC code 
 
   output                tmb_trig_pulse;    // ALCT or CLCT or both triggered
@@ -1742,8 +1759,8 @@
   wire [MXCLCTC-1:0] clctc_pipe, clctc_srl; // Common to CLCT0/1 to TMB
   wire [MXCFEB-1:0]  clctf_pipe, clctf_srl; // Active cfeb list to TMB
 
-  wire [MXCCLUTB-1  : 0]  clct0_cclut_xtmb = {clct0_gemAxky_xtmb, clct0_gemBxky_xtmb, clct0_bnd_xtmb, clct0_xky_xtmb};
-  wire [MXCCLUTB-1  : 0]  clct1_cclut_xtmb = {clct1_gemAxky_xtmb, clct1_gemBxky_xtmb, clct1_bnd_xtmb, clct1_xky_xtmb};
+  wire [MXCCLUTB-1  : 0]  clct0_cclut_xtmb = {clct0_gemAedge_xtmb, clct0_gemBedge_xtmb, clct0_gemAoffset_xtmb, clct0_gemBoffset_xtmb, clct0_gemAxky_xtmb, clct0_gemBxky_xtmb, clct0_bnd_xtmb, clct0_xky_xtmb};
+  wire [MXCCLUTB-1  : 0]  clct1_cclut_xtmb = {clct1_gemAedge_xtmb, clct1_gemBedge_xtmb, clct1_gemAoffset_xtmb, clct1_gemBoffset_xtmb, clct1_gemAxky_xtmb, clct1_gemBxky_xtmb, clct1_bnd_xtmb, clct1_xky_xtmb};
   wire [MXCCLUTB-1  : 0]  clct0_cclut_pipe, clct0_cclut_srl;
   wire [MXCCLUTB-1  : 0]  clct1_cclut_pipe, clct1_cclut_srl;
 
@@ -1793,14 +1810,22 @@
   wire  [MXXKYB-1     : 0] clct0_xky_pipe; // new position with 1/8 precision
   wire  [MXXKYB-1     : 0] clct0_gemAxky_pipe; // new position with 1/8 precision
   wire  [MXXKYB-1     : 0] clct0_gemBxky_pipe; // new position with 1/8 precision
+  wire  [         7:0]     clct0_gemAoffset_pipe;//CSC extrapolated in gemA
+  wire  [         7:0]     clct0_gemBoffset_pipe;
+  wire                     clct0_gemAedge_pipe;//CSC extrapolated in gemA
+  wire                     clct0_gemBedge_pipe;
   //wire  [MXPATC-1     : 0] clct1_carry_pipe; // CC code 
   wire  [MXBNDB - 1   : 0] clct1_bnd_pipe; // new bending 
   wire  [MXXKYB-1     : 0] clct1_xky_pipe; // new position with 1/8 precision
   wire  [MXXKYB-1     : 0] clct1_gemAxky_pipe; // new position with 1/8 precision
   wire  [MXXKYB-1     : 0] clct1_gemBxky_pipe; // new position with 1/8 precision
+  wire  [         7:0]     clct1_gemAoffset_pipe;//CSC extrapolated in gemA
+  wire  [         7:0]     clct1_gemBoffset_pipe;
+  wire                     clct1_gemAedge_pipe;//CSC extrapolated in gemA
+  wire                     clct1_gemBedge_pipe;
 
-  assign {clct0_gemAxky_pipe, clct0_gemBxky_pipe, clct0_bnd_pipe, clct0_xky_pipe} = clct0_cclut_pipe;
-  assign {clct1_gemAxky_pipe, clct1_gemBxky_pipe, clct1_bnd_pipe, clct1_xky_pipe} = clct1_cclut_pipe;
+  assign {clct0_gemAedge_pipe, clct0_gemBedge_pipe, clct0_gemAoffset_pipe, clct0_gemBoffset_pipe, clct0_gemAxky_pipe, clct0_gemBxky_pipe, clct0_bnd_pipe, clct0_xky_pipe} = clct0_cclut_pipe;
+  assign {clct1_gemAedge_pipe, clct1_gemBedge_pipe, clct1_gemAoffset_pipe, clct1_gemBoffset_pipe, clct1_gemAxky_pipe, clct1_gemBxky_pipe, clct1_bnd_pipe, clct1_xky_pipe} = clct1_cclut_pipe;
 //------------------------------------------------------------------------------------------------------------------
 // Pre-calculate dynamic clct window parameters
 //------------------------------------------------------------------------------------------------------------------
@@ -2627,6 +2652,14 @@
   .clct1_gemA_xky_slopecorr  (clct1_gemAxky_pipe[9:0]),
   .clct0_gemB_xky_slopecorr  (clct0_gemBxky_pipe[9:0]),
   .clct1_gemB_xky_slopecorr  (clct1_gemBxky_pipe[9:0]),
+  .clct0_gemA_edgeoffset  (clct0_gemAoffset_pipe[7:0]),
+  .clct1_gemA_edgeoffset  (clct1_gemAoffset_pipe[7:0]),
+  .clct0_gemB_edgeoffset  (clct0_gemBoffset_pipe[7:0]),
+  .clct1_gemB_edgeoffset  (clct1_gemBoffset_pipe[7:0]),
+  .clct0_gemA_edge  (clct0_gemAedge_pipe),
+  .clct1_gemA_edge  (clct1_gemAedge_pipe),
+  .clct0_gemB_edge  (clct0_gemBedge_pipe),
+  .clct1_gemB_edge  (clct1_gemBedge_pipe),
   .clct0_bnd  (clct0_bnd_pipe[4:0]),
   .clct1_bnd  (clct1_bnd_pipe[4:0]),
   .clct0_nhit (clct0_pipe[3:1]),
@@ -3509,15 +3542,23 @@
   wire  [MXXKYB-1     : 0] clct0_xky; // new position with 1/8 precision
   wire  [MXXKYB-1     : 0] clct0_gemAxky; // new position with 1/8 precision
   wire  [MXXKYB-1     : 0] clct0_gemBxky; // new position with 1/8 precision
+  wire  [         7:0]     clct0_gemAoffset;//CSC extrapolated in gemA
+  wire  [         7:0]     clct0_gemBoffset;
+  wire                     clct0_gemAedge;//CSC extrapolated in gemA
+  wire                     clct0_gemBedge;
   //wire  [MXPATC-1     : 0] clct0_carry; // CC code 
   wire  [MXBNDB - 1   : 0] clct1_bnd; // new bending 
   wire  [MXXKYB-1     : 0] clct1_xky; // new position with 1/8 precision
   wire  [MXXKYB-1     : 0] clct1_gemAxky; // new position with 1/8 precision
   wire  [MXXKYB-1     : 0] clct1_gemBxky; // new position with 1/8 precision
+  wire  [         7:0]     clct1_gemAoffset;//CSC extrapolated in gemA
+  wire  [         7:0]     clct1_gemBoffset;
+  wire                     clct1_gemAedge;//CSC extrapolated in gemA
+  wire                     clct1_gemBedge;
   //wire  [MXPATC-1     : 0] clct1_carry; // CC code 
 
-  assign {clct0_gemAxky, clct0_gemBxky, clct0_bnd, clct0_xky} = clct0_cclut;
-  assign {clct1_gemAxky, clct1_gemBxky, clct1_bnd, clct1_xky} = clct1_cclut;
+  assign {clct0_gemAedge, clct0_gemBedge, clct0_gemAoffset, clct0_gemBoffset, clct0_gemAxky, clct0_gemBxky, clct0_bnd, clct0_xky} = clct0_cclut;
+  assign {clct1_gemAedge, clct1_gemBedge, clct1_gemAoffset, clct1_gemBoffset, clct1_gemAxky, clct1_gemBxky, clct1_bnd, clct1_xky} = clct1_cclut;
   
 
 //------------------------------------------------------------------------------------------------------------------
@@ -3620,12 +3661,12 @@
   assign gemcsc_bnd1[4]  = best_cluster1_bend;
   wire [9:0] gemcsc0_angle_ff_s0 = best_cluster0_bend ? (clct0_xky_run3-best_cluster0_cscxky_ff) : (best_cluster0_cscxky_ff-clct0_xky_run3);
   wire [9:0] gemcsc1_angle_ff_s0 = best_cluster1_bend ? (clct1_xky_run3-best_cluster1_cscxky_ff) : (best_cluster1_cscxky_ff-clct1_xky_run3);
-  wire [6:0] gemcsc0_angle_ff = gemcsc0_angle_ff_s0[9:7] > 3'd0 ? 7'd127 : gemcsc0_angle_ff_s0[6:0];
-  wire [6:0] gemcsc1_angle_ff = gemcsc1_angle_ff_s0[9:7] > 3'd0 ? 7'd127 : gemcsc1_angle_ff_s0[6:0];
+  wire [7:0] gemcsc0_angle_ff = gemcsc0_angle_ff_s0[9:8] != 2'b00 ? 8'd255 : gemcsc0_angle_ff_s0[7:0];
+  wire [7:0] gemcsc1_angle_ff = gemcsc1_angle_ff_s0[9:8] != 2'b00 ? 8'd255 : gemcsc1_angle_ff_s0[7:0];
   gemcsc_bending_bits ugemcscbnd(
   .clock            (clock),
-  .gemcsc_bending0  (gemcsc0_angle_ff[6:0]),
-  .gemcsc_bending1  (gemcsc1_angle_ff[6:0]),
+  .gemcsc_bending0  (gemcsc0_angle_ff[7:0]),
+  .gemcsc_bending1  (gemcsc1_angle_ff[7:0]),
   .gemcsc_gemB0     (best_cluster0_ingemB),
   .gemcsc_gemB1     (best_cluster1_ingemB),
   .isME1a0          (clct0_xky_run3[9]),

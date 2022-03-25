@@ -14,6 +14,14 @@ module clct_gem_offset_slope (
     isME1a0, 
     isME1a1, 
     even, 
+    clct0_gemA_outedge,
+    clct0_gemB_outedge,
+    clct1_gemA_outedge,
+    clct1_gemB_outedge,
+    clct0_gemA_edgeoffset,
+    clct0_gemB_edgeoffset,
+    clct1_gemA_edgeoffset,
+    clct1_gemB_edgeoffset,
     clct0_gemA_xky_slopecorr,
     clct0_gemB_xky_slopecorr,
     clct1_gemA_xky_slopecorr,
@@ -43,11 +51,15 @@ parameter MAXKEYHSME1A = 10'd895;
   output [9:0]    clct1_gemA_xky_slopecorr;
   output [9:0]    clct1_gemB_xky_slopecorr;
 
+  output [7:0]    clct0_gemA_edgeoffset;
+  output [7:0]    clct0_gemB_edgeoffset;
+  output [7:0]    clct1_gemA_edgeoffset;
+  output [7:0]    clct1_gemB_edgeoffset;
+
   wire [7:0]    clct0_gemA_offset;
   wire [7:0]    clct0_gemB_offset;
   wire [7:0]    clct1_gemA_offset;
   wire [7:0]    clct1_gemB_offset;
-
 
   wire [7:0] clct0_offset_me1b_odd_A,  clct0_offset_me1b_odd_B;
   wire [7:0] clct1_offset_me1b_odd_A,  clct1_offset_me1b_odd_B;
@@ -178,16 +190,30 @@ rom_cscoffset_slope #(
   assign clct1_gemA_offset      = even ? clct1_offset_gemA_even : clct1_offset_gemA_odd;
   assign clct1_gemB_offset      = even ? clct1_offset_gemB_even : clct1_offset_gemB_odd;
 
-  wire [9:0] clct0_minxky = isME1a0 ? MINKEYHSME1A:MINKEYHSME1B;
-  wire [9:0] clct1_minxky = isME1a1 ? MINKEYHSME1A:MINKEYHSME1B;
-  wire [9:0] clct0_maxxky = isME1a0 ? MAXKEYHSME1A:MAXKEYHSME1B;
-  wire [9:0] clct1_maxxky = isME1a1 ? MAXKEYHSME1A:MAXKEYHSME1B;
+  //wire [9:0] clct0_minxky = isME1a0 ? MINKEYHSME1A:MINKEYHSME1B;
+  //wire [9:0] clct1_minxky = isME1a1 ? MINKEYHSME1A:MINKEYHSME1B;
+  //wire [9:0] clct0_maxxky = isME1a0 ? MAXKEYHSME1A:MAXKEYHSME1B;
+  //wire [9:0] clct1_maxxky = isME1a1 ? MAXKEYHSME1A:MAXKEYHSME1B;
 
-  assign clct0_gemA_xky_slopecorr = clct0_lr ? ((clct0_xky>clct0_gemA_offset+clct0_minxky) ? (clct0_xky-clct0_gemA_offset):clct0_minxky) : ((clct0_xky+clct0_gemA_offset > clct0_maxxky) ? clct0_maxxky : clct0_xky+clct0_gemA_offset);
-  assign clct0_gemB_xky_slopecorr = clct0_lr ? ((clct0_xky>clct0_gemB_offset+clct0_minxky) ? (clct0_xky-clct0_gemB_offset):clct0_minxky) : ((clct0_xky+clct0_gemB_offset > clct0_maxxky) ? clct0_maxxky : clct0_xky+clct0_gemB_offset);
-  assign clct1_gemA_xky_slopecorr = clct1_lr ? ((clct1_xky>clct1_gemA_offset+clct1_minxky) ? (clct1_xky-clct1_gemA_offset):clct1_minxky) : ((clct1_xky+clct1_gemA_offset > clct1_maxxky) ? clct1_maxxky : clct1_xky+clct1_gemA_offset);
-  assign clct1_gemB_xky_slopecorr = clct1_lr ? ((clct1_xky>clct1_gemB_offset+clct1_minxky) ? (clct1_xky-clct1_gemB_offset):clct1_minxky) : ((clct1_xky+clct1_gemB_offset > clct1_maxxky) ? clct1_maxxky : clct1_xky+clct1_gemB_offset);
+  //assign clct0_gemA_xky_slopecorr = clct0_lr ? ((clct0_xky>clct0_gemA_offset+clct0_minxky) ? (clct0_xky-clct0_gemA_offset):clct0_minxky) : ((clct0_xky+clct0_gemA_offset > clct0_maxxky) ? clct0_maxxky : clct0_xky+clct0_gemA_offset);
+  //assign clct0_gemB_xky_slopecorr = clct0_lr ? ((clct0_xky>clct0_gemB_offset+clct0_minxky) ? (clct0_xky-clct0_gemB_offset):clct0_minxky) : ((clct0_xky+clct0_gemB_offset > clct0_maxxky) ? clct0_maxxky : clct0_xky+clct0_gemB_offset);
+  //assign clct1_gemA_xky_slopecorr = clct1_lr ? ((clct1_xky>clct1_gemA_offset+clct1_minxky) ? (clct1_xky-clct1_gemA_offset):clct1_minxky) : ((clct1_xky+clct1_gemA_offset > clct1_maxxky) ? clct1_maxxky : clct1_xky+clct1_gemA_offset);
+  //assign clct1_gemB_xky_slopecorr = clct1_lr ? ((clct1_xky>clct1_gemB_offset+clct1_minxky) ? (clct1_xky-clct1_gemB_offset):clct1_minxky) : ((clct1_xky+clct1_gemB_offset > clct1_maxxky) ? clct1_maxxky : clct1_xky+clct1_gemB_offset);
 
+  assign clct0_gemA_xky_slopecorr = clct0_lr ? ((clct0_xky>clct0_gemA_offset) ? (clct0_xky-clct0_gemA_offset) : 10'd0) : (clct0_xky+clct0_gemA_offset);
+  assign clct0_gemB_xky_slopecorr = clct0_lr ? ((clct0_xky>clct0_gemB_offset) ? (clct0_xky-clct0_gemB_offset) : 10'd0) : (clct0_xky+clct0_gemB_offset);
+  assign clct1_gemA_xky_slopecorr = clct1_lr ? ((clct1_xky>clct1_gemA_offset) ? (clct1_xky-clct1_gemA_offset) : 10'd0) : (clct1_xky+clct1_gemA_offset);
+  assign clct1_gemB_xky_slopecorr = clct1_lr ? ((clct1_xky>clct1_gemB_offset) ? (clct1_xky-clct1_gemB_offset) : 10'd0) : (clct1_xky+clct1_gemB_offset);
+
+  assign clct0_gemA_outedge = clct0_lr && (clct0_xky<clct0_gemA_offset);
+  assign clct0_gemB_outedge = clct0_lr && (clct0_xky<clct0_gemB_offset);
+  assign clct1_gemA_outedge = clct1_lr && (clct1_xky<clct1_gemA_offset);
+  assign clct1_gemB_outedge = clct1_lr && (clct1_xky<clct1_gemB_offset);
+
+  assign clct0_gemA_edgeoffset = clct0_gemA_outedge ? clct0_gemA_offset-clct0_xky[7:0]: 8'd0;//distance away from gem edge, where clct0_gem_xky_slopecorr=0
+  assign clct0_gemB_edgeoffset = clct0_gemB_outedge ? clct0_gemB_offset-clct0_xky[7:0]: 8'd0;
+  assign clct1_gemA_edgeoffset = clct1_gemA_outedge ? clct1_gemA_offset-clct1_xky[7:0]: 8'd0;
+  assign clct1_gemB_edgeoffset = clct1_gemB_outedge ? clct1_gemB_offset-clct1_xky[7:0]: 8'd0;
 
 //-------------------------------------------------------------------------------------------------------------------
 endmodule

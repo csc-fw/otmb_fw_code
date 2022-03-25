@@ -95,6 +95,10 @@ module pattern_finder_ccLUT (
   hs_run2pid_1st,
   hs_gemAxky_1st,
   hs_gemBxky_1st,
+  hs_gemAoffset_1st,//CSC extrapolated in gemA
+  hs_gemBoffset_1st,
+    hs_gemAedge_1st,//CSC extrapolated in gemA
+    hs_gemBedge_1st,
 
   hs_hit_2nd,
   hs_pid_2nd,
@@ -107,6 +111,10 @@ module pattern_finder_ccLUT (
   hs_run2pid_2nd,
   hs_gemAxky_2nd,
   hs_gemBxky_2nd,
+  hs_gemAoffset_2nd,//CSC extrapolated in gemA
+  hs_gemBoffset_2nd,
+    hs_gemAedge_2nd,//CSC extrapolated in gemA
+    hs_gemBedge_2nd,
 
   hs_layer_trig,
   hs_nlayers_hit,
@@ -240,6 +248,10 @@ module pattern_finder_ccLUT (
   output [MXPIDB - 1: 0]  hs_run2pid_1st; // 1st CLCT pattern ID
   output [MXXKYB     - 1 : 0] hs_gemAxky_1st; // 1st CLCT key 1/8-strip, extrapolated to gemA
   output [MXXKYB     - 1 : 0] hs_gemBxky_1st; // 1st CLCT key 1/8-strip, extrapolated to gemB
+  output [           7:0] hs_gemAoffset_1st;//CSC extrapolated in gemA
+  output [           7:0] hs_gemBoffset_1st;
+  output                  hs_gemAedge_1st;//CSC extrapolated in gemA
+  output                  hs_gemBedge_1st;
 
   output [MXHITB - 1: 0]  hs_hit_2nd; // 2nd CLCT pattern hits
   output [MXPIDB - 1: 0]  hs_pid_2nd; // 2nd CLCT pattern ID
@@ -253,6 +265,10 @@ module pattern_finder_ccLUT (
   output [MXPIDB - 1: 0]  hs_run2pid_2nd; // 2nd CLCT pattern ID
   output [MXXKYB     - 1 : 0] hs_gemAxky_2nd; //2nd  CLCT key 1/8-strip, extrapolated to gemA
   output [MXXKYB     - 1 : 0] hs_gemBxky_2nd; //2nd  CLCT key 1/8-strip, extrapolated to gemB
+  output [           7:0] hs_gemAoffset_2nd;//CSC extrapolated in gemA
+  output [           7:0] hs_gemBoffset_2nd;
+  output                    hs_gemAedge_2nd;//CSC extrapolated in gemA
+  output                    hs_gemBedge_2nd;
 
   output                  hs_layer_trig;  // Layer triggered
   output [MXHITB - 1: 0]  hs_nlayers_hit; // Number of layers hit
@@ -1310,6 +1326,11 @@ module pattern_finder_ccLUT (
 
   wire [MXXKYB -1:0] gemAxky_slopecorr_1st;
   wire [MXXKYB -1:0] gemBxky_slopecorr_1st;
+  wire [        7:0] gemAoffset_slopecorr_1st;
+  wire [        7:0] gemBoffset_slopecorr_1st;
+  wire              gemAoutedge_slopecorr_1st; 
+  wire              gemBoutedge_slopecorr_1st; 
+
 
   parameter cdly = 4'd0;
 
@@ -1331,6 +1352,10 @@ module pattern_finder_ccLUT (
 
   reg [MXXKYB - 1:0] hs_gemAxky_1st;//CSC extrapolated in gemA
   reg [MXXKYB - 1:0] hs_gemBxky_1st;
+  reg [         7:0] hs_gemAoffset_1st;//CSC extrapolated in gemA
+  reg [         7:0] hs_gemBoffset_1st;
+  reg                  hs_gemAedge_1st;//CSC extrapolated in gemA
+  reg                  hs_gemBedge_1st;
 
   assign hs_hit_1st_dly = hs_pat_1st_dly[MXPATB - 1: MXPIDB];
 
@@ -1350,6 +1375,10 @@ module pattern_finder_ccLUT (
       hs_run2pid_1st <= 0;
       hs_gemAxky_1st <= 0;
       hs_gemBxky_1st <= 0;
+      hs_gemAoffset_1st  <= 0;
+      hs_gemBoffset_1st  <= 0;
+      hs_gemAoutedge_1st <= 0; 
+      hs_gemBoutedge_1st <= 0; 
     end
     else if (lyr_trig_1st) begin        // layer-trigger mode
       hs_pid_1st <= 1;                  // Pattern id=1 for layer triggers
@@ -1361,6 +1390,10 @@ module pattern_finder_ccLUT (
       hs_run2pid_1st <= 0;
       hs_gemAxky_1st <= 0;
       hs_gemBxky_1st <= 0;
+      hs_gemAoffset_1st  <= 0;
+      hs_gemBoffset_1st  <= 0;
+      hs_gemAoutedge_1st <= 0; 
+      hs_gemBoutedge_1st <= 0; 
     end
     else begin          // else assert final 1st clct
       hs_key_1st <= hs_key_1st_dly;
@@ -1372,6 +1405,10 @@ module pattern_finder_ccLUT (
       hs_run2pid_1st <= hs_run2pid_1st_dly;
       hs_gemAxky_1st <= gemAxky_slopecorr_1st;
       hs_gemBxky_1st <= gemBxky_slopecorr_1st;
+      hs_gemAoffset_1st  <=  gemAoffset_slopecorr_1st;
+      hs_gemBoffset_1st  <=  gemBoffset_slopecorr_1st;
+      hs_gemAoutedge_1st <= gemAoutedge_slopecorr_1st; 
+      hs_gemBoutedge_1st <= gemBoutedge_slopecorr_1st; 
     end
   end
 
@@ -1652,6 +1689,10 @@ module pattern_finder_ccLUT (
   wire [MXPATC -1:0]    hs_car_s5;
   wire [MXXKYB -1:0] gemAxky_slopecorr_2nd;
   wire [MXXKYB -1:0] gemBxky_slopecorr_2nd;
+  wire [        7:0] gemAoffset_slopecorr_2nd;
+  wire [        7:0] gemBoffset_slopecorr_2nd;
+  wire              gemAoutedge_slopecorr_2nd; 
+  wire              gemBoutedge_slopecorr_2nd; 
   wire hs_bsy_s5;
 
   // CCLUT, Tao, best_1of7_busy_ccLUT
@@ -1728,6 +1769,10 @@ module pattern_finder_ccLUT (
   reg [MXPIDB     - 1:0] hs_run2pid_2nd;
   reg [MXXKYB - 1:0]     hs_gemAxky_2nd;
   reg [MXXKYB - 1:0]     hs_gemBxky_2nd;
+  reg [         7:0] hs_gemAoffset_2nd;//CSC extrapolated in gemA
+  reg [         7:0] hs_gemBoffset_2nd;
+  reg                  hs_gemAedge_2nd;//CSC extrapolated in gemA
+  reg                  hs_gemBedge_2nd;
 
   assign hs_hit_s5 = hs_pat_s5[MXPATB - 1: MXPIDB];
   wire blank_2nd    = ((hs_hit_s5 == 0) && (clct_blanking == 1)) || purging;
@@ -1814,10 +1859,18 @@ module pattern_finder_ccLUT (
     .isME1a0          (hs_xky_1st_dly[9]),  // Me1a or not, isME1a0=1 means clct0 in ME1a
     .isME1a1          (hs_xky_s5[9]),  //Me1a or not, isME1a1=1 means clct1 in ME1a 
     .even             (evenchamber),   //even chamber pair not, even=1 means even chamber pair 
-    .clct0_gemA_xky_slopecorr(gemAxky_slopecorr_1st), // output, offset for clct0-gemA strip position match
-    .clct0_gemB_xky_slopecorr(gemBxky_slopecorr_1st),//output, offset for clct0-gemB strip position match
-    .clct1_gemA_xky_slopecorr(gemAxky_slopecorr_2nd),//output, offset for clct1-gemA strip position match
-    .clct1_gemB_xky_slopecorr(gemBxky_slopecorr_2nd)  // output, offset for clct1-gemB strip position match
+    .clct0_gemA_outedge      (gemAoutedge_slopecorr_1st),//Out, 1 means extrapolated CSC location is out of edge and < 0
+    .clct0_gemB_outedge      (gemBoutedge_slopecorr_1st),//Out, 1 means extrapolated CSC location is 
+    .clct1_gemA_outedge      (gemAoutedge_slopecorr_2nd),//Out, 1 means extrapolated CSC location is out of edge and < 0
+    .clct1_gemB_outedge      (gemBoutedge_slopecorr_2nd),//Out, 1 means extrapolated CSC location is 
+    .clct0_gemA_edgeoffset   (gemAoffset_slopecorr_1st[7:0]),//Out, extrapolation offset to the gem edge when extrapolated CSC location is out of edge and < 0
+    .clct0_gemB_edgeoffset   (gemBoffset_slopecorr_1st[7:0]),
+    .clct1_gemA_edgeoffset   (gemAoffset_slopecorr_2nd[7:0]),
+    .clct1_gemB_edgeoffset   (gemBoffset_slopecorr_2nd[7:0]),
+    .clct0_gemA_xky_slopecorr(gemAxky_slopecorr_1st[9:0]), // output, offset for clct0-gemA strip position match
+    .clct0_gemB_xky_slopecorr(gemBxky_slopecorr_1st[9:0]),//output, offset for clct0-gemB strip position match
+    .clct1_gemA_xky_slopecorr(gemAxky_slopecorr_2nd[9:0]),//output, offset for clct1-gemA strip position match
+    .clct1_gemB_xky_slopecorr(gemBxky_slopecorr_2nd[9:0])  // output, offset for clct1-gemB strip position match
   );
 
 //------------------------------------------------------------------------------------------------------------------------

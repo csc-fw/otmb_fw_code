@@ -12,9 +12,9 @@ module rom_gemcsc_slope (
 //----------------------------------------------------------------------------------------------------------------------
 
 parameter FALLING_EDGE = 0;
-parameter MXADRB       = 7;
+parameter MXADRB       = 8;
 parameter MXDATB       = 4;
-parameter ROMLENGTH    = 128;
+parameter ROMLENGTH    = 256;
 parameter ROM_FILE     = "../source/pattern_finder/default.dat";
 
 //----------------------------------------------------------------------------------------------------------------------

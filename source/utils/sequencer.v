@@ -542,6 +542,10 @@
   hs_run2pid_1st,
   hs_gemAxky_1st,
   hs_gemBxky_1st,
+  hs_gemAoffset_1st,
+  hs_gemBoffset_1st,
+  hs_gemAedge_1st,
+  hs_gemBedge_1st,
 
   hs_hit_2nd,
   hs_pid_2nd,
@@ -554,6 +558,10 @@
   hs_run2pid_2nd,     
   hs_gemAxky_2nd,
   hs_gemBxky_2nd,
+  hs_gemAoffset_2nd,
+  hs_gemBoffset_2nd,
+  hs_gemAedge_2nd,
+  hs_gemBedge_2nd,
 
   hs_layer_trig,
   hs_nlayers_hit,
@@ -835,11 +843,19 @@
   clct0_xky_xtmb,
   clct0_gemAxky_xtmb,
   clct0_gemBxky_xtmb,
+  clct0_gemAoffset_xtmb,//CSC extrapolated in gemA
+  clct0_gemBoffset_xtmb,
+  clct0_gemAedge_xtmb,//CSC extrapolated in gemA
+  clct0_gemBedge_xtmb,
   //clct0_carry_xtmb, // Out  First  CLCT
   clct1_bnd_xtmb,
   clct1_xky_xtmb,
   clct1_gemAxky_xtmb,
   clct1_gemBxky_xtmb,
+  clct1_gemAoffset_xtmb,//CSC extrapolated in gemA
+  clct1_gemBoffset_xtmb,
+  clct1_gemAedge_xtmb,//CSC extrapolated in gemA
+  clct1_gemBedge_xtmb,
   //clct1_carry_xtmb, // Out  Second CLCT
   bx0_xmpc,
   bx0_match,
@@ -1627,6 +1643,10 @@
   input  [MXPIDB-1:0]   hs_run2pid_1st;        // 1st CLCT pattern ID
   input [MXXKYB     - 1 : 0] hs_gemAxky_1st; // 1st CLCT key 1/8-strip     
   input [MXXKYB     - 1 : 0] hs_gemBxky_1st; // 1st CLCT key 1/8-strip     
+  input [           7:0] hs_gemAoffset_1st;//CSC extrapolated in gemA
+  input [           7:0] hs_gemBoffset_1st;
+  input                  hs_gemAedge_1st;//CSC extrapolated in gemA
+  input                  hs_gemBedge_1st;
 
   input [MXHITB - 1: 0]  hs_hit_2nd; // 2nd CLCT pattern hits
   input [MXPIDB - 1: 0]  hs_pid_2nd; // 2nd CLCT pattern ID
@@ -1640,6 +1660,10 @@
   input  [MXPIDB-1:0]   hs_run2pid_2nd;
   input [MXXKYB     - 1 : 0] hs_gemAxky_2nd; // 1st CLCT key 1/8-strip     
   input [MXXKYB     - 1 : 0] hs_gemBxky_2nd; // 1st CLCT key 1/8-strip     
+  input [           7:0] hs_gemAoffset_2nd;//CSC extrapolated in gemA
+  input [           7:0] hs_gemBoffset_2nd;
+  input                  hs_gemAedge_2nd;//CSC extrapolated in gemA
+  input                  hs_gemBedge_2nd;
 
   input          hs_layer_trig;      // Layer triggered
   input  [MXHITB-1:0]  hs_nlayers_hit;      // Number of layers hit
@@ -1922,12 +1946,20 @@
   output [MXXKYB-1     : 0] clct0_xky_xtmb; // new position with 1/8 precision
   output [MXXKYB-1     : 0] clct0_gemAxky_xtmb; // new position with 1/8 precision
   output [MXXKYB-1     : 0] clct0_gemBxky_xtmb; // new position with 1/8 precision
+  output [         7:0]     clct0_gemAoffset_xtmb;//CSC extrapolated in gemA
+  output [         7:0]     clct0_gemBoffset_xtmb;
+  output                    clct0_gemAedge_xtmb;//CSC extrapolated in gemA
+  output                    clct0_gemBedge_xtmb;
   //output [MXPATC-1     : 0] clct0_carry_xtmb; // CC code 
   output [MXBNDB - 1   : 0] clct1_bnd_xtmb; // new bending 
   output [MXXKYB-1     : 0] clct1_xky_xtmb; // new position with 1/8 precision
   //output [MXPATC-1     : 0] clct1_carry_xtmb; // CC code 
   output [MXXKYB-1     : 0] clct1_gemAxky_xtmb; // new position with 1/8 precision
   output [MXXKYB-1     : 0] clct1_gemBxky_xtmb; // new position with 1/8 precision
+  output [         7:0]     clct1_gemAoffset_xtmb;//CSC extrapolated in gemA
+  output [         7:0]     clct1_gemBoffset_xtmb;
+  output                    clct1_gemAedge_xtmb;//CSC extrapolated in gemA
+  output                    clct1_gemBedge_xtmb;
 
   output   bx0_xmpc;  // bx0 to mpc
   input    bx0_match; // ALCT bx0 and CLCT bx0 match in time
@@ -3376,18 +3408,35 @@
   wire [MXXKYB-1     : 0] clct0_xky; // new position with 1/8 precision
   wire [MXXKYB-1     : 0] clct0_gemAxky; // new position with 1/8 precision
   wire [MXXKYB-1     : 0] clct0_gemBxky; // new position with 1/8 precision
+  wire [         7:0]     clct0_gemAoffset;//CSC extrapolated in gemA
+  wire [         7:0]     clct0_gemBoffset;
+  wire                    clct0_gemAedge;//CSC extrapolated in gemA
+  wire                    clct0_gemBedge;
   wire [MXBNDB - 1   : 0] clct1_bnd; // new bending 
   wire [MXXKYB-1     : 0] clct1_xky; // new position with 1/8 precision
   wire [MXXKYB-1     : 0] clct1_gemAxky; // new position with 1/8 precision
   wire [MXXKYB-1     : 0] clct1_gemBxky; // new position with 1/8 precision
+  wire [         7:0]     clct1_gemAoffset;//CSC extrapolated in gemA
+  wire [         7:0]     clct1_gemBoffset;
+  wire                    clct1_gemAedge;//CSC extrapolated in gemA
+  wire                    clct1_gemBedge;
+
   wire [MXBNDB - 1   : 0] clct0_bnd_xtmb; // new bending 
   wire [MXXKYB-1     : 0] clct0_xky_xtmb; // new position with 1/8 precision
   wire [MXXKYB-1     : 0] clct0_gemAxky_xtmb; // new position with 1/8 precision
   wire [MXXKYB-1     : 0] clct0_gemBxky_xtmb; // new position with 1/8 precision
+  wire [         7:0]     clct0_gemAoffset_xtmb;//CSC extrapolated in gemA
+  wire [         7:0]     clct0_gemBoffset_xtmb;
+  wire                    clct0_gemAedge_xtmb;//CSC extrapolated in gemA
+  wire                    clct0_gemBedge_xtmb;
   wire [MXBNDB - 1   : 0] clct1_bnd_xtmb; // new bending 
   wire [MXXKYB-1     : 0] clct1_xky_xtmb; // new position with 1/8 precision
   wire [MXXKYB-1     : 0] clct1_gemAxky_xtmb; // new position with 1/8 precision
   wire [MXXKYB-1     : 0] clct1_gemBxky_xtmb; // new position with 1/8 precision
+  wire [         7:0]     clct1_gemAoffset_xtmb;//CSC extrapolated in gemA
+  wire [         7:0]     clct1_gemBoffset_xtmb;
+  wire                    clct1_gemAedge_xtmb;//CSC extrapolated in gemA
+  wire                    clct1_gemBedge_xtmb;
 
 
   assign clct0[0]    = clct0_vpf;       // Valid pattern flag
@@ -3400,11 +3449,20 @@
   assign clct0_carry[MXPATC-1:0] = hs_carry_1st[MXPATC-1:0];
   assign clct0_gemAxky[MXXKYB - 1: 0]= hs_gemAxky_1st[MXXKYB - 1   : 0];
   assign clct0_gemBxky[MXXKYB - 1: 0]= hs_gemBxky_1st[MXXKYB - 1   : 0];
+  assign clct0_gemAoffset[      7: 0]= hs_gemAoffset_1st[7: 0];
+  assign clct0_gemBoffset[      7: 0]= hs_gemBoffset_1st[7: 0];
+  assign clct0_gemAedge                = hs_gemAedge_1st;
+  assign clct0_gemBedge                = hs_gemBedge_1st;
+
   assign clct1_bnd[MXBNDB - 1: 0]= hs_bnd_2nd[MXBNDB - 1   : 0]; 
   assign clct1_xky[MXXKYB - 1: 0]= hs_xky_2nd[MXXKYB - 1   : 0]; 
   assign clct1_carry[MXPATC-1:0] = hs_carry_2nd[MXPATC-1:0];
   assign clct1_gemAxky[MXXKYB - 1: 0]= hs_gemAxky_2nd[MXXKYB - 1   : 0];
   assign clct1_gemBxky[MXXKYB - 1: 0]= hs_gemBxky_2nd[MXXKYB - 1   : 0];
+  assign clct1_gemAoffset[      7: 0]= hs_gemAoffset_2nd[7: 0];
+  assign clct1_gemBoffset[      7: 0]= hs_gemBoffset_2nd[7: 0];
+  assign clct1_gemAedge                = hs_gemAedge_2nd;
+  assign clct1_gemBedge                = hs_gemBedge_2nd;
 
   assign clct1[0]    = clct1_vpf;       // Valid pattern flag
   assign clct1[3:1]  = hs_hit_2nd[2:0]; // Hits on pattern 0-6
@@ -3438,8 +3496,16 @@
   assign clct1_xky_xtmb   = clct1_xky & {MXXKYB {!clct1_blanking}};
   assign clct0_gemAxky_xtmb   = clct0_gemAxky & {MXXKYB {!clct0_blanking}};
   assign clct0_gemBxky_xtmb   = clct0_gemBxky & {MXXKYB {!clct0_blanking}};
+  assign clct0_gemAoffset_xtmb= clct0_gemAoffset & {8{!clct0_blanking}};
+  assign clct0_gemBoffset_xtmb= clct0_gemBoffset & {8{!clct0_blanking}};
+  assign clct0_gemAedge_xtmb  = clct0_gemAedge   & (  !clct0_blanking);
+  assign clct0_gemBedge_xtmb  = clct0_gemBedge   & (  !clct0_blanking);
   assign clct1_gemAxky_xtmb   = clct1_gemAxky & {MXXKYB {!clct1_blanking}};
   assign clct1_gemBxky_xtmb   = clct1_gemBxky & {MXXKYB {!clct1_blanking}};
+  assign clct1_gemAoffset_xtmb= clct1_gemAoffset & {8{!clct1_blanking}};
+  assign clct1_gemBoffset_xtmb= clct1_gemBoffset & {8{!clct1_blanking}};
+  assign clct1_gemAedge_xtmb  = clct1_gemAedge   & (  !clct1_blanking);
+  assign clct1_gemBedge_xtmb  = clct1_gemBedge   & (  !clct1_blanking);
 
 // Latch CLCTs for VME
   reg [MXCLCT-1:0]  clct0_vme=0;

@@ -2530,6 +2530,10 @@ end
   wire [MXPIDB - 1: 0]  hs_run2pid_1st; // 1st CLCT pattern ID
   wire [MXXKYB-1     : 0] hs_gemAxky_1st; // new position with 1/8 precision
   wire [MXXKYB-1     : 0] hs_gemBxky_1st; // new position with 1/8 precision
+  wire [         7:0] hs_gemAoffset_1st;//CSC extrapolated in gemA
+  wire [         7:0] hs_gemBoffset_1st;
+  wire                  hs_gemAedge_1st;//CSC extrapolated in gemA
+  wire                  hs_gemBedge_1st;
 
   wire  [MXHITB-1:0]  hs_hit_2nd;
   wire  [MXPIDB-1:0]  hs_pid_2nd;
@@ -2543,6 +2547,10 @@ end
   wire [MXPIDB - 1: 0]  hs_run2pid_2nd; // 1st CLCT pattern ID
   wire [MXXKYB-1     : 0] hs_gemAxky_2nd; // new position with 1/8 precision
   wire [MXXKYB-1     : 0] hs_gemBxky_2nd; // new position with 1/8 precision
+  wire [         7:0] hs_gemAoffset_2nd;//CSC extrapolated in gemA
+  wire [         7:0] hs_gemBoffset_2nd;
+  wire                  hs_gemAedge_2nd;//CSC extrapolated in gemA
+  wire                  hs_gemBedge_2nd;
 
   reg reg_ccLUT_enable;
   //enable CCLUT, Tao
@@ -2565,11 +2573,19 @@ end
    assign hs_xky_1st[MXXKYB - 1   : 0] = {hs_key_1st, 2'b10};
    assign hs_gemAxky_1st[MXXKYB - 1   : 0] = {hs_key_1st, 2'b10};
    assign hs_gemBxky_1st[MXXKYB - 1   : 0] = {hs_key_1st, 2'b10};
+   assign hs_gemAoffset_1st[7:0]       = 0;
+   assign hs_gemBoffset_1st[7:0]       = 0;
+   assign   hs_gemAedge_1st            = 0;
+   assign   hs_gemBedge_1st            = 0;
    assign hs_carry_1st[MXPATC - 1 : 0] = 0;
    assign hs_bnd_2nd[MXBNDB - 1   : 0] = hs_pid_2nd;
    assign hs_xky_2nd[MXXKYB - 1   : 0] = {hs_key_2nd, 2'b10};
    assign hs_gemAxky_2nd[MXXKYB - 1   : 0] = {hs_key_2nd, 2'b10};
    assign hs_gemBxky_2nd[MXXKYB - 1   : 0] = {hs_key_2nd, 2'b10};
+   assign hs_gemAoffset_2nd[7:0]       = 0;
+   assign hs_gemBoffset_2nd[7:0]       = 0;
+   assign   hs_gemAedge_2nd            = 0;
+   assign   hs_gemBedge_2nd            = 0;
    assign hs_carry_2nd[MXPATC - 1 : 0] = 0;
    assign hs_run2pid_1st[MXPIDB-1:0]   = hs_pid_1st;
    assign hs_run2pid_2nd[MXPIDB-1:0]   = hs_pid_2nd;
@@ -2695,6 +2711,10 @@ end
   .hs_run2pid_1st (hs_run2pid_1st[MXPIDB-1:0]),  // Out  1st CLCT pattern ID
   .hs_gemAxky_1st (hs_gemAxky_1st[MXXKYB-1 : 0]), //Out 1st extrapolated CLCt location in gemA
   .hs_gemBxky_1st (hs_gemBxky_1st[MXXKYB-1 : 0]),
+  .hs_gemAoffset_1st (hs_gemAoffset_1st[7 : 0]), //Out 1st extrapolated CLCt offset in gemA
+  .hs_gemBoffset_1st (hs_gemBoffset_1st[7 : 0]), //Out 1st extrapolated CLCt offset in gemA
+  .hs_gemAedge_1st   (hs_gemAedge_1st),  //Out, extraploation out of gemA edge and is below 0
+  .hs_gemBedge_1st   (hs_gemBedge_1st),  //Out, extraploation out of gemB edge and is below 0
 
   .hs_hit_2nd (hs_hit_2nd[MXHITB-1:0]),  // Out  2nd CLCT pattern hits
   .hs_pid_2nd (hs_pid_2nd[MXPIDB-1:0]),  // Out  2nd CLCT pattern ID
@@ -2707,6 +2727,10 @@ end
   .hs_run2pid_2nd (hs_run2pid_2nd[MXPIDB-1:0]),  // Out  1st CLCT pattern ID
   .hs_gemAxky_2nd (hs_gemAxky_2nd[MXXKYB-1 : 0]), //Out 1st extrapolated CLCt location in gemA
   .hs_gemBxky_2nd (hs_gemBxky_2nd[MXXKYB-1 : 0]),
+  .hs_gemAoffset_2nd (hs_gemAoffset_2nd[7 : 0]), //Out 1st extrapolated CLCt offset in gemA
+  .hs_gemBoffset_2nd (hs_gemBoffset_2nd[7 : 0]), //Out 1st extrapolated CLCt offset in gemA
+  .hs_gemAedge_2nd   (hs_gemAedge_2nd),  //Out, extraploation out of gemA edge and is below 0
+  .hs_gemBedge_2nd   (hs_gemBedge_2nd),  //Out, extraploation out of gemB edge and is below 0
 
   .hs_layer_trig  (hs_layer_trig),              // Out  Layer triggered
   .hs_nlayers_hit (hs_nlayers_hit[MXHITB-1:0]), // Out  Number of layers hit
@@ -2987,11 +3011,19 @@ end
    wire [MXXKYB-1     : 0] clct0_xky_xtmb; // new position with 1/8 precision
    wire [MXXKYB-1     : 0] clct0_gemAxky_xtmb; // new position with 1/8 precision
    wire [MXXKYB-1     : 0] clct0_gemBxky_xtmb; // new position with 1/8 precision
+  wire [         7:0]   clct0_gemAoffset_xtmb;//CSC extrapolated in gemA
+  wire [         7:0]   clct0_gemBoffset_xtmb;
+  wire                  clct0_gemAedge_xtmb;//CSC extrapolated in gemA
+  wire                  clct0_gemBedge_xtmb;
    //wire [MXPATC-1     : 0] clct0_carry_xtmb; // CC code 
    wire [MXBNDB - 1   : 0] clct1_bnd_xtmb; // new bending 
    wire [MXXKYB-1     : 0] clct1_xky_xtmb; // new position with 1/8 precision
    wire [MXXKYB-1     : 0] clct1_gemAxky_xtmb; // new position with 1/8 precision
    wire [MXXKYB-1     : 0] clct1_gemBxky_xtmb; // new position with 1/8 precision
+  wire [         7:0]   clct1_gemAoffset_xtmb;//CSC extrapolated in gemA
+  wire [         7:0]   clct1_gemBoffset_xtmb;
+  wire                  clct1_gemAedge_xtmb;//CSC extrapolated in gemA
+  wire                  clct1_gemBedge_xtmb;
    //wire [MXPATC-1     : 0] clct1_carry_xtmb; // CC code 
 
 
@@ -3385,6 +3417,10 @@ end
   .hs_run2pid_1st (hs_run2pid_1st[MXPIDB-1:0]),  // In  1st CLCT pattern ID  
   .hs_gemAxky_1st (hs_gemAxky_1st[MXXKYB-1 : 0]), //In 1st extrapolated CLCt location in gemA
   .hs_gemBxky_1st (hs_gemBxky_1st[MXXKYB-1 : 0]),
+  .hs_gemAoffset_1st (hs_gemAoffset_1st[7 : 0]), //In 1st extrapolated CLCt offset in gemA
+  .hs_gemBoffset_1st (hs_gemBoffset_1st[7 : 0]), //In 1st extrapolated CLCt offset in gemA
+  .hs_gemAedge_1st   (hs_gemAedge_1st),  //In, extraploation out of gemA edge and is below 0
+  .hs_gemBedge_1st   (hs_gemBedge_1st),  //In, extraploation out of gemB edge and is below 0
 
   .hs_hit_2nd (hs_hit_2nd[MXHITB-1:0]),  // In  2nd CLCT pattern hits
   .hs_pid_2nd (hs_pid_2nd[MXPIDB-1:0]),  // In  2nd CLCT pattern ID
@@ -3397,6 +3433,10 @@ end
   .hs_run2pid_2nd (hs_run2pid_2nd[MXPIDB-1:0]),  // In  1st CLCT pattern ID
   .hs_gemAxky_2nd (hs_gemAxky_2nd[MXXKYB-1 : 0]), //In 1st extrapolated CLCt location in gemA
   .hs_gemBxky_2nd (hs_gemBxky_2nd[MXXKYB-1 : 0]),
+  .hs_gemAoffset_2nd (hs_gemAoffset_2nd[7 : 0]), //In 1st extrapolated CLCt offset in gemA
+  .hs_gemBoffset_2nd (hs_gemBoffset_2nd[7 : 0]), //In 1st extrapolated CLCt offset in gemA
+  .hs_gemAedge_2nd   (hs_gemAedge_2nd),  //In, extraploation out of gemA edge and is below 0
+  .hs_gemBedge_2nd   (hs_gemBedge_2nd),  //In, extraploation out of gemB edge and is below 0
 
   .hs_layer_trig  (hs_layer_trig),              // In  Layer triggered
   .hs_nlayers_hit (hs_nlayers_hit[MXHITB-1:0]), // In  Number of layers hit
@@ -3676,13 +3716,21 @@ end
   .clctf_xtmb (clctf_xtmb[MXCFEB-1:0]),  // Out  Active cfeb list to TMB
   .clct0_bnd_xtmb   (clct0_bnd_xtmb[MXBNDB - 1   : 0]),
   .clct0_xky_xtmb   (clct0_xky_xtmb[MXXKYB-1 : 0]),
-  .clct0_gemAxky_xtmb   (clct0_gemAxky_xtmb[MXXKYB-1 : 0]),
-  .clct0_gemBxky_xtmb   (clct0_gemBxky_xtmb[MXXKYB-1 : 0]),
+  .clct0_gemAxky_xtmb      (clct0_gemAxky_xtmb[MXXKYB-1 : 0]),//Out
+  .clct0_gemBxky_xtmb      (clct0_gemBxky_xtmb[MXXKYB-1 : 0]),//Out
+  .clct0_gemAoffset_xtmb   (clct0_gemAoffset_xtmb[7 : 0]),//Out
+  .clct0_gemBoffset_xtmb   (clct0_gemBoffset_xtmb[7 : 0]),//Out
+  .clct0_gemAedge_xtmb     (clct0_gemAedge_xtmb),//Out
+  .clct0_gemBedge_xtmb     (clct0_gemBedge_xtmb),//Out
   //.clct0_carry_xtmb (clct0_carry_xtmb[MXPATC-1:0]),  // Out  First  CLCT
   .clct1_bnd_xtmb   (clct1_bnd_xtmb[MXBNDB - 1   : 0]),
   .clct1_xky_xtmb   (clct1_xky_xtmb[MXXKYB-1 : 0]),
-  .clct1_gemAxky_xtmb   (clct1_gemAxky_xtmb[MXXKYB-1 : 0]),
-  .clct1_gemBxky_xtmb   (clct1_gemBxky_xtmb[MXXKYB-1 : 0]),
+  .clct1_gemAxky_xtmb      (clct1_gemAxky_xtmb[MXXKYB-1 : 0]),
+  .clct1_gemBxky_xtmb      (clct1_gemBxky_xtmb[MXXKYB-1 : 0]),
+  .clct1_gemAoffset_xtmb   (clct1_gemAoffset_xtmb[7 : 0]),//Out
+  .clct1_gemBoffset_xtmb   (clct1_gemBoffset_xtmb[7 : 0]),//Out
+  .clct1_gemAedge_xtmb     (clct1_gemAedge_xtmb),//Out
+  .clct1_gemBedge_xtmb     (clct1_gemBedge_xtmb),//Out
   //.clct1_carry_xtmb (clct1_carry_xtmb[MXPATC-1:0]),  // Out  Second CLCT
   .bx0_xmpc         (bx0_xmpc),                // Out  bx0 to tmb aligned with clct0/1
   .bx0_match        (bx0_match),               // In  ALCT bx0 and CLCT bx0 match in time
@@ -4814,11 +4862,19 @@ wire [15:0] gemB_bxn_counter;
   .clct0_xky_xtmb   (clct0_xky_xtmb[MXXKYB-1 : 0]),    //In
   .clct0_gemAxky_xtmb   (clct0_gemAxky_xtmb[MXXKYB-1 : 0]),
   .clct0_gemBxky_xtmb   (clct0_gemBxky_xtmb[MXXKYB-1 : 0]),
+  .clct0_gemAoffset_xtmb   (clct0_gemAoffset_xtmb[7 : 0]),//In
+  .clct0_gemBoffset_xtmb   (clct0_gemBoffset_xtmb[7 : 0]),//In
+  .clct0_gemAedge_xtmb     (clct0_gemAedge_xtmb),//In
+  .clct0_gemBedge_xtmb     (clct0_gemBedge_xtmb),//In
   //.clct0_carry_xtmb (clct0_carry_xtmb[MXPATC-1:0]),  // In  First  CLCT
   .clct1_bnd_xtmb   (clct1_bnd_xtmb[MXBNDB - 1   : 0]),  // In
   .clct1_xky_xtmb   (clct1_xky_xtmb[MXXKYB-1 : 0]),   // In 
   .clct1_gemAxky_xtmb   (clct1_gemAxky_xtmb[MXXKYB-1 : 0]),
   .clct1_gemBxky_xtmb   (clct1_gemBxky_xtmb[MXXKYB-1 : 0]),
+  .clct1_gemAoffset_xtmb   (clct1_gemAoffset_xtmb[7 : 0]),//In
+  .clct1_gemBoffset_xtmb   (clct1_gemBoffset_xtmb[7 : 0]),//In
+  .clct1_gemAedge_xtmb     (clct1_gemAedge_xtmb),//In
+  .clct1_gemBedge_xtmb     (clct1_gemBedge_xtmb),//In
   //.clct1_carry_xtmb (clct1_carry_xtmb[MXPATC-1:0]),  // In  Second CLCT
   .bx0_xmpc   (bx0_xmpc),                // In  bx0 to mpc
 

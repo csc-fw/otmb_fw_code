@@ -51,12 +51,13 @@ module gemcsc_bending_bits (
     bending_bits1  //corrected gemcsc bending angle
   );
 
-parameter MXADRB       = 7;
+parameter MXADRB       = 8;
 parameter MXDATB       = 4;
+parameter ROMLENGTH    = 256;
 // Ports
   input                  clock;
-  input [6:0]  gemcsc_bending0;
-  input [6:0]  gemcsc_bending1;
+  input [7:0]  gemcsc_bending0;
+  input [7:0]  gemcsc_bending1;
   input           gemcsc_gemB0;
   input           gemcsc_gemB1;
   input                isME1a0;
@@ -82,7 +83,7 @@ rom_gemcsc_slope #(
   .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME1b_odd_layer1.mem"),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB),
-  .ROMLENGTH(128)
+  .ROMLENGTH(ROMLENGTH)
 ) romme1boddA (
   .clock(clock),
   .adr0(gemcsc_bending0),
@@ -95,7 +96,7 @@ rom_gemcsc_slope #(
   .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME1b_even_layer1.mem"),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB),
-  .ROMLENGTH(128)
+  .ROMLENGTH(ROMLENGTH)
 ) romme1bevenA (
   .clock(clock),
   .adr0(gemcsc_bending0),
@@ -108,7 +109,7 @@ rom_gemcsc_slope #(
   .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME1b_odd_layer2.mem"),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB),
-  .ROMLENGTH(128)
+  .ROMLENGTH(ROMLENGTH)
 ) romme1boddB (
   .clock(clock),
   .adr0(gemcsc_bending0),
@@ -121,7 +122,7 @@ rom_gemcsc_slope #(
   .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME1b_even_layer2.mem"),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB),
-  .ROMLENGTH(128)
+  .ROMLENGTH(ROMLENGTH)
 ) romme1bevenB (
   .clock(clock),
   .adr0(gemcsc_bending0),
@@ -136,7 +137,7 @@ rom_gemcsc_slope #(
   .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME1a_odd_layer1.mem"),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB),
-  .ROMLENGTH(128)
+  .ROMLENGTH(ROMLENGTH)
 ) romme1aoddA (
   .clock(clock),
   .adr0(gemcsc_bending0),
@@ -149,7 +150,7 @@ rom_gemcsc_slope #(
   .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME1a_even_layer1.mem"),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB),
-  .ROMLENGTH(128)
+  .ROMLENGTH(ROMLENGTH)
 ) romme1aevenA (
   .clock(clock),
   .adr0(gemcsc_bending0),
@@ -162,7 +163,7 @@ rom_gemcsc_slope #(
   .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME1a_odd_layer2.mem"),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB),
-  .ROMLENGTH(128)
+  .ROMLENGTH(ROMLENGTH)
 ) romme1aoddB (
   .clock(clock),
   .adr0(gemcsc_bending0),
@@ -175,7 +176,7 @@ rom_gemcsc_slope #(
   .ROM_FILE("GEMCSC_SlopeAmendment_NoCOSI_ME1a_even_layer2.mem"),
   .MXADRB(MXADRB),
   .MXDATB(MXDATB),
-  .ROMLENGTH(128)
+  .ROMLENGTH(ROMLENGTH)
 ) romme1aevenB (
   .clock(clock),
   .adr0(gemcsc_bending0),
