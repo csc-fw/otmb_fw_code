@@ -72,14 +72,14 @@ module  alct_clct_gem_matching_TR(
   input [9:0] clct1_gemA_xky_slopecorr,
   input [9:0] clct0_gemB_xky_slopecorr,
   input [9:0] clct1_gemB_xky_slopecorr,
-  input [7:0] clct0_gemA_edgeoffset; //when extrapolated CSC location is out of edge, offset is the distance away from gem edge
-  input [7:0] clct1_gemA_edgeoffset;
-  input [7:0] clct0_gemB_edgeoffset;
-  input [7:0] clct1_gemB_edgeoffset;
-  input         clct0_gemA_edge;
-  input         clct1_gemA_edge;
-  input         clct0_gemB_edge;
-  input         clct1_gemB_edge;
+  input [7:0] clct0_gemA_edgeoffset, //when extrapolated CSC location is out of edge, offset is the distance away from gem edge
+  input [7:0] clct1_gemA_edgeoffset,
+  input [7:0] clct0_gemB_edgeoffset,
+  input [7:0] clct1_gemB_edgeoffset,
+  input         clct0_gemA_edge,
+  input         clct1_gemA_edge,
+  input         clct0_gemB_edge,
+  input         clct1_gemB_edge,
   input [4:0] clct0_bnd,//l or r
   input [4:0] clct1_bnd,
   input [2:0] clct0_nhit,

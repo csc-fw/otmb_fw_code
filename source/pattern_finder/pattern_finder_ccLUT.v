@@ -1377,8 +1377,8 @@ module pattern_finder_ccLUT (
       hs_gemBxky_1st <= 0;
       hs_gemAoffset_1st  <= 0;
       hs_gemBoffset_1st  <= 0;
-      hs_gemAoutedge_1st <= 0; 
-      hs_gemBoutedge_1st <= 0; 
+      hs_gemAedge_1st <= 0; 
+      hs_gemBedge_1st <= 0; 
     end
     else if (lyr_trig_1st) begin        // layer-trigger mode
       hs_pid_1st <= 1;                  // Pattern id=1 for layer triggers
@@ -1392,8 +1392,8 @@ module pattern_finder_ccLUT (
       hs_gemBxky_1st <= 0;
       hs_gemAoffset_1st  <= 0;
       hs_gemBoffset_1st  <= 0;
-      hs_gemAoutedge_1st <= 0; 
-      hs_gemBoutedge_1st <= 0; 
+      hs_gemAedge_1st <= 0; 
+      hs_gemBedge_1st <= 0; 
     end
     else begin          // else assert final 1st clct
       hs_key_1st <= hs_key_1st_dly;
@@ -1407,8 +1407,8 @@ module pattern_finder_ccLUT (
       hs_gemBxky_1st <= gemBxky_slopecorr_1st;
       hs_gemAoffset_1st  <=  gemAoffset_slopecorr_1st;
       hs_gemBoffset_1st  <=  gemBoffset_slopecorr_1st;
-      hs_gemAoutedge_1st <= gemAoutedge_slopecorr_1st; 
-      hs_gemBoutedge_1st <= gemBoutedge_slopecorr_1st; 
+      hs_gemAedge_1st <= gemAoutedge_slopecorr_1st; 
+      hs_gemBedge_1st <= gemBoutedge_slopecorr_1st; 
     end
   end
 
@@ -1790,6 +1790,10 @@ module pattern_finder_ccLUT (
       hs_run2pid_2nd <= 0;
       hs_gemAxky_2nd <= 0;
       hs_gemBxky_2nd <= 0;
+      hs_gemAoffset_2nd <= 0;
+      hs_gemBoffset_2nd <= 0;
+      hs_gemAedge_2nd   <= 0; 
+      hs_gemBedge_2nd   <= 0; 
     end
     else if (lyr_trig_2nd) begin    // layer-trigger mode
       hs_pid_2nd <= 0;
@@ -1802,6 +1806,10 @@ module pattern_finder_ccLUT (
       hs_run2pid_2nd <= 0;
       hs_gemAxky_2nd <= 0;
       hs_gemBxky_2nd <= 0;
+      hs_gemAoffset_2nd <= 0;
+      hs_gemBoffset_2nd <= 0;
+      hs_gemAedge_2nd   <= 0; 
+      hs_gemBedge_2nd   <= 0; 
     end
     else begin         // else assert final 2nd clct
       hs_pid_2nd <= hs_pat_s5[MXPIDB - 1: 0]; 
@@ -1814,6 +1822,10 @@ module pattern_finder_ccLUT (
       hs_run2pid_2nd <= hs_run2pid_2nd_s5;
       hs_gemAxky_2nd <= gemAxky_slopecorr_2nd;
       hs_gemBxky_2nd <= gemBxky_slopecorr_2nd;
+      hs_gemAoffset_2nd <=  gemAoffset_slopecorr_2nd;
+      hs_gemBoffset_2nd <=  gemBoffset_slopecorr_2nd;
+      hs_gemAedge_2nd   <= gemAoutedge_slopecorr_2nd; 
+      hs_gemBedge_2nd   <= gemBoutedge_slopecorr_2nd; 
     end
   end
 

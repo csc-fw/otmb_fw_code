@@ -56,6 +56,11 @@ parameter MAXKEYHSME1A = 10'd895;
   output [7:0]    clct1_gemA_edgeoffset;
   output [7:0]    clct1_gemB_edgeoffset;
 
+  output  clct0_gemA_outedge;
+  output  clct0_gemB_outedge;
+  output  clct1_gemA_outedge;
+  output  clct1_gemB_outedge;
+
   wire [7:0]    clct0_gemA_offset;
   wire [7:0]    clct0_gemB_offset;
   wire [7:0]    clct1_gemA_offset;
