@@ -6370,8 +6370,8 @@
     led_alct_ff        <=  alct_pat_trig_os;             // ALCT active_feb
     led_clct_ff        <=  trig_clct_flash;              // CLCT or external trigger, not ALCT
     led_l1a_intime_ff  <=  l1a_keep;                     // L1A arrived in window or forced L1A
-    //led_invpat_ff      <=  discard_event_led;            // Invalid pattern after drift
-    led_invpat_ff      <=  alct_clct_gem_match;            // ALCT-CLCT-GEM match found
+    led_invpat_ff      <=  run3_trig_df ? alct_clct_gem_match : discard_event_led;            // Invalid pattern after drift
+    //led_invpat_ff      <=  alct_clct_gem_match;            // ALCT-CLCT-GEM match found
     led_nol1a_flush_ff <=  tmb_nol1a;                    // L1A never arrived, event flushed
     led_nomatch_ff     <=  tmb_trig_pulse && !tmb_match; // Trigger but no match
   end

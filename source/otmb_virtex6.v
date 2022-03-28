@@ -1758,6 +1758,8 @@
   };
 
   wire gem_any = (|gemA_vpf) | (|gemB_vpf);
+  reg  gem_any_ff = 0;
+
    
   //GEMA trigger match control
   //wire  gemA_match_enable;
@@ -2084,6 +2086,7 @@
   always @ (posedge clock) begin
       gemA_overflow_ff <= gemA_overflow;
       gemB_overflow_ff <= gemB_overflow;
+      gem_any_ff  <= gem_any;
   end
 
 
@@ -2101,7 +2104,7 @@
   reg  [CLSTBITS -1 :0] gem_copad_reg  [MXCLUSTER_CHAMBER-1:0];
   wire [CLSTBITS -1 :0] gem_copad      [MXCLUSTER_CHAMBER-1:0];
   wire [MXCLUSTER_CHAMBER-1:0] copad_A_B [MXCLUSTER_CHAMBER-1:0];
-  reg  gem_any_copad_ff;
+  //reg  gem_any_copad_ff;
 
   wire [3:0] gem_match_deltaPad;
 
@@ -2231,7 +2234,6 @@ always @ (posedge clock) begin
   gem_copad_reg[5] <=  gemA_cluster[5];
   gem_copad_reg[6] <=  gemA_cluster[6];
   gem_copad_reg[7] <=  gemA_cluster[7];
-  gem_any_copad_ff <=  gem_any;
 end
 
   assign gem_copad[0] = copad_match[0] ? gem_copad_reg[0] : {3'd0,11'd255};
@@ -2297,7 +2299,7 @@ end
                 gemA_cluster_vme[icluster]  <= gemA_vpf[icluster] ? gemA_cluster[icluster] : {3'b0, 11'd255}; 
                 gemB_cluster_vme[icluster]  <= gemB_vpf[icluster] ? gemB_cluster[icluster] : {3'b0, 11'd255}; 
             end
-            if (gem_any_copad_ff) begin
+            if (gem_any_match) begin
                 gem_copad_vme[icluster]     <= gem_copad[icluster];
             end
         end
@@ -5233,7 +5235,7 @@ wire [15:0] gemB_bxn_counter;
 
 
   x_flashsm #(22) uflash_blink_cfeb_led (.trigger(|cfeb_rx_nonzero ),    .hold(1'b0), .clock(clock), .out(blink_cfeb_led));
-  x_flashsm #(22) uflash_blink_gem_led  (.trigger(gem_any),              .hold(1'b0), .clock(clock), .out(blink_gem_led));
+  x_flashsm #(22) uflash_blink_gem_led  (.trigger(gem_any_ff),              .hold(1'b0), .clock(clock), .out(blink_gem_led));
 
   assign mez_led[0] = ~|link_had_err ^ blink_gem_led;   // blue OFF.  was ~alct_wait_cfg
   assign mez_led[1] = ~l_tmbclk0_lock ^ blink_cfeb_led; // green
