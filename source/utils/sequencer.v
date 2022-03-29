@@ -5619,8 +5619,8 @@
   //assign  header41_[13:11]  =  lyr_thresh_pretrig[2:0]; // Layer pre-trigger threshold
   //assign  header41_[14]     =  layer_trig_en;           // Layer trigger mode enabled
   assign  header41_[12:11]  =  run3_daq_df ? r_tmb_cathode_hmt[1:0] : lyr_thresh_pretrig[1:0];  // Layer pre-trigger threshold
-  assign  header41_[13]     =  run3_daq_df ? r_alct_bxn[1] & run3_alct_df : lyr_thresh_pretrig[2];
-  assign  header41_[14]     =  run3_daq_df ? r_alct_bxn[2] & run3_alct_df : layer_trig_en;        // Layer trigger mode enabled
+  assign  header41_[13]     =  run3_daq_df ? (r_alct_bxn[1] & run3_alct_df) : lyr_thresh_pretrig[2];
+  assign  header41_[14]     =  run3_daq_df ? (r_alct_bxn[2] & run3_alct_df) : layer_trig_en;        // Layer trigger mode enabled
   assign  header41_[18:15]  =  0;                       // DDU+DMB control flags
 
 // Store header in parallel shifter

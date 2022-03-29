@@ -589,12 +589,19 @@
   assign hmt_fired_match        = hmt_cathode_fired &&  hmt_anode_fired && (hmt_allow_match   || hmt_allow_match_ro);
   assign hmt_fired_or           =(hmt_cathode_fired && (hmt_allow_cathode || hmt_allow_cathode_ro)) || (hmt_anode_fired && (hmt_allow_anode   || hmt_allow_anode_ro)) || (hmt_cathode_fired &&  hmt_anode_fired && (hmt_allow_match   || hmt_allow_match_ro));
 
+  wire [MXHMTB-1    :0] hmt_trigger_match, hmt_trigger_match_ro;
+
   wire [MXHMTB-1    :0] hmt_trigger_cathode    = hmt_cathode_pipe  & {MXHMTB{hmt_allow_cathode}};
   wire [MXHMTB-1    :0] hmt_trigger_anode      = hmt_anode & {MXHMTB{hmt_allow_anode}};
-  wire [MXHMTB-1    :0] hmt_trigger_match      = hmt_cathode_pipe & hmt_anode & {MXHMTB{hmt_allow_match}};
   wire [MXHMTB-1    :0] hmt_trigger_cathode_ro = hmt_cathode_pipe  & {MXHMTB{hmt_allow_cathode_ro}};
   wire [MXHMTB-1    :0] hmt_trigger_anode_ro   = hmt_anode & {MXHMTB{hmt_allow_anode_ro}};
-  wire [MXHMTB-1    :0] hmt_trigger_match_ro   = hmt_cathode_pipe & hmt_anode & {MXHMTB{hmt_allow_match_ro}};
+  //wire [MXHMTB-1    :0] hmt_trigger_match      = hmt_cathode_pipe & hmt_anode & {MXHMTB{hmt_allow_match}};
+  //wire [MXHMTB-1    :0] hmt_trigger_match_ro   = hmt_cathode_pipe & hmt_anode & {MXHMTB{hmt_allow_match_ro}};
+  assign hmt_trigger_match[1:0]    = (hmt_cathode_pipe[1:0] > hmt_anode[1:0] ? hmt_anode[1:0] : hmt_cathode_pipe[1:0]) & {2{hmt_allow_match}};
+  assign hmt_trigger_match[3:2]    = (hmt_cathode_pipe[3:2] > hmt_anode[3:2] ? hmt_anode[3:2] : hmt_cathode_pipe[3:2]) & {2{hmt_allow_match}};
+  assign hmt_trigger_match_ro[1:0] = (hmt_cathode_pipe[1:0] > hmt_anode[1:0] ? hmt_anode[1:0] : hmt_cathode_pipe[1:0]) & {2{hmt_allow_match_ro}};
+  assign hmt_trigger_match_ro[3:2] = (hmt_cathode_pipe[3:2] > hmt_anode[3:2] ? hmt_anode[3:2] : hmt_cathode_pipe[3:2]) & {2{hmt_allow_match_ro}};
+
 
   assign hmt_trigger_tmb     = hmt_trigger_cathode | hmt_trigger_anode | hmt_trigger_match;
   assign hmt_trigger_tmb_ro  = hmt_trigger_cathode_ro | hmt_trigger_anode_ro | hmt_trigger_match_ro;
