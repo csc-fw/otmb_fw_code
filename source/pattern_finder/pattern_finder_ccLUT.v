@@ -284,6 +284,7 @@ module pattern_finder_ccLUT (
 `ifdef CSC_TYPE_B initial $display ("CSC_TYPE_B=%H",`CSC_TYPE_B); `endif // Reversed ME234/1
 `ifdef CSC_TYPE_C initial $display ("CSC_TYPE_C=%H",`CSC_TYPE_C); `endif // Normal   ME1B, reversed ME1A
 `ifdef CSC_TYPE_D initial $display ("CSC_TYPE_D=%H",`CSC_TYPE_D); `endif // Reversed ME1B, normal   ME1A
+`ifdef CCLUT_V2   initial $display ("CCLUT is running V2 version"); `endif
 `define	STAGGER_HS_CSC 01'h1
 //-------------------------------------------------------------------------------------------------------------------
 // Debug mode, FF aligns inputs, and has local DLL to generate 2x clock and lac clock
@@ -1728,14 +1729,14 @@ function [3: 0] run2pid;
       5'd3 : pid = 4'd8 ;
       5'd4 : pid = 4'd8 ;
       5'd5 : pid = 4'd8 ;
-      5'd6 : pid = 4'd8 ;
+      5'd6 : pid = 4'd6 ;
       5'd7 : pid = 4'd6 ;
       5'd8 : pid = 4'd6 ;
-      5'd9 : pid = 4'd6 ;
+      5'd9 : pid = 4'd4 ;
       5'd10: pid = 4'd4 ;
       5'd11: pid = 4'd4 ;
-      5'd12: pid = 4'd4 ;
-      5'd13: pid = 4'd4 ;
+      5'd12: pid = 4'd2 ;
+      5'd13: pid = 4'd2 ;
       5'd14: pid = 4'd2 ;
       5'd15: pid = 4'd2 ;
       5'd16: pid = 4'd10;
@@ -1744,14 +1745,14 @@ function [3: 0] run2pid;
       5'd19: pid = 4'd9 ;
       5'd20: pid = 4'd9 ;
       5'd21: pid = 4'd9 ;
-      5'd22: pid = 4'd9 ;
+      5'd22: pid = 4'd7 ;
       5'd23: pid = 4'd7 ;
       5'd24: pid = 4'd7 ;
-      5'd25: pid = 4'd7 ;
+      5'd25: pid = 4'd5 ;
       5'd26: pid = 4'd5 ;
       5'd27: pid = 4'd5 ;
-      5'd28: pid = 4'd5 ;
-      5'd29: pid = 4'd5 ;
+      5'd28: pid = 4'd3 ;
+      5'd29: pid = 4'd3 ;
       5'd30: pid = 4'd3 ;
       5'd31: pid = 4'd3 ;
   endcase

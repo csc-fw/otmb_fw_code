@@ -3049,6 +3049,7 @@
     cnt_en[64]  <= sync_err_cnt_en;           // STAT  TTC sync errors
     cnt_en[65]  <= perr_pulse;                // STAT Raw hits RAM parity errors
 
+    //counter96
     hmt_cnt_en[0]  <= (|hmt_anode[1:0])  && ( hmt_anode[3:2] == 2'b00);// fire signal but not background region
     hmt_cnt_en[1]  <= (|hmt_anode[1:0])  && (|hmt_anode[3:2]);// fire both signal and background region
     hmt_cnt_en[2]  <= (|hmt_cathode[1:0])  && (hmt_cathode[3:2] == 2'b00);// fire signal but not background region
@@ -4618,8 +4619,8 @@
   assign  header41_[10]     =  r_tmb_non_trig_keep;    // Non-triggering readout event
   //assign  header41_[13:11]  =  lyr_thresh_pretrig[2:0];  // Layer pre-trigger threshold
   assign  header41_[12:11]  =  run3_daq_df ? r_tmb_cathode_hmt[1:0] : lyr_thresh_pretrig[1:0];  // Layer pre-trigger threshold
-  assign  header41_[13]     =  run3_daq_df ? r_alct_bxn[1] & run3_alct_df : lyr_thresh_pretrig[2];
-  assign  header41_[14]     =  run3_daq_df ? r_alct_bxn[2] & run3_alct_df : layer_trig_en;        // Layer trigger mode enabled
+  assign  header41_[13]     =  run3_daq_df ? (r_alct_bxn[1] & run3_alct_df) : lyr_thresh_pretrig[2];
+  assign  header41_[14]     =  run3_daq_df ? (r_alct_bxn[2] & run3_alct_df) : layer_trig_en;        // Layer trigger mode enabled
   assign  header41_[18:15]  =  0;              // DDU+DMB control flags
 
 // Store header in parallel shifter
