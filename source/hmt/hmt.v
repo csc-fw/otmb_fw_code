@@ -361,7 +361,7 @@
   wire [1:0] hmt_outtime_s0 = nhits_trig_s0_bkg >= hmt_thresh3 ? 2'b11 : (nhits_trig_s0_bkg >= hmt_thresh2 ? 2'b10 : {1'b0, nhits_trig_s0_bkg >= hmt_thresh1});
   wire hmt_intime_good  = (~|hmt_fired_s0_ff) & (~hmt_reset) & nlayer_pass_thresh_sig;
   wire hmt_outtime_good = (~|hmt_fired_s0_ff) & (~hmt_reset) & nlayer_pass_thresh_bkg;
-  wire [MXHMTB-1:0] hmt_cathode_s0 = hmt_enable ? { hmt_outtime_s0 & {2{hmt_outtime_good}}, hmt_intime_good & {2{hmt_intime_good}}} : 4'b0 ;
+  wire [MXHMTB-1:0] hmt_cathode_s0 = hmt_enable ? { hmt_outtime_s0 & {2{hmt_outtime_good}}, hmt_intime_s0 & {2{hmt_intime_good}}} : 4'b0 ;
 
   wire   hmt_fired_bkg_s0 = |hmt_cathode_s0[3:2];
   wire   hmt_fired_sig_s0 = |hmt_cathode_s0[1:0];
