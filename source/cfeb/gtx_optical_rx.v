@@ -45,15 +45,9 @@
   gtx_rx_err,
   gtx_rx_err_count, // switch between  link_errcount or prbs_errcount if it's enabled
   gtx_rx_data,
-  gtx_rx_kchar,
-  link_had_err,
-  link_good,
+        link_had_err,
+        link_good,
   link_bad,
-  gtx_rx_notintable_count, 
-  gtx_rx_disperr_count, 
-  lt_trg_err,
-  lt_trg_expect,
-  lt_trg_ff,
 
 // Sump
   gtx_rx_sump
@@ -93,20 +87,12 @@
   output      gtx_rx_err;    // PRBS test detects an error
   output  [15:0]  gtx_rx_err_count;    // Error count on this fiber channel (link errors or PRBS test errors if it's enabled)
   output  [47:0]  gtx_rx_data;      // DCFEB comparator data
-  output  [15:0]  gtx_rx_kchar;      // DCFEB comparator data
   output      link_had_err;
   output      link_good;
   output      link_bad;
-  output  [15:0]  gtx_rx_notintable_count;    // Error count on this fiber channel for notintable
-  output  [15:0]  gtx_rx_disperr_count;    // Error count on this fiber channel for disperr
-
-  output lt_trg_err;
-  output lt_trg_expect;
-  output lt_trg_ff;
 // Sump
   output      gtx_rx_sump;    // Unused signals
 
-  //wire  [15:0]  gtx_rx_kchar;      // DCFEB comparator data
 //-------------------------------------------------------------------------------------------------------------------
 // Instantiate TAMU SNAP12 optical receiver logic
 //-------------------------------------------------------------------------------------------------------------------
@@ -120,47 +106,38 @@
   wire [3:0]  cew;
   wire [3:1]  nonzero_word;
   wire [47:0]  comp_dat;
-  wire [15:0]  comp_kchar;
   wire [47:0]  prompt_dat;
-  wire [15:0]  link_errcount;
-  wire [15:0]  notintable_count;
-  wire [15:0]  disperr_count;
-  reg          lt_trg_err        = 0;
 
 // GTX instance
-  gtx_comp_fiber_in ugtx_comp_fiber_in (
-  .RST              (rst),                      // In  use this to reset GTX_RX & SYNC module...
-  .GTX_DISABLE      (clear_sync | !clocks_rdy), // In  use this to put GTX_RX in Reset state
-  .CLOCK_4X         (clock_4x),                 // In  4 * global TMB clock
-  .CLOCK_1X         (clock),
-  .ttc_resync       (ttc_resync),               // use this to clear the link status monitor
-  .CMP_RX_N         (rxn),                      // In  SNAP12- fiber input for GTX
-  .CMP_RX_P         (rxp),                      // In  SNAP12+ fiber input for GTX
-  .CMP_RX_REFCLK    (clock_160),                // In  QPLL 160 via GTX Clock
-  .RX_POLARITY_SWAP (gtx_rx_pol_swap),          // In  Inputs 5 & 6 have swapped rx board routes
-  .CMP_RX_CLK160    (rx_clk160),                // Out  Rx recovered clock out.  Use for internal Logic Fabric clock. Needed to sync all 7 CFEBs with Fabric clock
-  .STRT_MTCH        (rx_start),                 // Out  Gets set when the Start Pattern is present, N/A for me.  To TP for debug only.  --sw8,7
-  .VALID            (rx_valid),                 // Out  Send this output to TP                                                                                  ( only valid after StartMtch has come by)
-  .MATCH            (rx_match),                 // Out  Send this output to TP  AND use for counting errors. VALID="should match" when true, !MATCH is an error
-  .RCV_DATA         (comp_dat  [47:0]),         // Out  48 bit comp. data output; stable for 25ns
-  .RCV_KCHAR        (comp_kchar[15:0]),         // Out  16 bit comp. kchar output; stable for 25ns
-  .PROMPT_DATA      (prompt_dat[47:0]),         // Out  48 bit comp. data output, but 6.25ns sooner; only good for 6.25ns though!
-  .NONZERO_WORD     (nonzero_word[3:1]),        // Out
-  .CEW0             (cew[0]),                   // Out  Access four phases of 40 MHz cycle, frame separated output from GTX
-  .CEW1             (cew[1]),                   // Out
-  .CEW2             (cew[2]),                   // Out
-  .CEW3             (cew[3]),                   // Out  On CEW3_r                                                                                                     ( == CEW3 + 1) the RCV_DATA is valid, use to clock into pipeline
-  .LTNCY_TRIG       (rx_fc),                    // Out  Flags when RX sees "FC" for latency measurement.  Send raw to TP or LED
-  .RX_RST_DONE      (rx_rst_done),              // Out  set when gtx_reset is complete, then the rxsync cycle can begin
-  .RX_SYNC_DONE     (rx_sync_done),             // Out  set when gtx_rxsync is complete                                                                            ( after gtx_reset)
-  .errcount         (link_errcount[15:0]),
-  .link_had_err     (link_had_err),
-  .force_error      (lt_trg_err),
-  .link_good        (link_good),
-  .link_bad         (link_bad),
-  .notintablecount  (notintable_count[15:0]),
-  .disperrcount     (disperr_count[15:0]),
-  .sump             (sump_comp_fiber)           // Out  Unused signals
+  gtx_comp_fiber_in ugtx_comp_fiber_in
+  (
+  .RST         (rst),       // In  use this to reset GTX_RX & SYNC module... 
+  .GTX_DISABLE (clear_sync | !clocks_rdy),  // In  use this to put GTX_RX in Reset state
+  .CLOCK_4X    (clock_4x),  // In  4 * global TMB clock
+  .ttc_resync  (ttc_resync),  // use this to clear the link status monitor
+  .CMP_RX_N    (rxn),         // In  SNAP12- fiber input for GTX
+  .CMP_RX_P    (rxp),         // In  SNAP12+ fiber input for GTX
+  .CMP_RX_REFCLK     (clock_160),       // In  QPLL 160 via GTX Clock
+  .RX_POLARITY_SWAP  (gtx_rx_pol_swap), // In  Inputs 5 & 6 have swapped rx board routes
+  .CMP_RX_CLK160     (rx_clk160), // Out  Rx recovered clock out.  Use for internal Logic Fabric clock. Needed to sync all 7 CFEBs with Fabric clock
+  .STRT_MTCH   (rx_start),        // Out  Gets set when the Start Pattern is present, N/A for me.  To TP for debug only.  --sw8,7
+  .VALID       (rx_valid),        // Out  Send this output to TP (only valid after StartMtch has come by)
+  .MATCH       (rx_match),        // Out  Send this output to TP  AND use for counting errors. VALID="should match" when true, !MATCH is an error
+  .RCV_DATA    (comp_dat[47:0]),  // Out  48 bit comp. data output; stable for 25ns
+  .PROMPT_DATA (prompt_dat[47:0]),// Out  48 bit comp. data output, but 6.25ns sooner; only good for 6.25ns though!
+  .NONZERO_WORD(nonzero_word[3:1]),  // Out
+  .CEW0        (cew[0]),    // Out  Access four phases of 40 MHz cycle, frame separated output from GTX
+  .CEW1        (cew[1]),    // Out
+  .CEW2        (cew[2]),    // Out
+  .CEW3        (cew[3]),    // Out  On CEW3_r (== CEW3 + 1) the RCV_DATA is valid, use to clock into pipeline
+  .LTNCY_TRIG  (rx_fc),     // Out  Flags when RX sees "FC" for latency measurement.  Send raw to TP or LED
+  .RX_RST_DONE (rx_rst_done),  // Out  set when gtx_reset is complete, then the rxsync cycle can begin
+  .RX_SYNC_DONE(rx_sync_done), // Out  set when gtx_rxsync is complete (after gtx_reset)
+  .errcount    (link_errcount[7:0]),
+  .link_had_err(link_had_err),
+  .link_good   (link_good),
+  .link_bad    (link_bad),
+  .sump     (sump_comp_fiber)    // Out  Unused signals
   );
 
 
@@ -175,6 +152,8 @@
   reg  [47:0]  comp_dat_r    = 0;
   reg     rst_errcount_r  = 0;
 
+        wire [7:0]  link_errcount;
+   
   assign snap_wait = !(rx_sync_done & clocks_rdy);  // Allow pattern checks when RX is ready
 
   always @(posedge rx_clk160 or posedge gtx_rx_reset or posedge snap_wait)
@@ -225,39 +204,30 @@
   reg    gtx_rx_sync_done= 0;
   reg    gtx_rx_err  = 0;
   reg  [15:0]  gtx_rx_err_count = 0;
-  reg  [15:0]  gtx_rx_disperr_count = 0;
-  reg  [15:0]  gtx_rx_notintable_count = 0;
-  reg             posneg_ff = 0;
+         reg             posneg_ff = 0;
    
   always @(posedge clock) begin
-     if (clear_sync) begin  // JRG:  OR gtx_rx_reset??
+     if (clear_sync) begin  // JRG:  OR gtx_rx_reset??
         gtx_rx_data_raw[47:0] <= 0;
-        gtx_rx_start          <= 0;
-        gtx_rx_fc             <= 0;
-        gtx_rx_valid          <= 0;
-        gtx_rx_match          <= 0;
-        gtx_rx_sync_done      <= 0;
-        gtx_rx_err            <= 0;
-        gtx_rx_err_count      <= 0;
-        gtx_rx_disperr_count      <= 0;
-        gtx_rx_notintable_count      <= 0;
+        gtx_rx_start  <= 0;
+        gtx_rx_fc    <= 0;
+        gtx_rx_valid  <= 0;
+        gtx_rx_match  <= 0;
+        gtx_rx_sync_done  <= 0;
+        gtx_rx_err  <= 0;
+        gtx_rx_err_count  <= 0;
      end
      else begin
-        gtx_rx_data_raw[47:0]  <= comp_dat_r[47:0];  // JRG: for optimal timing use comp_dat, not gtx_rx_data_raw
-        gtx_rx_start           <= rx_start;
-        gtx_rx_fc              <= rx_fc;
-        gtx_rx_valid           <= rx_valid;
-        gtx_rx_match           <= rx_match;
-        gtx_rx_sync_done       <= rx_sync_done;
-        gtx_rx_err             <= err;
-        gtx_rx_err_count[7:0]  <= (gtx_rx_en_prbs_test) ? prbs_errcount[7:0] : {link_errcount[7:0]};
-        gtx_rx_err_count[15:8] <= 0;
-        gtx_rx_notintable_count[15:0] <=  notintable_count[15:0];
-        gtx_rx_disperr_count[15:0]    <=  disperr_count[15:0];
-
-
+        gtx_rx_data_raw[47:0] <= comp_dat_r[47:0];  // JRG: for optimal timing use comp_dat, not gtx_rx_data_raw
+        gtx_rx_start  <= rx_start;
+        gtx_rx_fc    <= rx_fc;
+        gtx_rx_valid  <= rx_valid;
+        gtx_rx_match  <= rx_match;
+        gtx_rx_sync_done  <= rx_sync_done;
+        gtx_rx_err  <= err;
+        gtx_rx_err_count[15:0] <= (gtx_rx_en_prbs_test) ? prbs_errcount[15:0] : {8'h00,link_errcount[7:0]};
 //        if (gtx_rx_en_prbs_test) gtx_rx_err_count[15:0] <= prbs_errcount[15:0];
-//        else gtx_rx_err_count[15:0]                     <= {8'h00,link_errcount[7:0]};
+//        else gtx_rx_err_count[15:0] <= {8'h00,link_errcount[7:0]};
      end // else: !if(clear_sync)
   end // always @ (posedge clock)
 
@@ -265,11 +235,8 @@
 // Delay data n-bx to compensate for osu cable length error
   wire [47:0] gtx_rx_data_srl;
   wire [47:0] comp_dat_mux;
-  wire [15:0] comp_kchar_mux;
   reg  [47:0] comp_dat_180;
-  reg  [15:0] comp_kchar_180;
   reg  [47:0] comp_dat_phaser;
-  reg  [15:0] comp_kchar_phaser;
   reg  [3:0]  idly=0;  // JRG, simple phase delay selector
   reg  [3:0]  dly=0;   // JRG, complex phase delay selector
   reg         dly_is_0=0;
@@ -285,69 +252,21 @@
    
 // JRG: add custom muonic CLCT logic. Note that comparator data leaves this module on FALLING LHC_CLOCK edge (~clock)
   always @(posedge clock_iob) begin  // JRG, comment this for test with no recclk or phaser clocks in use
-    if (!ignore_link) begin
-       comp_dat_phaser   [47:0] <= comp_dat  [47:0];  // JRG: bring data into phase-tuned time domain
-       //comp_kchar_phaser [15:0] <= comp_kchar[15:0];  // JRG: bring data into phase-tuned time domain
-     end
-     else begin
-       comp_dat_phaser  [47:0] <= 0;  // JRG: bring data into phase-tuned time domain
-       //comp_kchar_phaser[15:0] <= 0;  // JRG: bring data into phase-tuned time domain
-     end
-       comp_kchar_phaser [15:0] <= comp_kchar[15:0];  // JRG: bring data into phase-tuned time domain
+     if (!ignore_link) comp_dat_phaser[47:0] <= comp_dat[47:0];  // JRG: bring data into phase-tuned time domain
+     else comp_dat_phaser[47:0] <= 0;  // JRG: bring data into phase-tuned time domain
   end
 
   always @(posedge clock) begin
-     comp_dat_180  [47:0] <= comp_dat_phaser[47:0];  // JRG: push data to opposite lhc clock edge (if needed) for SRL
-     comp_kchar_180[15:0] <= comp_kchar_phaser[15:0];  // JRG: push data to opposite lhc clock edge (if needed) for SRL
+     comp_dat_180[47:0] <= comp_dat_phaser[47:0];  // JRG: push data to opposite lhc clock edge (if needed) for SRL
   end
-  assign comp_dat_mux  [47:0] = (posneg_ff) ? comp_dat_180  [47:0] : comp_dat_phaser  [47:0];
-  assign comp_kchar_mux[15:0] = (posneg_ff) ? comp_kchar_180[15:0] : comp_kchar_phaser[15:0];
+  assign comp_dat_mux[47:0] = (posneg_ff) ? comp_dat_180[47:0] : comp_dat_phaser[47:0];
 
 
 //  JRG: for muonic timing use comp_dat_r, not gtx_rx_data_raw; also force a minimum single clock delay (no zero bypass)
 // old  srl16e_bbl #(48) udcfebdly (.clock(clock),.ce(1'b1),.adr(dly),.d(gtx_rx_data_raw[47:0]),.q(gtx_rx_data_srl[47:0]));
 // old  assign gtx_rx_data[47:0] = (dly_is_0) ? gtx_rx_data_raw[47:0] : gtx_rx_data_srl[47:0];
-  srl16e_bbl #(48) udcfebdly   (.clock(~clock),.ce(1'b1),.adr(idly),.d(comp_dat_mux[47:0]),  .q(gtx_rx_data[47:0])); // JRG: comp data leaves module on FALLING LHC_CLOCK edge (~clock)
-  srl16e_bbl #(16) udcfebkcdly (.clock(~clock),.ce(1'b1),.adr(idly),.d(comp_kchar_mux[15:0]),.q(gtx_rx_kchar[15:0])); // JRG: comp data leaves module on FALLING LHC_CLOCK edge (~clock)
+  srl16e_bbl #(48) udcfebdly (.clock(~clock),.ce(1'b1),.adr(idly),.d(comp_dat_mux[47:0]),.q(gtx_rx_data[47:0])); // JRG: comp data leaves module on FALLING LHC_CLOCK edge (~clock)
 
-  //--------------------------------------------------------------------------------------------------------------------
-  //
-  //--------------------------------------------------------------------------------------------------------------------
-
-  assign lt_trg = (gtx_rx_kchar==16'h50FC);
-
-  reg  [6:0] lt_trg_cnt  = 0;
-  reg  lt_trg_locked     = 0;
-  reg  lt_trg_expect     = 0;
-  reg  lt_trg_ff         = 0;
-
-  always @(posedge clock) begin
-
-    lt_trg_ff <= lt_trg;
-    //adding rx_sync_done or not ??
-    if (!rx_rst_done || ttc_resync) begin
-      lt_trg_cnt    <= 0;
-      lt_trg_err    <= 0;
-      lt_trg_expect <= 0;
-      lt_trg_locked <= 0;
-    end
-    else begin
-
-      lt_trg_cnt    <=   (lt_trg_ff) ? 7'd1 : lt_trg_cnt + 1'b1;
-      lt_trg_expect <=   (lt_trg_cnt==7'd127); // expect lt trig in the next clock
-
-      if (lt_trg_ff)  // wait until we "lock in" once before we start accumulating errors
-        lt_trg_locked <= 1'b1;
-
-      lt_trg_err <=  lt_trg_locked ? ~(lt_trg_expect==lt_trg_ff) : 1'b0;
-
-    end
-  end
-
-
-  //--------------------------------------------------------------------------------------------------------------------
-  //
-  //--------------------------------------------------------------------------------------------------------------------
 
 // Unused muonic signals
   reg muonic_sump=0;
@@ -360,16 +279,10 @@
 // Sump unused signals
 //-------------------------------------------------------------------------------------------------------------------
   assign gtx_rx_sump =
-    sump_comp_fiber  &
-  | (|nonzero_word[3:1])
-  | (|cew[3:1])          
-  | muonic_sump  
-  | gtx_rx_reset_err_cnt 
-  | (|prbs_errcount[15:8])
-  | (|prompt_dat)
-  | (|gtx_rx_data_raw)
-  | (|gtx_rx_err_count[15:9])
-  | (|dly)
+  sump_comp_fiber  &
+  (|nonzero_word[3:1]) |
+  (|cew[3:1])          |
+  muonic_sump
   ;
 
 //------------------------------------------------------------------------------------------------------------------

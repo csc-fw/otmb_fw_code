@@ -18,8 +18,8 @@
 //  08/21/2009  Take out register balancing, ise8.2 does not need it
 //  08/12/2010  Port to ISE 12
 //-------------------------------------------------------------------------------------------------------------------
-module best_1of32_busy
-(
+  module best_1of32_busy
+  (
   clock,
 
   pat00, pat01, pat02, pat03, pat04, pat05, pat06, pat07,
@@ -31,25 +31,25 @@ module best_1of32_busy
   best_pat,
   best_key,
   best_bsy
-);
+  );
 
 // Constants
-  parameter MXPATB =  3+4;    // Pattern bits
-  parameter MXKEYB =  5;      // Number of 1/2-strip key bits on 1 CFEB
-  parameter MXKEY  =  32;      // Number of key 1/2-strips on 1 CFEB
+  parameter MXPATB    =  3+4;    // Pattern bits
+  parameter MXKEYB    =  5;      // Number of 1/2-strip key bits on 1 CFEB
+  parameter MXKEY      =  32;      // Number of key 1/2-strips on 1 CFEB
 
 // Ports
   input          clock;
 
-  input [MXPATB-1:0] pat00, pat01, pat02, pat03, pat04, pat05, pat06, pat07;
-  input [MXPATB-1:0] pat08, pat09, pat10, pat11, pat12, pat13, pat14, pat15;
-  input [MXPATB-1:0] pat16, pat17, pat18, pat19, pat20, pat21, pat22, pat23;
-  input [MXPATB-1:0] pat24, pat25, pat26, pat27, pat28, pat29, pat30, pat31;
-  input [MXKEY-1:0]  bsy;
+  input  [MXPATB-1:0]  pat00, pat01, pat02, pat03, pat04, pat05, pat06, pat07;
+  input  [MXPATB-1:0]  pat08, pat09, pat10, pat11, pat12, pat13, pat14, pat15;
+  input  [MXPATB-1:0]  pat16, pat17, pat18, pat19, pat20, pat21, pat22, pat23;
+  input  [MXPATB-1:0]  pat24, pat25, pat26, pat27, pat28, pat29, pat30, pat31;
+  input  [MXKEY-1:0]    bsy;
   
-  output [MXPATB-1:0] best_pat;
-  output [MXKEYB-1:0] best_key;
-  output              best_bsy;
+  output  [MXPATB-1:0]  best_pat;
+  output  [MXKEYB-1:0]  best_key;
+  output          best_bsy;
 
 // Local 2d Arrays
   wire [MXPATB-1:0]  pat_s0  [15:0];
@@ -64,7 +64,7 @@ module best_1of32_busy
   reg  [3:0]  key_s3  [1:0];
   wire [4:0]  key_s4  [0:0];
 
-  wire [15:0] bsy_s0;
+  wire [15:0]  bsy_s0;
   wire [7:0]  bsy_s1;
   wire [3:0]  bsy_s2;
   reg  [1:0]  bsy_s3;

@@ -726,13 +726,13 @@ NET "rxn[3]"		LOC = AA4 | IOSTANDARD = "LVDS_25";	# MGTRXN0_114
 NET "rxp[4]"		LOC = W3  | IOSTANDARD = "LVDS_25"; # MGTRXP1_114	RX p|n swapped at snap12 end
 NET "rxn[4]"		LOC = W4  | IOSTANDARD = "LVDS_25";	# MGTRXN1_114	RX p|n swapped at snap12 end
 
-## Snap fiber11 mgt: gtx11/rx10
-#NET "rxp[5]"		LOC = U3  | IOSTANDARD = "LVDS_25"; # MGTRXP2_114	RX p|n swapped at snap12 end
-#NET "rxn[5]"		LOC = U4  | IOSTANDARD = "LVDS_25"; # MGTRXN2_114	RX p|n swapped at snap12 end
-#
-## Snap fiber12 mgt: gtx2/rx11
-#NET "rxp[6]"		LOC = R3  | IOSTANDARD = "LVDS_25";	# MGTRXP3_114
-#NET "rxn[6]"		LOC = R4  | IOSTANDARD = "LVDS_25";	# MGTRXN3_114
+# Snap fiber11 mgt: gtx11/rx10
+NET "rxp[5]"		LOC = U3  | IOSTANDARD = "LVDS_25"; # MGTRXP2_114	RX p|n swapped at snap12 end
+NET "rxn[5]"		LOC = U4  | IOSTANDARD = "LVDS_25"; # MGTRXN2_114	RX p|n swapped at snap12 end
+
+# Snap fiber12 mgt: gtx2/rx11
+NET "rxp[6]"		LOC = R3  | IOSTANDARD = "LVDS_25";	# MGTRXP3_114
+NET "rxn[6]"		LOC = R4  | IOSTANDARD = "LVDS_25";	# MGTRXN3_114
 
 #
 # Snap fiber5, gemRx0

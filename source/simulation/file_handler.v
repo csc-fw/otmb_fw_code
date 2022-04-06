@@ -42,8 +42,7 @@ module file_handler(
 
   initial
   begin
-    infile  = $fopen("../source/simulation/commands/load_vme_default.txt","r");      // Load default VME
-//    infile  = $fopen("../source/simulation/commands/test_vme.txt","r");      // Test of VME
+    infile  = $fopen("../source/simulation/commands/test_vme.txt","r");      // Test of VME
     outfile = $fopen("../source/simulation/commands/test_vme_out.txt","w");  // Test of VME
     
     while (!$feof(infile))
