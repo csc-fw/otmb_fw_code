@@ -70,3 +70,11 @@ Update on March 24, 2019
 ### Simulation
 The folder source/simulation contains a test bench, as well as a
 file handler and VME emulator, for the OTMB firmware simulation.
+
+
+## Branch description
+The branch is used for ME2,3,4/1 chamber operation in 2022, the beginning of Run3.  This branches includes the following new features on top of Run2 version:
+   - Localized dead time zone, DN-13-022
+   - CCLUT algorithm, DN-19-059
+   - HMT, with anode and cathode hmt bits match, DN-20-033
+   - New trigger data format and DAQ data format, DN-20-016
