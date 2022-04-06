@@ -73,4 +73,4 @@ file handler and VME emulator, for the OTMB firmware simulation.
 
 
 ## Branch description
-MEX1 OTMB firwmar with legacy Run2 algorithm 
+MEX1 OTMB firwmar with legacy Run2 algorithm plus the localized dead time zone feature
