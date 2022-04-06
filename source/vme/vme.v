@@ -1,4 +1,8 @@
 `timescale 1ns / 1ps
+
+// debug firmware in Xilinx simulation
+//`define DEBUG_OTMB_FIRMWARE
+
 //------------------------------------------------------------------------------------------------------------------
 //  VME Section:
 //------------------------------------------------------------------------------------------------------------------
@@ -320,6 +324,10 @@
   pid_thresh_pretrig,
   dmb_thresh_pretrig,
   adjcfeb_dist,
+  ccLUT_enable,
+  run3_trig_df,
+  run3_daq_df,
+  run3_alct_df,
 
 // CFEB Ports: Hot Channel Mask
   cfeb0_ly0_hcm,
@@ -357,19 +365,20 @@
   cfeb4_ly4_hcm,
   cfeb4_ly5_hcm,
 
-  cfeb5_ly0_hcm,
-  cfeb5_ly1_hcm,
-  cfeb5_ly2_hcm,
-  cfeb5_ly3_hcm,
-  cfeb5_ly4_hcm,
-  cfeb5_ly5_hcm,
+  //Tao, 7DCFEB->5DCFEB
+  //cfeb5_ly0_hcm,
+  //cfeb5_ly1_hcm,
+  //cfeb5_ly2_hcm,
+  //cfeb5_ly3_hcm,
+  //cfeb5_ly4_hcm,
+  //cfeb5_ly5_hcm,
 
-  cfeb6_ly0_hcm,
-  cfeb6_ly1_hcm,
-  cfeb6_ly2_hcm,
-  cfeb6_ly3_hcm,
-  cfeb6_ly4_hcm,
-  cfeb6_ly5_hcm,
+  //cfeb6_ly0_hcm,
+  //cfeb6_ly1_hcm,
+  //cfeb6_ly2_hcm,
+  //cfeb6_ly3_hcm,
+  //cfeb6_ly4_hcm,
+  //cfeb6_ly5_hcm,
 
 // Bad CFEB rx bit detection
   bcb_read_enable,
@@ -414,19 +423,20 @@
   cfeb4_ly4_badbits,
   cfeb4_ly5_badbits,
 
-  cfeb5_ly0_badbits,
-  cfeb5_ly1_badbits,
-  cfeb5_ly2_badbits,
-  cfeb5_ly3_badbits,
-  cfeb5_ly4_badbits,
-  cfeb5_ly5_badbits,
+  //Tao, 7DCFEB->5DCFEB
+  //cfeb5_ly0_badbits,
+  //cfeb5_ly1_badbits,
+  //cfeb5_ly2_badbits,
+  //cfeb5_ly3_badbits,
+  //cfeb5_ly4_badbits,
+  //cfeb5_ly5_badbits,
 
-  cfeb6_ly0_badbits,
-  cfeb6_ly1_badbits,
-  cfeb6_ly2_badbits,
-  cfeb6_ly3_badbits,
-  cfeb6_ly4_badbits,
-  cfeb6_ly5_badbits,
+  //cfeb6_ly0_badbits,
+  //cfeb6_ly1_badbits,
+  //cfeb6_ly2_badbits,
+  //cfeb6_ly3_badbits,
+  //cfeb6_ly4_badbits,
+  //cfeb6_ly5_badbits,
 
 // Sequencer Ports: External Trigger Enables
   clct_pat_trig_en,
@@ -480,6 +490,7 @@
   pid_thresh_postdrift,
   pretrig_halt,
   scint_veto_clr,
+  seq_trigger_nodeadtime,
 
   fifo_mode,
   fifo_tbins_cfeb,
@@ -507,6 +518,28 @@
   lhc_cycle,
   l1a_offset,
 
+  //HMT part
+  hmt_enable,
+  hmt_nhits_bx7_vme,
+  hmt_nhits_sig_vme,
+  hmt_nhits_bkg_vme,
+  hmt_cathode_vme,
+//output
+  hmt_thresh1,
+  hmt_thresh2,
+  hmt_thresh3,
+  hmt_aff_thresh   ,
+  cfeb_allow_hmt_ro,
+  hmt_delay        ,
+  hmt_alct_win_size,
+  hmt_allow_anode      ,
+  hmt_allow_cathode    ,
+  hmt_allow_match      ,
+  hmt_allow_anode_ro   ,
+  hmt_allow_cathode_ro ,
+  hmt_allow_match_ro   ,
+  hmt_outtime_check  ,
+
 // Sequencer Ports: Latched CLCTs + Status
   event_clear_vme,
   clct0_vme,
@@ -519,6 +552,13 @@
   trig_source_vme,
   nlayers_hit_vme,
   clct_bx0_sync_err,
+
+  clct0_vme_bnd,
+  clct0_vme_xky,
+  clct0_vme_carry,
+  clct1_vme_bnd,
+  clct1_vme_xky,
+  clct1_vme_carry,
 
 // Sequencer Ports: Raw Hits Ram
   dmb_wr,
@@ -573,6 +613,7 @@
 // TMB Ports: Configuration
   alct_delay,
   clct_window,
+  algo2016_window,
 
   tmb_sync_err_en,
   tmb_allow_alct,
@@ -754,6 +795,8 @@
 // Header Counters
   hdr_clear_on_resync,
   pretrig_counter,
+  seq_pretrig_counter,
+  almostseq_pretrig_counter,
   clct_counter,
   trig_counter,
   alct_counter,
@@ -775,16 +818,46 @@
 
 // Active CFEB(s) counters
   active_cfebs_event_counter,      // Any CFEB active flag sent to DMB
-  active_cfebs_me1a_event_counter, // ME1a CFEB active flag sent to DMB
-  active_cfebs_me1b_event_counter, // ME1b CFEB active flag sent to DMB
+  //Tao, ME1/1->MEX/1
+  //active_cfebs_me1a_event_counter, // ME1a CFEB active flag sent to DMB
+  //active_cfebs_me1b_event_counter, // ME1b CFEB active flag sent to DMB
   active_cfeb0_event_counter,      // CFEB0 active flag sent to DMB
   active_cfeb1_event_counter,      // CFEB1 active flag sent to DMB
   active_cfeb2_event_counter,      // CFEB2 active flag sent to DMB
   active_cfeb3_event_counter,      // CFEB3 active flag sent to DMB
   active_cfeb4_event_counter,      // CFEB4 active flag sent to DMB
-  active_cfeb5_event_counter,      // CFEB5 active flag sent to DMB
-  active_cfeb6_event_counter,      // CFEB6 active flag sent to DMB
+  //Tao, 7DCFEB->5DCFEB
+  //active_cfeb5_event_counter,      // CFEB5 active flag sent to DMB
+  //active_cfeb6_event_counter,      // CFEB6 active flag sent to DMB
+  bx0_match_counter,
 
+  hmt_counter0,
+  hmt_counter1,
+  hmt_counter2,
+  hmt_counter3,
+  hmt_counter4,
+  hmt_counter5,
+  hmt_counter6,
+  hmt_counter7,
+  hmt_counter8,
+  hmt_counter9,
+  hmt_counter10,
+  hmt_counter11,
+  hmt_counter12,
+  hmt_counter13,
+  hmt_counter14,
+  hmt_counter15,
+  hmt_counter16,
+  hmt_counter17,
+  hmt_counter18,
+  hmt_counter19,
+
+  hmt_trigger_counter,
+  hmt_readout_counter,
+  hmt_aff_counter,
+  buf_stall_counter,
+
+  new_counter0,
 // CSC Orientation Ports
   csc_type,
   csc_me1ab,
@@ -832,7 +905,7 @@
   cfeb2_rxd_posneg,
   cfeb3_rxd_posneg,
   cfeb4_rxd_posneg,
-  cfeb5_rxd_posneg,
+  //cfeb5_rxd_posneg,
   cfeb6_rxd_posneg,
 
 // Phaser VME control/status ports
@@ -867,8 +940,9 @@
   cfeb2_rxd_int_delay,
   cfeb3_rxd_int_delay,
   cfeb4_rxd_int_delay,
-  cfeb5_rxd_int_delay,
-  cfeb6_rxd_int_delay,
+  //Tao, ME1/1->MEX/1, the following two could be ignored for ME234
+  //cfeb5_rxd_int_delay,
+  //cfeb6_rxd_int_delay,
 
 // Sync error source enables
   sync_err_reset,
@@ -921,16 +995,38 @@
   gtx_rx_err_count2,
   gtx_rx_err_count3,
   gtx_rx_err_count4,
-  gtx_rx_err_count5,
-  gtx_rx_err_count6,
+  //Tao, ME1/1->MEX/1
+  //gtx_rx_err_count5,
+  //gtx_rx_err_count6,
+  gtx_rx_notintable_count0,
+  gtx_rx_notintable_count1,
+  gtx_rx_notintable_count2,
+  gtx_rx_notintable_count3,
+  gtx_rx_notintable_count4,
+  gtx_rx_disperr_count0,
+  gtx_rx_disperr_count1,
+  gtx_rx_disperr_count2,
+  gtx_rx_disperr_count3,
+  gtx_rx_disperr_count4,
 
   gtx_link_had_err,  // link stability monitor: error happened at least once
   gtx_link_good,     // link stability monitor: always good, no errors since last resync
   gtx_link_bad,      // link stability monitor: errors happened over 100 times
 
-  comp_phaser_a_ready,
+  //Tao, ME1/1->MEX/1
+  //comp_phaser_a_ready,
   comp_phaser_b_ready,
   auto_gtx_reset,
+
+// ALGO2016 control parameters
+  algo2016_use_dead_time_zone,
+  algo2016_dead_time_zone_size,
+  algo2016_use_dynamic_dead_time_zone,
+  algo2016_clct_to_alct,
+  algo2016_drop_used_clcts,
+  algo2016_cross_bx_algorithm,
+  algo2016_clct_use_corrected_bx,
+  evenchamber,
 
 // Sump
   vme_sump
@@ -944,6 +1040,9 @@
   parameter MONTHDAY      = 16'h0000;      // Version date
   parameter YEAR        = 16'h0000;      // Version date
   parameter FPGAID      = 16'h0000;      // FPGA Type XCVnnnn
+  parameter VERSION_FORMAT      = 4'h0;     // Version branch
+  parameter VERSION_MAJOR       = 4'h0;     // Major version
+  parameter VERSION_MINOR       = 5'h0;     // Minor version
   parameter ISE_VERSION    = 16'h1234;      // ISE Compiler version
   parameter AUTO_VME      =  1'b1;      // Auto init vme registers
   parameter AUTO_JTAG      =  1'b1;      // Auto init jtag chain
@@ -967,12 +1066,15 @@
   $display ("vme.ALCT_MUONIC      = %H",ALCT_MUONIC);
   $display ("vme.CFEB_MUONIC      = %H",CFEB_MUONIC);
   $display ("vme.CCB_BX0_EMULATOR = %H",CCB_BX0_EMULATOR);
+  $display ("vme.VERSION_FORMAT   = %H",VERSION_FORMAT);
+  $display ("vme.VERSION_MAJOR    = %H",VERSION_MAJOR);
+  $display ("vme.VERSION_MINOR    = %H",VERSION_MINOR);
   end
 
 //------------------------------------------------------------------------------------------------------------------
 // Bus Parameters
 //------------------------------------------------------------------------------------------------------------------
-  parameter MXCFEB     = 7;        // Number of CFEBs on CSC
+  parameter MXCFEB     = 5;        // Number of CFEBs on CSC
   parameter MXLY       = 6;        // Number Layers in CSC
   parameter MXHS       = 32;       // Number of 1/2-Strips per layer
   parameter MXKEYB     = 5;        // Number of key bits
@@ -1021,6 +1123,14 @@
   parameter MXL1ARX    = 12;       // Number L1As received counter bits
   parameter MXORBIT    = 30;       // Number orbit counter bits
 
+  // ccLUT
+  //parameter MXPATC  = 11;                // Pattern Carry Bits
+  parameter MXPATC  = 12;                // Pattern Carry Bits
+  parameter MXOFFSB = 4;                 // Quarter-strip bits
+  parameter MXBNDB  = 5;                 // Bend bits
+  parameter MXXKYB = 10;            // Number of EightStrip key bits on 7 CFEBs, was 8 bits with traditional pattern finding
+  parameter MXHMTB  = 4; // max HMT bits  
+  parameter NHMTHITB   = 10;
 //------------------------------------------------------------------------------------------------------------------
 // VME Addresses
 //------------------------------------------------------------------------------------------------------------------
@@ -1132,6 +1242,8 @@
   parameter ADR_GTX_SYNC_DONE_TIME    = 9'h192; // Read gtx rx sync done time
   
   parameter ADR_TMB_LATENCY_SR    = 9'h196; // Shift register for "CFEB data received on optical link" latched with MPC frame latch strobe for VME
+  
+  parameter ADR_ALGO2016_CTRL = 9'h198; // Controls parameters of new trigger algorithm
   
   parameter ADR_MPC_INJ      = 9'h90;  // MPC Injector Control
   parameter ADR_MPC_RAM_ADR    = 9'h92;  // MPC Injector RAM address
@@ -1279,15 +1391,49 @@
   parameter ADR_V6_PHASER7    = 9'h16A;  // Phaser 7 cfeb5_rxd phase "ME1/1A-side"
   parameter ADR_V6_PHASER8    = 9'h16C;  // Phaser 8 cfeb6_rxd phase "ME1/1B-side"
 
-  parameter ADR_V6_HCM501      = 9'h16E;  // CFEB5 Ly0,Ly1 Hot Channel Mask
-  parameter ADR_V6_HCM523      = 9'h170;  // CFEB5 Ly2,Ly3 Hot Channel Mask
-  parameter ADR_V6_HCM545      = 9'h172;  // CFEB5 Ly4,Ly5 Hot Channel Mask
+  //Tao, 7DCFEB->5DCFEB
+  //parameter ADR_V6_HCM501      = 9'h16E;  // CFEB5 Ly0,Ly1 Hot Channel Mask
+  //parameter ADR_V6_HCM523      = 9'h170;  // CFEB5 Ly2,Ly3 Hot Channel Mask
+  //parameter ADR_V6_HCM545      = 9'h172;  // CFEB5 Ly4,Ly5 Hot Channel Mask
 
-  parameter ADR_V6_HCM601      = 9'h174;  // CFEB6 Ly0,Ly1 Hot Channel Mask
-  parameter ADR_V6_HCM623      = 9'h176;  // CFEB6 Ly2,Ly3 Hot Channel Mask
-  parameter ADR_V6_HCM645      = 9'h178;  // CFEB6 Ly4,Ly5 Hot Channel Mask
+  //parameter ADR_V6_HCM601      = 9'h174;  // CFEB6 Ly0,Ly1 Hot Channel Mask
+  //parameter ADR_V6_HCM623      = 9'h176;  // CFEB6 Ly2,Ly3 Hot Channel Mask
+  //parameter ADR_V6_HCM645      = 9'h178;  // CFEB6 Ly4,Ly5 Hot Channel Mask
 
   parameter ADR_V6_EXTEND      = 9'h17A;  // DCFEB 7-bit extensions
+
+  // Tao,CCLUT register starts from 10'h19A = 410
+  parameter ADR_CLCT0_CC              = 10'h19A;  // Comparator code, for 1st CLCT, readonly
+  parameter ADR_CLCT1_CC              = 10'h19C;  // Comparator code, for 2nd CLCT, readonly
+  parameter ADR_CLCT0_BNDXKY          = 10'h19E;  // new bending
+  parameter ADR_CLCT1_BNDXKY          = 10'h1A0; 
+  //parameter ADR_CLCT0_QLT             = 10'h19E;  // new Quality
+  //parameter ADR_CLCT1_QLT             = 10'h1A0; 
+  //parameter ADR_CLCT0_XKY             = 10'h1A6; // new position with 1/8 strip precision
+  //parameter ADR_CLCT1_XKY             = 10'h1A8; 
+
+  parameter ADR_RUN3_FORMAT_CTRL      = 10'h1AA; // control for CCLUT, data format
+  parameter ADR_HMT_CTRL              = 10'h1AC; // control for HMT
+  parameter ADR_HMT_THRESH1           = 10'h1AE; // threshold1 for HMT
+  parameter ADR_HMT_THRESH2           = 10'h1B0; // threshold2 for HMT
+  parameter ADR_HMT_THRESH3           = 10'h1B2; // threshold3 for HMT
+  parameter ADR_HMT_NHITS_SIG         = 10'h1B4;
+  parameter ADR_HMT_NHITS_BKG         = 10'h1B6;
+  //parameter ADR_LCT_INJECTION         = 10'h1B8; //LCT injection from configuration
+  parameter ADR_V6_GTX0_NOTINTABLE    = 10'h1BA;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX1_NOTINTABLE    = 10'h1BC;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX2_NOTINTABLE    = 10'h1BE;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX3_NOTINTABLE    = 10'h1C0;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX4_NOTINTABLE    = 10'h1C2;  // Virtex-6 GTX0 control and status
+  //parameter ADR_V6_GTX5_NOTINTABLE    = 10'h1C4;  // Virtex-6 GTX0 control and status
+  //parameter ADR_V6_GTX6_NOTINTABLE    = 10'h1C6;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX0_DISPERR       = 10'h1C8;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX1_DISPERR       = 10'h1CA;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX2_DISPERR       = 10'h1CC;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX3_DISPERR       = 10'h1CE;  // Virtex-6 GTX0 control and status
+  parameter ADR_V6_GTX4_DISPERR       = 10'h1D0;  // Virtex-6 GTX0 control and status
+  //parameter ADR_V6_GTX5_DISPERR       = 10'h1D2;  // Virtex-6 GTX0 control and status
+  //parameter ADR_V6_GTX6_DISPERR       = 10'h1D4;  // Virtex-6 GTX0 control and status
 
   parameter ADR_ODMB      = 9'h1EE;  // ODMB mode: various addresses are handled inside odmb_device
 
@@ -1603,6 +1749,12 @@
   output  [MXPIDB-1:0]  pid_thresh_pretrig;    // Pattern shape ID pre-trigger threshold
   output  [MXHITB-1:0]  dmb_thresh_pretrig;    // Hits on pattern template DMB active-feb threshold
   output  [MXKEYB-1+1:0]  adjcfeb_dist;      // Distance from key to cfeb boundary for marking adjacent cfeb as hit
+  input  ccLUT_enable;
+  output run3_trig_df;
+  output run3_daq_df;
+  output run3_alct_df;
+  //output run2_revcode;
+  wire run2_revcode;
 
 // CFEB Ports: Hot Channel Mask
   output  [MXDS-1:0]    cfeb0_ly0_hcm;      // 1=enable DiStrip
@@ -1640,19 +1792,20 @@
   output  [MXDS-1:0]    cfeb4_ly4_hcm;      // 1=enable DiStrip
   output  [MXDS-1:0]    cfeb4_ly5_hcm;      // 1=enable DiStrip
 
-  output  [MXDS-1:0]    cfeb5_ly0_hcm;      // 1=enable DiStrip
-  output  [MXDS-1:0]    cfeb5_ly1_hcm;      // 1=enable DiStrip
-  output  [MXDS-1:0]    cfeb5_ly2_hcm;      // 1=enable DiStrip
-  output  [MXDS-1:0]    cfeb5_ly3_hcm;      // 1=enable DiStrip
-  output  [MXDS-1:0]    cfeb5_ly4_hcm;      // 1=enable DiStrip
-  output  [MXDS-1:0]    cfeb5_ly5_hcm;      // 1=enable DiStrip
+  //Tao, 7DCFEB->5DCFEB
+  //output  [MXDS-1:0]    cfeb5_ly0_hcm;      // 1=enable DiStrip
+  //output  [MXDS-1:0]    cfeb5_ly1_hcm;      // 1=enable DiStrip
+  //output  [MXDS-1:0]    cfeb5_ly2_hcm;      // 1=enable DiStrip
+  //output  [MXDS-1:0]    cfeb5_ly3_hcm;      // 1=enable DiStrip
+  //output  [MXDS-1:0]    cfeb5_ly4_hcm;      // 1=enable DiStrip
+  //output  [MXDS-1:0]    cfeb5_ly5_hcm;      // 1=enable DiStrip
 
-  output  [MXDS-1:0]    cfeb6_ly0_hcm;      // 1=enable DiStrip
-  output  [MXDS-1:0]    cfeb6_ly1_hcm;      // 1=enable DiStrip
-  output  [MXDS-1:0]    cfeb6_ly2_hcm;      // 1=enable DiStrip
-  output  [MXDS-1:0]    cfeb6_ly3_hcm;      // 1=enable DiStrip
-  output  [MXDS-1:0]    cfeb6_ly4_hcm;      // 1=enable DiStrip
-  output  [MXDS-1:0]    cfeb6_ly5_hcm;      // 1=enable DiStrip
+  //output  [MXDS-1:0]    cfeb6_ly0_hcm;      // 1=enable DiStrip
+  //output  [MXDS-1:0]    cfeb6_ly1_hcm;      // 1=enable DiStrip
+  //output  [MXDS-1:0]    cfeb6_ly2_hcm;      // 1=enable DiStrip
+  //output  [MXDS-1:0]    cfeb6_ly3_hcm;      // 1=enable DiStrip
+  //output  [MXDS-1:0]    cfeb6_ly4_hcm;      // 1=enable DiStrip
+  //output  [MXDS-1:0]    cfeb6_ly5_hcm;      // 1=enable DiStrip
 
 // Bad CFEB rx bit detection
   output          bcb_read_enable;    // Enable blocked bits in dmb readout
@@ -1697,19 +1850,20 @@
   input  [MXDS-1:0]    cfeb4_ly4_badbits;    // 1=CFEB rx bit went bad
   input  [MXDS-1:0]    cfeb4_ly5_badbits;    // 1=CFEB rx bit went bad
 
-  input  [MXDS-1:0]    cfeb5_ly0_badbits;    // 1=CFEB rx bit went bad
-  input  [MXDS-1:0]    cfeb5_ly1_badbits;    // 1=CFEB rx bit went bad
-  input  [MXDS-1:0]    cfeb5_ly2_badbits;    // 1=CFEB rx bit went bad
-  input  [MXDS-1:0]    cfeb5_ly3_badbits;    // 1=CFEB rx bit went bad
-  input  [MXDS-1:0]    cfeb5_ly4_badbits;    // 1=CFEB rx bit went bad
-  input  [MXDS-1:0]    cfeb5_ly5_badbits;    // 1=CFEB rx bit went bad
+  //Tao, 7DCFEB->5DCFEB
+  //input  [MXDS-1:0]    cfeb5_ly0_badbits;    // 1=CFEB rx bit went bad
+  //input  [MXDS-1:0]    cfeb5_ly1_badbits;    // 1=CFEB rx bit went bad
+  //input  [MXDS-1:0]    cfeb5_ly2_badbits;    // 1=CFEB rx bit went bad
+  //input  [MXDS-1:0]    cfeb5_ly3_badbits;    // 1=CFEB rx bit went bad
+  //input  [MXDS-1:0]    cfeb5_ly4_badbits;    // 1=CFEB rx bit went bad
+  //input  [MXDS-1:0]    cfeb5_ly5_badbits;    // 1=CFEB rx bit went bad
 
-  input  [MXDS-1:0]    cfeb6_ly0_badbits;    // 1=CFEB rx bit went bad
-  input  [MXDS-1:0]    cfeb6_ly1_badbits;    // 1=CFEB rx bit went bad
-  input  [MXDS-1:0]    cfeb6_ly2_badbits;    // 1=CFEB rx bit went bad
-  input  [MXDS-1:0]    cfeb6_ly3_badbits;    // 1=CFEB rx bit went bad
-  input  [MXDS-1:0]    cfeb6_ly4_badbits;    // 1=CFEB rx bit went bad
-  input  [MXDS-1:0]    cfeb6_ly5_badbits;    // 1=CFEB rx bit went bad
+  //input  [MXDS-1:0]    cfeb6_ly0_badbits;    // 1=CFEB rx bit went bad
+  //input  [MXDS-1:0]    cfeb6_ly1_badbits;    // 1=CFEB rx bit went bad
+  //input  [MXDS-1:0]    cfeb6_ly2_badbits;    // 1=CFEB rx bit went bad
+  //input  [MXDS-1:0]    cfeb6_ly3_badbits;    // 1=CFEB rx bit went bad
+  //input  [MXDS-1:0]    cfeb6_ly4_badbits;    // 1=CFEB rx bit went bad
+  //input  [MXDS-1:0]    cfeb6_ly5_badbits;    // 1=CFEB rx bit went bad
 
 // Sequencer Ports: External Trigger Enables
   output              clct_pat_trig_en;   // Allow CLCT Pattern pre-triggers
@@ -1759,6 +1913,7 @@
 // Sequencer Ports: CLCT Processing
   input  [11:0]      sequencer_state;    // Sequencer State machine
   input          scint_veto_vme;      // Scintillator veto for FAST Sites
+  output         seq_trigger_nodeadtime;
 
   output  [MXDRIFT-1:0]  drift_delay;      // CSC Drift delay clocks
   output  [MXHITB-1:0]  hit_thresh_postdrift;  // Minimum pattern hits for a valid pattern
@@ -1791,6 +1946,28 @@
   output  [MXBXN-1:0]    bxn_offset_l1a;      // BXN offset at reset, for L1A bxn
   output  [MXBXN-1:0]    lhc_cycle;        // LHC period, max BXN count+1
   output  [MXL1ARX-1:0]  l1a_offset;        // L1A counter preset value
+  //HMT part
+  output hmt_enable;
+  input [NHMTHITB-1:0] hmt_nhits_bx7_vme;
+  input [NHMTHITB-1:0] hmt_nhits_sig_vme;
+  input [NHMTHITB-1:0] hmt_nhits_bkg_vme;
+  input [MXHMTB-1:0] hmt_cathode_vme;
+
+  output [7:0] hmt_thresh1;
+  output [7:0] hmt_thresh2;
+  output [7:0] hmt_thresh3;
+  output       cfeb_allow_hmt_ro;
+  output [6:0] hmt_aff_thresh   ;
+  output [3:0] hmt_delay        ;
+  output [3:0] hmt_alct_win_size;
+  output       hmt_allow_anode      ;
+  output       hmt_allow_cathode    ;
+  output       hmt_allow_match      ;
+  output       hmt_allow_anode_ro   ;
+  output       hmt_allow_cathode_ro ;
+  output       hmt_allow_match_ro   ;
+  output       hmt_outtime_check;  
+  
 
 // Sequencer Ports: Latched CLCTs
   output          event_clear_vme;    // Event clear for aff,clct,mpc vme diagnostic registers
@@ -1804,6 +1981,12 @@
   input  [10:0]      trig_source_vme;    // Trigger source readback
   input  [2:0]      nlayers_hit_vme;    // Number layers hit on layer trigger
   input          clct_bx0_sync_err;    // Sync error: BXN counter==0 did not match bx0
+  input  [MXBNDB - 1   : 0] clct0_vme_bnd; // new bending 
+  input  [MXXKYB-1     : 0] clct0_vme_xky; // new position with 1/8 precision
+  input  [MXBNDB - 1   : 0] clct1_vme_bnd; // new bending 
+  input  [MXXKYB-1     : 0] clct1_vme_xky; // new position with 1/8 precision
+  input  [MXPATC-1     : 0] clct0_vme_carry;         // First  CLCT
+  input  [MXPATC-1     : 0] clct1_vme_carry;         // Second CLCT
 
 // Sequencer Ports: Raw Hits Ram
   output          dmb_wr;          // Raw hits RAM VME write enable
@@ -1857,9 +2040,10 @@
   output  [MXTBIN-1:0]  fifo_pretrig_mini;    // Number Mini FIFO time bins before pretrigger
 
 // TMB Ports: Configuration
-  output  [3:0]      alct_delay;        //  Delay ALCT for CLCT match window
-  output  [3:0]      clct_window;      //  CLCT match window width
-  output  [1:0]      tmb_sync_err_en;    // Allow sync_err to MPC for either muon
+  output  [3:0] alct_delay;           // Delay ALCT for CLCT match window
+  output  [3:0] clct_window;          // CLCT match window width (for CLCT-centric "old" algorithm)
+  output  [3:0] algo2016_window; // CLCT match window width (for ALCT-centric 2016 algorithm), not used!!!
+  output  [1:0] tmb_sync_err_en;      // Allow sync_err to MPC for either muon
 
   output          tmb_allow_alct;      // Allow ALCT only 
   output          tmb_allow_clct;      // Allow CLCT only
@@ -2040,6 +2224,8 @@
 // Header Counters
   output                hdr_clear_on_resync; // Clear header counters on ttc_resync
   input  [MXCNTVME-1:0] pretrig_counter;     // Pre-trigger counter
+  input  [MXCNTVME-1:0] seq_pretrig_counter;       // consecutive Pre-trigger counter (equential, 1 bx apart)
+  input  [MXCNTVME-1:0] almostseq_pretrig_counter; // Pre-triggers-2bx-apart counter
   input  [MXCNTVME-1:0] clct_counter;        // CLCT counter
   input  [MXCNTVME-1:0] trig_counter;        // TMB trigger counter
   input  [MXCNTVME-1:0] alct_counter;        // ALCTs received counter
@@ -2061,16 +2247,43 @@
 
 // Active CFEB(s) counters
   input  [MXCNTVME-1:0] active_cfebs_event_counter;      // Any CFEB active flag sent to DMB
-  input  [MXCNTVME-1:0] active_cfebs_me1a_event_counter; // ME1a CFEB active flag sent to DMB
-  input  [MXCNTVME-1:0] active_cfebs_me1b_event_counter; // ME1b CFEB active flag sent to DMB
+  //input  [MXCNTVME-1:0] active_cfebs_me1a_event_counter; // ME1a CFEB active flag sent to DMB
+  //input  [MXCNTVME-1:0] active_cfebs_me1b_event_counter; // ME1b CFEB active flag sent to DMB
   input  [MXCNTVME-1:0] active_cfeb0_event_counter;      // CFEB0 active flag sent to DMB
   input  [MXCNTVME-1:0] active_cfeb1_event_counter;      // CFEB1 active flag sent to DMB
   input  [MXCNTVME-1:0] active_cfeb2_event_counter;      // CFEB2 active flag sent to DMB
   input  [MXCNTVME-1:0] active_cfeb3_event_counter;      // CFEB3 active flag sent to DMB
   input  [MXCNTVME-1:0] active_cfeb4_event_counter;      // CFEB4 active flag sent to DMB
-  input  [MXCNTVME-1:0] active_cfeb5_event_counter;      // CFEB5 active flag sent to DMB
-  input  [MXCNTVME-1:0] active_cfeb6_event_counter;      // CFEB6 active flag sent to DMB
+  //input  [MXCNTVME-1:0] active_cfeb5_event_counter;      // CFEB5 active flag sent to DMB
+  //input  [MXCNTVME-1:0] active_cfeb6_event_counter;      // CFEB6 active flag sent to DMB
+  input  [MXCNTVME-1:0] bx0_match_counter;
 
+  input  [MXCNTVME-1:0]  hmt_counter0;
+  input  [MXCNTVME-1:0]  hmt_counter1;
+  input  [MXCNTVME-1:0]  hmt_counter2;
+  input  [MXCNTVME-1:0]  hmt_counter3;
+  input  [MXCNTVME-1:0]  hmt_counter4;
+  input  [MXCNTVME-1:0]  hmt_counter5;
+  input  [MXCNTVME-1:0]  hmt_counter6;
+  input  [MXCNTVME-1:0]  hmt_counter7;
+  input  [MXCNTVME-1:0]  hmt_counter8;
+  input  [MXCNTVME-1:0]  hmt_counter9;
+  input  [MXCNTVME-1:0]  hmt_counter10;
+  input  [MXCNTVME-1:0]  hmt_counter11;
+  input  [MXCNTVME-1:0]  hmt_counter12;
+  input  [MXCNTVME-1:0]  hmt_counter13;
+  input  [MXCNTVME-1:0]  hmt_counter14;
+  input  [MXCNTVME-1:0]  hmt_counter15;
+  input  [MXCNTVME-1:0]  hmt_counter16;
+  input  [MXCNTVME-1:0]  hmt_counter17;
+  input  [MXCNTVME-1:0]  hmt_counter18;
+  input  [MXCNTVME-1:0]  hmt_counter19;
+  input  [MXCNTVME-1:0]  hmt_trigger_counter;
+  input  [MXCNTVME-1:0]  hmt_readout_counter;
+  input  [MXCNTVME-1:0]  hmt_aff_counter;
+  input  [MXCNTVME-1:0]  buf_stall_counter;
+
+  input  [MXCNTVME-1:0]  new_counter0;
 // CSC Orientation Ports
   input  [3:0] csc_type;        // Firmware compile type
   input        csc_me1ab;       // 1=ME1A or ME1B CSC type
@@ -2122,7 +2335,7 @@
   output          cfeb2_rxd_posneg;    // CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
   output          cfeb3_rxd_posneg;    // CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
   output          cfeb4_rxd_posneg;    // CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
-  output          cfeb5_rxd_posneg;    // CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
+  //output          cfeb5_rxd_posneg;    // CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
   output          cfeb6_rxd_posneg;    // CFEB cfeb-to-tmb inter-stage clock select 0 or 180 degrees
 
 // Phaser VME control/status ports
@@ -2157,8 +2370,9 @@
   output  [3:0]      cfeb2_rxd_int_delay;  // Interstage delay
   output  [3:0]      cfeb3_rxd_int_delay;  // Interstage delay
   output  [3:0]      cfeb4_rxd_int_delay;  // Interstage delay
-  output  [3:0]      cfeb5_rxd_int_delay;  // Interstage delay
-  output  [3:0]      cfeb6_rxd_int_delay;  // Interstage delay
+  //Tao, ME1/1->MEX/1, the following two could be ignored for ME234
+  //output  [3:0]      cfeb5_rxd_int_delay;  // Interstage delay
+  //output  [3:0]      cfeb6_rxd_int_delay;  // Interstage delay
 
 // Sync error source enables
   output          sync_err_reset;      // VME sync error reset
@@ -2212,16 +2426,40 @@
   input  [15:0]      gtx_rx_err_count2;    // Error count on this fiber channel
   input  [15:0]      gtx_rx_err_count3;    // Error count on this fiber channel
   input  [15:0]      gtx_rx_err_count4;    // Error count on this fiber channel
-  input  [15:0]      gtx_rx_err_count5;    // Error count on this fiber channel
-  input  [15:0]      gtx_rx_err_count6;    // Error count on this fiber channel
+  //Tao, ME1/1->MEX/1
+  //input  [15:0]      gtx_rx_err_count5;    // Error count on this fiber channel
+  //input  [15:0]      gtx_rx_err_count6;    // Error count on this fiber channel
+   // Virtex-6 GTX error counters: disperr/notintable
+  input  [15:0]      gtx_rx_notintable_count0;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_notintable_count1;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_notintable_count2;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_notintable_count3;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_notintable_count4;    // Error count on this fiber channel
+
+  input  [15:0]      gtx_rx_disperr_count0;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_disperr_count1;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_disperr_count2;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_disperr_count3;    // Error count on this fiber channel
+  input  [15:0]      gtx_rx_disperr_count4;    // Error count on this fiber channel
 
   input  [MXCFEB-1:0]  gtx_link_had_err;   // link stability monitor: error happened at least once
   input  [MXCFEB-1:0]  gtx_link_good;      // link stability monitor: always good, no errors since last resync
   input  [MXCFEB-1:0]  gtx_link_bad;       // link stability monitor: errors happened over 100 times
 
-  output    comp_phaser_a_ready;
+  //output    comp_phaser_a_ready;
   output    comp_phaser_b_ready;
   output    auto_gtx_reset;
+
+// ALGO2016 Control Parameters
+  
+  output       algo2016_use_dead_time_zone;         // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
+  output [4:0] algo2016_dead_time_zone_size;        // Constant size of the dead time zone
+  output       algo2016_use_dynamic_dead_time_zone; // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
+  output       algo2016_clct_to_alct;               // ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
+  output       algo2016_drop_used_clcts;            // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - drop used CLCTs
+  output       algo2016_cross_bx_algorithm;         // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
+  output       algo2016_clct_use_corrected_bx;      // Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
+  output       evenchamber;
 
 // Sump
   output          vme_sump;        // Unused signals
@@ -2370,23 +2608,24 @@
   reg    [15:0]  hcm445_wr;
   wire  [15:0]  hcm445_rd;
 
-  reg    [15:0]  hcm501_wr;
-  wire  [15:0]  hcm501_rd;
+  //Tao, 7DCFEB->5DCFEB
+  //reg    [15:0]  hcm501_wr;
+  //wire  [15:0]  hcm501_rd;
 
-  reg    [15:0]  hcm523_wr;
-  wire  [15:0]  hcm523_rd;
+  //reg    [15:0]  hcm523_wr;
+  //wire  [15:0]  hcm523_rd;
 
-  reg    [15:0]  hcm545_wr;
-  wire  [15:0]  hcm545_rd;
+  //reg    [15:0]  hcm545_wr;
+  //wire  [15:0]  hcm545_rd;
 
-  reg    [15:0]  hcm601_wr;
-  wire  [15:0]  hcm601_rd;
+  //reg    [15:0]  hcm601_wr;
+  //wire  [15:0]  hcm601_rd;
 
-  reg    [15:0]  hcm623_wr;
-  wire  [15:0]  hcm623_rd;
+  //reg    [15:0]  hcm623_wr;
+  //wire  [15:0]  hcm623_rd;
 
-  reg    [15:0]  hcm645_wr;
-  wire  [15:0]  hcm645_rd;
+  //reg    [15:0]  hcm645_wr;
+  //wire  [15:0]  hcm645_rd;
 
   reg   [15:0]  seq_trigen_wr;
   wire  [15:0]  seq_trigen_rd;
@@ -2438,6 +2677,9 @@
   
   reg  [15:0] mpc_frames_fifo_ctrl_wr;
   wire [15:0] mpc_frames_fifo_ctrl_rd;
+  
+  reg  [15:0] algo2016_ctrl_wr;
+  wire [15:0] algo2016_ctrl_rd;
 
 // counters to monitor startup timing...
 //   Read bits 20:5 or 19:4 or 17:2 to VME... 800 or 400 or 100 ns resolution, counts to 52.4 or 26.2 or 6.5 ms
@@ -2674,13 +2916,14 @@
   wire  [15:0]  cfeb4_badbits_ly23_rd;
   wire  [15:0]  cfeb4_badbits_ly45_rd;
 
-  wire  [15:0]  cfeb5_badbits_ly01_rd;
-  wire  [15:0]  cfeb5_badbits_ly23_rd;
-  wire  [15:0]  cfeb5_badbits_ly45_rd;
+  //Tao, ME1/1->MEX/1, the following two could be ignored for ME234
+  //wire  [15:0]  cfeb5_badbits_ly01_rd;
+  //wire  [15:0]  cfeb5_badbits_ly23_rd;
+  //wire  [15:0]  cfeb5_badbits_ly45_rd;
 
-  wire  [15:0]  cfeb6_badbits_ly01_rd;
-  wire  [15:0]  cfeb6_badbits_ly23_rd;
-  wire  [15:0]  cfeb6_badbits_ly45_rd;
+  //wire  [15:0]  cfeb6_badbits_ly01_rd;
+  //wire  [15:0]  cfeb6_badbits_ly23_rd;
+  //wire  [15:0]  cfeb6_badbits_ly45_rd;
 
   reg   [15:0]  alct_startup_delay_wr;
   wire  [15:0]  alct_startup_delay_rd;
@@ -2694,6 +2937,8 @@
 
   reg   [15:0]  virtex6_gtx_rx_wr [MXCFEB-1:0];
   wire  [15:0]  virtex6_gtx_rx_rd [MXCFEB-1:0];
+  wire  [15:0]  virtex6_gtx_rx_notintable_rd [MXCFEB-1:0];
+  wire  [15:0]  virtex6_gtx_rx_disperr_rd [MXCFEB-1:0];
 
   reg   [15:0]  virtex6_sysmon_wr;
   wire  [15:0]  virtex6_sysmon_rd;
@@ -2701,6 +2946,28 @@
   reg   [15:0]  virtex6_extend_wr;
   wire  [15:0]  virtex6_extend_rd;
 
+  wire [15:0] clct0_cc_rd;
+  wire [15:0] clct1_cc_rd;
+  wire [15:0] clct0_bndxky_rd;
+  wire [15:0] clct1_bndxky_rd;
+  //wire [15:0] clct0_xky_rd;
+  //wire [15:0] clct1_xky_rd;
+
+  reg  [15:0] run3_format_ctrl_wr;
+  wire [15:0] run3_format_ctrl_rd;
+
+  reg  [15:0] hmt_ctrl_wr;
+  wire [15:0] hmt_ctrl_rd;
+
+  reg  [15:0] hmt_thresh1_wr;
+  wire [15:0] hmt_thresh1_rd;
+  reg  [15:0] hmt_thresh2_wr;
+  wire [15:0] hmt_thresh2_rd;
+  reg  [15:0] hmt_thresh3_wr;
+  wire [15:0] hmt_thresh3_rd;
+
+  wire [15:0] hmt_nhits_sig_rd;
+  wire [15:0] hmt_nhits_bkg_rd;
 //------------------------------------------------------------------------------------------------------------------
 // Address Write Decodes
 //------------------------------------------------------------------------------------------------------------------
@@ -2748,12 +3015,13 @@
   wire      wr_hcm401;
   wire      wr_hcm423;
   wire      wr_hcm445;
-  wire      wr_hcm501;
-  wire      wr_hcm523;
-  wire      wr_hcm545;
-  wire      wr_hcm601;
-  wire      wr_hcm623;
-  wire      wr_hcm645;
+  //Tao, 7DCFEB->5DCFEB
+  //wire      wr_hcm501;
+  //wire      wr_hcm523;
+  //wire      wr_hcm545;
+  //wire      wr_hcm601;
+  //wire      wr_hcm623;
+  //wire      wr_hcm645;
 
   wire      wr_seq_trigen;
   wire      wr_seq_trigdly0;
@@ -2835,24 +3103,45 @@
 
   wire      wr_virtex6_snap12_qpll;
   wire      wr_virtex6_gtx_rx_all;
-  wire [6:0]    wr_virtex6_gtx_rx;
+  wire [MXCFEB-1:0]    wr_virtex6_gtx_rx;
   wire      wr_virtex6_sysmon;
   wire      wr_virtex6_extend;
+  //CCLUT
+  wire      wr_run3_format_ctrl;
+  wire      wr_hmt_ctrl;
+  wire      wr_hmt_thresh1;
+  wire      wr_hmt_thresh2;
+  wire      wr_hmt_thresh3;
   wire      wr_adr_cap;
   
        // Virtex-6 GTX error counters
-       wire    [7:0]           gtx_rx_err_count [MXCFEB-1:0];    // JRG In:    Error count on each fiber channel
-         assign        gtx_rx_err_count[0][7:0] = gtx_rx_err_count0[7:0];      //      Error count on this fiber channel
-         assign        gtx_rx_err_count[1][7:0] = gtx_rx_err_count1[7:0];      //      Error count on this fiber channel
-         assign        gtx_rx_err_count[2][7:0] = gtx_rx_err_count2[7:0];      //      Error count on this fiber channel
-         assign        gtx_rx_err_count[3][7:0] = gtx_rx_err_count3[7:0];      //      Error count on this fiber channel
-         assign        gtx_rx_err_count[4][7:0] = gtx_rx_err_count4[7:0];      //      Error count on this fiber channel
-         assign        gtx_rx_err_count[5][7:0] = gtx_rx_err_count5[7:0];      //      Error count on this fiber channel
-         assign        gtx_rx_err_count[6][7:0] = gtx_rx_err_count6[7:0];      //      Error count on this fiber channel
-       wire    [11:0]          gtx_rx_err_count_all; // R      JRG: create a sum of all GTX error counts
+  wire    [7:0]           gtx_rx_err_count [MXCFEB-1:0];    // JRG In:    Error count on each fiber channel
+  assign        gtx_rx_err_count[0][7:0] = gtx_rx_err_count0[7:0];      //      Error count on this fiber channel
+  assign        gtx_rx_err_count[1][7:0] = gtx_rx_err_count1[7:0];      //      Error count on this fiber channel
+  assign        gtx_rx_err_count[2][7:0] = gtx_rx_err_count2[7:0];      //      Error count on this fiber channel
+  assign        gtx_rx_err_count[3][7:0] = gtx_rx_err_count3[7:0];      //      Error count on this fiber channel
+  assign        gtx_rx_err_count[4][7:0] = gtx_rx_err_count4[7:0];      //      Error count on this fiber channel
+  //assign        gtx_rx_err_count[5][7:0] = gtx_rx_err_count5[7:0];      //      Error count on this fiber channel
+  //assign        gtx_rx_err_count[6][7:0] = gtx_rx_err_count6[7:0];      //      Error count on this fiber channel
+  wire    [11:0]          gtx_rx_err_count_all; // R      JRG: create a sum of all GTX error counts
 
+  // Virtex-6 GTX error counters: disperr/notintable
+  wire [15:0] gtx_rx_notintable_count [MXCFEB-1:0];    // JRG In:    Error count on each fiber channel
+  wire [15:0] gtx_rx_disperr_count [MXCFEB-1:0];    // JRG In:    Error count on each fiber channel
+
+  assign gtx_rx_notintable_count[0][15:0] = gtx_rx_notintable_count0[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_notintable_count[1][15:0] = gtx_rx_notintable_count1[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_notintable_count[2][15:0] = gtx_rx_notintable_count2[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_notintable_count[3][15:0] = gtx_rx_notintable_count3[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_notintable_count[4][15:0] = gtx_rx_notintable_count4[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_disperr_count[0][15:0]    = gtx_rx_disperr_count0[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_disperr_count[1][15:0]    = gtx_rx_disperr_count1[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_disperr_count[2][15:0]    = gtx_rx_disperr_count2[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_disperr_count[3][15:0]    = gtx_rx_disperr_count3[15:0];      //      Error count on this fiber channel
+  assign gtx_rx_disperr_count[4][15:0]    = gtx_rx_disperr_count4[15:0];      //      Error count on this fiber channel
 
   wire wr_mpc_frames_fifo_ctrl;
+  wire wr_algo2016_ctrl;
   
 //---------------------------------------------------------------------------------------------------------------------
 //  Power-up Section
@@ -2953,7 +3242,7 @@
   assign comp_phaser3_done =  ( (!dps_busy[3]) && ldps_busy[3] && dps_lock[3]  );  // use to time the first comp dps phaser3 cycle
   assign gtx_rst_done = &gtx_rx_rst_done;
 
-  assign comp_phaser_a_ready =   comp_phaser2_done_r;    // permanently set after first comp dps phaser lock cycle  is complete
+  //assign comp_phaser_a_ready =   comp_phaser2_done_r;    // permanently set after first comp dps phaser lock cycle  is complete
   assign comp_phaser_b_ready =   comp_phaser3_done_r;    // permanently set after first comp dps phaser lock cycle  is complete
   assign auto_gtx_reset = gtx_sync_too_long;  // gtx did not sync after hard reset, so force a gtx reset
 
@@ -3118,7 +3407,11 @@
   wire [23:0] vsm_adr;
   wire        vsm_oe;
 
+`ifndef DEBUG_OTMB_FIRMWARE
   wire [8:0]  reg_adr = (vsm_oe) ? vsm_adr[8:0] : {a_vme[8:1],1'b0};  // Pad A0, multplex vme backplane with vmesm prom data
+`else
+  wire [8:0]  reg_adr = (vsm_oe) ? vsm_adr[8:0] : {1'b0,a_vme[8:1]};  // Pad A0, multplex vme backplane with vmesm prom data
+`endif
 
   always @* begin
   case (reg_adr)
@@ -3227,7 +3520,9 @@
   ADR_GTX_SYNC_DONE_TIME:    data_out  <= gtx_sync_done_time_rd;    // Adr 192
   
   ADR_TMB_LATENCY_SR: data_out  <= tmb_latency_sr_rd; // Adr 196
-
+  
+  ADR_ALGO2016_CTRL: data_out <= algo2016_ctrl_rd; // Adr 198
+  
   ADR_MPC_INJ:      data_out  <= mpc_inj_rd;
   ADR_MPC_RAM_ADR:    data_out  <= mpc_ram_adr_rd;  
   ADR_MPC_RAM_WDATA:    data_out  <= mpc_ram_wdata_rd;
@@ -3236,19 +3531,19 @@
   ADR_SCP_CTRL:      data_out  <= scp_ctrl_rd;
   ADR_SCP_RDATA:      data_out  <= scp_rdata_rd;
                  
-  ADR_CCB_CMD:      data_out  <= ccb_cmd_rd;
-  ADR_BUF_STAT0:      data_out  <= buf_stat0_rd;
-  ADR_BUF_STAT1:      data_out  <= buf_stat1_rd;
-  ADR_BUF_STAT2:      data_out  <= buf_stat2_rd;
-  ADR_BUF_STAT3:      data_out  <= buf_stat3_rd;
-  ADR_BUF_STAT4:      data_out  <= buf_stat4_rd;
-  ADR_ALCTFIFO1:      data_out  <= alct_fifo1_rd;
-  ADR_ALCTFIFO2:      data_out  <= alct_fifo2_rd;
-  ADR_SEQMOD:      data_out  <= seq_trigmod_rd;
-  ADR_SEQSM:      data_out  <= seq_smstat_rd;
-  ADR_SEQCLCTM:      data_out  <= seq_clctmsb_rd;
-  ADR_TMBTIM:      data_out  <= tmb_timing_rd;
-  ADR_LHC_CYCLE:      data_out  <= lhc_cycle_rd;
+  ADR_CCB_CMD:   data_out  <= ccb_cmd_rd;
+  ADR_BUF_STAT0: data_out  <= buf_stat0_rd;
+  ADR_BUF_STAT1: data_out  <= buf_stat1_rd;
+  ADR_BUF_STAT2: data_out  <= buf_stat2_rd;
+  ADR_BUF_STAT3: data_out  <= buf_stat3_rd;
+  ADR_BUF_STAT4: data_out  <= buf_stat4_rd;
+  ADR_ALCTFIFO1: data_out  <= alct_fifo1_rd;
+  ADR_ALCTFIFO2: data_out  <= alct_fifo2_rd;
+  ADR_SEQMOD:    data_out  <= seq_trigmod_rd;
+  ADR_SEQSM:     data_out  <= seq_smstat_rd;
+  ADR_SEQCLCTM:  data_out  <= seq_clctmsb_rd;
+  ADR_TMBTIM:    data_out  <= tmb_timing_rd;
+  ADR_LHC_CYCLE: data_out  <= lhc_cycle_rd;
                  
   ADR_RPC_CFG:      data_out  <= rpc_cfg_rd;
   ADR_RPC_RDATA:      data_out  <= rpc_rdata_rd;
@@ -3354,31 +3649,61 @@
   ADR_V6_GTX_RX2:      data_out  <= virtex6_gtx_rx_rd[2];
   ADR_V6_GTX_RX3:      data_out  <= virtex6_gtx_rx_rd[3];
   ADR_V6_GTX_RX4:      data_out  <= virtex6_gtx_rx_rd[4];
-  ADR_V6_GTX_RX5:      data_out  <= virtex6_gtx_rx_rd[5];
-  ADR_V6_GTX_RX6:      data_out  <= virtex6_gtx_rx_rd[6];
+  //Tao, ME1/1->MEX/1, the following two could be ignored for ME234
+  //ADR_V6_GTX_RX5:      data_out  <= virtex6_gtx_rx_rd[5];
+  //ADR_V6_GTX_RX6:      data_out  <= virtex6_gtx_rx_rd[6];
+  ADR_V6_GTX0_NOTINTABLE:    data_out <= virtex6_gtx_rx_notintable_rd[0];
+  ADR_V6_GTX1_NOTINTABLE:    data_out <= virtex6_gtx_rx_notintable_rd[1];
+  ADR_V6_GTX2_NOTINTABLE:    data_out <= virtex6_gtx_rx_notintable_rd[2];
+  ADR_V6_GTX3_NOTINTABLE:    data_out <= virtex6_gtx_rx_notintable_rd[3];
+  ADR_V6_GTX4_NOTINTABLE:    data_out <= virtex6_gtx_rx_notintable_rd[4];
+  ADR_V6_GTX0_DISPERR:       data_out <= virtex6_gtx_rx_disperr_rd[0];
+  ADR_V6_GTX1_DISPERR:       data_out <= virtex6_gtx_rx_disperr_rd[1];
+  ADR_V6_GTX2_DISPERR:       data_out <= virtex6_gtx_rx_disperr_rd[2];
+  ADR_V6_GTX3_DISPERR:       data_out <= virtex6_gtx_rx_disperr_rd[3];
+  ADR_V6_GTX4_DISPERR:       data_out <= virtex6_gtx_rx_disperr_rd[4];
 
   ADR_V6_SYSMON:      data_out  <=  virtex6_sysmon_rd;
 
-  ADR_V6_CFEB_BADBITS_CTRL:  data_out  <=  cfeb_v6_badbits_ctrl_rd;
-  ADR_V6_CFEB5_BADBITS_LY01:  data_out  <= cfeb5_badbits_ly01_rd;
-  ADR_V6_CFEB5_BADBITS_LY23:  data_out  <= cfeb5_badbits_ly23_rd;
-  ADR_V6_CFEB5_BADBITS_LY45:  data_out  <= cfeb5_badbits_ly45_rd;
+  //Tao, ME1/1->MEX/1, the following two could be ignored for ME234
+  //ADR_V6_CFEB_BADBITS_CTRL:  data_out  <=  cfeb_v6_badbits_ctrl_rd;
+  //ADR_V6_CFEB5_BADBITS_LY01:  data_out  <= cfeb5_badbits_ly01_rd;
+  //ADR_V6_CFEB5_BADBITS_LY23:  data_out  <= cfeb5_badbits_ly23_rd;
+  //ADR_V6_CFEB5_BADBITS_LY45:  data_out  <= cfeb5_badbits_ly45_rd;
 
-  ADR_V6_CFEB6_BADBITS_LY01:  data_out  <= cfeb6_badbits_ly01_rd;
-  ADR_V6_CFEB6_BADBITS_LY23:  data_out  <= cfeb6_badbits_ly23_rd;
-  ADR_V6_CFEB6_BADBITS_LY45:  data_out  <= cfeb6_badbits_ly45_rd;
+  //ADR_V6_CFEB6_BADBITS_LY01:  data_out  <= cfeb6_badbits_ly01_rd;
+  //ADR_V6_CFEB6_BADBITS_LY23:  data_out  <= cfeb6_badbits_ly23_rd;
+  //ADR_V6_CFEB6_BADBITS_LY45:  data_out  <= cfeb6_badbits_ly45_rd;
 
   ADR_V6_PHASER7:      data_out  <= phaser7_rd;
   ADR_V6_PHASER8:      data_out  <= phaser8_rd;
 
-  ADR_V6_HCM501:      data_out  <= hcm501_rd;
-  ADR_V6_HCM523:      data_out  <= hcm523_rd;
-  ADR_V6_HCM545:      data_out  <= hcm545_rd;
-  ADR_V6_HCM601:      data_out  <= hcm601_rd;
-  ADR_V6_HCM623:      data_out  <= hcm623_rd;
-  ADR_V6_HCM645:      data_out  <= hcm645_rd;
+  //Tao, 7DCFEB->5DCFEB
+  //ADR_V6_HCM501:      data_out  <= hcm501_rd;
+  //ADR_V6_HCM523:      data_out  <= hcm523_rd;
+  //ADR_V6_HCM545:      data_out  <= hcm545_rd;
+  //ADR_V6_HCM601:      data_out  <= hcm601_rd;
+  //ADR_V6_HCM623:      data_out  <= hcm623_rd;
+  //ADR_V6_HCM645:      data_out  <= hcm645_rd;
 
   ADR_V6_EXTEND:      data_out  <= virtex6_extend_rd;
+
+  //CCLUT, Tao
+  ADR_CLCT0_CC:              data_out <= clct0_cc_rd;
+  ADR_CLCT1_CC:              data_out <= clct1_cc_rd;
+  ADR_CLCT0_BNDXKY:          data_out <= clct0_bndxky_rd;  // new bending
+  ADR_CLCT1_BNDXKY:          data_out <= clct1_bndxky_rd; 
+  //ADR_CLCT0_XKY:             data_out <= clct0_xky_rd; // new position with 1/8 strip precision
+  //ADR_CLCT1_XKY:             data_out <= clct1_xky_rd; 
+
+  ADR_RUN3_FORMAT_CTRL:      data_out <= run3_format_ctrl_rd;
+  ADR_HMT_CTRL:              data_out <= hmt_ctrl_rd;
+  ADR_HMT_THRESH1:           data_out <= hmt_thresh1_rd;
+  ADR_HMT_THRESH2:           data_out <= hmt_thresh2_rd;
+  ADR_HMT_THRESH3:           data_out <= hmt_thresh3_rd;
+
+  ADR_HMT_NHITS_SIG:         data_out <= hmt_nhits_sig_rd;
+  ADR_HMT_NHITS_BKG:         data_out <= hmt_nhits_bkg_rd;
 
   ADR_ODMB:      data_out  <= odmb_data;
 
@@ -3432,12 +3757,13 @@
   assign wr_hcm401    = (reg_adr==ADR_HCM401      && clk_en);
   assign wr_hcm423    = (reg_adr==ADR_HCM423      && clk_en);
   assign wr_hcm445    = (reg_adr==ADR_HCM445      && clk_en);
-  assign wr_hcm501    = (reg_adr==ADR_V6_HCM501   && clk_en);
-  assign wr_hcm523    = (reg_adr==ADR_V6_HCM523   && clk_en);
-  assign wr_hcm545    = (reg_adr==ADR_V6_HCM545   && clk_en);
-  assign wr_hcm601    = (reg_adr==ADR_V6_HCM601   && clk_en);
-  assign wr_hcm623    = (reg_adr==ADR_V6_HCM623   && clk_en);
-  assign wr_hcm645    = (reg_adr==ADR_V6_HCM645   && clk_en);
+  //Tao, 7DCFEB->5DCFEB
+  //assign wr_hcm501    = (reg_adr==ADR_V6_HCM501   && clk_en);
+  //assign wr_hcm523    = (reg_adr==ADR_V6_HCM523   && clk_en);
+  //assign wr_hcm545    = (reg_adr==ADR_V6_HCM545   && clk_en);
+  //assign wr_hcm601    = (reg_adr==ADR_V6_HCM601   && clk_en);
+  //assign wr_hcm623    = (reg_adr==ADR_V6_HCM623   && clk_en);
+  //assign wr_hcm645    = (reg_adr==ADR_V6_HCM645   && clk_en);
 
   assign wr_seq_trigen   = (reg_adr==ADR_SEQ_TRIG_EN   && clk_en);
   assign wr_seq_trigdly0 = (reg_adr==ADR_SEQ_TRIG_DLY0 && clk_en);
@@ -3455,15 +3781,15 @@
   assign wr_mpc_inj       = (reg_adr==ADR_MPC_INJ       && clk_en);
   assign wr_mpc_ram_adr   = (reg_adr==ADR_MPC_RAM_ADR   && clk_en);
   assign wr_mpc_ram_wdata = (reg_adr==ADR_MPC_RAM_WDATA && clk_en);
-
+  
   assign wr_scp_ctrl  = (reg_adr==ADR_SCP_CTRL  && clk_en);
   assign wr_scp_rdata = (reg_adr==ADR_SCP_RDATA && clk_en);
 
-  assign wr_ccb_cmd    = (reg_adr==ADR_CCB_CMD      && clk_en);
-  assign wr_alct_fifo1    = (reg_adr==ADR_ALCTFIFO1    && clk_en);
-  assign wr_seq_trigmod    = (reg_adr==ADR_SEQMOD      && clk_en);
-  assign wr_tmb_timing    = (reg_adr==ADR_TMBTIM      && clk_en);
-  assign wr_lhc_cycle    = (reg_adr==ADR_LHC_CYCLE    && clk_en);
+  assign wr_ccb_cmd     = (reg_adr==ADR_CCB_CMD   && clk_en);
+  assign wr_alct_fifo1  = (reg_adr==ADR_ALCTFIFO1 && clk_en);
+  assign wr_seq_trigmod = (reg_adr==ADR_SEQMOD    && clk_en);
+  assign wr_tmb_timing  = (reg_adr==ADR_TMBTIM    && clk_en);
+  assign wr_lhc_cycle   = (reg_adr==ADR_LHC_CYCLE && clk_en);
 
   assign wr_rpc_cfg    = (reg_adr==ADR_RPC_CFG      && clk_en);
   assign wr_rpc_raw_delay    = (reg_adr==ADR_RPC_RAW_DELAY    && clk_en);
@@ -3529,14 +3855,23 @@
   assign wr_virtex6_gtx_rx[2]  = (reg_adr==ADR_V6_GTX_RX2    && clk_en);
   assign wr_virtex6_gtx_rx[3]  = (reg_adr==ADR_V6_GTX_RX3    && clk_en);
   assign wr_virtex6_gtx_rx[4]  = (reg_adr==ADR_V6_GTX_RX4    && clk_en);
-  assign wr_virtex6_gtx_rx[5]  = (reg_adr==ADR_V6_GTX_RX5    && clk_en);
-  assign wr_virtex6_gtx_rx[6]  = (reg_adr==ADR_V6_GTX_RX6    && clk_en);
+
+  assign wr_run3_format_ctrl      =  (reg_adr==ADR_RUN3_FORMAT_CTRL       && clk_en);
+  assign wr_hmt_ctrl              =  (reg_adr==ADR_HMT_CTRL               && clk_en);
+  assign wr_hmt_thresh1           =  (reg_adr==ADR_HMT_THRESH1            && clk_en);
+  assign wr_hmt_thresh2           =  (reg_adr==ADR_HMT_THRESH2            && clk_en);
+  assign wr_hmt_thresh3           =  (reg_adr==ADR_HMT_THRESH3            && clk_en);
+  //Tao, ME1/1->MEX/1, the following two could be ignored for ME234
+  //assign wr_virtex6_gtx_rx[5]  = (reg_adr==ADR_V6_GTX_RX5    && clk_en);
+  //assign wr_virtex6_gtx_rx[6]  = (reg_adr==ADR_V6_GTX_RX6    && clk_en);
   assign wr_virtex6_sysmon  = (reg_adr==ADR_V6_SYSMON    && clk_en);
 
   assign wr_virtex6_extend  = (reg_adr==ADR_V6_EXTEND    && clk_en);
   assign wr_adr_cap    = (adr_cap);
   
-  assign wr_mpc_frames_fifo_ctrl = (reg_adr==  ADR_MPC_FRAMES_FIFO_CTRL && clk_en);
+  assign wr_mpc_frames_fifo_ctrl = (reg_adr==ADR_MPC_FRAMES_FIFO_CTRL && clk_en);
+  
+  assign wr_algo2016_ctrl = (reg_adr==ADR_ALGO2016_CTRL && clk_en);
   
 //------------------------------------------------------------------------------------------------------------------
 // VME Bidirectional Data Bus
@@ -3679,13 +4014,32 @@
 //------------------------------------------------------------------------------------------------------------------
 // Construct firmware revcode from global define, truncate for DMB frame
   wire [15:0]  revcode_vme;
+  wire [15:0]  revcode_vme_new;
   wire [15:0]  version_slot;
 
   assign revcode_vme[8:0]    = (MONTHDAY[15:12]*10 + MONTHDAY[11:8])*32+ (MONTHDAY[7:4]*10 + MONTHDAY[3:0]);
   assign revcode_vme[12:9]  = YEAR[3:0]+4'hA;    // Need to reformat this in year 2018
   assign revcode_vme[15:13]  = FPGAID[15:13];    // Virtex 2,4,6 etc
 
-  assign revcode[14:0]    = revcode_vme[14:0];  // Sequencer format is 15 bits, VME is 16
+  //Tao, 2020 definition
+  assign revcode_vme_new [04:00] = VERSION_MINOR;// 6 bits = Minor version  (minor features, internal fixes, bug fixes, etc).
+  assign revcode_vme_new [08:05] = (run3_daq_df) ? VERSION_MAJOR : VERSION_MAJOR+1'b1;//5 bits = Major Version (major features which breaks compatibility, requires      changes to other board firmware)
+  //[12:09], 4bits for DAQ format
+  //0, old TMB
+  //1, Run2 OTMB
+  //2, Run3 OTMB with CCLUT and without GEM
+  //3, Run3 OTMB with CCLUT and GEM
+  assign revcode_vme_new [12:09] = VERSION_FORMAT;
+  assign revcode_vme_new [15:13] = 3'd0;
+
+  //CCLUT algorithm
+  wire run2_revcode_enable = run2_revcode && !run3_daq_df;//switch to Run2 legacy revision code 
+  wire [15:0] run2_legacy_revcode;//2016.03.16
+  assign run2_legacy_revcode[8:0]    = 8'd112;//3*32 + 16
+  assign run2_legacy_revcode[12:9]   = 4'h6 + 4'hA;   
+  assign run2_legacy_revcode[15:13]  = FPGAID[15:13];  
+  assign revcode[14:0]    = run2_revcode_enable ? run2_legacy_revcode[14:0] : ((ccLUT_enable) ? revcode_vme_new[14:0] : revcode_vme[14:0]);  // Sequencer format is 15 bits, VME is 16
+  //assign revcode[14:0]    = revcode_vme_new[14:0];  // Sequencer format is 15 bits, VME is 16
 
 // VME ID Registers, Readonly
   assign version_slot[ 3: 0]  = FIRMWARE_TYPE[3:0];  // Firmware type, C=Normal TMB, D=Debug loopback
@@ -3696,7 +4050,8 @@
   assign id_reg0_rd = version_slot[15:0];
   assign id_reg1_rd = MONTHDAY[15:0];
   assign id_reg2_rd = YEAR[15:0];
-  assign id_reg3_rd = revcode_vme[15:0];
+  //assign id_reg3_rd = revcode_vme[15:0];
+  assign id_reg3_rd = {1'b0, revcode[14:0]};
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_VME_STATUS=08  VME Bus Status Register, Readonly
@@ -4430,6 +4785,7 @@
   assign step_rpc             = step_wr[2];
   assign step_cfeb           = step_wr[3];
   assign step_run             = step_wr[4];
+  //Tao, question, why ME11 do not actively enable clock for DCFEB5&6???
   assign cfeb_clock_en[4:0]    = step_wr[9:5];
   assign alct_clock_en         = step_wr[10];
   assign _hard_reset_alct_fpga = step_wr[11];
@@ -4665,7 +5021,7 @@
   assign global_reset_en    = mod_cfg_wr[12];  // RW  Enable global reset on lock_lost.  JG: used to be ON by default
 
   assign mod_cfg_rd[4:0]    = mod_cfg_wr[4:0];  // RW  Readback
-  assign mod_cfg_rd[11:5]    = cfeb_exists[6:0];  // R  CFEBs instantiated in this firmware
+  assign mod_cfg_rd[5+MXCFEB-1:5]    = cfeb_exists[MXCFEB-1:0];  // R  CFEBs instantiated in this firmware
   assign mod_cfg_rd[12]    = mod_cfg_wr[12];  // RW  Readback
   assign mod_cfg_rd[13]    = power_up;    // R  Power-up FF
   assign mod_cfg_rd[14]    = ddd_autostart;  // R  DDD autostart
@@ -4930,6 +5286,7 @@
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_CFEB_INJ = 0x42    CFEB Injector Control Register
+// extension for DCFEB5&6 :  0x17A 
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
@@ -5039,19 +5396,20 @@
   parameter DEF_CFEB4_LY4_HCM    =  8'b11111111;  // 1=Enable DiStrip
   parameter DEF_CFEB4_LY5_HCM    =  8'b11111111;  // 1=Enable DiStrip
 
-  parameter DEF_CFEB5_LY0_HCM    =  8'b11111111;  // 1=Enable DiStrip
-  parameter DEF_CFEB5_LY1_HCM    =  8'b11111111;  // 1=Enable DiStrip
-  parameter DEF_CFEB5_LY2_HCM    =  8'b11111111;  // 1=Enable DiStrip
-  parameter DEF_CFEB5_LY3_HCM    =  8'b11111111;  // 1=Enable DiStrip
-  parameter DEF_CFEB5_LY4_HCM    =  8'b11111111;  // 1=Enable DiStrip
-  parameter DEF_CFEB5_LY5_HCM    =  8'b11111111;  // 1=Enable DiStrip
+  //Tao, 7DCFEB->5DCFEB
+  //parameter DEF_CFEB5_LY0_HCM    =  8'b11111111;  // 1=Enable DiStrip
+  //parameter DEF_CFEB5_LY1_HCM    =  8'b11111111;  // 1=Enable DiStrip
+  //parameter DEF_CFEB5_LY2_HCM    =  8'b11111111;  // 1=Enable DiStrip
+  //parameter DEF_CFEB5_LY3_HCM    =  8'b11111111;  // 1=Enable DiStrip
+  //parameter DEF_CFEB5_LY4_HCM    =  8'b11111111;  // 1=Enable DiStrip
+  //parameter DEF_CFEB5_LY5_HCM    =  8'b11111111;  // 1=Enable DiStrip
 
-  parameter DEF_CFEB6_LY0_HCM    =  8'b11111111;  // 1=Enable DiStrip
-  parameter DEF_CFEB6_LY1_HCM    =  8'b11111111;  // 1=Enable DiStrip
-  parameter DEF_CFEB6_LY2_HCM    =  8'b11111111;  // 1=Enable DiStrip
-  parameter DEF_CFEB6_LY3_HCM    =  8'b11111111;  // 1=Enable DiStrip
-  parameter DEF_CFEB6_LY4_HCM    =  8'b11111111;  // 1=Enable DiStrip
-  parameter DEF_CFEB6_LY5_HCM    =  8'b11111111;  // 1=Enable DiStrip
+  //parameter DEF_CFEB6_LY0_HCM    =  8'b11111111;  // 1=Enable DiStrip
+  //parameter DEF_CFEB6_LY1_HCM    =  8'b11111111;  // 1=Enable DiStrip
+  //parameter DEF_CFEB6_LY2_HCM    =  8'b11111111;  // 1=Enable DiStrip
+  //parameter DEF_CFEB6_LY3_HCM    =  8'b11111111;  // 1=Enable DiStrip
+  //parameter DEF_CFEB6_LY4_HCM    =  8'b11111111;  // 1=Enable DiStrip
+  //parameter DEF_CFEB6_LY5_HCM    =  8'b11111111;  // 1=Enable DiStrip
 
 // CFEB Hot Channel Mask defaults, packed
   initial begin
@@ -5075,13 +5433,14 @@
   hcm423_wr[15:0] = {DEF_CFEB4_LY3_HCM,DEF_CFEB4_LY2_HCM};
   hcm445_wr[15:0] = {DEF_CFEB4_LY5_HCM,DEF_CFEB4_LY4_HCM};
 
-  hcm501_wr[15:0] = {DEF_CFEB5_LY1_HCM,DEF_CFEB5_LY0_HCM};
-  hcm523_wr[15:0] = {DEF_CFEB5_LY3_HCM,DEF_CFEB5_LY2_HCM};
-  hcm545_wr[15:0] = {DEF_CFEB5_LY5_HCM,DEF_CFEB5_LY4_HCM};
+  //Tao, 7DCFEB->5DCFEB
+  //hcm501_wr[15:0] = {DEF_CFEB5_LY1_HCM,DEF_CFEB5_LY0_HCM};
+  //hcm523_wr[15:0] = {DEF_CFEB5_LY3_HCM,DEF_CFEB5_LY2_HCM};
+  //hcm545_wr[15:0] = {DEF_CFEB5_LY5_HCM,DEF_CFEB5_LY4_HCM};
 
-  hcm601_wr[15:0] = {DEF_CFEB6_LY1_HCM,DEF_CFEB6_LY0_HCM};
-  hcm623_wr[15:0] = {DEF_CFEB6_LY3_HCM,DEF_CFEB6_LY2_HCM};
-  hcm645_wr[15:0] = {DEF_CFEB6_LY5_HCM,DEF_CFEB6_LY4_HCM};
+  //hcm601_wr[15:0] = {DEF_CFEB6_LY1_HCM,DEF_CFEB6_LY0_HCM};
+  //hcm623_wr[15:0] = {DEF_CFEB6_LY3_HCM,DEF_CFEB6_LY2_HCM};
+  //hcm645_wr[15:0] = {DEF_CFEB6_LY5_HCM,DEF_CFEB6_LY4_HCM};
   end
 
   assign cfeb0_ly0_hcm = hcm001_wr[ 7:0];    // Mask map 2 layers to 1 register
@@ -5119,19 +5478,20 @@
   assign cfeb4_ly4_hcm = hcm445_wr[ 7:0];
   assign cfeb4_ly5_hcm = hcm445_wr[15:8];
 
-  assign cfeb5_ly0_hcm = hcm501_wr[ 7:0];
-  assign cfeb5_ly1_hcm = hcm501_wr[15:8];
-  assign cfeb5_ly2_hcm = hcm523_wr[ 7:0];
-  assign cfeb5_ly3_hcm = hcm523_wr[15:8];
-  assign cfeb5_ly4_hcm = hcm545_wr[ 7:0];
-  assign cfeb5_ly5_hcm = hcm545_wr[15:8];
+  //Tao, 7DCFEB->5DCFEB
+  //assign cfeb5_ly0_hcm = hcm501_wr[ 7:0];
+  //assign cfeb5_ly1_hcm = hcm501_wr[15:8];
+  //assign cfeb5_ly2_hcm = hcm523_wr[ 7:0];
+  //assign cfeb5_ly3_hcm = hcm523_wr[15:8];
+  //assign cfeb5_ly4_hcm = hcm545_wr[ 7:0];
+  //assign cfeb5_ly5_hcm = hcm545_wr[15:8];
 
-  assign cfeb6_ly0_hcm = hcm601_wr[ 7:0];
-  assign cfeb6_ly1_hcm = hcm601_wr[15:8];
-  assign cfeb6_ly2_hcm = hcm623_wr[ 7:0];
-  assign cfeb6_ly3_hcm = hcm623_wr[15:8];
-  assign cfeb6_ly4_hcm = hcm645_wr[ 7:0];
-  assign cfeb6_ly5_hcm = hcm645_wr[15:8];
+  //assign cfeb6_ly0_hcm = hcm601_wr[ 7:0];
+  //assign cfeb6_ly1_hcm = hcm601_wr[15:8];
+  //assign cfeb6_ly2_hcm = hcm623_wr[ 7:0];
+  //assign cfeb6_ly3_hcm = hcm623_wr[15:8];
+  //assign cfeb6_ly4_hcm = hcm645_wr[ 7:0];
+  //assign cfeb6_ly5_hcm = hcm645_wr[15:8];
 
   assign  hcm001_rd[15:0] = hcm001_wr[15:0];  // Readback
   assign  hcm023_rd[15:0] = hcm023_wr[15:0];
@@ -5153,13 +5513,14 @@
   assign  hcm423_rd[15:0] = hcm423_wr[15:0];
   assign  hcm445_rd[15:0] = hcm445_wr[15:0];
 
-  assign  hcm501_rd[15:0] = hcm501_wr[15:0];
-  assign  hcm523_rd[15:0] = hcm523_wr[15:0];
-  assign  hcm545_rd[15:0] = hcm545_wr[15:0];
+  //Tao, 7DCFEB->5DCFEB
+  //assign  hcm501_rd[15:0] = hcm501_wr[15:0];
+  //assign  hcm523_rd[15:0] = hcm523_wr[15:0];
+  //assign  hcm545_rd[15:0] = hcm545_wr[15:0];
 
-  assign  hcm601_rd[15:0] = hcm601_wr[15:0];
-  assign  hcm623_rd[15:0] = hcm623_wr[15:0];
-  assign  hcm645_rd[15:0] = hcm645_wr[15:0];
+  //assign  hcm601_rd[15:0] = hcm601_wr[15:0];
+  //assign  hcm623_rd[15:0] = hcm623_wr[15:0];
+  //assign  hcm645_rd[15:0] = hcm645_wr[15:0];
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_SEQ_TRIG_EN = 0x68    Sequencer External Trigger Enables Register
@@ -5286,21 +5647,21 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  seq_clct_wr[3:0]        = 4'd6;            // Triad output persistence, a 6 gives 6 clock-wide output
-  seq_clct_wr[6:4]        = 3'd4;            // Hits on pattern template pre-trigger threshold
-  seq_clct_wr[9:7]        = 3'd4;            // dmb_thresh_pretrig[2:0]=hit_thresh_pretrig default
-  seq_clct_wr[12:10]        = 3'd4;            // Minimum post-drift pattern hits for a valid pattern
-  seq_clct_wr[14:13]        = 2'd2;            // CSC Drift delay clocks
-  seq_clct_wr[15]          = 1'b0;            // Pretrigger and halt until unhalt arrives
+  seq_clct_wr[3:0]   = 4'd6; // Triad output persistence, a 6 gives 6 clock-wide output
+  seq_clct_wr[6:4]   = 3'd4; // Hits on pattern template pre-trigger threshold
+  seq_clct_wr[9:7]   = 3'd4; // dmb_thresh_pretrig[2:0]=hit_thresh_pretrig default
+  seq_clct_wr[12:10] = 3'd4; // Minimum post-drift pattern hits for a valid pattern
+  seq_clct_wr[14:13] = 2'd2; // CSC Drift delay clocks
+  seq_clct_wr[15]    = 1'b0; // Pretrigger and halt until unhalt arrives
   end
 
-  assign triad_persist[3:0]    = seq_clct_wr[3:0];      // RW  Triad 1/2-strip persistence
-  assign hit_thresh_pretrig[2:0]  = seq_clct_wr[6:4];      // RW  Hits on pattern template pre-trigger threshold
-  assign dmb_thresh_pretrig[2:0]  = seq_clct_wr[9:7];      // RW  dmb_thresh_pretrig[2:0]=hit_thresh_pretrig default
-  assign hit_thresh_postdrift[2:0]= seq_clct_wr[12:10];    // RW  Minimum post-drift pattern hits for a valid pattern
-  assign drift_delay[1:0]      = seq_clct_wr[14:13];    // RW  CSC Drift delay clocks
-  assign pretrig_halt        = seq_clct_wr[15];      // RW  Pretrigger and halt until unhalt arrives
-  assign seq_clct_rd[15:0]    = seq_clct_wr[15:0];    //    Readback
+  assign triad_persist[3:0]        = seq_clct_wr[3:0];   // RW  Triad 1/2-strip persistence
+  assign hit_thresh_pretrig[2:0]   = seq_clct_wr[6:4];   // RW  Hits on pattern template pre-trigger threshold
+  assign dmb_thresh_pretrig[2:0]   = seq_clct_wr[9:7];   // RW  dmb_thresh_pretrig[2:0]=hit_thresh_pretrig default
+  assign hit_thresh_postdrift[2:0] = seq_clct_wr[12:10]; // RW  Minimum post-drift pattern hits for a valid pattern
+  assign drift_delay[1:0]          = seq_clct_wr[14:13]; // RW  CSC Drift delay clocks
+  assign pretrig_halt              = seq_clct_wr[15];    // RW  Pretrigger and halt until unhalt arrives
+  assign seq_clct_rd[15:0]         = seq_clct_wr[15:0];  //     Readback
 
 // Clear triad one-shots if persistence is changed
   parameter triad_clr_width = 3;
@@ -5430,30 +5791,30 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  tmb_trig_wr[1:0]        = 2'b11;          // 1=Allow sync_err to MPC for either muon
-  tmb_trig_wr[2]          = 1'b0;            // 1=Allow ALCT only
-  tmb_trig_wr[3]          = 1'b1;            // 1=Allow CLCT only
-  tmb_trig_wr[4]          = 1'b1;            // 1=Allow ALCT+CLCT match
-  tmb_trig_wr[8:5]        = 4'd7;            // Delay for MPC response
-  tmb_trig_wr[12:9]        = 0;            // Readonly
-  tmb_trig_wr[13]          = 1;            // 1=MPC gets ttc_bx0 or 0=bx0_local aka clct_bx0
-  tmb_trig_wr[14]          = 0;            // 1=blank mpc output except on trigger, blocks bx0 to mpc
-  tmb_trig_wr[15]          = 1;            // 1=enable output to mpc, 0 asets mpc driver FFs to 1s
+  tmb_trig_wr[1:0]  = 2'b11; // 1=Allow sync_err to MPC for either muon
+  tmb_trig_wr[2]    = 1'b0;  // 1=Allow ALCT only
+  tmb_trig_wr[3]    = 1'b1;  // 1=Allow CLCT only
+  tmb_trig_wr[4]    = 1'b1;  // 1=Allow ALCT+CLCT match
+  tmb_trig_wr[8:5]  = 4'd7;  // Delay for MPC response
+  tmb_trig_wr[12:9] = 0;     // Readonly
+  tmb_trig_wr[13]   = 1;     // 1=MPC gets ttc_bx0 or 0=bx0_local aka clct_bx0
+  tmb_trig_wr[14]   = 0;     // 1=blank mpc output except on trigger, blocks bx0 to mpc
+  tmb_trig_wr[15]   = 1;     // 1=enable output to mpc, 0 asets mpc driver FFs to 1s
   end
 
-  assign tmb_sync_err_en[1:0]    = tmb_trig_wr[1:0];      // RW  Allow sync_err to MPC for either muon
-  assign tmb_allow_alct      = tmb_trig_wr[2];      // RW  Allow ALCT only 
-  assign tmb_allow_clct      = tmb_trig_wr[3];      // RW  Allow CLCT only
-  assign tmb_allow_match      = tmb_trig_wr[4];      // RW  Allow ALCT+CLCT match
-  assign mpc_rx_delay[3:0]    = tmb_trig_wr[8:5];      // RW  Delay for MPC response
-  assign mpc_sel_ttc_bx0      = tmb_trig_wr[13];      // RW  1=MPC gets ttc_bx0 or 0=bx0_local
-  assign mpc_idle_blank      = tmb_trig_wr[14];      // RW  1=blank mpc output except on trigger, block bx0 too
-  assign mpc_oe          = tmb_trig_wr[15];      // RW  1=MPC output enable, 0=aset outputs to 1s
+  assign tmb_sync_err_en[1:0] = tmb_trig_wr[1:0]; // RW  Allow sync_err to MPC for either muon
+  assign tmb_allow_alct       = tmb_trig_wr[2];   // RW  Allow ALCT only 
+  assign tmb_allow_clct       = tmb_trig_wr[3];   // RW  Allow CLCT only
+  assign tmb_allow_match      = tmb_trig_wr[4];   // RW  Allow ALCT+CLCT match
+  assign mpc_rx_delay[3:0]    = tmb_trig_wr[8:5]; // RW  Delay for MPC response
+  assign mpc_sel_ttc_bx0      = tmb_trig_wr[13];  // RW  1=MPC gets ttc_bx0 or 0=bx0_local
+  assign mpc_idle_blank       = tmb_trig_wr[14];  // RW  1=blank mpc output except on trigger, block bx0 too
+  assign mpc_oe               = tmb_trig_wr[15];  // RW  1=MPC output enable, 0=aset outputs to 1s
 
-  assign tmb_trig_rd[ 8:0]    = tmb_trig_wr[ 8:0];    //    Readback
-  assign tmb_trig_rd[10:9]    = mpc_accept_vme[1:0];    // R  MPC accept response
-  assign tmb_trig_rd[12:11]    = mpc_reserved_vme[1:0];  // R  MPC reserved response
-  assign tmb_trig_rd[15:13]    = tmb_trig_wr[15:13];    //    Readback
+  assign tmb_trig_rd[ 8:0]  = tmb_trig_wr[ 8:0];     //    Readback
+  assign tmb_trig_rd[10:9]  = mpc_accept_vme[1:0];   // R  MPC accept response
+  assign tmb_trig_rd[12:11] = mpc_reserved_vme[1:0]; // R  MPC reserved response
+  assign tmb_trig_rd[15:13] = tmb_trig_wr[15:13];    //    Readback
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_MPC0_FRAME0=88    MPC0 Frame 0 Data sent to MPC, Readonly
@@ -5547,6 +5908,7 @@
   assign mpc_frames_fifo_ctrl_rd[6] = mpc_frames_fifo_ctrl_prog_full;
   assign mpc_frames_fifo_ctrl_rd[7] = mpc_frames_fifo_ctrl_sbiterr;
   assign mpc_frames_fifo_ctrl_rd[8] = mpc_frames_fifo_ctrl_dbiterr;
+  assign mpc_frames_fifo_ctrl_rd[15:9] = 7'd0;
   
 //------------------------------------------------------------------------------------------------------------------
 // ADR_MPC_INJ=90    MPC Injector Control Register
@@ -5750,27 +6112,28 @@
   assign seq_smstat_rd[15:12]    = 0;
 
 // Sequencer Register: CLCT MSBs
-  assign seq_clctmsb_rd[2:0]    = clctc_vme[2:0];      // R  Common to CLCT0/1 to TMB
-  assign seq_clctmsb_rd[9:3]    = clctf_vme[6:0];      // R  Active cfeb list at TMB match
-  assign seq_clctmsb_rd[13:10]  = 0;            // R  Unassigned
-  assign seq_clctmsb_rd[14]    = clock_lock_lost_err;    // R  40MHz main clock lost lock FF
-  assign seq_clctmsb_rd[15]    = clct_bx0_sync_err;    // R  Sync error: BXN counter==0 did not match bx0
+  assign seq_clctmsb_rd[2:0]            = clctc_vme[2:0];      // R  Common to CLCT0/1 to TMB
+  assign seq_clctmsb_rd[3+MXCFEB-1:3]   = clctf_vme[MXCFEB-1:0];      // R  Active cfeb list at TMB match
+  assign seq_clctmsb_rd[13:10]          = 0;                   // R  Unassigned
+  assign seq_clctmsb_rd[14]             = clock_lock_lost_err; // R  40MHz main clock lost lock FF
+  assign seq_clctmsb_rd[15]             = clct_bx0_sync_err;   // R  Sync error: BXN counter==0 did not match bx0
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_TMBTIM = 0xB2  TMB ALCT*CLCT Coincidence Timing Register
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  tmb_timing_wr[3:0]        = 4;            // Delay ALCT for CLCT match window 6/22/07
-  tmb_timing_wr[7:4]        = 3;            // CLCT match window width
-  tmb_timing_wr[11:8]        = 4'd0;            // MPC transmit delay
-  tmb_timing_wr[15:12]      = 0;
+  tmb_timing_wr[3:0]   = 4;    // Delay ALCT for CLCT match window 6/22/07
+  tmb_timing_wr[7:4]   = 3;    // CLCT match window width (for CLCT-centric "old" algorithm)
+  tmb_timing_wr[11:8]  = 4'd0; // MPC transmit delay
+  tmb_timing_wr[15:12] = 3;    // CLCT match window width (for ALCT-centric 2016 algorithm)
   end
 
-  assign alct_delay[3:0]      = tmb_timing_wr[3:0];    // RW  Delay ALCT for CLCT match window
-  assign clct_window[3:0]      = tmb_timing_wr[7:4];    // RW  CLCT match window width
-  assign mpc_tx_delay[3:0]    = tmb_timing_wr[11:8];    // RW  MPC transmit delay
-  assign tmb_timing_rd[15:0]    = tmb_timing_wr[15:0];    // RW  Readback
+  assign alct_delay[3:0]      = tmb_timing_wr[3:0];   // RW  Delay ALCT for CLCT match window
+  assign clct_window[3:0]     = tmb_timing_wr[7:4];   // RW  CLCT match window width (for CLCT-centric "old" algorithm)
+  assign mpc_tx_delay[3:0]    = tmb_timing_wr[11:8];  // RW  MPC transmit delay
+  assign algo2016_window[3:0] = tmb_timing_wr[15:12]; // RW  CLCT match window width (for ALCT-centric 2016 algorithm)
+  assign tmb_timing_rd[15:0]  = tmb_timing_wr[15:0];  // RW  Readback
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_LHC_CYCLE = 0xB4    LHC Cycle Counter Maximum BXN Register
@@ -5964,36 +6327,36 @@
 // ADR_NON_TRIG_RO=CC  Non-Triggering Readout Events, ME1A/B reversal
 //------------------------------------------------------------------------------------------------------------------
   initial begin
-  non_trig_ro_wr[0]        = 0;            // RW  tmb_allow_alct_ro  Allow ALCT only  readout, non-triggering
-  non_trig_ro_wr[1]        = 1;            // RW  tmb_allow_clct_ro  Allow CLCT only  readout, non-triggering
-  non_trig_ro_wr[2]        = 1;            // RW  tmb_allow_match_ro  Allow Match only readout, non-triggering
-  non_trig_ro_wr[3]        = 1;            // RW  Block ME1A LCTs from MPC, but still queue for L1A readout
-  non_trig_ro_wr[4]        = 0;            // RW  1=allow clct pretrig counters 6,7 count non me1ab pretrigs
+    non_trig_ro_wr[0]     = 0; // RW  tmb_allow_alct_ro  Allow ALCT only  readout, non-triggering
+    non_trig_ro_wr[1]     = 1; // RW  tmb_allow_clct_ro  Allow CLCT only  readout, non-triggering
+    non_trig_ro_wr[2]     = 1; // RW  tmb_allow_match_ro  Allow Match only readout, non-triggering
+    non_trig_ro_wr[3]     = 1; // RW  Block ME1A LCTs from MPC, but still queue for L1A readout
+    non_trig_ro_wr[4]     = 0; // RW  1=allow clct pretrig counters 6,7 count non me1ab pretrigs
 
-  non_trig_ro_wr[5]        = 0;            // R  1=ME1A or ME1B CSC type
-  non_trig_ro_wr[6]        = 0;            // R  1=Staggered CSC, 0=non-staggered
-  non_trig_ro_wr[7]        = 0;            // R  1=Reverse staggered CSC, non-me1
-  non_trig_ro_wr[8]        = 0;            // R  1=reverse me1a hstrips prior to pattern sorting
-  non_trig_ro_wr[9]        = 0;            // R  1=reverse me1b hstrips prior to pattern sorting
+    non_trig_ro_wr[5]     = 0; // R  1=ME1A or ME1B CSC type
+    non_trig_ro_wr[6]     = 0; // R  1=Staggered CSC, 0=non-staggered
+    non_trig_ro_wr[7]     = 0; // R  1=Reverse staggered CSC, non-me1
+    non_trig_ro_wr[8]     = 0; // R  1=reverse me1a hstrips prior to pattern sorting
+    non_trig_ro_wr[9]     = 0; // R  1=reverse me1b hstrips prior to pattern sorting
 
-  non_trig_ro_wr[11:10]      = 0;            // RW  Free 2
-  non_trig_ro_wr[15:12]      = 0;            // R  Firmware compile type
+    non_trig_ro_wr[11:10] = 0; // RW  Free 2
+    non_trig_ro_wr[15:12] = 0; // R  Firmware compile type
   end
 
-  assign tmb_allow_alct_ro    = non_trig_ro_wr[0];    // RW  Allow ALCT only  readout, non-triggering
-  assign tmb_allow_clct_ro    = non_trig_ro_wr[1];    // RW  Allow CLCT only  readout, non-triggering
-  assign tmb_allow_match_ro    = non_trig_ro_wr[2];    // RW  Allow Match only readout, non-triggering
-  assign mpc_me1a_block      = non_trig_ro_wr[3];    // RW  Block ME1A LCTs from MPC, but still queue for L1A readout
-  assign cnt_non_me1ab_en      = non_trig_ro_wr[4];    // RW  Allow clct pretrig counters count non me1ab
+  assign tmb_allow_alct_ro  = non_trig_ro_wr[0]; // RW  Allow ALCT only  readout, non-triggering
+  assign tmb_allow_clct_ro  = non_trig_ro_wr[1]; // RW  Allow CLCT only  readout, non-triggering
+  assign tmb_allow_match_ro = non_trig_ro_wr[2]; // RW  Allow Match only readout, non-triggering
+  assign mpc_me1a_block     = non_trig_ro_wr[3]; // RW  Block ME1A LCTs from MPC, but still queue for L1A readout
+  assign cnt_non_me1ab_en   = non_trig_ro_wr[4]; // RW  Allow clct pretrig counters count non me1ab
 
-  assign non_trig_ro_rd[4:0]    = non_trig_ro_wr[4:0];    // RW  Readback
-  assign non_trig_ro_rd[5]    = csc_me1ab;        // R  1=ME1A or ME1B CSC type
-  assign non_trig_ro_rd[6]    = stagger_hs_csc;      // R  1=Staggered CSC, 0=non-staggered
-  assign non_trig_ro_rd[7]    = reverse_hs_csc;      // R  1=Reverse staggered CSC, non-me1
-  assign non_trig_ro_rd[8]    = reverse_hs_me1a;      // R  1=reverse me1a hstrips prior to pattern sorting
-  assign non_trig_ro_rd[9]    = reverse_hs_me1b;      // R  1=reverse me1b hstrips prior to pattern sorting
-  assign non_trig_ro_rd[11:10]  = non_trig_ro_wr[11:10];  // RW  Free 2
-  assign non_trig_ro_rd[15:12]  = csc_type[3:0];      // R  Firmware compile type
+  assign non_trig_ro_rd[4:0]   = non_trig_ro_wr[4:0];   // RW  Readback
+  assign non_trig_ro_rd[5]     = csc_me1ab;             // R  1=ME1A or ME1B CSC type
+  assign non_trig_ro_rd[6]     = stagger_hs_csc;        // R  1=Staggered CSC, 0=non-staggered
+  assign non_trig_ro_rd[7]     = reverse_hs_csc;        // R  1=Reverse staggered CSC, non-me1
+  assign non_trig_ro_rd[8]     = reverse_hs_me1a;       // R  1=reverse me1a hstrips prior to pattern sorting
+  assign non_trig_ro_rd[9]     = reverse_hs_me1b;       // R  1=reverse me1b hstrips prior to pattern sorting
+  assign non_trig_ro_rd[11:10] = non_trig_ro_wr[11:10]; // RW  Free 2
+  assign non_trig_ro_rd[15:12] = csc_type[3:0];         // R  Firmware compile type
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_SCP_TRIG=CE  Scope Channel Trigger Source Register
@@ -6028,7 +6391,7 @@
     cnt_ctrl_wr[15]   = 0; // RW  Parity error reset
   end
 
-  wire [6:0] cnt_select;
+  wire [6:0] cnt_select; //MX allow counter is 127
   wire       cnt_snapshot;
   wire       cnt_all_reset_vme;
   wire       cnt_clear_on_resync;
@@ -6056,7 +6419,10 @@
 // ADR_CNT_RDATA=0xD2  Trigger/Readout Counter Data Register                                                          
 //------------------------------------------------------------------------------------------------------------------
 // Remap 1D counters to 2D, because XST does not support 2D ports
-  parameter MXCNT = 93;                     // Number of counters, last counter id is mxcnt-1
+// MAX allowed counter is 127
+  parameter MXHMTCNT = 20;
+  parameter MXNEWCNT = 2;//2 new counters for syncerror
+  parameter MXCNT = 100 + MXHMTCNT + MXNEWCNT;                     // Number of counters, last counter id is mxcnt-1
   reg  [MXCNTVME-1:0] cnt_snap [MXCNT-1:0]; // Event counter snapshot 2D
   wire [MXCNTVME-1:0] cnt      [MXCNT-1:0]; // Event counter 2D map
 
@@ -6169,12 +6535,47 @@
   assign cnt[85]  = active_cfeb2_event_counter;      // CFEB2 active flag sent to DMB
   assign cnt[86]  = active_cfeb3_event_counter;      // CFEB3 active flag sent to DMB
   assign cnt[87]  = active_cfeb4_event_counter;      // CFEB4 active flag sent to DMB
-  assign cnt[88]  = active_cfeb5_event_counter;      // CFEB5 active flag sent to DMB
-  assign cnt[89]  = active_cfeb6_event_counter;      // CFEB6 active flag sent to DMB
-  assign cnt[90]  = active_cfebs_me1a_event_counter; // ME1a CFEB active flag sent to DMB
-  assign cnt[91]  = active_cfebs_me1b_event_counter; // ME1b CFEB active flag sent to DMB
+  //assign cnt[88]  = active_cfeb5_event_counter;      // CFEB5 active flag sent to DMB
+  //assign cnt[89]  = active_cfeb6_event_counter;      // CFEB6 active flag sent to DMB
+  //assign cnt[90]  = active_cfebs_me1a_event_counter; // ME1a CFEB active flag sent to DMB
+  //assign cnt[91]  = active_cfebs_me1b_event_counter; // ME1b CFEB active flag sent to DMB
+  assign cnt[88]  = 0;
+  assign cnt[89]  = 0;
+  assign cnt[90]  = 0;
+  assign cnt[91]  = 0;
   assign cnt[92]  = active_cfebs_event_counter;      // Any CFEB active flag sent to DMB
+  assign cnt[93]  = seq_pretrig_counter;       // consecutive Pre-trigger counter (equential, 1 bx apart)
+  assign cnt[94]  = almostseq_pretrig_counter; // Pre-triggers-2bx-apart counter
+  assign cnt[95]  = bx0_match_counter;    // ALCT-CLCT bx0 match
+
+  assign cnt[96]  = hmt_counter0;
+  assign cnt[97]  = hmt_counter1;
+  assign cnt[98]  = hmt_counter2;
+  assign cnt[99]  = hmt_counter3;
+  assign cnt[100] = hmt_counter4;
+  assign cnt[101] = hmt_counter5;
+  assign cnt[102] = hmt_counter6;
+  assign cnt[103] = hmt_counter7;
+  assign cnt[104] = hmt_counter8;
+  assign cnt[105] = hmt_counter9;
+  assign cnt[106] = hmt_counter10;
+  assign cnt[107] = hmt_counter11;
+  assign cnt[108] = hmt_counter12;
+  assign cnt[109] = hmt_counter13;
+  assign cnt[110] = hmt_counter14;
+  assign cnt[111] = hmt_counter15;
+  assign cnt[112] = hmt_counter16;
+  assign cnt[113] = hmt_counter17;
+  assign cnt[114] = hmt_counter18;
+  assign cnt[115] = hmt_counter19;
   
+  assign cnt[116] = hmt_trigger_counter; 
+  assign cnt[117] = hmt_readout_counter; 
+  assign cnt[118] = hmt_aff_counter;// active cfeb flag from HMT
+  assign cnt[119] = buf_stall_counter;
+
+  assign cnt[120] = new_counter0;
+  assign cnt[121] = new_counter0;//reserved for ME1a for ME11
 // Virtex-6 GTX Optical Receiver Error Counters
 //  assign cnt[81]  = gtx_rx_err_count0;  // Error count on this fiber channel
 //  assign cnt[82]  = gtx_rx_err_count1;
@@ -6268,20 +6669,20 @@
 //------------------------------------------------------------------------------------------------------------------
 // Power-up defaults
   initial begin
-  layer_trig_wr[0]        = 1'b0;          // RW  1=Enable layer trigger mode
-  layer_trig_wr[3:1]        = 3'd4;          // RW  Layer-wide threshold
-  layer_trig_wr[6:4]        = 0;          // R  Number layers hit on layer trigger, readonly
-  layer_trig_wr[7]        = 0;          // RW  Free
-  layer_trig_wr[15:8]       = 0;          // RW  CLCT pre-trigger throttle
+  layer_trig_wr[0]    = 1'b0; // RW  1=Enable layer trigger mode
+  layer_trig_wr[3:1]  = 3'd4; // RW  Layer-wide threshold
+  layer_trig_wr[6:4]  = 0;    // R   Number layers hit on layer trigger, readonly
+  layer_trig_wr[7]    = 0;    // RW  Free
+  layer_trig_wr[15:8] = 0;    // RW  CLCT pre-trigger throttle
   end
 
-  assign layer_trig_en      = layer_trig_wr[0];    // RW  Scope trigger channel
-  assign lyr_thresh_pretrig[2:0]  = layer_trig_wr[3:1];  // RW  Number layers required for layer trigger
-  assign clct_throttle[7:0]    = layer_trig_wr[15:8];  // RW  CLCT pre-trigger throttle
+  assign layer_trig_en           = layer_trig_wr[0];    // RW  Scope trigger channel
+  assign lyr_thresh_pretrig[2:0] = layer_trig_wr[3:1];  // RW  Number layers required for layer trigger
+  assign clct_throttle[7:0]      = layer_trig_wr[15:8]; // RW  CLCT pre-trigger throttle
 
-  assign layer_trig_rd[3:0]    = layer_trig_wr[3:0];  // RW  Readback
-  assign layer_trig_rd[6:4]    = nlayers_hit_vme[2:0];  // R  Number layers hit on layer trigger
-  assign layer_trig_rd[15:7]    = layer_trig_wr[15:7];  // RW
+  assign layer_trig_rd[3:0]  = layer_trig_wr[3:0];   // RW  Readback
+  assign layer_trig_rd[6:4]  = nlayers_hit_vme[2:0]; // R  Number layers hit on layer trigger
+  assign layer_trig_rd[15:7] = layer_trig_wr[15:7];  // RW
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_ISE_VERSION=F2  ISE Compiler version Regster
@@ -6362,6 +6763,7 @@
   assign parity_rd[7]    = perr_reset_vme;            // RW  Parity error reset
   assign parity_rd[15:8]  = parity_rd_mux[7:0];          // R  Parity data mux
 
+
   always @* begin
   case (perr_adr)
   4'd0:  parity_rd_mux <= {2'h0,  perr_ram_ff[ 5: 0]};      // R  cfeb0 rams
@@ -6369,12 +6771,15 @@
   4'd2:  parity_rd_mux <= {2'h0,  perr_ram_ff[17:12]};      // R  cfeb2 rams
   4'd3:  parity_rd_mux <= {2'h0,  perr_ram_ff[23:18]};      // R  cfeb3 rams
   4'd4:  parity_rd_mux <= {2'h0,  perr_ram_ff[29:24]};      // R  cfeb4 rams
-  4'd5:  parity_rd_mux <= {2'h0,  perr_ram_ff[35:30]};      // R  cfeb5 rams
-  4'd6:  parity_rd_mux <= {2'h0,  perr_ram_ff[41:36]};      // R  cfeb6 rams
+  //Tao  ME1/1->MEX/1, send 0 error
+  //4'd5:  parity_rd_mux <= {2'h0,  perr_ram_ff[35:30]};      // R  cfeb5 rams
+  //4'd6:  parity_rd_mux <= {2'h0,  perr_ram_ff[41:36]};      // R  cfeb6 rams
+  4'd5:  parity_rd_mux <= {8'h00};
+  4'd6:  parity_rd_mux <= {8'h00};
   4'd7:  parity_rd_mux <= {3'h0,  perr_ram_ff[46:42]};      // R  rpc   rams
   4'd8:  parity_rd_mux <= {6'h00, perr_ram_ff[48:47]};      // R  mini  rams
-  4'd9:  parity_rd_mux <= {1'h0,  perr_cfeb[6:0]};        // R  cfeb parity errors
-  4'd10:  parity_rd_mux <= {1'h0,  perr_cfeb_ff[6:0]};      // R  cfeb parity errors,latched
+  4'd9:  parity_rd_mux <= {3'h0,  perr_cfeb[MXCFEB-1:0]};        // R  cfeb parity errors
+  4'd10:  parity_rd_mux <= {3'h0,  perr_cfeb_ff[MXCFEB-1:0]};      // R  cfeb parity errors,latched
   4'd11:  parity_rd_mux <= {6'h00, perr_rpc_ff,perr_rpc};      // R  rpc  parity errors,latched
   4'd12:  parity_rd_mux <= {6'h00, perr_mini_ff, perr_mini};    // R  mini parity errors,latched
   default  parity_rd_mux <=  8'hFF;                // R  sub-addressing error flag
@@ -6707,7 +7112,7 @@
 
   assign dps_fire_vme[7]      = phaser7_wr[0];        // RW  Set new phase, software sets then unsets
   assign dps_reset[7]         = phaser7_wr[1];        // RW  Reset current phase to 32
-  assign cfeb5_rxd_posneg     = phaser7_wr[7];        // RW  Posneg    // JGhere: apply this value for all A-side cfebs
+  //assign cfeb5_rxd_posneg     = phaser7_wr[7];        // RW  Posneg    // JGhere: apply this value for all A-side cfebs
   assign dps7_phase[7:0]      = phaser7_wr[15:8];     // RW  Phase to set, 0-255
 
 // JGhere: for OTMB, ME1/1a uses dps2 (with values from phaser 7) and  ME1/1b uses dps3 (with values from phaser 8) 
@@ -6731,7 +7136,7 @@
 
   assign dps_fire_vme[8]      = phaser8_wr[0];        // RW  Set new phase, software sets then unsets
   assign dps_reset[8]         = phaser8_wr[1];        // RW  Reset current phase to 32
-  assign cfeb6_rxd_posneg     = phaser8_wr[7];        // RW  Posneg    // JGhere: apply this value for all B-side cfebs
+  assign cfeb6_rxd_posneg     = phaser8_wr[7];        // RW  Posneg    // JGhere: apply this value for all B-side cfebs, later used for whole MEX/1
   assign dps8_phase[7:0]      = phaser8_wr[15:8];     // RW  Phase to set, 0-255
 
 //   JRG, phaser8 read values come from dps3 instead of dps8 (which no longer exists)
@@ -6765,11 +7170,12 @@
   assign cfeb2_rxd_int_delay[3:0]  = delay0_int_wr[11:8];     // RW  CFEB2 Interstage delay
   assign cfeb3_rxd_int_delay[3:0]  = delay0_int_wr[15:12];    // RW  CFEB3 Interstage delay
 */
-// JGhere, new shared delay values for ME1/1b side:
+// JGhere, new shared delay values for ME1/1b side: later ME234
   assign cfeb0_rxd_int_delay[3:0]  = delay1_int_wr[11:8];     // RW  CFEB0 Interstage delay
   assign cfeb1_rxd_int_delay[3:0]  = delay1_int_wr[11:8];     // RW  CFEB1 Interstage delay
   assign cfeb2_rxd_int_delay[3:0]  = delay1_int_wr[11:8];     // RW  CFEB2 Interstage delay
   assign cfeb3_rxd_int_delay[3:0]  = delay1_int_wr[11:8];     // RW  CFEB3 Interstage delay
+  assign cfeb4_rxd_int_delay[3:0]  = delay1_int_wr[11:8];     // RW  CFEB4 Interstage delay
 
   assign delay0_int_rd[15:0]    = delay0_int_wr[15:0];      //    Readback
 
@@ -6785,9 +7191,10 @@
 //  assign cfeb5_rxd_int_delay[3:0]  = delay1_int_wr[7:4];      // RW  CFEB5 Interstage delay
 //  assign cfeb6_rxd_int_delay[3:0]  = delay1_int_wr[11:8];     // RW  CFEB6 Interstage delay
 // JGhere, new shared delay values for ME1/1a side:
-  assign cfeb4_rxd_int_delay[3:0] = delay1_int_wr[7:4];      // RW  CFEB4 Interstage delay
-  assign cfeb5_rxd_int_delay[3:0] = delay1_int_wr[7:4];      // RW  CFEB4 Interstage delay
-  assign cfeb6_rxd_int_delay[3:0] = delay1_int_wr[7:4];      // RW  CFEB4 Interstage delay
+  //Tao, ME1/1->MEX/1, the following two could be ignored for ME234
+  //assign cfeb4_rxd_int_delay[3:0] = delay1_int_wr[7:4];      // RW  CFEB4 Interstage delay
+  //assign cfeb5_rxd_int_delay[3:0] = delay1_int_wr[7:4];      // RW  CFEB4 Interstage delay
+  //assign cfeb6_rxd_int_delay[3:0] = delay1_int_wr[7:4];      // RW  CFEB4 Interstage delay
 
   assign delay1_int_rd[15:0]    = delay1_int_wr[15:0];      //    Readback
 
@@ -6860,7 +7267,8 @@
   assign cfeb_badbits_ctrl_rd[14:10] = cfeb_badbits_found[4:0];    // RO  CFEB[n] has at least 1 bad bit
   assign cfeb_badbits_ctrl_rd[15]    = cfeb_badbits_blocked;      // RO  A CFEB had bad bits that were blocked
 
-// ADR_V6_CFEB_BADBITS_CTRL = 0x15C CFEB  Bad Bits Control/Status
+// ADR_V6_CFEB_BADBITS_CTRL = 0x15C CFEB  Bad Bits Control/Status, 
+//it is used only for DCFEB5&6, ignored for MEX/1 fw
   initial begin
   cfeb_v6_badbits_ctrl_wr[1:0]        = 0;              // RW  Reset bad cfeb bits FFs
   cfeb_v6_badbits_ctrl_wr[3:2]        = 0;              // RW  Allow bad bits to block triads
@@ -6868,13 +7276,14 @@
   cfeb_v6_badbits_ctrl_wr[15:6]       = 0;              // RW  Unused
   end
 
-  assign cfeb_badbits_reset[6:5]      = (cfeb_v6_badbits_ctrl_wr[1:0] | {2{ttc_resync}});  // RW  Reset bad bits FFs for cfeb[n]
-  assign cfeb_badbits_block[6:5]      = cfeb_v6_badbits_ctrl_wr[3:2];  // RW  Block bad bits on cfeb[n]
-  wire   cfeb_v6_badbits_ctrl_sump    =|cfeb_v6_badbits_ctrl_wr[5:4];  // RO
+  //Tao,question, ME1/1->MEX/1, ignored
+  //assign cfeb_badbits_reset[6:5]      = (cfeb_v6_badbits_ctrl_wr[1:0] | {2{ttc_resync}});  // RW  Reset bad bits FFs for cfeb[n]
+  //assign cfeb_badbits_block[6:5]      = cfeb_v6_badbits_ctrl_wr[3:2];  // RW  Block bad bits on cfeb[n]
+  //wire   cfeb_v6_badbits_ctrl_sump    =|cfeb_v6_badbits_ctrl_wr[5:4];  // RO
 
-  assign cfeb_v6_badbits_ctrl_rd[3:0]  = cfeb_v6_badbits_ctrl_wr[3:0];  // RW  Readback
-  assign cfeb_v6_badbits_ctrl_rd[5:4]  = cfeb_badbits_found[6:5];      // RO  CFEB[n] has at least 1 bad bit
-  assign cfeb_v6_badbits_ctrl_rd[15:6] = cfeb_v6_badbits_ctrl_wr[15:6];  // RW  Unused
+  //assign cfeb_v6_badbits_ctrl_rd[3:0]  = cfeb_v6_badbits_ctrl_wr[3:0];  // RW  Readback
+  //assign cfeb_v6_badbits_ctrl_rd[5:4]  = cfeb_badbits_found[6:5];      // RO  CFEB[n] has at least 1 bad bit
+  //assign cfeb_v6_badbits_ctrl_rd[15:6] = cfeb_v6_badbits_ctrl_wr[15:6];  // RW  Unused
 
 // ADR_CFEB_BADBIT_TIMER = 0x124 CFEB  Bad Bit Check Interval for bad bits
   initial begin
@@ -6935,13 +7344,14 @@
   assign cfeb4_badbits_ly45_rd[15:0] = {cfeb4_ly5_badbits,cfeb4_ly4_badbits};
 
 // Virtex-6 only
-  assign cfeb5_badbits_ly01_rd[15:0] = {cfeb5_ly1_badbits,cfeb5_ly0_badbits};
-  assign cfeb5_badbits_ly23_rd[15:0] = {cfeb5_ly3_badbits,cfeb5_ly2_badbits};
-  assign cfeb5_badbits_ly45_rd[15:0] = {cfeb5_ly5_badbits,cfeb5_ly4_badbits};
+  //Tao, 7DCFEB->5DCFEB
+  //assign cfeb5_badbits_ly01_rd[15:0] = {cfeb5_ly1_badbits,cfeb5_ly0_badbits};
+  //assign cfeb5_badbits_ly23_rd[15:0] = {cfeb5_ly3_badbits,cfeb5_ly2_badbits};
+  //assign cfeb5_badbits_ly45_rd[15:0] = {cfeb5_ly5_badbits,cfeb5_ly4_badbits};
 
-  assign cfeb6_badbits_ly01_rd[15:0] = {cfeb6_ly1_badbits,cfeb6_ly0_badbits};
-  assign cfeb6_badbits_ly23_rd[15:0] = {cfeb6_ly3_badbits,cfeb6_ly2_badbits};
-  assign cfeb6_badbits_ly45_rd[15:0] = {cfeb6_ly5_badbits,cfeb6_ly4_badbits};
+  //assign cfeb6_badbits_ly01_rd[15:0] = {cfeb6_ly1_badbits,cfeb6_ly0_badbits};
+  //assign cfeb6_badbits_ly23_rd[15:0] = {cfeb6_ly3_badbits,cfeb6_ly2_badbits};
+  //assign cfeb6_badbits_ly45_rd[15:0] = {cfeb6_ly5_badbits,cfeb6_ly4_badbits};
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_ALCT_STARTUP_DELAY = 0x144 ALCT startup delay milliseconds for Spartan-6
@@ -7043,7 +7453,9 @@
 //    assign virtex6_gtx_rx_all_rd[15:11] = virtex6_gtx_rx_all_wr[15:11]; // RW       JRG: was Unused
       wire virtex6_gtx_rx_all_sump    = |virtex6_gtx_rx_all_wr[10:3]; // R    Unused write bits. JRG: used to be [10:4]
 
-      assign gtx_rx_err_count_all[11:0] = gtx_rx_err_count0[7:0]+gtx_rx_err_count1[7:0]+gtx_rx_err_count2[7:0]+gtx_rx_err_count3[7:0]+gtx_rx_err_count4[7:0]+gtx_rx_err_count5[7:0]+gtx_rx_err_count6[7:0];
+      //Tao, ME1/1->MEX/1
+      //assign gtx_rx_err_count_all[11:0] = gtx_rx_err_count0[7:0]+gtx_rx_err_count1[7:0]+gtx_rx_err_count2[7:0]+gtx_rx_err_count3[7:0]+gtx_rx_err_count4[7:0]+gtx_rx_err_count5[7:0]+gtx_rx_err_count6[7:0];
+      assign gtx_rx_err_count_all[11:0] = gtx_rx_err_count0[7:0]+gtx_rx_err_count1[7:0]+gtx_rx_err_count2[7:0]+gtx_rx_err_count3[7:0]+gtx_rx_err_count4[7:0];
 
 
 //------------------------------------------------------------------------------------------------------------------
@@ -7091,6 +7503,9 @@
 //      assign virtex6_gtx_rx_rd[idcfeb][10]    = gtx_rx_err[idcfeb];               // R    JRG: not useful! -- PRBS test detects an error
 //      assign virtex6_gtx_rx_rd[idcfeb][15:11] = virtex6_gtx_rx_wr[idcfeb][15:11]; // RW   JRG: was Unused
         assign virtex6_gtx_rx_sump[idcfeb] = |virtex6_gtx_rx_wr[idcfeb][10:3]; // R  Unused write bits. JRG: used to be [10:4]
+
+        assign virtex6_gtx_rx_notintable_rd[idcfeb][15:0] = gtx_rx_notintable_count[idcfeb][15:0];
+        assign virtex6_gtx_rx_disperr_rd[idcfeb][15:0]    = gtx_rx_disperr_count[idcfeb][15:0];
   end
   endgenerate
 
@@ -7132,6 +7547,7 @@
 //------------------------------------------------------------------------------------------------------------------
 // ADR_V6_EXTEND = 0x17A  DCFEB 7-bit extensions for Adr 0x42 and 0x68
 //------------------------------------------------------------------------------------------------------------------
+//Tao, ME1/1->MEX/1, ignore for MEX/1 fw with 5DCFEBs in total
 // Power up
   initial begin
   virtex6_extend_wr[1:0]        = 2'b11;          // RW  1=Enable, 0=Turn off all CFEB inputs
@@ -7142,16 +7558,16 @@
   virtex6_extend_wr[15:10]      = 0;            // RW  Unused
   end
 
-  assign mask_all[6:5]        = virtex6_extend_wr[1:0];  // RW  Extend 0x42[4:0]   = mask_all[4:0]           1=Enable, 0=Turn off all CFEB inputs
-  assign inj_febsel[6:5]        = virtex6_extend_wr[3:2];  // RW  Extend 0x42[9:5]   = inj_febsel[4:0]         1=Select CFEBn for RAM read/write
-  assign injector_mask_cfeb[6:5]    = virtex6_extend_wr[5:4];  // RW  Extend 0x42[14:10] = injector_mask_cfeb[4:0] 1=Enable CFEB(n) for injector trigger
-  assign cfeb_en_vme[6:5]        = virtex6_extend_wr[7:6];  // RW  Extend 0x68[14:10] = cfeb_en_vme[4:0]       1=Enable CFEBs for triggering and active feb flag
+  //assign mask_all[6:5]        = virtex6_extend_wr[1:0];  // RW  Extend 0x42[4:0]   = mask_all[4:0]           1=Enable, 0=Turn off all CFEB inputs
+  //assign inj_febsel[6:5]        = virtex6_extend_wr[3:2];  // RW  Extend 0x42[9:5]   = inj_febsel[4:0]         1=Select CFEBn for RAM read/write
+  //assign injector_mask_cfeb[6:5]    = virtex6_extend_wr[5:4];  // RW  Extend 0x42[14:10] = injector_mask_cfeb[4:0] 1=Enable CFEB(n) for injector trigger
+  //assign cfeb_en_vme[6:5]        = virtex6_extend_wr[7:6];  // RW  Extend 0x68[14:10] = cfeb_en_vme[4:0]       1=Enable CFEBs for triggering and active feb flag
   
-  assign virtex6_extend_rd[7:0]    = virtex6_extend_wr[7:0];  // RW  Readback
-  assign virtex6_extend_rd[9:8]    = cfeb_en[6:5];        // RO  Extend 0x68 cfeb_en[4:0] Readback actual cfeb_en state, altered by mask_all
-  assign virtex6_extend_rd[15:10]    = virtex6_extend_wr[15:10];  // RW  Unused
+  //assign virtex6_extend_rd[7:0]    = virtex6_extend_wr[7:0];  // RW  Readback
+  //assign virtex6_extend_rd[9:8]    = cfeb_en[6:5];        // RO  Extend 0x68 cfeb_en[4:0] Readback actual cfeb_en state, altered by mask_all
+  assign virtex6_extend_rd[15:0]    = virtex6_extend_wr[15:0];  // RW  Unused
 
-  wire   virtex6_extend_sump      = |virtex6_extend_wr[9:8];  // RO
+  //wire   virtex6_extend_sump      = |virtex6_extend_wr[9:8];  // RO
 
 //------------------------------------------------------------------------------------------------------------------
 // ADR_TMB_LATENCY_SR = 0x196 TMB Latency Shift Register
@@ -7177,6 +7593,166 @@
     if (global_reset)       tmb_latency_sr_latched <= 0;
     else if (mpc_frame_vme) tmb_latency_sr_latched <= tmb_latency_sr[20:5];
   end
+
+//------------------------------------------------------------------------------------------------------------------
+// ADR_ALGO2016_CTRL=198    Controls parameters of new trigger algorithm
+//------------------------------------------------------------------------------------------------------------------
+// Power-up defaults
+  initial begin
+    // "Old" algorithm switched ON by default:
+    //algo2016_ctrl_wr[0]   = 1'b0;  // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
+    //algo2016_ctrl_wr[5:1] = 5'd15; // Constant size of the dead time zone
+    //algo2016_ctrl_wr[6]   = 1'b0;  // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
+    //algo2016_ctrl_wr[7]   = 1'b0;  // ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
+    //algo2016_ctrl_wr[8]   = 1'b0;  // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - similar to "old" behavior of CLCT-centric algorithm when ALCTs are droped from further usage
+    //algo2016_ctrl_wr[9]   = 1'b0;  // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
+    //algo2016_ctrl_wr[10]  = 1'b0;  // Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
+    // Algo2016 ON:    
+    algo2016_ctrl_wr[0]   = 1'b1;  // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
+    algo2016_ctrl_wr[5:1] = 5'd15; // Constant size of the dead time zone
+    algo2016_ctrl_wr[6]   = 1'b1;  // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
+    algo2016_ctrl_wr[7]   = 1'b0;  // not used!!
+    algo2016_ctrl_wr[8]   = 1'b0;  // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - similar to "old" behavior of CLCT-centric algorithm when ALCTs are droped from further usage
+    algo2016_ctrl_wr[9]   = 1'b1;  // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
+    algo2016_ctrl_wr[10]  = 1'b0;  // not used!!!
+    algo2016_ctrl_wr[11]  = 1'b0;  // allow seq trigger in a row
+    algo2016_ctrl_wr[12]  = 1'b0;  // even odd parity. software use 1 for odd chamber.  here we use 1 for evenchamber 
+  end
+  
+  assign algo2016_use_dead_time_zone         = algo2016_ctrl_wr[0];   // Dead time zone switch: 0 - "old" whole chamber is dead when pre-CLCT is registered, 1 - algo2016 only half-strips around pre-CLCT are marked dead
+  assign algo2016_dead_time_zone_size[4:0]   = algo2016_ctrl_wr[5:1]; // Constant size of the dead time zone
+  assign algo2016_use_dynamic_dead_time_zone = algo2016_ctrl_wr[6];   // Dynamic dead time zone switch: 0 - dead time zone is set by algo2016_use_dynamic_dead_time_zone, 1 - dead time zone depends on pre-CLCT pattern ID
+  assign algo2016_clct_to_alct               = algo2016_ctrl_wr[7];   // ALCT-to-CLCT matching switch: 0 - "old" CLCT-centric algorithm, 1 - algo2016 ALCT-centric algorithm
+  assign algo2016_drop_used_clcts            = algo2016_ctrl_wr[8];   // Drop CLCTs from matching in ALCT-centric algorithm: 0 - algo2016 do NOT drop CLCTs, 1 - drop used CLCTs
+  assign algo2016_cross_bx_algorithm         = algo2016_ctrl_wr[9];   // LCT sorting using cross BX algorithm: 0 - "old" no cross BX algorithm used, 1 - algo2016 uses cross BX algorithm
+  assign algo2016_clct_use_corrected_bx      = algo2016_ctrl_wr[10];  // Use median of hits for CLCT timing: 0 - "old" no CLCT timing corrections, 1 - algo2016 CLCT timing calculated based on median of hits
+  assign seq_trigger_nodeadtime              = algo2016_ctrl_wr[11];// allow two seq trigger in a row
+  assign evenchamber                         =~algo2016_ctrl_wr[12]; // even odd parity. software use 1 for odd chamber.  here we use 1 for evenchamber 
+
+  assign algo2016_ctrl_rd[15:0] = algo2016_ctrl_wr[15:0];
+
+//------------------------------------------------------------------------------------------------------------------
+// ADR_CLCT0_CC= 0x19A    1st CLCT Comparator Code
+// ADR_CLCT1_CC= 0x19C    2nd CLCT Comparator Code
+// ADR_CLCT0_BNDXKY= 0x19E    1st CLCT new bnd+XKY
+// ADR_CLCT1_BNDXKY= 0x1A0    2nd CLCT new bnd+XKY
+//------------------------------------------------------------------------------------------------------------------
+  assign clct0_cc_rd[MXPATC-1:0] = clct0_vme_carry[MXPATC-1:0]; 
+  assign clct1_cc_rd[MXPATC-1:0] = clct1_vme_carry[MXPATC-1:0]; 
+  //assign clct0_cc_rd[11] = 1'b0;
+  //assign clct1_cc_rd[11] = 1'b0;//since comparator code is reduced to 11 bits but software is not changed yet
+  assign clct0_cc_rd[15:12]  = 4'b0;
+  assign clct1_cc_rd[15:12]  = 4'b0;
+  assign clct0_bndxky_rd[MXBNDB - 1    : 0]         = clct0_vme_bnd[MXBNDB - 1   : 0];
+  assign clct0_bndxky_rd[MXXKYB - 1+MXBNDB: MXBNDB] = clct0_vme_xky[MXXKYB - 1   : 0];
+  assign clct1_bndxky_rd[MXBNDB - 1    : 0]         = clct1_vme_bnd[MXBNDB - 1   : 0];
+  assign clct1_bndxky_rd[MXXKYB - 1+MXBNDB: MXBNDB] = clct1_vme_xky[MXXKYB - 1   : 0];
+  assign clct0_bndxky_rd[15] = 1'b0;
+  assign clct1_bndxky_rd[15] = 1'b0;
+
+//------------------------------------------------------------------------------------------------------------------
+// ADR_RUN3_FORMAT_CTRL = 0x1AA  CCLUT
+//------------------------------------------------------------------------------------------------------------------
+
+  initial begin
+    run3_format_ctrl_wr[0] = 1'b0;
+    run3_format_ctrl_wr[1] = 1'b1; // default, Run3 trigger format upgrade is off
+    run3_format_ctrl_wr[2] = 1'b1; // default, Run3 daq format upgrade is ON
+    run3_format_ctrl_wr[3] = 1'b0; // Run3 ALCT data format enable or not.  Run2 ALCT data format had HMT encoded
+    run3_format_ctrl_wr[4] = 1'b0; // use Run2 legacy revcode or not
+    run3_format_ctrl_wr[15:5] = 12'b0; // NOT used
+    //cclut_format_ctrl_wr[1] = 0; //CLCT pattern sorting, 0= use {pat, nhits}, 1={new quality}
+    //cclut_format_ctrl_wr[2] = 0; //LCT data format control, 0 = use Run2, 1= use Run3 with GEM-CSC+CCLUT
+  end
+  assign run3_trig_df = run3_format_ctrl_wr[1];
+  assign run3_daq_df  = run3_format_ctrl_wr[2];
+  assign run3_alct_df = run3_format_ctrl_wr[3];
+  assign run2_revcode = run3_format_ctrl_wr[4];
+
+  assign run3_format_ctrl_rd[0]    = ccLUT_enable;
+  assign run3_format_ctrl_rd[1]    = ccLUT_enable ? run3_trig_df : 1'b0;//only enable it for CCLUT case
+  assign run3_format_ctrl_rd[2]    = ccLUT_enable ? run3_daq_df  : 1'b0; 
+  assign run3_format_ctrl_rd[3]    = ccLUT_enable ? run3_alct_df : 1'b0;
+  assign run3_format_ctrl_rd[15:4] = run3_format_ctrl_wr[15:4];
+      
+
+//------------------------------------------------------------------------------------------------------------------
+// ADR_HMT_CTRL = 0x1AC  HMT
+//------------------------------------------------------------------------------------------------------------------
+
+  initial begin
+    hmt_ctrl_wr[0]     = 1'b1; // RW, enable the HMT or not
+    hmt_ctrl_wr[1]     = 1'b1; //RW, enable ME1a or not
+    hmt_ctrl_wr[11:2]  = 10'b0; //R only nhits for trigger 
+    hmt_ctrl_wr[15:12] = 4'b0; // result of over threshold, reserved
+  end
+  assign hmt_enable  = hmt_ctrl_wr[0];
+  assign hmt_me1a_enable = hmt_ctrl_wr[1];
+  //assign hmt_me1a_enable = 1'b1;// always enable now 
+
+
+  assign hmt_ctrl_rd[0] = hmt_enable;
+  assign hmt_ctrl_rd[1] = hmt_me1a_enable;
+  assign hmt_ctrl_rd[11: 2] = hmt_nhits_bx7_vme[9:0];
+  assign hmt_ctrl_rd[15:12] = hmt_cathode_vme[MXHMTB-1:0];  //reserved for HMT results
+
+//------------------------------------------------------------------------------------------------------------------
+// ADR_HMT_THRESH1 = 0x1AE  HMT thresh
+// ADR_HMT_THRESH2 = 0x1B0  HMT thresh
+// ADR_HMT_THRESH3 = 0x1B2  HMT thresh
+//------------------------------------------------------------------------------------------------------------------
+
+  initial begin
+    hmt_thresh1_wr[ 7: 0] = 8'd35; // RW, enable the HMT thresh1
+    hmt_thresh2_wr[ 7: 0] = 8'd40; // RW, enable the HMT thresh1
+    hmt_thresh3_wr[ 7: 0] = 8'd45; // RW, enable the HMT thresh1
+
+    hmt_thresh1_wr[    8] = 1'b1; //  RW, enable HMT to readout cfeb 
+    hmt_thresh1_wr[15: 9] = 7'd6; //  RW, thresh for hmt_aff_thresh 
+
+    hmt_thresh2_wr[11: 8] = 4'd5; // RW hmt delay for alct-hmt match
+    hmt_thresh2_wr[15:12] = 4'd7; // RW alct-hmt match window size
+
+    hmt_thresh3_wr[    8] = 1'b0; //  RW, hmt allow to trigger on anode hmt
+    hmt_thresh3_wr[    9] = 1'b1; //  RW, hmt allow to trigger on cathode hmt
+    hmt_thresh3_wr[   10] = 1'b0; //  RW, hmt allow to trigger on anode and cathod match hmt
+    hmt_thresh3_wr[   11] = 1'b0; //  RW, hmt allow to readout on anode hmt
+    hmt_thresh3_wr[   12] = 1'b1; //  RW, hmt allow to readout on cathode hmt
+    hmt_thresh3_wr[   13] = 1'b0; //  RW, hmt allow to readout on match hmt
+    hmt_thresh3_wr[   14] = 1'b0; //  RW, hmt anode/cathode out-time counter low than threshold to fire hmt
+    hmt_thresh3_wr[   15] = 1'b0; //  RW, not used
+  end 
+
+  assign hmt_thresh1[7:0]  = hmt_thresh1_wr[7:0];
+  assign hmt_thresh2[7:0]  = hmt_thresh2_wr[7:0];
+  assign hmt_thresh3[7:0]  = hmt_thresh3_wr[7:0];
+
+  assign cfeb_allow_hmt_ro    = hmt_thresh1_wr[8];
+  assign hmt_aff_thresh[6:0]  = hmt_thresh1_wr[15:9];
+
+  assign hmt_delay[3:0]            = hmt_thresh2_wr[11:8];
+  assign hmt_alct_win_size[3:0]    = hmt_thresh2_wr[15:12];
+
+  assign hmt_allow_anode      = hmt_thresh3_wr[ 8];
+  assign hmt_allow_cathode    = hmt_thresh3_wr[ 9];
+  assign hmt_allow_match      = hmt_thresh3_wr[10];
+  assign hmt_allow_anode_ro   = hmt_thresh3_wr[11];
+  assign hmt_allow_cathode_ro = hmt_thresh3_wr[12];
+  assign hmt_allow_match_ro   = hmt_thresh3_wr[13];
+  assign hmt_outtime_check    = hmt_thresh3_wr[14];
+
+  assign hmt_thresh1_rd[15:0] = hmt_thresh1_wr[15:0];
+  assign hmt_thresh2_rd[15:0] = hmt_thresh2_wr[15:0];
+  assign hmt_thresh3_rd[15:0] = hmt_thresh3_wr[15:0];
+
+//------------------------------------------------------------------------------------------------------------------
+// ADR_HMT_NHITS_SIG=0x1B4  Nhits for HMT in bx678, Signal
+// ADR_HMT_NHITS_BKG=0x1B6  Nhits for HMT in bx2345, background/control region
+//------------------------------------------------------------------------------------------------------------------
+  assign hmt_nhits_sig_rd[9:0]   = hmt_nhits_sig_vme[9:0];
+  assign hmt_nhits_sig_rd[15:10] = 6'b0;
+  assign hmt_nhits_bkg_rd[9:0]   = hmt_nhits_bkg_vme[9:0];
+  assign hmt_nhits_bkg_rd[15:10] = 6'b0;
 
 //------------------------------------------------------------------------------------------------------------------
 // VME Write-Registers latch data when addressed + latch power-up defaults
@@ -7221,12 +7797,13 @@
   if (wr_hcm401)          hcm401_wr        <=  d[15:0];
   if (wr_hcm423)          hcm423_wr        <=  d[15:0];
   if (wr_hcm445)          hcm445_wr        <=  d[15:0];
-  if (wr_hcm501)          hcm501_wr        <=  d[15:0];
-  if (wr_hcm523)          hcm523_wr        <=  d[15:0];
-  if (wr_hcm545)          hcm545_wr        <=  d[15:0];
-  if (wr_hcm601)          hcm601_wr        <=  d[15:0];
-  if (wr_hcm623)          hcm623_wr        <=  d[15:0];
-  if (wr_hcm645)          hcm645_wr        <=  d[15:0];
+  //Tao, 7DCFEB->5DCFEB
+  //if (wr_hcm501)          hcm501_wr        <=  d[15:0];
+  //if (wr_hcm523)          hcm523_wr        <=  d[15:0];
+  //if (wr_hcm545)          hcm545_wr        <=  d[15:0];
+  //if (wr_hcm601)          hcm601_wr        <=  d[15:0];
+  //if (wr_hcm623)          hcm623_wr        <=  d[15:0];
+  //if (wr_hcm645)          hcm645_wr        <=  d[15:0];
   if (wr_seq_trigen)      seq_trigen_wr    <=  d[15:0];
   if (wr_seq_trigdly0)    seq_trigdly0_wr  <=  d[15:0];
   if (wr_seq_trigdly1)    seq_trigdly1_wr  <=  d[15:0];
@@ -7301,11 +7878,18 @@
   if (wr_virtex6_gtx_rx[2])   virtex6_gtx_rx_wr[2] <=  d[15:0];
   if (wr_virtex6_gtx_rx[3])   virtex6_gtx_rx_wr[3] <=  d[15:0];
   if (wr_virtex6_gtx_rx[4])   virtex6_gtx_rx_wr[4] <=  d[15:0];
-  if (wr_virtex6_gtx_rx[5])   virtex6_gtx_rx_wr[5] <=  d[15:0];
-  if (wr_virtex6_gtx_rx[6])   virtex6_gtx_rx_wr[6] <=  d[15:0];  
+  if (wr_run3_format_ctrl)      run3_format_ctrl_wr     <= d[15:0];
+  if (wr_hmt_ctrl)              hmt_ctrl_wr             <= d[15:0];
+  if (wr_hmt_thresh1)           hmt_thresh1_wr          <= d[15:0];
+  if (wr_hmt_thresh2)           hmt_thresh2_wr          <= d[15:0];
+  if (wr_hmt_thresh3)           hmt_thresh3_wr          <= d[15:0];
+  //Tao, ME1/1->MEX/1, the following two could be ignored for ME234
+  //if (wr_virtex6_gtx_rx[5])   virtex6_gtx_rx_wr[5] <=  d[15:0];
+  //if (wr_virtex6_gtx_rx[6])   virtex6_gtx_rx_wr[6] <=  d[15:0];  
   if (wr_virtex6_sysmon)      virtex6_sysmon_wr    <=  d[15:0];
   if (wr_virtex6_extend)      virtex6_extend_wr    <=  d[15:0];
   if (wr_mpc_frames_fifo_ctrl) mpc_frames_fifo_ctrl_wr <= d[15:0];
+  if (wr_algo2016_ctrl) algo2016_ctrl_wr <= d[15:0];
   end
 
 //------------------------------------------------------------------------------------------------------------------
@@ -7360,9 +7944,9 @@
   virtex6_snap12_qpll_sump  |
   virtex6_gtx_rx_all_sump    |
   virtex6_sysmon_sump      |
-  adc_sump          |
-  cfeb_v6_badbits_ctrl_sump  |
-  virtex6_extend_sump
+  adc_sump          
+  //cfeb_v6_badbits_ctrl_sump  |
+  //virtex6_extend_sump
   ;
 
 

@@ -556,7 +556,7 @@
   SRL16E upup (.CLK(clock),.CE(!powerupq),.D(1'b1),.A0(pdly[0]),.A1(pdly[1]),.A2(pdly[2]),.A3(pdly[3]),.Q(powerupq));
 
   always @(posedge clock) begin
-  powerup_ff <= powerupq && !(global_reset || ttc_resync);
+    powerup_ff <= powerupq && !(global_reset || ttc_resync);
   end
 
   wire sm_reset  = !powerup_ff;  // injector state machine reset
@@ -574,8 +574,8 @@
   reg alct_inject_ff = 0;
 
   always @(posedge clock) begin
-  alct_clear_ff  <= alct_clear;
-  alct_inject_ff <= alct_inject;
+    alct_clear_ff  <= alct_clear;
+    alct_inject_ff <= alct_inject;
   end
 
 // Latch 80 MHz multiplexed inputs in DDR IOB FFs, 80MHz 1st in time is aligned with 40MHz falling edge
@@ -583,15 +583,15 @@
   wire  [28:1]  alct_2nd_ff;
 
   x_demux_ddr_alct_muonic #(28) ux_demux_alct (
-  .clock    (clock),          // In  40MHz TMB main clock
-  .clock_2x  (clock_2x),          // In  80MHz commutator clock
-  .clock_lac  (clock_lac),        // In  40MHz logic accessible clock  .clock_iob  (clock_alct_rxd),      // In  40MHZ iob ddr clock
-  .clock_iob  (clock_alct_rxd),      // In  40MHZ iob ddr clock
-  .posneg    (alct_rxd_posneg),      // In  Select inter-stage clock 0 or 180 degrees
-  .clr    (alct_clear_ff),      // In  Sync clear
-  .din    (alct_rx[28:1]),      // In  80MHz data from ALCT
-  .dout1st  (alct_1st_ff[28:1]),    // Out  Data de-multiplexed 1st in time
-  .dout2nd  (alct_2nd_ff[28:1]));    // Out  Data de-multiplexed 2nd in time
+  .clock     (clock),              // In  40MHz TMB main clock
+  .clock_2x  (clock_2x),           // In  80MHz commutator clock
+  .clock_lac (clock_lac),          // In  40MHz logic accessible clock  .clock_iob  (clock_alct_rxd),      // In  40MHZ iob ddr clock
+  .clock_iob (clock_alct_rxd),     // In  40MHZ iob ddr clock
+  .posneg    (alct_rxd_posneg),    // In  Select inter-stage clock 0 or 180 degrees
+  .clr       (alct_clear_ff),      // In  Sync clear
+  .din       (alct_rx[28:1]),      // In  80MHz data from ALCT
+  .dout1st   (alct_1st_ff[28:1]),  // Out  Data de-multiplexed 1st in time
+  .dout2nd   (alct_2nd_ff[28:1])); // Out  Data de-multiplexed 2nd in time
 
 // Copy ALCT rx data for VME readout, for use with alct debug firmware in sync mode
   reg [28:1] alct_sync_rxdata_1st = 0;
@@ -664,28 +664,28 @@
 // Assign random bits to alct signals for alct_sync_adr=3 mode
   wire [48:0]  alct_lfsr;
 
-  wire     rnd_first_valid    = alct_lfsr[0];    // First LCT
-  wire     rnd_first_amu    = alct_lfsr[1];
-  wire [1:0]  rnd_first_quality  = alct_lfsr[3:2];
-  wire [6:0]  rnd_first_key    = alct_lfsr[10:4];
+  wire       rnd_first_valid   = alct_lfsr[0]; // First LCT
+  wire       rnd_first_amu     = alct_lfsr[1];
+  wire [1:0] rnd_first_quality = alct_lfsr[3:2];
+  wire [6:0] rnd_first_key     = alct_lfsr[10:4];
 
-  wire     rnd_second_valid  = alct_lfsr[11];  // Second LCT
-  wire     rnd_second_amu    = alct_lfsr[12];
-  wire [1:0]  rnd_second_quality  = alct_lfsr[14:13];
-  wire [6:0]  rnd_second_key    = alct_lfsr[21:15];
+  wire       rnd_second_valid   = alct_lfsr[11]; // Second LCT
+  wire       rnd_second_amu     = alct_lfsr[12];
+  wire [1:0] rnd_second_quality = alct_lfsr[14:13];
+  wire [6:0] rnd_second_key     = alct_lfsr[21:15];
 
-  wire [4:0]  rnd_bxn        = alct_lfsr[26:22];  // Common to both LCTs
+  wire [4:0] rnd_bxn = alct_lfsr[26:22]; // Common to both LCTs
 
-  wire     rnd_active_feb    = alct_lfsr[27];  // Non trigger path signals
-  wire     rnd_alct_bx0    = alct_lfsr[28];
-  wire     rnd_cfg_done    = alct_lfsr[29];
+  wire       rnd_active_feb = alct_lfsr[27];  // Non trigger path signals
+  wire       rnd_alct_bx0   = alct_lfsr[28];
+  wire       rnd_cfg_done   = alct_lfsr[29];
 
-  wire     rnd_first_frame    = alct_lfsr[30];  // DMB signals are not covered by ECC
-  wire     rnd_last_frame    = alct_lfsr[31];
-  wire [13:0]  rnd_daq_data    = alct_lfsr[45:32];
-  wire     rnd_ddu_special    = alct_lfsr[46];
-  wire     rnd_lct_special    = alct_lfsr[47];
-  wire     rnd_nwr_fifo    = alct_lfsr[48];
+  wire        rnd_first_frame = alct_lfsr[30];  // DMB signals are not covered by ECC
+  wire        rnd_last_frame  = alct_lfsr[31];
+  wire [13:0] rnd_daq_data    = alct_lfsr[45:32];
+  wire        rnd_ddu_special = alct_lfsr[46];
+  wire        rnd_lct_special = alct_lfsr[47];
+  wire        rnd_nwr_fifo    = alct_lfsr[48];
 
 // Apply ECC to random alct signals for alct_sync_adr=3 mode
   wire [6:0]  rnd_parity_out;
@@ -1064,16 +1064,16 @@
   
   wire   active_feb_flag_rx = (alct_sync_mode) ? 0 : active_feb_flag;
 
-  assign alct0_mux =  (pass_ff) ? alct0_rx : alct0_inj_ff;
-  assign alct1_mux =  (pass_ff) ? alct1_rx : alct1_inj_ff;
+  assign alct0_mux = (pass_ff) ? alct0_rx : alct0_inj_ff;
+  assign alct1_mux = (pass_ff) ? alct1_rx : alct1_inj_ff;
 
-  assign alct0_valid        = alct0_mux[0];
-  assign alct1_valid        = alct1_mux[0];
+  assign alct0_valid = alct0_mux[0];
+  assign alct1_valid = alct1_mux[0];
   
-  assign alct0_tmb[MXALCT-1:0]  = alct0_mux[MXALCT-1:0];
-  assign alct1_tmb[MXALCT-1:0]  = alct1_mux[MXALCT-1:0];
+  assign alct0_tmb[MXALCT-1:0] = alct0_mux[MXALCT-1:0];
+  assign alct1_tmb[MXALCT-1:0] = alct1_mux[MXALCT-1:0];
 
-  assign alct_active_feb   = active_feb_flag_rx | inj_active_feb_flag;
+  assign alct_active_feb = active_feb_flag_rx | inj_active_feb_flag;
 
 // Latch full alct bxn for vme readout
   reg [4:0] bxn_alct_vme=0;

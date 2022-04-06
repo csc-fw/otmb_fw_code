@@ -3,9 +3,9 @@
 //---------------------------------------------------------------------------------------------------------------------------------------
 // Firmware version global definitions
   `define FIRMWARE_TYPE 04'hC    // C=Normal CLCT/TMB, D=Debug PCB loopback version
-  `define VERSION       04'hE    // Version revision number, A=TMB2004 and earlier, E=TMB2005E production
-  `define MONTHDAY      16'h0316 // Version date
-  `define YEAR          16'h2016 // Version year
+  `define VERSION       04'hE   // Version revision number, A=TMB2004 and earlier, E=TMB2005E production
+  `define MONTHDAY      16'h0908 // Version date
+  `define YEAR          16'h2021 // Version year
 
   `define AUTO_VME         01'h1 // Automatically initialize VME registers from PROM data,   0=do not
   `define AUTO_JTAG        01'h1 // Automatically initialize JTAG chain from PROM data,      0=do not
@@ -20,9 +20,21 @@
 //  `define FPGAID     16'h6195 // FPGA Type 6195 XC6VLX195T
   `define FPGAID       16'h6240 // FPGA Type 6240 XC6VLX240T
 
+   // version_format is control by gem_enable, ccLUT_enable
+  `define VERSION_FORMAT       04'h2   // [12:09]; 0=TMB standard, 1=OTMB Standard, 2=CCLUT, 3=GEM+CCLUT
+  `define VERSION_MAJOR        04'h0   // [08:05];4 bits = Major Version (major features which breaks compatibility, requires c    hanges to other board firmware)
+  `define VERSION_MINOR        05'h2   // [04:00];5 bits = Minor version  (minor features, internal fixes, bug fixes, etc).
+  //minor version code: 
+  //5'h1 11bits comparator code version
+  //5'h2 roll back to 12bits comparator code
+
+
+  `define CCLUT                01'h1  // 1=turn on CCLUT
 // Conditional compile flags: Enable only one CSC_TYPE
-//  `define CSC_TYPE_C  04'hC // Normal   ME1B: ME1B   chambers facing toward IR.    ME1B hs =!reversed, ME1A hs = reversed
-  `define CSC_TYPE_D  04'hD    // Reversed ME1B: ME1B   chambers facing away from IR. ME1B hs = reversed, ME1A hs =!reversed
+    `define CSC_TYPE_A			04'hA		// Normal   CSC:  Normal chambers facing toward IR. All non-ME11 chambers at P5
+//`define CSC_TYPE_B			04'hB		// Normal   CSC:  Normal chambers facing toward IR. Not used anywhere
+//  `define CSC_TYPE_C  04'hC // Normal   ME1B: ME1B   chambers facing toward IR.    ME1B hs =!reversed, ME1A hs = reversed. plus ME11
+//  `define CSC_TYPE_D  04'hD    // Reversed ME1B: ME1B   chambers facing away from IR. ME1B hs = reversed, ME1A hs =!reversed. Minus ME11
 
 // Revision log
 //  02/08/2013  Initial Virtex-6 specific
@@ -92,6 +104,13 @@
 //      04/12/2015      Activate auto-reset for GTX if they don't lock within 1.638 ms
 //      05/30/2015      Keep bad links from contaminating the triads == hot comps: triads load zeroes if !link_good OR link_bad
 //  	06/09/2015	Fixed bug in posneg logic in top-level file
+//  10/25/2017  focus on fix for Yuri's algo2016_deadzone implementation in sequencer & pattern_finder
+//             -also fixed bugs in cfeb_active logic, cfeb_en application in CLCT an layer_trig logic
+//  10/27/2017  testing if new noflush logic etc cause the rate problems, add "dynamic dead zone" etc to enable
+//             -only changed sequencer file
+//  12/05/2017  found a bug in busy/dead zone logic with layerTrig handling, casued half-rate bug... add layer_trig_en req to fix.
+//  12/08/2017  removed temporary half-rate-debug options, return to normal algo2016 control
+//             -added counters for sequential preClct and almost-sequential preClct
 //---------------------------------------------------------------------------------------------------------------------------------------
 //  End Global Definitions
 //---------------------------------------------------------------------------------------------------------------------------------------

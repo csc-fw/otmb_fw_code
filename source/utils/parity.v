@@ -23,8 +23,9 @@
   parity_err_cfeb2,
   parity_err_cfeb3,
   parity_err_cfeb4,
-  parity_err_cfeb5,
-  parity_err_cfeb6,
+  //Tao, ME1/1->MEX/1
+  //parity_err_cfeb5,
+  //parity_err_cfeb6,
   parity_err_rpc,
   parity_err_mini,
 
@@ -55,7 +56,7 @@
 //------------------------------------------------------------------------------------------------------------------
 // Bus widths
 //------------------------------------------------------------------------------------------------------------------
-  parameter MXCFEB  = 7;            // Number of CFEBs on CSC
+  parameter MXCFEB  = 5;            // Number of CFEBs on CSC
   parameter MXLY    = 6;            // Number Layers in CSC
   parameter RAM_ADRB  = 11;            // Address width=log2(ram_depth)
 
@@ -73,8 +74,9 @@
   input  [MXLY-1:0]    parity_err_cfeb2;    // CFEB raw hits RAM parity errors
   input  [MXLY-1:0]    parity_err_cfeb3;    // CFEB raw hits RAM parity errors
   input  [MXLY-1:0]    parity_err_cfeb4;    // CFEB raw hits RAM parity errors
-  input  [MXLY-1:0]    parity_err_cfeb5;    // CFEB raw hits RAM parity errors
-  input  [MXLY-1:0]    parity_err_cfeb6;    // CFEB raw hits RAM parity errors
+  //Tao, ME1/1->MEX/1
+  //input  [MXLY-1:0]    parity_err_cfeb5;    // CFEB raw hits RAM parity errors
+  //input  [MXLY-1:0]    parity_err_cfeb6;    // CFEB raw hits RAM parity errors
   input  [4:0]      parity_err_rpc;      // RPC  raw hits RAM parity errors
   input  [1:0]      parity_err_mini;    // Miniscope     RAM parity errors
 
@@ -111,8 +113,9 @@
   assign perr_cfeb[2]  = | parity_err_cfeb2[MXLY-1:0];
   assign perr_cfeb[3]  = | parity_err_cfeb3[MXLY-1:0];
   assign perr_cfeb[4]  = | parity_err_cfeb4[MXLY-1:0];
-  assign perr_cfeb[5]  = | parity_err_cfeb5[MXLY-1:0];
-  assign perr_cfeb[6]  = | parity_err_cfeb6[MXLY-1:0];
+  //Tao, ME1/1->MEX/1
+  //assign perr_cfeb[5]  = | parity_err_cfeb5[MXLY-1:0];
+  //assign perr_cfeb[6]  = | parity_err_cfeb6[MXLY-1:0];
   assign perr_rpc    = | parity_err_rpc[4:0];
   assign perr_mini  = | parity_err_mini[1:0];
 
@@ -180,8 +183,9 @@
   perr_ram_ff[17:12]  <= perr_ram_ff[17:12] | parity_err_cfeb2[5:0];  // cfeb2 rams
   perr_ram_ff[23:18]  <= perr_ram_ff[23:18] | parity_err_cfeb3[5:0];  // cfeb3 rams
   perr_ram_ff[29:24]  <= perr_ram_ff[29:24] | parity_err_cfeb4[5:0];  // cfeb4 rams
-  perr_ram_ff[35:30]  <= perr_ram_ff[35:30] | parity_err_cfeb5[5:0];  // cfeb5 rams
-  perr_ram_ff[41:36]  <= perr_ram_ff[41:36] | parity_err_cfeb6[5:0];  // cfeb6 rams
+  //Tao, ME1/1->MEX/1
+  //perr_ram_ff[35:30]  <= perr_ram_ff[35:30] | parity_err_cfeb5[5:0];  // cfeb5 rams
+  //perr_ram_ff[41:36]  <= perr_ram_ff[41:36] | parity_err_cfeb6[5:0];  // cfeb6 rams
   perr_ram_ff[46:42]  <= perr_ram_ff[46:42] | parity_err_rpc[4:0];  // rpc   rams
   perr_ram_ff[48:47]  <= perr_ram_ff[48:47] | parity_err_mini[1:0];  // mini  rams
   end

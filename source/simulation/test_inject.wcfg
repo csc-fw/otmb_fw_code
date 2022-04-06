@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="/home/cscdev/pakhotin/Work/2016-11-29_Test_OTMB_Algo/otmb_fw_code/work/otmb_virtex6_isim_inject1_isim_beh.wdb" id="1" type="auto">
+         <top_modules>
+            <top_module name="glbl" />
+            <top_module name="hdlmacro" />
+            <top_module name="numeric_std" />
+            <top_module name="otmb_virtex6_isim_inject1" />
+            <top_module name="std_logic_1164" />
+            <top_module name="std_logic_arith" />
+            <top_module name="std_logic_unsigned" />
+            <top_module name="textio" />
+            <top_module name="vcomponents" />
+            <top_module name="vcomponents" />
+            <top_module name="vital_primitives" />
+            <top_module name="vital_timing" />
+            <top_module name="vpkg" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <WVObjectSize size="7" />
+   <wvobject fp_name="/otmb_virtex6_isim_inject1/clk" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/otmb_virtex6_isim_inject1/vme_a" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">vme_a[23:1]</obj_property>
+      <obj_property name="ObjectShortName">vme_a[23:1]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/otmb_virtex6_isim_inject1/vme_d" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">vme_d[15:0]</obj_property>
+      <obj_property name="ObjectShortName">vme_d[15:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="group223" type="group">
+      <obj_property name="label">Debug_VME</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/vme_a" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">vme_a[23:1]</obj_property>
+         <obj_property name="ObjectShortName">vme_a[23:1]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/vme_d" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">vme_d[15:0]</obj_property>
+         <obj_property name="ObjectShortName">vme_d[15:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/a" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">a[23:1]</obj_property>
+         <obj_property name="ObjectShortName">a[23:1]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/d_vme" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">d_vme[15:0]</obj_property>
+         <obj_property name="ObjectShortName">d_vme[15:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/d" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">d[15:0]</obj_property>
+         <obj_property name="ObjectShortName">d[15:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/vsm_data" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">vsm_data[15:0]</obj_property>
+         <obj_property name="ObjectShortName">vsm_data[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/wr_cfeb_inj" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_cfeb_inj</obj_property>
+         <obj_property name="ObjectShortName">wr_cfeb_inj</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/reg_adr" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">reg_adr[8:0]</obj_property>
+         <obj_property name="ObjectShortName">reg_adr[8:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="vbus211" type="vbus" db_ref_id="1">
+         <obj_property name="label">a_vme[8:1]</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/a_vme[8]" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">[8]</obj_property>
+            <obj_property name="ObjectShortName">a_vme[8]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/a_vme[7]" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">[7]</obj_property>
+            <obj_property name="ObjectShortName">a_vme[7]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/a_vme[6]" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">[6]</obj_property>
+            <obj_property name="ObjectShortName">a_vme[6]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/a_vme[5]" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">[5]</obj_property>
+            <obj_property name="ObjectShortName">a_vme[5]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/a_vme[4]" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">[4]</obj_property>
+            <obj_property name="ObjectShortName">a_vme[4]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/a_vme[3]" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">[3]</obj_property>
+            <obj_property name="ObjectShortName">a_vme[3]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/a_vme[2]" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">[2]</obj_property>
+            <obj_property name="ObjectShortName">a_vme[2]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/a_vme[1]" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">[1]</obj_property>
+            <obj_property name="ObjectShortName">a_vme[1]</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/ADR_CFEB_INJ" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">ADR_CFEB_INJ[8:0]</obj_property>
+         <obj_property name="ObjectShortName">ADR_CFEB_INJ[8:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/ADR_CFEB_INJ_ADR" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">ADR_CFEB_INJ_ADR[8:0]</obj_property>
+         <obj_property name="ObjectShortName">ADR_CFEB_INJ_ADR[8:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/ADR_CFEB_INJ_WDATA" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">ADR_CFEB_INJ_WDATA[8:0]</obj_property>
+         <obj_property name="ObjectShortName">ADR_CFEB_INJ_WDATA[8:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/clk_en" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">clk_en</obj_property>
+         <obj_property name="ObjectShortName">clk_en</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/wr_cfeb_inj_adr" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_cfeb_inj_adr</obj_property>
+         <obj_property name="ObjectShortName">wr_cfeb_inj_adr</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/wr_cfeb_inj_wdata" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">wr_cfeb_inj_wdata</obj_property>
+         <obj_property name="ObjectShortName">wr_cfeb_inj_wdata</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="group210" type="group">
+      <obj_property name="label">CLCT Injection</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/mask_all" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">mask_all[6:0]</obj_property>
+         <obj_property name="ObjectShortName">mask_all[6:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/inj_febsel" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">inj_febsel[6:0]</obj_property>
+         <obj_property name="ObjectShortName">inj_febsel[6:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/injector_mask_cfeb" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">injector_mask_cfeb[6:0]</obj_property>
+         <obj_property name="ObjectShortName">injector_mask_cfeb[6:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/inj_trig_vme" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">inj_trig_vme</obj_property>
+         <obj_property name="ObjectShortName">inj_trig_vme</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">#ffa500</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/inj_ramout_busy" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">inj_ramout_busy</obj_property>
+         <obj_property name="ObjectShortName">inj_ramout_busy</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/cfeb_inj_wr" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cfeb_inj_wr[15:0]</obj_property>
+         <obj_property name="ObjectShortName">cfeb_inj_wr[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/cfeb_inj_adr_wr" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cfeb_inj_adr_wr[15:0]</obj_property>
+         <obj_property name="ObjectShortName">cfeb_inj_adr_wr[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/cfeb_inj_wdata_wr" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cfeb_inj_wdata_wr[15:0]</obj_property>
+         <obj_property name="ObjectShortName">cfeb_inj_wdata_wr[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="vbus215" type="vbus" db_ref_id="1">
+         <obj_property name="label">inj_wdata</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/inj_wdata[17]" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">[17]</obj_property>
+            <obj_property name="ObjectShortName">inj_wdata[17]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/uvme/inj_wdata[16]" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">[16]</obj_property>
+            <obj_property name="ObjectShortName">inj_wdata[16]</obj_property>
+         </wvobject>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="group144" type="group">
+      <obj_property name="label">Pattern Finder</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/upattern_finder/hs_hit_1st" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">hs_hit_1st[2:0]</obj_property>
+         <obj_property name="ObjectShortName">hs_hit_1st[2:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/upattern_finder/hs_pid_1st" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">hs_pid_1st[3:0]</obj_property>
+         <obj_property name="ObjectShortName">hs_pid_1st[3:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/upattern_finder/hs_key_1st" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">hs_key_1st[7:0]</obj_property>
+         <obj_property name="ObjectShortName">hs_key_1st[7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/upattern_finder/hs_hit_2nd" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">hs_hit_2nd[2:0]</obj_property>
+         <obj_property name="ObjectShortName">hs_hit_2nd[2:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/upattern_finder/hs_pid_2nd" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">hs_pid_2nd[3:0]</obj_property>
+         <obj_property name="ObjectShortName">hs_pid_2nd[3:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/upattern_finder/hs_key_2nd" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">hs_key_2nd[7:0]</obj_property>
+         <obj_property name="ObjectShortName">hs_key_2nd[7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="divider159" type="divider">
+         <obj_property name="label">All HS</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="BkColor">128 128 255</obj_property>
+         <obj_property name="TextColor">230 230 230</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/upattern_finder/hs_key_hit0" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">hs_key_hit0[31:0]</obj_property>
+         <obj_property name="ObjectShortName">hs_key_hit0[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/upattern_finder/hs_key_pid0" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">hs_key_pid0[31:0]</obj_property>
+         <obj_property name="ObjectShortName">hs_key_pid0[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/upattern_finder/hs_key_hit1" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">hs_key_hit1[31:0]</obj_property>
+         <obj_property name="ObjectShortName">hs_key_hit1[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/upattern_finder/hs_key_pid1" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">hs_key_pid1[31:0]</obj_property>
+         <obj_property name="ObjectShortName">hs_key_pid1[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/upattern_finder/hs_key_hit2" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">hs_key_hit2[31:0]</obj_property>
+         <obj_property name="ObjectShortName">hs_key_hit2[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/upattern_finder/hs_key_pid2" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">hs_key_pid2[31:0]</obj_property>
+         <obj_property name="ObjectShortName">hs_key_pid2[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/upattern_finder/hs_key_hit3" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">hs_key_hit3[31:0]</obj_property>
+         <obj_property name="ObjectShortName">hs_key_hit3[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/upattern_finder/hs_key_pid3" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">hs_key_pid3[31:0]</obj_property>
+         <obj_property name="ObjectShortName">hs_key_pid3[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/upattern_finder/hs_key_hit4" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">hs_key_hit4[31:0]</obj_property>
+         <obj_property name="ObjectShortName">hs_key_hit4[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/upattern_finder/hs_key_pid4" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">hs_key_pid4[31:0]</obj_property>
+         <obj_property name="ObjectShortName">hs_key_pid4[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/upattern_finder/hs_key_hit5" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">hs_key_hit5[31:0]</obj_property>
+         <obj_property name="ObjectShortName">hs_key_hit5[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/upattern_finder/hs_key_pid5" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">hs_key_pid5[31:0]</obj_property>
+         <obj_property name="ObjectShortName">hs_key_pid5[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/upattern_finder/hs_key_hit6" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">hs_key_hit6[31:0]</obj_property>
+         <obj_property name="ObjectShortName">hs_key_hit6[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/upattern_finder/hs_key_pid6" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">hs_key_pid6[31:0]</obj_property>
+         <obj_property name="ObjectShortName">hs_key_pid6[31:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="group172" type="group">
+      <obj_property name="label">MPC Frames</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/mpc0_frame0" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">mpc0_frame0[15:0]</obj_property>
+         <obj_property name="ObjectShortName">mpc0_frame0[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/mpc0_frame1" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">mpc0_frame1[15:0]</obj_property>
+         <obj_property name="ObjectShortName">mpc0_frame1[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/mpc1_frame0" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">mpc1_frame0[15:0]</obj_property>
+         <obj_property name="ObjectShortName">mpc1_frame0[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/mpc1_frame1" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">mpc1_frame1[15:0]</obj_property>
+         <obj_property name="ObjectShortName">mpc1_frame1[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="divider177" type="divider">
+         <obj_property name="label">MPC frames decoded</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="BkColor">128 128 255</obj_property>
+         <obj_property name="TextColor">230 230 230</obj_property>
+      </wvobject>
+      <wvobject fp_name="group180" type="group">
+         <obj_property name="label">mpc0_frame0</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/alct0_key" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">alct0_key[6:0]</obj_property>
+            <obj_property name="ObjectShortName">alct0_key[6:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/clct0_pat" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">clct0_pat[3:0]</obj_property>
+            <obj_property name="ObjectShortName">clct0_pat[3:0]</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/lct0_quality" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">lct0_quality[3:0]</obj_property>
+            <obj_property name="ObjectShortName">lct0_quality[3:0]</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/lct0_vpf" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">lct0_vpf</obj_property>
+            <obj_property name="ObjectShortName">lct0_vpf</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+            <obj_property name="CustomSignalColor">#00ffff</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject fp_name="group187" type="group">
+         <obj_property name="label">mpc0_frame1</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/clct0_key" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">clct0_key[4:0]</obj_property>
+            <obj_property name="ObjectShortName">clct0_key[4:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/clct0_cfeb" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">clct0_cfeb[2:0]</obj_property>
+            <obj_property name="ObjectShortName">clct0_cfeb[2:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/clct0_bend" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">clct0_bend</obj_property>
+            <obj_property name="ObjectShortName">clct0_bend</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/clct_sync_err" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">clct_sync_err</obj_property>
+            <obj_property name="ObjectShortName">clct_sync_err</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/tmb_sync_err_en[0]" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">[0]</obj_property>
+            <obj_property name="ObjectShortName">tmb_sync_err_en[0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/alct0_bxn[0]" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">[0]</obj_property>
+            <obj_property name="ObjectShortName">alct0_bxn[0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/clct_bx0" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">clct_bx0</obj_property>
+            <obj_property name="ObjectShortName">clct_bx0</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/csc_id" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">csc_id[3:0]</obj_property>
+            <obj_property name="ObjectShortName">csc_id[3:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject fp_name="group202" type="group">
+         <obj_property name="label">mpc1_frame0</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/alct1_key" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">alct1_key[6:0]</obj_property>
+            <obj_property name="ObjectShortName">alct1_key[6:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/clct1_pat" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">clct1_pat[3:0]</obj_property>
+            <obj_property name="ObjectShortName">clct1_pat[3:0]</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/lct1_quality" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">lct1_quality[3:0]</obj_property>
+            <obj_property name="ObjectShortName">lct1_quality[3:0]</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/lct1_vpf" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">lct1_vpf</obj_property>
+            <obj_property name="ObjectShortName">lct1_vpf</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+            <obj_property name="CustomSignalColor">#00ffff</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject fp_name="group207" type="group">
+         <obj_property name="label">mpc1_frame1</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/clct1_key" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">clct1_key[4:0]</obj_property>
+            <obj_property name="ObjectShortName">clct1_key[4:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/clct1_cfeb" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">clct1_cfeb[2:0]</obj_property>
+            <obj_property name="ObjectShortName">clct1_cfeb[2:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/clct1_bend" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">clct1_bend</obj_property>
+            <obj_property name="ObjectShortName">clct1_bend</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/clct_sync_err" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">clct_sync_err</obj_property>
+            <obj_property name="ObjectShortName">clct_sync_err</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/tmb_sync_err_en[1]" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">[1]</obj_property>
+            <obj_property name="ObjectShortName">tmb_sync_err_en[1]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/alct1_bxn[0]" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">[0]</obj_property>
+            <obj_property name="ObjectShortName">alct1_bxn[0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/alct_bx0" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">alct_bx0</obj_property>
+            <obj_property name="ObjectShortName">alct_bx0</obj_property>
+         </wvobject>
+         <wvobject fp_name="/otmb_virtex6_isim_inject1/uut/utmb/csc_id" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">csc_id[3:0]</obj_property>
+            <obj_property name="ObjectShortName">csc_id[3:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+      </wvobject>
+   </wvobject>
+</wave_config>
