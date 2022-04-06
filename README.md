@@ -70,3 +70,7 @@ Update on March 24, 2019
 ### Simulation
 The folder source/simulation contains a test bench, as well as a
 file handler and VME emulator, for the OTMB firmware simulation.
+
+
+## Branch description
+MEX1 OTMB firwmar with legacy Run2 algorithm 
