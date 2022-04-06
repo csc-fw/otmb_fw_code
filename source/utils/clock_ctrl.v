@@ -36,9 +36,8 @@
   clock_cfeb2_rxd,
   clock_cfeb3_rxd,
   clock_cfeb4_rxd,
-  //Tao ME1/1->MEX/1
-  //clock_cfeb5_rxd,
-  //clock_cfeb6_rxd,
+  clock_cfeb5_rxd,
+  clock_cfeb6_rxd,
 
 // Global reset
   mmcm_reset,
@@ -124,9 +123,8 @@
   output        clock_cfeb2_rxd;    // 40MHz CFEB2 receive  data clock 1x
   output        clock_cfeb3_rxd;    // 40MHz CFEB3 receive  data clock 1x
   output        clock_cfeb4_rxd;    // 40MHz CFEB4 receive  data clock 1x
-  //Tao, ME1/1->MEX/1
-  //output        clock_cfeb5_rxd;    // 40MHz CFEB5 receive  data clock 1x
-  //output        clock_cfeb6_rxd;    // 40MHz CFEB6 receive  data clock 1x
+  output        clock_cfeb5_rxd;    // 40MHz CFEB5 receive  data clock 1x
+  output        clock_cfeb6_rxd;    // 40MHz CFEB6 receive  data clock 1x
 
 // Global reset
   input         mmcm_reset;    // PLL reset input, for simulation only
@@ -378,10 +376,9 @@
   assign clock_cfeb1_rxd    = dps_clock[3]; // JGhere: use clock for ME1/1b
   assign clock_cfeb2_rxd    = dps_clock[3]; // JGhere:   another ME1/1b
   assign clock_cfeb3_rxd    = dps_clock[3]; // JGhere:   another ME1/1b
-  assign clock_cfeb4_rxd    = dps_clock[3]; // JGhere: use clock for ME1/1a
-  //Tao, ME1/1->MEX/1, use ME1b part for ME234
-  //assign clock_cfeb5_rxd    = dps_clock[2]; // JGhere:   another ME1/1a
-  //assign clock_cfeb6_rxd    = dps_clock[2]; // JGhere:   another ME1/1a
+  assign clock_cfeb4_rxd    = dps_clock[2]; // JGhere: use clock for ME1/1a
+  assign clock_cfeb5_rxd    = dps_clock[2]; // JGhere:   another ME1/1a
+  assign clock_cfeb6_rxd    = dps_clock[2]; // JGhere:   another ME1/1a
 
 
 // PLL phase shifters

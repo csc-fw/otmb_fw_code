@@ -92,9 +92,8 @@
   fifo2_rdata_cfeb,
   fifo3_rdata_cfeb,
   fifo4_rdata_cfeb,
-  //Tao ME1/1->MEX/1
-  //fifo5_rdata_cfeb,
-  //fifo6_rdata_cfeb,
+  fifo5_rdata_cfeb,
+  fifo6_rdata_cfeb,
 
 // CFEB blockedbits Data Ports
   cfeb0_blockedbits,
@@ -102,9 +101,8 @@
   cfeb2_blockedbits,
   cfeb3_blockedbits,
   cfeb4_blockedbits,
-  //Tao ME1/1->MEX/1
-  //cfeb5_blockedbits,
-  //cfeb6_blockedbits,
+  cfeb5_blockedbits,
+  cfeb6_blockedbits,
 
 // RPC Raw hits Data Ports
   fifo0_rdata_rpc,
@@ -242,12 +240,12 @@
 //------------------------------------------------------------------------------------------------------------------
 // Constants
 //------------------------------------------------------------------------------------------------------------------
-  parameter MXCFEB        = 5;      // Number CFEBs
+  parameter MXCFEB        = 7;      // Number CFEBs
   parameter MXCFEBB        = 3;      // Number CFEB ID bits
   parameter MXTBIN        = 5;      // Time bin address width
   parameter MXLY          = 6;      // Number Layers in CSC
   parameter MXDS          = 8;      // Number of DiStrips per layer
-  parameter MXRPC         = 2;      // Number RPCs
+  parameter MXRPC          = 2;      // Number RPCs
   parameter MXRPCB        = 1;      // Number RPC ID bits
   parameter READ_ADR_OFFSET    = 11'd6;    // Number clocks from first address to pretrigger adr latch, trial 04/22/08
   parameter READ_ADR_OFFSET_RPC  = 11'd0;    // Number clocks from first address to pretrigger
@@ -282,9 +280,8 @@
   input  [RAM_WIDTH-1:0]    fifo2_rdata_cfeb;  // FIFO RAM read data
   input  [RAM_WIDTH-1:0]    fifo3_rdata_cfeb;  // FIFO RAM read data
   input  [RAM_WIDTH-1:0]    fifo4_rdata_cfeb;  // FIFO RAM read data
-  //Tao ME1/1->MEX/1
-  //input  [RAM_WIDTH-1:0]    fifo5_rdata_cfeb;  // FIFO RAM read data
-  //input  [RAM_WIDTH-1:0]    fifo6_rdata_cfeb;  // FIFO RAM read data
+  input  [RAM_WIDTH-1:0]    fifo5_rdata_cfeb;  // FIFO RAM read data
+  input  [RAM_WIDTH-1:0]    fifo6_rdata_cfeb;  // FIFO RAM read data
 
 // CFEB Blockedbits Data
   input  [MXDS*MXLY-1:0]    cfeb0_blockedbits;  // 1=CFEB rx bit blocked by hcm or went bad, packed
@@ -292,10 +289,8 @@
   input  [MXDS*MXLY-1:0]    cfeb2_blockedbits;  // 1=CFEB rx bit blocked by hcm or went bad, packed
   input  [MXDS*MXLY-1:0]    cfeb3_blockedbits;  // 1=CFEB rx bit blocked by hcm or went bad, packed
   input  [MXDS*MXLY-1:0]    cfeb4_blockedbits;  // 1=CFEB rx bit blocked by hcm or went bad, packed
-  
-  //Tao ME1/1->MEX/1
-  //input  [MXDS*MXLY-1:0]    cfeb5_blockedbits;  // 1=CFEB rx bit blocked by hcm or went bad, packed
-  //input  [MXDS*MXLY-1:0]    cfeb6_blockedbits;  // 1=CFEB rx bit blocked by hcm or went bad, packed
+  input  [MXDS*MXLY-1:0]    cfeb5_blockedbits;  // 1=CFEB rx bit blocked by hcm or went bad, packed
+  input  [MXDS*MXLY-1:0]    cfeb6_blockedbits;  // 1=CFEB rx bit blocked by hcm or went bad, packed
 
 // RPC Raw hits Data
   input  [RAM_WIDTH-1+4:0]  fifo0_rdata_rpc;  // FIFO RAM read data, rpc
@@ -557,9 +552,8 @@
   3'h2:  cfeb_rawhits <= fifo2_rdata_cfeb;
   3'h3:  cfeb_rawhits <= fifo3_rdata_cfeb;
   3'h4:  cfeb_rawhits <= fifo4_rdata_cfeb;
-  //Tao ME1/1->MEX/1
-  //3'h5:  cfeb_rawhits <= fifo5_rdata_cfeb;
-  //3'h6:  cfeb_rawhits <= fifo6_rdata_cfeb;
+  3'h5:  cfeb_rawhits <= fifo5_rdata_cfeb;
+  3'h6:  cfeb_rawhits <= fifo6_rdata_cfeb;
   default  cfeb_rawhits <= fifo0_rdata_cfeb;
   endcase
   end
@@ -684,9 +678,8 @@
   3'h2:  cfeb_blockedbits <= cfeb2_blockedbits;
   3'h3:  cfeb_blockedbits <= cfeb3_blockedbits;
   3'h4:  cfeb_blockedbits <= cfeb4_blockedbits;
-  //Tao ME1/1->MEX/1
-  //3'h5:  cfeb_blockedbits <= cfeb5_blockedbits;
-  //3'h6:  cfeb_blockedbits <= cfeb6_blockedbits;
+  3'h5:  cfeb_blockedbits <= cfeb5_blockedbits;
+  3'h6:  cfeb_blockedbits <= cfeb6_blockedbits;
   default  cfeb_blockedbits <= cfeb0_blockedbits;
   endcase
   end 

@@ -20,18 +20,18 @@
   initial  $display("srl16e_bbl: WIDTH=%d",WIDTH);
 
 // Ports
-  input              clock;
-  input              ce;
-  input  [3:0]       adr;
-  input  [WIDTH-1:0] d;
-  output [WIDTH-1:0] q;
+  input        clock;
+  input        ce;
+  input  [3:0]    adr;
+  input  [WIDTH-1:0]  d;
+  output  [WIDTH-1:0]  q;
 
 // Generate MXSRL instances of SRL16E
   genvar i;
   generate
-    for ( i = 0; i < WIDTH; i = i + 1 ) begin: srlgen
-      SRL16E u00 (.CLK(clock),.CE(ce),.D(d[i]),.A0(adr[0]),.A1(adr[1]),.A2(adr[2]),.A3(adr[3]),.Q(q[i]));
-    end
+  for (i=0; i<WIDTH; i=i+1) begin: srlgen
+  SRL16E u00 (.CLK(clock),.CE(ce),.D(d[i]),.A0(adr[0]),.A1(adr[1]),.A2(adr[2]),.A3(adr[3]),.Q(q[i]));
+  end
   endgenerate
   
 //-----------------------------------------------------------------------------------------------------------------------
