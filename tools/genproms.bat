@@ -1,0 +1,2 @@
+xtclsh genproms.tcl    
+PAUSE
