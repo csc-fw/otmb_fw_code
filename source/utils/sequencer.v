@@ -2911,7 +2911,8 @@
   reg [MXBNDB - 1   : 0] clct1_vme_bnd = 0; // new bending 
   reg [MXXKYB-1     : 0] clct1_vme_xky = 0; // new position with 1/8 precision
 
-  wire clear_clct_vme = event_clear_vme | clct_pretrig;
+  //wire clear_clct_vme = event_clear_vme | clct_pretrig;
+  wire clear_clct_vme = event_clear_vme;
 
   always @(posedge clock) begin
     if (clear_clct_vme) begin    // Clear clcts in case event gets flushed
